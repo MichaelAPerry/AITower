@@ -7,6 +7,9 @@
 | 2026-10-15 | 3 | Briefing answered: TS + Pixi + React, 2D side-cut pixel art, plausible physics, lean vertical slice | ✅ |
 | 2026-10-15 | 4 | Scaffold, frozen contracts, boundary checker, task specs | ✅ |
 | 2026-10-15 | 4 | T1–T4 sub-agent work integrated; MVP playable in the browser | ✅ |
+| 2026-10-15 | 5 | Cassette-futurism art direction (`docs/STYLE.md`), retro fonts, restyled content | ✅ |
+| 2026-10-15 | 5 | T5 world-art pass (agent-render) + T6 HUD pass (agent-ui) integrated | ✅ |
+| 2026-10-15 | 5 | Publishing: GitHub Pages workflow + claude.ai artifact build (`scripts/build-artifact.mjs`) | ✅ |
 
 ## Sub-agent assignments
 | Task | Agent | Scope | Status | Tests |
@@ -15,6 +18,8 @@
 | T2 | agent-render | `packages/render` | ✅ integrated | 32 |
 | T3 | agent-ui | `packages/ui` | ✅ integrated | 19 |
 | T4 | agent-assets | `packages/content`, `packages/audio` | ✅ integrated | 30 |
+| T5 | agent-render | art pass, `packages/render` | ✅ integrated | 35 |
+| T6 | agent-ui | HUD art pass, `packages/ui` | ✅ integrated | 19 |
 
 All four agents hit an API usage limit once and were resumed from their saved work.
 
@@ -42,3 +47,9 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 5. Ascension paths: Biotech, Greentech and Synthetic Mind (ARCHITECTURE §9).
 6. Bot routes through more than one lift; quantised temperatures for lockstep determinism across JS engines.
 7. Code-split the Pixi bundle (the main chunk is 656 kB).
+
+## Publishing
+- **GitHub Pages:** `.github/workflows/pages.yml` runs check, build and deploy on pushes to `main` and this branch.
+  The deploy needs the `github-pages` environment to allow this branch, or a merge to `main`.
+- **claude.ai artifact:** run `node scripts/build-artifact.mjs`, then publish
+  `apps/web/dist-artifact/artifact.html` with `assets/app.js` and `assets/app.css`.
