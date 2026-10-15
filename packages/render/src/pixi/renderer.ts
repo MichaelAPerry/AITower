@@ -2,20 +2,68 @@
 import type { ContentDB } from "@aitower/content";
 import type { CellPointerEvent, Ghost, OverlayMode, Renderer, Selection } from "@aitower/shared";
 import type { CellRef, SimView } from "@aitower/sim";
-import { Application, Container, Graphics, TextureSource } from "pixi.js";
+import { Application, Container, Graphics, Sprite, Texture, TextureSource, TilingSprite } from "pixi.js";
 import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
-import { DEFAULT_ZOOM, SETTLE_MS, TILE } from "../constants";
+import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
 import { Interpolator, effectiveAlpha, hashArrays } from "../interp";
 import { Background } from "./background";
 import { Bots } from "./bots";
-import { drawCoolant, drawPower } from "./conduits";
-import { Effects } from "./effects";
+import { drawCoolant, drawPower, dripCells } from "./conduits";
+import { Effects, dripFloorY } from "./effects";
 import { drawBody, drawLive } from "./facilityArt";
 import { Input } from "./input";
+import { TextPool } from "./labels";
 import { Lifts, liftKey } from "./lifts";
 import { GhostLayer, drawSelection, selectionRect } from "./markers";
 import { Overlays } from "./overlays";
+import { Pneumatics } from "./pneumatics";
+import { T } from "../palette";
 import { Structure } from "./structure";
+
+/** Screen-space CRT finish: faint scanlines + vignette, both ≤ 8 % opacity (STYLE §1). */
+function makeScreenFx(): { root: Container; resize: (w: number, h: number) => void; destroy: () => void } {
+	const root = new Container();
+	const lines = document.createElement("canvas");
+	lines.width = 1;
+	lines.height = 3;
+	const lc = lines.getContext("2d");
+	if (lc) {
+		lc.fillStyle = "#0d0b08";
+		lc.fillRect(0, 0, 1, 1);
+	}
+	const lineTex = Texture.from(lines);
+	lineTex.source.scaleMode = "nearest";
+	const scan = new TilingSprite({ texture: lineTex, width: 1, height: 1 });
+	scan.alpha = 0.06;
+	const vig = document.createElement("canvas");
+	vig.width = 128;
+	vig.height = 128;
+	const vc = vig.getContext("2d");
+	if (vc) {
+		const grd = vc.createRadialGradient(64, 64, 30, 64, 64, 92);
+		grd.addColorStop(0, "rgba(13,11,8,0)");
+		grd.addColorStop(1, "rgba(13,11,8,1)");
+		vc.fillStyle = grd;
+		vc.fillRect(0, 0, 128, 128);
+	}
+	const vigTex = Texture.from(vig);
+	const vignette = new Sprite(vigTex);
+	vignette.alpha = 0.08;
+	root.addChild(scan, vignette);
+	return {
+		root,
+		resize(w, h) {
+			scan.width = w;
+			scan.height = h;
+			vignette.width = w;
+			vignette.height = h;
+		},
+		destroy() {
+			lineTex.destroy(true);
+			vigTex.destroy(true);
+		},
+	};
+}
 
 const facilityKey = (view: SimView): string => view.facilities.map((f) => `${f.id}:${f.defId}:${f.floor}:${f.x}`).join("|");
 
@@ -32,7 +80,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		roundPixels: true,
 		resolution: Math.max(1, Math.round(window.devicePixelRatio || 1)),
 		autoDensity: true,
-		background: 0x070b1e,
+		background: T.ink,
 		autoStart: false,
 		sharedTicker: false,
 	});
@@ -50,6 +98,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const lifts = new Lifts();
 	const facBodies = new Graphics();
 	const facLive = new Graphics();
+	const facLabels = new TextPool(9);
+	const pneumatics = new Pneumatics(content);
 	const bots = new Bots(content);
 	const effects = new Effects(content);
 	const overlays = new Overlays(content);
@@ -59,17 +109,22 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		structure.earth,
 		structure.shell,
 		conduits,
+		structure.plates,
 		lifts.shafts,
 		lifts.cars,
 		facBodies,
 		facLive,
+		facLabels.root,
+		pneumatics.g,
 		bots.g,
 		effects.g,
 		overlays.root,
 		ghost.root,
 		selectionG,
 	);
-	app.stage.addChild(background.root, world);
+	const screenFx = makeScreenFx();
+	screenFx.resize(w0, h0);
+	app.stage.addChild(background.root, world, screenFx.root);
 
 	// ─── State ─────────────────────────────────────────────────────────
 	let cam: Camera = { cx: 0, cy: 0, zoom: DEFAULT_ZOOM, vw: w0, vh: h0 };
@@ -132,6 +187,17 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			structure.rebuild(view);
 		}
 		const ch = hashArrays(view.power, view.coolant);
+		const fk = facilityKey(view);
+		if (gridChanged || ch !== keys.conduit || fk !== keys.fac) {
+			// Drips only where no facility stands underneath.
+			const occupied = new Set<string>();
+			for (const f of view.facilities) for (let k = 0; k < f.width; k++) occupied.add(`${f.x + k}:${f.floor}`);
+			effects.setDrips(
+				dripCells(view)
+					.filter((d) => !occupied.has(`${Math.floor(d.x / TILE)}:${d.floor}`))
+					.map((d) => ({ x: d.x, y: d.y, floorY: dripFloorY(floorTop(view, d.floor)) })),
+			);
+		}
 		if (gridChanged || ch !== keys.conduit) {
 			keys.conduit = ch;
 			conduits.clear();
@@ -143,7 +209,6 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			keys.lift = lk;
 			lifts.rebuildShafts(view);
 		}
-		const fk = facilityKey(view);
 		if (gridChanged || fk !== keys.fac) {
 			keys.fac = fk;
 			facBodies.clear();
@@ -152,6 +217,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				if (def) drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor));
 			}
 		}
+		pneumatics.onTick(view, (now - t0) / 1000);
 		overlayDirty = true;
 	};
 
@@ -176,17 +242,28 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			world.scale.set(cam.zoom);
 			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t);
 
-			// Per-frame layers.
+			// Per-frame layers (facility details culled to the viewport).
+			const vx0 = -o.x / cam.zoom - 4 * TILE;
+			const vx1 = (cam.vw - o.x) / cam.zoom + 4 * TILE;
+			const vy0 = -o.y / cam.zoom - 2 * FAC_BOTTOM;
+			const vy1 = (cam.vh - o.y) / cam.zoom + FAC_TOP;
 			facLive.clear();
+			facLabels.begin();
 			for (const f of view.facilities) {
 				const def = content.facilities[f.defId];
-				if (def) drawLive(facLive, def, f, f.x * TILE, floorTop(view, f.floor), t);
+				if (!def) continue;
+				const fx = f.x * TILE;
+				const ft = floorTop(view, f.floor);
+				if (fx > vx1 || fx + def.width * TILE < vx0 || ft > vy1 || ft < vy0) continue;
+				drawLive(facLive, def, f, fx, ft, t, facLabels);
 			}
+			facLabels.end();
+			pneumatics.draw(t);
 			const liftPos = (id: number): number | null => liftInterp.get(id, a)?.y ?? null;
 			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t);
 			const botPos = (b: { id: number; x: number; floor: number }) => botInterp.get(b.id, a) ?? { x: b.x, y: b.floor };
 			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t);
-			effects.update(view, botPos, dt, t);
+			effects.update(view, bots.torches, dt, t);
 
 			overlays.root.visible = overlay !== "normal";
 			if (overlayDirty) {
@@ -229,6 +306,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		},
 		resize(width, height) {
 			app.renderer.resize(width, height);
+			screenFx.resize(width, height);
 			cam = { ...cam, vw: width, vh: height };
 			if (grid) cam = clampCamera(cam, grid);
 			if (lastView) renderer.draw(lastView, 1);
@@ -238,6 +316,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			// Destroys the whole scene graph (all layer Graphics are children of the stage).
 			app.destroy({ removeView: true }, { children: true });
 			background.destroyShared();
+			screenFx.destroy();
 		},
 	};
 	return renderer;

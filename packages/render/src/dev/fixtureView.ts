@@ -31,30 +31,30 @@ const def = (d: DefInit): FacilityDef => ({
 const RACK = { powerKw: 40, liquidFraction: 0, pflops: 20, storageTB: 0, failurePerDay: 0.01 };
 
 export const fixtureFacilities: Record<string, FacilityDef> = {
-	rack_air_gpu: def({ id: "rack_air_gpu", kind: "rack", category: "rack", width: 2, color: "#2b2f36", accent: "#3ee0c8", rack: { ...RACK, cooling: "air" } }),
+	rack_air_gpu: def({ id: "rack_air_gpu", kind: "rack", category: "rack", width: 2, color: "#c9bc9c", accent: "#33ff66", rack: { ...RACK, cooling: "air" } }),
 	rack_dlc_gpu: def({
 		id: "rack_dlc_gpu",
 		kind: "rack",
 		category: "rack",
 		width: 2,
-		color: "#272c38",
-		accent: "#4a8cff",
+		color: "#a8987a",
+		accent: "#c06a3b",
 		rack: { ...RACK, cooling: "dlc", powerKw: 120, liquidFraction: 0.8, pflops: 90 },
 		placement: { needsCoolant: true },
 	}),
-	rack_storage: def({ id: "rack_storage", kind: "rack", category: "rack", width: 2, color: "#2e2a38", accent: "#b07cff", rack: { ...RACK, cooling: "air", powerKw: 12, pflops: 0, storageTB: 2000 } }),
-	crah_unit: def({ id: "crah_unit", kind: "crah", category: "cooling", width: 2, color: "#c8d6e0", accent: "#6ad0ff", cooling: { capacityKw: 150, radius: 8 } }),
-	chiller: def({ id: "chiller", kind: "chiller", category: "cooling", width: 4, color: "#b8c8d4", accent: "#3fa8ff", cooling: { capacityKw: 600, cop: 5 }, placement: { needsCoolant: true } }),
-	cdu: def({ id: "cdu", kind: "cdu", category: "cooling", width: 2, color: "#9fb4c4", accent: "#3f8cff", cooling: { capacityKw: 400 }, placement: { needsCoolant: true } }),
-	grid_tie: def({ id: "grid_tie", kind: "grid_tie", category: "power", width: 4, color: "#5e6670", accent: "#ffcc33", power: { capacityKw: 1500 } }),
-	genset: def({ id: "genset", kind: "genset", category: "power", width: 4, color: "#c87a2a", accent: "#ffd23f", power: { capacityKw: 800, startDelayTicks: 10 } }),
-	ups_battery: def({ id: "ups_battery", kind: "ups", category: "power", width: 3, color: "#3a4048", accent: "#ff9f1a", power: { capacityKw: 500, storageKwh: 250 } }),
-	parts_depot: def({ id: "parts_depot", kind: "depot", category: "logistics", width: 3, color: "#4a7a78", accent: "#2ec4b6", logistics: { capacity: 20 } }),
-	bot_charger: def({ id: "bot_charger", kind: "charger", category: "logistics", width: 2, color: "#3a6a68", accent: "#2ef0d0", logistics: { capacity: 2 } }),
+	rack_storage: def({ id: "rack_storage", kind: "rack", category: "rack", width: 2, color: "#5d6243", accent: "#ffb000", rack: { ...RACK, cooling: "air", powerKw: 12, pflops: 0, storageTB: 2000 } }),
+	crah_unit: def({ id: "crah_unit", kind: "crah", category: "cooling", width: 2, color: "#a8987a", accent: "#4f9a85", cooling: { capacityKw: 150, radius: 8 } }),
+	chiller: def({ id: "chiller", kind: "chiller", category: "cooling", width: 4, color: "#6f7473", accent: "#c06a3b", cooling: { capacityKw: 600, cop: 5 }, placement: { needsCoolant: true } }),
+	cdu: def({ id: "cdu", kind: "cdu", category: "cooling", width: 2, color: "#7d6227", accent: "#c8a248", cooling: { capacityKw: 400 }, placement: { needsCoolant: true } }),
+	grid_tie: def({ id: "grid_tie", kind: "grid_tie", category: "power", width: 4, color: "#5d6243", accent: "#e8dfc6", power: { capacityKw: 1500 } }),
+	genset: def({ id: "genset", kind: "genset", category: "power", width: 4, color: "#3f5a3a", accent: "#ffb000", power: { capacityKw: 800, startDelayTicks: 10 } }),
+	ups_battery: def({ id: "ups_battery", kind: "ups", category: "power", width: 3, color: "#4a4335", accent: "#33ff66", power: { capacityKw: 500, storageKwh: 250 } }),
+	parts_depot: def({ id: "parts_depot", kind: "depot", category: "logistics", width: 3, color: "#6f7473", accent: "#c8a248", logistics: { capacity: 20 } }),
+	bot_charger: def({ id: "bot_charger", kind: "charger", category: "logistics", width: 2, color: "#4a4335", accent: "#c8a248", logistics: { capacity: 2 } }),
 };
 
 export const fixtureBots: Record<string, BotDef> = {
-	rover: { id: "rover", name: "Rover", cost: 50000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#2ec4b6" },
+	rover: { id: "rover", name: "Rover", cost: 50000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#8a8f8c" },
 };
 
 /** Only `facilities` and `bots` are read by the renderer; the rest is stubbed. */
@@ -104,8 +104,8 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 	run(coolant, 2, 4, 30);
 
 	for (let i = 0; i < n; i++) {
-		if (power[i]) powerNetOf[i] = i >= idx(0, 4) ? 2 : 1;
-		if (coolant[i]) coolantNetOf[i] = 1;
+		if (power[i]) powerNetOf[i] = i >= idx(0, 4) ? 1 : 0;
+		if (coolant[i]) coolantNetOf[i] = 0;
 	}
 
 	let nextId = 1;
@@ -128,7 +128,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 			heatKw: isRack ? (status === "ok" ? p : status === "throttled" ? p * 0.7 : status === "idle" ? p * 0.1 : 0) : 0,
 			jobId: status === "ok" || status === "throttled" ? 1 : null,
 			powerNet: power[idx(x, floor)] ? powerNetOf[idx(x, floor)] : null,
-			coolantNet: coolant[idx(x, floor)] ? 1 : null,
+			coolantNet: coolant[idx(x, floor)] ? 0 : null,
 			...extra,
 		};
 	};
@@ -176,10 +176,10 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 	];
 
 	const powerNets: PowerNetView[] = [
-		{ id: 1, supplyKw: 2300, demandKw: 1900, satisfaction: 1, storedKwh: 120, storageCapacityKwh: 500, gridImportKw: 1500 },
-		{ id: 2, supplyKw: 20, demandKw: 50, satisfaction: 0.4, storedKwh: 30, storageCapacityKwh: 250, gridImportKw: 0 },
+		{ id: 0, supplyKw: 2300, demandKw: 1900, satisfaction: 1, storedKwh: 120, storageCapacityKwh: 500, gridImportKw: 1500 },
+		{ id: 1, supplyKw: 20, demandKw: 50, satisfaction: 0.4, storedKwh: 30, storageCapacityKwh: 250, gridImportKw: 0 },
 	];
-	const coolantNets: CoolantNetView[] = [{ id: 1, capacityKw: 600, loadKw: 470, supplyTempC: 30 }];
+	const coolantNets: CoolantNetView[] = [{ id: 0, capacityKw: 600, loadKw: 470, supplyTempC: 30 }];
 
 	const view: SimView = {
 		tick: 0,
@@ -284,6 +284,12 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 			const d = fixtureFacilities[fv.defId];
 			if (d.kind === "ups") fv.charge = ((fv.charge ?? 0) + 0.002) % 1;
 			if (d.kind === "rack" && (fv.status === "ok" || fv.status === "throttled")) fv.tempC += Math.sin(view.tick * 0.07 + fv.id) * 0.3;
+		}
+		// Jobs come and go every few seconds so the pneumatic capsules have something to deliver.
+		if (view.tick % 25 === 0) {
+			const racks = facilities.filter((fv) => fixtureFacilities[fv.defId].kind === "rack" && (fv.status === "ok" || fv.status === "throttled" || fv.status === "idle"));
+			const r = racks[(view.tick / 25) % racks.length];
+			if (r) r.jobId = r.jobId === null ? (view.tick / 25) | 0 : r.jobId % 3 === 0 ? null : r.jobId + 100;
 		}
 		if (view.tick % 5 === 0) computeAir();
 		return view;

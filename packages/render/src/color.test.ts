@@ -26,12 +26,14 @@ describe("colour", () => {
 		expect(ramp(s, 50)).toBe(0xffffff);
 	});
 
-	it("heat ramp: cold blue, hot red, white-hot", () => {
+	it("heat ramp follows the STYLE.md stops: cold blue, amber 30, red 42, cream-hot", () => {
 		expect(b(heatColor(10))).toBeGreaterThan(r(heatColor(10)));
-		const hot = heatColor(35);
+		expect(heatColor(30)).toBe(0xffb000);
+		const hot = heatColor(42);
 		expect(r(hot)).toBe(255);
 		expect(b(hot)).toBeLessThan(80);
-		expect(heatColor(50)).toBe(0xffffff);
+		expect(heatColor(50)).toBe(0xfff2c4);
+		expect(heatColor(60)).toBe(0xfff2c4);
 	});
 
 	it("satisfaction: red at 0, green at 1", () => {

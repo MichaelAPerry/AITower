@@ -3,12 +3,14 @@ export const TILE = 16;
 export const FLOOR_H = 48;
 
 /** Vertical layout inside one floor cell, measured from the cell's top edge. */
-export const SLAB_H = 4; // concrete slab at the bottom of the cell
-export const CABLE_Y = 41; // power cable tray (raised floor) just above the slab
-export const CABLE_H = 2;
-export const PIPE_SUPPLY_Y = 2; // coolant supply pipe along the ceiling
-export const PIPE_RETURN_Y = 5;
-export const PIPE_H = 2;
+export const SLAB_H = 4; // riveted I-beam slab at the bottom of the cell
+export const CABLE_Y = 41; // riveted cable tray (cloth bundle on ceramic standoffs) just above the slab
+export const CABLE_H = 3;
+export const PIPE_SUPPLY_Y = 1; // copper coolant supply pipe along the ceiling
+export const PIPE_RETURN_Y = 4; // verdigris return pipe just below it
+export const PIPE_H = 3;
+export const TUBE_Y = 8; // brass pneumatic job tube (2 px) under the pipes
+export const WAINSCOT_Y = 27; // top of the dark lower wall band
 export const FAC_TOP = 10; // facility body top
 export const FAC_BOTTOM = 41; // facility body bottom (sits on the raised floor)
 

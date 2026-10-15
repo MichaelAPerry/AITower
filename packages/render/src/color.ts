@@ -1,4 +1,5 @@
-/** Pure colour helpers (numbers are 0xRRGGBB). */
+/** Pure colour helpers (numbers are 0xRRGGBB). Ramps use the STYLE.md tokens from `palette.ts`. */
+import { HEAT_RAMP as R, T, dk, lt, mix } from "./palette";
 
 export const hex = (s: string): number => {
 	const m = /^#?([0-9a-f]{6})$/i.exec(s.trim());
@@ -38,30 +39,29 @@ export const ramp = (stops: readonly (readonly [number, number])[], v: number): 
 	return stops[stops.length - 1][1];
 };
 
-/** Air temperature ramp: ≤18 blue → 27 green/yellow → 35 red → 45+ white-hot. */
+/** Air temperature ramp (STYLE.md §2): ≤18 deep blue → 24 verdigris → 30 amber → 36 sodium → 42 red → ≥50 cream-hot. */
 export const HEAT_STOPS = [
-	[18, 0x2f6bff],
-	[22, 0x22b8c8],
-	[27, 0xb8e04a],
-	[31, 0xffb22e],
-	[35, 0xff3a1f],
-	[40, 0xff8a6a],
-	[45, 0xffffff],
+	[18, R[0]],
+	[24, R[1]],
+	[30, R[2]],
+	[36, R[3]],
+	[42, R[4]],
+	[50, R[5]],
 ] as const;
 
 export const heatColor = (tempC: number): number => ramp(HEAT_STOPS, tempC);
 
 /** Overlay alpha for a heat cell: cool air faint, hot air stronger. */
-export const heatAlpha = (tempC: number): number => 0.28 + 0.32 * clamp01((tempC - 18) / 27);
+export const heatAlpha = (tempC: number): number => 0.42 + 0.3 * clamp01((tempC - 18) / 27);
 
-/** Rack die temperature ramp (°C), aligned with typical ok/throttle/trip limits. */
+/** Rack die temperature ramp (°C), aligned with typical ok/throttle/trip limits; same hues as the heat ramp. */
 export const RACK_TEMP_STOPS = [
-	[40, 0x2f6bff],
-	[60, 0x22b8c8],
-	[75, 0xb8e04a],
-	[85, 0xffb22e],
-	[92, 0xff3a1f],
-	[100, 0xffffff],
+	[40, R[0]],
+	[60, R[1]],
+	[75, R[2]],
+	[85, R[3]],
+	[92, R[4]],
+	[100, R[5]],
 ] as const;
 
 export const rackTempColor = (tempC: number): number => ramp(RACK_TEMP_STOPS, tempC);
@@ -70,9 +70,9 @@ export const rackTempColor = (tempC: number): number => ramp(RACK_TEMP_STOPS, te
 export const satisfactionColor = (s: number): number =>
 	ramp(
 		[
-			[0, 0xff3030],
-			[0.5, 0xffb020],
-			[1, 0x40e070],
+			[0, T.red],
+			[0.5, T.amber],
+			[1, T.green],
 		],
 		s,
 	);
@@ -81,14 +81,15 @@ export const satisfactionColor = (s: number): number =>
 export const loadColor = (r: number): number =>
 	ramp(
 		[
-			[0, 0x40e070],
-			[0.8, 0xffb020],
-			[1, 0xff3030],
+			[0, T.green],
+			[0.8, T.amber],
+			[1, T.red],
 		],
 		r,
 	);
 
-const NET_PALETTE = [0xffd23f, 0x3fd2ff, 0xff6fd8, 0x7dff6f, 0xff8f3f, 0xb48cff, 0x3fffc0, 0xff5f5f];
+/** Network tints, all phosphor/metal tokens: amber first (power), verdigris second (coolant). */
+const NET_PALETTE = [T.amber, T.verdigris, T.paper, T.sodium, T.green, T.copper, lt(T.verdigris, 0.45), T.brass];
 
 /** Stable distinct colour per network id. */
 export const netColor = (id: number): number => NET_PALETTE[((id % NET_PALETTE.length) + NET_PALETTE.length) % NET_PALETTE.length];
@@ -98,24 +99,36 @@ export const netColor = (id: number): number => NET_PALETTE[((id % NET_PALETTE.l
 export interface SkyColors {
 	top: number;
 	horizon: number;
-	/** 0 (day) .. 1 (full night) — drives stars and window glow. */
+	/** 0 (day) .. 1 (full night) — drives stars, window glow, searchlights. */
 	night: number;
-	/** City silhouette colour. */
+	/** Near city silhouette colour. */
 	city: number;
+	/** Far (hazier) city layer. */
+	cityFar: number;
+	/** Low smog band hanging over the skyline. */
+	haze: number;
 }
 
-/** Keyframes: [minuteOfDay, top, horizon, night, city]. */
-const SKY_KEYS: readonly (readonly [number, number, number, number, number])[] = [
-	[0, 0x070b1e, 0x16204a, 1, 0x0c1024],
-	[300, 0x070b1e, 0x16204a, 1, 0x0c1024],
-	[360, 0x2b2f6a, 0xe58a6a, 0.5, 0x1d1a35],
-	[420, 0x3c78c8, 0xf3c28e, 0.1, 0x2b3550],
-	[480, 0x3f8fdc, 0xa9d6f2, 0, 0x3a4d68],
-	[1020, 0x3f8fdc, 0xa9d6f2, 0, 0x3a4d68],
-	[1110, 0x4a3c8a, 0xf08a52, 0.2, 0x2a2440],
-	[1170, 0x1e1f52, 0x8a4a6a, 0.6, 0x15142c],
-	[1230, 0x070b1e, 0x16204a, 1, 0x0c1024],
-	[1440, 0x070b1e, 0x16204a, 1, 0x0c1024],
+// Night: brown-black. Dawn/dusk: sodium. Day: dirty teal smog.
+const NIGHT_TOP = T.ink;
+const NIGHT_HZ = mix(T.ink, T.sodium, 0.16);
+const DAY_TOP = dk(mix(T.smog, T.verdigris, 0.2), 0.22);
+const DAY_HZ = mix(mix(T.smog, T.paper, 0.45), T.amber, 0.08);
+const DUSK_TOP = mix(T.housing, T.copper, 0.25);
+const DUSK_HZ = mix(T.sodium, T.copper, 0.35);
+
+/** Keyframes: [minuteOfDay, top, horizon, night, cityNear, cityFar, haze]. */
+const SKY_KEYS: readonly (readonly [number, number, number, number, number, number, number])[] = [
+	[0, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
+	[300, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
+	[370, mix(T.housing, T.smog, 0.3), mix(T.sodium, T.housing, 0.45), 0.5, T.housingLo, T.housing, mix(T.sodium, T.housing, 0.5)],
+	[450, mix(T.smog, T.housing, 0.25), mix(T.smog, T.paper, 0.32), 0.1, dk(T.smog, 0.55), dk(T.smog, 0.25), mix(T.smog, T.paper, 0.3)],
+	[540, DAY_TOP, DAY_HZ, 0, dk(T.smog, 0.5), dk(T.smog, 0.18), mix(T.smog, T.paper, 0.35)],
+	[1020, DAY_TOP, DAY_HZ, 0, dk(T.smog, 0.5), dk(T.smog, 0.18), mix(T.smog, T.paper, 0.35)],
+	[1110, DUSK_TOP, DUSK_HZ, 0.25, mix(T.housingLo, T.copper, 0.12), mix(T.housing, T.copper, 0.3), mix(T.sodium, T.paper, 0.2)],
+	[1170, mix(T.ink, T.housing, 0.6), mix(T.copper, T.ink, 0.45), 0.65, dk(T.housingLo, 0.1), mix(T.housingLo, T.copper, 0.15), mix(T.sodium, T.ink, 0.45)],
+	[1240, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
+	[1440, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
 ];
 
 export const skyColors = (minuteOfDay: number): SkyColors => {
@@ -130,9 +143,11 @@ export const skyColors = (minuteOfDay: number): SkyColors => {
 				horizon: lerpColor(a[2], b[2], t),
 				night: lerp(a[3], b[3], t),
 				city: lerpColor(a[4], b[4], t),
+				cityFar: lerpColor(a[5], b[5], t),
+				haze: lerpColor(a[6], b[6], t),
 			};
 		}
 	}
 	const k = SKY_KEYS[0];
-	return { top: k[1], horizon: k[2], night: k[3], city: k[4] };
+	return { top: k[1], horizon: k[2], night: k[3], city: k[4], cityFar: k[5], haze: k[6] };
 };

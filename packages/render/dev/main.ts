@@ -1,5 +1,7 @@
 // Dev harness: renders the hand-built fixture and animates it.
-// Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?select=facility:4  ?ghost=1  ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
+// Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
+//               ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
+import "@fontsource/vt323";
 import { loadContent } from "@aitower/content";
 import type { OverlayMode, Selection } from "@aitower/shared";
 import { createRenderer } from "../src/index";
@@ -18,8 +20,24 @@ if (params.has("real")) {
 		console.warn("loadContent failed, using fixture content", err);
 	}
 }
+// The app loads the fonts before creating the renderer; do the same here.
+await document.fonts.load('16px "VT323"').catch(() => []);
 const renderer = await createRenderer(host, content);
 renderer.resize(window.innerWidth, window.innerHeight);
+const focus = params.get("focus");
+if (focus) {
+	const [fx0, ff0] = focus.split(",").map(Number);
+	renderer.focus({ x: fx0, floor: ff0 });
+}
+const zoomTo = Number(params.get("zoom") ?? 2);
+if (zoomTo !== 2) {
+	// Zoom via synthetic wheel steps at the viewport centre (the camera zoom is internal to the renderer).
+	renderer.draw(fx.view, 1);
+	const canvas = host.querySelector("canvas") as HTMLCanvasElement;
+	for (let i = 0; i < Math.abs(zoomTo - 2); i++) {
+		canvas.dispatchEvent(new WheelEvent("wheel", { deltaY: zoomTo > 2 ? -100 : 100, clientX: window.innerWidth / 2, clientY: window.innerHeight / 2, cancelable: true }));
+	}
+}
 window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
 
 const modes: OverlayMode[] = ["normal", "heat", "power", "coolant"];
@@ -40,6 +58,7 @@ if (sel) {
 }
 if (params.has("ghost")) {
 	renderer.setGhost({ cells: [{ x: 36, floor: 1 }, { x: 37, floor: 1 }], valid: true, defId: "rack_air_gpu", label: "$400k" });
+	if (params.get("ghost") === "bad") renderer.setGhost({ cells: [{ x: 21, floor: 2 }, { x: 22, floor: 2 }], valid: false, defId: "rack_dlc_gpu", label: "$1.2M" });
 }
 let lastCell = "";
 renderer.onPointer((e) => {

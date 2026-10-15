@@ -1,12 +1,14 @@
 /** Pure mapping from sim status to visual cues. */
 import type { FacilityStatus } from "@aitower/sim";
+import { T, dk } from "./palette";
 
+/** Indicator lamp / phosphor colours (STYLE.md tokens). */
 export const LED = {
-	ok: 0x3dff6e,
-	amber: 0xffb020,
-	red: 0xff3030,
-	idle: 0x3d8bff,
-	off: 0x1a1d22,
+	ok: T.green,
+	amber: T.amber,
+	red: T.red,
+	idle: T.greenDim,
+	off: dk(T.housing, 0.35),
 } as const;
 
 export type LedMode = "activity" | "steady" | "blink" | "off";
@@ -16,7 +18,7 @@ export interface LedCue {
 	mode: LedMode;
 }
 
-/** Rack status LEDs: green ok (activity flicker), amber throttled, red tripped/failed, blue idle, off unpowered. */
+/** Rack status lamps / CRT phosphor: green ok (activity), amber throttled, red tripped/failed, dim-green idle, off unpowered. */
 export const ledCue = (status: FacilityStatus, enabled: boolean): LedCue => {
 	if (!enabled) return { color: LED.off, mode: "off" };
 	switch (status) {
