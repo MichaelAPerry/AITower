@@ -8,6 +8,7 @@ import { Inspector } from "./components/Inspector";
 import { OverlaySwitcher } from "./components/OverlaySwitcher";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
+import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import "./ui.css";
@@ -42,6 +43,7 @@ export function Hud({ store, content }: HudProps) {
 				<OverlaySwitcher {...props} />
 				<Toasts content={content} state={state} />
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
+				<Tutorial store={store} content={content} state={state} />
 			</div>
 			<div className="ui-right">
 				<Inspector {...props} />

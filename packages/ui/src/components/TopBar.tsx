@@ -6,6 +6,7 @@ import { Icon, Lamp, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { niceMax } from "./Dial";
 import { Gauge, PueGauge } from "./PueGauge";
+import { restartInduction } from "../tutorial/Tutorial";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
@@ -126,6 +127,9 @@ export function TopBar({ store, content, state }: PanelProps) {
 					{view.energyPrice.toFixed(3)}
 				</Stat>
 			</div>
+			<button type="button" className="ui-btn ui-induction" onClick={restartInduction} title="Reopen the Ministry induction (tutorial)">
+				Induction
+			</button>
 			<Toggle on={!muted} onClick={() => store.setMuted(!muted)} title={`${muted ? "Unmute" : "Mute"} (M)`} label="AUDIO" className="ui-mute" />
 		</header>
 	);

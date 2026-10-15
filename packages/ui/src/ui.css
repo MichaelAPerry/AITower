@@ -1988,3 +1988,117 @@
 		transition: none;
 	}
 }
+
+/* ── Ministry induction (tutorial) ── */
+.aitower-hud .ui-tutorial {
+	position: absolute;
+	right: 10px;
+	bottom: 10px;
+	width: min(380px, calc(100% - 20px));
+	max-height: calc(100% - 20px);
+	overflow-y: auto;
+	pointer-events: auto;
+	background:
+		repeating-linear-gradient(180deg, transparent 0 21px, color-mix(in srgb, var(--beige) 35%, transparent) 21px 22px),
+		var(--paper);
+	color: var(--ink);
+	border: 1px solid var(--brass-dk);
+	box-shadow: 0 0 0 3px var(--housing), 0 8px 24px color-mix(in srgb, var(--ink) 70%, transparent);
+	padding: 12px 14px 10px;
+	font: 16px/1.3 var(--f-type);
+	z-index: 5;
+	animation: tut-in 260ms ease-out;
+}
+.aitower-hud .tut-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 4px;
+}
+.aitower-hud .tut-count {
+	font: 16px/1 var(--f-crt);
+	color: var(--brass-dk);
+}
+.aitower-hud .tut-title {
+	font: 19px/1.2 var(--f-type);
+	margin: 6px 0 8px;
+	text-decoration: underline;
+	text-decoration-color: var(--brass-dk);
+	text-wrap: balance;
+}
+.aitower-hud .tut-body {
+	margin: 0 0 8px;
+	font-size: 15px;
+}
+.aitower-hud .tut-task {
+	position: relative;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 10px 0 6px;
+	padding: 7px 8px;
+	border: 1px dashed var(--brass-dk);
+	background: color-mix(in srgb, var(--amber) 10%, var(--paper));
+	font-size: 15px;
+}
+.aitower-hud .tut-task.is-done {
+	background: color-mix(in srgb, var(--green-dim) 14%, var(--paper));
+}
+.aitower-hud .tut-box {
+	flex: none;
+	width: 16px;
+	height: 16px;
+	border: 2px solid var(--ink);
+	display: grid;
+	place-items: center;
+	font: 16px/1 var(--f-crt);
+	color: var(--green-dim);
+}
+.aitower-hud .tut-stamp {
+	position: absolute;
+	right: 8px;
+	top: 50%;
+	transform: translateY(-50%) rotate(-8deg);
+	font: 13px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--green-dim);
+	border: 2px solid var(--green-dim);
+	padding: 3px 6px;
+	animation: tut-stamp 220ms ease-out;
+}
+.aitower-hud .tut-actions {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+	margin-top: 8px;
+}
+.aitower-hud .tut-skip,
+.aitower-hud .tut-later {
+	opacity: 0.75;
+}
+.aitower-hud .ui-induction {
+	align-self: center;
+}
+/* The element the current memo talks about. */
+.aitower-hud .tut-target {
+	outline: 2px solid var(--amber);
+	outline-offset: 2px;
+	animation: tut-pulse 1.2s ease-in-out infinite;
+}
+@keyframes tut-pulse {
+	0%, 100% { outline-color: var(--amber); box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 60%, transparent); }
+	50% { outline-color: var(--sodium); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--amber) 45%, transparent); }
+}
+@keyframes tut-in {
+	from { transform: translateY(12px); opacity: 0; }
+	to { transform: none; opacity: 1; }
+}
+@keyframes tut-stamp {
+	from { transform: translateY(-50%) rotate(-8deg) scale(1.8); opacity: 0; }
+	to { transform: translateY(-50%) rotate(-8deg) scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-tutorial,
+	.aitower-hud .tut-stamp,
+	.aitower-hud .tut-target { animation: none; }
+}
