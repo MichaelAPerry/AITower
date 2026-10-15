@@ -1,3 +1,6 @@
+import "@fontsource/vt323";
+import "@fontsource/special-elite";
+import "@fontsource/silkscreen";
 import { createRoot } from "react-dom/client";
 import { Hud } from "../src/Hud";
 import { createFakeContent, createFakeStore, type FakeStoreWithEmit } from "../src/dev/fakeStore";

@@ -2,7 +2,16 @@ import type { ContentDB } from "@aitower/content";
 import type { GameState } from "@aitower/shared";
 import { useEffect, useRef, useState } from "react";
 import { describeEvent, eventKey } from "../events";
-import { type Notice, onNotice } from "../notices";
+import { type Notice, onNotice, type Severity } from "../notices";
+import { Stamp } from "./common";
+
+/** Severity → [stamp, ink, slip header]. */
+const SLIP: Record<Severity, [string, "red" | "green" | "amber" | "ink", string]> = {
+	error: ["URGENT", "red", "TELEX · OPS CONTROL"],
+	warn: ["NOTICE", "amber", "INTERDEPT. MEMO"],
+	good: ["COMMENDATION", "green", "MINISTRY CIRCULAR"],
+	info: ["NOTICE", "ink", "INTERDEPT. MEMO"],
+};
 
 interface Toast extends Notice {
 	id: number;
@@ -61,13 +70,21 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 
 	return (
 		<div className="ui-toasts" aria-live="polite">
-			{toasts.map((t) => (
-				<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))}>
-					<span className="ui-alert-dot" />
-					<span>{t.text}</span>
-					{t.count > 1 && <span className="ui-toast-count">×{t.count}</span>}
-				</div>
-			))}
+			{toasts.map((t) => {
+				const [stamp, tone, head] = SLIP[t.severity] ?? SLIP.info;
+				return (
+					<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))} title="Click to file away">
+						<span className="ui-toast-head">
+							{head} · NO. {String(t.id).padStart(4, "0")}
+						</span>
+						<span className="ui-toast-text">{t.text}</span>
+						{t.count > 1 && <span className="ui-toast-count">×{t.count}</span>}
+						<Stamp tone={tone} className="ui-toast-stamp">
+							{stamp}
+						</Stamp>
+					</div>
+				);
+			})}
 		</div>
 	);
 }

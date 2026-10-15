@@ -5,7 +5,7 @@ import { type MouseEvent, useState } from "react";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
 import { toolKey } from "../tools/controller";
-import { Icon, Swatch } from "./common";
+import { FormLabel, Icon, Stamp, Swatch } from "./common";
 import type { PanelProps } from "./context";
 
 type Tab = "structure" | BuildCategory;
@@ -120,9 +120,15 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 	return (
 		<aside className="ui-palette ui-panel" onMouseLeave={() => setHover(null)}>
 			<div className="ui-panel-title">
-				<span>Build</span>
-				<button type="button" className={`ui-btn ui-mini ${tool.kind === "select" ? "is-on" : ""}`} onClick={() => pick({ kind: "select" })} title="Select / inspect (Esc)">
-					<Icon name="pointer" size={11} /> Select
+				<FormLabel form="DEPT. OF">Provisioning</FormLabel>
+				<button
+					type="button"
+					className={`ui-btn ui-icon-btn ui-select-btn ${tool.kind === "select" ? "is-on" : ""}`}
+					onClick={() => pick({ kind: "select" })}
+					title="Select / inspect (Esc)"
+					aria-label="Select"
+				>
+					<Icon name="pointer" size={13} />
 				</button>
 			</div>
 			<div className="ui-tabs ui-tabs-5" role="tablist">
@@ -141,7 +147,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 						<button
 							key={s.name}
 							type="button"
-							className={`ui-item ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
+							className={`ui-item ui-card ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
 							onClick={() => pick(s.tool)}
 							onMouseLeave={() => setHover(null)}
 							onMouseEnter={(e) => hoverAt(e, { title: s.name, body: s.body, specs: [["Cost", s.cost], ["How", s.hint]] })}
@@ -167,7 +173,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 								key={d.id}
 								type="button"
 								aria-disabled={locked || poor}
-								className={`ui-item ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
+								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
 								onClick={() => {
 									if (!locked && !poor) pick(t);
 								}}
@@ -193,15 +199,21 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 									</span>
 									<span className="ui-item-sub">{defHeadline(d)}</span>
 								</span>
-								<span className={`ui-item-cost ${poor ? "is-neg" : ""}`}>{fmtMoney(d.cost)}</span>
+								<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
+								{locked && (
+									<Stamp tone="red" className="ui-card-stamp">
+										Restricted
+									</Stamp>
+								)}
 							</button>
 						);
 					})}
 			</div>
 			<div className="ui-supplies">
+				<span className="ui-dymo ui-supplies-title">STORES REQUISITION</span>
 				<div className="ui-supply">
 					<span className="ui-k">Spare parts</span>
-					<span className="ui-v">{view.spareParts}</span>
+					<span className="ui-v ui-crt crt-amber">{view.spareParts}</span>
 					<button
 						type="button"
 						className="ui-btn ui-mini"
@@ -214,7 +226,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 				</div>
 				<div className="ui-supply">
 					<span className="ui-k">Bots</span>
-					<span className="ui-v">{view.bots.length}</span>
+					<span className="ui-v ui-crt crt-amber">{view.bots.length}</span>
 					<button
 						type="button"
 						className="ui-btn ui-mini"
@@ -228,6 +240,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 			</div>
 			{hover && (
 				<div className="ui-tooltip ui-panel" style={{ top: Math.max(60, Math.min(hover.top, window.innerHeight - 320)) }}>
+					<div className="ui-tooltip-form">SPECIFICATION SHEET · FORM SP-4</div>
 					<div className="ui-tooltip-title">{hover.title}</div>
 					<p>{hover.body}</p>
 					<div className="ui-tooltip-specs">

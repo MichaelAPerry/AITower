@@ -20,15 +20,36 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
 - `tools/controller.ts`, `tools/geometry.ts`, `tools/pick.ts`: tool logic, span/path geometry, selection picking.
 - `events.ts`: SimEvent → text, severity, focus cell and whether to toast; plus coalescing keys.
 - `notices.ts`: module-level bus. The controller and HUD buttons push rejection reasons here, and `<Toasts>` shows them.
-- `components/`: TopBar (with PueGauge), BuildPalette, OverlaySwitcher (with legends), Inspector
-  (with TempBar and net summaries), BottomPanel (Contracts/Jobs/Telemetry/Finance/Alerts), Sparkline,
-  Toasts, common (Pill/Meter/Swatch/Icon/Row/Kbd).
+- `components/`: TopBar (speed push-buttons, CRT readouts, PUE / IT-load / net-today gauges), BuildPalette
+  (index cards), OverlaySwitcher (toggle switches + CRT legends), Inspector (TempBar = temperature dial,
+  net summaries, MAINS toggle), BottomPanel (Contracts form / Jobs CRT / Telemetry scopes / Finance
+  printout / Alerts teletype), Sparkline (oscilloscope trace), Toasts (memo slips), PueGauge (also the
+  generic `Gauge` = Dial + Dymo label + CRT readout), Dial (SVG needle gauge, `niceMax`), common
+  (Pill/Meter/Swatch/Icon/Row/Kbd plus the hardware primitives Crt/Lamp/Toggle/Stamp/Counter/FormLabel).
 - `dev/fakeStore.ts`: a fake GameStore with a hand-built SimView and local content fixture. It is for
   development and tests only and is not exported.
 - `dev/` (package root): Vite harness. Run `npx vite packages/ui/dev --port 5175`, then
   `node scripts/screenshot.mjs http://localhost:5175 out.png 1440 900 1500`.
   Query params: `?tab=jobs|telemetry|finance|alerts`, `?overlay=heat`, `?sel=<facilityId>|bot|lift|none`,
-  `?tool=<defId>`.
+  `?tool=<defId>`. The harness imports the three `@fontsource` fonts itself.
+
+## Art direction (docs/STYLE.md §1–3)
+Cassette-futurist control-room hardware. `ui.css` defines every STYLE.md §2 token as a custom property on
+`.aitower-hud` (`--ink`, `--housing`, … `--smog`, plus `--heat-18…--heat-50`), and rules use only those
+tokens or `color-mix()` of them, never raw hex. Fonts are `--f-crt` (VT323: numbers and readouts, ≥ 18 px
+for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, forms, memos) and `--f-stamp`
+(Silkscreen at 8 px: Dymo tape, tags, buttons). `apps/web` loads the fonts and so does the dev harness.
+- Housings: `.ui-panel` is bevelled bakelite with four slotted screws drawn by `::after`. Keep about 12 px
+  of padding clear in the corners.
+- Readouts sit in `.ui-crt` (`crt-amber` is the default for data, `crt-green` for OK, `crt-red` for alarms).
+  Inside a CRT, `--ph`, `--ph-lo` and `--ph-grid` give the phosphor, its dim tone and the grid colour;
+  `.ui-label`, `.ui-k` and `.ui-dim` pick them up. Scanlines and flicker come from `::after`.
+- Paper surfaces (cards, forms, memos, spec sheets, the ledger) use `--paper` with ink text. Tone classes
+  are remapped to ink colours inside `.ui-form`.
+- Motion: CRT flicker, lamp blink, needle overshoot (`.ui-dial-needle` transition), lever flip and the
+  teletype toast reveal are all switched off under `prefers-reduced-motion`.
+- Layout budget: the top bar fits at 1280 px only because the brand plate and the grid price hide below
+  1480 px. Measure `.ui-topbar` (scrollWidth vs clientWidth) after adding anything to it.
 
 ## Invariants
 - The UI only emits `SimCommand`s through `store.dispatch`. It reads every number from `SimView` or `ContentDB`.

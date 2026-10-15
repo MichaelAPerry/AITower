@@ -12,10 +12,25 @@ export interface SparklineProps {
 	refLine?: number;
 }
 
-/** Hand-rolled SVG sparkline: area + line + last-point dot. */
+/** Oscilloscope trace on a graticule (10 × 4 divisions): faint fill, glowing phosphor line, bright last-point dot. */
 export function Sparkline({ values, width = 200, height = 48, color, min, max, refLine }: SparklineProps) {
 	const id = useId();
-	if (values.length < 2) return <svg width={width} height={height} className="ui-spark" aria-hidden="true" />;
+	const grid = (
+		<g className="ui-spark-grid">
+			{Array.from({ length: 9 }, (_, i) => (
+				<line key={`v${i}`} x1={(width * (i + 1)) / 10} x2={(width * (i + 1)) / 10} y1="0" y2={height} vectorEffect="non-scaling-stroke" />
+			))}
+			{Array.from({ length: 3 }, (_, i) => (
+				<line key={`h${i}`} x1="0" x2={width} y1={(height * (i + 1)) / 4} y2={(height * (i + 1)) / 4} vectorEffect="non-scaling-stroke" className={i === 1 ? "axis" : ""} />
+			))}
+		</g>
+	);
+	if (values.length < 2)
+		return (
+			<svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="ui-spark" aria-hidden="true">
+				{grid}
+			</svg>
+		);
 	let lo = min ?? Math.min(...values);
 	let hi = max ?? Math.max(...values);
 	if (refLine !== undefined && min === undefined) lo = Math.min(lo, refLine);
@@ -24,7 +39,7 @@ export function Sparkline({ values, width = 200, height = 48, color, min, max, r
 		hi += 1;
 		lo -= 1;
 	}
-	const pad = 3;
+	const pad = 4;
 	const x = (i: number): number => pad + (i / (values.length - 1)) * (width - pad * 2);
 	const y = (v: number): number => pad + (1 - (v - lo) / (hi - lo)) * (height - pad * 2);
 	let line = "";
@@ -35,14 +50,16 @@ export function Sparkline({ values, width = 200, height = 48, color, min, max, r
 		<svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" className="ui-spark" aria-hidden="true">
 			<defs>
 				<linearGradient id={id} x1="0" y1="0" x2="0" y2="1">
-					<stop offset="0" stopColor={color} stopOpacity="0.35" />
+					<stop offset="0" stopColor={color} stopOpacity="0.16" />
 					<stop offset="1" stopColor={color} stopOpacity="0" />
 				</linearGradient>
 			</defs>
-			{refLine !== undefined && <line x1="0" x2={width} y1={y(refLine)} y2={y(refLine)} stroke="var(--error)" strokeDasharray="3 3" strokeWidth="1" opacity="0.6" vectorEffect="non-scaling-stroke" />}
+			{grid}
+			{refLine !== undefined && <line x1="0" x2={width} y1={y(refLine)} y2={y(refLine)} stroke="var(--red)" strokeDasharray="4 3" strokeWidth="1" opacity="0.8" vectorEffect="non-scaling-stroke" />}
 			<path d={area} fill={`url(#${id})`} />
-			<path d={line} fill="none" stroke={color} strokeWidth="1.5" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
-			<circle cx={x(values.length - 1)} cy={y(last)} r="2.5" fill={color} />
+			<path d={line} fill="none" stroke={color} strokeWidth="3.5" opacity="0.22" vectorEffect="non-scaling-stroke" strokeLinejoin="round" />
+			<path d={line} fill="none" stroke={color} strokeWidth="1.4" vectorEffect="non-scaling-stroke" strokeLinejoin="round" className="ui-spark-trace" />
+			<circle cx={x(values.length - 1)} cy={y(last)} r="2.2" fill="var(--paper)" stroke={color} strokeWidth="1" vectorEffect="non-scaling-stroke" />
 		</svg>
 	);
 }

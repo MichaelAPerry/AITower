@@ -1,5 +1,5 @@
 import type { OverlayMode } from "@aitower/shared";
-import { Kbd } from "./common";
+import { Toggle } from "./common";
 import type { PanelProps } from "./context";
 
 const MODES: { id: OverlayMode; label: string; key: string }[] = [
@@ -9,67 +9,85 @@ const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "coolant", label: "Coolant", key: "C" },
 ];
 
-function Legend({ mode, content }: { mode: OverlayMode; content: PanelProps["content"] }) {
-	const t = content.balance.thermal;
+/** STYLE.md §2 heat ramp: [°C, colour token]. */
+const HEAT_RAMP: [number, string][] = [
+	[18, "var(--heat-18)"],
+	[24, "var(--heat-24)"],
+	[30, "var(--heat-30)"],
+	[36, "var(--heat-36)"],
+	[42, "var(--heat-42)"],
+	[50, "var(--heat-50)"],
+];
+
+function Legend({ mode }: { mode: OverlayMode }) {
 	if (mode === "heat") {
-		const lo = 18;
-		const hi = t.tripC;
-		const at = (c: number): string => `${((c - lo) / (hi - lo)) * 100}%`;
+		const lo = HEAT_RAMP[0][0];
+		const hi = HEAT_RAMP[HEAT_RAMP.length - 1][0];
+		const pct = (c: number): number => ((c - lo) / (hi - lo)) * 100;
+		const grad = `linear-gradient(90deg, ${HEAT_RAMP.map(([c, col]) => `${col} ${pct(c).toFixed(1)}%`).join(", ")})`;
 		return (
-			<div className="ui-legend">
-				<div className="ui-legend-bar heat" />
+			<div className="ui-legend ui-crt crt-amber" title="Heat overlay: air temperature per cell">
+				<div className="ui-legend-bar" style={{ background: grad }} />
 				<div className="ui-legend-ticks">
-					<span style={{ left: 0 }}>{lo}°</span>
-					<span style={{ left: at(t.okC) }}>{t.okC}°</span>
-					<span style={{ left: at(t.throttleC) }}>{t.throttleC}°</span>
-					<span style={{ left: "100%" }}>{hi}°C</span>
+					{HEAT_RAMP.map(([c], i) => (
+						<span key={c} style={{ left: `${pct(c)}%` }}>
+							{i === 0 ? "≤" : i === HEAT_RAMP.length - 1 ? "≥" : ""}
+							{c}°
+						</span>
+					))}
 				</div>
 			</div>
 		);
 	}
 	if (mode === "power")
 		return (
-			<div className="ui-legend">
+			<div className="ui-legend ui-crt crt-amber">
 				<div className="ui-legend-bar sat" />
 				<div className="ui-legend-ticks">
 					<span style={{ left: 0 }}>0%</span>
-					<span style={{ left: "50%" }}>net supplied</span>
+					<span style={{ left: "50%" }}>supplied</span>
 					<span style={{ left: "100%" }}>100%</span>
 				</div>
 			</div>
 		);
 	if (mode === "coolant")
 		return (
-			<div className="ui-legend">
+			<div className="ui-legend ui-crt crt-amber">
 				<div className="ui-legend-bar load" />
 				<div className="ui-legend-ticks">
 					<span style={{ left: 0 }}>0%</span>
-					<span style={{ left: "50%" }}>loop load</span>
-					<span style={{ left: "100%" }}>≥100%</span>
+					<span style={{ left: "80%" }}>80%</span>
+					<span style={{ left: "100%" }}>≥100</span>
 				</div>
 			</div>
 		);
 	return null;
 }
 
-export function OverlaySwitcher({ store, content, state }: PanelProps) {
+export function OverlaySwitcher({ store, state }: PanelProps) {
 	return (
 		<div className="ui-overlay ui-panel">
+			<span className="ui-dymo ui-overlay-title">OVERLAY</span>
 			<div className="ui-seg" role="radiogroup" aria-label="Overlay">
 				{MODES.map((m) => (
-					<button
+					<Toggle
 						key={m.id}
-						type="button"
 						role="radio"
-						aria-checked={state.overlay === m.id}
-						className={`ui-seg-btn ov-${m.id} ${state.overlay === m.id ? "is-on" : ""}`}
+						on={state.overlay === m.id}
 						onClick={() => store.setOverlay(m.id)}
-					>
-						{m.label} <Kbd>{m.key}</Kbd>
-					</button>
+						lamp={m.id === "normal" ? "green" : "amber"}
+						className={`ov-${m.id}`}
+						title={`${m.label} overlay (${m.key})`}
+						label={
+							<>
+								<b>{m.key}</b>
+								{m.label}
+							</>
+						}
+					/>
 				))}
 			</div>
-			<Legend mode={state.overlay} content={content} />
+			<Legend mode={state.overlay} />
 		</div>
 	);
 }

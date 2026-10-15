@@ -1,57 +1,85 @@
+import type { ReactNode } from "react";
 import { fmtPue } from "../format";
+import { Dial, type DialNeedle, type DialZone } from "./Dial";
 
 const MIN = 1;
-const MAX = 2;
-const R = 26;
-const CX = 32;
-const CY = 31;
+const MAX = 2.5;
 
-/** Point on the gauge arc for PUE value v (1.0 = left, 2.0 = right). */
-function pt(v: number, r = R): [number, number] {
-	const t = Math.min(1, Math.max(0, (v - MIN) / (MAX - MIN)));
-	const a = Math.PI * (1 - t);
-	return [CX + r * Math.cos(a), CY - r * Math.sin(a)];
-}
-
-function arc(v0: number, v1: number): string {
-	const [x0, y0] = pt(v0);
-	const [x1, y1] = pt(v1);
-	return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${R} ${R} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
-}
-
-/** Green → amber → red band colour for a PUE value. */
+/** Phosphor colour for a PUE value: green → amber → red. */
 export function pueColor(v: number): string {
-	if (v <= 1.25) return "var(--good)";
-	if (v <= 1.5) return "var(--lime)";
-	if (v <= 1.75) return "var(--warn)";
-	return "var(--error)";
+	if (v <= 1.35) return "var(--green)";
+	if (v <= 1.75) return "var(--amber)";
+	return "var(--red)";
 }
 
-const BANDS: [number, number, string][] = [
-	[1, 1.25, "var(--good)"],
-	[1.25, 1.5, "var(--lime)"],
-	[1.5, 1.75, "var(--warn)"],
-	[1.75, 2, "var(--error)"],
+const ZONES: DialZone[] = [
+	{ from: 1, to: 1.35, color: "var(--green-dim)" },
+	{ from: 1.35, to: 1.75, color: "var(--amber)" },
+	{ from: 1.75, to: 2.5, color: "var(--red)" },
 ];
 
-/** Semicircle PUE gauge: 1.0 green → 2.0 red, needle + numeric readout. */
-export function PueGauge({ pue }: { pue: number }) {
-	const [nx, ny] = pt(Number.isFinite(pue) ? pue : MIN, R - 7);
+/** A needle gauge with a Dymo label and a CRT readout beside it. */
+export function Gauge({
+	label,
+	min,
+	max,
+	needles,
+	zones,
+	majors,
+	minors,
+	face,
+	ends,
+	title,
+	children,
+	sub,
+	tone = "amber",
+}: {
+	label: string;
+	min: number;
+	max: number;
+	needles: DialNeedle[];
+	zones?: DialZone[];
+	majors?: number;
+	minors?: number;
+	face?: string;
+	ends?: [string, string];
+	title: string;
+	children: ReactNode;
+	sub?: ReactNode;
+	tone?: "amber" | "green" | "red";
+}) {
 	return (
-		<div className="ui-pue" title="Power Usage Effectiveness (rolling 24h): total facility power ÷ IT power. 1.0 is perfect.">
-			<svg width="64" height="36" viewBox="0 0 64 36" aria-hidden="true">
-				{BANDS.map(([a, b, c]) => (
-					<path key={a} d={arc(a + 0.008, b - 0.008)} stroke={c} strokeWidth="5" fill="none" opacity="0.85" />
-				))}
-				<line x1={CX} y1={CY} x2={nx} y2={ny} stroke="var(--text)" strokeWidth="2" strokeLinecap="round" />
-				<circle cx={CX} cy={CY} r="3" fill="var(--text)" />
-			</svg>
-			<div className="ui-pue-read">
-				<span className="ui-label">PUE</span>
-				<span className="ui-big" style={{ color: pueColor(pue) }}>
-					{fmtPue(pue)}
-				</span>
+		<div className="ui-gauge" title={title}>
+			<Dial min={min} max={max} needles={needles} zones={zones} majors={majors} minors={minors} face={face} ends={ends} title={title} />
+			<div className="ui-gauge-read">
+				<span className="ui-dymo">{label}</span>
+				<div className={`ui-crt crt-${tone} ui-gauge-crt`}>
+					<span className="ui-big">{children}</span>
+					{sub !== undefined && <span className="ui-gauge-sub">{sub}</span>}
+				</div>
 			</div>
 		</div>
+	);
+}
+
+/** PUE needle gauge, 1.0 (perfect) to 2.5, with a CRT readout. */
+export function PueGauge({ pue }: { pue: number }) {
+	const tone = pue <= 1.35 ? "green" : pue <= 1.75 ? "amber" : "red";
+	return (
+		<Gauge
+			label="PUE"
+			min={MIN}
+			max={MAX}
+			majors={6}
+			minors={2}
+			zones={ZONES}
+			face="PUE"
+			ends={["1", "2.5"]}
+			needles={[{ value: Number.isFinite(pue) ? pue : MIN }]}
+			title="Power Usage Effectiveness (rolling 24h): total facility power ÷ IT power. 1.0 is perfect."
+			tone={tone}
+		>
+			{fmtPue(pue)}
+		</Gauge>
 	);
 }

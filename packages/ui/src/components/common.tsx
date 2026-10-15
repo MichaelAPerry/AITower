@@ -28,16 +28,94 @@ export const statusLabel: Record<FacilityStatus, string> = {
 	failed: "failed",
 };
 
+/** Small stamped status tag. */
 export function Pill({ tone, children }: { tone: Tone; children: ReactNode }) {
 	return <span className={`ui-pill tone-${tone}`}>{children}</span>;
 }
 
-/** Horizontal meter 0..1. */
-export function Meter({ value, tone = "cyan", height = 6 }: { value: number; tone?: Tone; height?: number }) {
+/** Segmented phosphor VU bar, 0..1. */
+export function Meter({ value, tone = "cyan", height = 8 }: { value: number; tone?: Tone; height?: number }) {
 	return (
 		<div className={`ui-meter tone-${tone}`} style={{ height }}>
 			<div className="ui-meter-fill" style={{ width: `${clamp01(value) * 100}%` }} />
 		</div>
+	);
+}
+
+/** Inset CRT screen: dark glass, phosphor glow, scanlines and a curved inner shadow. */
+export function Crt({ tone = "amber", className = "", children, title }: { tone?: "amber" | "green" | "red"; className?: string; children: ReactNode; title?: string }) {
+	return (
+		<div className={`ui-crt crt-${tone} ${className}`} title={title}>
+			{children}
+		</div>
+	);
+}
+
+/** Round indicator lamp with a glow halo. */
+export function Lamp({ on, tone = "amber", blink = false }: { on: boolean; tone?: "amber" | "green" | "red"; blink?: boolean }) {
+	return <span className={`ui-lamp lamp-${tone} ${on ? "is-lit" : ""} ${on && blink ? "is-blink" : ""}`} aria-hidden="true" />;
+}
+
+/** Mechanical bat-handle toggle switch with ON/OFF engraving. Lever up = on. */
+export function Toggle({
+	on,
+	onClick,
+	label,
+	title,
+	role = "switch",
+	lamp,
+	className = "",
+	children,
+}: {
+	on: boolean;
+	onClick: () => void;
+	label?: ReactNode;
+	title?: string;
+	role?: "switch" | "radio";
+	lamp?: "amber" | "green" | "red";
+	className?: string;
+	children?: ReactNode;
+}) {
+	return (
+		<button type="button" role={role} aria-checked={on} className={`ui-toggle ${on ? "is-on" : "is-off"} ${className}`} onClick={onClick} title={title}>
+			{lamp && <Lamp on={on} tone={lamp} />}
+			<span className="ui-toggle-plate" aria-hidden="true">
+				<span className="ui-toggle-eng on">ON</span>
+				<span className="ui-toggle-nut" />
+				<span className="ui-toggle-lever" />
+				<span className="ui-toggle-eng off">OFF</span>
+			</span>
+			{label !== undefined && <span className="ui-toggle-label">{label}</span>}
+			{children}
+		</button>
+	);
+}
+
+/** Rubber-stamp impression. */
+export function Stamp({ tone = "red", children, className = "" }: { tone?: "red" | "green" | "amber" | "ink"; children: ReactNode; className?: string }) {
+	return <span className={`ui-stamp stamp-${tone} ${className}`}>{children}</span>;
+}
+
+/** Mechanical drum counter: each character on its own wheel. */
+export function Counter({ text, className = "" }: { text: string; className?: string }) {
+	return (
+		<span className={`ui-counter ${className}`} aria-label={text}>
+			{Array.from(text).map((ch, i) => (
+				<span key={i} className={/[0-9]/.test(ch) ? "d" : "s"}>
+					{ch}
+				</span>
+			))}
+		</span>
+	);
+}
+
+/** Typewritten form-title strip riveted onto a housing, e.g. "FORM AT-7 · CONTRACT REQUISITION". */
+export function FormLabel({ form, children }: { form?: string; children: ReactNode }) {
+	return (
+		<span className="ui-formlabel">
+			{form && <span className="ui-formlabel-no">{form}</span>}
+			<span className="ui-formlabel-text">{children}</span>
+		</span>
 	);
 }
 

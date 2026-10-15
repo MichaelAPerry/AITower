@@ -1,7 +1,7 @@
 import { fmtDuration, fmtMoney, fmtPflops, fmtPower, fmtPue, fmtTemp } from "../format";
 import { describeEvent, isNoise } from "../events";
 import { pushNotice } from "../notices";
-import { Icon, Meter, Pill, type Tone } from "./common";
+import { Counter, Meter, Pill, Toggle, type Tone } from "./common";
 import type { BottomTab, PanelProps } from "./context";
 import { downsample, Sparkline } from "./Sparkline";
 import type { CommandResult, JobStatus, SimEvent } from "@aitower/sim";
@@ -19,54 +19,74 @@ function Contracts({ store, state }: PanelProps) {
 	const { view } = state;
 	if (!view.offers.length) return <div className="ui-empty ui-pad">No offers right now — new contracts arrive every few hours.</div>;
 	return (
-		<table className="ui-table">
-			<thead>
-				<tr>
-					<th>Client</th>
-					<th>Kind</th>
-					<th>Size</th>
-					<th>Window</th>
-					<th className="num">Payout</th>
-					<th className="num">Penalty</th>
-					<th>Needs</th>
-					<th>Expires</th>
-					<th />
-				</tr>
-			</thead>
-			<tbody>
-				{view.offers.map((o) => {
-					const left = o.expiresAt - view.tick;
-					return (
-						<tr key={o.id}>
-							<td className="strong">{o.clientName}</td>
-							<td>
-								<Pill tone={o.kind === "inference" ? "info" : "cyan"}>{o.kind}</Pill>
-							</td>
-							<td>{o.kind === "inference" ? `${fmtPflops(o.sustainedPflops ?? o.work)} sustained` : `${Math.round(o.work).toLocaleString()} PF·h`}</td>
-							<td>{fmtDuration(o.durationTicks)}</td>
-							<td className="num is-pos">{fmtMoney(o.payout)}</td>
-							<td className="num is-neg-soft">{o.penalty ? fmtMoney(o.penalty) : "—"}</td>
-							<td>
-								<span className="ui-tags">
-									{o.needsLiquid && <Pill tone="info">liquid</Pill>}
-									{o.storageTB > 0 && <Pill tone="dim">{o.storageTB} TB</Pill>}
-									{!o.needsLiquid && !o.storageTB && <span className="ui-dim">—</span>}
-								</span>
-							</td>
-							<td className={left < 120 ? "is-warn" : "ui-dim"}>{fmtDuration(left)}</td>
-							<td className="actions">
-								<button type="button" className="ui-btn ui-mini is-go" onClick={() => report(store.dispatch({ type: "acceptContract", contractId: o.id }))}>
-									Accept
-								</button>
-								<button type="button" className="ui-btn ui-mini" onClick={() => report(store.dispatch({ type: "declineContract", contractId: o.id }))}>
-									Decline
-								</button>
-							</td>
-						</tr>
-					);
-				})}
-			</tbody>
-		</table>
+		<div className="ui-form">
+			<div className="ui-form-head">
+				<span>FORM AT-7 · CONTRACT REQUISITION</span>
+				<span>IN TRIPLICATE · {view.offers.length} PENDING</span>
+			</div>
+			<table className="ui-table">
+				<thead>
+					<tr>
+						<th>Client</th>
+						<th>Kind</th>
+						<th>Size</th>
+						<th>Window</th>
+						<th className="num">Payout</th>
+						<th className="num">Penalty</th>
+						<th>Needs</th>
+						<th>Expires</th>
+						<th />
+					</tr>
+				</thead>
+				<tbody>
+					{view.offers.map((o) => {
+						const left = o.expiresAt - view.tick;
+						return (
+							<tr key={o.id}>
+								<td className="strong">{o.clientName}</td>
+								<td>
+									<Pill tone={o.kind === "inference" ? "info" : "cyan"}>{o.kind}</Pill>
+								</td>
+								<td>{o.kind === "inference" ? `${fmtPflops(o.sustainedPflops ?? o.work)} sustained` : `${Math.round(o.work).toLocaleString()} PF·h`}</td>
+								<td>{fmtDuration(o.durationTicks)}</td>
+								<td className="num is-pos">{fmtMoney(o.payout)}</td>
+								<td className="num is-neg-soft">{o.penalty ? fmtMoney(o.penalty) : "—"}</td>
+								<td>
+									<span className="ui-tags">
+										{o.needsLiquid && <Pill tone="info">liquid</Pill>}
+										{o.storageTB > 0 && <Pill tone="dim">{o.storageTB} TB</Pill>}
+										{!o.needsLiquid && !o.storageTB && <span className="ui-dim">—</span>}
+									</span>
+								</td>
+								<td className={left < 120 ? "is-warn" : "ui-dim"}>{fmtDuration(left)}</td>
+								<td className="actions">
+									<button
+										type="button"
+										className="ui-stampbtn stamp-green"
+										aria-label="Accept"
+										title="Accept contract"
+										onClick={() => report(store.dispatch({ type: "acceptContract", contractId: o.id }))}
+									>
+										<span className="rest">Accept</span>
+										<span className="hot">Approved</span>
+									</button>
+									<button
+										type="button"
+										className="ui-stampbtn stamp-red"
+										aria-label="Decline"
+										title="Decline contract"
+										onClick={() => report(store.dispatch({ type: "declineContract", contractId: o.id }))}
+									>
+										<span className="rest">Decline</span>
+										<span className="hot">Denied</span>
+									</button>
+								</td>
+							</tr>
+						);
+					})}
+				</tbody>
+			</table>
+		</div>
 	);
 }
 
@@ -74,7 +94,7 @@ function Jobs({ store, state, ui }: PanelProps) {
 	const { view } = state;
 	if (!view.jobs.length) return <div className="ui-empty ui-pad">No jobs. Accept a contract to put your racks to work.</div>;
 	return (
-		<table className="ui-table">
+		<table className="ui-table ui-crt crt-amber ui-crt-table">
 			<thead>
 				<tr>
 					<th>Client</th>
@@ -102,8 +122,8 @@ function Jobs({ store, state, ui }: PanelProps) {
 							</td>
 							<td className="wide">
 								<div className="ui-progress">
-									<Meter value={p} tone={j.status === "stalled" ? "warn" : j.status === "failed" ? "error" : "good"} height={8} />
-									<span>{(p * 100).toFixed(1)}%</span>
+									<Meter value={p} tone={j.status === "stalled" ? "warn" : j.status === "failed" ? "error" : "good"} height={12} />
+									<Counter text={`${(p * 100).toFixed(1).padStart(5, "0")}%`} />
 								</div>
 							</td>
 							<td className="num">{fmtPflops(j.pflops)}</td>
@@ -112,8 +132,8 @@ function Jobs({ store, state, ui }: PanelProps) {
 							<td className="num is-pos">{fmtMoney(j.payout)}</td>
 							<td className="actions">
 								{!done && (
-									<button type="button" className="ui-btn ui-mini is-danger" onClick={() => report(store.dispatch({ type: "cancelJob", jobId: j.id }))}>
-										Cancel
+									<button type="button" className="ui-btn ui-mini is-danger" onClick={() => report(store.dispatch({ type: "cancelJob", jobId: j.id }))} title="Cancel job">
+										Abort
 									</button>
 								)}
 							</td>
@@ -128,11 +148,11 @@ function Jobs({ store, state, ui }: PanelProps) {
 function Telemetry({ content, state }: PanelProps) {
 	const h = state.view.history;
 	const series: { label: string; color: string; pick: (s: (typeof h)[number]) => number; fmt: (v: number) => string; ref?: number; min?: number }[] = [
-		{ label: "PUE", color: "var(--good)", pick: (s) => s.pue, fmt: fmtPue, min: 1 },
-		{ label: "IT load", color: "var(--cyan)", pick: (s) => s.itKw, fmt: fmtPower, min: 0 },
-		{ label: "Compute", color: "var(--violet)", pick: (s) => s.pflops, fmt: fmtPflops, min: 0 },
-		{ label: "Cash", color: "var(--lime)", pick: (s) => s.cash, fmt: fmtMoney },
-		{ label: "Max rack temp", color: "var(--warn)", pick: (s) => s.maxRackC, fmt: (v) => fmtTemp(v), ref: content.balance.thermal.throttleC },
+		{ label: "PUE", color: "var(--green)", pick: (s) => s.pue, fmt: fmtPue, min: 1 },
+		{ label: "IT load", color: "var(--green)", pick: (s) => s.itKw, fmt: fmtPower, min: 0 },
+		{ label: "Compute", color: "var(--green)", pick: (s) => s.pflops, fmt: fmtPflops, min: 0 },
+		{ label: "Cash", color: "var(--green)", pick: (s) => s.cash, fmt: fmtMoney },
+		{ label: "Max rack temp", color: "var(--green)", pick: (s) => s.maxRackC, fmt: (v) => fmtTemp(v), ref: content.balance.thermal.throttleC },
 	];
 	const span = h.length > 1 ? h[h.length - 1].tick - h[0].tick : 0;
 	return (
@@ -144,12 +164,10 @@ function Telemetry({ content, state }: PanelProps) {
 				);
 				const last = vals.length ? vals[vals.length - 1] : Number.NaN;
 				return (
-					<div key={s.label} className="ui-spark-card">
+					<div key={s.label} className="ui-spark-card ui-crt crt-green">
 						<div className="ui-spark-head">
 							<span className="ui-label">{s.label}</span>
-							<span className="ui-big" style={{ color: s.color }}>
-								{s.fmt(last)}
-							</span>
+							<span className="ui-big">{s.fmt(last)}</span>
 						</div>
 						<Sparkline values={vals} color={s.color} refLine={s.ref} min={s.min} height={72} />
 						<div className="ui-spark-foot">
@@ -171,6 +189,7 @@ function Finance({ state }: PanelProps) {
 	const today = state.view.day;
 	return (
 		<table className="ui-table ui-ledger">
+			<caption>MINISTRY OF COMPUTATION · GENERAL LEDGER · DAILY ABSTRACT</caption>
 			<thead>
 				<tr>
 					<th>Day</th>
@@ -206,7 +225,7 @@ function Alerts({ store, content, state }: PanelProps) {
 	const items = state.log.filter((e) => !isNoise(e.event)).slice(-80).reverse();
 	if (!items.length) return <div className="ui-empty ui-pad">All quiet.</div>;
 	return (
-		<ul className="ui-alerts">
+		<ul className="ui-alerts ui-crt crt-amber">
 			{items.map((e, i) => {
 				const d = describeEvent(e.event, state.view, content);
 				const cell = d.cell;
@@ -258,9 +277,7 @@ export function BottomPanel(props: PanelProps) {
 					</button>
 				))}
 				<div className="ui-grow" />
-				<button type="button" className="ui-btn ui-icon-btn ui-mini" onClick={() => setUi({ bottomOpen: !ui.bottomOpen })} title={ui.bottomOpen ? "Collapse (`)" : "Expand (`)"}>
-					<Icon name={ui.bottomOpen ? "chevDown" : "chevUp"} size={12} />
-				</button>
+				<Toggle on={ui.bottomOpen} onClick={() => setUi({ bottomOpen: !ui.bottomOpen })} title={ui.bottomOpen ? "Collapse (`)" : "Expand (`)"} label="PANEL" className="ui-collapse" />
 			</div>
 			{ui.bottomOpen && (
 				<div className="ui-bottom-body">

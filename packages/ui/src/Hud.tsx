@@ -67,7 +67,8 @@ function ToolHint({ content, state }: PanelProps) {
 							: "";
 	return (
 		<div className="ui-toolhint ui-panel">
-			<span className="ui-toolhint-dot" />
+			<span className="ui-lamp lamp-red is-lit is-blink" />
+			<span className="ui-dymo">TOOL ARMED</span>
 			{what}
 			<span className="ui-dim"> · Esc / right-click to exit</span>
 		</div>

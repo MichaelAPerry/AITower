@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
 import type { Balance } from "@aitower/content";
 import type { BotState, FacilityView, SimView } from "@aitower/sim";
-import { clamp01, fmtDuration, fmtEnergy, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
+import { fmtDuration, fmtEnergy, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
-import { Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone } from "./common";
+import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
+import { Dial } from "./Dial";
 
 const botStateLabel: Record<BotState, string> = {
 	idle: "idle",
@@ -17,25 +18,35 @@ const botStateLabel: Record<BotState, string> = {
 	riding: "riding lift",
 };
 
-/** Temperature bar with ok / throttle / trip markers. */
-export function TempBar({ tempC, thermal }: { tempC: number; thermal: Balance["thermal"] }) {
+/** Round temperature dial (ok / throttle / trip bands) with a CRT readout. */
+export function TempBar({ tempC, thermal, label = "Die temp" }: { tempC: number; thermal: Balance["thermal"]; label?: string }) {
 	const lo = 15;
 	const hi = thermal.tripC + 10;
-	const pos = (c: number): string => `${clamp01((c - lo) / (hi - lo)) * 100}%`;
-	const tone = tempC >= thermal.tripC ? "error" : tempC >= thermal.okC ? "warn" : "good";
+	const tone = tempC >= thermal.tripC ? "red" : tempC >= thermal.okC ? "amber" : "green";
 	return (
-		<div className="ui-tempbar" title={`ok ≤ ${thermal.okC}°C · throttle ${thermal.throttleC}°C · trip ${thermal.tripC}°C`}>
-			<div className="ui-tempbar-track">
-				<div className="ui-tempbar-zone z-ok" style={{ left: 0, width: pos(thermal.okC) }} />
-				<div className="ui-tempbar-zone z-warm" style={{ left: pos(thermal.okC), width: `calc(${pos(thermal.throttleC)} - ${pos(thermal.okC)})` }} />
-				<div className="ui-tempbar-zone z-hot" style={{ left: pos(thermal.throttleC), width: `calc(${pos(thermal.tripC)} - ${pos(thermal.throttleC)})` }} />
-				<div className="ui-tempbar-zone z-trip" style={{ left: pos(thermal.tripC), right: 0 }} />
-				<div className={`ui-tempbar-needle tone-${tone}`} style={{ left: pos(tempC) }} />
-			</div>
-			<div className="ui-tempbar-ticks">
-				<span style={{ left: pos(thermal.okC) }}>{thermal.okC}</span>
-				<span style={{ left: pos(thermal.throttleC) }}>{thermal.throttleC}</span>
-				<span style={{ left: pos(thermal.tripC) }}>{thermal.tripC}</span>
+		<div className="ui-tempgauge" title={`ok ≤ ${thermal.okC}°C · throttle ${thermal.throttleC}°C · trip ${thermal.tripC}°C`}>
+			<Dial
+				size={64}
+				min={lo}
+				max={hi}
+				majors={4}
+				minors={5}
+				face="°C"
+				ends={[String(lo), String(hi)]}
+				zones={[
+					{ from: thermal.okC, to: thermal.throttleC, color: "var(--amber)" },
+					{ from: thermal.throttleC, to: thermal.tripC, color: "var(--sodium)" },
+					{ from: thermal.tripC, to: hi, color: "var(--red)" },
+				]}
+				needles={[{ value: tempC }]}
+				title={`${label}: ${fmtTemp(tempC)}`}
+			/>
+			<div className={`ui-crt crt-${tone} ui-tempgauge-crt`}>
+				<span className="ui-label">{label}</span>
+				<span className="ui-big">{fmtTemp(tempC)}</span>
+				<span className="ui-tempgauge-legend">
+					ok≤{thermal.okC} · thr {thermal.throttleC} · trip {thermal.tripC}
+				</span>
 			</div>
 		</div>
 	);
@@ -46,7 +57,7 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 	const cn = f.coolantNet === null ? undefined : view.coolantNets.find((n) => n.id === f.coolantNet);
 	return (
 		<>
-			<div className="ui-section">
+			<div className="ui-section ui-crt crt-amber">
 				<div className="ui-section-title">
 					Power net {pn ? `#${pn.id}` : ""}
 					{pn && <Pill tone={pn.satisfaction >= 1 ? "good" : pn.satisfaction > 0 ? "warn" : "error"}>{fmtPct(pn.satisfaction, 0)}</Pill>}
@@ -69,7 +80,7 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 				)}
 			</div>
 			{(cn || f.coolantNet !== null || f.status === "noCoolant") && (
-				<div className="ui-section">
+				<div className="ui-section ui-crt crt-amber">
 					<div className="ui-section-title">
 						Coolant net {cn ? `#${cn.id}` : ""}
 						{cn && <Pill tone={cn.loadKw <= cn.capacityKw ? "good" : "error"}>{fmtPct(cn.capacityKw ? cn.loadKw / cn.capacityKw : 1, 0)}</Pill>}
@@ -113,11 +124,8 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				</div>
 				<Pill tone={statusTone[f.status]}>{statusLabel[f.status]}</Pill>
 			</div>
-			<div className="ui-section">
-				<Row k={def?.rack ? "Die temp" : "Air temp"}>
-					<span className={f.tempC >= thermal.tripC ? "is-neg" : f.tempC >= thermal.okC ? "is-warn" : ""}>{fmtTemp(f.tempC)}</span>
-				</Row>
-				{def?.rack && <TempBar tempC={f.tempC} thermal={thermal} />}
+			<TempBar tempC={f.tempC} thermal={thermal} label={def?.rack ? "Die temp" : "Air temp"} />
+			<div className="ui-section ui-crt crt-amber">
 				{def?.rack && (
 					<>
 						<Row k="Clock">{fmtPct(f.clock, 0)}</Row>
@@ -161,12 +169,16 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 			</div>
 			<NetSummaries view={view} f={f} />
 			<div className="ui-insp-actions">
-				<button type="button" className="ui-btn" onClick={() => send(store.dispatch({ type: "setEnabled", facilityId: f.id, enabled: !f.enabled }))}>
-					{f.enabled ? "Disable" : "Enable"}
-				</button>
+				<Toggle
+					on={f.enabled}
+					lamp="green"
+					label="MAINS"
+					title={f.enabled ? "Disable (switch off)" : "Enable (switch on)"}
+					onClick={() => send(store.dispatch({ type: "setEnabled", facilityId: f.id, enabled: !f.enabled }))}
+				/>
 				<button
 					type="button"
-					className="ui-btn is-danger"
+					className="ui-btn is-danger ui-decom"
 					onClick={() => {
 						const r = store.dispatch({ type: "demolish", floor: f.floor, x: f.x });
 						send(r);
@@ -197,7 +209,7 @@ export function Inspector(props: PanelProps) {
 			body = (
 				<>
 					<div className="ui-insp-head">
-						<span className="ui-botchip" style={{ background: def?.color ?? "#8fd" }} />
+						<span className="ui-botchip" style={{ background: def?.color ?? "var(--steel)" }} />
 						<div className="ui-insp-name">
 							<span>{def?.name ?? b.defId}</span>
 							<span className="ui-dim">
@@ -206,7 +218,7 @@ export function Inspector(props: PanelProps) {
 						</div>
 						<Pill tone={b.state === "idle" || b.state === "charging" ? "dim" : "cyan"}>{botStateLabel[b.state]}</Pill>
 					</div>
-					<div className="ui-section">
+					<div className="ui-section ui-crt crt-amber">
 						<Row k="Battery">{fmtPct(b.battery, 0)}</Row>
 						<Meter value={b.battery} tone={b.battery < 0.2 ? "error" : b.battery < 0.5 ? "warn" : "good"} />
 						<Row k="Carrying part">{b.carrying ? "yes" : "no"}</Row>
@@ -244,7 +256,7 @@ export function Inspector(props: PanelProps) {
 						</div>
 						<Pill tone={l.dir === 0 ? "dim" : "cyan"}>{l.dir === 0 ? (l.doorsOpen ? "doors open" : "parked") : l.dir > 0 ? "going up" : "going down"}</Pill>
 					</div>
-					<div className="ui-section">
+					<div className="ui-section ui-crt crt-amber">
 						<Row k="Floors">
 							F{l.floorMin} – F{l.floorMax} ({l.floorMax - l.floorMin + 1})
 						</Row>
@@ -271,7 +283,7 @@ export function Inspector(props: PanelProps) {
 	return (
 		<aside className="ui-inspector ui-panel">
 			<div className="ui-panel-title">
-				<span>Inspector</span>
+				<FormLabel form="FORM IN-3">Dossier</FormLabel>
 				<button type="button" className="ui-btn ui-icon-btn ui-mini" onClick={() => store.setSelection(null)} title="Close">
 					<Icon name="close" size={11} />
 				</button>
