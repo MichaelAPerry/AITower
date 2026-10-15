@@ -1,0 +1,9 @@
+{
+	"slabPerTile": 2000,
+	"basementSlabPerTile": 6000,
+	"powerConduitPerTile": 500,
+	"coolantConduitPerTile": 1500,
+	"liftPerFloor": 25000,
+	"liftBase": 80000,
+	"sparePart": 15000
+}

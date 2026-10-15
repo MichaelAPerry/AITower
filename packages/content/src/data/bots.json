@@ -1,0 +1,11 @@
+{
+	"rover": {
+		"id": "rover",
+		"name": "Service Rover",
+		"cost": 50000,
+		"speed": 0.25,
+		"batteryTicks": 600,
+		"repairTicks": 30,
+		"color": "#ffcf5a"
+	}
+}

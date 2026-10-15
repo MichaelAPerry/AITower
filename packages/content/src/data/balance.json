@@ -1,0 +1,40 @@
+{
+	"startingCash": 3000000,
+	"energyPrice": 7.5,
+	"energyPriceByHour": [
+		0.6, 0.55, 0.55, 0.55, 0.6, 0.7,
+		0.85, 1.0, 1.1, 1.1, 1.05, 1.0,
+		1.0, 1.0, 1.05, 1.1, 1.25, 1.7,
+		1.9, 1.9, 1.6, 1.2, 0.9, 0.7
+	],
+	"ambientMeanC": 18,
+	"ambientSwingC": 7,
+	"thermal": {
+		"airCellHeatCapacity": 3000,
+		"airConductance": 6,
+		"slabConductance": 1,
+		"envelopeConductance": 0.3,
+		"buoyancy": 1.5,
+		"rackEase": 0.1,
+		"rackDeltaC": 40,
+		"okC": 80,
+		"throttleC": 90,
+		"tripC": 95,
+		"tripHysteresisC": 8,
+		"minClock": 0.6,
+		"tripCooldownTicks": 30,
+		"coolantSupplyC": 30,
+		"hazardPerDegree": 0.06
+	},
+	"economy": {
+		"slaPenaltyFactor": 1.5,
+		"maxOffers": 4,
+		"offerIntervalTicks": 240,
+		"offerExpiryTicks": 720
+	},
+	"tiers": {
+		"pflops": [0, 120, 400, 1200],
+		"uptime": [0, 0.95, 0.97, 0.99],
+		"reward": [0, 250000, 750000, 2000000]
+	}
+}

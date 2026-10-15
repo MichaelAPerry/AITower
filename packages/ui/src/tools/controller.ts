@@ -1,0 +1,231 @@
+import type { ContentDB } from "@aitower/content";
+import type { CellRef, CommandResult, ConduitLayer, SimCommand, SimView } from "@aitower/sim";
+import { type CellPointerEvent, type GameStore, type Ghost, type Tool, cellIndex, inBounds } from "@aitower/shared";
+import { fmtMoney } from "../format";
+import { type Notice, pushNotice } from "../notices";
+import { cellKey, footprint, lPath, liftSpan, sameCell, slabSpan } from "./geometry";
+import { pickAt } from "./pick";
+
+export interface ToolController {
+	/** Feed every pointer event from the renderer here. */
+	handle(e: CellPointerEvent): void;
+	/** Abort any drag in progress and clear the ghost (e.g. after the tool changed). */
+	cancel(): void;
+}
+
+export interface ToolControllerOptions {
+	/** Called with a human-readable reason when a command is rejected. Defaults to the HUD toast bus. */
+	notify?: (n: Notice) => void;
+}
+
+const LEFT = 0;
+const RIGHT = 2;
+
+/**
+ * Pure tool logic: turns world-cell pointer events into ghosts (`store.setGhost`) and
+ * `SimCommand`s (`store.dispatch`). No React, no DOM.
+ *
+ * - Left button drives tools. A right-button click (down+up on the same cell, i.e. not a
+ *   camera pan) returns to the select tool.
+ * - Tools stay active after use (SimTower style); Esc in the HUD returns to select.
+ */
+export function createToolController(store: GameStore, content: ContentDB, opts: ToolControllerOptions = {}): ToolController {
+	const notify = opts.notify ?? pushNotice;
+	let drag: { start: CellRef; tool: Tool; cells: Map<string, CellRef> } | null = null;
+	let hover: CellRef | null = null;
+	let rightDown: CellRef | null = null;
+	let lastTool = toolKey(store.get().tool);
+
+	const reject = (r: CommandResult, key = "reject"): boolean => {
+		if (r.ok) return true;
+		notify({ text: r.reason, severity: "warn", key: `${key}:${r.reason}` });
+		return false;
+	};
+	const send = (cmd: SimCommand): boolean => reject(store.dispatch(cmd), cmd.type);
+
+	const cancel = (): void => {
+		drag = null;
+		store.setGhost(null);
+	};
+
+	const ghostFor = (tool: Tool, cell: CellRef | null): Ghost | null => {
+		if (!cell) return null;
+		const { view } = store.get();
+		switch (tool.kind) {
+			case "select":
+				return null;
+			case "place": {
+				const def = content.facilities[tool.defId];
+				if (!def) return null;
+				const r = store.canPlace(tool.defId, cell.floor, cell.x);
+				return {
+					cells: footprint(cell, def.width),
+					valid: r.ok,
+					defId: tool.defId,
+					label: r.ok ? `${def.name} · ${fmtMoney(def.cost)}` : r.reason,
+				};
+			}
+			case "slab": {
+				const s = drag ? slabSpan(drag.start.floor, drag.start.x, cell.x) : slabSpan(cell.floor, cell.x, cell.x);
+				return slabGhost(view, content, s.cells);
+			}
+			case "conduit": {
+				const cells = drag ? lPath(drag.start, cell) : [cell];
+				return conduitGhost(view, content, tool.layer, cells);
+			}
+			case "lift": {
+				const s = drag ? liftSpan(drag.start.x, drag.start.floor, cell.floor) : liftSpan(cell.x, cell.floor, cell.floor);
+				return liftGhost(view, content, s.cells, !!drag);
+			}
+			case "demolish": {
+				const cells = drag ? [...drag.cells.values()] : [cell];
+				// Demolish ghosts are intentionally `valid: false` so the renderer draws them red.
+				return { cells, valid: false, label: cells.length > 1 ? `Demolish ×${cells.length}` : "Demolish" };
+			}
+		}
+	};
+
+	const commit = (tool: Tool, start: CellRef, end: CellRef, collected: CellRef[]): void => {
+		switch (tool.kind) {
+			case "slab": {
+				const s = slabSpan(start.floor, start.x, end.x);
+				send({ type: "buildSlab", floor: s.floor, x0: s.x0, x1: s.x1 });
+				return;
+			}
+			case "conduit":
+				send({ type: "buildConduit", layer: tool.layer, cells: lPath(start, end) });
+				return;
+			case "lift": {
+				const s = liftSpan(start.x, start.floor, end.floor);
+				if (s.floorMin === s.floorMax) {
+					notify({ text: "Drag vertically to span at least two floors", severity: "info", key: "lift-span" });
+					return;
+				}
+				send({ type: "buildLift", x: s.x, floorMin: s.floorMin, floorMax: s.floorMax });
+				return;
+			}
+			case "demolish": {
+				let failed = 0;
+				let reason = "";
+				for (const c of collected) {
+					const r = store.dispatch({ type: "demolish", floor: c.floor, x: c.x });
+					if (!r.ok) {
+						failed++;
+						reason = r.reason;
+					}
+				}
+				if (failed) notify({ text: failed > 1 ? `${reason} (×${failed})` : reason, severity: "warn", key: `demolish:${reason}` });
+				return;
+			}
+			default:
+				return;
+		}
+	};
+
+	const handle = (e: CellPointerEvent): void => {
+		const { tool, view } = store.get();
+		const key = toolKey(tool);
+		if (key !== lastTool) {
+			drag = null;
+			lastTool = key;
+		}
+		const cell = e.cell && inBounds(view, e.cell.x, e.cell.floor) ? e.cell : null;
+
+		// Right click (without dragging) → back to select.
+		if (e.button === RIGHT) {
+			if (e.kind === "down") rightDown = cell;
+			else if (e.kind === "up") {
+				if (rightDown && sameCell(rightDown, cell)) {
+					cancel();
+					if (tool.kind !== "select") store.setTool({ kind: "select" });
+				}
+				rightDown = null;
+			}
+			return;
+		}
+
+		switch (e.kind) {
+			case "leave":
+				hover = null;
+				cancel();
+				return;
+			case "move":
+				if (sameCell(hover, cell) && cell) return;
+				hover = cell;
+				if (drag && cell && tool.kind === "demolish") drag.cells.set(cellKey(cell), cell);
+				store.setGhost(ghostFor(tool, cell));
+				return;
+			case "down": {
+				if (e.button !== LEFT || !cell) return;
+				hover = cell;
+				if (tool.kind === "select") {
+					store.setSelection(pickAt(view, cell));
+					return;
+				}
+				if (tool.kind === "place") {
+					if (send({ type: "place", defId: tool.defId, floor: cell.floor, x: cell.x })) {
+						// Stay in place mode; refresh the ghost (the cell is now occupied).
+						store.setGhost(ghostFor(tool, cell));
+					}
+					return;
+				}
+				drag = { start: cell, tool, cells: new Map([[cellKey(cell), cell]]) };
+				store.setGhost(ghostFor(tool, cell));
+				return;
+			}
+			case "up": {
+				if (e.button !== LEFT || !drag) return;
+				const d = drag;
+				drag = null;
+				const end = cell ?? hover ?? d.start;
+				if (d.tool.kind === "demolish" && cell) d.cells.set(cellKey(cell), cell);
+				commit(d.tool, d.start, end, [...d.cells.values()]);
+				store.setGhost(ghostFor(tool, cell));
+				return;
+			}
+		}
+	};
+
+	return { handle, cancel };
+}
+
+/** Structural identity of a tool (the store may hand out fresh objects). */
+export const toolKey = (t: Tool): string =>
+	t.kind === "place" ? `place:${t.defId}` : t.kind === "conduit" ? `conduit:${t.layer}` : t.kind;
+
+// ─── Ghost validity (client-side estimate; the sim has the final word) ─────
+
+function slabGhost(view: SimView, content: ContentDB, cells: CellRef[]): Ghost {
+	let cost = 0;
+	let missingBelow = false;
+	for (const c of cells) {
+		if (view.slab[cellIndex(view, c.x, c.floor)]) continue;
+		cost += c.floor < 0 ? content.structure.basementSlabPerTile : content.structure.slabPerTile;
+		if (c.floor > 0 && !(inBounds(view, c.x, c.floor - 1) && view.slab[cellIndex(view, c.x, c.floor - 1)])) missingBelow = true;
+	}
+	if (missingBelow) return { cells, valid: false, label: "Needs a slab below" };
+	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
+	return { cells, valid: true, label: cost ? `Slab ×${cells.length} · ${fmtMoney(cost)}` : "Already built" };
+}
+
+function conduitGhost(view: SimView, content: ContentDB, layer: ConduitLayer, cells: CellRef[]): Ghost {
+	const grid = layer === "power" ? view.power : view.coolant;
+	const per = layer === "power" ? content.structure.powerConduitPerTile : content.structure.coolantConduitPerTile;
+	let n = 0;
+	for (const c of cells) if (!grid[cellIndex(view, c.x, c.floor)]) n++;
+	const cost = n * per;
+	const name = layer === "power" ? "Power conduit" : "Coolant conduit";
+	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
+	return { cells, valid: true, label: `${name} ×${cells.length} · ${fmtMoney(cost)}` };
+}
+
+function liftGhost(view: SimView, content: ContentDB, cells: CellRef[], dragging: boolean): Ghost {
+	const s = content.structure;
+	const cost = s.liftBase + s.liftPerFloor * cells.length;
+	if (cells.some((c) => !view.slab[cellIndex(view, c.x, c.floor)])) return { cells, valid: false, label: "Every floor needs slab here" };
+	if (view.lifts.some((l) => l.x === cells[0].x && cells.some((c) => c.floor >= l.floorMin && c.floor <= l.floorMax)))
+		return { cells, valid: false, label: "A lift is already here" };
+	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
+	if (!dragging) return { cells, valid: true, label: "Drag up/down to size the shaft" };
+	return { cells, valid: cells.length > 1, label: `Lift ${cells.length} floors · ${fmtMoney(cost)}` };
+}

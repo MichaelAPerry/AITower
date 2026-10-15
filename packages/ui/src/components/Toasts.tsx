@@ -1,0 +1,73 @@
+import type { ContentDB } from "@aitower/content";
+import type { GameState } from "@aitower/shared";
+import { useEffect, useRef, useState } from "react";
+import { describeEvent, eventKey } from "../events";
+import { type Notice, onNotice } from "../notices";
+
+interface Toast extends Notice {
+	id: number;
+	count: number;
+	until: number;
+}
+
+const TTL = 5000;
+const MAX = 5;
+
+/** Toast stack: important sim events from `state.log` plus notices (command rejections). */
+export function Toasts({ content, state }: { content: ContentDB; state: GameState }) {
+	const [toasts, setToasts] = useState<Toast[]>([]);
+	const cursor = useRef<{ tick: number; n: number } | null>(null);
+	const nextId = useRef(1);
+
+	const add = (n: Notice): void => {
+		const now = Date.now();
+		setToasts((list) => {
+			const key = n.key ?? n.text;
+			const hit = list.find((t) => (t.key ?? t.text) === key);
+			if (hit) return list.map((t) => (t === hit ? { ...t, text: n.text, count: t.count + 1, until: now + TTL } : t));
+			return [...list, { ...n, key, id: nextId.current++, count: 1, until: now + (n.severity === "error" ? TTL * 1.6 : TTL) }].slice(-MAX);
+		});
+	};
+
+	useEffect(() => onNotice(add), []);
+
+	// New log entries → toasts. Entries present at mount are skipped. The cursor is (tick, count at that
+	// tick) so it works even if the app rebuilds entry objects; a tick going backwards (load) resets it.
+	useEffect(() => {
+		const log = state.log;
+		const last = log[log.length - 1];
+		const countAt = (tick: number): number => log.reduce((n, e) => n + (e.tick === tick ? 1 : 0), 0);
+		const c = cursor.current;
+		if (!c || !last || last.tick < c.tick) {
+			cursor.current = last ? { tick: last.tick, n: countAt(last.tick) } : { tick: -1, n: 0 };
+			return;
+		}
+		let atTick = 0;
+		for (const e of log) {
+			if (e.tick < c.tick) continue;
+			if (e.tick === c.tick && ++atTick <= c.n) continue;
+			const d = describeEvent(e.event, state.view, content);
+			if (d.toast) add({ text: d.text, severity: d.severity, key: eventKey(e.event) });
+		}
+		cursor.current = { tick: last.tick, n: countAt(last.tick) };
+	}, [state.log]);
+
+	useEffect(() => {
+		if (!toasts.length) return;
+		const next = Math.min(...toasts.map((t) => t.until)) - Date.now();
+		const h = setTimeout(() => setToasts((l) => l.filter((t) => t.until > Date.now())), Math.max(50, next));
+		return () => clearTimeout(h);
+	}, [toasts]);
+
+	return (
+		<div className="ui-toasts" aria-live="polite">
+			{toasts.map((t) => (
+				<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))}>
+					<span className="ui-alert-dot" />
+					<span>{t.text}</span>
+					{t.count > 1 && <span className="ui-toast-count">×{t.count}</span>}
+				</div>
+			))}
+		</div>
+	);
+}
