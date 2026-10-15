@@ -26,7 +26,7 @@ for (const [pkg, allowed] of Object.entries(ALLOWED)) {
 		const src = readFileSync(file, "utf8");
 		for (const m of src.matchAll(/(?:import|export)[^'"]*?from\s+["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)/g)) {
 			const spec = m[1] ?? m[2];
-			if (spec.startsWith(".") || spec.startsWith("node:") && file.endsWith(".test.ts")) continue;
+			if (spec.startsWith(".") || ((spec.startsWith("node:") || spec === "vitest") && /\.test\.tsx?$/.test(file))) continue;
 			const target = spec.startsWith("@aitower/") ? spec.split("/")[1] : spec.split("/")[0];
 			if (target === pkg) continue;
 			if (!allowed.includes(target)) {

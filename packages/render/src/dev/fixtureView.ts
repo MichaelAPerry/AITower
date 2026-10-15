@@ -256,7 +256,6 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		if (view.minuteOfDay < minutesPerTick) view.day++;
 
 		const lift = lifts[0];
-		const target = liftStops[stop];
 		if (dwell > 0) {
 			dwell--;
 			lift.doorsOpen = true;
@@ -271,7 +270,6 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 				dwell = 6;
 			} else lift.carFloor += Math.sign(d) * 0.2;
 		}
-		void target;
 
 		for (const b of bots) {
 			const dir = botDir.get(b.id);
