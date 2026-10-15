@@ -1,178 +1,249 @@
 {
-	"rack_air_gpu": {
-		"id": "rack_air_gpu",
-		"name": "Air GPU Rack",
-		"description": "Four 8-GPU servers breathing cold-aisle air through hot-aisle fans. About 40 kW is where air cooling runs out of breath, so keep a CRAH within reach.",
-		"kind": "rack",
-		"category": "rack",
-		"width": 2,
-		"cost": 400000,
-		"upkeepPerDay": 1500,
-		"unlockTier": 1,
-		"facilityKw": 0,
-		"color": "#2a2f36",
-		"accent": "#3ee6c8",
-		"rack": { "cooling": "air", "powerKw": 40, "liquidFraction": 0, "pflops": 20, "storageTB": 0, "failurePerDay": 0.2 },
-		"placement": { "needsPower": true }
-	},
-	"rack_dlc_gpu": {
-		"id": "rack_dlc_gpu",
-		"name": "Liquid-Cooled GPU Rack",
-		"description": "A 72-GPU NVLink rack with cold plates on every die, drawing around 120 kW. Roughly 80% of its heat leaves through the coolant loop; the rest still needs air.",
-		"kind": "rack",
-		"category": "rack",
-		"width": 2,
-		"cost": 1400000,
-		"upkeepPerDay": 4000,
-		"unlockTier": 2,
-		"facilityKw": 0,
-		"color": "#252a33",
-		"accent": "#3d8bff",
-		"rack": { "cooling": "dlc", "powerKw": 120, "liquidFraction": 0.8, "pflops": 90, "storageTB": 0, "failurePerDay": 0.25 },
-		"placement": { "needsPower": true, "needsCoolant": true }
-	},
-	"rack_storage": {
-		"id": "rack_storage",
-		"name": "Storage Rack",
-		"description": "Dense NVMe and disk shelves holding the datasets and checkpoints that training jobs stream from. No FLOPS, but without enough terabytes, big jobs stall.",
-		"kind": "rack",
-		"category": "rack",
-		"width": 2,
-		"cost": 150000,
-		"upkeepPerDay": 600,
-		"unlockTier": 1,
-		"facilityKw": 0,
-		"color": "#2e2a38",
-		"accent": "#b07cff",
-		"rack": { "cooling": "air", "powerKw": 12, "liquidFraction": 0, "pflops": 0, "storageTB": 2000, "failurePerDay": 0.08 },
-		"placement": { "needsPower": true }
-	},
-	"crah_unit": {
-		"id": "crah_unit",
-		"name": "CRAH Unit",
-		"description": "A computer-room air handler with its own compressor: it pulls hot air from nearby aisles and returns it at about 20°C. Simple and reliable, but its fans and compressor run whether the racks are busy or not.",
-		"kind": "crah",
-		"category": "cooling",
-		"width": 2,
-		"cost": 120000,
-		"upkeepPerDay": 500,
-		"unlockTier": 1,
-		"facilityKw": 40,
-		"color": "#cfe4ef",
-		"accent": "#6fc3ff",
-		"cooling": { "capacityKw": 180, "radius": 8 },
-		"placement": { "needsPower": true }
-	},
-	"chiller": {
-		"id": "chiller",
-		"name": "Chiller",
-		"description": "Rejects coolant-loop heat outdoors, spending about 1 kW of electricity for every 5.5 kW it moves. Its efficiency drops on hot afternoons, so basements and roofs suit it best.",
-		"kind": "chiller",
-		"category": "cooling",
-		"width": 4,
-		"cost": 1100000,
-		"upkeepPerDay": 2500,
-		"unlockTier": 2,
-		"facilityKw": 6,
-		"color": "#b9d3e3",
-		"accent": "#4fb0e8",
-		"cooling": { "capacityKw": 600, "cop": 5.5 },
-		"placement": { "needsPower": true, "needsCoolant": true }
-	},
-	"cdu": {
-		"id": "cdu",
-		"name": "Coolant Distribution Unit",
-		"description": "A heat exchanger and pump skid that feeds warm-water cold plates from the facility loop with a ~4°C approach. A coolant loop carries no more rack heat than its CDUs can pass.",
-		"kind": "cdu",
-		"category": "cooling",
-		"width": 2,
-		"cost": 400000,
-		"upkeepPerDay": 800,
-		"unlockTier": 2,
-		"facilityKw": 4,
-		"color": "#a7c6db",
-		"accent": "#2f86c9",
-		"cooling": { "capacityKw": 400 },
-		"placement": { "needsPower": true, "needsCoolant": true }
-	},
-	"grid_tie": {
-		"id": "grid_tie",
-		"name": "Grid Tie",
-		"description": "Utility substation and step-down transformer. It imports up to 1.5 MW at the going rate, which is cheap at night and painful during the evening peak.",
-		"kind": "grid_tie",
-		"category": "power",
-		"width": 4,
-		"cost": 250000,
-		"upkeepPerDay": 1000,
-		"unlockTier": 1,
-		"facilityKw": 10,
-		"color": "#c99a2e",
-		"accent": "#ffd84a",
-		"power": { "capacityKw": 1500 },
-		"placement": { "maxFloor": 0, "needsPower": true }
-	},
-	"genset": {
-		"id": "genset",
-		"name": "Diesel Genset",
-		"description": "An 800 kW backup generator that cranks automatically when the net runs short and takes about ten minutes to reach load. Every kWh it makes is expensive.",
-		"kind": "genset",
-		"category": "power",
-		"width": 4,
-		"cost": 350000,
-		"upkeepPerDay": 600,
-		"unlockTier": 1,
-		"facilityKw": 0,
-		"color": "#b8642a",
-		"accent": "#ffb347",
-		"power": { "capacityKw": 800, "startDelayTicks": 10, "costPerKwh": 25 },
-		"placement": { "maxFloor": 0, "needsPower": true }
-	},
-	"ups_battery": {
-		"id": "ups_battery",
-		"name": "UPS Battery Bank",
-		"description": "Lithium-ion strings behind a double-conversion UPS: 250 kWh that bridges the gap until the genset is up. About 5% is lost in conversion.",
-		"kind": "ups",
-		"category": "power",
-		"width": 3,
-		"cost": 300000,
-		"upkeepPerDay": 500,
-		"unlockTier": 1,
-		"facilityKw": 3,
-		"color": "#8c7a2a",
-		"accent": "#f5e663",
-		"power": { "capacityKw": 500, "storageKwh": 250, "efficiency": 0.95 },
-		"placement": { "needsPower": true }
-	},
-	"parts_depot": {
-		"id": "parts_depot",
-		"name": "Parts Depot",
-		"description": "Shelving for spare GPU trays, PSUs and pumps. Failures are routine at scale, so a well-stocked depot close to the racks keeps repair times short.",
-		"kind": "depot",
-		"category": "logistics",
-		"width": 3,
-		"cost": 60000,
-		"upkeepPerDay": 200,
-		"unlockTier": 1,
-		"facilityKw": 0.5,
-		"color": "#1f6f6a",
-		"accent": "#5fe0d0",
-		"logistics": { "capacity": 20 },
-		"placement": { "needsPower": true }
-	},
-	"bot_charger": {
-		"id": "bot_charger",
-		"name": "Bot Charging Dock",
-		"description": "Home base for maintenance rovers. Two bays, each charging at 5 kW, and new bots are delivered here.",
-		"kind": "charger",
-		"category": "logistics",
-		"width": 2,
-		"cost": 40000,
-		"upkeepPerDay": 150,
-		"unlockTier": 1,
-		"facilityKw": 0.5,
-		"color": "#23807a",
-		"accent": "#9dfff2",
-		"logistics": { "capacity": 2, "chargeKw": 5 },
-		"placement": { "needsPower": true }
-	}
+ "rack_air_gpu": {
+  "id": "rack_air_gpu",
+  "name": "Mk.I Air-Cooled Compute Cabinet",
+  "description": "Four 8-GPU servers in a putty-enamel mainframe cabinet, breathing aisle air through a punch-card intake. Around 40 kW per cabinet is where air cooling gives up. Ministry Form CC-1 applies.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 400000,
+  "upkeepPerDay": 1500,
+  "unlockTier": 1,
+  "facilityKw": 0,
+  "color": "#c9bc9c",
+  "accent": "#33ff66",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 40,
+   "liquidFraction": 0,
+   "pflops": 20,
+   "storageTB": 0,
+   "failurePerDay": 0.2
+  },
+  "placement": {
+   "needsPower": true
+  }
+ },
+ "rack_dlc_gpu": {
+  "id": "rack_dlc_gpu",
+  "name": "Mk.II Liquid-Plumbed Compute Cabinet",
+  "description": "A 72-GPU NVLink cabinet with copper cold plates bolted to every die, drawing about 120 kW. Roughly 80% of its heat leaves through the brass manifold, so it must be plumbed into a coolant loop.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 1400000,
+  "upkeepPerDay": 4000,
+  "unlockTier": 2,
+  "facilityKw": 0,
+  "color": "#a8987a",
+  "accent": "#c06a3b",
+  "rack": {
+   "cooling": "dlc",
+   "powerKw": 120,
+   "liquidFraction": 0.8,
+   "pflops": 90,
+   "storageTB": 0,
+   "failurePerDay": 0.25
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  }
+ },
+ "rack_storage": {
+  "id": "rack_storage",
+  "name": "Magnetic Archive Cabinet",
+  "description": "Spinning tape reels and drive shelves holding the datasets and checkpoints that training jobs stream from. Every byte is filed in triplicate.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 150000,
+  "upkeepPerDay": 600,
+  "unlockTier": 1,
+  "facilityKw": 0,
+  "color": "#5d6243",
+  "accent": "#ffb000",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 12,
+   "liquidFraction": 0,
+   "pflops": 0,
+   "storageTB": 2000,
+   "failurePerDay": 0.08
+  },
+  "placement": {
+   "needsPower": true
+  }
+ },
+ "crah_unit": {
+  "id": "crah_unit",
+  "name": "Air Handler (Fans Zip-Tied)",
+  "description": "A computer-room air handler with its own compressor and three desk fans zip-tied on for good measure. Pulls hot air from aisles within about 8 tiles and returns it chilled.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 2,
+  "cost": 120000,
+  "upkeepPerDay": 500,
+  "unlockTier": 1,
+  "facilityKw": 40,
+  "color": "#a8987a",
+  "accent": "#4f9a85",
+  "cooling": {
+   "capacityKw": 180,
+   "radius": 8
+  },
+  "placement": {
+   "needsPower": true
+  }
+ },
+ "chiller": {
+  "id": "chiller",
+  "name": "Steam-Vented Chiller",
+  "description": "A riveted boiler-tank chiller that rejects coolant-loop heat outdoors, spending about 1 kW of electricity per 5.5 kW of heat moved. Works less well on hot days.",
+  "kind": "chiller",
+  "category": "cooling",
+  "width": 4,
+  "cost": 1100000,
+  "upkeepPerDay": 2500,
+  "unlockTier": 2,
+  "facilityKw": 6,
+  "color": "#6f7473",
+  "accent": "#c06a3b",
+  "cooling": {
+   "capacityKw": 600,
+   "cop": 5.5
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  }
+ },
+ "cdu": {
+  "id": "cdu",
+  "name": "Coolant Distribution Manifold",
+  "description": "A heat exchanger, pump and wall of brass valve wheels that feeds warm-water cold plates from the facility loop. Liquid cabinets on its loop are capped by its capacity.",
+  "kind": "cdu",
+  "category": "cooling",
+  "width": 2,
+  "cost": 400000,
+  "upkeepPerDay": 800,
+  "unlockTier": 2,
+  "facilityKw": 4,
+  "color": "#7d6227",
+  "accent": "#c8a248",
+  "cooling": {
+   "capacityKw": 400
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  }
+ },
+ "grid_tie": {
+  "id": "grid_tie",
+  "name": "Municipal Grid Intake",
+  "description": "Porcelain insulators, a knife switch and a step-down transformer on the city's high-voltage main. Imports up to 1.5 MW at the going rate.",
+  "kind": "grid_tie",
+  "category": "power",
+  "width": 4,
+  "cost": 250000,
+  "upkeepPerDay": 1000,
+  "unlockTier": 1,
+  "facilityKw": 10,
+  "color": "#5d6243",
+  "accent": "#e8dfc6",
+  "power": {
+   "capacityKw": 1500
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  }
+ },
+ "genset": {
+  "id": "genset",
+  "name": "Diesel Generator No. 4",
+  "description": "An 800 kW green-enamel diesel that cranks itself when the net runs short. It takes about 10 minutes to come up to speed, and the fuel bill is not small.",
+  "kind": "genset",
+  "category": "power",
+  "width": 4,
+  "cost": 350000,
+  "upkeepPerDay": 600,
+  "unlockTier": 1,
+  "facilityKw": 0,
+  "color": "#3f5a3a",
+  "accent": "#ffb000",
+  "power": {
+   "capacityKw": 800,
+   "startDelayTicks": 10,
+   "costPerKwh": 25
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  }
+ },
+ "ups_battery": {
+  "id": "ups_battery",
+  "name": "Accumulator Bank",
+  "description": "Rows of glass-jar cells behind a double-conversion rectifier: 250 kWh that bridges outages until the generator wakes up. Watch the charge needle.",
+  "kind": "ups",
+  "category": "power",
+  "width": 3,
+  "cost": 300000,
+  "upkeepPerDay": 500,
+  "unlockTier": 1,
+  "facilityKw": 3,
+  "color": "#4a4335",
+  "accent": "#33ff66",
+  "power": {
+   "capacityKw": 500,
+   "storageKwh": 250,
+   "efficiency": 0.95
+  },
+  "placement": {
+   "needsPower": true
+  }
+ },
+ "parts_depot": {
+  "id": "parts_depot",
+  "name": "Spare Parts Requisition Cage",
+  "description": "A wire cage of stamped crates holding spare GPU trays, PSUs and pumps. Failures are routine at scale, so keep it stocked. Requisitions on Form 27B/6.",
+  "kind": "depot",
+  "category": "logistics",
+  "width": 3,
+  "cost": 60000,
+  "upkeepPerDay": 200,
+  "unlockTier": 1,
+  "facilityKw": 0.5,
+  "color": "#6f7473",
+  "accent": "#c8a248",
+  "logistics": {
+   "capacity": 20
+  },
+  "placement": {
+   "needsPower": true
+  }
+ },
+ "bot_charger": {
+  "id": "bot_charger",
+  "name": "Automaton Docking Station",
+  "description": "Brass docking bays where maintenance automatons recharge at 5 kW through a pantograph arm. New units are delivered here.",
+  "kind": "charger",
+  "category": "logistics",
+  "width": 2,
+  "cost": 40000,
+  "upkeepPerDay": 150,
+  "unlockTier": 1,
+  "facilityKw": 0.5,
+  "color": "#4a4335",
+  "accent": "#c8a248",
+  "logistics": {
+   "capacity": 2,
+   "chargeKw": 5
+  },
+  "placement": {
+   "needsPower": true
+  }
+ }
 }

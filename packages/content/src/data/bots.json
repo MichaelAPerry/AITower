@@ -1,11 +1,11 @@
 {
-	"rover": {
-		"id": "rover",
-		"name": "Service Rover",
-		"cost": 50000,
-		"speed": 0.25,
-		"batteryTicks": 600,
-		"repairTicks": 30,
-		"color": "#ffcf5a"
-	}
+ "rover": {
+  "id": "rover",
+  "name": "Maintenance Automaton",
+  "cost": 50000,
+  "speed": 0.25,
+  "batteryTicks": 600,
+  "repairTicks": 30,
+  "color": "#8a8f8c"
+ }
 }
