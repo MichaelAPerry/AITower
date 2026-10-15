@@ -151,11 +151,11 @@ function Telemetry({ content, state }: PanelProps) {
 								{s.fmt(last)}
 							</span>
 						</div>
-						<Sparkline values={vals} color={s.color} refLine={s.ref} min={s.min} height={58} />
+						<Sparkline values={vals} color={s.color} refLine={s.ref} min={s.min} height={72} />
 						<div className="ui-spark-foot">
 							<span>−{fmtDuration(span)}</span>
 							<span>
-								min {vals.length ? s.fmt(Math.min(...vals)) : "—"} · max {vals.length ? s.fmt(Math.max(...vals)) : "—"}
+								↓{vals.length ? s.fmt(Math.min(...vals)) : "—"} ↑{vals.length ? s.fmt(Math.max(...vals)) : "—"}
 							</span>
 						</div>
 					</div>

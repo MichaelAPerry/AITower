@@ -334,7 +334,6 @@ function drawBadge(g: Graphics, f: FacilityView, cx: number, y: number, t: numbe
 		px(g, x + 4, y + 5, 1, 1, ink);
 		cross(g, x, y);
 	}
-	void t;
 }
 
 function cross(g: Graphics, x: number, y: number): void {

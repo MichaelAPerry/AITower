@@ -624,7 +624,7 @@
 }
 .aitower-hud .ui-overlay {
 	position: absolute;
-	top: 0;
+	bottom: 0;
 	left: 0;
 	padding: 4px;
 }
@@ -743,8 +743,7 @@
 .aitower-hud .ui-toolhint {
 	position: absolute;
 	bottom: 0;
-	left: 50%;
-	transform: translateX(-50%);
+	right: 0;
 	padding: 5px 12px;
 	font-size: 11px;
 	white-space: nowrap;
@@ -945,7 +944,7 @@
 	min-width: 0;
 }
 .aitower-hud .ui-bottom.is-open {
-	height: 232px;
+	height: clamp(170px, 30vh, 240px);
 }
 .aitower-hud .ui-bottom-tabs {
 	display: flex;
@@ -1019,7 +1018,6 @@
 }
 .aitower-hud .ui-table tr.is-today td {
 	background: rgba(79, 216, 255, 0.06);
-	color: var(--text);
 }
 .aitower-hud .ui-tags {
 	display: inline-flex;
@@ -1075,6 +1073,10 @@
 	white-space: nowrap;
 	overflow: hidden;
 }
+.aitower-hud .ui-spark-foot span:last-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
 
 /* Alerts */
 .aitower-hud .ui-alerts {
@@ -1110,4 +1112,26 @@
 }
 .aitower-hud .ui-alerts li.sev-warn .ui-alert-text {
 	color: #ffe0b0;
+}
+
+/* ─── Narrow screens ────────────────────────────────────────────────── */
+
+@media (max-width: 1360px) {
+	.aitower-hud {
+		grid-template-columns: 236px minmax(0, 1fr) 280px;
+	}
+	.aitower-hud .ui-topbar {
+		gap: 12px;
+	}
+	.aitower-hud .ui-hide-narrow,
+	.aitower-hud .ui-brand > span:last-child {
+		display: none;
+	}
+	.aitower-hud .ui-speed {
+		min-width: 32px;
+		padding: 6px 7px;
+	}
+	.aitower-hud .ui-tooltip {
+		left: 252px;
+	}
 }

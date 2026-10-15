@@ -131,7 +131,7 @@ export type BotState = "idle" | "toDepot" | "toTarget" | "repairing" | "toCharge
 export interface BotView {
 	id: number;
 	defId: string;
-	/** Fractional tile position. */
+	/** Fractional tile index: x = 3.0 means standing centred in tile 3 (renderer draws at (x + 0.5) × tileWidth). */
 	x: number;
 	/** Fractional floor (fractional only while riding a lift). */
 	floor: number;

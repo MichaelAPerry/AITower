@@ -1,5 +1,5 @@
 /** demolish: facility ▸ lift ▸ conduit(s) ▸ slab, refunding 50 %. */
-import type { ConduitLayer } from "../api";
+import type { ConduitLayer, SimEvent } from "../api";
 import { DEMOLISH_REFUND } from "../core/constants";
 import { cellIdx, findById, inBounds } from "../core/grid";
 import { getDef } from "../world/defs";
@@ -11,7 +11,7 @@ export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: Con
 	const s = ctx.state;
 	if (!inBounds(s, x, floor)) return reject("out of bounds");
 	const i = cellIdx(s, x, floor);
-	const done = (events: Parameters<Extract<Plan, { ok: true }>["apply"]>[0]): void => {
+	const done = (events: SimEvent[]): void => {
 		events.push({ type: "demolished", floor, x });
 	};
 

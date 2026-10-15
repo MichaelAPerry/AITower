@@ -1,5 +1,6 @@
 // Dev harness: renders the hand-built fixture and animates it.
-// Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?select=facility:4  ?ghost=1  ?mpt=4 (minutes per tick)
+// Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?select=facility:4  ?ghost=1  ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
+import { loadContent } from "@aitower/content";
 import type { OverlayMode, Selection } from "@aitower/shared";
 import { createRenderer } from "../src/index";
 import { createFixture, fixtureContent } from "../src/dev/fixtureView";
@@ -8,7 +9,16 @@ const params = new URLSearchParams(location.search);
 const host = document.getElementById("world") as HTMLElement;
 const hud = document.getElementById("hud") as HTMLElement;
 const fx = createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
-const renderer = await createRenderer(host, fixtureContent);
+// ?real=1 draws the fixture with the real content colours (falls back to the local stub).
+let content = fixtureContent;
+if (params.has("real")) {
+	try {
+		content = loadContent();
+	} catch (err) {
+		console.warn("loadContent failed, using fixture content", err);
+	}
+}
+const renderer = await createRenderer(host, content);
 renderer.resize(window.innerWidth, window.innerHeight);
 window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
 

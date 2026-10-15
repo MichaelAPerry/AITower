@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>AItower HUD harness</title>
+		<style>
+			html, body { margin: 0; height: 100%; overflow: hidden; background: #07090d; }
+			#world { position: fixed; inset: 0; background:
+				linear-gradient(rgba(79,216,255,0.04) 1px, transparent 1px) 0 0 / 24px 24px,
+				linear-gradient(90deg, rgba(79,216,255,0.04) 1px, transparent 1px) 0 0 / 24px 24px,
+				radial-gradient(ellipse at 50% 60%, #121a24, #07090d 70%); }
+			#world .placeholder { position: absolute; left: 30%; top: 30%; width: 40%; height: 34%; border: 1px dashed #24506a; color: #3d5262; font: 12px ui-monospace, monospace; display: grid; place-items: center; }
+			#hud { position: fixed; inset: 0; pointer-events: none; }
+		</style>
+	</head>
+	<body>
+		<div id="world"><div class="placeholder">world canvas (renderer) goes here</div></div>
+		<div id="hud"></div>
+		<script type="module" src="./main.tsx"></script>
+	</body>
+</html>

@@ -51,7 +51,7 @@ function defSpecs(def: FacilityDef): [string, string][] {
 	const s: [string, string][] = [
 		["Cost", fmtMoney(def.cost)],
 		["Upkeep", `${fmtMoney(def.upkeepPerDay)}/day`],
-		["Width", `${def.width} tiles`],
+		["Width", `${def.width} tile${def.width === 1 ? "" : "s"}`],
 	];
 	if (def.facilityKw) s.push(["Aux draw", fmtPower(def.facilityKw)]);
 	if (def.rack) {
@@ -101,8 +101,8 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 
 	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
 		{ tool: { kind: "slab" }, icon: "slab", name: "Floor slab", cost: `${fmtMoney(st.slabPerTile)}/tile`, hint: `basement ${fmtMoney(st.basementSlabPerTile)}/tile`, body: "Drag horizontally along one floor. Floors above ground need slab underneath." },
-		{ tool: { kind: "conduit", layer: "power" }, icon: "bolt", name: "Power conduit", cost: `${fmtMoney(st.powerConduitPerTile)}/tile`, hint: "drag: across, then up/down", body: "Busway linking power sources, UPS and loads into one net. Vertical runs become risers." },
-		{ tool: { kind: "conduit", layer: "coolant" }, icon: "drop", name: "Coolant conduit", cost: `${fmtMoney(st.coolantConduitPerTile)}/tile`, hint: "drag: across, then up/down", body: "Liquid loop piping between chillers, CDUs and liquid-cooled racks." },
+		{ tool: { kind: "conduit", layer: "power" }, icon: "bolt", name: "Power conduit", cost: `${fmtMoney(st.powerConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Busway linking power sources, UPS and loads into one net. Vertical runs become risers." },
+		{ tool: { kind: "conduit", layer: "coolant" }, icon: "drop", name: "Coolant conduit", cost: `${fmtMoney(st.coolantConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Liquid loop piping between chillers, CDUs and liquid-cooled racks." },
 		{ tool: { kind: "lift" }, icon: "lift", name: "Service lift", cost: `${fmtMoney(st.liftBase)}+${fmtMoney(st.liftPerFloor)}/fl`, hint: "drag vertically", body: "Lets bots change floors. Every floor in the span needs slab at that column." },
 		{ tool: { kind: "demolish" }, icon: "demolish", name: "Demolish", cost: "50% refund", hint: "click or drag", body: "Removes the top-most thing in a cell: facility ▸ lift ▸ conduit ▸ slab." },
 	];
@@ -127,7 +127,10 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 			</div>
 			<div className="ui-tabs ui-tabs-5" role="tablist">
 				{TABS.map((t) => (
-					<button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => setTab(t.id)}>
+					<button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => {
+							setTab(t.id);
+							setHover(null);
+						}}>
 						{t.label}
 					</button>
 				))}
@@ -140,6 +143,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 							type="button"
 							className={`ui-item ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
 							onClick={() => pick(s.tool)}
+							onMouseLeave={() => setHover(null)}
 							onMouseEnter={(e) => hoverAt(e, { title: s.name, body: s.body, specs: [["Cost", s.cost], ["How", s.hint]] })}
 						>
 							<span className={`ui-item-icon ic-${s.icon}`}>
@@ -167,6 +171,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 								onClick={() => {
 									if (!locked && !poor) pick(t);
 								}}
+								onMouseLeave={() => setHover(null)}
 								onMouseEnter={(e) =>
 									hoverAt(e, {
 										title: d.name,

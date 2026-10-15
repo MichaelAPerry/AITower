@@ -128,7 +128,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				<Meter value={f.health} tone={f.health < 0.5 ? "error" : f.health < 0.9 ? "warn" : "good"} />
 				<Row k="Power draw">{fmtPower(f.powerKw)}</Row>
 				<Row k={def?.cooling ? "Heat removed" : "Heat out"}>{fmtPower(f.heatKw)}</Row>
-				{def?.rack && def.rack.pflops > 0 && <Row k="Compute">{fmtPflops(def.rack.pflops * f.clock * (f.status === "ok" ? 1 : 0))}</Row>}
+				{def?.rack && def.rack.pflops > 0 && <Row k="Compute">{fmtPflops(def.rack.pflops * f.clock * (f.status === "ok" || f.status === "throttled" ? 1 : 0))}</Row>}
 				{f.running !== undefined && <Row k="Genset">{f.running ? <span className="is-warn">running</span> : "standby"}</Row>}
 				{f.charge !== undefined && (
 					<>

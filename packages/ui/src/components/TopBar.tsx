@@ -76,7 +76,7 @@ export function TopBar({ store, content, state }: PanelProps) {
 			<Stat label="Outside" title="Outdoor ambient temperature">
 				{fmtTemp(view.ambientC, 1)}
 			</Stat>
-			<Stat label="Grid $/kWh" title="Current energy price">
+			<Stat label="Grid $/kWh" title="Current energy price" className="ui-hide-narrow">
 				{view.energyPrice.toFixed(3)}
 			</Stat>
 			<button
