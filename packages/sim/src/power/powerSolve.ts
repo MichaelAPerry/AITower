@@ -132,8 +132,9 @@ export function powerSolve(ctx: TickCtx): void {
 			if (before > 0 && u.storedKwh === 0) events.push({ type: "upsDepleted", facilityId: u.id });
 		}
 
-		// Charge UPS from remaining grid ▸ genset headroom (only when nothing was discharged).
-		const discharged = served > gridKw + gensetKw + EPS;
+		// Charge UPS from remaining grid ▸ genset headroom, only when they cover the full demand
+		// (charging a short net would make it flicker between powered and unpowered).
+		const discharged = gridCap + gensetCap < demand - EPS;
 		let gridSpare = gridCap - gridKw;
 		let gridCharge = 0;
 		for (const u of b.upses) {
@@ -197,7 +198,10 @@ export function powerSolve(ctx: TickCtx): void {
 				f.powerKw = 0;
 			}
 		}
-		if (d.kind === "rack") itKw += f.powerKw;
+		if (d.kind === "rack") {
+			f.heatKw = f.powerKw; // all electrical draw becomes heat
+			itKw += f.powerKw;
+		}
 	}
 	for (const lift of state.lifts) lift.sat = lift.powerNet >= 0 ? nets[lift.powerNet].satisfaction : 0;
 

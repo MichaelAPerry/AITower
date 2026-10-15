@@ -35,7 +35,7 @@ export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: Con
 		});
 	}
 
-	const layers: ConduitLayer[] = (layer ? [layer] : ["power", "coolant"]).filter((l) =>
+	const layers: ConduitLayer[] = (layer ? [layer] : (["power", "coolant"] as ConduitLayer[])).filter((l) =>
 		l === "power" ? s.power[i] === 1 : s.coolant[i] === 1,
 	);
 	if (layers.length > 0) {

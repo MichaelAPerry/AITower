@@ -31,6 +31,8 @@ async function boot() {
 	const tools = createToolController(store, content);
 	renderer.onPointer((e) => tools.handle(e));
 	renderer.resize(window.innerWidth, window.innerHeight);
+	// Open on the starter rack row, nudged right so the build palette doesn't cover it.
+	renderer.focus({ x: 19, floor: 0 });
 	window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
 
 	// Browsers only allow audio after a user gesture.

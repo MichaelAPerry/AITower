@@ -13,7 +13,7 @@
 		"airCellHeatCapacity": 3000,
 		"airConductance": 6,
 		"slabConductance": 1,
-		"envelopeConductance": 0.3,
+		"envelopeConductance": 0.05,
 		"buoyancy": 1.5,
 		"rackEase": 0.1,
 		"rackDeltaC": 40,

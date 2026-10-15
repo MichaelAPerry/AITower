@@ -4,7 +4,6 @@
  */
 import type { ContentDB } from "@aitower/content";
 import type { BotState, BotView, FacilityView, JobView, SimView } from "../api";
-import { TICKS_PER_DAY } from "../api";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
@@ -140,5 +139,3 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		bankrupt: state.bankrupt,
 	};
 }
-
-export { TICKS_PER_DAY };

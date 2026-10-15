@@ -1,7 +1,6 @@
 /**
  * Tick stage 5a: explicit air-field step (ARCHITECTURE §4.1) in flux form (energy-conserving).
- * Built cells exchange heat with neighbours (horizontal: air, vertical: slab + buoyancy when the
- * lower cell is hotter); edges and unbuilt neighbours couple to ambient; unbuilt cells = ambient.
+ * Built cells exchange heat with neighbours (horizontal: air, vertical: slab + upward buoyancy); edges and unbuilt neighbours couple to ambient; unbuilt cells = ambient.
  * Rack air heat is added, then CRAHs pull cells within their radius toward 20 °C (never below).
  */
 import type { TickCtx } from "../core/context";
@@ -24,7 +23,8 @@ export function airFieldStep(ctx: TickCtx): void {
 	const perKj = SECONDS_PER_TICK / th.airCellHeatCapacity;
 	const aAir = coupling(th.airConductance, perKj);
 	const aSlab = coupling(th.slabConductance, perKj);
-	const aRise = coupling(th.slabConductance + th.buoyancy, perKj);
+	/** Buoyancy share, clamped so slab + buoyancy ≤ MAX_LINK_COUPLING. */
+	const aBuoy = coupling(th.slabConductance + th.buoyancy, perKj) - aSlab;
 	const aEnv = coupling(th.envelopeConductance, perKj);
 
 	const T = scratch.tempA;
@@ -46,10 +46,12 @@ export function airFieldStep(ctx: TickCtx): void {
 				next[i + 1] -= flow;
 			} else next[i] += aEnv * (amb - t);
 			if (x === 0 || !slab[i - 1]) next[i] += aEnv * (amb - t);
-			// Upper neighbour through its slab, with buoyancy / roof envelope.
+			// Upper neighbour: conduction through its slab plus buoyancy. Buoyancy lifts air that is
+			// warmer than the cooler of (upper cell, outdoors) — a stack effect, so with equal loads the
+			// upper floor ends warmer. Pairwise, so energy is conserved.
 			if (row + 1 < h && slab[i + w]) {
 				const up = T[i + w];
-				const flow = (t > up ? aRise : aSlab) * (t - up);
+				const flow = aSlab * (t - up) + aBuoy * Math.max(0, t - Math.min(up, amb));
 				next[i] -= flow;
 				next[i + w] += flow;
 			} else next[i] += aEnv * (amb - t);
