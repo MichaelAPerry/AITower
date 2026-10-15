@@ -1,0 +1,22 @@
+{
+  "name": "aitower",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*", "tools/*"],
+  "scripts": {
+    "dev": "npm run dev -w @aitower/web",
+    "build": "npm run build -w @aitower/web",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check": "npm run typecheck && npm run check:boundaries && npm test",
+    "sim": "tsx tools/sim-cli/src/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.3",
+    "vitest": "~3.2.7"
+  }
+}

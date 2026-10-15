@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>AItower render harness</title>
+		<style>
+			html, body { margin: 0; height: 100%; background: #070b1e; overflow: hidden; }
+			#world { position: fixed; inset: 0; }
+			#hud { position: fixed; left: 8px; top: 8px; color: #cfe; font: 12px monospace; background: #0008; padding: 4px 8px; pointer-events: none; }
+		</style>
+	</head>
+	<body>
+		<div id="world"></div>
+		<div id="hud"></div>
+		<script type="module" src="./main.ts"></script>
+	</body>
+</html>

@@ -1,0 +1,15 @@
+[
+	{ "id": "helios_labs", "name": "Helios Frontier Labs", "sector": "frontier", "weight": 3, "kinds": ["training", "finetune"], "minTier": 1, "payMultiplier": 1.0 },
+	{ "id": "foldwise", "name": "Foldwise Bio", "sector": "biotech", "weight": 2, "kinds": ["training", "finetune"], "minTier": 1, "payMultiplier": 1.1 },
+	{ "id": "kestrel_quant", "name": "Kestrel Quantitative", "sector": "finance", "weight": 2, "kinds": ["inference"], "minTier": 1, "payMultiplier": 1.3 },
+	{ "id": "nimbus_climate", "name": "Nimbus Climate Collective", "sector": "climate", "weight": 2, "kinds": ["training", "inference"], "minTier": 1, "payMultiplier": 0.9 },
+	{ "id": "northlight_render", "name": "Northlight Render Farm", "sector": "media", "weight": 2, "kinds": ["inference", "finetune"], "minTier": 1, "payMultiplier": 0.85 },
+	{ "id": "civic_translate", "name": "Civic Translation Bureau", "sector": "gov", "weight": 1, "kinds": ["inference", "finetune"], "minTier": 1, "payMultiplier": 0.95 },
+	{ "id": "polymath_ai", "name": "Polymath AI", "sector": "frontier", "weight": 2, "kinds": ["training", "inference"], "minTier": 2, "payMultiplier": 1.25, "needsLiquid": true },
+	{ "id": "cellular_atlas", "name": "Cellular Atlas Institute", "sector": "biotech", "weight": 2, "kinds": ["training", "inference"], "minTier": 2, "payMultiplier": 1.15 },
+	{ "id": "ledgerline", "name": "Ledgerline Capital", "sector": "finance", "weight": 2, "kinds": ["finetune", "inference"], "minTier": 2, "payMultiplier": 1.2 },
+	{ "id": "paperlantern", "name": "Paper Lantern Studios", "sector": "media", "weight": 1, "kinds": ["finetune", "training"], "minTier": 2, "payMultiplier": 1.0 },
+	{ "id": "stratos_weather", "name": "Stratos Ensemble Weather Service", "sector": "climate", "weight": 2, "kinds": ["inference", "training"], "minTier": 3, "payMultiplier": 1.2 },
+	{ "id": "valdoria_sovereign", "name": "Valdorian Sovereign AI Programme", "sector": "gov", "weight": 2, "kinds": ["training"], "minTier": 3, "payMultiplier": 1.4, "needsLiquid": true },
+	{ "id": "meridian_agi", "name": "Meridian Superintelligence Project", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.6, "needsLiquid": true }
+]

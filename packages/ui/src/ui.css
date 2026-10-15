@@ -1,0 +1,1990 @@
+/*
+ * AItower HUD — cassette-futurist control-room hardware (docs/STYLE.md §1–3).
+ * Bakelite housings with corner screws, inset CRT screens, brass needle gauges, toggle switches,
+ * paper forms and rubber stamps. Every colour is a STYLE.md token (or a color-mix of tokens).
+ * All selectors are scoped under .aitower-hud.
+ */
+
+.aitower-hud {
+	/* ── STYLE.md §2 palette ── */
+	--ink: #0d0b08;
+	--housing: #2a261d;
+	--housing-hi: #3b3528;
+	--housing-lo: #17140f;
+	--putty: #c9bc9c;
+	--beige: #a8987a;
+	--olive: #5d6243;
+	--wall: #3d4a3f;
+	--brass: #c8a248;
+	--brass-dk: #7d6227;
+	--copper: #c06a3b;
+	--verdigris: #4f9a85;
+	--steel: #6f7473;
+	--paper: #e8dfc6;
+	--amber: #ffb000;
+	--amber-dim: #7a5400;
+	--green: #33ff66;
+	--green-dim: #14662a;
+	--red: #ff3b2f;
+	--sodium: #ff8a3d;
+	--smog: #4a5a55;
+	/* heat ramp (overlay legend) */
+	--heat-18: #1b3a5c;
+	--heat-24: #3f7f6a;
+	--heat-30: #ffb000;
+	--heat-36: #ff8a3d;
+	--heat-42: #ff3b2f;
+	--heat-50: #fff2c4;
+
+	/* ── derived (mixes of the tokens above) ── */
+	--shade: color-mix(in srgb, var(--ink) 55%, transparent);
+	--shade-hard: color-mix(in srgb, var(--ink) 85%, transparent);
+	--gleam: color-mix(in srgb, var(--paper) 16%, transparent);
+	--paper-ink: color-mix(in srgb, var(--ink) 72%, var(--paper));
+	--paper-rule: color-mix(in srgb, var(--verdigris) 18%, var(--paper));
+	--etch: color-mix(in srgb, var(--paper) 52%, var(--housing));
+
+	/* ── STYLE.md §3 fonts ── */
+	--f-crt: "VT323", ui-monospace, monospace;
+	--f-type: "Special Elite", "Courier New", ui-monospace, monospace;
+	--f-stamp: "Silkscreen", ui-monospace, monospace;
+
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	display: grid;
+	grid-template-columns: 256px minmax(0, 1fr) 300px;
+	grid-template-rows: auto minmax(0, 1fr) auto;
+	gap: 8px;
+	padding: 8px;
+	box-sizing: border-box;
+	font: 17px/1.15 var(--f-crt);
+	font-variant-numeric: tabular-nums;
+	color: var(--paper);
+	user-select: none;
+	-webkit-font-smoothing: antialiased;
+}
+.aitower-hud *,
+.aitower-hud *::before,
+.aitower-hud *::after {
+	box-sizing: border-box;
+}
+.aitower-hud button {
+	font: inherit;
+	color: inherit;
+}
+.aitower-hud button:focus-visible {
+	outline: 1px dashed var(--amber);
+	outline-offset: 2px;
+}
+.aitower-hud.is-bankrupt .ui-topbar {
+	box-shadow:
+		0 0 0 1px var(--ink),
+		0 0 0 3px var(--red),
+		0 0 26px color-mix(in srgb, var(--red) 45%, transparent);
+}
+
+/* ─── Housings ──────────────────────────────────────────────────────── */
+
+.aitower-hud .ui-panel {
+	position: relative;
+	pointer-events: auto;
+	background:
+		repeating-linear-gradient(0deg, transparent 0 3px, color-mix(in srgb, var(--ink) 7%, transparent) 3px 4px),
+		linear-gradient(180deg, color-mix(in srgb, var(--housing-hi) 45%, var(--housing)) 0%, var(--housing) 38%, color-mix(in srgb, var(--housing-lo) 35%, var(--housing)) 100%);
+	border: 2px solid;
+	border-color: var(--housing-hi) var(--housing-lo) var(--housing-lo) var(--housing-hi);
+	border-radius: 6px;
+	box-shadow:
+		0 0 0 1px var(--ink),
+		0 8px 22px var(--shade),
+		inset 0 0 0 1px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+/* Four slotted corner screws. */
+.aitower-hud .ui-panel::after {
+	--screw: radial-gradient(circle at 38% 34%, var(--paper) 0 0.6px, var(--steel) 1.6px, var(--housing-lo) 3.2px, var(--ink) 3.6px, transparent 4.1px);
+	content: "";
+	position: absolute;
+	inset: 3px;
+	pointer-events: none;
+	z-index: 4;
+	background:
+		linear-gradient(var(--ink), var(--ink)) left 1.6px top 3.4px / 4.8px 1.2px no-repeat,
+		linear-gradient(var(--ink), var(--ink)) right 3.4px top 1.6px / 1.2px 4.8px no-repeat,
+		linear-gradient(var(--ink), var(--ink)) left 3.4px bottom 1.6px / 1.2px 4.8px no-repeat,
+		linear-gradient(var(--ink), var(--ink)) right 1.6px bottom 3.4px / 4.8px 1.2px no-repeat,
+		var(--screw) left top / 8px 8px no-repeat,
+		var(--screw) right top / 8px 8px no-repeat,
+		var(--screw) left bottom / 8px 8px no-repeat,
+		var(--screw) right bottom / 8px 8px no-repeat;
+}
+.aitower-hud .ui-panel-title {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 9px 14px 8px;
+	border-bottom: 1px solid var(--housing-lo);
+	box-shadow: 0 1px 0 var(--housing-hi);
+}
+
+/* Typewritten paper label strip, riveted to the housing. */
+.aitower-hud .ui-formlabel {
+	display: inline-flex;
+	align-items: baseline;
+	gap: 7px;
+	min-width: 0;
+	padding: 3px 9px 2px;
+	background:
+		linear-gradient(180deg, transparent 0 82%, color-mix(in srgb, var(--beige) 40%, transparent) 100%),
+		var(--paper);
+	color: var(--ink);
+	border-radius: 1px;
+	box-shadow:
+		0 1px 0 var(--ink),
+		0 2px 4px var(--shade);
+	transform: rotate(-0.6deg);
+	white-space: nowrap;
+	overflow: hidden;
+}
+.aitower-hud .ui-formlabel-no {
+	font: 8px/1 var(--f-stamp);
+	color: var(--red);
+	letter-spacing: 0.04em;
+}
+.aitower-hud .ui-formlabel-text {
+	font: 14px/1.1 var(--f-type);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Embossed Dymo tape. */
+.aitower-hud .ui-dymo {
+	display: inline-block;
+	align-self: flex-start;
+	padding: 3px 5px 2px;
+	background: linear-gradient(180deg, color-mix(in srgb, var(--housing-hi) 40%, var(--ink)), var(--ink));
+	color: var(--paper);
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	border-radius: 2px;
+	text-shadow: 0 1px 0 var(--ink);
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 1px 0 var(--housing-hi);
+}
+
+/* ─── CRT screens ──────────────────────────────────────────────────── */
+
+.aitower-hud .ui-crt {
+	--ph: var(--amber);
+	--ph-lo: color-mix(in srgb, var(--amber) 64%, var(--ink));
+	--ph-grid: var(--amber-dim);
+	position: relative;
+	color: var(--ph);
+	font-family: var(--f-crt);
+	background: radial-gradient(ellipse 120% 150% at 50% 45%, color-mix(in srgb, var(--ph) 9%, var(--ink)) 0%, var(--ink) 78%);
+	border-radius: 8px / 10px;
+	box-shadow:
+		inset 0 0 14px 3px var(--shade-hard),
+		inset 0 0 0 1px var(--ink),
+		0 0 0 2px var(--housing-lo),
+		0 1px 0 2px var(--housing-hi);
+	text-shadow:
+		0 0 1px color-mix(in srgb, var(--ph) 55%, transparent),
+		0 0 7px color-mix(in srgb, var(--ph) 30%, transparent);
+}
+.aitower-hud .ui-crt::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	pointer-events: none;
+	background:
+		radial-gradient(ellipse 70% 55% at 28% 12%, color-mix(in srgb, var(--paper) 7%, transparent), transparent 70%),
+		repeating-linear-gradient(180deg, color-mix(in srgb, var(--ink) 26%, transparent) 0 1px, transparent 1px 3px);
+	animation: ui-flicker 3.7s infinite;
+}
+.aitower-hud .crt-green {
+	--ph: var(--green);
+	--ph-lo: color-mix(in srgb, var(--green) 58%, var(--ink));
+	--ph-grid: var(--green-dim);
+}
+.aitower-hud .crt-red {
+	--ph: var(--red);
+	--ph-lo: color-mix(in srgb, var(--red) 62%, var(--ink));
+	--ph-grid: color-mix(in srgb, var(--red) 40%, var(--ink));
+}
+@keyframes ui-flicker {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	41% {
+		opacity: 1;
+	}
+	43% {
+		opacity: 0.72;
+	}
+	45% {
+		opacity: 1;
+	}
+	77% {
+		opacity: 0.88;
+	}
+	79% {
+		opacity: 1;
+	}
+}
+.aitower-hud .ui-label {
+	font: 15px/1 var(--f-crt);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ph-lo, var(--beige));
+	white-space: nowrap;
+}
+.aitower-hud .ui-big {
+	font: 24px/1 var(--f-crt);
+	white-space: nowrap;
+	letter-spacing: 0.01em;
+}
+.aitower-hud .ui-dim {
+	color: var(--ph-lo, var(--beige));
+}
+.aitower-hud .ui-grow {
+	flex: 1;
+}
+.aitower-hud .ui-icon {
+	display: inline-block;
+	vertical-align: -2px;
+	flex: none;
+}
+.aitower-hud .is-neg {
+	color: var(--red) !important;
+}
+.aitower-hud .is-neg-soft {
+	color: var(--red);
+}
+.aitower-hud .is-pos {
+	color: var(--green);
+}
+.aitower-hud .is-warn {
+	color: var(--amber);
+}
+.aitower-hud .ui-empty {
+	color: var(--beige);
+	font: 15px/1.35 var(--f-type);
+	padding: 4px 0;
+}
+.aitower-hud .ui-pad {
+	padding: 18px;
+}
+.aitower-hud .ui-kbd {
+	display: inline-block;
+	min-width: 13px;
+	padding: 2px 3px 1px;
+	margin-left: 4px;
+	background: var(--putty);
+	color: var(--ink);
+	border-radius: 2px;
+	box-shadow: 0 1px 0 var(--beige), 0 2px 0 var(--ink);
+	font: 8px/1 var(--f-stamp);
+	text-align: center;
+}
+
+/* ─── Lamps ─────────────────────────────────────────────────────────── */
+
+.aitower-hud .ui-lamp {
+	--lamp: var(--amber);
+	flex: none;
+	display: inline-block;
+	width: 11px;
+	height: 11px;
+	border-radius: 50%;
+	background: radial-gradient(circle at 36% 30%, color-mix(in srgb, var(--lamp) 30%, var(--housing-hi)) 0 1.5px, color-mix(in srgb, var(--lamp) 16%, var(--ink)) 4px, var(--ink) 100%);
+	box-shadow:
+		0 0 0 1.5px var(--brass-dk),
+		0 0 0 2.5px var(--ink);
+}
+.aitower-hud .lamp-green {
+	--lamp: var(--green);
+}
+.aitower-hud .lamp-red {
+	--lamp: var(--red);
+}
+.aitower-hud .ui-lamp.is-lit {
+	background: radial-gradient(circle at 36% 30%, var(--paper) 0 1px, var(--lamp) 3.5px, color-mix(in srgb, var(--lamp) 55%, var(--ink)) 100%);
+	box-shadow:
+		0 0 0 1.5px var(--brass-dk),
+		0 0 0 2.5px var(--ink),
+		0 0 9px 2px color-mix(in srgb, var(--lamp) 55%, transparent);
+}
+.aitower-hud .ui-lamp.is-blink {
+	animation: ui-blink 1.1s steps(2) infinite;
+}
+@keyframes ui-blink {
+	50% {
+		filter: brightness(0.35);
+		box-shadow:
+			0 0 0 1.5px var(--brass-dk),
+			0 0 0 2.5px var(--ink);
+	}
+}
+
+/* ─── Push buttons ──────────────────────────────────────────────────── */
+
+.aitower-hud .ui-btn {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--paper);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--putty) 14%, var(--housing-hi)), var(--housing));
+	border: 1px solid var(--ink);
+	border-radius: 3px;
+	padding: 6px 9px 5px;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	white-space: nowrap;
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 2px 0 var(--housing-lo),
+		0 3px 0 var(--ink);
+	transition: transform 0.06s, box-shadow 0.06s, filter 0.12s;
+}
+.aitower-hud .ui-btn:hover:not(:disabled) {
+	filter: brightness(1.18);
+}
+.aitower-hud .ui-btn:active:not(:disabled) {
+	transform: translateY(2px);
+	box-shadow:
+		inset 0 1px 2px var(--shade),
+		0 1px 0 var(--ink);
+}
+.aitower-hud .ui-btn:disabled {
+	opacity: 0.42;
+	cursor: not-allowed;
+}
+.aitower-hud .ui-btn.is-on {
+	color: var(--ink);
+	background: radial-gradient(ellipse at 50% 35%, color-mix(in srgb, var(--paper) 30%, var(--amber)), var(--amber) 55%, color-mix(in srgb, var(--amber) 70%, var(--sodium)));
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 1px 0 var(--ink),
+		0 0 10px color-mix(in srgb, var(--amber) 45%, transparent);
+	transform: translateY(1px);
+}
+.aitower-hud .ui-btn.is-danger {
+	color: var(--paper);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--red) 62%, var(--housing-hi)), color-mix(in srgb, var(--red) 40%, var(--housing-lo)));
+}
+.aitower-hud .ui-btn.is-go {
+	color: var(--ink);
+	background: linear-gradient(180deg, color-mix(in srgb, var(--green) 50%, var(--paper)), var(--green-dim));
+}
+.aitower-hud .ui-mini {
+	padding: 5px 7px 4px;
+}
+.aitower-hud .ui-icon-btn {
+	padding: 4px 6px;
+}
+.aitower-hud .ui-link {
+	font: inherit;
+	color: var(--ph, var(--amber));
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	text-decoration: underline dotted;
+	text-underline-offset: 3px;
+	text-shadow: inherit;
+}
+
+/* ─── Toggle switches ──────────────────────────────────────────────── */
+
+.aitower-hud .ui-toggle {
+	display: inline-flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	padding: 0;
+	background: none;
+	border: 0;
+	cursor: pointer;
+	flex: none;
+}
+.aitower-hud .ui-toggle-plate {
+	position: relative;
+	display: block;
+	width: 40px;
+	height: 36px;
+	border-radius: 4px;
+	background: linear-gradient(180deg, var(--housing-hi), var(--housing-lo));
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 0 0 1px var(--ink),
+		0 2px 3px var(--shade);
+}
+.aitower-hud .ui-toggle-eng {
+	position: absolute;
+	left: 4px;
+	font: 8px/1 var(--f-stamp);
+	color: color-mix(in srgb, var(--paper) 30%, var(--housing));
+	text-shadow: 0 1px 0 var(--ink);
+	transition: color 0.1s;
+}
+.aitower-hud .ui-toggle-eng.on {
+	top: 5px;
+}
+.aitower-hud .ui-toggle-eng.off {
+	bottom: 4px;
+}
+.aitower-hud .ui-toggle.is-on .ui-toggle-eng.on,
+.aitower-hud .ui-toggle.is-off .ui-toggle-eng.off {
+	color: var(--paper);
+}
+.aitower-hud .ui-toggle-nut {
+	position: absolute;
+	left: 28px;
+	top: 50%;
+	width: 13px;
+	height: 13px;
+	margin: -6.5px 0 0 -6.5px;
+	border-radius: 50%;
+	background: radial-gradient(circle at 35% 30%, var(--paper) 0 1px, var(--steel) 4px, var(--housing-lo) 100%);
+	box-shadow:
+		0 0 0 1px var(--ink),
+		0 1px 2px var(--shade);
+}
+.aitower-hud .ui-toggle-lever {
+	position: absolute;
+	left: 28px;
+	top: calc(50% - 13px);
+	width: 5px;
+	height: 13px;
+	margin-left: -2.5px;
+	border-radius: 2px 2px 1px 1px;
+	background: linear-gradient(90deg, var(--housing-lo), var(--steel) 25%, var(--paper) 50%, var(--steel) 78%, var(--housing-lo));
+	transform-origin: 50% 100%;
+	transition: transform 0.09s cubic-bezier(0.5, 0, 0.5, 1.6);
+	filter: drop-shadow(1px 2px 1px var(--shade));
+}
+.aitower-hud .ui-toggle-lever::after {
+	content: "";
+	position: absolute;
+	left: -2px;
+	top: -3px;
+	width: 9px;
+	height: 6px;
+	border-radius: 50%;
+	background: radial-gradient(circle at 40% 35%, var(--paper) 0 1px, var(--steel) 3px, var(--housing-lo) 100%);
+}
+.aitower-hud .ui-toggle.is-off .ui-toggle-lever {
+	transform: scaleY(-1);
+}
+.aitower-hud .ui-toggle:hover .ui-toggle-plate {
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 0 0 1px var(--brass-dk),
+		0 2px 3px var(--shade);
+}
+.aitower-hud .ui-toggle-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 3px;
+	padding: 3px 4px 2px;
+	background: var(--ink);
+	color: var(--paper);
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	border-radius: 2px;
+	box-shadow: inset 0 1px 0 var(--gleam);
+}
+.aitower-hud .ui-toggle-label b {
+	font-weight: 400;
+	color: var(--amber);
+}
+/* compact variant: label beside a short plate */
+.aitower-hud .ui-toggle.ui-collapse {
+	flex-direction: row-reverse;
+	gap: 6px;
+}
+.aitower-hud .ui-collapse .ui-toggle-plate {
+	height: 32px;
+	width: 24px;
+}
+.aitower-hud .ui-collapse .ui-toggle-eng {
+	display: none;
+}
+.aitower-hud .ui-collapse .ui-toggle-nut,
+.aitower-hud .ui-collapse .ui-toggle-lever {
+	left: 50%;
+}
+
+/* ─── Stamps ───────────────────────────────────────────────────────── */
+
+.aitower-hud .ui-stamp {
+	display: inline-block;
+	padding: 3px 6px 2px;
+	font: 13px/1 var(--f-type);
+	text-transform: uppercase;
+	letter-spacing: 0.14em;
+	white-space: nowrap;
+	border: 2px solid currentColor;
+	border-radius: 3px;
+	outline: 1px solid currentColor;
+	outline-offset: 2px;
+	transform: rotate(-7deg);
+	opacity: 0.86;
+	mask-image: repeating-linear-gradient(112deg, var(--ink) 0 5px, color-mix(in srgb, var(--ink) 62%, transparent) 5px 6px, var(--ink) 6px 9px);
+	pointer-events: none;
+}
+.aitower-hud .stamp-red {
+	color: var(--red);
+}
+.aitower-hud .stamp-green {
+	color: var(--green-dim);
+}
+.aitower-hud .stamp-amber {
+	color: var(--brass-dk);
+}
+.aitower-hud .stamp-ink {
+	color: var(--paper-ink);
+}
+
+/* ─── Pills (small stamped tags) / tones ──────────────────────────── */
+
+.aitower-hud .ui-pill {
+	display: inline-block;
+	padding: 3px 5px 2px;
+	border-radius: 2px;
+	border: 1px solid currentColor;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	white-space: nowrap;
+	background: color-mix(in srgb, currentColor 13%, transparent);
+	text-shadow: none;
+}
+.aitower-hud .tone-good {
+	color: var(--green);
+}
+.aitower-hud .tone-warn {
+	color: var(--amber);
+}
+.aitower-hud .tone-error {
+	color: var(--red);
+}
+.aitower-hud .tone-info {
+	color: var(--verdigris);
+}
+.aitower-hud .tone-dim {
+	color: var(--beige);
+}
+.aitower-hud .tone-cyan {
+	color: var(--amber);
+}
+
+/* Segmented VU bar. */
+.aitower-hud .ui-meter {
+	width: 100%;
+	padding: 2px;
+	background: color-mix(in srgb, currentColor 10%, var(--ink));
+	border-radius: 2px;
+	box-shadow:
+		inset 0 1px 2px var(--ink),
+		0 0 0 1px var(--housing-lo);
+	margin: 2px 0 6px;
+	overflow: hidden;
+}
+.aitower-hud .ui-meter-fill {
+	height: 100%;
+	background: repeating-linear-gradient(90deg, currentColor 0 5px, transparent 5px 7px);
+	filter: drop-shadow(0 0 3px currentColor);
+	transition: width 0.25s linear;
+}
+
+/* Mechanical drum counter. */
+.aitower-hud .ui-counter {
+	display: inline-flex;
+	padding: 1px;
+	background: var(--brass-dk);
+	border-radius: 2px;
+	box-shadow: 0 0 0 1px var(--ink);
+	text-shadow: none;
+}
+.aitower-hud .ui-counter > span {
+	display: inline-block;
+	min-width: 10px;
+	padding: 1px 1px 0;
+	font: 17px/1 var(--f-crt);
+	text-align: center;
+	color: var(--paper);
+	background: linear-gradient(180deg, var(--housing-hi), var(--ink) 30%, var(--ink) 70%, var(--housing-hi));
+}
+.aitower-hud .ui-counter > span + span {
+	margin-left: 1px;
+}
+.aitower-hud .ui-counter > span.s {
+	min-width: 6px;
+	color: var(--beige);
+}
+
+/* Key/value rows */
+.aitower-hud .ui-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 10px;
+	padding: 1px 0;
+	font: 18px/1.1 var(--f-crt);
+}
+.aitower-hud .ui-k {
+	color: var(--ph-lo, var(--beige));
+	white-space: nowrap;
+}
+.aitower-hud .ui-v {
+	text-align: right;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Facility swatch: a little enamel cabinet. */
+.aitower-hud .ui-swatch {
+	flex: none;
+	display: inline-flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+	padding: 3px;
+	border-radius: 1px;
+	box-shadow:
+		0 0 0 1px var(--ink),
+		inset 1px 1px 0 var(--gleam),
+		inset 0 -4px 0 var(--shade);
+	image-rendering: pixelated;
+}
+.aitower-hud .ui-swatch > span {
+	display: block;
+	height: 2px;
+	width: 60%;
+	box-shadow: 0 0 3px currentColor;
+}
+.aitower-hud .ui-swatch > span:nth-child(2) {
+	width: 80%;
+}
+
+/* Folder tabs */
+.aitower-hud .ui-tab {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--etch);
+	background: linear-gradient(180deg, var(--housing-hi), var(--housing-lo));
+	border: 1px solid var(--ink);
+	border-bottom: 0;
+	border-radius: 5px 5px 0 0;
+	padding: 7px 4px 6px;
+	cursor: pointer;
+	white-space: nowrap;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 5px;
+	box-shadow: inset 0 1px 0 var(--gleam);
+}
+.aitower-hud .ui-tab:hover {
+	color: var(--paper);
+}
+.aitower-hud .ui-tab.is-on {
+	color: var(--ink);
+	background: linear-gradient(180deg, var(--paper), color-mix(in srgb, var(--beige) 50%, var(--paper)));
+	box-shadow: inset 0 1px 0 var(--paper);
+}
+.aitower-hud .ui-badge {
+	min-width: 17px;
+	padding: 2px 4px 0;
+	border-radius: 8px;
+	background: var(--ink);
+	color: var(--amber);
+	font: 15px/13px var(--f-crt);
+	text-align: center;
+	letter-spacing: 0;
+	text-shadow: 0 0 4px color-mix(in srgb, var(--amber) 60%, transparent);
+	box-shadow: 0 0 0 1px var(--brass-dk);
+}
+.aitower-hud .ui-badge.is-alert {
+	background: var(--red);
+	color: var(--ink);
+	text-shadow: none;
+	box-shadow:
+		0 0 0 1px var(--ink),
+		0 0 8px color-mix(in srgb, var(--red) 60%, transparent);
+}
+
+/* ─── Top bar: the main console ───────────────────────────────────── */
+
+.aitower-hud .ui-topbar {
+	grid-column: 1 / -1;
+	grid-row: 1;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 6px 16px;
+	min-height: 74px;
+	overflow: hidden;
+}
+.aitower-hud .ui-brand {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 4px;
+	flex: none;
+}
+.aitower-hud .ui-brand-plate {
+	padding: 4px 9px 3px 10px;
+	font: 17px/1 var(--f-type);
+	letter-spacing: 0.16em;
+	color: var(--ink);
+	background:
+		radial-gradient(circle at 4px 50%, var(--brass-dk) 0 1.6px, transparent 2px),
+		radial-gradient(circle at calc(100% - 4px) 50%, var(--brass-dk) 0 1.6px, transparent 2px),
+		linear-gradient(170deg, var(--paper) 0%, var(--brass) 30%, var(--brass-dk) 75%, var(--brass) 100%);
+	border-radius: 2px;
+	box-shadow:
+		0 0 0 1px var(--ink),
+		inset 0 1px 0 var(--gleam);
+	text-shadow: 0 1px 0 color-mix(in srgb, var(--paper) 45%, transparent);
+	white-space: nowrap;
+}
+.aitower-hud .ui-brand-plate b {
+	font-weight: 400;
+	color: var(--housing-lo);
+}
+.aitower-hud .ui-brand-sub {
+	font: 8px/1 var(--f-stamp);
+	color: var(--beige);
+	letter-spacing: 0.06em;
+	white-space: nowrap;
+}
+.aitower-hud .ui-topbar > .ui-crt {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 3px;
+	padding: 6px 10px 5px;
+	flex: none;
+}
+.aitower-hud .ui-clock .ui-big {
+	font-size: 30px;
+}
+.aitower-hud .ui-cash {
+	min-width: 104px;
+}
+.aitower-hud .ui-cash .ui-big {
+	font-size: 28px;
+}
+.aitower-hud .ui-statbank {
+	flex-direction: row !important;
+	gap: 14px !important;
+}
+.aitower-hud .ui-stat {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	min-width: 0;
+}
+.aitower-hud .ui-stat.is-warn .ui-big {
+	color: var(--amber);
+}
+.aitower-hud .ui-stat.is-ok .ui-big {
+	color: var(--green);
+	text-shadow:
+		0 0 2px color-mix(in srgb, var(--green) 70%, transparent),
+		0 0 9px color-mix(in srgb, var(--green) 35%, transparent);
+}
+
+/* Chunky illuminated speed buttons in a recessed well. */
+.aitower-hud .ui-speeds {
+	display: flex;
+	gap: 5px;
+	padding: 5px 5px 7px;
+	flex: none;
+	background: var(--housing-lo);
+	border-radius: 5px;
+	box-shadow:
+		inset 0 2px 4px var(--ink),
+		0 1px 0 var(--housing-hi);
+}
+.aitower-hud .ui-speed {
+	position: relative;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	border: 0;
+	border-radius: 4px;
+	background: var(--ink);
+	cursor: pointer;
+}
+.aitower-hud .ui-speed-cap {
+	position: absolute;
+	inset: 0 0 5px;
+	display: grid;
+	place-items: center;
+	border-radius: 3px;
+	font: 21px/1 var(--f-crt);
+	color: color-mix(in srgb, var(--amber) 55%, var(--housing-hi));
+	background: linear-gradient(180deg, color-mix(in srgb, var(--amber-dim) 34%, var(--housing-hi)), color-mix(in srgb, var(--amber-dim) 22%, var(--housing)));
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		inset 0 -2px 0 var(--shade),
+		0 4px 0 var(--housing-lo),
+		0 5px 0 var(--ink);
+	transition: transform 0.06s, box-shadow 0.06s, background 0.1s;
+}
+.aitower-hud .ui-speed:hover .ui-speed-cap {
+	color: color-mix(in srgb, var(--amber) 70%, var(--housing-hi));
+}
+.aitower-hud .ui-speed:active .ui-speed-cap,
+.aitower-hud .ui-speed.is-on .ui-speed-cap {
+	transform: translateY(4px);
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		inset 0 -1px 0 var(--shade),
+		0 1px 0 var(--ink);
+}
+.aitower-hud .ui-speed.is-on .ui-speed-cap {
+	color: var(--ink);
+	background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--paper) 45%, var(--amber)), var(--amber) 55%, color-mix(in srgb, var(--amber) 65%, var(--sodium)));
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 1px 0 var(--ink),
+		0 0 14px 2px color-mix(in srgb, var(--amber) 50%, transparent);
+}
+.aitower-hud .ui-speed.is-pause.is-on .ui-speed-cap {
+	background: radial-gradient(ellipse at 50% 40%, color-mix(in srgb, var(--paper) 40%, var(--red)), var(--red) 60%, color-mix(in srgb, var(--red) 70%, var(--ink)));
+	box-shadow:
+		inset 0 1px 0 var(--gleam),
+		0 1px 0 var(--ink),
+		0 0 14px 2px color-mix(in srgb, var(--red) 50%, transparent);
+}
+
+/* Gauges */
+.aitower-hud .ui-gauges {
+	display: flex;
+	gap: 12px;
+	flex: none;
+}
+.aitower-hud .ui-gauge {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.aitower-hud .ui-dial {
+	display: block;
+	flex: none;
+	filter: drop-shadow(0 2px 2px var(--shade-hard));
+}
+.aitower-hud .ui-dial-face {
+	font: 7px var(--f-type);
+	fill: var(--paper-ink);
+}
+.aitower-hud .ui-dial-end {
+	font: 6px var(--f-type);
+	fill: var(--paper-ink);
+}
+.aitower-hud .ui-dial-needle {
+	transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.aitower-hud .ui-gauge-read {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	align-items: flex-start;
+}
+.aitower-hud .ui-gauge-crt {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+	padding: 4px 8px 3px;
+	min-width: 62px;
+}
+.aitower-hud .ui-gauge-crt .ui-big {
+	font-size: 23px;
+}
+.aitower-hud .ui-gauge-sub {
+	font: 15px/1 var(--f-crt);
+	color: var(--ph-lo);
+	white-space: nowrap;
+}
+
+/* Clearance lamps */
+.aitower-hud .ui-tier {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: none;
+}
+.aitower-hud .ui-lamps {
+	display: flex;
+	gap: 5px;
+	padding: 2px 3px;
+}
+
+/* ─── Build palette ─────────────────────────────────────────────────── */
+
+.aitower-hud .ui-palette {
+	grid-column: 1;
+	grid-row: 2 / 4;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+}
+.aitower-hud .ui-select-btn {
+	flex: none;
+}
+.aitower-hud .ui-tabs {
+	display: grid;
+	gap: 2px;
+	padding: 8px 10px 0;
+	border-bottom: 2px solid var(--paper);
+}
+.aitower-hud .ui-tabs-5 {
+	grid-template-columns: repeat(5, 1fr);
+}
+.aitower-hud .ui-palette-list {
+	flex: 1;
+	min-height: 0;
+	overflow-y: auto;
+	margin: 0 10px;
+	padding: 8px 7px;
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+	background: var(--housing-lo);
+	box-shadow: inset 0 3px 6px var(--ink);
+	scrollbar-width: thin;
+	scrollbar-color: var(--brass-dk) var(--housing-lo);
+}
+/* Index card */
+.aitower-hud .ui-item {
+	position: relative;
+	font: 15px/1.15 var(--f-type);
+	color: var(--ink);
+	text-align: left;
+	display: grid;
+	grid-template-columns: auto minmax(0, 1fr) auto;
+	align-items: center;
+	column-gap: 9px;
+	row-gap: 4px;
+	width: 100%;
+	flex: none;
+	padding: 6px 9px 6px;
+	background:
+		linear-gradient(180deg, transparent 0 22px, color-mix(in srgb, var(--red) 55%, var(--paper)) 22px 23px, transparent 23px),
+		repeating-linear-gradient(180deg, transparent 0 12px, var(--paper-rule) 12px 13px),
+		var(--paper);
+	background-position: 0 0, 0 11px, 0 0;
+	border: 0;
+	border-radius: 2px;
+	cursor: pointer;
+	box-shadow:
+		0 1px 0 var(--beige),
+		0 2px 0 var(--ink),
+		0 3px 5px var(--shade);
+	transition: transform 0.12s, box-shadow 0.12s;
+}
+.aitower-hud .ui-item:hover {
+	transform: translateX(3px);
+}
+.aitower-hud .ui-item.is-on {
+	transform: translateX(6px);
+	box-shadow:
+		0 0 0 2px var(--amber),
+		0 0 14px color-mix(in srgb, var(--amber) 45%, transparent),
+		0 3px 5px var(--shade);
+}
+.aitower-hud .ui-item.is-on::before {
+	content: "";
+	position: absolute;
+	left: -9px;
+	top: 50%;
+	width: 6px;
+	height: 6px;
+	margin-top: -3px;
+	border-radius: 50%;
+	background: var(--amber);
+	box-shadow: 0 0 6px 1px var(--amber);
+}
+.aitower-hud .ui-item.is-locked,
+.aitower-hud .ui-item.is-poor {
+	cursor: not-allowed;
+}
+.aitower-hud .ui-item.is-locked {
+	background:
+		linear-gradient(180deg, transparent 0 22px, color-mix(in srgb, var(--red) 40%, var(--beige)) 22px 23px, transparent 23px),
+		repeating-linear-gradient(180deg, transparent 0 12px, color-mix(in srgb, var(--verdigris) 18%, var(--beige)) 12px 13px),
+		color-mix(in srgb, var(--beige) 55%, var(--paper));
+	background-position: 0 0, 0 11px, 0 0;
+}
+.aitower-hud .ui-item.is-locked:hover,
+.aitower-hud .ui-item.is-poor:hover {
+	transform: none;
+}
+.aitower-hud .ui-item.is-locked > :not(.ui-card-stamp) {
+	opacity: 0.4;
+}
+.aitower-hud .ui-card-stamp {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	font-size: 16px;
+	letter-spacing: 0.16em;
+	padding: 4px 8px 3px;
+	background: color-mix(in srgb, var(--paper) 55%, transparent);
+	transform: translate(-50%, -50%) rotate(-8deg);
+	opacity: 0.92;
+}
+.aitower-hud .ui-item-icon {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	display: grid;
+	place-items: center;
+	border-radius: 1px;
+	background: var(--putty);
+	border: 1px solid var(--ink);
+	color: var(--ink);
+}
+.aitower-hud .ui-item.is-danger .ui-item-icon {
+	color: var(--red);
+}
+.aitower-hud .ic-bolt {
+	color: var(--brass-dk);
+}
+.aitower-hud .ic-drop {
+	color: var(--verdigris);
+}
+.aitower-hud .ic-slab {
+	color: var(--ink);
+}
+.aitower-hud .ui-item > .ui-swatch,
+.aitower-hud .ui-item > .ui-item-icon {
+	grid-row: 1 / 3;
+}
+.aitower-hud .ui-item-main {
+	display: contents;
+}
+.aitower-hud .ui-item-name {
+	grid-column: 2 / 4;
+	min-width: 0;
+	font-size: 15px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.aitower-hud .ui-item-sub {
+	grid-column: 2;
+	min-width: 0;
+	font-size: 12.5px;
+	line-height: 1.2;
+	color: var(--paper-ink);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.aitower-hud .ui-item-cost {
+	grid-column: 3;
+	grid-row: 2;
+	align-self: end;
+	font: 14px/1.15 var(--f-type);
+	color: var(--ink);
+	padding: 0 3px;
+	background: color-mix(in srgb, var(--putty) 45%, var(--paper));
+	box-shadow: 0 0 0 1px color-mix(in srgb, var(--beige) 70%, transparent);
+}
+.aitower-hud .ui-item-cost.is-short {
+	color: var(--red);
+	text-decoration: line-through;
+}
+.aitower-hud .ui-lock {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	font: 8px/1 var(--f-stamp);
+	color: var(--red);
+}
+.aitower-hud .ui-supplies {
+	padding: 8px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 7px;
+}
+.aitower-hud .ui-supplies-title {
+	margin-bottom: 2px;
+}
+.aitower-hud .ui-supply {
+	display: grid;
+	grid-template-columns: 1fr auto auto;
+	align-items: center;
+	gap: 9px;
+}
+.aitower-hud .ui-supply .ui-k {
+	font: 14px/1 var(--f-type);
+	color: var(--putty);
+}
+.aitower-hud .ui-supply .ui-v {
+	min-width: 34px;
+	padding: 2px 6px 1px;
+	text-align: right;
+	font: 20px/1 var(--f-crt);
+	border-radius: 4px;
+}
+.aitower-hud .ui-supply .ui-btn {
+	min-width: 78px;
+	justify-content: center;
+}
+
+/* Specification sheet (palette hover) */
+.aitower-hud .ui-tooltip {
+	position: fixed;
+	left: 274px;
+	width: 290px;
+	padding: 10px 14px 12px;
+	z-index: 20;
+	pointer-events: none;
+	color: var(--ink);
+	background:
+		linear-gradient(90deg, transparent 0 6px, color-mix(in srgb, var(--red) 40%, var(--paper)) 6px 7px, transparent 7px),
+		var(--paper);
+	border: 0;
+	border-radius: 1px;
+	box-shadow:
+		0 0 0 1px var(--beige),
+		4px 6px 0 var(--shade),
+		0 10px 24px var(--shade);
+	transform: rotate(0.4deg);
+}
+.aitower-hud .ui-tooltip::after {
+	display: none;
+}
+.aitower-hud .ui-tooltip-form {
+	font: 8px/1 var(--f-stamp);
+	color: var(--red);
+	letter-spacing: 0.06em;
+	padding-bottom: 6px;
+	margin-bottom: 6px;
+	border-bottom: 2px double var(--ink);
+}
+.aitower-hud .ui-tooltip-title {
+	font: 18px/1.15 var(--f-type);
+	text-transform: uppercase;
+	margin-bottom: 5px;
+}
+.aitower-hud .ui-tooltip p {
+	margin: 0 0 8px;
+	font: 14px/1.3 var(--f-type);
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-tooltip-specs {
+	border-top: 1px dashed var(--paper-ink);
+	padding-top: 5px;
+}
+.aitower-hud .ui-tooltip .ui-row {
+	font: 14px/1.3 var(--f-type);
+}
+.aitower-hud .ui-tooltip .ui-k {
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-tooltip-warn {
+	display: inline-block;
+	margin-top: 8px;
+	padding: 2px 6px;
+	color: var(--red);
+	border: 2px solid var(--red);
+	font: 13px/1 var(--f-type);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	transform: rotate(-3deg);
+}
+
+/* ─── Centre column ─────────────────────────────────────────────────── */
+
+.aitower-hud .ui-center {
+	grid-column: 2;
+	grid-row: 2;
+	position: relative;
+	min-height: 0;
+	pointer-events: none;
+}
+.aitower-hud .ui-overlay {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 16px 8px 14px;
+}
+.aitower-hud .ui-overlay-title {
+	writing-mode: vertical-rl;
+	transform: rotate(180deg);
+	align-self: center;
+	padding: 5px 3px 5px 2px;
+}
+.aitower-hud .ui-seg {
+	display: flex;
+	gap: 10px;
+}
+.aitower-hud .ui-seg .ui-toggle {
+	gap: 5px;
+}
+.aitower-hud .ui-seg .ui-lamp {
+	width: 9px;
+	height: 9px;
+}
+.aitower-hud .ui-legend {
+	width: 236px;
+	padding: 7px 10px 3px;
+}
+.aitower-hud .ui-legend-bar {
+	height: 9px;
+	border-radius: 1px;
+	box-shadow: 0 0 0 1px var(--ink);
+}
+.aitower-hud .ui-legend-bar.sat {
+	background: linear-gradient(90deg, var(--red), var(--amber) 50%, var(--green));
+}
+.aitower-hud .ui-legend-bar.load {
+	background: linear-gradient(90deg, var(--green), var(--amber) 80%, var(--red));
+}
+.aitower-hud .ui-legend-ticks {
+	position: relative;
+	height: 17px;
+	margin: 2px 6px 0;
+	font: 15px/1 var(--f-crt);
+	color: var(--ph-lo);
+}
+.aitower-hud .ui-legend-ticks span {
+	position: absolute;
+	top: 1px;
+	transform: translateX(-50%);
+	white-space: nowrap;
+}
+
+/* Toasts: teletype memo slips */
+.aitower-hud .ui-toasts {
+	position: absolute;
+	top: 2px;
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 8px;
+	width: min(500px, 72%);
+	pointer-events: none;
+	z-index: 10;
+}
+.aitower-hud .ui-toast {
+	position: relative;
+	pointer-events: auto;
+	cursor: pointer;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	column-gap: 8px;
+	row-gap: 2px;
+	width: 100%;
+	padding: 9px 130px 9px 16px;
+	color: var(--ink);
+	background:
+		radial-gradient(circle at 6px 6px, var(--housing-lo) 0 2px, transparent 2.5px) 0 0 / 100% 100% no-repeat,
+		linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--red) 45%, var(--paper)) 9px 10px, transparent 10px),
+		var(--paper);
+	border-radius: 1px;
+	box-shadow:
+		0 0 0 1px var(--beige),
+		3px 5px 0 var(--shade),
+		0 8px 20px var(--shade);
+	/* torn bottom edge */
+	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 3px), 97% 100%, 93% calc(100% - 2px), 88% 100%, 82% calc(100% - 3px), 76% 100%, 70% calc(100% - 2px), 63% 100%, 57% calc(100% - 3px), 50% 100%, 44% calc(100% - 2px), 37% 100%, 31% calc(100% - 3px), 24% 100%, 18% calc(100% - 2px), 11% 100%, 5% calc(100% - 3px), 0 100%);
+	animation: ui-teletype 0.32s steps(6) both;
+}
+.aitower-hud .ui-toast:nth-child(even) {
+	transform: rotate(0.5deg);
+}
+.aitower-hud .ui-toast:nth-child(odd) {
+	transform: rotate(-0.4deg);
+}
+.aitower-hud .ui-toast-head {
+	flex-basis: 100%;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	color: var(--paper-ink);
+	padding-bottom: 4px;
+	border-bottom: 1px dashed var(--beige);
+	margin-bottom: 3px;
+}
+.aitower-hud .ui-toast-text {
+	flex: 1;
+	font: 15px/1.3 var(--f-type);
+}
+.aitower-hud .ui-toast-count {
+	font: 18px/1 var(--f-crt);
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-toast-stamp {
+	position: absolute;
+	right: 14px;
+	top: 50%;
+	margin-top: -12px;
+	font-size: 14px;
+}
+.aitower-hud .ui-toast.sev-good .ui-toast-stamp {
+	font-size: 11px;
+	letter-spacing: 0.08em;
+}
+@keyframes ui-teletype {
+	from {
+		clip-path: inset(0 0 100% 0);
+	}
+	to {
+		clip-path: inset(0 0 0 0);
+	}
+}
+.aitower-hud .ui-toolhint {
+	position: absolute;
+	bottom: 102px;
+	left: 0;
+	padding: 9px 16px;
+	font: 15px/1 var(--f-type);
+	color: var(--paper);
+	white-space: nowrap;
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	pointer-events: none;
+}
+.aitower-hud .ui-toolhint .ui-dim {
+	color: var(--beige);
+}
+
+/* Severity colouring (alerts + toasts) */
+.aitower-hud .sev-info {
+	color: var(--ph-lo, var(--beige));
+}
+.aitower-hud .sev-good {
+	color: var(--green);
+}
+.aitower-hud .sev-warn {
+	color: var(--amber);
+}
+.aitower-hud .sev-error {
+	color: var(--red);
+}
+.aitower-hud .ui-toast.sev-info,
+.aitower-hud .ui-toast.sev-good,
+.aitower-hud .ui-toast.sev-warn,
+.aitower-hud .ui-toast.sev-error {
+	color: var(--ink);
+}
+.aitower-hud .ui-alert-dot {
+	flex: none;
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: currentColor;
+	box-shadow: 0 0 6px currentColor;
+}
+
+/* ─── Inspector ─────────────────────────────────────────────────────── */
+
+.aitower-hud .ui-right {
+	grid-column: 3;
+	grid-row: 2;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	pointer-events: none;
+}
+.aitower-hud .ui-inspector {
+	display: flex;
+	flex-direction: column;
+	max-height: 100%;
+	min-height: 0;
+}
+.aitower-hud .ui-insp-body {
+	overflow-y: auto;
+	padding: 10px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	scrollbar-width: thin;
+	scrollbar-color: var(--brass-dk) var(--housing-lo);
+}
+.aitower-hud .ui-insp-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.aitower-hud .ui-insp-name {
+	flex: 1;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.aitower-hud .ui-insp-name > span:first-child {
+	font: 17px/1.1 var(--f-type);
+	color: var(--paper);
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+	overflow: hidden;
+}
+.aitower-hud .ui-insp-name > span:last-child {
+	font: 16px/1 var(--f-crt);
+	color: var(--beige);
+}
+.aitower-hud .ui-section {
+	padding: 7px 10px 6px;
+	margin: 2px;
+}
+.aitower-hud .ui-section-title {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	font: 16px/1 var(--f-crt);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--ph-lo);
+	padding-bottom: 4px;
+	margin-bottom: 4px;
+	border-bottom: 1px dashed var(--ph-grid);
+}
+.aitower-hud .ui-insp-actions {
+	position: sticky;
+	bottom: -14px;
+	z-index: 2;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+	margin: 0 -14px -14px;
+	padding: 8px 16px 12px;
+	background: linear-gradient(180deg, var(--housing), color-mix(in srgb, var(--housing-lo) 35%, var(--housing)));
+	border-top: 1px solid var(--housing-lo);
+	box-shadow: 0 -1px 0 var(--housing-hi) inset, 0 -6px 10px var(--shade);
+}
+.aitower-hud .ui-btn.ui-decom {
+	padding: 8px 12px 7px;
+	border: 3px solid transparent;
+	background:
+		linear-gradient(180deg, color-mix(in srgb, var(--red) 62%, var(--housing-hi)), color-mix(in srgb, var(--red) 40%, var(--housing-lo))) padding-box,
+		repeating-linear-gradient(-45deg, var(--amber) 0 4px, var(--ink) 4px 8px) border-box;
+}
+.aitower-hud .ui-botchip {
+	width: 24px;
+	height: 24px;
+	border-radius: 50% 50% 3px 3px;
+	box-shadow:
+		0 0 0 1px var(--ink),
+		inset 0 -5px 0 var(--shade);
+}
+.aitower-hud .ui-liftshaft {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 3px;
+	margin: 4px 0 6px;
+}
+.aitower-hud .ui-liftshaft span {
+	min-width: 24px;
+	text-align: center;
+	font: 17px/1 var(--f-crt);
+	padding: 2px 0 1px;
+	border: 1px solid var(--ph-grid);
+	border-radius: 50%;
+	color: var(--ph-lo);
+}
+.aitower-hud .ui-liftshaft span.on {
+	color: var(--ink);
+	background: var(--amber);
+	border-color: var(--amber);
+	box-shadow: 0 0 8px color-mix(in srgb, var(--amber) 60%, transparent);
+	text-shadow: none;
+}
+
+/* Temperature gauge */
+.aitower-hud .ui-tempgauge {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.aitower-hud .ui-tempgauge-crt {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 6px 10px 5px;
+	min-width: 0;
+}
+.aitower-hud .ui-tempgauge-crt .ui-big {
+	font-size: 28px;
+}
+.aitower-hud .ui-tempgauge-legend {
+	font: 15px/1 var(--f-crt);
+	color: var(--ph-lo);
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* ─── Bottom panel ──────────────────────────────────────────────────── */
+
+.aitower-hud .ui-bottom {
+	grid-column: 2 / 4;
+	grid-row: 3;
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+}
+.aitower-hud .ui-bottom.is-open {
+	height: clamp(180px, 31vh, 250px);
+}
+.aitower-hud .ui-bottom-tabs {
+	display: flex;
+	align-items: flex-end;
+	gap: 3px;
+	padding: 6px 14px 0 16px;
+	border-bottom: 2px solid var(--paper);
+}
+.aitower-hud .ui-bottom-tabs .ui-tab {
+	padding: 9px 12px 7px;
+}
+.aitower-hud .ui-bottom-tabs .ui-collapse {
+	align-self: center;
+	margin-bottom: 4px;
+}
+.aitower-hud .ui-bottom.is-closed .ui-bottom-tabs {
+	border-bottom: 0;
+	padding-bottom: 4px;
+}
+.aitower-hud .ui-bottom.is-closed .ui-tab {
+	border-radius: 5px;
+	border-bottom: 1px solid var(--ink);
+}
+.aitower-hud .ui-bottom-body {
+	flex: 1;
+	min-height: 0;
+	overflow: auto;
+	margin: 0 10px 10px;
+	padding: 8px;
+	background: var(--housing-lo);
+	box-shadow: inset 0 3px 6px var(--ink);
+	scrollbar-width: thin;
+	scrollbar-color: var(--brass-dk) var(--housing-lo);
+}
+
+/* Tables (base) */
+.aitower-hud .ui-table {
+	width: 100%;
+	border-collapse: collapse;
+}
+.aitower-hud .ui-table th {
+	text-align: left;
+	font-weight: 400;
+	white-space: nowrap;
+}
+.aitower-hud .ui-table td {
+	white-space: nowrap;
+}
+.aitower-hud .ui-table .num {
+	text-align: right;
+}
+.aitower-hud .ui-table .wide {
+	width: 26%;
+	min-width: 170px;
+}
+.aitower-hud .ui-table .actions {
+	text-align: right;
+	width: 1%;
+}
+.aitower-hud .ui-tags {
+	display: inline-flex;
+	gap: 4px;
+}
+
+/* Contracts: requisition form on paper */
+.aitower-hud .ui-form {
+	color: var(--ink);
+	background:
+		radial-gradient(ellipse at 85% 20%, transparent 60%, color-mix(in srgb, var(--beige) 22%, transparent)),
+		var(--paper);
+	padding: 7px 16px 6px 12px;
+	border-radius: 1px;
+	box-shadow: 0 2px 0 var(--beige), 0 3px 6px var(--ink);
+}
+.aitower-hud .ui-form-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 12px;
+	padding-bottom: 5px;
+	border-bottom: 3px double var(--ink);
+}
+.aitower-hud .ui-form-head span:first-child {
+	font: 16px/1 var(--f-type);
+	letter-spacing: 0.04em;
+}
+.aitower-hud .ui-form-head span:last-child {
+	font: 8px/1 var(--f-stamp);
+	color: var(--red);
+	letter-spacing: 0.06em;
+}
+.aitower-hud .ui-form .ui-table th {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--paper-ink);
+	padding: 7px 8px 5px;
+	border-bottom: 1px solid var(--ink);
+}
+.aitower-hud .ui-form .ui-table td {
+	font: 15px/1.1 var(--f-type);
+	padding: 5px 8px;
+	border-bottom: 1px dotted var(--paper-ink);
+}
+.aitower-hud .ui-form .ui-table td.strong {
+	font-size: 15px;
+	text-decoration: underline;
+	text-decoration-color: var(--beige);
+	text-underline-offset: 3px;
+}
+.aitower-hud .ui-form .ui-dim {
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-form .is-pos {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-form .is-neg-soft {
+	color: var(--red);
+}
+.aitower-hud .ui-form .is-warn {
+	color: var(--copper);
+}
+.aitower-hud .ui-form .tone-good {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-form .tone-warn,
+.aitower-hud .ui-form .tone-cyan {
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-form .tone-info {
+	color: color-mix(in srgb, var(--verdigris) 70%, var(--ink));
+}
+.aitower-hud .ui-form .tone-dim {
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-form .ui-pill {
+	background: transparent;
+	border-width: 1.5px;
+}
+
+/* Rubber-stamp action buttons */
+.aitower-hud .ui-stampbtn {
+	position: relative;
+	display: inline-grid;
+	place-items: center;
+	min-width: 96px;
+	padding: 4px 6px 3px;
+	margin-left: 4px;
+	font: 13px/1 var(--f-type);
+	text-transform: uppercase;
+	letter-spacing: 0.1em;
+	background: transparent;
+	border: 2px solid currentColor;
+	border-radius: 3px;
+	cursor: pointer;
+	opacity: 0.72;
+	transform: rotate(-1.5deg);
+	transition: transform 0.08s, opacity 0.08s, background 0.08s;
+}
+.aitower-hud .ui-stampbtn.stamp-green {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-stampbtn.stamp-red {
+	color: var(--red);
+}
+.aitower-hud .ui-stampbtn .hot {
+	display: none;
+}
+.aitower-hud .ui-stampbtn:hover,
+.aitower-hud .ui-stampbtn:focus-visible {
+	opacity: 1;
+	transform: rotate(-7deg) scale(1.06);
+	background: color-mix(in srgb, currentColor 10%, transparent);
+	box-shadow:
+		0 0 0 2px var(--paper),
+		0 0 0 3px currentColor;
+	mask-image: repeating-linear-gradient(112deg, var(--ink) 0 5px, color-mix(in srgb, var(--ink) 60%, transparent) 5px 6px, var(--ink) 6px 9px);
+}
+.aitower-hud .ui-stampbtn:hover .rest,
+.aitower-hud .ui-stampbtn:focus-visible .rest {
+	display: none;
+}
+.aitower-hud .ui-stampbtn:hover .hot,
+.aitower-hud .ui-stampbtn:focus-visible .hot {
+	display: inline;
+}
+.aitower-hud .ui-stampbtn:active {
+	transform: rotate(-9deg) scale(0.92);
+	background: color-mix(in srgb, currentColor 22%, transparent);
+}
+
+/* Jobs: CRT table */
+.aitower-hud .ui-crt-table {
+	border-collapse: separate;
+	border-spacing: 0;
+	padding: 2px 6px;
+}
+.aitower-hud .ui-crt-table th {
+	font: 15px/1 var(--f-crt);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--ph-lo);
+	padding: 7px 8px 5px;
+	border-bottom: 1px dashed var(--ph-grid);
+}
+.aitower-hud .ui-crt-table td {
+	font: 18px/1 var(--f-crt);
+	padding: 5px 8px;
+	border-bottom: 1px solid color-mix(in srgb, var(--ph-grid) 45%, transparent);
+}
+.aitower-hud .ui-crt-table tr.is-focus td {
+	background: color-mix(in srgb, var(--amber) 12%, transparent);
+}
+.aitower-hud .ui-crt-table tr.is-focus td:first-child {
+	box-shadow: inset 3px 0 0 var(--amber);
+}
+.aitower-hud .ui-crt-table .ui-btn {
+	text-shadow: none;
+}
+.aitower-hud .ui-progress {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.aitower-hud .ui-progress .ui-meter {
+	margin: 0;
+	flex: 1;
+}
+
+/* Telemetry: oscilloscopes */
+.aitower-hud .ui-telemetry {
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 12px;
+	padding: 4px;
+}
+.aitower-hud .ui-spark-card {
+	padding: 7px 9px 6px;
+	min-width: 0;
+	border-radius: 10px / 12px;
+}
+.aitower-hud .ui-spark-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 6px;
+	margin-bottom: 4px;
+}
+.aitower-hud .ui-spark-head .ui-big {
+	font-size: 22px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.aitower-hud .ui-spark {
+	display: block;
+	overflow: visible;
+}
+.aitower-hud .ui-spark-grid line {
+	stroke: var(--ph-grid);
+	stroke-width: 1;
+	stroke-dasharray: 1 2;
+	opacity: 0.85;
+}
+.aitower-hud .ui-spark-grid line.axis {
+	stroke-dasharray: none;
+	opacity: 0.6;
+}
+.aitower-hud .ui-spark-trace {
+	filter: drop-shadow(0 0 2px var(--ph));
+}
+.aitower-hud .ui-spark-foot {
+	display: flex;
+	justify-content: space-between;
+	gap: 6px;
+	margin-top: 4px;
+	font: 15px/1 var(--f-crt);
+	color: var(--ph-lo);
+	white-space: nowrap;
+	overflow: hidden;
+}
+.aitower-hud .ui-spark-foot span:last-child {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+/* Finance: green-bar tractor-feed printout */
+.aitower-hud .ui-ledger {
+	border-collapse: separate;
+	border-spacing: 0;
+	color: var(--ink);
+	border-left: 20px solid transparent;
+	border-right: 20px solid transparent;
+	background:
+		radial-gradient(circle, var(--housing-lo) 0 3px, transparent 3.6px) left 4px top 2px / 12px 16px repeat-y border-box,
+		radial-gradient(circle, var(--housing-lo) 0 3px, transparent 3.6px) right 4px top 2px / 12px 16px repeat-y border-box,
+		var(--paper) border-box;
+	box-shadow: 0 3px 6px var(--ink);
+}
+.aitower-hud .ui-ledger caption {
+	caption-side: top;
+	padding: 6px 10px 5px;
+	text-align: left;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	color: var(--paper-ink);
+	background: var(--paper);
+	border-bottom: 1px dashed var(--paper-ink);
+}
+.aitower-hud .ui-ledger th {
+	font: 16px/1 var(--f-crt);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: var(--paper-ink);
+	padding: 6px 10px 4px;
+	border-bottom: 1px solid var(--ink);
+}
+.aitower-hud .ui-ledger td {
+	font: 19px/1 var(--f-crt);
+	padding: 4px 10px 3px;
+}
+.aitower-hud .ui-ledger tbody tr:nth-child(odd) td {
+	background: color-mix(in srgb, var(--green) 16%, var(--paper));
+}
+.aitower-hud .ui-ledger tr.is-today td {
+	background: color-mix(in srgb, var(--amber) 26%, var(--paper)) !important;
+}
+.aitower-hud .ui-ledger .is-pos {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-ledger .is-neg {
+	color: var(--red) !important;
+}
+
+/* Alerts: teletype log on a CRT */
+.aitower-hud .ui-alerts {
+	list-style: none;
+	margin: 0;
+	padding: 6px 4px;
+	min-height: 100%;
+}
+.aitower-hud .ui-alerts li {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 3px 10px;
+	font: 18px/1.1 var(--f-crt);
+	border-bottom: 1px solid color-mix(in srgb, var(--ph-grid) 40%, transparent);
+}
+.aitower-hud .ui-alerts li.is-click {
+	cursor: pointer;
+}
+.aitower-hud .ui-alerts li.is-click:hover {
+	background: color-mix(in srgb, var(--amber) 10%, transparent);
+}
+.aitower-hud .ui-alert-time {
+	color: var(--ph-lo);
+	width: 84px;
+	flex: none;
+}
+.aitower-hud .ui-alert-text {
+	color: inherit;
+}
+
+/* ─── Narrow screens ────────────────────────────────────────────────── */
+
+@media (max-width: 1600px) {
+	.aitower-hud .ui-brand-sub {
+		display: none;
+	}
+}
+@media (max-width: 1480px) {
+	.aitower-hud .ui-brand,
+	.aitower-hud .ui-hide-narrow {
+		display: none;
+	}
+}
+@media (max-width: 1360px) {
+	.aitower-hud {
+		grid-template-columns: 240px minmax(0, 1fr) 282px;
+	}
+	.aitower-hud .ui-topbar {
+		gap: 8px;
+		padding: 6px 14px;
+	}
+	.aitower-hud .ui-gauges {
+		gap: 6px;
+	}
+	.aitower-hud .ui-statbank {
+		gap: 10px !important;
+	}
+	.aitower-hud .ui-speed {
+		width: 34px;
+	}
+	.aitower-hud .ui-tooltip {
+		left: 258px;
+	}
+	.aitower-hud .ui-legend {
+		width: 200px;
+	}
+	.aitower-hud .ui-form .ui-table th,
+	.aitower-hud .ui-form .ui-table td {
+		padding-left: 5px;
+		padding-right: 5px;
+	}
+	.aitower-hud .ui-form .ui-table td {
+		font-size: 14px;
+	}
+	.aitower-hud .ui-stampbtn {
+		min-width: 84px;
+		font-size: 12px;
+		letter-spacing: 0.06em;
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-crt::after,
+	.aitower-hud .ui-lamp.is-blink,
+	.aitower-hud .ui-toast {
+		animation: none;
+	}
+	.aitower-hud .ui-dial-needle,
+	.aitower-hud .ui-toggle-lever,
+	.aitower-hud .ui-meter-fill {
+		transition: none;
+	}
+}

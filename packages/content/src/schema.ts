@@ -1,0 +1,270 @@
+/**
+ * CONTRACT — owned by the orchestrator. Changes need orchestrator sign-off
+ * because `sim`, `render`, `ui` and `audio` all depend on these shapes.
+ *
+ * Everything the player can place (except slabs, conduits and lifts) is a
+ * FacilityDef. Facilities sit on a single floor and span `width` tiles.
+ * Units: kW, kWh, °C, $, ticks (1 tick = 1 game-minute).
+ */
+
+export type BuildCategory = "rack" | "power" | "cooling" | "logistics";
+
+export type FacilityKind =
+	| "rack" // IT load: produces FLOPS and heat
+	| "grid_tie" // utility connection: power source, capped import
+	| "genset" // backup generator: starts after a delay when the net is short
+	| "ups" // battery: charges from surplus, bridges shortfalls
+	| "crah" // air handler: removes heat from air cells within `radius` tiles on its floor
+	| "chiller" // coolant source: removes heat from a coolant net, uses power = Q / COP
+	| "cdu" // coolant distribution unit: adds coolant capacity cap for liquid racks on its net
+	| "depot" // parts depot: bots pick spare parts here
+	| "charger"; // bot dock: bots spawn & recharge here
+
+export type CoolingMode = "air" | "dlc" | "immersion";
+
+export interface RackSpec {
+	cooling: CoolingMode;
+	/** Electrical draw at 100% utilisation. All of it becomes heat. */
+	powerKw: number;
+	/** Share of heat rejected into the coolant net (rest goes to air). 0 for air racks. */
+	liquidFraction: number;
+	/** Compute delivered at full clocks, in PFLOPS. 0 for storage racks. */
+	pflops: number;
+	storageTB: number;
+	/** Base probability of a component failure per game-day at nominal temperature. */
+	failurePerDay: number;
+}
+
+export interface PowerSpec {
+	/** Max continuous output (sources) or max charge/discharge rate (ups). */
+	capacityKw: number;
+	/** ups only: energy storage. */
+	storageKwh?: number;
+	/** genset only: ticks from start request to producing power. */
+	startDelayTicks?: number;
+	/** Cost per kWh produced. grid_tie uses balance.energyPrice instead. */
+	costPerKwh?: number;
+	/** Round-trip/conversion efficiency 0..1 (ups). Losses count toward PUE. */
+	efficiency?: number;
+}
+
+export interface CoolingSpec {
+	/** Heat removal capacity in kW (crah, chiller) or flow capacity in kW-of-heat (cdu). */
+	capacityKw: number;
+	/** chiller: coefficient of performance at 20°C ambient. Power = Q / COP. */
+	cop?: number;
+	/** crah: horizontal reach in tiles on its own floor. */
+	radius?: number;
+	/** crah: fan power per kW removed is folded into `facilityKw`. */
+}
+
+export interface LogisticsSpec {
+	/** depot: max spare parts stored. charger: bots that can dock simultaneously. */
+	capacity: number;
+	/** charger: kW drawn while charging bots. */
+	chargeKw?: number;
+}
+
+export interface PlacementRules {
+	minFloor?: number;
+	maxFloor?: number;
+	/** Requires a coolant conduit under at least one of its cells. */
+	needsCoolant?: boolean;
+	/** Requires a power conduit under at least one of its cells (default true for anything drawing power). */
+	needsPower?: boolean;
+}
+
+export interface FacilityDef {
+	id: string;
+	name: string;
+	description: string;
+	kind: FacilityKind;
+	category: BuildCategory;
+	/** Width in tiles (1 tile ≈ 1 m). Height is always one floor. */
+	width: number;
+	cost: number;
+	upkeepPerDay: number;
+	/** Tier rating required to build (1 = available at start). */
+	unlockTier: number;
+	/** Constant parasitic draw when enabled (fans, pumps, controls). */
+	facilityKw: number;
+	/** Pixel-art hint for the renderer: base body colour (#rrggbb) and accent (#rrggbb). */
+	color: string;
+	accent: string;
+	rack?: RackSpec;
+	power?: PowerSpec;
+	cooling?: CoolingSpec;
+	logistics?: LogisticsSpec;
+	placement?: PlacementRules;
+}
+
+export interface BotDef {
+	id: string;
+	name: string;
+	cost: number;
+	/** Walk speed in tiles per tick. */
+	speed: number;
+	/** Battery capacity in ticks of activity. */
+	batteryTicks: number;
+	/** Ticks to swap a failed component. */
+	repairTicks: number;
+	color: string;
+}
+
+export interface StructureCosts {
+	/** Per tile of floor slab above ground. */
+	slabPerTile: number;
+	/** Per tile of floor slab below ground (excavation). */
+	basementSlabPerTile: number;
+	powerConduitPerTile: number;
+	coolantConduitPerTile: number;
+	/** Per floor of lift shaft. */
+	liftPerFloor: number;
+	/** Fixed cost per lift (the car). */
+	liftBase: number;
+	sparePart: number;
+}
+
+export interface LiftSpec {
+	/** Floors per tick. */
+	speed: number;
+	/** Bots per car. */
+	capacity: number;
+	/** Ticks doors stay open at a stop. */
+	dwellTicks: number;
+	facilityKw: number;
+}
+
+/** Tunable simulation constants. Sim must read every magic number from here. */
+export interface Balance {
+	startingCash: number;
+	/** $ per kWh for grid import (base, before time-of-day multiplier). */
+	energyPrice: number;
+	/** 24 multipliers, one per game hour. */
+	energyPriceByHour: number[];
+	/** Outdoor ambient °C: mean and daily swing (sinusoid, peak at 15:00). */
+	ambientMeanC: number;
+	ambientSwingC: number;
+	thermal: {
+		/** Heat capacity of one air cell, kJ/°C (gameplay-scaled). */
+		airCellHeatCapacity: number;
+		/** Horizontal conductance between open-air cells, kW/°C. */
+		airConductance: number;
+		/** Vertical conductance through a slab, kW/°C. */
+		slabConductance: number;
+		/** Conductance to outdoors for edge / unbuilt cells, kW/°C. */
+		envelopeConductance: number;
+		/** Extra upward transfer per °C difference when the lower cell is hotter, kW/°C. */
+		buoyancy: number;
+		/** Rack temperature easing factor per tick (0..1). */
+		rackEase: number;
+		/** Rack temp rise above inlet at full load with nominal cooling, °C. */
+		rackDeltaC: number;
+		okC: number;
+		throttleC: number;
+		tripC: number;
+		tripHysteresisC: number;
+		/** Clock factor at throttleC (linear from 1 at okC). */
+		minClock: number;
+		/** Ticks a tripped rack stays down after cooling below trip − hysteresis. */
+		tripCooldownTicks: number;
+		/** Coolant net supply temp when within capacity, °C. */
+		coolantSupplyC: number;
+		/** Failure hazard multiplier per °C above okC. */
+		hazardPerDegree: number;
+	};
+	economy: {
+		/** Penalty per tick a running inference/serving job's rack is down, as fraction of its pay rate. */
+		slaPenaltyFactor: number;
+		/** Contracts offered at most this many at a time. */
+		maxOffers: number;
+		/** New contract offer roughly every N ticks. */
+		offerIntervalTicks: number;
+		/** Offers expire after N ticks if not accepted. */
+		offerExpiryTicks: number;
+	};
+	/** Tier thresholds: tier n requires totalPflops ≥ pflops[n-1] AND uptime ≥ uptime[n-1] (rolling day). */
+	tiers: { pflops: number[]; uptime: number[]; reward: number[] };
+}
+
+export type JobKind = "training" | "finetune" | "inference";
+
+/** Client company template used by the contract generator. */
+export interface ClientTemplate {
+	id: string;
+	name: string;
+	sector: "frontier" | "biotech" | "finance" | "gov" | "climate" | "media";
+	/** Relative weight when picking a client. */
+	weight: number;
+	kinds: JobKind[];
+	/** Min tier before this client shows up. */
+	minTier: number;
+	/** Pay multiplier on top of the base rate. */
+	payMultiplier: number;
+	/** Requires all allocated racks to be liquid-cooled. */
+	needsLiquid?: boolean;
+}
+
+/** A contract as generated; the sim assigns the id. */
+export interface ContractSpec {
+	clientId: string;
+	clientName: string;
+	kind: JobKind;
+	/** Total work in PFLOP-hours (training/finetune). For inference: required PFLOPS sustained. */
+	work: number;
+	/** inference only: required sustained PFLOPS. */
+	sustainedPflops?: number;
+	/** Duration in ticks (inference runs this long; training must finish within it). */
+	durationTicks: number;
+	/** Training/finetune: paid on completion. Inference: paid per tick while meeting sustainedPflops. */
+	payout: number;
+	/** Penalty if a training job misses its deadline. */
+	penalty: number;
+	needsLiquid: boolean;
+	/**
+	 * Dataset size. While running, Σ storageTB of running jobs must be ≤ Σ storageTB of
+	 * powered storage racks, else the newest jobs stall. 0 for inference.
+	 */
+	storageTB: number;
+	/** Training checkpoints every N ticks: on rack failure, progress rolls back to last checkpoint. */
+	checkpointTicks: number;
+}
+
+export interface ContractGenContext {
+	tier: number;
+	/** Current total PFLOPS capacity of the facility (to scale job sizes). */
+	capacityPflops: number;
+	day: number;
+}
+
+/** Deterministic: must use only `rng` (returns [0,1)) for randomness. */
+export type ContractGenerator = (rng: () => number, ctx: ContractGenContext, db: ContentDB) => ContractSpec;
+
+export interface Scenario {
+	id: string;
+	name: string;
+	/** Lot width in tiles. */
+	width: number;
+	floorMin: number;
+	floorMax: number;
+	/** Pre-built slab spans: [floor, x0, x1] inclusive. */
+	slabs: [number, number, number][];
+	/** Pre-placed facilities. */
+	facilities: { defId: string; floor: number; x: number }[];
+	/** Pre-built conduits: [layer, floor, x0, x1] horizontal runs inclusive. */
+	conduits: ["power" | "coolant", number, number, number][];
+	lifts: { x: number; floorMin: number; floorMax: number }[];
+	bots: { defId: string; floor: number; x: number }[];
+	spareParts: number;
+}
+
+export interface ContentDB {
+	facilities: Record<string, FacilityDef>;
+	bots: Record<string, BotDef>;
+	clients: ClientTemplate[];
+	structure: StructureCosts;
+	lift: LiftSpec;
+	balance: Balance;
+	scenarios: Record<string, Scenario>;
+	generateContract: ContractGenerator;
+}

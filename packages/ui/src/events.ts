@@ -1,0 +1,126 @@
+import type { ContentDB } from "@aitower/content";
+import type { CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import { fmtMoney, fmtPct } from "./format";
+import type { Severity } from "./notices";
+
+export interface Described {
+	text: string;
+	severity: Severity;
+	/** Cell to focus when clicked (facility events). */
+	cell?: CellRef;
+	/** Show as a toast when it happens. */
+	toast: boolean;
+}
+
+const commandName: Record<SimCommand["type"], string> = {
+	buildSlab: "Build slab",
+	place: "Place",
+	buildConduit: "Build conduit",
+	buildLift: "Build lift",
+	demolish: "Demolish",
+	setEnabled: "Toggle",
+	acceptContract: "Accept contract",
+	declineContract: "Decline contract",
+	cancelJob: "Cancel job",
+	buyParts: "Buy parts",
+	buyBot: "Buy bot",
+};
+
+/** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
+export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): Described {
+	const fac = (id: number): { name: string; cell?: CellRef } => {
+		const f = view.facilities.find((f) => f.id === id);
+		if (!f) return { name: `facility #${id}` };
+		const def = content.facilities[f.defId];
+		return { name: `${def?.name ?? f.defId} #${id} (F${f.floor})`, cell: { x: f.x, floor: f.floor } };
+	};
+	const job = (id: number): string => {
+		const j = view.jobs.find((j) => j.id === id);
+		return j ? `${j.clientName} ${j.kind}` : `Job #${id}`;
+	};
+	const offer = (id: number): string => {
+		const o = view.offers.find((o) => o.id === id);
+		return o ? `${o.clientName} (${o.kind})` : `#${id}`;
+	};
+	switch (ev.type) {
+		case "commandRejected":
+			return { text: `${commandName[ev.command.type]} rejected: ${ev.reason}`, severity: "warn", toast: true };
+		case "built":
+			return { text: `Built ${ev.what} at F${ev.floor} x${ev.x}`, severity: "info", cell: { x: ev.x, floor: ev.floor }, toast: false };
+		case "demolished":
+			return { text: `Demolished at F${ev.floor} x${ev.x}`, severity: "info", cell: { x: ev.x, floor: ev.floor }, toast: false };
+		case "rackThrottled": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} throttling — running hot`, severity: "warn", cell: f.cell, toast: false };
+		}
+		case "rackTripped": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} TRIPPED on over-temperature`, severity: "error", cell: f.cell, toast: true };
+		}
+		case "rackRecovered": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} back online`, severity: "good", cell: f.cell, toast: false };
+		}
+		case "componentFailed": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: true };
+		}
+		case "repaired": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} repaired by bot #${ev.botId}`, severity: "good", cell: f.cell, toast: false };
+		}
+		case "powerShortfall":
+			return { text: `Power shortfall on net ${ev.netId} — ${fmtPct(ev.satisfaction, 0)} supplied`, severity: "error", toast: true };
+		case "gensetStarted": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} started`, severity: "warn", cell: f.cell, toast: false };
+		}
+		case "gensetStopped": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} stopped`, severity: "info", cell: f.cell, toast: false };
+		}
+		case "upsDepleted": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name} battery depleted`, severity: "error", cell: f.cell, toast: true };
+		}
+		case "contractOffered":
+			return { text: `New offer: ${offer(ev.contractId)}`, severity: "info", toast: false };
+		case "contractExpired":
+			return { text: `Offer #${ev.contractId} expired`, severity: "info", toast: false };
+		case "jobStarted":
+			return { text: `${job(ev.jobId)} started`, severity: "info", toast: false };
+		case "jobCompleted":
+			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: true };
+		case "jobFailed":
+			return { text: `${job(ev.jobId)} failed · penalty ${fmtMoney(ev.penalty)}`, severity: "error", toast: true };
+		case "jobRolledBack":
+			return { text: `${job(ev.jobId)} rolled back to checkpoint`, severity: "warn", toast: false };
+		case "liftArrived":
+			return { text: `Lift #${ev.liftId} at F${ev.floor}`, severity: "info", toast: false };
+		case "tierUp":
+			return { text: `Tier ${ev.tier} reached! Bonus +${fmtMoney(ev.reward)}`, severity: "good", toast: true };
+		case "newDay":
+			return { text: `Day ${ev.day} begins`, severity: "info", toast: false };
+		case "bankrupt":
+			return { text: "BANKRUPT — cash below zero for a full day", severity: "error", toast: true };
+	}
+}
+
+/** Events too chatty for the alert feed. */
+export const isNoise = (ev: SimEvent): boolean => ev.type === "liftArrived";
+
+/** Coalescing key for toasts (repeated shortfalls on the same net merge). */
+export function eventKey(ev: SimEvent): string {
+	switch (ev.type) {
+		case "powerShortfall":
+			return `ps:${ev.netId}`;
+		case "rackTripped":
+		case "componentFailed":
+		case "upsDepleted":
+			return `${ev.type}:${ev.facilityId}`;
+		case "commandRejected":
+			return `rej:${ev.reason}`;
+		default:
+			return JSON.stringify(ev);
+	}
+}
