@@ -10,6 +10,9 @@
 | 2026-10-15 | 5 | Cassette-futurism art direction (`docs/STYLE.md`), retro fonts, restyled content | ✅ |
 | 2026-10-15 | 5 | T5 world-art pass (agent-render) + T6 HUD pass (agent-ui) integrated | ✅ |
 | 2026-10-15 | 5 | Publishing: GitHub Pages workflow + claude.ai artifact build (`scripts/build-artifact.mjs`) | ✅ |
+| 2026-10-15 | 6 | MVP merged to `main` (MichaelAPerry/AITower#1) | ✅ |
+| 2026-10-15 | 6 | Ministry Induction tutorial (13 steps, `packages/ui/src/tutorial`) | ✅ |
+| 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
 
 ## Sub-agent assignments
 | Task | Agent | Scope | Status | Tests |
@@ -39,7 +42,7 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 - **The starter includes a storage rack:** training jobs need dataset storage.
 - **Tier 2 needs 120 PFLOPS:** the starter has 80, so the player must expand to progress.
 
-## Backlog (candidates for the next milestone)
+## Backlog (superseded by `docs/ROADMAP_1.0.md`; kept for history)
 1. `canBuild(cmd)` on `Sim` and `GameStore`, so slab, conduit and lift ghosts use the sim's real validation (agent-ui proposal).
 2. Move sim literals (idle draw 15%, 8-rack training cap, refund %, bot battery thresholds) into `Balance.sim` (agent-sim proposal).
 3. `submit()` validation that accounts for queued commands, so "build slab" then "place" works within one paused tick.
@@ -49,7 +52,7 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 7. Code-split the Pixi bundle (the main chunk is 656 kB).
 
 ## Publishing
-- **GitHub Pages:** `.github/workflows/pages.yml` runs check, build and deploy on pushes to `main` and this branch.
-  The deploy needs the `github-pages` environment to allow this branch, or a merge to `main`.
+- **GitHub Pages:** `.github/workflows/pages.yml` runs check and build on every PR. On pushes to `main` it also
+  deploys to Pages.
 - **claude.ai artifact:** run `node scripts/build-artifact.mjs`, then publish
   `apps/web/dist-artifact/artifact.html` with `assets/app.js` and `assets/app.css`.
