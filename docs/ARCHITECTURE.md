@@ -1,7 +1,8 @@
 # AItower — System Architecture & Design Specification
 
-_Status: draft v0.1 (Phase 2). Open decisions are marked **[DECIDE]** and are the
-subject of the Phase 3 briefing. Code samples are TypeScript-flavoured pseudocode, but the
+_Status: v0.2. Phase 3 decisions (2026-10-15): **TypeScript + PixiJS v8 + React 19 (Vite)**,
+**2D side-cut pixel art**, **plausible physics**, **lean vertical slice MVP** — see `tasks/README.md`.
+Items marked **[DECIDE]** below are now resolved by those choices. Code samples are TypeScript-flavoured pseudocode, but the
 design is language-agnostic._
 
 ---
