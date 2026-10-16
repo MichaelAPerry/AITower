@@ -1,0 +1,175 @@
+/* ── Title screen: the Ministry front office ── */
+.aitower-hud .ui-title {
+	position: absolute;
+	inset: 0;
+	z-index: 50;
+	pointer-events: auto;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+	overflow: hidden;
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 20%, transparent) 2px 3px),
+		linear-gradient(180deg, color-mix(in srgb, var(--ink) 92%, var(--smog)) 0%, color-mix(in srgb, var(--smog) 38%, var(--ink)) 62%, color-mix(in srgb, var(--sodium) 22%, var(--ink)) 100%);
+}
+.aitower-hud .ui-title-sky {
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	background:
+		linear-gradient(var(--ink), var(--ink)) 6% 100% / 9% 38% no-repeat,
+		linear-gradient(var(--ink), var(--ink)) 17% 100% / 7% 52% no-repeat,
+		linear-gradient(var(--ink), var(--ink)) 26% 100% / 11% 30% no-repeat,
+		linear-gradient(var(--ink), var(--ink)) 74% 100% / 10% 46% no-repeat,
+		linear-gradient(var(--ink), var(--ink)) 86% 100% / 7% 60% no-repeat,
+		linear-gradient(var(--ink), var(--ink)) 95% 100% / 8% 34% no-repeat;
+	opacity: 0.85;
+}
+.aitower-hud .ui-title-sign {
+	position: absolute;
+	top: 5%;
+	left: 50%;
+	transform: translateX(-50%);
+	font: 14px/1 var(--f-stamp);
+	letter-spacing: 0.6em;
+	color: var(--sodium);
+	text-shadow: 0 0 12px color-mix(in srgb, var(--sodium) 80%, transparent);
+	padding-left: 0.6em;
+}
+.aitower-hud .ui-title-cabinet {
+	position: relative;
+	z-index: 1;
+	width: min(560px, 100%);
+	padding: 26px 30px 20px;
+	display: grid;
+	gap: 18px;
+	max-height: 100%;
+	overflow-y: auto;
+}
+.aitower-hud .ui-title-plate {
+	display: grid;
+	justify-items: center;
+	gap: 8px;
+}
+.aitower-hud .ui-title-brand {
+	padding: 8px 26px 6px 30px;
+	font: 40px/1 var(--f-type);
+	letter-spacing: 0.22em;
+	color: var(--ink);
+	background:
+		radial-gradient(circle at 8px 50%, var(--brass-dk) 0 2.4px, transparent 3px),
+		radial-gradient(circle at calc(100% - 8px) 50%, var(--brass-dk) 0 2.4px, transparent 3px),
+		linear-gradient(170deg, var(--paper) 0%, var(--brass) 30%, var(--brass-dk) 75%, var(--brass) 100%);
+	border-radius: 3px;
+	box-shadow: 0 0 0 2px var(--ink), inset 0 1px 0 var(--gleam), 0 6px 0 var(--housing-lo);
+	text-shadow: 0 1px 0 color-mix(in srgb, var(--paper) 45%, transparent);
+	white-space: nowrap;
+}
+.aitower-hud .ui-title-brand b {
+	font-weight: 400;
+	color: var(--housing-lo);
+}
+.aitower-hud .ui-title-sub {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--beige);
+	text-align: center;
+}
+.aitower-hud .ui-title-crt {
+	padding: 18px 20px 16px;
+	min-height: 150px;
+}
+.aitower-hud .ui-title-wait {
+	margin: 0;
+	font: 24px/1 var(--f-crt);
+	color: var(--ph);
+	animation: ui-blink 1.1s steps(2) infinite;
+}
+.aitower-hud .ui-title-menu {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+}
+.aitower-hud .ui-title-item {
+	display: flex;
+	align-items: baseline;
+	gap: 10px;
+	width: 100%;
+	text-align: left;
+	padding: 5px 8px 3px;
+	font: 30px/1.05 var(--f-crt);
+	letter-spacing: 0.04em;
+	color: var(--ph);
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	text-shadow: 0 0 6px color-mix(in srgb, var(--ph) 60%, transparent);
+}
+.aitower-hud .ui-title-cursor {
+	visibility: hidden;
+	font-size: 22px;
+}
+.aitower-hud .ui-title-item:hover,
+.aitower-hud .ui-title-item:focus-visible {
+	outline: none;
+	color: var(--ink);
+	background: var(--ph);
+	text-shadow: none;
+}
+.aitower-hud .ui-title-item:hover .ui-title-cursor,
+.aitower-hud .ui-title-item:focus-visible .ui-title-cursor {
+	visibility: visible;
+}
+.aitower-hud .ui-title-detail {
+	margin-left: auto;
+	font-size: 19px;
+	opacity: 0.85;
+	white-space: nowrap;
+}
+.aitower-hud .ui-title-check {
+	display: flex;
+	align-items: center;
+	gap: 9px;
+	margin: 2px 0 8px 40px;
+	font: 19px/1 var(--f-crt);
+	color: var(--ph-lo, var(--ph));
+	cursor: pointer;
+}
+.aitower-hud .ui-title-check input {
+	width: 18px;
+	height: 18px;
+	margin: 0;
+	accent-color: var(--amber);
+	cursor: pointer;
+}
+.aitower-hud .ui-title-check input:focus-visible {
+	outline: 2px dashed var(--amber);
+	outline-offset: 3px;
+}
+.aitower-hud .ui-title-foot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+.aitower-hud.is-density-tight .ui-title-brand,
+.aitower-hud.is-density-cramped .ui-title-brand {
+	font-size: 28px;
+}
+.aitower-hud.is-density-cramped .ui-title-cabinet {
+	padding: 16px 14px 14px;
+}
+.aitower-hud.is-density-cramped .ui-title-item {
+	font-size: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-title-wait {
+		animation: none;
+	}
+}
+.aitower-hud.is-reduced-motion .ui-title-wait {
+	animation: none;
+}

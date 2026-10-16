@@ -63,6 +63,7 @@ function Contracts({ store, state }: PanelProps) {
 									<button
 										type="button"
 										className="ui-stampbtn stamp-green"
+										data-tut="accept"
 										aria-label="Accept"
 										title="Accept contract"
 										onClick={() => report(store.dispatch({ type: "acceptContract", contractId: o.id }))}
@@ -269,6 +270,7 @@ export function BottomPanel(props: PanelProps) {
 					<button
 						key={t.id}
 						type="button"
+						data-tut={`btab-${t.id}`}
 						role="tab"
 						aria-selected={ui.bottomTab === t.id}
 						className={`ui-tab ${ui.bottomTab === t.id && ui.bottomOpen ? "is-on" : ""}`}

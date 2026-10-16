@@ -7,6 +7,7 @@ import type { PanelProps } from "./context";
 import { niceMax } from "./Dial";
 import { Gauge, PueGauge } from "./PueGauge";
 import { saveLamp } from "../menu/slots";
+import { InboxButton, StandingMeter } from "../memo/MemoDesk";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
@@ -20,7 +21,7 @@ function Stat({ label, children, title, className = "" }: { label: string; child
 	);
 }
 
-export function TopBar({ store, content, state, openMenu }: PanelProps) {
+export function TopBar({ store, content, state, openMenu, ui, setUi }: PanelProps) {
 	const { view, speed, muted } = state;
 	const lamp = saveLamp(state.saveStatus);
 	const maxTier = Math.max(1, content.balance.tiers.pflops.length);
@@ -52,6 +53,7 @@ export function TopBar({ store, content, state, openMenu }: PanelProps) {
 					<button
 						key={s}
 						type="button"
+						data-tut={`speed-${s}`}
 						className={`ui-speed ${speed === s ? "is-on" : ""} ${s === 0 ? "is-pause" : ""}`}
 						onClick={() => store.setSpeed(s)}
 						title={`${s === 0 ? "Pause (Space)" : `${s}× speed`} — key ${i + 1}`}
@@ -121,6 +123,8 @@ export function TopBar({ store, content, state, openMenu }: PanelProps) {
 					))}
 				</span>
 			</div>
+			<StandingMeter standing={view.standing} />
+			<InboxButton state={state} ui={ui} setUi={setUi} />
 			<div className="ui-grow" />
 			<div className="ui-crt crt-amber ui-statbank ui-env">
 				<Stat label="OUTSIDE" title="Outdoor ambient temperature">

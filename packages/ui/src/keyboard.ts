@@ -81,14 +81,18 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	return true;
 }
 
-export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController): void {
+/** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
+export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggleBottom);
 	toggleRef.current = toggleBottom;
+	const blockedRef = useRef(blocked);
+	blockedRef.current = blocked;
 	useEffect(() => {
 		const env: KeyEnv = { menu, lastSpeed, toggleBottom: () => toggleRef.current() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+			if (blockedRef.current() && !menu.isOpen()) return;
 			// Typing in a field ignores hotkeys, except Esc while the menu is open (it must always close).
 			if (typing(e.target) && !(menu.isOpen() && e.key === "Escape")) return;
 			if (runKey(store, e.key, env)) e.preventDefault();

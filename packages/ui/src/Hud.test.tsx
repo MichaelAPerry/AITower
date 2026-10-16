@@ -81,7 +81,7 @@ describe("SystemMenu (server render)", () => {
 		const store = createFakeStore(content);
 		const menu = createMenuController(store);
 		const html = renderToString(<SystemMenu store={store} state={store.get()} menu={menu} initial="settings" />);
-		for (const t of ["Master volume", "Mute", "Text size", "CRT effects", "Reduced motion", "Colour-blind mode", "Horror intensity", "Autosave", "Desktop notice"]) expect(html).toContain(t);
+		for (const t of ["Master volume", "Music volume", "Mute", "Text size", "CRT effects", "Reduced motion", "Colour-blind mode", "Horror intensity", "Autosave", "Desktop notice"]) expect(html).toContain(t);
 	});
 	it("lists every key and mouse action in the controls drawer", () => {
 		const content = createFakeContent();
@@ -90,5 +90,73 @@ describe("SystemMenu (server render)", () => {
 		for (const t of ["Space", "Right-drag", "Middle-drag", "Wheel", "Esc", "Left-drag", "Right-click"]) expect(html).toContain(t);
 		expect(html).toContain(">W<");
 		expect(html).toContain(">D<");
+	});
+
+	it("shows the title screen over the game when asked (and not by default in tests); the menu is not open", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		const plain = renderToString(<Hud store={store} content={content} />);
+		expect(plain).not.toContain("ui-title-cabinet");
+		const html = renderToString(<Hud store={store} content={content} title />);
+		expect(html).toContain("ui-title-cabinet");
+		expect(html).toContain("AI<b>TOWER</b>");
+		expect(html).not.toContain("ui-induction");
+		// the tutorial memo must not run behind the title screen
+		expect(html).not.toContain("ui-tutorial");
+	});
+
+	it("pops the newest memo with its stamps, hints, countdown and default; the top bar shows the inbox count and standing", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		store.issueMemo("heatwave", 840);
+		store.setStanding(18);
+		store.addModifier({ label: "Heatwave", kind: "ambient", value: 8, endsAt: store.get().view.tick + 840 });
+		const html = renderToString(<Hud store={store} content={content} />);
+		expect(html).toContain("ui-memo-pop");
+		expect(html).toContain("Notice of Unseasonable Warmth");
+		expect(html).toContain("BUY CREDITS");
+		expect(html).toContain("Pay $12k now");
+		expect(html).toContain("AUTO-FILED IN 14h");
+		expect(html).toContain("Unanswered memos are filed as: <b>FILE IN TRIPLICATE</b>");
+		expect(html).toMatch(/ui-inbox-count has[^>]*>1</);
+		expect(html).toContain("tone-red"); // standing 18 is below 25
+		expect(html).toContain("HEATWAVE +8 °C · 14h");
+		expect(html).not.toContain("ui-memo-drawer");
+	});
+
+	it("renders each game-over notice once the sim reports it", () => {
+		const content = createFakeContent();
+		for (const [kind, heading, buttons] of [
+			["bankrupt", "NOTICE OF TERMINATION", ["Load game", "New game"]],
+			["shutdown", "NOTICE OF TERMINATION", ["Load game", "New game"]],
+			["victory", "COMMENDATION", ["Continue in sandbox", "New game"]],
+		] as const) {
+			const store = createFakeStore(content);
+			store.triggerGameOver(kind);
+			const html = renderToString(<Hud store={store} content={content} />);
+			expect(html, kind).toContain(heading);
+			expect(html, kind).toContain("SERVICE RECORD");
+			for (const b of buttons) expect(html, `${kind} ${b}`).toContain(`>${b}<`);
+			if (kind !== "victory") expect(html).not.toContain("Continue in sandbox");
+		}
+		const clean = renderToString(<Hud store={createFakeStore(content)} content={content} />);
+		expect(clean).not.toContain("ui-over-memo");
+	});
+
+	it("uses Ministry wording for memo, standing and game-over events", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		const id = store.issueMemo("audit");
+		store.dispatch({ type: "resolveMemo", memoId: id, choiceId: "comply" });
+		store.advance(1);
+		const v = store.get().view;
+		const resolved = describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: false }, v, content);
+		expect(resolved).toMatchObject({ toast: true });
+		expect(resolved.text).toBe("Memo stamped COMPLY. The Inspector counted 4,112 cables and left.");
+		expect(describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: true }, v, content).text).toContain("unanswered and filed as COMPLY");
+		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Ministry standing falls by 8 to 42", severity: "warn", toast: true });
+		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
+		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");
+		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");
 	});
 });

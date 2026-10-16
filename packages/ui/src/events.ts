@@ -103,16 +103,30 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 		case "newDay":
 			return { text: `Day ${ev.day} begins`, severity: "info", toast: false };
 		case "bankrupt":
-			return { text: "BANKRUPT — cash below zero for a full day", severity: "error", toast: true };
-		// Placeholder wording until M2-T2 designs the memo desk.
-		case "memoIssued":
-			return { text: `Ministry memo received (${ev.eventId})`, severity: "info", toast: false };
-		case "memoResolved":
-			return { text: `Memo ${ev.auto ? "auto-filed" : "answered"}: ${ev.choiceId}`, severity: "info", toast: false };
+			return { text: "WARNING: Treasury below zero for a full day (insolvency notice)", severity: "error", toast: true };
+		case "memoIssued": {
+			const m = view.memos.find((m) => m.eventId === ev.eventId);
+			return { text: m ? `Memo received from the Ministry: ${m.title}` : "A memo has arrived from the Ministry", severity: "info", toast: false };
+		}
+		case "memoResolved": {
+			const h = view.memoHistory.find((h) => h.memoId === ev.memoId);
+			const label = h ? content.events.find((e) => e.id === h.eventId)?.choices.find((c) => c.id === h.choiceId)?.label : undefined;
+			const stamp = label ?? ev.choiceId.toUpperCase();
+			const head = ev.auto ? `Memo unanswered and filed as ${stamp}` : `Memo stamped ${stamp}`;
+			return { text: h ? `${head}. ${h.outcome}` : `${head}.`, severity: "info", toast: true };
+		}
 		case "standingChanged":
-			return { text: `Ministry standing ${ev.delta >= 0 ? "+" : ""}${ev.delta} → ${ev.standing}`, severity: ev.delta < 0 ? "warn" : "info", toast: false };
+			return {
+				text: `Ministry standing ${ev.delta >= 0 ? "rises" : "falls"} by ${Math.abs(ev.delta)} to ${ev.standing}`,
+				severity: ev.delta < 0 ? "warn" : "good",
+				toast: ev.delta <= -5 || ev.standing < 25,
+			};
 		case "gameOver":
-			return { text: `GAME OVER — ${ev.kind}`, severity: ev.kind === "victory" ? "info" : "error", toast: true };
+			return {
+				text: ev.kind === "victory" ? "COMMENDATION issued by the Ministry" : ev.kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, Ministry standing is zero" : "NOTICE OF TERMINATION: foreclosed for insolvency",
+				severity: ev.kind === "victory" ? "good" : "error",
+				toast: false,
+			};
 	}
 }
 

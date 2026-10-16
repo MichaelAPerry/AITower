@@ -9,12 +9,17 @@ import { Inspector } from "./components/Inspector";
 import { OverlaySwitcher } from "./components/OverlaySwitcher";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
+import { GameOverScreen } from "./gameover/GameOverScreen";
+import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
+import { MemoDrawer, MemoPop, ModifierChips } from "./memo/MemoDesk";
+import { TitleScreen } from "./title/TitleScreen";
+import { showTitleAtBoot } from "./title/titleState";
 import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
 import { newSaveError } from "./menu/slots";
-import { SystemMenu } from "./menu/SystemMenu";
+import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
@@ -22,22 +27,59 @@ import "./ui.css";
 export interface HudProps {
 	store: GameStore;
 	content: ContentDB;
+	/** Show the title screen over a paused game. Default: yes, unless the URL has ?new (the e2e smoke test relies on that). */
+	title?: boolean;
 }
 
 /** The whole HUD, absolutely positioned over the world canvas; empty areas let pointer events through. */
-export function Hud({ store, content }: HudProps) {
+export function Hud({ store, content, title }: HudProps) {
 	const state = useGameState(store);
-	const [ui, setUiState] = useState<UiState>({ bottomTab: "contracts", bottomOpen: true, focusJobId: null, alertsSeenTick: -1 });
+	const [ui, setUiState] = useState<UiState>({ bottomTab: "contracts", bottomOpen: true, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, stamped: [], aside: [] });
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
+	const [menuSection, setMenuSection] = useState<MenuSection>("save");
+	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
+	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
+	const titleOpenRef = useRef(titleOpen);
+	titleOpenRef.current = titleOpen;
+	const overRef = useRef(false);
+	const openMenuAt = useCallback(
+		(section: MenuSection) => {
+			setMenuSection(section);
+			menu.open();
+		},
+		[menu],
+	);
+	useEffect(() => {
+		if (!menuOpen) setMenuSection("save");
+	}, [menuOpen]);
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
 	useHudKeyboard(
 		store,
 		useCallback(() => setUiState((u) => ({ ...u, bottomOpen: !u.bottomOpen })), []),
 		menu,
+		useCallback(() => titleOpenRef.current || overRef.current, []),
 	);
+
+	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
+	const gameOver = state.view.gameOver;
+	const over = titleOpen ? null : gameOverToShow(gameOver, dismissedOver);
+	overRef.current = !!over;
+	useEffect(() => {
+		setDismissedOver((k) => keepDismissed(gameOver, k));
+	}, [gameOver]);
+	const overId = over ? overKey(over) : null;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: pause once when a game-over appears
+	useEffect(() => {
+		if (overId) store.setSpeed(0);
+	}, [overId]);
+	// A load or import replaced the game: leave the title or the game-over notice and run at 1×.
+	const onReplaced = (): void => {
+		if (titleOpen || over) store.setSpeed(1);
+		setTitleOpen(false);
+	};
 
 	// An error toast whenever saveStatus.error changes to a new message.
 	const saveError = state.saveStatus.error;
@@ -61,7 +103,7 @@ export function Hud({ store, content }: HudProps) {
 		if (alertsOpen) setUi({ alertsSeenTick: tick });
 	}, [alertsOpen, tick, setUi]);
 
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: menu.open };
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save") };
 	return (
 		<div
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
@@ -71,16 +113,36 @@ export function Hud({ store, content }: HudProps) {
 			<BuildPalette {...props} />
 			<div className="ui-center">
 				<OverlaySwitcher {...props} />
+				<ModifierChips modifiers={state.view.modifiers} tick={state.view.tick} />
 				<Toasts content={content} state={state} />
+				<MemoPop store={store} state={state} ui={ui} setUi={setUi} />
+				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
-				<Tutorial store={store} content={content} state={state} />
+				{!titleOpen && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
 			</div>
 			<div className="ui-right">
 				<Inspector {...props} />
 			</div>
 			<BottomPanel {...props} />
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
-			{menuOpen && <SystemMenu store={store} state={state} menu={menu} />}
+			{titleOpen && <TitleScreen store={store} state={state} menuOpen={menuOpen} openMenu={openMenuAt} onStart={() => setTitleOpen(false)} />}
+			{over && (
+				<GameOverScreen
+					over={over}
+					view={state.view}
+					menuOpen={menuOpen}
+					onLoad={() => openMenuAt("load")}
+					onNewGame={() => {
+						store.newGame();
+						store.setSpeed(1);
+					}}
+					onContinue={() => {
+						setDismissedOver(overKey(over));
+						store.setSpeed(1);
+					}}
+				/>
+			)}
+			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 	);
 }

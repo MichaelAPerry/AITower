@@ -2,8 +2,8 @@
  * Dev-only fake GameStore backed by a hand-built SimView fixture. Uses content *types* only and a small
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
-import type { ContentDB, FacilityDef } from "@aitower/content";
-import type { CommandResult, FacilityView, JobView, LedgerDay, MetricSample, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { ContentDB, EventDef, FacilityDef } from "@aitower/content";
+import type { CommandResult, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -15,6 +15,40 @@ const fac = (d: Partial<FacilityDef> & Pick<FacilityDef, "id" | "name" | "kind" 
 	facilityKw: 0,
 	...d,
 });
+
+const FAKE_EVENTS: EventDef[] = [
+	{
+		id: "heatwave",
+		category: "environmental",
+		title: "Notice of Unseasonable Warmth",
+		body: "The Weather Bureau advises that the outside air will be 8 °C warmer than the Ministry considers reasonable for the next fourteen hours.\n\nYou may purchase emergency chilled-water credits, or endure.",
+		weight: 1,
+		minTier: 1,
+		cooldownDays: 5,
+		timeoutTicks: 720,
+		defaultChoice: "endure",
+		choices: [
+			{ id: "credits", label: "BUY CREDITS", hint: "Pay $12k now. The heatwave is only +4 °C for 14 h.", outcome: "Credits purchased. The Weather Bureau thanks you for your cheque.", effects: [] },
+			{ id: "endure", label: "FILE IN TRIPLICATE", hint: "Free. Outside air +8 °C for 14 h; failures run higher.", outcome: "Filed. The heat is noted and will not be discussed further.", effects: [] },
+		],
+	},
+	{
+		id: "audit",
+		category: "ministry",
+		title: "Form A-9: Surprise Inspection",
+		body: "An Inspector will visit tomorrow to count your cables.",
+		weight: 1,
+		minTier: 1,
+		cooldownDays: 5,
+		timeoutTicks: 360,
+		defaultChoice: "comply",
+		choices: [
+			{ id: "bribe", label: "OFFER TEA", hint: "Pay $5k. Standing +0, no inspection.", outcome: "The Inspector enjoyed the tea.", effects: [] },
+			{ id: "comply", label: "COMPLY", hint: "Free. Standing −5 if uptime is under target.", outcome: "The Inspector counted 4,112 cables and left.", effects: [] },
+			{ id: "protest", label: "PROTEST", hint: "Standing −10. The Inspector notes your attitude.", outcome: "Your protest was received and shredded.", effects: [] },
+		],
+	},
+];
 
 export function createFakeContent(): ContentDB {
 	const facilities: FacilityDef[] = [
@@ -50,7 +84,7 @@ export function createFakeContent(): ContentDB {
 			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
 		},
 		scenarios: {},
-		events: [],
+		events: FAKE_EVENTS,
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
@@ -227,6 +261,13 @@ export interface FakeStore extends GameStore {
 	ghost: Ghost | null;
 	/** Put a save into a slot without going through saveTo (harness and tests). */
 	seedSlot: ReturnType<typeof createFakeSaves>["seedSlot"];
+	/** Open a fake Ministry memo from the fixture events (`eventId` default: heatwave) expiring in `ticks`. */
+	issueMemo(eventId?: string, ticks?: number): number;
+	/** Set Ministry standing (0..100). Reaching 0 triggers the shutdown game over, like the real sim. */
+	setStanding(standing: number): void;
+	addModifier(m: ModifierView): void;
+	/** End the game as the real sim would. */
+	triggerGameOver(kind: GameOverKind): void;
 }
 
 export function createFakeStore(content: ContentDB = createFakeContent(), opts: { saveDelayMs?: number } = {}): FakeStore {
@@ -264,8 +305,54 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 
 	const canPlace = (defId: string, floor: number, x: number): CommandResult => canPlaceFor(view, content, defId, floor, x);
 
+	// Memos and standing, mimicking the sim: resolveMemo is queued and applied on the next advance().
+	let nextMemo = 1;
+	const queued: { memoId: number; choiceId: string }[] = [];
+	const memoByEvent = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
+	const fileMemo = (memoId: number, choiceId: string, auto: boolean): void => {
+		const m = view.memos.find((x) => x.id === memoId);
+		if (!m) return;
+		const def = memoByEvent(m.eventId);
+		const outcome = def.choices.find((c) => c.id === choiceId)?.outcome ?? "Filed.";
+		newView({
+			memos: view.memos.filter((x) => x.id !== memoId),
+			memoHistory: [...view.memoHistory, { memoId, eventId: m.eventId, title: m.title, choiceId, outcome, tick: view.tick, auto }].slice(-20),
+		});
+		pushEvents([{ type: "memoResolved", memoId, eventId: m.eventId, choiceId, auto }]);
+	};
+
 	const store: FakeStore = {
 		ghost: null,
+		issueMemo(eventId = "heatwave", ticks = 720) {
+			const def = memoByEvent(eventId);
+			const memo: MemoView = {
+				id: nextMemo++,
+				eventId: def.id,
+				category: def.category,
+				title: def.title,
+				body: def.body,
+				choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
+				defaultChoice: def.defaultChoice,
+				issuedAt: view.tick,
+				expiresAt: view.tick + ticks,
+			};
+			newView({ memos: [...view.memos, memo] });
+			pushEvents([{ type: "memoIssued", memoId: memo.id, eventId: def.id }]);
+			return memo.id;
+		},
+		setStanding(standing) {
+			const next = Math.min(100, Math.max(0, standing));
+			const delta = next - view.standing;
+			newView({ standing: next });
+			if (delta !== 0) pushEvents([{ type: "standingChanged", standing: next, delta }]);
+			if (next <= 0 && !view.gameOver) store.triggerGameOver("shutdown");
+		},
+		addModifier: (m) => newView({ modifiers: [...view.modifiers, m] }),
+		triggerGameOver(kind) {
+			if (view.gameOver) return;
+			newView({ gameOver: { kind, tick: view.tick }, bankrupt: kind === "bankrupt" || view.bankrupt });
+			pushEvents([{ type: "gameOver", kind }]);
+		},
 		get: () => state,
 		subscribe(cb) {
 			subs.add(cb);
@@ -310,6 +397,13 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 				case "demolish":
 					newView({ facilities: view.facilities.filter((f) => !(f.floor === cmd.floor && cmd.x >= f.x && cmd.x < f.x + f.width)) });
 					return ok;
+				case "resolveMemo": {
+					const m = view.memos.find((x) => x.id === cmd.memoId);
+					if (!m || queued.some((q) => q.memoId === cmd.memoId)) return no("That memo is no longer on file");
+					if (!m.choices.some((c) => c.id === cmd.choiceId)) return no("Unknown choice");
+					queued.push({ memoId: cmd.memoId, choiceId: cmd.choiceId });
+					return ok;
+				}
 				default:
 					return ok;
 			}
@@ -339,6 +433,11 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 		setMuted: (muted) => store.setSettings({ muted }),
 		advance(minutes) {
 			const tick = view.tick + minutes;
+			// Like the sim, queued commands apply only when the clock actually advances.
+			if (minutes > 0) {
+				for (const q of queued.splice(0)) fileMemo(q.memoId, q.choiceId, false);
+				for (const m of view.memos) if (m.expiresAt <= tick) fileMemo(m.id, m.defaultChoice, true);
+			}
 			const ph = tick / 97;
 			const facilities = view.facilities.map((f) => {
 				const d = content.facilities[f.defId];

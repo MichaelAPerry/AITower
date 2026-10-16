@@ -20,6 +20,8 @@ interface PaneProps {
 	state: GameState;
 	menu: MenuController;
 	flash: (f: Flash | null) => void;
+	/** Called after a load or import replaced the running game. */
+	onReplaced?: () => void;
 }
 
 interface SlotPaneProps extends PaneProps {
@@ -108,7 +110,7 @@ export function SavePane({ store, state, flash, saves, reload }: SlotPaneProps) 
 	);
 }
 
-export function LoadPane({ store, state, menu, flash, saves, reload }: SlotPaneProps) {
+export function LoadPane({ store, state, menu, flash, onReplaced, saves, reload }: SlotPaneProps) {
 	const [armed, setArmed] = useState<SaveSlotId | null>(null);
 	const [working, setWorking] = useState(false);
 	const file = useRef<HTMLInputElement>(null);
@@ -123,6 +125,7 @@ export function LoadPane({ store, state, menu, flash, saves, reload }: SlotPaneP
 			const r = await store.loadFrom(id);
 			if (r.ok) {
 				pushNotice({ text: `Loaded “${name}”.`, severity: "good", key: "loaded" });
+				onReplaced?.();
 				menu.close();
 				return;
 			}
@@ -143,6 +146,7 @@ export function LoadPane({ store, state, menu, flash, saves, reload }: SlotPaneP
 		setWorking(false);
 		if (r.ok) {
 			pushNotice({ text: `Imported ${f.name}.`, severity: "good", key: "imported" });
+			onReplaced?.();
 			menu.close();
 		} else flash({ tone: "error", text: r.reason });
 	};
@@ -210,6 +214,9 @@ export function SettingsPane({ store, state }: PaneProps) {
 			<SettingRow label="Master volume" hint="Everything the Ministry plays through the loudspeakers.">
 				<Slider label="Master volume" value={s.masterVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.masterVolume * 100)}%`} onChange={(v) => set({ masterVolume: v })} />
 			</SettingRow>
+			<SettingRow label="Music volume" hint="The Ministry's background music, on top of the master volume.">
+				<Slider label="Music volume" value={s.musicVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.musicVolume * 100)}%`} onChange={(v) => set({ musicVolume: v })} />
+			</SettingRow>
 			<SettingRow label="Mute" hint="Silence all audio (key M).">
 				<Toggle on={s.muted} onClick={() => set({ muted: !s.muted })} label="MUTE" />
 			</SettingRow>
@@ -267,7 +274,7 @@ export function ControlsPane() {
 	);
 }
 
-export function NewGamePane({ store, menu }: PaneProps) {
+export function NewGamePane({ store, menu, onReplaced }: PaneProps) {
 	const [armed, setArmed] = useState(false);
 	return (
 		<div className="ui-newgame">
@@ -280,6 +287,7 @@ export function NewGamePane({ store, menu }: PaneProps) {
 					yes="Start over"
 					onYes={() => {
 						store.newGame();
+						onReplaced?.();
 						pushNotice({ text: "A fresh datacenter has been requisitioned.", severity: "info", key: "newgame" });
 						menu.close();
 					}}
