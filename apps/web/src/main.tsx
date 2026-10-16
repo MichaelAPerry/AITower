@@ -8,8 +8,15 @@ import type { AudioEngine } from "@aitower/shared";
 import { Hud, createToolController } from "@aitower/ui";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { ErrorBoundary } from "./ErrorBoundary";
+import { configureCrashOverlay, installGlobalErrorLogging } from "./crash";
 import { startLoop } from "./loop";
 import { createGameStore } from "./store";
+
+const SPEEDS = [0, 1, 3, 10, 30] as const;
+const OVERLAYS = ["normal", "heat", "power", "coolant"] as const;
+
+installGlobalErrorLogging();
 
 async function boot() {
 	const content = loadContent();
@@ -30,10 +37,29 @@ async function boot() {
 
 	const store = createGameStore(content, renderer, audio);
 	const params = new URLSearchParams(location.search);
-	if (params.has("new")) store.newGame(Number(params.get("seed")) || undefined);
-	else store.loadAutosave();
-	if (params.has("speed")) store.setSpeed(Number(params.get("speed")) as 0 | 1 | 3 | 10 | 30);
-	if (params.has("overlay")) store.setOverlay(params.get("overlay") as "normal" | "heat" | "power" | "coolant");
+	const seedParam = params.get("seed");
+	const seed = seedParam !== null && seedParam.trim() !== "" && Number.isFinite(Number(seedParam)) ? Math.trunc(Number(seedParam)) : undefined;
+	await store.boot({ fresh: params.has("new"), seed });
+	const speed = Number(params.get("speed"));
+	if (params.has("speed") && (SPEEDS as readonly number[]).includes(speed)) store.setSpeed(speed as (typeof SPEEDS)[number]);
+	const overlay = params.get("overlay");
+	if (overlay && (OVERLAYS as readonly string[]).includes(overlay)) store.setOverlay(overlay as (typeof OVERLAYS)[number]);
+
+	configureCrashOverlay({
+		autosaveDay: async () => {
+			const env = (await store.listSaves()).find((s) => s.id === "auto");
+			return env ? env.day : null;
+		},
+		exportText: async () => {
+			try {
+				return { text: store.save(), from: "current" as const };
+			} catch (err) {
+				console.warn("current game cannot be exported:", err);
+			}
+			const text = await store.readSlotRaw("auto");
+			return text === null ? null : { text, from: "autosave" as const };
+		},
+	});
 
 	const tools = createToolController(store, content);
 	renderer.onPointer((e) => tools.handle(e));
@@ -53,7 +79,9 @@ async function boot() {
 
 	createRoot(hudEl).render(
 		<StrictMode>
-			<Hud store={store} content={content} />
+			<ErrorBoundary>
+				<Hud store={store} content={content} />
+			</ErrorBoundary>
 		</StrictMode>,
 	);
 	startLoop(store, renderer, audio);

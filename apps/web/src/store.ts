@@ -1,12 +1,42 @@
 import type { ContentDB } from "@aitower/content";
-import { type Sim, type SimEvent, type SimSnapshot, createSim, simFromSnapshot } from "@aitower/sim";
-import { type AudioEngine, DEFAULT_SETTINGS, type GameState, type GameStore, type Ghost, type OverlayMode, type Renderer, type Selection, type Speed, type Tool } from "@aitower/shared";
+import { type CommandResult, type Sim, type SimEvent, createSim } from "@aitower/sim";
+import {
+	type AudioEngine,
+	type GameState,
+	type GameStore,
+	type Ghost,
+	type OverlayMode,
+	type Renderer,
+	SAVE_SLOTS,
+	type SaveSlotId,
+	type SaveSlotInfo,
+	type Selection,
+	type Settings,
+	type Speed,
+	type Tool,
+} from "@aitower/shared";
+import { type KeyValueStorage, type SaveBackend, createDefaultBackend, safeLocalStorage } from "./saveBackend";
+import { decodeSave, makeEnvelope, readEnvelope } from "./saves";
+import { loadSettings, mergeSettings, persistSettings, systemPrefersReducedMotion } from "./settings";
 
 export const SCENARIO = "starter";
 const LOG_CAP = 200;
 /** HUD refresh cap while only the sim is advancing (UI-state changes notify immediately). */
 const UI_NOTIFY_MS = 66;
-const AUTOSAVE_KEY = "aitower.autosave.v1";
+/** Pre-M1 single-slot autosave (raw SimSnapshot JSON in localStorage). Migrated once into slot "auto". */
+export const LEGACY_AUTOSAVE_KEY = "aitower.autosave.v1";
+const NAME_MAX = 60;
+
+export interface StoreOptions {
+	/** Where save slots live. Default: IndexedDB with a localStorage fallback. */
+	backend?: SaveBackend;
+	/** Settings + legacy autosave storage. Default: `localStorage` when usable. */
+	storage?: KeyValueStorage | null;
+	/** Default for `reducedMotion` when no settings are stored. Default: the OS media query. */
+	prefersReducedMotion?: boolean;
+	/** Epoch-ms clock (tests). */
+	now?: () => number;
+}
 
 export interface GameStoreInternals extends GameStore {
 	/** Advance the sim by `n` ticks, collecting events. Called by the loop. */
@@ -14,10 +44,43 @@ export interface GameStoreInternals extends GameStore {
 	/** Push the latest view to subscribers (throttled unless `force`). */
 	publish(now: number, force?: boolean): void;
 	sim(): Sim;
-	loadAutosave(): boolean;
+	/**
+	 * Boot the game: migrate the legacy autosave, then start fresh (`fresh`) or load slot "auto".
+	 * An invalid autosave starts a fresh game and sets `saveStatus.error` instead of throwing.
+	 */
+	boot(opts?: { fresh?: boolean; seed?: number }): Promise<void>;
+	/** Resolves once every queued save-slot read/write has finished (tests, unload). */
+	idle(): Promise<void>;
+	/** True while the loop is dropping backlog because the sim cannot keep up. Set by the loop; a HUD may show it. */
+	behind: boolean;
+	/** Read one slot's raw envelope text (crash overlay export). Null when empty. */
+	readSlotRaw(slot: SaveSlotId): Promise<string | null>;
 }
 
-export function createGameStore(content: ContentDB, renderer: Renderer | null, audio: AudioEngine | null): GameStoreInternals {
+const errText = (err: unknown) => (err instanceof Error ? err.message : String(err));
+
+export function createGameStore(content: ContentDB, renderer: Renderer | null, audio: AudioEngine | null, opts: StoreOptions = {}): GameStoreInternals {
+	const backend = opts.backend ?? createDefaultBackend();
+	const storage = opts.storage === undefined ? safeLocalStorage() : opts.storage;
+	const clock = opts.now ?? Date.now;
+
+	const applySettings = (s: Settings) => {
+		try {
+			audio?.setMuted(s.muted);
+			audio?.setVolume(s.masterVolume);
+		} catch (err) {
+			console.warn("audio settings failed:", err);
+		}
+		try {
+			renderer?.setOptions({ reducedMotion: s.reducedMotion, crtEffects: s.crtEffects, colorBlind: s.colorBlind, horrorIntensity: s.horrorIntensity });
+		} catch (err) {
+			console.warn("renderer settings failed:", err);
+		}
+	};
+
+	const initialSettings = loadSettings(storage, opts.prefersReducedMotion ?? systemPrefersReducedMotion());
+	applySettings(initialSettings);
+
 	let sim = createSim(content, SCENARIO, 1);
 	let state: GameState = {
 		view: sim.view(),
@@ -26,13 +89,15 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		tool: { kind: "select" },
 		selection: null,
 		log: [],
-		muted: false,
-		settings: { ...DEFAULT_SETTINGS },
+		muted: initialSettings.muted,
+		settings: initialSettings,
 		saveStatus: { lastSavedAt: null, error: null, busy: false },
 	};
 	const subs = new Set<() => void>();
 	let lastNotify = 0;
 	let dirty = false;
+	let pending = 0;
+	let queue: Promise<unknown> = Promise.resolve();
 
 	const notify = () => {
 		for (const cb of subs) cb();
@@ -41,6 +106,7 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		state = { ...state, ...p };
 		notify();
 	};
+	const patchStatus = (p: Partial<GameState["saveStatus"]>) => patch({ saveStatus: { ...state.saveStatus, ...p } });
 	const pushLog = (events: SimEvent[]) => {
 		if (!events.length) return;
 		const tick = sim.view().tick;
@@ -49,12 +115,85 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 	};
 	const replaceSim = (next: Sim) => {
 		sim = next;
-		state = { ...state, view: sim.view(), log: [], selection: null };
+		dirty = true;
+		state = { ...state, view: sim.view(), log: [], selection: null, tool: { kind: "select" } };
 		renderer?.setSelection(null);
+		renderer?.setGhost(null);
 		notify();
 	};
 
+	/** Serialise all backend access so a slow write can never be overtaken by a later read or write. */
+	const enqueue = <T>(op: () => Promise<T>): Promise<T> => {
+		const run = queue.then(op);
+		queue = run.then(
+			() => undefined,
+			() => undefined,
+		);
+		return run;
+	};
+	/** Wrap a user-visible slot operation: sets busy, then lastSavedAt/error from the outcome. */
+	const tracked = async (op: () => Promise<CommandResult>, savedOk: boolean): Promise<CommandResult> => {
+		pending++;
+		patchStatus({ busy: true });
+		let result: CommandResult;
+		try {
+			result = await op();
+		} catch (err) {
+			result = { ok: false, reason: errText(err) };
+		}
+		pending--;
+		patchStatus(result.ok ? { busy: pending > 0, error: null, ...(savedOk ? { lastSavedAt: clock() } : {}) } : { busy: pending > 0, error: result.reason });
+		return result;
+	};
+
+	const serialize = (name: string) => JSON.stringify(makeEnvelope(sim.snapshot(), sim.view(), name, clock()));
+	const defaultName = (slot: SaveSlotId) => (slot === "auto" ? "Autosave" : `Slot ${slot.replace("slot", "")}`);
+
+	function autosave() {
+		if (!state.settings.autosave) return;
+		let json: string;
+		try {
+			json = serialize("Autosave"); // synchronous: captures the state as of this tick
+		} catch (err) {
+			console.warn("autosave failed:", err);
+			patchStatus({ error: `Autosave failed: ${errText(err)}` });
+			return;
+		}
+		// The write is async and never blocks the frame; failures surface in saveStatus.
+		enqueue(() => backend.put("auto", json)).then(
+			() => patchStatus({ lastSavedAt: clock() }),
+			(err) => {
+				console.warn("autosave write failed:", err);
+				patchStatus({ error: `Autosave failed: ${errText(err)}` });
+			},
+		);
+	}
+
+	/** One-time move of the pre-M1 localStorage autosave into slot "auto". */
+	async function migrateLegacyAutosave() {
+		let legacy: string | null = null;
+		try {
+			legacy = storage?.getItem(LEGACY_AUTOSAVE_KEY) ?? null;
+		} catch {
+			return;
+		}
+		if (legacy === null) return;
+		try {
+			const existing = await enqueue(() => backend.get("auto"));
+			if (existing === null || readEnvelope(existing) === null) {
+				const { sim: old } = decodeSave(content, legacy);
+				const json = JSON.stringify(makeEnvelope(old.snapshot(), old.view(), "Autosave", clock()));
+				await enqueue(() => backend.put("auto", json));
+			}
+			storage?.removeItem(LEGACY_AUTOSAVE_KEY);
+		} catch (err) {
+			// Leave the old key in place: it is the only copy.
+			console.warn("legacy autosave not migrated:", err);
+		}
+	}
+
 	const store: GameStoreInternals = {
+		behind: false,
 		get: () => state,
 		subscribe(cb) {
 			subs.add(cb);
@@ -80,24 +219,71 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		setMuted(muted) {
 			store.setSettings({ muted });
 		},
-		// Placeholders until agent-platform implements settings persistence and save slots (M1-T3).
 		setSettings(p) {
-			const settings = { ...state.settings, ...p };
-			audio?.setMuted(settings.muted);
+			const settings = mergeSettings(state.settings, p);
+			persistSettings(storage, settings);
+			applySettings(settings);
 			patch({ settings, muted: settings.muted });
 		},
 		canBuild: (cmd) => sim.canBuild(cmd),
-		listSaves: async () => [],
-		saveTo: async () => ({ ok: false, reason: "save slots not implemented yet" }),
-		loadFrom: async () => ({ ok: false, reason: "save slots not implemented yet" }),
-		deleteSave: async () => {},
-		save: () => JSON.stringify(sim.snapshot()),
+
+		save: () => serialize("Export"),
 		load(json) {
-			replaceSim(simFromSnapshot(content, JSON.parse(json) as SimSnapshot));
+			const { sim: next } = decodeSave(content, json); // throws before anything is replaced
+			replaceSim(next);
 		},
 		newGame(seed = (Math.random() * 2 ** 31) | 0) {
 			replaceSim(createSim(content, SCENARIO, seed));
 		},
+
+		async listSaves() {
+			const found: SaveSlotInfo[] = [];
+			for (const id of SAVE_SLOTS) {
+				try {
+					const text = await enqueue(() => backend.get(id));
+					const env = text === null ? null : readEnvelope(text);
+					if (env) found.push({ id, name: env.name, savedAt: env.savedAt, day: env.meta.day, cash: env.meta.cash, tier: env.meta.tier });
+				} catch (err) {
+					console.warn(`slot ${id} unreadable:`, err);
+				}
+			}
+			return found.sort((a, b) => b.savedAt - a.savedAt);
+		},
+		saveTo(slot, name) {
+			if (!SAVE_SLOTS.includes(slot)) return Promise.resolve({ ok: false, reason: `Unknown save slot "${String(slot)}"` });
+			let json: string;
+			try {
+				json = serialize(name?.trim().slice(0, NAME_MAX) || defaultName(slot)); // captured now, written later
+			} catch (err) {
+				const reason = `Could not save: ${errText(err)}`;
+				patchStatus({ error: reason });
+				return Promise.resolve({ ok: false, reason });
+			}
+			return tracked(async () => {
+				await enqueue(() => backend.put(slot, json));
+				return { ok: true };
+			}, true);
+		},
+		loadFrom(slot) {
+			return tracked(async () => {
+				const text = await enqueue(() => backend.get(slot));
+				if (text === null) return { ok: false, reason: "That slot is empty" };
+				try {
+					const { sim: next } = decodeSave(content, text);
+					replaceSim(next);
+					return { ok: true };
+				} catch (err) {
+					return { ok: false, reason: errText(err) };
+				}
+			}, false);
+		},
+		async deleteSave(slot) {
+			await tracked(async () => {
+				await enqueue(() => backend.remove(slot));
+				return { ok: true };
+			}, false);
+		},
+
 		advance(n) {
 			const events: SimEvent[] = [];
 			for (let i = 0; i < n; i++) {
@@ -118,26 +304,26 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			notify();
 		},
 		sim: () => sim,
-		loadAutosave() {
+
+		async boot({ fresh = false, seed } = {}) {
+			await migrateLegacyAutosave();
+			if (fresh) {
+				store.newGame(seed);
+				return;
+			}
 			try {
-				const json = localStorage.getItem(AUTOSAVE_KEY);
-				if (!json) return false;
-				store.load(json);
-				return true;
+				const text = await enqueue(() => backend.get("auto"));
+				if (text === null) return;
+				replaceSim(decodeSave(content, text).sim);
 			} catch (err) {
 				console.warn("autosave ignored:", err);
-				return false;
+				store.newGame(seed);
+				patchStatus({ error: `Autosave could not be loaded (${errText(err)}). Started a new game.` });
 			}
 		},
+		idle: () => queue.then(() => undefined),
+		readSlotRaw: (slot) => enqueue(() => backend.get(slot)),
 	};
-
-	function autosave() {
-		try {
-			localStorage.setItem(AUTOSAVE_KEY, store.save());
-		} catch {
-			/* storage may be unavailable (private mode, quota) — autosave is best-effort */
-		}
-	}
 
 	return store;
 }
