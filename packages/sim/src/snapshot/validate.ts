@@ -145,12 +145,11 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	if (width < 1 || floorMax < floorMin) fail("grid dimensions are invalid");
 	const cells = width * (floorMax - floorMin + 1);
 	if (!Number.isSafeInteger(cells) || cells > MAX_CELLS) fail(`grid of ${cells} cells is too large`);
-	const floors = floorMax - floorMin + 1;
 	const idx = (x: number, floor: number): number => (floor - floorMin) * width + x;
 	const inGrid = (x: number, floor: number): boolean => Number.isInteger(x) && Number.isInteger(floor) && x >= 0 && x < width && floor >= floorMin && floor <= floorMax;
 
 	// ── grid layers ──
-	const slab = typed(s, "slab", Uint8Array, cells);
+	typed(s, "slab", Uint8Array, cells);
 	typed(s, "power", Uint8Array, cells);
 	typed(s, "coolant", Uint8Array, cells);
 	const facilityAt = typed(s, "facilityAt", Int32Array, cells);
@@ -158,7 +157,6 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	typed(s, "airTemp", Float32Array, cells);
 	const powerNetOf = typed(s, "powerNetOf", Int32Array, cells);
 	const coolantNetOf = typed(s, "coolantNetOf", Int32Array, cells);
-	void slab;
 	const pCount = s.powerNetCount as number;
 	const cCount = s.coolantNetCount as number;
 	if (pCount < 0 || cCount < 0 || pCount > cells || cCount > cells) fail("net counts are out of range");
@@ -273,13 +271,11 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	history.forEach((d, i) => fields(d, SAMPLE, `history[${i}]`));
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
-	const rng = fields(s.rng, { contracts: "num", reliability: "num" }, "rng");
-	void rng;
+	fields(s.rng, { contracts: "num", reliability: "num" }, "rng");
 	array(s, "pending");
 
 	// Catch-all: any non-finite number anywhere (including float arrays) is corruption.
 	finiteDeep(s, "state");
-	void floors;
 	return s as unknown as SimState;
 }
 

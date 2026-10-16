@@ -25,7 +25,6 @@ function savedJson(ticks = 600): SimSnapshot {
 
 const load = (snap: unknown) => simFromSnapshot(content(), snap as SimSnapshot);
 const clone = <T>(v: T): T => JSON.parse(JSON.stringify(v)) as T;
-const state = (snap: SimSnapshot): Json => snap.state as Json;
 
 function expectInvalid(mutate: (snap: Json) => void, reason: RegExp | string): void {
 	const snap = clone(savedJson(200)) as unknown as Json;
@@ -192,6 +191,22 @@ describe("snapshot validation", () => {
 			}
 			if (t === 700) sim.submit({ type: "demolish", floor: 2, x: 9 });
 			if (t % 40 === 0) {
+				const twin = simFromSnapshot(c, JSON.parse(JSON.stringify(sim.snapshot()))) as SimImpl;
+				expect(twin.hash(), `tick ${t}`).toBe(sim.hash());
+			}
+		}
+	});
+});
+
+describe("snapshot validation on a big busy tower", () => {
+	it("every sampled state of the 60×64 tower is a valid, hash-identical save", async () => {
+		const { towerContent } = await import("./test/tower");
+		const c = towerContent();
+		const sim = newSim(c, "tower", 11);
+		for (let t = 1; t <= 900; t++) {
+			if (t % 150 === 0) sim.submit({ type: "buyParts", count: 15 });
+			for (const e of sim.step()) if (e.type === "contractOffered") sim.submit({ type: "acceptContract", contractId: e.contractId });
+			if (t % 150 === 75) {
 				const twin = simFromSnapshot(c, JSON.parse(JSON.stringify(sim.snapshot()))) as SimImpl;
 				expect(twin.hash(), `tick ${t}`).toBe(sim.hash());
 			}

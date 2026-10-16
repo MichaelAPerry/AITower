@@ -17,16 +17,6 @@ import { cellIdx, inBounds } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { getDef } from "../world/defs";
 
-/** Every tile between xa and xb (inclusive, rounded outward) on `floor` has slab. */
-export function walkable(state: SimState, floor: number, xa: number, xb: number): boolean {
-	const lo = Math.floor(Math.min(xa, xb));
-	const hi = Math.ceil(Math.max(xa, xb));
-	for (let x = lo; x <= hi; x++) {
-		if (!inBounds(state, x, floor) || !state.slab[cellIdx(state, x, floor)]) return false;
-	}
-	return true;
-}
-
 /** `Hop.lift` value for "walk straight to the goal". */
 export const WALK_DIRECT = -1;
 

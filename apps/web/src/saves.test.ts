@@ -230,3 +230,25 @@ describe("boot", () => {
 		expect(store.get().saveStatus.error).toMatch(/Invalid save/);
 	});
 });
+
+describe("decodeSave probe isolation", () => {
+	it("the first-tick probe runs on a throwaway copy, never on the returned game", async () => {
+		const { decodeSave } = await import("./saves");
+		const sim = createSim(content, SCENARIO, 11);
+		// Get jobs, bots and failures moving so the state holds plenty of mutable objects.
+		for (let t = 0; t < 600; t++) {
+			for (const o of sim.view().offers) sim.submit({ type: "acceptContract", contractId: o.id });
+			sim.step();
+		}
+		const text = JSON.stringify(sim.snapshot());
+		const { sim: loaded } = decodeSave(content, text);
+		expect(loaded.hash()).toBe(sim.hash());
+		expect(loaded.view().tick).toBe(sim.view().tick);
+		// And both continue identically.
+		for (let t = 0; t < 200; t++) {
+			sim.step();
+			loaded.step();
+		}
+		expect(loaded.hash()).toBe(sim.hash());
+	});
+});
