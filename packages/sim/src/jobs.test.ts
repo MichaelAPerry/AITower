@@ -35,6 +35,8 @@ const training = (over: Partial<ContractSpec> = {}): ContractSpec => ({
 
 /** Inject an offer and accept it; returns the job id. */
 function acceptSpec(sim: SimImpl, spec: ContractSpec): number {
+	// Power is first solved inside a tick; at tick 0 every rack still reads unpowered and acceptance would refuse.
+	if (sim.state.tick === 0) sim.step();
 	const id = sim.state.nextId.contract++;
 	sim.state.offers.push({ id, spec, expiresAt: sim.state.tick + 1000 });
 	const ev = exec(sim, { type: "acceptContract", contractId: id });
@@ -96,7 +98,7 @@ describe("jobs", () => {
 		const pen0 = sim.state.today.penalties;
 		const rev0 = sim.state.today.revenue;
 		const events = run(sim, 100);
-		// The accept tick counted as tick 1 (racks not yet busy) → one penalty tick.
+		// The accept tick (racks not yet delivering) is not penalised: the service had not started yet.
 		expect(sim.state.today.penalties - pen0).toBeCloseTo(0, 9);
 		expect(sim.state.today.revenue - rev0).toBeCloseTo(99 * 100, 6);
 		const done = events.find((e) => e.type === "jobCompleted");
@@ -104,17 +106,68 @@ describe("jobs", () => {
 		expect(job?.status).toBe("completed");
 	});
 
-	it("datasets need storage racks; jobs that don't fit stall", () => {
+	it("datasets need storage racks; contracts that don't fit are refused, and running jobs stall if storage goes", () => {
 		const sim = newSim(noOffers(), "farm");
 		const a = acceptSpec(sim, training({ work: 1e6, storageTB: 1500 }));
-		const b = acceptSpec(sim, training({ work: 1e6, storageTB: 1000 }));
 		run(sim, 3);
 		const ja = sim.state.jobs.find((j) => j.id === a);
-		const jb = sim.state.jobs.find((j) => j.id === b);
 		expect(ja?.status).toBe("running");
-		expect(jb?.status).toBe("stalled");
-		expect(jb?.rackIds).toHaveLength(0);
 		expect(sim.state.storageUtil).toBeCloseTo(0.75, 9);
+
+		// A second dataset that does not fit is refused up front instead of queueing behind the first.
+		const id = sim.state.nextId.contract++;
+		sim.state.offers.push({ id, spec: training({ work: 1e6, storageTB: 1000 }), expiresAt: sim.state.tick + 1000 });
+		const r = sim.submit({ type: "acceptContract", contractId: id });
+		expect(r.ok).toBe(false);
+
+		// Losing the storage rack stalls the running job and frees its compute.
+		const store = sim.state.facilities.find((f) => f.defId === "rack_storage");
+		if (!store) throw new Error("no storage rack");
+		exec(sim, { type: "setEnabled", facilityId: store.id, enabled: false });
+		run(sim, 2);
+		expect(ja?.status).toBe("stalled");
+		expect(ja?.rackIds).toHaveLength(0);
+	});
+
+	it("refuses contracts the idle racks cannot start, with a reason that names the shortfall", () => {
+		const sim = newSim(noOffers(), "farm");
+		sim.step();
+		const offer = (spec: ContractSpec) => {
+			const id = sim.state.nextId.contract++;
+			sim.state.offers.push({ id, spec, expiresAt: sim.state.tick + 1000 });
+			sim.invalidateProjection(); // the offer was injected straight into state
+			return sim.submit({ type: "acceptContract", contractId: id });
+		};
+		// 4 × 20 PF air racks are idle: 100 PF sustained cannot be served.
+		const big = offer({ ...training(), kind: "inference", work: 100, sustainedPflops: 100 });
+		expect(big).toEqual({ ok: false, reason: "not enough idle compute: needs 100 PF, 80 PF idle" });
+		// Liquid-only work with no liquid racks installed.
+		expect(offer(training({ needsLiquid: true }))).toEqual({ ok: false, reason: "needs liquid-cooled racks (none installed)" });
+		// Training takes every idle rack (≤ 8); after that, further work is refused rather than queued.
+		expect(offer(training({ work: 1e6 })).ok).toBe(true);
+		run(sim, 1);
+		const after = offer({ ...training(), kind: "inference", work: 10, sustainedPflops: 10 });
+		expect(after.ok).toBe(false);
+		if (!after.ok) expect(after.reason).toMatch(/not enough idle compute: needs 10 PF, 0 PF idle/);
+		// canBuild agrees with submit and never queues.
+		const id = sim.state.offers.at(-1)?.id ?? -1;
+		expect(sim.canBuild({ type: "acceptContract", contractId: id })).toEqual(sim.submit({ type: "acceptContract", contractId: id }));
+	});
+
+	it("SLA penalties apply only once an inference service has started and then falls short", () => {
+		const sim = newSim(noOffers(), "farm");
+		const spec: ContractSpec = { ...training(), kind: "inference", work: 20, sustainedPflops: 20, durationTicks: 500, payout: 50_000 };
+		const jobId = acceptSpec(sim, spec);
+		run(sim, 5);
+		const job = sim.state.jobs.find((j) => j.id === jobId);
+		expect(job?.earned).toBeGreaterThan(0);
+		const pen0 = sim.state.today.penalties;
+		for (const id of [...(job?.rackIds ?? [])]) {
+			const f = sim.state.facilities.find((x) => x.id === id);
+			if (f) failRack(sim.state, f, []);
+		}
+		run(sim, 3);
+		expect(sim.state.today.penalties - pen0).toBeGreaterThan(0); // the running service broke its SLA
 	});
 
 	it("training that misses its deadline fails with a penalty", () => {
@@ -147,5 +200,25 @@ describe("contract offers", () => {
 		expect(sim.view().offers.length).toBeLessThanOrEqual(4);
 		const offer = sim.view().offers[0];
 		expect(offer.expiresAt).toBeGreaterThan(sim.state.tick);
+	});
+});
+
+describe("training milestone billing", () => {
+	it("pays 80% progressively at checkpoints and the balance on completion, never more than the payout", () => {
+		const sim = newSim(noOffers(), "farm");
+		sim.step();
+		const id = sim.state.nextId.contract++;
+		// 80 PF × 300 ticks / 60 = 400 PF·h of work; checkpoints every 60 ticks.
+		sim.state.offers.push({ id, spec: training({ work: 400, payout: 100_000, durationTicks: 5000 }), expiresAt: sim.state.tick + 1000 });
+		sim.invalidateProjection();
+		exec(sim, { type: "acceptContract", contractId: id });
+		const rev0 = sim.state.today.revenue;
+		run(sim, 125); // two checkpoints in, job still running
+		const mid = sim.state.today.revenue - rev0;
+		expect(mid).toBeGreaterThan(0);
+		expect(mid).toBeLessThan(80_000);
+		const events = run(sim, 400);
+		expect(events.some((e) => e.type === "jobCompleted")).toBe(true);
+		expect(sim.state.today.revenue - rev0).toBeCloseTo(100_000, 6);
 	});
 });

@@ -1,5 +1,5 @@
 /** Rack ↔ job allocation: release of bad racks (with checkpoint rollback), storage gating, auto-scheduler. */
-import type { ContentDB } from "@aitower/content";
+import type { ContentDB, ContractSpec } from "@aitower/content";
 import type { SimEvent } from "../api";
 import { MIN_POWERED_SATISFACTION, TRAINING_MAX_RACKS } from "../core/constants";
 import { findById } from "../core/grid";
@@ -120,4 +120,77 @@ export function installedPflops(state: SimState, content: ContentDB): number {
 		if (isComputeRack(d) && f.enabled && !f.failed) p += d.rack?.pflops ?? 0;
 	}
 	return p;
+}
+
+/**
+ * Can this offer start right now? Plays out the same greedy claims as `allocateRacks` for every active job first
+ * (a running training job keeps absorbing free racks up to its cap), then checks what is left, plus free storage.
+ * Pure: never changes state. Used to refuse contracts that would only sit in a queue accruing penalties.
+ */
+export function acceptCheck(state: SimState, content: ContentDB, spec: ContractSpec): { ok: true } | { ok: false; reason: string } {
+	const free = state.facilities.filter((f) => isFreeRack(content, f));
+	const claimed = new Set<number>();
+	const claim = (needLiquid: boolean, enough: (have: number, count: number) => boolean, have0: number, count0: number) => {
+		let have = have0;
+		let count = count0;
+		for (const r of free) {
+			if (enough(have, count)) break;
+			if (claimed.has(r.id)) continue;
+			const d = getDef(content, r.defId);
+			if (needLiquid && d.rack?.cooling === "air") continue;
+			claimed.add(r.id);
+			have += d.rack?.pflops ?? 0;
+			count++;
+		}
+		return have;
+	};
+	for (const job of state.jobs) {
+		if (!isActive(job)) continue;
+		if (job.spec.kind === "inference") {
+			let have = 0;
+			for (const id of job.rackIds) have += pflopsOf(state, content, id);
+			const need = sustainedPflops(job);
+			claim(job.spec.needsLiquid, (h) => h >= need, have, 0);
+		} else claim(job.spec.needsLiquid, (_h, n) => n >= TRAINING_MAX_RACKS, 0, job.rackIds.length);
+	}
+
+	let idlePflops = 0;
+	let idleRacks = 0;
+	let anyCompatible = false;
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (isComputeRack(d) && !(spec.needsLiquid && d.rack?.cooling === "air")) anyCompatible = true;
+	}
+	for (const r of free) {
+		if (claimed.has(r.id)) continue;
+		const d = getDef(content, r.defId);
+		if (spec.needsLiquid && d.rack?.cooling === "air") continue;
+		idlePflops += d.rack?.pflops ?? 0;
+		idleRacks++;
+	}
+	const pf = (n: number) => `${Math.round(n * 10) / 10} PF`;
+	if (spec.needsLiquid && !anyCompatible) return { ok: false, reason: "needs liquid-cooled racks (none installed)" };
+	if (spec.kind === "inference") {
+		const need = spec.sustainedPflops ?? spec.work;
+		if (idlePflops + 1e-9 < need) return { ok: false, reason: `not enough idle compute: needs ${pf(need)}, ${pf(idlePflops)} idle` };
+	} else if (idleRacks === 0) {
+		let busy = 0;
+		let offline = 0;
+		for (const f of state.facilities) {
+			const d = getDef(content, f.defId);
+			if (!isComputeRack(d) || (spec.needsLiquid && d.rack?.cooling === "air")) continue;
+			if (f.jobId >= 0 || claimed.has(f.id)) busy++;
+			else if (!isFreeRack(content, f)) offline++;
+		}
+		const parts = [busy ? `${busy} busy with current jobs` : "", offline ? `${offline} offline (unpowered, failed, tripped or uncooled)` : ""].filter(Boolean);
+		return { ok: false, reason: `no idle racks${parts.length ? `: ${parts.join(", ")}` : ""}` };
+	}
+
+	if (spec.storageTB > 0) {
+		let used = 0;
+		for (const job of state.jobs) if (isActive(job)) used += job.spec.storageTB;
+		const freeTB = storageCapacityTB(state, content) - used;
+		if (spec.storageTB > freeTB) return { ok: false, reason: `not enough free storage: needs ${spec.storageTB} TB, ${Math.max(0, Math.round(freeTB))} TB free` };
+	}
+	return { ok: true };
 }

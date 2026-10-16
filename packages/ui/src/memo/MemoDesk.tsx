@@ -13,7 +13,7 @@ type SetUi = (patch: Partial<UiState>) => void;
 
 const CATEGORY: Record<string, string> = { ministry: "MINISTRY", environmental: "WEATHER BUREAU", operational: "OPERATIONS", client: "CLIENT LIAISON", horror: "CLASSIFIED" };
 
-/** Stamp a memo: the sim queues the command until the next tick, so the memo is hidden at once and filed when the clock runs. */
+/** Stamp a memo. The memo is hidden at once; the store applies the answer immediately (or on the next tick while running). */
 function answer(store: GameStore, ui: UiState, setUi: SetUi, memo: MemoView, choiceId: string): void {
 	const r = store.dispatch({ type: "resolveMemo", memoId: memo.id, choiceId });
 	if (!r.ok) {
@@ -21,7 +21,6 @@ function answer(store: GameStore, ui: UiState, setUi: SetUi, memo: MemoView, cho
 		return;
 	}
 	setUi({ stamped: [...ui.stamped, memo.id] });
-	if (store.get().speed === 0) pushNotice({ text: "Stamp applied. The Ministry files it as soon as the clock runs.", severity: "info", key: "memo-paused" });
 }
 
 export function MemoCard({ memo, tick, onAnswer, onAside }: { memo: MemoView; tick: number; onAnswer: (choiceId: string) => void; onAside?: () => void }) {

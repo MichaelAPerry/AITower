@@ -14,6 +14,7 @@ import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { MemoDrawer, MemoPop, ModifierChips } from "./memo/MemoDesk";
 import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
+import { Objective } from "./objective/Objective";
 import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -118,6 +119,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<MemoPop store={store} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
+				{!titleOpen && !over && <Objective {...props} />}
 				{!titleOpen && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
 			</div>
 			<div className="ui-right">

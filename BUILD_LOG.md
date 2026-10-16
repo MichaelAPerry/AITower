@@ -15,6 +15,7 @@
 | 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
 | 2026-10-16 | M1 | Foundations: contracts, then T1 sim, T2 ui, T3 platform, T4 render, T5 CI (see `tasks/m1/`) | ✅ |
 | 2026-10-16 | M2a | Ministry memos, standing, game over, economy retune, title screen, tutorial rework, music v1 (see `tasks/m2/`) | ✅ |
+| 2026-10-16 | fix | Playtest fixes: deploys unblocked, money trap removed, CURRENT ORDERS, short tutorial, paused commands apply at once | ✅ |
 
 ## Sub-agent assignments
 | Task | Agent | Scope | Status | Tests |
@@ -89,3 +90,19 @@ All four agents hit an API usage limit once and were resumed from their saved wo
   - the clock stays paused while reading, and ✕ CLOSE resumes it
   - a real heatwave memo arrives and is answered
   - standing stays in range
+
+## Playtest fixes (owner: "title never shows, tutorial thick as mud, money only goes down")
+- **The live site was stale.** Pages deploys from the M1 and M2 merges had failed on a wall-clock perf assert (2.1 ms vs 2 ms on a shared runner), so the owner played the pre-M1 build.
+  - Fix: CI timing budgets get 3× slack.
+  - New rule: after every merge, verify the deploy run **and** that the live bundle contains the new code.
+- **Money trap.** You could accept contracts your racks could not serve, and queued inference was charged SLA penalties from acceptance. In a sim of an accept-everything player, penalties were $200–500k a day against $0 revenue.
+  - Acceptance now requires the job to start on idle racks and free storage (`acceptCheck` mirrors `allocateRacks`), with plain reasons.
+  - SLA penalties apply only after a service has started.
+- **No income for days.** Training paid only on completion. It now bills 80% at checkpoints and the rest on completion.
+- **Paused dead end.** Commands queued while paused never applied, so the tutorial waited forever after ACCEPT.
+  - New contract method `Sim.flush()` applies queued commands at once. It is equivalent to the next tick's command stage and hash-identical, which is tested. The store uses it while the game is paused.
+- **CURRENT ORDERS:** an always-visible strip with the next step (accept a fitting offer, buy parts, answer an urgent memo, build toward the next clearance) and today's income against costs.
+- **Contracts table:** each offer shows "Fits your idle racks" or "Can't start: <reason>", and ACCEPT is disabled when an offer can't start.
+- **Bottom-panel tabs:** clicking the open tab no longer collapses the panel.
+- **Tutorial:** 15 memos (about 670 words) cut to 9 of at most 40 words each, enforced by a test. It points at CURRENT ORDERS, and the memo avoids covering the strip.
+- **Verified in the real build:** a new-player journey (title, induction, accept the highlighted offer, the job starts, the steps advance, money rises over two days with zero penalties). e2e now follows the same path.

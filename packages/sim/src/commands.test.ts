@@ -229,3 +229,24 @@ describe("malformed input is rejected, never thrown", () => {
 		expect(sim.canPlace(null as unknown as string, Number.NaN, undefined as unknown as number).ok).toBe(false);
 	});
 });
+
+describe("flush (apply queued commands while paused)", () => {
+	it("is identical to letting the next step apply them", async () => {
+		const { loadContent } = await import("@aitower/content");
+		const { createSim } = await import("./sim");
+		const content = loadContent();
+		const a = createSim(content, "starter", 9);
+		const b = createSim(content, "starter", 9);
+		for (const s of [a, b]) s.step();
+		const cmd = { type: "place", defId: "rack_air_gpu", floor: 1, x: 18 } as const;
+		expect(a.submit(cmd).ok).toBe(true);
+		expect(b.submit(cmd).ok).toBe(true);
+		const ev = a.flush();
+		expect(ev.some((e) => e.type === "built")).toBe(true);
+		expect(a.view().facilities.length).toBe(b.view().facilities.length + 1); // visible at once
+		expect(a.flush()).toEqual([]); // nothing left queued
+		a.step();
+		b.step();
+		expect(a.hash()).toBe(b.hash());
+	});
+});

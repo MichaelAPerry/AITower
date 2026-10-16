@@ -104,6 +104,15 @@ export class SimImpl implements Sim {
 		}
 	}
 
+	flush(): SimEvent[] {
+		if (this.state.pending.length === 0) return [];
+		this.projected = null;
+		const events: SimEvent[] = [];
+		// Exactly stage 1 of step(): nothing runs before it, so applying it now is identical to applying it next tick.
+		applyCommands({ state: this.state, content: this.content, events, scratch: this.scratch });
+		return events;
+	}
+
 	step(): SimEvent[] {
 		this.projected = null;
 		const events: SimEvent[] = [];

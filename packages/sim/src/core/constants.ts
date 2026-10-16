@@ -68,3 +68,6 @@ export const FINISHED_JOB_RETENTION_TICKS = 1440;
 
 /** Numerical tolerance for float comparisons. */
 export const EPS = 1e-9;
+
+/** Share of a training/finetune payout billed progressively at checkpoints; the rest is paid on completion. */
+export const TRAINING_PROGRESS_PAY_SHARE = 0.8;

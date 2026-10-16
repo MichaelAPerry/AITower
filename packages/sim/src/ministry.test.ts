@@ -525,6 +525,8 @@ const training = (over: Partial<ContractSpec> = {}): ContractSpec => ({
 });
 
 function accept(sim: SimImpl, spec: ContractSpec): number {
+	// Power is first solved inside a tick; at tick 0 every rack still reads unpowered and acceptance would refuse.
+	if (sim.state.tick === 0) sim.step();
 	const id = sim.state.nextId.contract++;
 	sim.state.offers.push({ id, spec, expiresAt: sim.state.tick + 100_000 });
 	const e = exec(sim, { type: "acceptContract", contractId: id }).find((x) => x.type === "jobStarted");

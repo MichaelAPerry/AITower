@@ -4,7 +4,7 @@ import type { Job } from "../core/state";
 import { spend } from "../economy/ledger";
 import { getDef } from "../world/defs";
 import { addBot, chargerSpot, findChargerWithSpace } from "../world/entities";
-import { releaseJobRacks } from "../compute/allocation";
+import { acceptCheck, releaseJobRacks } from "../compute/allocation";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
 export function planSetEnabled(ctx: PlanCtx, facilityId: number, enabled: boolean): Plan {
@@ -19,6 +19,8 @@ export function planAcceptContract(ctx: PlanCtx, contractId: number): Plan {
 	const s = ctx.state;
 	const offer = findById(s.offers, contractId);
 	if (!offer) return reject("no such offer");
+	const fits = acceptCheck(s, ctx.content, offer.spec);
+	if (!fits.ok) return reject(fits.reason);
 	return accept(0, (events) => {
 		s.offers = s.offers.filter((o) => o.id !== contractId);
 		const spec = offer.spec;
