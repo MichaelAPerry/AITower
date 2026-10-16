@@ -2,21 +2,12 @@
  * Tick stage 3: per power net — genset control, supply vs demand, satisfaction, dispatch
  * (grid ▸ gensets ▸ UPS discharge), UPS charging from surplus, energy cost.
  */
-import type { FacilityDef } from "@aitower/content";
-import type { TickCtx } from "../core/context";
+import type { PowerBucket, TickCtx } from "../core/context";
 import { EPS, GENSET_STOP_SURPLUS_TICKS, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR } from "../core/constants";
 import { type Facility, GensetMode, type PowerNet } from "../core/state";
 import { energyPriceAt } from "../core/time";
 import { getDef, isComputeRack, needsPower } from "../world/defs";
 import { facilityDemandKw } from "./demand";
-
-interface NetBucket {
-	loads: Facility[];
-	liftKw: number;
-	grids: Facility[];
-	gensets: Facility[];
-	upses: Facility[];
-}
 
 /** Share of requested power a load actually gets at satisfaction `sat`. */
 export const powerFactor = (sat: number): number => (sat >= MIN_POWERED_SATISFACTION ? sat : 0);
@@ -26,13 +17,21 @@ const isUsableSource = (f: Facility): boolean => f.enabled;
 export function powerSolve(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	const prevNets = state.powerNets;
-	const buckets: NetBucket[] = [];
-	for (let n = 0; n < state.powerNetCount; n++) buckets.push({ loads: [], liftKw: 0, grids: [], gensets: [], upses: [] });
+	const pool = ctx.scratch.power;
+	const buckets = pool.buckets;
+	const netCount = state.powerNetCount;
+	while (buckets.length < netCount) buckets.push({ loads: [], liftKw: 0, grids: [], gensets: [], upses: [] });
+	for (let n = 0; n < netCount; n++) {
+		const b = buckets[n];
+		b.loads.length = 0;
+		b.grids.length = 0;
+		b.gensets.length = 0;
+		b.upses.length = 0;
+		b.liftKw = 0;
+	}
 
-	const defs = new Map<Facility, FacilityDef>();
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
-		defs.set(f, d);
 		f.busy = isComputeRack(d) && f.jobId >= 0 && f.enabled && !f.failed && !f.tripped;
 		f.demandKw = facilityDemandKw(state, content, f);
 		if (f.powerNet < 0) continue;
@@ -50,12 +49,12 @@ export function powerSolve(ctx: TickCtx): void {
 	let energyCost = 0;
 	const nets: PowerNet[] = [];
 
-	for (let n = 0; n < buckets.length; n++) {
-		const b = buckets[n];
+	for (let n = 0; n < netCount; n++) {
+		const b: PowerBucket = buckets[n];
 		let demand = b.liftKw;
 		for (const f of b.loads) demand += f.demandKw;
 
-		const cap = (f: Facility): number => defs.get(f)?.power?.capacityKw ?? 0;
+		const cap = (f: Facility): number => getDef(content, f.defId).power?.capacityKw ?? 0;
 		let gridCap = 0;
 		for (const g of b.grids) if (isUsableSource(g)) gridCap += cap(g);
 
@@ -70,7 +69,7 @@ export function powerSolve(ctx: TickCtx): void {
 			}
 			if (g.gensetMode === GensetMode.Off && committed < demand - EPS) {
 				g.gensetMode = GensetMode.Starting;
-				g.gensetTimer = defs.get(g)?.power?.startDelayTicks ?? 0;
+				g.gensetTimer = getDef(content, g.defId).power?.startDelayTicks ?? 0;
 				g.surplusTicks = 0;
 				committed += cap(g);
 			}
@@ -93,7 +92,7 @@ export function powerSolve(ctx: TickCtx): void {
 		let upsAvail = 0;
 		let storageCap = 0;
 		for (const u of b.upses) {
-			storageCap += defs.get(u)?.power?.storageKwh ?? 0;
+			storageCap += getDef(content, u.defId).power?.storageKwh ?? 0;
 			if (isUsableSource(u)) upsAvail += Math.min(cap(u), u.storedKwh * TICKS_PER_HOUR);
 		}
 
@@ -114,11 +113,14 @@ export function powerSolve(ctx: TickCtx): void {
 		const gridKw = Math.min(gridCap, rest);
 		rest -= gridKw;
 		let gensetKw = 0;
-		const gensetOut = new Map<Facility, number>();
-		for (const g of b.gensets) {
+		const gensetOut = pool.gensetOut;
+		gensetOut.length = b.gensets.length;
+		for (let gi = 0; gi < b.gensets.length; gi++) {
+			const g = b.gensets[gi];
+			gensetOut[gi] = 0;
 			if (g.gensetMode !== GensetMode.Running) continue;
 			const out = Math.min(cap(g), rest);
-			gensetOut.set(g, out);
+			gensetOut[gi] = out;
 			gensetKw += out;
 			rest -= out;
 		}
@@ -139,7 +141,7 @@ export function powerSolve(ctx: TickCtx): void {
 		let gridCharge = 0;
 		for (const u of b.upses) {
 			if (discharged || !isUsableSource(u)) continue;
-			const d = defs.get(u)?.power;
+			const d = getDef(content, u.defId).power;
 			const eff = d?.efficiency ?? 1;
 			const room = (d?.storageKwh ?? 0) - u.storedKwh;
 			if (room <= EPS || eff <= 0) continue;
@@ -148,12 +150,13 @@ export function powerSolve(ctx: TickCtx): void {
 			gridSpare -= fromGrid;
 			input -= fromGrid;
 			let fromGenset = 0;
-			for (const g of b.gensets) {
+			for (let gi = 0; gi < b.gensets.length; gi++) {
+				const g = b.gensets[gi];
 				if (input <= EPS) break;
 				if (g.gensetMode !== GensetMode.Running) continue;
-				const used = gensetOut.get(g) ?? 0;
+				const used = gensetOut[gi];
 				const extra = Math.min(cap(g) - used, input);
-				gensetOut.set(g, used + extra);
+				gensetOut[gi] = used + extra;
 				fromGenset += extra;
 				input -= extra;
 			}
@@ -166,7 +169,10 @@ export function powerSolve(ctx: TickCtx): void {
 		gridTotal += gridImport;
 		gensetTotal += gensetKw;
 		energyCost += (gridImport / TICKS_PER_HOUR) * price;
-		for (const [g, out] of gensetOut) energyCost += (out / TICKS_PER_HOUR) * (defs.get(g)?.power?.costPerKwh ?? 0);
+		for (let gi = 0; gi < b.gensets.length; gi++) {
+			const g = b.gensets[gi];
+			if (g.gensetMode === GensetMode.Running) energyCost += (gensetOut[gi] / TICKS_PER_HOUR) * (getDef(content, g.defId).power?.costPerKwh ?? 0);
+		}
 
 		let storedAfter = 0;
 		for (const u of b.upses) storedAfter += u.storedKwh;
@@ -188,7 +194,7 @@ export function powerSolve(ctx: TickCtx): void {
 	// Facilities off-net, or not needing power.
 	let itKw = 0;
 	for (const f of state.facilities) {
-		const d = defs.get(f) as FacilityDef;
+		const d = getDef(content, f.defId);
 		if (f.powerNet < 0) {
 			if (needsPower(d)) {
 				f.sat = 0;

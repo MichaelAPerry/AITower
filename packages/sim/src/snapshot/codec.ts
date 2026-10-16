@@ -35,12 +35,18 @@ export function decode(value: unknown): unknown {
 	if (value === null || typeof value !== "object") return value;
 	if (Array.isArray(value)) return value.map(decode);
 	const obj = value as Record<string, unknown>;
-	if (typeof obj.$ta === "string" && Array.isArray(obj.v)) {
-		const ctor = CTORS[obj.$ta as TypedArrayName];
-		if (!ctor) throw new Error(`snapshot: unknown typed array '${obj.$ta}'`);
-		return new ctor(obj.v as number[]);
+	if (typeof obj.$ta === "string") {
+		if (!Object.hasOwn(CTORS, obj.$ta)) throw new Error(`unknown typed array '${obj.$ta}'`);
+		const v = obj.v;
+		if (!Array.isArray(v)) throw new Error(`typed array '${obj.$ta}' has no data`);
+		// JSON turns NaN / Infinity into null; typed arrays would silently coerce those (and strings) to 0.
+		for (let i = 0; i < v.length; i++) if (typeof v[i] !== "number" || !Number.isFinite(v[i])) throw new Error(`typed array '${obj.$ta}' has a non-numeric entry at ${i}`);
+		return new CTORS[obj.$ta as TypedArrayName](v as number[]);
 	}
 	const out: Record<string, unknown> = {};
-	for (const [k, v] of Object.entries(obj)) out[k] = decode(v);
+	for (const [k, v] of Object.entries(obj)) {
+		if (k === "__proto__") throw new Error("forbidden key '__proto__'");
+		out[k] = decode(v);
+	}
 	return out;
 }

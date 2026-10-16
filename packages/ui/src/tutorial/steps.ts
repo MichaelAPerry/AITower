@@ -185,7 +185,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		body: [
 			"Your standing orders: reach Clearance 2 (120 PFLOPS installed, 95% uptime) to unlock liquid cooling.",
 			"F2 still needs an air handler before you fill it with cabinets. Watch PUE, keep parts stocked, and file your contracts promptly.",
-			"You can reopen this induction from the INDUCTION button in the top bar.",
+			"Press Esc (or MENU in the top bar) for saves, settings and controls. RESTART INDUCTION there reopens this memo.",
 		],
 		target: ".ui-tier",
 	},

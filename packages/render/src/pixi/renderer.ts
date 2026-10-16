@@ -1,6 +1,6 @@
 /** Pixi v8 implementation of the `Renderer` contract. */
 import type { ContentDB } from "@aitower/content";
-import type { CellPointerEvent, Ghost, OverlayMode, Renderer, Selection } from "@aitower/shared";
+import type { CellPointerEvent, Ghost, OverlayMode, Renderer, RenderOptions, Selection } from "@aitower/shared";
 import type { CellRef, SimView } from "@aitower/sim";
 import { Application, Container, Graphics, Sprite, Texture, TextureSource, TilingSprite } from "pixi.js";
 import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
@@ -17,6 +17,7 @@ import { Lifts, liftKey } from "./lifts";
 import { GhostLayer, drawSelection, selectionRect } from "./markers";
 import { Overlays } from "./overlays";
 import { Pneumatics } from "./pneumatics";
+import { Presentation } from "../presentation";
 import { T } from "../palette";
 import { Structure } from "./structure";
 
@@ -141,6 +142,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const botInterp = new Interpolator(3);
 	const liftInterp = new Interpolator(3);
 	const t0 = performance.now();
+	const pres = new Presentation();
 
 	const input = new Input(canvas, {
 		camera: () => cam,
@@ -222,6 +224,13 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	};
 
 	const renderer: Renderer = {
+		setOptions(o: RenderOptions) {
+			// Cheap when nothing changed: only changed keys invalidate anything.
+			const changed = pres.set(o);
+			if (changed.length === 0) return;
+			if (changed.includes("colorBlind")) overlayDirty = true;
+			if (changed.includes("crtEffects")) screenFx.root.visible = pres.options.crtEffects;
+		},
 		draw(view, alpha) {
 			const now = performance.now();
 			const dt = Math.min((now - lastFrame) / 1000, 0.25);
@@ -240,7 +249,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			const o = offset(cam);
 			world.position.set(o.x, o.y);
 			world.scale.set(cam.zoom);
-			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t);
+			const opt = pres.options;
+			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt);
 
 			// Per-frame layers (facility details culled to the viewport).
 			const vx0 = -o.x / cam.zoom - 4 * TILE;
@@ -255,22 +265,22 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				const fx = f.x * TILE;
 				const ft = floorTop(view, f.floor);
 				if (fx > vx1 || fx + def.width * TILE < vx0 || ft > vy1 || ft < vy0) continue;
-				drawLive(facLive, def, f, fx, ft, t, facLabels);
+				drawLive(facLive, def, f, fx, ft, t, opt, facLabels);
 			}
 			facLabels.end();
-			pneumatics.draw(t);
+			pneumatics.draw(t, opt);
 			const liftPos = (id: number): number | null => liftInterp.get(id, a)?.y ?? null;
-			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t);
+			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t, opt);
 			const botPos = (b: { id: number; x: number; floor: number }) => botInterp.get(b.id, a) ?? { x: b.x, y: b.floor };
 			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t);
-			effects.update(view, bots.torches, dt, t);
+			effects.update(view, bots.torches, dt, t, opt);
 
 			overlays.root.visible = overlay !== "normal";
 			if (overlayDirty) {
 				overlayDirty = false;
-				overlays.rebuild(view, overlay);
+				overlays.rebuild(view, overlay, opt);
 			}
-			overlays.animate(view, overlay, t);
+			overlays.animate(view, overlay, t, opt);
 			ghost.update(view, t);
 			const rect = selectionRect(
 				view,

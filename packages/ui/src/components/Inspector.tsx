@@ -60,7 +60,7 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 			<div className="ui-section ui-crt crt-amber">
 				<div className="ui-section-title">
 					Power net {pn ? `#${pn.id}` : ""}
-					{pn && <Pill tone={pn.satisfaction >= 1 ? "good" : pn.satisfaction > 0 ? "warn" : "error"}>{fmtPct(pn.satisfaction, 0)}</Pill>}
+					{pn && <Pill status tone={pn.satisfaction >= 1 ? "good" : pn.satisfaction > 0 ? "warn" : "error"}>{fmtPct(pn.satisfaction, 0)}</Pill>}
 				</div>
 				{pn ? (
 					<>
@@ -83,7 +83,7 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 				<div className="ui-section ui-crt crt-amber">
 					<div className="ui-section-title">
 						Coolant net {cn ? `#${cn.id}` : ""}
-						{cn && <Pill tone={cn.loadKw <= cn.capacityKw ? "good" : "error"}>{fmtPct(cn.capacityKw ? cn.loadKw / cn.capacityKw : 1, 0)}</Pill>}
+						{cn && <Pill status tone={cn.loadKw <= cn.capacityKw ? "good" : "error"}>{fmtPct(cn.capacityKw ? cn.loadKw / cn.capacityKw : 1, 0)}</Pill>}
 					</div>
 					{cn ? (
 						<>
@@ -122,7 +122,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 						{f.width > 1 ? `–${f.x + f.width - 1}` : ""}
 					</span>
 				</div>
-				<Pill tone={statusTone[f.status]}>{statusLabel[f.status]}</Pill>
+				<Pill status tone={statusTone[f.status]}>{statusLabel[f.status]}</Pill>
 			</div>
 			<TempBar tempC={f.tempC} thermal={thermal} label={def?.rack ? "Die temp" : "Air temp"} />
 			<div className="ui-section ui-crt crt-amber">

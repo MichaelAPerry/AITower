@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createState } from "./world/init";
 import { SimImpl } from "./sim";
 import { makeContent, scenario } from "./test/fixture";
+import { TOWER_FLOORS, TOWER_WIDTH, towerContent } from "./test/tower";
 
 /** 48 × 13 lot (floors −2..10), 60 air racks on floors 1..6, CRAHs, 4 bots, one lift. */
 function bigScenario() {
@@ -42,5 +43,38 @@ describe("perf", () => {
 		const ms = Number(process.hrtime.bigint() - t0) / 1e6;
 		console.log(`perf: 1440 ticks in ${ms.toFixed(1)} ms (${((ms / 1440) * 1000).toFixed(1)} µs/tick)`);
 		expect(ms).toBeLessThan(1500);
+	});
+
+	it("60 floors × 64 wide, ~1,000 racks, 30 bots, chained lifts: mean step() < 2 ms", () => {
+		const content = towerContent();
+		const sim = new SimImpl(content, createState(content, "tower", 7));
+		const racks = sim.state.facilities.filter((f) => f.defId === "rack_air_gpu").length;
+		expect(racks).toBeGreaterThanOrEqual(1000);
+		expect(sim.state.bots).toHaveLength(30);
+		expect(sim.state.width * (sim.state.floorMax - sim.state.floorMin + 1)).toBe(TOWER_WIDTH * TOWER_FLOORS);
+		let repaired = 0;
+		let maxOrders = 0;
+		const tick = (): void => {
+			if (sim.state.tick % 150 === 0) sim.submit({ type: "buyParts", count: 15 }); // the player keeps the depots stocked
+			for (const e of sim.step()) {
+				if (e.type === "contractOffered") sim.submit({ type: "acceptContract", contractId: e.contractId });
+				else if (e.type === "repaired") repaired++;
+			}
+			maxOrders = Math.max(maxOrders, sim.state.workOrders.length);
+		};
+		for (let i = 0; i < 150; i++) tick(); // warm-up (JIT, first failures)
+		// Mean over several windows; the best window is asserted so a noisy neighbour cannot fail the build,
+		// while a genuine regression (every window slow) still does.
+		const windows: number[] = [];
+		for (let w = 0; w < 4; w++) {
+			const t0 = process.hrtime.bigint();
+			for (let i = 0; i < 250; i++) tick();
+			windows.push(Number(process.hrtime.bigint() - t0) / 1e6 / 250);
+		}
+		const best = Math.min(...windows);
+		console.log(`perf tower: mean step() per window [${windows.map((x) => x.toFixed(3)).join(", ")}] ms, best ${best.toFixed(3)} ms; repaired ${repaired}, peak work orders ${maxOrders}`);
+		expect(repaired).toBeGreaterThan(20); // bots really worked (incl. across the lift transfer)
+		expect(maxOrders).toBeGreaterThan(50); // the queue was deep, i.e. the claim path was exercised
+		expect(best).toBeLessThan(2);
 	});
 });

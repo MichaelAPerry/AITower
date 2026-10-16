@@ -16,7 +16,7 @@ export function failRack(state: SimState, f: Facility, events: SimEvent[]): void
 	if (f.failed) return;
 	f.failed = true;
 	f.health = 0;
-	state.workOrders.push({ id: state.nextId.workOrder++, facilityId: f.id, botId: -1, createdAt: state.tick });
+	state.workOrders.push({ id: state.nextId.workOrder++, facilityId: f.id, botId: -1, createdAt: state.tick, attempts: 0, retryAt: 0, retryRev: 0 });
 	events.push({ type: "componentFailed", facilityId: f.id });
 }
 

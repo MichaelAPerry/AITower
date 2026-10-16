@@ -6,20 +6,21 @@
  * `FacilityDef.color` / `accent`; everything else from the palette tokens.
  */
 import type { FacilityDef } from "@aitower/content";
+import type { RenderOptions } from "@aitower/shared";
 import type { FacilityView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
-import { hex } from "../color";
+import { alertColor, hex } from "../color";
 import { FAC_BOTTOM, FAC_TOP, PIPE_H, PIPE_RETURN_Y, PIPE_SUPPLY_Y, TILE, TUBE_Y } from "../constants";
-import { BRASS, COPPER, CRATE, GLASS, type Mat, PAPER, PHOSPHOR, SCREEN, STEEL, T, VERDI, dk, lt, mat, mix } from "../palette";
-import { badgeFor, flicker, isActive, LED, ledCue } from "../status";
+import { BRASS, COPPER, CRATE, GLASS, type Mat, PAPER, SCREEN, STEEL, T, VERDI, dk, lt, mat, mix } from "../palette";
+import { CRT_GLYPHS, badgeFor, crtGlyph, flicker, isActive, ledCue, phosphorFor } from "../status";
 import {
 	bevel,
-	box,
 	cornerBracket,
 	crt,
 	dialFace,
 	disc,
 	fanBlades,
+	glyph3,
 	hash,
 	lamp,
 	meterNeedle,
@@ -114,23 +115,32 @@ export function drawBody(g: Graphics, def: FacilityDef, x: number, top: number):
 	const y = top + FAC_TOP;
 	switch (def.kind) {
 		case "rack":
-			return rackBody(g, def, x, y, top, c, a);
+			rackBody(g, def, x, y, top, c, a);
+			return;
 		case "crah":
-			return crahBody(g, x, y, W, c, a);
+			crahBody(g, x, y, W, c, a);
+			return;
 		case "chiller":
-			return chillerBody(g, x, y, top, W, c, a);
+			chillerBody(g, x, y, top, W, c, a);
+			return;
 		case "cdu":
-			return cduBody(g, x, y, top, W, c, a);
+			cduBody(g, x, y, top, W, c, a);
+			return;
 		case "grid_tie":
-			return gridTieBody(g, x, y, top, W, c, a);
+			gridTieBody(g, x, y, top, W, c, a);
+			return;
 		case "genset":
-			return gensetBody(g, x, y, top, W, c, a);
+			gensetBody(g, x, y, top, W, c, a);
+			return;
 		case "ups":
-			return upsBody(g, x, y, W, c, a);
+			upsBody(g, x, y, W, c, a);
+			return;
 		case "depot":
-			return depotBody(g, x, y, W, c, a);
+			depotBody(g, x, y, W, c, a);
+			return;
 		case "charger":
-			return chargerBody(g, x, y, W, c, a);
+			chargerBody(g, x, y, W, c, a);
+			return;
 	}
 }
 
@@ -464,27 +474,33 @@ function chargerBody(g: Graphics, x: number, y: number, W: number, c: number, a:
 // ─── Live details ──────────────────────────────────────────────────────
 
 /** Time-varying details drawn on top of the cached body. `t` is seconds. */
-export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, top: number, t: number, labels?: TextPool): void {
+/**
+ * Per-frame live details. `opt.reducedMotion` stops spin/flutter/flap and holds blinking lamps lit
+ * (status lamps show a steady colour); `opt.colorBlind` switches status colours to blue/orange.
+ */
+export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, top: number, t: number, opt: RenderOptions, labels?: TextPool): void {
 	const y = top + FAC_TOP;
 	const W = def.width * TILE;
 	const active = isActive(f.status, f.enabled);
 	const c = hex(def.color);
+	const calm = opt.reducedMotion;
 	switch (def.kind) {
 		case "rack":
-			rackLive(g, def, f, x, y, t);
+			rackLive(g, def, f, x, y, t, opt);
 			break;
 		case "crah": {
 			const run = active;
+			const spin = run && !calm;
 			const cap = def.cooling?.capacityKw ?? 150;
 			const fx = x + 16;
 			const fy = y + 6;
-			fanBlades(g, fx + 1, fy + 1, 11, run ? t * (7 + 12 * Math.min(1, f.heatKw / cap)) : 0.4, lt(T.steel, 0.35));
+			fanBlades(g, fx + 1, fy + 1, 11, spin ? t * (7 + 12 * Math.min(1, f.heatKw / cap)) : 0.4, lt(T.steel, 0.35));
 			// Cage wires over the blades.
 			for (const k of [3, 6, 9]) px(g, fx + k, fy + 1, 1, 11, STEEL.mid, 0.55);
 			px(g, fx + 1, fy + 6, 11, 1, STEEL.mid, 0.55);
 			// Ribbon streamer fluttering from the cage.
 			for (let k = 0; k < 6; k++) {
-				const wv = run ? Math.round(Math.sin(t * 13 - k * 1.1) * (k * 0.35)) : 0;
+				const wv = spin ? Math.round(Math.sin(t * 13 - k * 1.1) * (k * 0.35)) : 0;
 				const rx = run ? fx + 12 + k : fx + 12;
 				const ry = run ? fy + 8 + wv : fy + 8 + k;
 				px(g, rx, ry, 1, 1, k % 2 ? T.red : lt(T.red, 0.3));
@@ -524,12 +540,12 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 					px(g, hx + 7, hy - 10, 3, 3, T.ink);
 				}
 			}
-			lamp(g, bx + 18, y + 6, on ? T.amber : T.red, on || Math.floor(t * 2) % 2 === 0);
+			lamp(g, bx + 18, y + 6, on ? T.amber : alertColor(opt.colorBlind), on || calm || Math.floor(t * 2) % 2 === 0);
 			break;
 		}
 		case "genset": {
 			const run = f.running === true;
-			const ang = run ? t * 11 : 0.3;
+			const ang = run && !calm ? t * 11 : 0.3;
 			// Flywheel spokes.
 			for (let k = 0; k < 4; k++) {
 				const aa = ang + (k * Math.PI) / 2;
@@ -537,12 +553,12 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 			}
 			px(g, x + 8, y + 18, 2, 2, BRASS.mid);
 			// Rain cap flapping on the stack.
-			const flap = run ? Math.floor(t * 9) % 2 : 0;
+			const flap = run && !calm ? Math.floor(t * 9) % 2 : 0;
 			px(g, x + 40, top + 4 - flap, 5, 1, STEEL.hi);
 			px(g, x + 40, top + 5 - flap, 5, 1, STEEL.lo);
 			lamp(g, x + 54, y + 3, run ? T.green : T.red, true, 0.3);
-			lamp(g, x + 57, y + 3, T.amber, run && Math.floor(t * 4) % 2 === 0, 0.3);
-			if (run) {
+			lamp(g, x + 57, y + 3, T.amber, run && (calm || Math.floor(t * 4) % 2 === 0), 0.3);
+			if (run && !calm) {
 				// Engine shake on the heads.
 				const j = Math.floor(t * 18) % 2;
 				px(g, x + 14 + j, y + 8, 31, 1, lt(c, 0.25), 0.5);
@@ -552,8 +568,8 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 		case "ups": {
 			const ch = Math.max(0, Math.min(1, f.charge ?? 0));
 			meterNeedle(g, x + 35, y + 2, 9, 7, ch);
-			lamp(g, x + 43, y + 11, ch > 0.2 ? T.green : T.red, active && (ch > 0.2 || Math.floor(t * 2) % 2 === 0), 0.25);
-			if (active) {
+			lamp(g, x + 43, y + 11, ch > 0.2 ? T.green : alertColor(opt.colorBlind), active && (ch > 0.2 || calm || Math.floor(t * 2) % 2 === 0), 0.25);
+			if (active && !calm) {
 				// Bubbles rising in the acid.
 				for (let k = 0; k < 10; k++) {
 					const ph = (t * 0.6 + hash(f.id, k)) % 1;
@@ -581,7 +597,7 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 		}
 		case "charger": {
 			// Pantograph arm: scissor from the pivot to a contact shoe over the pad.
-			const ext = active ? 0.75 + 0.25 * Math.sin(t * 1.5) : 0;
+			const ext = active ? (calm ? 0.75 : 0.75 + 0.25 * Math.sin(t * 1.5)) : 0;
 			const px0 = x + W - 10;
 			const py0 = y + 7;
 			const sx = x + 8;
@@ -596,12 +612,12 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 			}
 			px(g, sx - 3, sy + 3, 7, 2, BRASS.line);
 			px(g, sx - 2, sy + 3, 5, 1, BRASS.hi);
-			lamp(g, x + W - 6, y + 25, T.green, active && Math.sin(t * 4) > -0.3, 0.3);
+			lamp(g, x + W - 6, y + 25, T.green, active && (calm || Math.sin(t * 4) > -0.3), 0.3);
 			break;
 		}
 	}
 	if (!f.enabled || f.status === "unpowered" || f.status === "disabled") px(g, x + 1, y, W - 2, H, T.ink, 0.45);
-	drawBadge(g, f, x + W / 2, top + 1, t);
+	drawBadge(g, f, x + W / 2, top + 1, t, calm);
 }
 
 function crate(g: Graphics, x: number, y: number): void {
@@ -611,28 +627,26 @@ function crate(g: Graphics, x: number, y: number): void {
 	px(g, x + 1, y + 2, 2, 1, CRATE.stamp);
 }
 
-function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: number, t: number): void {
+function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: number, t: number, opt: RenderOptions): void {
 	const v = rackVariant(def);
-	const cue = ledCue(f.status, f.enabled);
+	const calm = opt.reducedMotion;
+	const cue = ledCue(f.status, f.enabled, opt.colorBlind);
 	const slot = Math.floor(t * 6);
-	const blinkOn = Math.floor(t * 2.5) % 2 === 0;
-	// CRT phosphor by status.
-	const ph =
-		cue.mode === "off"
-			? null
-			: f.status === "idle"
-				? PHOSPHOR.dim
-				: cue.color === LED.red
-					? PHOSPHOR.red
-					: cue.color === LED.amber
-						? PHOSPHOR.amber
-						: PHOSPHOR.green;
-	const speed = f.status === "ok" ? 5 : f.status === "idle" ? 0.6 : cue.color === LED.red ? 0 : 2.5;
-	const level = f.status === "idle" ? 0.25 : cue.color === LED.red ? (blinkOn ? 1 : 0.15) : 0.35 + 0.65 * Math.max(0.2, f.clock);
+	// Blinking lamps hold lit under reduced motion (steady colour, no blink).
+	const blinkOn = calm || Math.floor(t * 2.5) % 2 === 0;
+	// CRT phosphor by health tone; the CRT flicker stops under reduced motion or with CRT effects off.
+	const ph = cue.mode === "off" ? null : phosphorFor(cue.tone, opt.colorBlind);
+	const steady = calm || !opt.crtEffects;
+	const glyph = cue.mode === "off" ? null : crtGlyph(f.status);
+	const speed = f.status === "ok" ? 5 : f.status === "idle" ? 0.6 : cue.tone === "fault" ? 0 : 2.5;
+	const level = f.status === "idle" ? 0.25 : cue.tone === "fault" ? (blinkOn ? 1 : 0.15) : 0.35 + 0.65 * Math.max(0.2, f.clock);
 	const active = isActive(f.status, f.enabled);
 	for (let i = 0; i < def.width; i++) {
 		const cx = x + i * TILE + 1;
-		if (ph) crt(g, cx + CRT_X, y + CRT_Y, CRT_W, CRT_H, ph[0], ph[1], level, t, f.id * 8 + i, speed, true);
+		if (ph) {
+			crt(g, cx + CRT_X, y + CRT_Y, CRT_W, CRT_H, ph[0], ph[1], level, t, f.id * 8 + i, speed, true, steady);
+			if (glyph) glyph3(g, cx + CRT_X + 2, y + CRT_Y + 1, CRT_GLYPHS[glyph], ph[0]);
+		}
 		const lampOn = (l: number): boolean =>
 			cue.mode === "off"
 				? false
@@ -640,11 +654,13 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 					? blinkOn
 					: cue.mode === "steady"
 						? l === 0
-						: flicker(f.id, i * 8 + l, slot + l) < 0.3 + f.clock * 0.55;
+						: calm || flicker(f.id, i * 8 + l, slot + l) < 0.3 + f.clock * 0.55;
 		if (v === "storage") {
-			[14, 18, 22].forEach((ly, l) => lamp(g, cx + 11, y + ly, l === 2 && cue.mode === "activity" ? T.amber : cue.color, lampOn(l)));
+			[14, 18, 22].forEach((ly, l) => {
+				lamp(g, cx + 11, y + ly, l === 2 && cue.mode === "activity" ? cue.accent : cue.color, lampOn(l));
+			});
 			// Spinning tape reels.
-			const ang = active ? t * (f.status === "idle" ? 1.2 : 5) * (i ? 1 : -0.8) : 0;
+			const ang = active && !calm ? t * (f.status === "idle" ? 1.2 : 5) * (i ? 1 : -0.8) : 0;
 			for (const [k, ry] of [y + 14, y + 20].entries()) {
 				// Flange rim, wound tape (more on the supply reel), hub with a rotating notch.
 				ring(g, cx + 3, ry, 6, STEEL.mid, TAPE);
@@ -656,9 +672,11 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 			}
 			px(g, cx + 9, y + 16, 1, 8, TAPE);
 		} else {
-			[3, 6, 9].forEach((lx, l) => lamp(g, cx + lx, y + LAMP_Y, cue.color, lampOn(l)));
+			[3, 6, 9].forEach((lx, l) => {
+				lamp(g, cx + lx, y + LAMP_Y, cue.color, lampOn(l));
+			});
 			// Punch card feeding through the slot.
-			const feed = active && f.jobId !== null ? Math.floor(t * 1.5 + i) % 3 : 0;
+			const feed = active && !calm && f.jobId !== null ? Math.floor(t * 1.5 + i) % 3 : 0;
 			const kx = cx + 4 + ((f.id + i) % 3);
 			px(g, kx, y + 24 + feed, 3, 2 - Math.min(1, feed), PAPER.mid);
 			px(g, kx + 1, y + 24 + feed, 1, 1, dk(T.paper, 0.5));
@@ -667,10 +685,10 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 }
 
 /** Status tag (wrench / crossed drop / crossed bolt) hanging above the facility. */
-function drawBadge(g: Graphics, f: FacilityView, cx: number, y: number, t: number): void {
+function drawBadge(g: Graphics, f: FacilityView, cx: number, y: number, t: number, calm: boolean): void {
 	const b = badgeFor(f.status);
 	if (!b) return;
-	if (Math.floor(t * 2) % 3 === 2) return; // gentle blink
+	if (!calm && Math.floor(t * 2) % 3 === 2) return; // gentle blink, held steady under reduced motion
 	const x = Math.round(cx) - 5;
 	const face = b === "wrench" ? T.amber : b === "noCoolant" ? T.verdigris : T.paper;
 	px(g, x - 1, y - 1, 11, 9, T.ink, 0.85);

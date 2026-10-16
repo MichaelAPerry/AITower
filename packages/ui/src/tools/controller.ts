@@ -67,15 +67,15 @@ export function createToolController(store: GameStore, content: ContentDB, opts:
 			}
 			case "slab": {
 				const s = drag ? slabSpan(drag.start.floor, drag.start.x, cell.x) : slabSpan(cell.floor, cell.x, cell.x);
-				return slabGhost(view, content, s.cells);
+				return slabGhost(store, view, content, s.floor, s.x0, s.x1, s.cells);
 			}
 			case "conduit": {
 				const cells = drag ? lPath(drag.start, cell) : [cell];
-				return conduitGhost(view, content, tool.layer, cells);
+				return conduitGhost(store, view, content, tool.layer, cells);
 			}
 			case "lift": {
 				const s = drag ? liftSpan(drag.start.x, drag.start.floor, cell.floor) : liftSpan(cell.x, cell.floor, cell.floor);
-				return liftGhost(view, content, s.cells, !!drag);
+				return liftGhost(store, content, s, !!drag);
 			}
 			case "demolish": {
 				const cells = drag ? [...drag.cells.values()] : [cell];
@@ -193,39 +193,43 @@ export function createToolController(store: GameStore, content: ContentDB, opts:
 export const toolKey = (t: Tool): string =>
 	t.kind === "place" ? `place:${t.defId}` : t.kind === "conduit" ? `conduit:${t.layer}` : t.kind;
 
-// ─── Ghost validity (client-side estimate; the sim has the final word) ─────
+// ─── Ghost validity: store.canBuild decides; the cost label is display-only ─────
 
-function slabGhost(view: SimView, content: ContentDB, cells: CellRef[]): Ghost {
+/** "no slab below at x=3" → "No slab below at x=3". */
+const sentence = (r: string): string => (r ? r[0].toUpperCase() + r.slice(1) : r);
+
+function slabGhost(store: GameStore, view: SimView, content: ContentDB, floor: number, x0: number, x1: number, cells: CellRef[]): Ghost {
+	const r = store.canBuild({ type: "buildSlab", floor, x0, x1 });
+	if (!r.ok) return { cells, valid: false, label: sentence(r.reason) };
 	let cost = 0;
-	let missingBelow = false;
-	for (const c of cells) {
-		if (view.slab[cellIndex(view, c.x, c.floor)]) continue;
-		cost += c.floor < 0 ? content.structure.basementSlabPerTile : content.structure.slabPerTile;
-		if (c.floor > 0 && !(inBounds(view, c.x, c.floor - 1) && view.slab[cellIndex(view, c.x, c.floor - 1)])) missingBelow = true;
-	}
-	if (missingBelow) return { cells, valid: false, label: "Needs a slab below" };
-	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
-	return { cells, valid: true, label: cost ? `Slab ×${cells.length} · ${fmtMoney(cost)}` : "Already built" };
+	for (const c of cells) if (!view.slab[cellIndex(view, c.x, c.floor)]) cost += c.floor < 0 ? content.structure.basementSlabPerTile : content.structure.slabPerTile;
+	return { cells, valid: true, label: `Slab ×${cells.length} · ${fmtMoney(cost)}` };
 }
 
-function conduitGhost(view: SimView, content: ContentDB, layer: ConduitLayer, cells: CellRef[]): Ghost {
+function conduitGhost(store: GameStore, view: SimView, content: ContentDB, layer: ConduitLayer, cells: CellRef[]): Ghost {
+	const r = store.canBuild({ type: "buildConduit", layer, cells });
+	if (!r.ok) return { cells, valid: false, label: sentence(r.reason) };
 	const grid = layer === "power" ? view.power : view.coolant;
 	const per = layer === "power" ? content.structure.powerConduitPerTile : content.structure.coolantConduitPerTile;
 	let n = 0;
 	for (const c of cells) if (!grid[cellIndex(view, c.x, c.floor)]) n++;
-	const cost = n * per;
 	const name = layer === "power" ? "Power conduit" : "Coolant conduit";
-	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
-	return { cells, valid: true, label: `${name} ×${cells.length} · ${fmtMoney(cost)}` };
+	return { cells, valid: true, label: `${name} ×${cells.length} · ${fmtMoney(n * per)}` };
 }
 
-function liftGhost(view: SimView, content: ContentDB, cells: CellRef[], dragging: boolean): Ghost {
-	const s = content.structure;
-	const cost = s.liftBase + s.liftPerFloor * cells.length;
-	if (cells.some((c) => !view.slab[cellIndex(view, c.x, c.floor)])) return { cells, valid: false, label: "Every floor needs slab here" };
-	if (view.lifts.some((l) => l.x === cells[0].x && cells.some((c) => c.floor >= l.floorMin && c.floor <= l.floorMax)))
-		return { cells, valid: false, label: "A lift is already here" };
-	if (cost > view.cash) return { cells, valid: false, label: `Not enough cash (${fmtMoney(cost)})` };
-	if (!dragging) return { cells, valid: true, label: "Drag up/down to size the shaft" };
-	return { cells, valid: cells.length > 1, label: `Lift ${cells.length} floors · ${fmtMoney(cost)}` };
+function liftGhost(store: GameStore, content: ContentDB, span: ReturnType<typeof liftSpan>, dragging: boolean): Ghost {
+	const st = content.structure;
+	const { x, floorMin, floorMax, cells } = span;
+	if (!dragging) {
+		// A lift spans two or more floors: this column is a valid start if the cell can pair with the floor above or below.
+		const f = floorMin;
+		const up = store.canBuild({ type: "buildLift", x, floorMin: f, floorMax: f + 1 });
+		if (up.ok) return { cells, valid: true, label: "Drag up/down to size the shaft" };
+		const down = store.canBuild({ type: "buildLift", x, floorMin: f - 1, floorMax: f });
+		if (down.ok) return { cells, valid: true, label: "Drag up/down to size the shaft" };
+		return { cells, valid: false, label: sentence(up.reason) };
+	}
+	const r = store.canBuild({ type: "buildLift", x, floorMin, floorMax });
+	if (!r.ok) return { cells, valid: false, label: sentence(r.reason) };
+	return { cells, valid: true, label: `Lift ${cells.length} floors · ${fmtMoney(st.liftBase + st.liftPerFloor * cells.length)}` };
 }

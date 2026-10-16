@@ -3,6 +3,7 @@
  * house with a dial floor indicator) and cars (per frame, interpolated: open
  * brass cage, accordion gate when the doors are closed, dial needle, winding drum).
  */
+import type { RenderOptions } from "@aitower/shared";
 import type { LiftView, SimView } from "@aitower/sim";
 import { Graphics } from "pixi.js";
 import { floorTop } from "../camera";
@@ -72,7 +73,7 @@ export class Lifts {
 	}
 
 	/** `pos(id)` returns the interpolated carFloor. */
-	drawCars(view: SimView, pos: (l: LiftView) => number, t: number): void {
+	drawCars(view: SimView, pos: (l: LiftView) => number, t: number, opt: RenderOptions): void {
 		const g = this.cars;
 		g.clear();
 		for (const l of view.lifts) {
@@ -138,7 +139,7 @@ export class Lifts {
 				}
 			}
 			// Direction lamp on the crosshead.
-			const on = moving && Math.floor(t * 3) % 2 === 0;
+			const on = moving && (opt.reducedMotion || Math.floor(t * 3) % 2 === 0);
 			lamp(g, x + 11, y - 5, l.dir === 0 ? T.amberDim : T.amber, on || l.dir === 0, 0.3);
 		}
 	}

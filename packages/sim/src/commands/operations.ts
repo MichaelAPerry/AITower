@@ -98,7 +98,7 @@ export function stockParts(ctx: PlanCtx, count: number): number {
 
 export function planBuyBot(ctx: PlanCtx, defId: string): Plan {
 	const s = ctx.state;
-	const def = ctx.content.bots[defId];
+	const def = Object.hasOwn(ctx.content.bots, defId) ? ctx.content.bots[defId] : undefined;
 	if (!def) return reject(`unknown bot '${defId}'`);
 	const chargerId = findChargerWithSpace(s, ctx.content);
 	if (chargerId < 0) return reject("no charger with a free dock");

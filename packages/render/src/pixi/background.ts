@@ -5,6 +5,7 @@
  * and a giant "MINISTRY" sign. Silhouettes are shared `GraphicsContext`s tinted
  * per time of day; everything is drawn in whole zoom-pixels.
  */
+import type { RenderOptions } from "@aitower/shared";
 import { Container, Graphics, GraphicsContext, Texture, TilingSprite } from "pixi.js";
 import { lerpColor, skyColors } from "../color";
 import { T, dk, lt, mix } from "../palette";
@@ -206,8 +207,14 @@ export class Background {
 	 * @param horizonY screen y of the ground line
 	 * @param originX screen x of world origin (for parallax)
 	 */
-	update(vw: number, vh: number, zoom: number, horizonY: number, originX: number, minuteOfDay: number, t: number): void {
+	/**
+	 * `opt.reducedMotion` freezes the drift, twinkle and searchlight sweep (time held at 0) and holds the
+	 * sign and aircraft lamps lit instead of blinking.
+	 */
+	update(vw: number, vh: number, zoom: number, horizonY: number, originX: number, minuteOfDay: number, t: number, opt: RenderOptions): void {
 		const sky = skyColors(minuteOfDay);
+		const calm = opt.reducedMotion;
+		const tt = calm ? 0 : t;
 		const hz = Math.round(horizonY);
 		const z = zoom;
 
@@ -252,7 +259,7 @@ export class Background {
 			for (const st of this.starList) {
 				const sy = Math.floor(st.y * (hz - 60 * z));
 				if (sy < 0) continue;
-				const tw = 0.5 + 0.5 * Math.sin(t * 1.3 + st.phase);
+				const tw = 0.5 + 0.5 * Math.sin(tt * 1.3 + st.phase);
 				px(s, Math.floor(st.x * vw), sy, z, z, T.paper, (sky.night - 0.3) * 0.6 * tw);
 			}
 		}
@@ -266,7 +273,7 @@ export class Background {
 				this.clouds.addChild(c);
 				this.cloudTiles.push(c);
 			}
-			const par = Math.round(originX * 0.12 + t * 3 * z);
+			const par = Math.round(originX * 0.12 + tt * 3 * z);
 			const st = (((par % tw) + tw) % tw) - tw;
 			const tint = sky.night > 0.5 ? mix(sky.haze, T.sodium, 0.15) : lt(sky.haze, 0.25);
 			for (let i = 0; i < this.cloudTiles.length; i++) {
@@ -282,7 +289,7 @@ export class Background {
 		// Layers.
 		this.placeLayer(this.far, vw, z, hz, originX, sky.cityFar, dk(sky.cityFar, 0.25), sky.night * 0.5, mix(sky.cityFar, sky.horizon, 0.3), sky.night);
 		const signLit = sky.night > 0.25;
-		const signCol = signLit ? (Math.floor(t * 1.7) % 9 === 0 ? dk(T.sodium, 0.3) : T.sodium) : mix(sky.city, T.paper, 0.35);
+		const signCol = signLit ? (!calm && Math.floor(t * 1.7) % 9 === 0 ? dk(T.sodium, 0.3) : T.sodium) : mix(sky.city, T.paper, 0.35);
 		this.placeLayer(this.near, vw, z, hz, originX, sky.city, dk(sky.city, 0.3), sky.night * 0.85, signCol, sky.night);
 
 		// Searchlights sweeping from the near skyline.
@@ -300,7 +307,7 @@ export class Background {
 					const ox = start + i * tileW + bm.x * z;
 					const oy = hz + bm.y * z;
 					if (ox < -len || ox > vw + len) continue;
-					const a = -Math.PI / 2 + Math.sin(t * 0.25 + bm.phase) * 0.55;
+					const a = -Math.PI / 2 + Math.sin(tt * 0.25 + bm.phase) * 0.55;
 					const spread = 0.045;
 					b.poly([ox, oy, ox + Math.cos(a - spread) * len, oy + Math.sin(a - spread) * len, ox + Math.cos(a + spread) * len, oy + Math.sin(a + spread) * len]).fill({
 						color: lt(T.sodium, 0.55),
@@ -313,7 +320,7 @@ export class Background {
 		for (let i = 0; i < this.near.tiles.length; i++) {
 			if (!this.near.tiles[i].body.visible) continue;
 			for (const lp of this.near.ctx.lamps) {
-				if (Math.sin(t * 2.2 + lp.phase) < 0.1) continue;
+				if (!calm && Math.sin(t * 2.2 + lp.phase) < 0.1) continue;
 				const lx = start + i * tileW + lp.x * z;
 				const ly = hz + lp.y * z;
 				if (lx < -4 * z || lx > vw + 4 * z) continue;

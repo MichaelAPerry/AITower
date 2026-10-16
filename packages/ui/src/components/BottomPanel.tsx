@@ -118,7 +118,7 @@ function Jobs({ store, state, ui }: PanelProps) {
 							<td className="strong">{j.clientName}</td>
 							<td>{j.kind}</td>
 							<td>
-								<Pill tone={jobTone[j.status]}>{j.status}</Pill>
+								<Pill status tone={jobTone[j.status]}>{j.status}</Pill>
 							</td>
 							<td className="wide">
 								<div className="ui-progress">
@@ -233,6 +233,8 @@ function Alerts({ store, content, state }: PanelProps) {
 				const min = (e.tick + 360) % 1440;
 				const t = `D${day} ${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 				return (
+					// biome-ignore lint/suspicious/noArrayIndexKey: log rows can share a tick; the tick-index pair is the stable key
+					// biome-ignore lint/a11y/useKeyWithClickEvents: click-to-focus on a log row is a mouse convenience; the log text is the accessible content
 					<li key={`${e.tick}-${i}`} className={`sev-${d.severity} ${cell ? "is-click" : ""}`} onClick={cell ? () => store.focus(cell) : undefined} title={cell ? "Click to focus" : undefined}>
 						<span className="ui-alert-dot" />
 						<span className="ui-alert-time">{t}</span>

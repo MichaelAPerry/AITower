@@ -26,6 +26,7 @@ export function planSlab(ctx: PlanCtx, floor: number, x0: number, x1: number): P
 	if (cells.length === 0) return reject("already built");
 	return accept(cells.length * slabCost(ctx, floor), (events) => {
 		for (const i of cells) s.slab[i] = 1;
+		s.topologyRev++;
 		events.push({ type: "built", what: "slab", floor, x: x0 });
 	});
 }
@@ -35,31 +36,42 @@ export function planConduit(ctx: PlanCtx, layer: ConduitLayer, cells: CellRef[])
 	if (layer !== "power" && layer !== "coolant") return reject("unknown conduit layer");
 	if (!Array.isArray(cells) || cells.length === 0) return reject("no cells");
 	const grid = layer === "power" ? s.power : s.coolant;
-	const added = new Set<number>();
-	const order: number[] = [];
-	const hasConduit = (x: number, floor: number): boolean => {
-		if (!inBounds(s, x, floor)) return false;
-		const i = cellIdx(s, x, floor);
-		return grid[i] === 1 || added.has(i);
-	};
+	// Unique new cells in input order.
+	const wanted = new Set<number>();
+	const order: CellRef[] = [];
 	for (const c of cells) {
-		if (!inBounds(s, c.x, c.floor)) return reject("conduit cell out of bounds");
+		if (!c || !inBounds(s, c.x, c.floor)) return reject("conduit cell out of bounds");
 		const i = cellIdx(s, c.x, c.floor);
-		if (grid[i] || added.has(i)) continue;
-		const supported =
-			s.slab[i] === 1 ||
-			hasConduit(c.x - 1, c.floor) ||
-			hasConduit(c.x + 1, c.floor) ||
-			hasConduit(c.x, c.floor - 1) ||
-			hasConduit(c.x, c.floor + 1);
-		if (!supported) return reject(`conduit at (${c.x}, ${c.floor}) needs slab or an adjacent conduit`);
-		added.add(i);
-		order.push(i);
+		if (grid[i] || wanted.has(i)) continue;
+		wanted.add(i);
+		order.push(c);
 	}
 	if (order.length === 0) return reject("already built");
+	// Support is resolved to a fixed point, so the result does not depend on the order of `cells`: a cell
+	// without slab is accepted once a neighbour (existing, or accepted earlier in this pass) carries conduit.
+	const placed = new Set<number>();
+	const has = (x: number, floor: number): boolean => {
+		if (!inBounds(s, x, floor)) return false;
+		const i = cellIdx(s, x, floor);
+		return grid[i] === 1 || placed.has(i);
+	};
+	let pending = order;
+	for (;;) {
+		const next: CellRef[] = [];
+		for (const c of pending) {
+			const i = cellIdx(s, c.x, c.floor);
+			const supported =
+				s.slab[i] === 1 || has(c.x - 1, c.floor) || has(c.x + 1, c.floor) || has(c.x, c.floor - 1) || has(c.x, c.floor + 1);
+			if (supported) placed.add(i);
+			else next.push(c);
+		}
+		if (next.length === 0) break;
+		if (next.length === pending.length) return reject(`conduit at (${next[0].x}, ${next[0].floor}) needs slab or an adjacent conduit`);
+		pending = next;
+	}
 	const first = cells[0];
-	return accept(order.length * conduitCost(ctx, layer), (events) => {
-		for (const i of order) grid[i] = 1;
+	return accept(placed.size * conduitCost(ctx, layer), (events) => {
+		for (const i of placed) grid[i] = 1;
 		s.netsDirty = true;
 		events.push({ type: "built", what: "conduit", floor: first.floor, x: first.x });
 	});

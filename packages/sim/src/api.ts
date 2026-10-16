@@ -266,8 +266,14 @@ export interface SimSnapshot {
 }
 
 export interface Sim {
-	/** Queue a command; it is validated and applied at the start of the next step(). Returns a pre-validation result. */
+	/**
+	 * Queue a command; it is validated and applied at the start of the next step(). The returned pre-validation
+	 * accounts for commands already queued this tick (e.g. buildSlab then place on that slab, or two purchases that
+	 * together exceed cash). Never throws, even for malformed input.
+	 */
 	submit(cmd: SimCommand): CommandResult;
+	/** Same validation as submit() (including queued commands) without queueing anything. For UI ghosts. Never throws. */
+	canBuild(cmd: SimCommand): CommandResult;
 	/** Advance exactly one tick. Returns events emitted during it. */
 	step(): SimEvent[];
 	/** Cheap read-only view; arrays may be reused between calls, don't mutate. */
@@ -279,6 +285,11 @@ export interface Sim {
 	canPlace(defId: string, floor: number, x: number): CommandResult;
 }
 
+/**
+ * `fromSnapshot` validates the snapshot (version, scenario, array lengths, known def ids, references) and migrates
+ * older versions. On failure it throws an Error whose message starts with "Invalid save:" and never returns a sim
+ * that would later throw in step().
+ */
 export interface SimFactory {
 	create(content: ContentDB, scenarioId: string, seed: number): Sim;
 	fromSnapshot(content: ContentDB, snap: SimSnapshot): Sim;

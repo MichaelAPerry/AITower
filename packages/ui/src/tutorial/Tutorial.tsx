@@ -30,7 +30,7 @@ function writeSaved(s: Saved) {
 	}
 }
 
-/** Global hook so the top bar's INDUCTION button can reopen the tutorial without prop drilling. */
+/** Global hook so the system menu's RESTART INDUCTION button can reopen the tutorial without prop drilling. */
 const listeners = new Set<() => void>();
 export function restartInduction() {
 	writeSaved({ step: 0, done: false });
@@ -77,6 +77,7 @@ export function Tutorial({ store, content, state }: TutorialProps) {
 	const skip = () => update({ step: saved.step, done: true });
 
 	// Enter a step: capture its baseline, run side effects, move the camera.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: run once per step change; state, ctx and store are read at entry and must not re-trigger it
 	useEffect(() => {
 		if (!step || enteredStep.current === saved.step) return;
 		enteredStep.current = saved.step;
@@ -84,7 +85,6 @@ export function Tutorial({ store, content, state }: TutorialProps) {
 		setCompletedAt(null);
 		step.onEnter?.(store);
 		if (step.focus) store.focus(step.focus);
-		// biome-ignore lint/correctness/useExhaustiveDependencies: run once per step change
 	}, [saved.step, step]);
 
 	// Spotlight the step's target element.
@@ -101,11 +101,11 @@ export function Tutorial({ store, content, state }: TutorialProps) {
 		if (satisfied && completedAt === null) setCompletedAt(Date.now());
 	}, [satisfied, completedAt]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: one-shot advance timer keyed on completedAt; `next` is recreated every render and must not restart it
 	useEffect(() => {
 		if (completedAt === null) return;
 		const t = setTimeout(() => next(), ADVANCE_MS);
 		return () => clearTimeout(t);
-		// biome-ignore lint/correctness/useExhaustiveDependencies: next is stable enough for a one-shot timer
 	}, [completedAt]);
 
 	if (!step) return null;

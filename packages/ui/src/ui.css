@@ -49,6 +49,9 @@
 	--f-type: "Special Elite", "Courier New", ui-monospace, monospace;
 	--f-stamp: "Silkscreen", ui-monospace, monospace;
 
+	/* Text size setting: scales the whole HUD (fonts, px sizes, gauges) from one variable. */
+	--hud-scale: 1;
+	zoom: var(--hud-scale);
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
@@ -980,10 +983,9 @@
 	color: var(--ink);
 	text-align: left;
 	display: grid;
-	grid-template-columns: auto minmax(0, 1fr) auto;
-	align-items: center;
+	grid-template-columns: auto minmax(0, 1fr);
+	align-items: start;
 	column-gap: 9px;
-	row-gap: 4px;
 	width: 100%;
 	flex: none;
 	padding: 6px 9px 6px;
@@ -1077,37 +1079,45 @@
 }
 .aitower-hud .ui-item > .ui-swatch,
 .aitower-hud .ui-item > .ui-item-icon {
-	grid-row: 1 / 3;
+	align-self: start;
+	margin-top: 1px;
 }
 .aitower-hud .ui-item-main {
-	display: contents;
+	grid-column: 2;
+	min-width: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
 }
 .aitower-hud .ui-item-name {
-	grid-column: 2 / 4;
 	min-width: 0;
 	font-size: 15px;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
+	line-height: 1.15;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 6px;
+	column-gap: 6px;
+}
+/* Description and price share a wrapping row: the full description is always shown, and the price drops
+   to its own right-aligned line when the card is too narrow for both. */
+.aitower-hud .ui-item-foot {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 2px 8px;
 }
 .aitower-hud .ui-item-sub {
-	grid-column: 2;
+	flex: 1 1 96px;
 	min-width: 0;
 	font-size: 12.5px;
 	line-height: 1.2;
 	color: var(--paper-ink);
-	display: -webkit-box;
-	-webkit-line-clamp: 2;
-	-webkit-box-orient: vertical;
-	overflow: hidden;
 }
 .aitower-hud .ui-item-cost {
-	grid-column: 3;
-	grid-row: 2;
-	align-self: end;
+	flex: none;
+	margin-left: auto;
+	white-space: nowrap;
 	font: 14px/1.15 var(--f-type);
 	color: var(--ink);
 	padding: 0 3px;
@@ -1228,35 +1238,62 @@
 	min-height: 0;
 	pointer-events: none;
 }
+/* Overlay switcher: a compact, foldable strip at the top of the world so it never covers the lowest floors. */
 .aitower-hud .ui-overlay {
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	left: 0;
+	max-width: 100%;
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
-	gap: 12px;
-	padding: 8px 16px 8px 14px;
+	gap: 6px 10px;
+	padding: 6px 10px 6px 8px;
+	z-index: 5;
 }
-.aitower-hud .ui-overlay-title {
-	writing-mode: vertical-rl;
-	transform: rotate(180deg);
-	align-self: center;
-	padding: 5px 3px 5px 2px;
+.aitower-hud .ui-overlay-fold {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 2px 4px;
+	background: none;
+	border: 0;
+	cursor: pointer;
+	color: var(--etch);
+}
+.aitower-hud .ui-overlay-fold:hover {
+	color: var(--paper);
+}
+.aitower-hud .ui-overlay-cur {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	font: 17px/1 var(--f-crt);
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	color: var(--amber);
 }
 .aitower-hud .ui-seg {
 	display: flex;
-	gap: 10px;
+	gap: 6px;
+	padding: 4px;
+	border-radius: 4px;
+	background: var(--housing-lo);
+	box-shadow: inset 0 2px 4px var(--ink);
 }
-.aitower-hud .ui-seg .ui-toggle {
-	gap: 5px;
+.aitower-hud .ui-ov {
+	padding: 6px 8px 5px;
 }
-.aitower-hud .ui-seg .ui-lamp {
-	width: 9px;
-	height: 9px;
+.aitower-hud .ui-ov b {
+	font-weight: 400;
+	color: var(--amber);
+}
+.aitower-hud .ui-ov.is-on b {
+	color: var(--ink);
 }
 .aitower-hud .ui-legend {
 	width: 236px;
-	padding: 7px 10px 3px;
+	padding: 6px 10px 2px;
 }
 .aitower-hud .ui-legend-bar {
 	height: 9px;
@@ -1286,7 +1323,7 @@
 /* Toasts: teletype memo slips */
 .aitower-hud .ui-toasts {
 	position: absolute;
-	top: 2px;
+	top: 54px;
 	left: 50%;
 	transform: translateX(-50%);
 	display: flex;
@@ -1366,7 +1403,7 @@
 }
 .aitower-hud .ui-toolhint {
 	position: absolute;
-	bottom: 102px;
+	bottom: 0;
 	left: 0;
 	padding: 9px 16px;
 	font: 15px/1 var(--f-type);
@@ -1561,7 +1598,7 @@
 	min-width: 0;
 }
 .aitower-hud .ui-bottom.is-open {
-	height: clamp(180px, 31vh, 250px);
+	height: clamp(180px, calc(31vh / var(--hud-scale)), 250px);
 }
 .aitower-hud .ui-bottom-tabs {
 	display: flex;
@@ -1995,7 +2032,8 @@
 	right: 10px;
 	bottom: 10px;
 	width: min(380px, calc(100% - 20px));
-	max-height: calc(100% - 20px);
+	/* Leave the overlay strip at the top of the world visible. */
+	max-height: calc(100% - 56px);
 	overflow-y: auto;
 	pointer-events: auto;
 	background:
@@ -2076,9 +2114,6 @@
 .aitower-hud .tut-later {
 	opacity: 0.75;
 }
-.aitower-hud .ui-induction {
-	align-self: center;
-}
 /* The element the current memo talks about. */
 .aitower-hud .tut-target {
 	outline: 2px solid var(--amber);
@@ -2101,4 +2136,312 @@
 	.aitower-hud .ui-tutorial,
 	.aitower-hud .tut-stamp,
 	.aitower-hud .tut-target { animation: none; }
+}
+
+/* ─── System menu button + save lamp (top bar) ─────────────────────── */
+.aitower-hud .ui-sysbox {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 5px;
+	flex: none;
+}
+.aitower-hud .ui-menu-btn {
+	justify-content: center;
+	padding: 7px 10px 6px;
+}
+.aitower-hud .ui-savelamp {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	white-space: nowrap;
+	color: var(--beige);
+}
+.aitower-hud .ui-savelamp.tone-red {
+	color: var(--red);
+}
+.aitower-hud .ui-savelamp .ui-lamp {
+	width: 8px;
+	height: 8px;
+}
+
+/* ─── "Best on desktop" memo ─────────────────────────────────────────── */
+.aitower-hud .ui-desknotice {
+	position: absolute;
+	left: 50%;
+	top: 86px;
+	transform: translateX(-50%) rotate(-0.6deg);
+	z-index: 40;
+	width: min(360px, calc(100% - 24px));
+	padding: 10px 14px 10px;
+	pointer-events: auto;
+	color: var(--ink);
+	background:
+		radial-gradient(circle at 6px 6px, var(--housing-lo) 0 2px, transparent 2.5px) 0 0 / 100% 100% no-repeat,
+		linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--red) 45%, var(--paper)) 9px 10px, transparent 10px),
+		var(--paper);
+	border-radius: 1px;
+	box-shadow:
+		0 0 0 1px var(--beige),
+		3px 5px 0 var(--shade),
+		0 10px 26px var(--shade);
+}
+.aitower-hud .ui-desknotice .ui-desknotice-stamp {
+	font-size: 12px;
+}
+.aitower-hud .ui-desknotice-check {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin-top: 8px;
+	font: 14px/1.2 var(--f-type);
+	cursor: pointer;
+}
+.aitower-hud .ui-desknotice-check input {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	accent-color: var(--red);
+	cursor: pointer;
+}
+
+/* ─── Settings the HUD honours ──────────────────────────────────────── */
+
+/* reducedMotion: same effect as prefers-reduced-motion, as a root class. */
+.aitower-hud.is-reduced-motion .ui-crt::after,
+.aitower-hud.is-reduced-motion .ui-lamp.is-blink,
+.aitower-hud.is-reduced-motion .ui-toast,
+.aitower-hud.is-reduced-motion .ui-tutorial,
+.aitower-hud.is-reduced-motion .tut-stamp,
+.aitower-hud.is-reduced-motion .tut-target {
+	animation: none;
+}
+.aitower-hud.is-reduced-motion .ui-dial-needle,
+.aitower-hud.is-reduced-motion .ui-toggle-lever,
+.aitower-hud.is-reduced-motion .ui-meter-fill,
+.aitower-hud.is-reduced-motion .ui-item,
+.aitower-hud.is-reduced-motion .ui-btn,
+.aitower-hud.is-reduced-motion .ui-stampbtn,
+.aitower-hud.is-reduced-motion .ui-speed-cap {
+	transition: none;
+}
+
+/* crtEffects off: no scanlines and no flicker on any CRT (the glass highlight stays). */
+.aitower-hud.no-crt .ui-crt::after {
+	background: radial-gradient(ellipse 70% 55% at 28% 12%, color-mix(in srgb, var(--paper) 7%, transparent), transparent 70%);
+	animation: none;
+}
+.aitower-hud.no-crt .ui-crt-table,
+.aitower-hud.no-crt .ui-menu-backdrop {
+	background-image: none;
+}
+.aitower-hud.no-crt .ui-menu-backdrop {
+	background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ink) 50%, transparent), color-mix(in srgb, var(--ink) 88%, transparent));
+}
+
+/* colorBlind: green moves to a blue-cyan so ok/bad never rely on red vs green, and status lamps and
+   tags gain glyphs (✓ ok, ▲ throttled, ✕ tripped or failed, ○ idle). */
+.aitower-hud.is-colorblind {
+	--green: #4fc3ff;
+	--green-dim: #1b5f85;
+}
+.aitower-hud.is-colorblind .ui-lamp:not(.is-plain) {
+	width: 15px;
+	height: 15px;
+	display: inline-grid;
+	place-items: center;
+	font: 700 10px/1 var(--f-crt);
+	color: var(--ink);
+}
+.aitower-hud.is-colorblind .ui-lamp:not(.is-plain)::before {
+	content: "○";
+	color: var(--lamp);
+	font-size: 11px;
+}
+.aitower-hud.is-colorblind .ui-lamp.lamp-green.is-lit::before {
+	content: "✓";
+	color: var(--ink);
+}
+.aitower-hud.is-colorblind .ui-lamp.lamp-red.is-lit::before {
+	content: "✕";
+	color: var(--ink);
+}
+.aitower-hud.is-colorblind .ui-lamp:not(.lamp-green):not(.lamp-red).is-lit::before {
+	content: "▲";
+	color: var(--ink);
+}
+.aitower-hud.is-colorblind .ui-pill.is-status::before {
+	margin-right: 4px;
+	font-family: var(--f-crt);
+	font-size: 12px;
+}
+.aitower-hud.is-colorblind .ui-pill.is-status.tone-good::before {
+	content: "✓";
+}
+.aitower-hud.is-colorblind .ui-pill.is-status.tone-warn::before {
+	content: "▲";
+}
+.aitower-hud.is-colorblind .ui-pill.is-status.tone-error::before {
+	content: "✕";
+}
+.aitower-hud.is-colorblind .ui-pill.is-status.tone-dim::before {
+	content: "○";
+}
+
+/* ─── Density (effective size = viewport / text scale) ──────────────── */
+
+.aitower-hud.is-density-tight,
+.aitower-hud.is-density-cramped {
+	grid-template-columns: 240px minmax(0, 1fr) 282px;
+	gap: 6px;
+	padding: 6px;
+}
+.aitower-hud.is-density-tight .ui-topbar,
+.aitower-hud.is-density-cramped .ui-topbar {
+	gap: 7px;
+	padding: 5px 10px;
+	min-height: 70px;
+}
+.aitower-hud.is-density-tight .ui-topbar .ui-grow,
+.aitower-hud.is-density-cramped .ui-topbar .ui-grow {
+	display: none;
+}
+.aitower-hud.is-density-tight .ui-dial {
+	width: 46px;
+	height: 46px;
+}
+.aitower-hud.is-density-tight .ui-gauge-crt {
+	min-width: 56px;
+}
+.aitower-hud.is-density-tight .ui-cash {
+	min-width: 96px;
+}
+.aitower-hud.is-density-tight .ui-brand,
+.aitower-hud.is-density-tight .ui-hide-narrow,
+.aitower-hud.is-density-cramped .ui-brand,
+.aitower-hud.is-density-cramped .ui-hide-narrow {
+	display: none;
+}
+.aitower-hud.is-density-tight .ui-bottom.is-open {
+	height: clamp(160px, calc(31vh / var(--hud-scale)), 230px);
+}
+
+.aitower-hud.is-density-cramped {
+	grid-template-columns: 196px minmax(0, 1fr) 232px;
+}
+.aitower-hud.is-density-cramped .ui-dial,
+.aitower-hud.is-density-cramped .ui-gauge-sub,
+.aitower-hud.is-density-cramped .ui-env {
+	display: none;
+}
+.aitower-hud.is-density-cramped .ui-gauge-crt {
+	min-width: 0;
+	padding: 3px 6px 2px;
+}
+.aitower-hud.is-density-cramped .ui-gauges {
+	gap: 4px;
+}
+.aitower-hud.is-density-cramped .ui-speed {
+	width: 30px;
+}
+.aitower-hud.is-density-cramped .ui-cash {
+	min-width: 0;
+}
+.aitower-hud.is-density-cramped .ui-statbank {
+	gap: 8px !important;
+}
+.aitower-hud.is-density-cramped .ui-bottom.is-open {
+	height: clamp(120px, calc(34vh / var(--hud-scale)), 180px);
+}
+.aitower-hud.is-density-cramped .ui-toasts {
+	width: min(500px, 92%);
+}
+.aitower-hud.is-density-cramped .ui-tooltip {
+	left: 206px;
+	width: 250px;
+}
+.aitower-hud.is-density-tight .ui-tooltip {
+	left: 250px;
+}
+.aitower-hud .ui-center:has(.ui-tutorial) .ui-toolhint {
+	max-width: calc(100% - 396px);
+	white-space: normal;
+}
+
+/* Cramped (about 850 px effective or narrower, e.g. text size 150% on a 1280 screen). */
+.aitower-hud.is-density-cramped .ui-tier,
+.aitower-hud.is-density-cramped .ui-mute {
+	display: none;
+}
+.aitower-hud.is-density-cramped .ui-topbar {
+	gap: 6px;
+	padding: 4px 8px;
+}
+.aitower-hud.is-density-cramped .ui-clock .ui-big,
+.aitower-hud.is-density-cramped .ui-cash .ui-big {
+	font-size: 24px;
+}
+.aitower-hud.is-density-cramped .ui-big {
+	font-size: 21px;
+}
+.aitower-hud.is-density-cramped .ui-tabs {
+	padding: 6px 6px 0;
+}
+.aitower-hud.is-density-cramped .ui-tab {
+	letter-spacing: 0;
+	padding: 7px 1px 6px;
+	font-size: 7px;
+}
+.aitower-hud.is-density-cramped .ui-formlabel-no {
+	display: none;
+}
+.aitower-hud.is-density-cramped .ui-panel-title {
+	padding: 7px 8px 6px;
+}
+.aitower-hud.is-density-cramped .ui-palette-list {
+	margin: 0 6px;
+	padding: 6px 5px;
+}
+.aitower-hud.is-density-cramped .ui-supplies {
+	padding: 6px 8px 8px;
+}
+.aitower-hud.is-density-cramped .ui-tutorial {
+	width: min(300px, calc(100% - 12px));
+	max-height: calc(100% - 48px);
+	right: 6px;
+	bottom: 6px;
+	padding: 8px 10px 8px;
+}
+.aitower-hud.is-density-cramped .ui-toast {
+	padding: 7px 96px 7px 14px;
+}
+.aitower-hud.is-density-cramped .ui-toast-text {
+	font-size: 13px;
+	line-height: 1.2;
+}
+.aitower-hud.is-density-cramped .ui-toast-stamp {
+	right: 8px;
+	font-size: 11px;
+}
+.aitower-hud.is-density-cramped .ui-overlay {
+	padding: 4px 8px 4px 6px;
+}
+.aitower-hud.is-density-cramped .ui-toasts {
+	top: 44px;
+}
+.aitower-hud.is-density-cramped .ui-supply {
+	gap: 6px;
+}
+.aitower-hud.is-density-cramped .ui-supply .ui-k {
+	font-size: 12px;
+}
+.aitower-hud.is-density-cramped .ui-supply .ui-btn {
+	min-width: 0;
+	padding: 5px 5px 4px;
+}
+.aitower-hud.is-density-cramped .ui-supply .ui-v {
+	min-width: 26px;
 }

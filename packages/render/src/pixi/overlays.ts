@@ -1,10 +1,10 @@
 /** Heat / power / coolant overlays. The base is rebuilt once per tick; shimmer is per frame. */
 import type { ContentDB } from "@aitower/content";
-import type { OverlayMode } from "@aitower/shared";
+import type { OverlayMode, RenderOptions } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { Container, Graphics } from "pixi.js";
 import { floorTop } from "../camera";
-import { heatAlpha, heatColor, loadColor, netColor, rackTempColor, satisfactionColor, shade } from "../color";
+import { alertColor, heatAlpha, heatColor, loadColor, netColor, rackTempColor, satisfactionColor } from "../color";
 import { FAC_BOTTOM, FAC_TOP, FLOOR_H, MARGIN_BOTTOM, MARGIN_TOP, MARGIN_X, TILE } from "../constants";
 import { drawCoolant, drawPower } from "./conduits";
 import { box, px } from "./draw";
@@ -27,12 +27,13 @@ export class Overlays {
 		this.root.addChild(this.base, this.anim);
 	}
 
-	rebuild(view: SimView, mode: OverlayMode): void {
+	/** Rebuilt once per tick (and when the mode or colour-blind option changes). */
+	rebuild(view: SimView, mode: OverlayMode, opt: RenderOptions): void {
 		const g = this.base;
 		g.clear();
-		if (mode === "heat") this.heat(view);
-		else if (mode === "power") this.power(view);
-		else if (mode === "coolant") this.coolant(view);
+		if (mode === "heat") this.heat(view, opt.colorBlind);
+		else if (mode === "power") this.power(view, opt.colorBlind);
+		else if (mode === "coolant") this.coolant(view, opt.colorBlind);
 	}
 
 	private dim(view: SimView, alpha: number): void {
@@ -40,7 +41,7 @@ export class Overlays {
 		px(this.base, -MARGIN_X - 4000, -MARGIN_TOP - 4000, view.width * TILE + 2 * MARGIN_X + 8000, h + MARGIN_TOP + MARGIN_BOTTOM + 8000, DIM, alpha);
 	}
 
-	private heat(view: SimView): void {
+	private heat(view: SimView, cb: boolean): void {
 		const g = this.base;
 		this.dim(view, 0.5);
 		const { width, floorMin, floorMax, airTemp, slab } = view;
@@ -50,21 +51,21 @@ export class Overlays {
 				const i = (f - floorMin) * width + x;
 				const t = airTemp[i];
 				const a = heatAlpha(t) * (slab[i] ? 1 : 0.45);
-				px(g, x * TILE, top, TILE, FLOOR_H, heatColor(t), a);
+				px(g, x * TILE, top, TILE, FLOOR_H, heatColor(t, cb), a);
 			}
 		}
 		for (const fv of view.facilities) {
 			const def = this.content.facilities[fv.defId];
-			if (!def || def.kind !== "rack") continue;
+			if (def?.kind !== "rack") continue;
 			const x = fv.x * TILE;
 			const y = floorTop(view, fv.floor) + FAC_TOP;
-			const c = rackTempColor(fv.tempC);
+			const c = rackTempColor(fv.tempC, cb);
 			px(g, x + 1, y, def.width * TILE - 1, FAC_BOTTOM - FAC_TOP, c, 0.55);
 			box(g, x + 1, y, def.width * TILE - 1, FAC_BOTTOM - FAC_TOP, lt(c, 0.45), 0.9);
 		}
 	}
 
-	private power(view: SimView): void {
+	private power(view: SimView, cb: boolean): void {
 		const g = this.base;
 		this.dim(view, 0.62);
 		const nets = new Map(view.powerNets.map((n) => [n.id, n]));
@@ -77,13 +78,13 @@ export class Overlays {
 			const w = def.width * TILE - 1;
 			const h = FAC_BOTTOM - FAC_TOP;
 			const net = fv.powerNet !== null ? nets.get(fv.powerNet) : undefined;
-			const c = net ? satisfactionColor(net.satisfaction) : T.red;
+			const c = net ? satisfactionColor(net.satisfaction, cb) : alertColor(cb);
 			px(g, x + 1, y, w, h, c, net ? 0.3 : 0.35);
-			box(g, x + 1, y, w, h, fv.powerNet !== null ? powerNet(fv.powerNet) : T.red, 1);
+			box(g, x + 1, y, w, h, fv.powerNet !== null ? powerNet(fv.powerNet) : alertColor(cb), 1);
 		}
 	}
 
-	private coolant(view: SimView): void {
+	private coolant(view: SimView, cb: boolean): void {
 		const g = this.base;
 		this.dim(view, 0.62);
 		const nets = new Map(view.coolantNets.map((n) => [n.id, n]));
@@ -100,17 +101,17 @@ export class Overlays {
 			const w = def.width * TILE - 1;
 			const h = FAC_BOTTOM - FAC_TOP;
 			const net = fv.coolantNet !== null ? nets.get(fv.coolantNet) : undefined;
-			const c = net ? loadColor(net.capacityKw > 0 ? net.loadKw / net.capacityKw : 1) : T.red;
+			const c = net ? loadColor(net.capacityKw > 0 ? net.loadKw / net.capacityKw : 1, cb) : alertColor(cb);
 			px(g, x + 1, y, w, h, c, 0.45);
-			box(g, x + 1, y, w, h, fv.coolantNet !== null ? coolNet(T.verdigris, fv.coolantNet) : T.red, 1);
+			box(g, x + 1, y, w, h, fv.coolantNet !== null ? coolNet(T.verdigris, fv.coolantNet) : alertColor(cb), 1);
 		}
 	}
 
-	/** Per-frame animation: rising shimmer over hot cells in heat mode. */
-	animate(view: SimView, mode: OverlayMode, t: number): void {
+	/** Per-frame animation: rising shimmer over hot cells in heat mode (none under reduced motion). */
+	animate(view: SimView, mode: OverlayMode, t: number, opt: RenderOptions): void {
 		const g = this.anim;
 		g.clear();
-		if (mode !== "heat") return;
+		if (mode !== "heat" || opt.reducedMotion) return;
 		const { width, floorMin, floorMax, airTemp } = view;
 		for (let f = floorMin; f <= floorMax; f++) {
 			const top = floorTop(view, f);

@@ -4,6 +4,7 @@
  * slow drips from the coolant pipes.
  */
 import type { ContentDB } from "@aitower/content";
+import type { RenderOptions } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { Graphics } from "pixi.js";
 import { floorTop } from "../camera";
@@ -60,12 +61,18 @@ export class Effects {
 		if (this.parts.length < MAX_PARTICLES) this.parts.push(p);
 	}
 
-	update(view: SimView, torches: readonly Torch[], dt: number, t: number): void {
+	/**
+	 * `opt.reducedMotion` stops new shimmer, steam, smoke and drips (existing puffs finish their short life).
+	 * Welding sparks are repair activity, so they stay.
+	 */
+	update(view: SimView, torches: readonly Torch[], dt: number, t: number, opt: RenderOptions): void {
 		const g = this.g;
 		g.clear();
 		const step = Math.min(dt, 0.1);
+		const calm = opt.reducedMotion;
 
 		for (const f of view.facilities) {
+			if (calm) break;
 			const def = this.content.facilities[f.defId];
 			if (!def) continue;
 			const top = floorTop(view, f.floor);
@@ -137,7 +144,7 @@ export class Effects {
 		}
 
 		// Drips: a drop swells under the return pipe, falls, and splashes on the floor.
-		for (const d of this.drips) {
+		for (const d of calm ? [] : this.drips) {
 			const period = 3 + hash(d.x, d.y) * 5;
 			const ph = (t / period + hash(d.y, d.x)) % 1;
 			if (ph < 0.75) {

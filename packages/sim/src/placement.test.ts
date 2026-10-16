@@ -42,13 +42,17 @@ describe("placement & costs", () => {
 		expect(sim.submit({ type: "buildLift", x: 3, floorMin: 0, floorMax: 1 }).ok).toBe(false); // rack in the way
 	});
 
-	it("rejects when cash is insufficient (pre-validation and at apply time)", () => {
+	it("rejects when cash is insufficient (queue-aware pre-validation, and authoritative at apply time)", () => {
 		const content = makeContent([], { startingCash: 450_000 });
 		const sim = newSim(content);
 		exec(sim, { type: "buildSlab", floor: 0, x0: 0, x1: 9 });
 		exec(sim, { type: "buildConduit", layer: "power", cells: rowCells(0, 0, 9) });
 		expect(sim.submit({ type: "place", defId: "rack_air_gpu", floor: 0, x: 0 }).ok).toBe(true);
-		expect(sim.submit({ type: "place", defId: "rack_air_gpu", floor: 0, x: 4 }).ok).toBe(true);
+		// The first rack is already queued, so the second no longer fits the remaining cash.
+		expect(reasonOf(sim.submit({ type: "place", defId: "rack_air_gpu", floor: 0, x: 4 }))).toMatch(/insufficient funds/);
+		expect(reasonOf(sim.canBuild({ type: "place", defId: "rack_air_gpu", floor: 0, x: 4 }))).toMatch(/insufficient funds/);
+		// A command forced into the queue (e.g. from an old save) is still re-validated by step().
+		sim.state.pending.push({ type: "place", defId: "rack_air_gpu", floor: 0, x: 4 });
 		const events = sim.step();
 		expect(events.filter((e) => e.type === "commandRejected")).toHaveLength(1);
 		expect(sim.state.facilities).toHaveLength(1);

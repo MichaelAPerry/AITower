@@ -10,28 +10,43 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   Feed it every `CellPointerEvent` from the renderer.
 - Helpers: `fmtMoney/fmtPower/fmtTemp/fmtPct/fmtPflops/fmtDuration/fmtPue`, `describeEvent`, `pickAt`,
   `slabSpan/lPath/liftSpan`, `keyAction`, `pushNotice/onNotice`.
+- Settings and menu helpers: `HEAT_RAMP_COLORBLIND` (the six plasma stops the renderer mirrors, at 18/24/30/36/42/50 °C via
+  `HEAT_RAMP_TEMPS`), `heatRamp(colorBlind)`, `hudScale`, `settingsToCssVars`, `settingsToClasses`,
+  `createMenuController`, `escapeStep`.
 
 ## Files
-- `Hud.tsx`: layout grid, HUD-local UI state (bottom tab, collapsed state, focused job), tool hint. Imports `ui.css`.
+- `Hud.tsx`: layout grid, HUD-local UI state (bottom tab, collapsed state, focused job), tool hint, the menu controller,
+  the settings classes/variables on the root, the save-error toast and the small-screen notice. Imports `ui.css`.
+- `settings.ts`: pure Settings → HUD mappings (`--hud-scale`, root classes, heat ramps, density from the effective size,
+  `isSmallScreen`).
+- `menu/`: the system menu (`SystemMenu.tsx` shell, rail and focus trap; `panes.tsx` the five drawers; `parts.tsx`
+  StampBtn/Slider/ConfirmBar; `menu.css`). Pure parts: `escape.ts` (Esc order), `menuController.ts` (open/close + pause/restore),
+  `slots.ts` (slot rows, time/date text, save lamp, export file name, import error text), `controls.ts` (the key list),
+  `focus.ts`, `fileIO.ts` (Blob download, FileReader import with try/catch), `useSaves.ts`.
 - `hooks.ts`: `useGameState` (useSyncExternalStore). View-only churn is throttled to 10 Hz; changes to
   speed, tool, overlay, selection or mute re-render at once.
-- `keyboard.ts`: pure `keyAction` map plus the `useHudKeyboard` hook. It does not use WASD or the arrow
-  keys, because the renderer uses them for the camera.
+- `keyboard.ts`: pure `keyAction` map, `runKey` (the testable dispatcher) and the `useHudKeyboard` hook. It does not use
+  WASD or the arrow keys, because the renderer uses them for the camera. While the menu is open `runKey` ignores every
+  key except Esc.
 - `tools/controller.ts`, `tools/geometry.ts`, `tools/pick.ts`: tool logic, span/path geometry, selection picking.
 - `events.ts`: SimEvent → text, severity, focus cell and whether to toast; plus coalescing keys.
 - `notices.ts`: module-level bus. The controller and HUD buttons push rejection reasons here, and `<Toasts>` shows them.
-- `components/`: TopBar (speed push-buttons, CRT readouts, PUE / IT-load / net-today gauges), BuildPalette
-  (index cards), OverlaySwitcher (toggle switches + CRT legends), Inspector (TempBar = temperature dial,
+- `components/`: TopBar (speed push-buttons, CRT readouts, PUE / IT-load / net-today gauges, MENU button + save lamp),
+  BuildPalette (index cards), OverlaySwitcher (compact, foldable strip at the top of the world + CRT legends),
+  DesktopNotice ("best on desktop" memo), Inspector (TempBar = temperature dial,
   net summaries, MAINS toggle), BottomPanel (Contracts form / Jobs CRT / Telemetry scopes / Finance
   printout / Alerts teletype), Sparkline (oscilloscope trace), Toasts (memo slips), PueGauge (also the
   generic `Gauge` = Dial + Dymo label + CRT readout), Dial (SVG needle gauge, `niceMax`), common
   (Pill/Meter/Swatch/Icon/Row/Kbd plus the hardware primitives Crt/Lamp/Toggle/Stamp/Counter/FormLabel).
 - `dev/fakeStore.ts`: a fake GameStore with a hand-built SimView and local content fixture. It is for
-  development and tests only and is not exported.
+  development and tests only and is not exported. `canBuild` mirrors the sim's structure rules and reason wording;
+  `dev/fakeSaves.ts` gives it in-memory async save slots, export/import text and `newGame`.
 - `dev/` (package root): Vite harness. Run `npx vite packages/ui/dev --port 5175`, then
   `node scripts/screenshot.mjs http://localhost:5175 out.png 1440 900 1500`.
   Query params: `?tab=jobs|telemetry|finance|alerts`, `?overlay=heat`, `?sel=<facilityId>|bot|lift|none`,
-  `?tool=<defId>`. The harness imports the three `@fontsource` fonts itself.
+  `?tool=<defId>`, `?menu=save|load|settings|controls|new` (opens the menu on that drawer), `?scale=0.85..1.5`, `?cb=1`,
+  `?crt=0`, `?motion=1`, `?notice=0`. `window.__store` exposes the fake store to probe scripts. The harness imports the
+  three `@fontsource` fonts itself. A long-running vite may serve stale CSS; restart it (by the node PID) if edits do not show.
 
 ## Art direction (docs/STYLE.md §1–3)
 Cassette-futurist control-room hardware. `ui.css` defines every STYLE.md §2 token as a custom property on
@@ -49,7 +64,19 @@ for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, for
 - Motion: CRT flicker, lamp blink, needle overshoot (`.ui-dial-needle` transition), lever flip and the
   teletype toast reveal are all switched off under `prefers-reduced-motion`.
 - Layout budget: the top bar fits at 1280 px only because the brand plate and the grid price hide below
-  1480 px. Measure `.ui-topbar` (scrollWidth vs clientWidth) after adding anything to it.
+  1480 px, the density class `is-density-tight` compacts gaps and dials, and the induction button moved into the menu.
+  Measure `.ui-topbar` (scrollWidth vs clientWidth) after adding anything to it, at 1280 and at text scale 1.5.
+- Settings the HUD honours (all driven from `state.settings` in `Hud.tsx`): `textScale` sets `--hud-scale` and the root uses
+  `zoom: var(--hud-scale)`, so every px size scales; `vh` units inside the HUD must divide by `--hud-scale`, and fixed
+  positions computed from `getBoundingClientRect` must divide by the scale (`tooltipTop`). `is-density-tight|cramped`
+  (from effective size = viewport / scale) hide dials, the tier lamps and the audio toggle at about 850 px and fold the menu
+  rail. `reducedMotion` = root class `is-reduced-motion` (same rules as `prefers-reduced-motion`). `crtEffects` off = root
+  class `no-crt` (no scanlines or flicker on `.ui-crt`). `colorBlind` = `is-colorblind`: green becomes blue-cyan, status
+  lamps get glyphs (✓ green, ▲ amber, ✕ red, ○ unlit; `Lamp plain` opts out, used for switch and progress lamps), pills
+  with `status` get ✓ ▲ ✕ ○, and the heat legend uses `HEAT_RAMP_COLORBLIND`.
+- The menu is modal inside `.aitower-hud`: opening pauses (`setSpeed(0)`, previous speed remembered), closing restores it
+  only if the speed is still 0. Keys pressed inside it are stopped from bubbling, so game hotkeys and the renderer's
+  WASD never see them. Focus is trapped (Tab wraps; stray focus is pulled back).
 
 ## Invariants
 - The UI only emits `SimCommand`s through `store.dispatch`. It reads every number from `SimView` or `ContentDB`.
@@ -60,9 +87,17 @@ for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, for
 - Tools stay active after use. A left click or drag runs the tool. A right-button click (down and up on the
   same cell, not a pan) and Esc return to Select.
 - Demolish ghosts are `valid:false` on purpose, so the renderer draws them red.
-- Ghost validity for slab, conduit and lift is a client-side estimate (bounds, cash, slab below or under the
-  shaft). The sim has the final word, and rejections are toasted.
+- Ghost validity for slab, conduit and lift comes from `store.canBuild(cmd)` (same command the click would dispatch);
+  the label is the sim's reason (capitalised) when refused, or the cost label (computed locally for display only) when
+  allowed. A lift hover without a drag is valid if the cell can pair with the floor above or below. Place ghosts use
+  `store.canPlace`. Rejections are still toasted on dispatch.
+- Esc order: close the menu, else cancel the armed tool, else clear the selection, else open the menu (`menu/escape.ts`).
+- Import never throws: the file is read with FileReader and `store.load(text)` runs in try/catch; failures show
+  "Invalid save: …" in the menu and the running game is kept.
 
 ## Test
-`npx vitest run packages/ui`: controller (each tool, L-path, span normalisation, picking, rejections),
-format helpers, keyboard map, and a Hud server-render smoke test.
+`npx vitest run packages/ui`: controller (each tool, L-path, span normalisation, picking, rejections, ghosts via
+`canBuild`), format helpers, Esc state machine, menu pause/restore, hotkeys ignored while the menu is open, save-slot
+formatting, import/export, settings → CSS variables/classes, heat ramps, density, the fake store's saves, throttled
+subscribe, and Hud/SystemMenu server-render tests. There is no DOM test environment: DOM behaviour (focus trap, file
+input, download) was verified in Chromium through the dev harness.

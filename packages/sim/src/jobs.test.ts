@@ -39,7 +39,7 @@ function acceptSpec(sim: SimImpl, spec: ContractSpec): number {
 	sim.state.offers.push({ id, spec, expiresAt: sim.state.tick + 1000 });
 	const ev = exec(sim, { type: "acceptContract", contractId: id });
 	const started = ev.find((e) => e.type === "jobStarted");
-	if (!started || started.type !== "jobStarted") throw new Error("job not started");
+	if (started?.type !== "jobStarted") throw new Error("job not started");
 	return started.jobId;
 }
 
