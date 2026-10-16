@@ -1,5 +1,7 @@
 import type { GameStore, OverlayMode, Speed } from "@aitower/shared";
 import { useEffect, useRef } from "react";
+import { applyEscape } from "./menu/escape";
+import type { MenuController } from "./menu/menuController";
 
 export type KeyAction =
 	| { type: "togglePause" }
@@ -32,46 +34,66 @@ export function keyAction(key: string): KeyAction | null {
 const typing = (t: EventTarget | null): boolean =>
 	t instanceof HTMLElement && (t.isContentEditable || t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT");
 
-export function useHudKeyboard(store: GameStore, toggleBottom: () => void): void {
+export interface KeyEnv {
+	menu: MenuController;
+	toggleBottom: () => void;
+	/** Last non-zero speed, for the space-bar toggle. */
+	lastSpeed: { current: Speed };
+}
+
+/**
+ * Apply one key press. While the menu is open every game hotkey is ignored and only Esc acts (it closes
+ * the menu). Returns true if the key was consumed.
+ */
+export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
+	const a = keyAction(key);
+	if (!a) return false;
+	if (env.menu.isOpen()) {
+		if (a.type === "escape") applyEscape(store, env.menu);
+		return a.type === "escape";
+	}
+	const s = store.get();
+	if (s.speed !== 0) env.lastSpeed.current = s.speed;
+	switch (a.type) {
+		case "togglePause":
+			store.setSpeed(s.speed === 0 ? env.lastSpeed.current : 0);
+			break;
+		case "speed":
+			store.setSpeed(a.speed);
+			break;
+		case "overlay":
+			store.setOverlay(a.mode);
+			break;
+		case "mute":
+			store.setMuted(!s.muted);
+			break;
+		case "escape":
+			applyEscape(store, env.menu);
+			break;
+		case "demolish":
+			store.setGhost(null);
+			store.setTool(s.tool.kind === "demolish" ? { kind: "select" } : { kind: "demolish" });
+			break;
+		case "toggleBottom":
+			env.toggleBottom();
+			break;
+	}
+	return true;
+}
+
+export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggleBottom);
 	toggleRef.current = toggleBottom;
 	useEffect(() => {
+		const env: KeyEnv = { menu, lastSpeed, toggleBottom: () => toggleRef.current() };
 		const onKey = (e: KeyboardEvent): void => {
-			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat || typing(e.target)) return;
-			const a = keyAction(e.key);
-			if (!a) return;
-			e.preventDefault();
-			const s = store.get();
-			if (s.speed !== 0) lastSpeed.current = s.speed;
-			switch (a.type) {
-				case "togglePause":
-					store.setSpeed(s.speed === 0 ? lastSpeed.current : 0);
-					break;
-				case "speed":
-					store.setSpeed(a.speed);
-					break;
-				case "overlay":
-					store.setOverlay(a.mode);
-					break;
-				case "mute":
-					store.setMuted(!s.muted);
-					break;
-				case "escape":
-					store.setGhost(null);
-					if (s.tool.kind !== "select") store.setTool({ kind: "select" });
-					else store.setSelection(null);
-					break;
-				case "demolish":
-					store.setGhost(null);
-					store.setTool(s.tool.kind === "demolish" ? { kind: "select" } : { kind: "demolish" });
-					break;
-				case "toggleBottom":
-					toggleRef.current();
-					break;
-			}
+			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
+			// Typing in a field ignores hotkeys, except Esc while the menu is open (it must always close).
+			if (typing(e.target) && !(menu.isOpen() && e.key === "Escape")) return;
+			if (runKey(store, e.key, env)) e.preventDefault();
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [store]);
+	}, [store, menu]);
 }

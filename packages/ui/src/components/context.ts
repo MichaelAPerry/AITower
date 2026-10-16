@@ -19,4 +19,6 @@ export interface PanelProps {
 	state: GameState;
 	ui: UiState;
 	setUi: (patch: Partial<UiState>) => void;
+	/** Open the system menu (pauses the game). */
+	openMenu: () => void;
 }

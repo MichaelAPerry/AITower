@@ -4,6 +4,7 @@ import type { Tool } from "@aitower/shared";
 import { type MouseEvent, useState } from "react";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
+import { hudScale } from "../settings";
 import { toolKey } from "../tools/controller";
 import { FormLabel, Icon, Stamp, Swatch } from "./common";
 import type { PanelProps } from "./context";
@@ -83,6 +84,14 @@ function defSpecs(def: FacilityDef): [string, string][] {
 	return s;
 }
 
+/**
+ * `top` for the fixed spec sheet. `rectTop` is a viewport coordinate; the HUD is zoomed by `scale`, so the
+ * CSS value is in zoomed pixels: divide the viewport numbers by the scale.
+ */
+export function tooltipTop(rectTop: number, viewportH: number, scale: number): number {
+	return Math.max(60 / scale, Math.min(rectTop, viewportH - 320 * scale) / scale);
+}
+
 export function BuildPalette({ store, content, state }: PanelProps) {
 	const [tab, setTab] = useState<Tab>("structure");
 	const [hover, setHover] = useState<Hover | null>(null);
@@ -157,9 +166,11 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 							</span>
 							<span className="ui-item-main">
 								<span className="ui-item-name">{s.name}</span>
-								<span className="ui-item-sub">{s.hint}</span>
+								<span className="ui-item-foot">
+									<span className="ui-item-sub">{s.hint}</span>
+									<span className="ui-item-cost">{s.cost}</span>
+								</span>
 							</span>
-							<span className="ui-item-cost">{s.cost}</span>
 						</button>
 					))}
 				{tab !== "structure" && defs.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
@@ -197,9 +208,11 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 											</span>
 										)}
 									</span>
-									<span className="ui-item-sub">{defHeadline(d)}</span>
+									<span className="ui-item-foot">
+										<span className="ui-item-sub">{defHeadline(d)}</span>
+										<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
+									</span>
 								</span>
-								<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
 								{locked && (
 									<Stamp tone="red" className="ui-card-stamp">
 										Restricted
@@ -239,7 +252,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 				</div>
 			</div>
 			{hover && (
-				<div className="ui-tooltip ui-panel" style={{ top: Math.max(60, Math.min(hover.top, window.innerHeight - 320)) }}>
+				<div className="ui-tooltip ui-panel" style={{ top: tooltipTop(hover.top, window.innerHeight, hudScale(state.settings)) }}>
 					<div className="ui-tooltip-form">SPECIFICATION SHEET · FORM SP-4</div>
 					<div className="ui-tooltip-title">{hover.title}</div>
 					<p>{hover.body}</p>

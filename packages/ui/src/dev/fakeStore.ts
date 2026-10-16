@@ -4,7 +4,8 @@
  */
 import type { ContentDB, FacilityDef } from "@aitower/content";
 import type { CommandResult, FacilityView, JobView, LedgerDay, MetricSample, SimCommand, SimEvent, SimView } from "@aitower/sim";
-import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds } from "@aitower/shared";
+import { createFakeSaves } from "./fakeSaves";
+import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
 const fac = (d: Partial<FacilityDef> & Pick<FacilityDef, "id" | "name" | "kind" | "category" | "cost" | "color" | "accent">): FacilityDef => ({
 	description: "",
@@ -149,14 +150,78 @@ function buildView(content: ContentDB): SimView {
 	return v;
 }
 
+/** Dev stand-in for Sim.canBuild: the same rules and reason wording as the sim's structure planners. */
+export function fakeCanBuild(view: SimView, content: ContentDB, cmd: SimCommand): CommandResult {
+	const no = (reason: string): CommandResult => ({ ok: false, reason });
+	const st = content.structure;
+	const funds = (cost: number): CommandResult => (cost > view.cash ? no(`insufficient funds (need $${Math.ceil(cost)})`) : { ok: true });
+	switch (cmd.type) {
+		case "buildSlab": {
+			if (!inBounds(view, cmd.x0, cmd.floor) || !inBounds(view, cmd.x1, cmd.floor) || cmd.x1 < cmd.x0) return no("slab span out of bounds");
+			let n = 0;
+			for (let x = cmd.x0; x <= cmd.x1; x++) {
+				if (view.slab[cellIndex(view, x, cmd.floor)]) continue;
+				if (cmd.floor > 0 && !view.slab[cellIndex(view, x, cmd.floor - 1)]) return no(`no slab below at x=${x}`);
+				n++;
+			}
+			if (n === 0) return no("already built");
+			return funds(n * (cmd.floor < 0 ? st.basementSlabPerTile : st.slabPerTile));
+		}
+		case "buildConduit": {
+			const grid = cmd.layer === "power" ? view.power : view.coolant;
+			if (!cmd.cells.length) return no("no cells");
+			let n = 0;
+			for (const c of cmd.cells) {
+				if (!inBounds(view, c.x, c.floor)) return no("conduit cell out of bounds");
+				const i = cellIndex(view, c.x, c.floor);
+				if (grid[i]) continue;
+				const near = (x: number, f: number): boolean => inBounds(view, x, f) && grid[cellIndex(view, x, f)] === 1;
+				if (!view.slab[i] && !near(c.x - 1, c.floor) && !near(c.x + 1, c.floor) && !near(c.x, c.floor - 1) && !near(c.x, c.floor + 1)) return no(`conduit at (${c.x}, ${c.floor}) needs slab or an adjacent conduit`);
+				n++;
+			}
+			if (n === 0) return no("already built");
+			return funds(n * (cmd.layer === "power" ? st.powerConduitPerTile : st.coolantConduitPerTile));
+		}
+		case "buildLift": {
+			if (!inBounds(view, cmd.x, cmd.floorMin) || !inBounds(view, cmd.x, cmd.floorMax) || cmd.floorMax <= cmd.floorMin) return no("lift must span at least two floors inside the lot");
+			for (let f = cmd.floorMin; f <= cmd.floorMax; f++) {
+				if (!view.slab[cellIndex(view, cmd.x, f)]) return no(`no slab at floor ${f}`);
+				if (view.facilities.some((fa) => fa.floor === f && cmd.x >= fa.x && cmd.x < fa.x + fa.width)) return no(`facility in the way at floor ${f}`);
+				if (view.lifts.some((l) => l.x === cmd.x && f >= l.floorMin && f <= l.floorMax)) return no(`lift already at floor ${f}`);
+			}
+			return funds(st.liftBase + st.liftPerFloor * (cmd.floorMax - cmd.floorMin + 1));
+		}
+		case "place":
+			return canPlaceFor(view, content, cmd.defId, cmd.floor, cmd.x);
+		default:
+			return { ok: true };
+	}
+}
+
+function canPlaceFor(view: SimView, content: ContentDB, defId: string, floor: number, x: number): CommandResult {
+	const no = (reason: string): CommandResult => ({ ok: false, reason });
+	const d = content.facilities[defId];
+	if (!d) return no("Unknown facility");
+	if (d.unlockTier > view.tier) return no(`Requires Tier ${d.unlockTier}`);
+	for (let i = 0; i < d.width; i++) {
+		if (!inBounds(view, x + i, floor)) return no("Out of bounds");
+		if (!view.slab[cellIndex(view, x + i, floor)]) return no("Needs floor slab");
+		if (view.facilities.some((f) => f.floor === floor && x + i >= f.x && x + i < f.x + f.width)) return no("Space occupied");
+	}
+	if (d.cost > view.cash) return no("Not enough cash");
+	return { ok: true };
+}
+
 export interface FakeStore extends GameStore {
 	/** Advance the fake world by `minutes` and jitter numbers. */
 	advance(minutes: number): void;
 	/** Last ghost set (for debugging). */
 	ghost: Ghost | null;
+	/** Put a save into a slot without going through saveTo (harness and tests). */
+	seedSlot: ReturnType<typeof createFakeSaves>["seedSlot"];
 }
 
-export function createFakeStore(content: ContentDB = createFakeContent()): FakeStore {
+export function createFakeStore(content: ContentDB = createFakeContent(), opts: { saveDelayMs?: number } = {}): FakeStore {
 	let view = buildView(content);
 	const initialLog: { tick: number; event: SimEvent }[] = [
 		{ tick: view.tick - 300, event: { type: "newDay", day: 12 } },
@@ -179,21 +244,17 @@ export function createFakeStore(content: ContentDB = createFakeContent()): FakeS
 		view = { ...view, ...patch };
 		set({ view });
 	};
+	const saves = createFakeSaves({
+		getState: () => state,
+		patchState: (patch) => set(patch),
+		setView: (v) => newView(v),
+		freshView: () => buildView(content),
+		delayMs: opts.saveDelayMs ?? 150,
+	});
 	const ok: CommandResult = { ok: true };
 	const no = (reason: string): CommandResult => ({ ok: false, reason });
 
-	const canPlace = (defId: string, floor: number, x: number): CommandResult => {
-		const d = content.facilities[defId];
-		if (!d) return no("Unknown facility");
-		if (d.unlockTier > view.tier) return no(`Requires Tier ${d.unlockTier}`);
-		for (let i = 0; i < d.width; i++) {
-			if (!inBounds(view, x + i, floor)) return no("Out of bounds");
-			if (!view.slab[cellIndex(view, x + i, floor)]) return no("Needs floor slab");
-			if (view.facilities.some((f) => f.floor === floor && x + i >= f.x && x + i < f.x + f.width)) return no("Space occupied");
-		}
-		if (d.cost > view.cash) return no("Not enough cash");
-		return ok;
-	};
+	const canPlace = (defId: string, floor: number, x: number): CommandResult => canPlaceFor(view, content, defId, floor, x);
 
 	const store: FakeStore = {
 		ghost: null,
@@ -246,13 +307,19 @@ export function createFakeStore(content: ContentDB = createFakeContent()): FakeS
 			}
 		},
 		canPlace,
-		// Placeholders until agent-ui builds the menus against them (M1-T2).
-		setSettings: (patch) => set({ settings: { ...state.settings, ...patch } }),
-		canBuild: () => ok,
-		listSaves: async () => [],
-		saveTo: async () => ok,
-		loadFrom: async () => ok,
-		deleteSave: async () => {},
+		canBuild: (cmd) => fakeCanBuild(view, content, cmd),
+		setSettings: (patch) => {
+			const settings = normalizeSettings({ ...state.settings, ...patch });
+			set({ settings, muted: settings.muted });
+		},
+		save: saves.save,
+		load: saves.load,
+		newGame: saves.newGame,
+		listSaves: saves.listSaves,
+		saveTo: saves.saveTo,
+		loadFrom: saves.loadFrom,
+		deleteSave: saves.deleteSave,
+		seedSlot: saves.seedSlot,
 		setSpeed: (speed) => set({ speed }),
 		setOverlay: (overlay) => set({ overlay }),
 		setTool: (tool) => set({ tool }),
@@ -261,10 +328,7 @@ export function createFakeStore(content: ContentDB = createFakeContent()): FakeS
 			store.ghost = g;
 		},
 		focus: () => {},
-		setMuted: (muted) => set({ muted }),
-		save: () => "{}",
-		load: () => {},
-		newGame: () => {},
+		setMuted: (muted) => store.setSettings({ muted }),
 		advance(minutes) {
 			const tick = view.tick + minutes;
 			const ph = tick / 97;

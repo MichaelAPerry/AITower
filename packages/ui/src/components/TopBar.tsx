@@ -6,7 +6,7 @@ import { Icon, Lamp, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { niceMax } from "./Dial";
 import { Gauge, PueGauge } from "./PueGauge";
-import { restartInduction } from "../tutorial/Tutorial";
+import { saveLamp } from "../menu/slots";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
@@ -20,8 +20,9 @@ function Stat({ label, children, title, className = "" }: { label: string; child
 	);
 }
 
-export function TopBar({ store, content, state }: PanelProps) {
+export function TopBar({ store, content, state, openMenu }: PanelProps) {
 	const { view, speed, muted } = state;
+	const lamp = saveLamp(state.saveStatus);
 	const maxTier = Math.max(1, content.balance.tiers.pflops.length);
 	const headroom = view.powerNets.reduce((s, n) => s + n.supplyKw, 0);
 
@@ -114,7 +115,7 @@ export function TopBar({ store, content, state }: PanelProps) {
 				<span className="ui-dymo">CLEARANCE</span>
 				<span className="ui-lamps">
 					{Array.from({ length: maxTier }, (_, i) => (
-						<Lamp key={i} on={i < view.tier} tone="amber" />
+						<Lamp key={i} on={i < view.tier} tone="amber" plain />
 					))}
 				</span>
 			</div>
@@ -127,9 +128,15 @@ export function TopBar({ store, content, state }: PanelProps) {
 					{view.energyPrice.toFixed(3)}
 				</Stat>
 			</div>
-			<button type="button" className="ui-btn ui-induction" onClick={restartInduction} title="Reopen the Ministry induction (tutorial)">
-				Induction
-			</button>
+			<div className="ui-sysbox">
+				<button type="button" className="ui-btn ui-menu-btn" onClick={openMenu} title="System menu (Esc): save, load, settings, controls">
+					Menu
+				</button>
+				<span className={`ui-savelamp tone-${lamp.tone}`} title={state.saveStatus.error ?? "Last successful save"} role="status">
+					<Lamp on={lamp.lit} tone={lamp.tone} blink={lamp.blink} />
+					<span className="ui-savelamp-text">{lamp.text}</span>
+				</span>
+			</div>
 			<Toggle on={!muted} onClick={() => store.setMuted(!muted)} title={`${muted ? "Unmute" : "Mute"} (M)`} label="AUDIO" className="ui-mute" />
 		</header>
 	);

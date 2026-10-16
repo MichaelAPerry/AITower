@@ -1,6 +1,24 @@
 import type { OverlayMode } from "@aitower/shared";
-import { Toggle } from "./common";
+import { useState } from "react";
+import { heatRamp } from "../settings";
+import { Icon, Lamp } from "./common";
 import type { PanelProps } from "./context";
+
+const COLLAPSED_KEY = "aitower.overlay.collapsed";
+const readCollapsed = (): boolean => {
+	try {
+		return localStorage.getItem(COLLAPSED_KEY) === "1";
+	} catch {
+		return false;
+	}
+};
+const writeCollapsed = (v: boolean): void => {
+	try {
+		localStorage.setItem(COLLAPSED_KEY, v ? "1" : "0");
+	} catch {
+		/* best effort */
+	}
+};
 
 const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "normal", label: "Normal", key: "N" },
@@ -9,29 +27,20 @@ const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "coolant", label: "Coolant", key: "C" },
 ];
 
-/** STYLE.md §2 heat ramp: [°C, colour token]. */
-const HEAT_RAMP: [number, string][] = [
-	[18, "var(--heat-18)"],
-	[24, "var(--heat-24)"],
-	[30, "var(--heat-30)"],
-	[36, "var(--heat-36)"],
-	[42, "var(--heat-42)"],
-	[50, "var(--heat-50)"],
-];
-
-function Legend({ mode }: { mode: OverlayMode }) {
+function Legend({ mode, colorBlind }: { mode: OverlayMode; colorBlind: boolean }) {
 	if (mode === "heat") {
-		const lo = HEAT_RAMP[0][0];
-		const hi = HEAT_RAMP[HEAT_RAMP.length - 1][0];
+		const ramp = heatRamp(colorBlind);
+		const lo = ramp[0][0];
+		const hi = ramp[ramp.length - 1][0];
 		const pct = (c: number): number => ((c - lo) / (hi - lo)) * 100;
-		const grad = `linear-gradient(90deg, ${HEAT_RAMP.map(([c, col]) => `${col} ${pct(c).toFixed(1)}%`).join(", ")})`;
+		const grad = `linear-gradient(90deg, ${ramp.map(([c, col]) => `${col} ${pct(c).toFixed(1)}%`).join(", ")})`;
 		return (
 			<div className="ui-legend ui-crt crt-amber" title="Heat overlay: air temperature per cell">
 				<div className="ui-legend-bar" style={{ background: grad }} />
 				<div className="ui-legend-ticks">
-					{HEAT_RAMP.map(([c], i) => (
+					{ramp.map(([c], i) => (
 						<span key={c} style={{ left: `${pct(c)}%` }}>
-							{i === 0 ? "≤" : i === HEAT_RAMP.length - 1 ? "≥" : ""}
+							{i === 0 ? "≤" : i === ramp.length - 1 ? "≥" : ""}
 							{c}°
 						</span>
 					))}
@@ -65,29 +74,49 @@ function Legend({ mode }: { mode: OverlayMode }) {
 }
 
 export function OverlaySwitcher({ store, state }: PanelProps) {
+	const [collapsed, setCollapsed] = useState(readCollapsed);
+	const toggle = (): void => {
+		writeCollapsed(!collapsed);
+		setCollapsed(!collapsed);
+	};
+	const cur = MODES.find((m) => m.id === state.overlay) ?? MODES[0];
 	return (
-		<div className="ui-overlay ui-panel">
-			<span className="ui-dymo ui-overlay-title">OVERLAY</span>
-			<div className="ui-seg" role="radiogroup" aria-label="Overlay">
-				{MODES.map((m) => (
-					<Toggle
-						key={m.id}
-						role="radio"
-						on={state.overlay === m.id}
-						onClick={() => store.setOverlay(m.id)}
-						lamp={m.id === "normal" ? "green" : "amber"}
-						className={`ov-${m.id}`}
-						title={`${m.label} overlay (${m.key})`}
-						label={
-							<>
-								<b>{m.key}</b>
-								{m.label}
-							</>
-						}
-					/>
-				))}
-			</div>
-			<Legend mode={state.overlay} />
+		<div className={`ui-overlay ui-panel ${collapsed ? "is-collapsed" : ""}`}>
+			<button
+				type="button"
+				className="ui-overlay-fold"
+				onClick={toggle}
+				aria-expanded={!collapsed}
+				title={collapsed ? "Show the overlay switcher" : "Fold the overlay switcher away"}
+			>
+				<Icon name={collapsed ? "chevDown" : "chevUp"} size={11} />
+				<span className="ui-dymo ui-overlay-title">OVERLAY</span>
+				{collapsed && (
+					<span className="ui-overlay-cur">
+						<Lamp on={state.overlay !== "normal"} tone="amber" plain />
+						{cur.label}
+					</span>
+				)}
+			</button>
+			{!collapsed && (
+				<div className="ui-seg" role="radiogroup" aria-label="Overlay">
+					{MODES.map((m) => (
+						<button
+							key={m.id}
+							type="button"
+							role="radio"
+							aria-checked={state.overlay === m.id}
+							className={`ui-btn ui-ov ov-${m.id} ${state.overlay === m.id ? "is-on" : ""}`}
+							onClick={() => store.setOverlay(m.id)}
+							title={`${m.label} overlay (${m.key})`}
+						>
+							<b>{m.key}</b>
+							{m.label}
+						</button>
+					))}
+				</div>
+			)}
+			{state.overlay !== "normal" && !collapsed && <Legend mode={state.overlay} colorBlind={state.settings.colorBlind} />}
 		</div>
 	);
 }

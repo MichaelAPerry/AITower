@@ -10,16 +10,21 @@ import { pickAt } from "./pick";
 const content = createFakeContent();
 
 /** Wrap the dev fake store, recording dispatches/ghosts and optionally forcing a result. */
-function harness(tool: Tool, result?: CommandResult) {
+function harness(tool: Tool, result?: CommandResult, canBuild?: (cmd: SimCommand) => CommandResult) {
 	const base = createFakeStore(content);
 	const sent: SimCommand[] = [];
 	const ghosts: (Ghost | null)[] = [];
 	const notices: Notice[] = [];
+	const asked: SimCommand[] = [];
 	let sel: Selection = null;
 	let state: GameState = { ...base.get(), tool, selection: null };
 	const store: GameStore = {
 		...base,
 		get: () => state,
+		canBuild: (c) => {
+			asked.push(c);
+			return canBuild ? canBuild(c) : base.canBuild(c);
+		},
 		dispatch: (c) => {
 			sent.push(c);
 			return result ?? { ok: true };
@@ -37,7 +42,7 @@ function harness(tool: Tool, result?: CommandResult) {
 	const ctl = createToolController(store, content, { notify: (n) => notices.push(n) });
 	const ev = (kind: CellPointerEvent["kind"], x: number | null, floor = 0, button = 0): void =>
 		ctl.handle({ kind, cell: x === null ? null : { x, floor }, button, shift: false });
-	return { store, ctl, ev, sent, ghosts, notices, sel: () => sel, tool: () => state.tool, lastGhost: () => ghosts[ghosts.length - 1] };
+	return { store, ctl, ev, sent, ghosts, notices, asked, sel: () => sel, tool: () => state.tool, lastGhost: () => ghosts[ghosts.length - 1] };
 }
 
 describe("geometry", () => {
@@ -170,5 +175,90 @@ describe("tool controller", () => {
 		h.store.setTool({ kind: "lift" });
 		h.ev("up", 3, 2);
 		expect(h.sent).toHaveLength(0);
+	});
+});
+
+describe("ghost validity comes from store.canBuild", () => {
+	const ok: CommandResult = { ok: true };
+	const deny = (reason: string): CommandResult => ({ ok: false, reason });
+
+	it("slab: asks canBuild with the normalised span and shows its verdict with the cost label", () => {
+		const h = harness({ kind: "slab" }, undefined, () => ok);
+		h.ev("down", 30, 1);
+		h.ev("move", 27, 1);
+		expect(h.asked.at(-1)).toEqual({ type: "buildSlab", floor: 1, x0: 27, x1: 30 });
+		expect(h.lastGhost()).toMatchObject({ valid: true });
+		expect(h.lastGhost()?.label).toMatch(/^Slab ×4 · \$/);
+	});
+	it("slab: a refusal turns the ghost red with the sim's reason, capitalised", () => {
+		const h = harness({ kind: "slab" }, undefined, () => deny("no slab below at x=30"));
+		h.ev("move", 30, 7);
+		expect(h.lastGhost()).toMatchObject({ valid: false, label: "No slab below at x=30" });
+	});
+	it("does not second-guess canBuild with client-side estimates (cash, support)", () => {
+		// 36 new tiles would cost far more than the fixture's cash and floor 7 has no slab below, yet canBuild says ok.
+		const h = harness({ kind: "slab" }, undefined, () => ok);
+		h.ev("down", 0, 7);
+		h.ev("move", 39, 7);
+		expect(h.lastGhost()?.valid).toBe(true);
+		// ... and the other way round: affordable, supported, but canBuild refuses.
+		const r = harness({ kind: "slab" }, undefined, () => deny("insufficient funds (need $5)"));
+		r.ev("move", 20, 1);
+		expect(r.lastGhost()).toMatchObject({ valid: false, label: "Insufficient funds (need $5)" });
+	});
+	it("real canBuild rules (fake store): slab above empty floor and already-built slab are red", () => {
+		const h = harness({ kind: "slab" });
+		h.ev("move", 3, 8);
+		expect(h.lastGhost()).toMatchObject({ valid: false });
+		expect(h.lastGhost()?.label).toMatch(/slab below/i);
+		h.ev("move", 3, 1);
+		expect(h.lastGhost()).toMatchObject({ valid: false, label: "Already built" });
+		h.ev("move", 30, 5); // floor 5 is slabbed only to x=23; floor 4 below is slabbed to x=35
+		expect(h.lastGhost()).toMatchObject({ valid: true });
+	});
+	it("conduit: asks for the full L path and shows the cost label", () => {
+		const h = harness({ kind: "conduit", layer: "power" }, undefined, () => ok);
+		h.ev("down", 2, 1);
+		h.ev("move", 4, 3);
+		expect(h.asked.at(-1)).toEqual({ type: "buildConduit", layer: "power", cells: lPath({ x: 2, floor: 1 }, { x: 4, floor: 3 }) });
+		expect(h.lastGhost()?.valid).toBe(true);
+		expect(h.lastGhost()?.label).toMatch(/^Power conduit ×5 · \$/);
+		const bad = harness({ kind: "conduit", layer: "coolant" }, undefined, () => deny("conduit at (3, 3) needs slab or an adjacent conduit"));
+		bad.ev("move", 3, 3);
+		expect(bad.lastGhost()).toMatchObject({ valid: false, label: "Conduit at (3, 3) needs slab or an adjacent conduit" });
+	});
+	it("lift: hover is valid when the cell can pair with the floor above or below", () => {
+		const h = harness({ kind: "lift" }, undefined, (c) => (c.type === "buildLift" && c.floorMin === 2 && c.floorMax === 3 ? ok : deny("no slab at floor 3")));
+		h.ev("move", 30, 2); // up-span (2,3) ok
+		expect(h.lastGhost()).toMatchObject({ valid: true, label: "Drag up/down to size the shaft" });
+		h.ev("move", 30, 3); // up (3,4) denied, down (2,3) ok
+		expect(h.lastGhost()?.valid).toBe(true);
+		h.ev("move", 30, 6); // neither
+		expect(h.lastGhost()).toMatchObject({ valid: false, label: "No slab at floor 3" });
+	});
+	it("lift: dragging asks about the whole shaft and labels the cost", () => {
+		const h = harness({ kind: "lift" }, undefined, () => ok);
+		h.ev("down", 30, 1);
+		h.ev("move", 30, 4);
+		expect(h.asked.at(-1)).toEqual({ type: "buildLift", x: 30, floorMin: 1, floorMax: 4 });
+		expect(h.lastGhost()).toMatchObject({ valid: true });
+		expect(h.lastGhost()?.label).toMatch(/^Lift 4 floors · \$/);
+		const d = harness({ kind: "lift" }, undefined, () => deny("lift already at floor 2"));
+		d.ev("down", 2, 1);
+		d.ev("move", 2, 3);
+		expect(d.lastGhost()).toMatchObject({ valid: false, label: "Lift already at floor 2" });
+	});
+	it("lift (fake store rules): existing shaft column is red, a free slabbed column is green", () => {
+		const h = harness({ kind: "lift" });
+		h.ev("move", 2, 1);
+		expect(h.lastGhost()?.valid).toBe(false);
+		h.ev("move", 30, 1);
+		expect(h.lastGhost()?.valid).toBe(true);
+	});
+	it("place and demolish ghosts are unchanged (canPlace, intentionally red)", () => {
+		const h = harness({ kind: "place", defId: "genset" }, undefined, () => deny("should not be asked"));
+		h.ev("move", 20, 1);
+		expect(h.asked).toHaveLength(0);
+		expect(h.lastGhost()).toMatchObject({ valid: true });
 	});
 });

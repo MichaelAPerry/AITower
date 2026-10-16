@@ -30,7 +30,7 @@ function writeSaved(s: Saved) {
 	}
 }
 
-/** Global hook so the top bar's INDUCTION button can reopen the tutorial without prop drilling. */
+/** Global hook so the system menu's RESTART INDUCTION button can reopen the tutorial without prop drilling. */
 const listeners = new Set<() => void>();
 export function restartInduction() {
 	writeSaved({ step: 0, done: false });

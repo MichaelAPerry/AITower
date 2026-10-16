@@ -118,7 +118,7 @@ function Jobs({ store, state, ui }: PanelProps) {
 							<td className="strong">{j.clientName}</td>
 							<td>{j.kind}</td>
 							<td>
-								<Pill tone={jobTone[j.status]}>{j.status}</Pill>
+								<Pill status tone={jobTone[j.status]}>{j.status}</Pill>
 							</td>
 							<td className="wide">
 								<div className="ui-progress">

@@ -28,9 +28,12 @@ export const statusLabel: Record<FacilityStatus, string> = {
 	failed: "failed",
 };
 
-/** Small stamped status tag. */
-export function Pill({ tone, children }: { tone: Tone; children: ReactNode }) {
-	return <span className={`ui-pill tone-${tone}`}>{children}</span>;
+/**
+ * Small stamped tag. `status` marks a true status indicator: with colour-blind mode on it gains a glyph
+ * (✓ good, ▲ warn, ✕ error, ○ dim) so it never relies on colour alone.
+ */
+export function Pill({ tone, children, status = false }: { tone: Tone; children: ReactNode; status?: boolean }) {
+	return <span className={`ui-pill tone-${tone} ${status ? "is-status" : ""}`}>{children}</span>;
 }
 
 /** Segmented phosphor VU bar, 0..1. */
@@ -51,9 +54,12 @@ export function Crt({ tone = "amber", className = "", children, title }: { tone?
 	);
 }
 
-/** Round indicator lamp with a glow halo. */
-export function Lamp({ on, tone = "amber", blink = false }: { on: boolean; tone?: "amber" | "green" | "red"; blink?: boolean }) {
-	return <span className={`ui-lamp lamp-${tone} ${on ? "is-lit" : ""} ${on && blink ? "is-blink" : ""}`} aria-hidden="true" />;
+/**
+ * Round indicator lamp with a glow halo. Status lamps gain a glyph in colour-blind mode (✓ green, ▲ amber,
+ * ✕ red, ○ unlit); `plain` lamps (progress or switch indicators) never do.
+ */
+export function Lamp({ on, tone = "amber", blink = false, plain = false }: { on: boolean; tone?: "amber" | "green" | "red"; blink?: boolean; plain?: boolean }) {
+	return <span className={`ui-lamp lamp-${tone} ${on ? "is-lit" : ""} ${on && blink ? "is-blink" : ""} ${plain ? "is-plain" : ""}`} aria-hidden="true" />;
 }
 
 /** Mechanical bat-handle toggle switch with ON/OFF engraving. Lever up = on. */
@@ -78,7 +84,7 @@ export function Toggle({
 }) {
 	return (
 		<button type="button" role={role} aria-checked={on} className={`ui-toggle ${on ? "is-on" : "is-off"} ${className}`} onClick={onClick} title={title}>
-			{lamp && <Lamp on={on} tone={lamp} />}
+			{lamp && <Lamp on={on} tone={lamp} plain />}
 			<span className="ui-toggle-plate" aria-hidden="true">
 				<span className="ui-toggle-eng on">ON</span>
 				<span className="ui-toggle-nut" />
