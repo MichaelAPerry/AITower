@@ -38,10 +38,12 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 		});
 	};
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: subscribe once on mount; `add` only touches refs and functional setState, so a stale closure is harmless
 	useEffect(() => onNotice(add), []);
 
 	// New log entries → toasts. Entries present at mount are skipped. The cursor is (tick, count at that
 	// tick) so it works even if the app rebuilds entry objects; a tick going backwards (load) resets it.
+	// biome-ignore lint/correctness/useExhaustiveDependencies: intentionally keyed on the log only: re-running on view/content changes would re-scan entries already toasted
 	useEffect(() => {
 		const log = state.log;
 		const last = log[log.length - 1];
@@ -73,6 +75,8 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 			{toasts.map((t) => {
 				const [stamp, tone, head] = SLIP[t.severity] ?? SLIP.info;
 				return (
+					// biome-ignore lint/a11y/noStaticElementInteractions: click-to-dismiss is a mouse convenience on a non-essential toast
+					// biome-ignore lint/a11y/useKeyWithClickEvents: click-to-dismiss is a mouse convenience; toasts also expire on their own and are mirrored in the keyboard-reachable log
 					<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))} title="Click to file away">
 						<span className="ui-toast-head">
 							{head} · NO. {String(t.id).padStart(4, "0")}

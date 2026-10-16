@@ -13,6 +13,7 @@
 | 2026-10-15 | 6 | MVP merged to `main` (MichaelAPerry/AITower#1) | ✅ |
 | 2026-10-15 | 6 | Ministry Induction tutorial (13 steps, `packages/ui/src/tutorial`) | ✅ |
 | 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
+| 2026-10-16 | M1 | Foundations: contracts, then T1 sim, T2 ui, T3 platform, T4 render, T5 CI (see `tasks/m1/`) | ✅ |
 
 ## Sub-agent assignments
 | Task | Agent | Scope | Status | Tests |
@@ -23,6 +24,11 @@
 | T4 | agent-assets | `packages/content`, `packages/audio` | ✅ integrated | 30 |
 | T5 | agent-render | art pass, `packages/render` | ✅ integrated | 35 |
 | T6 | agent-ui | HUD art pass, `packages/ui` | ✅ integrated | 19 |
+| M1-T1 | agent-sim (Sonnet) | queue-aware commands, save validation and migration, multi-lift bots, scale | ✅ integrated | sim 120+ |
+| M1-T2 | agent-ui (Sonnet) | system menu, saves UI, settings, controls help, UX fixes | ✅ integrated | ui 85 |
+| M1-T3 | agent-platform (Sonnet) | crash safety, save slots, settings persistence, frame budget | ✅ integrated | web 35 |
+| M1-T4 | agent-render (Haiku) | presentation options (reduced motion, CRT, colour-blind) | ✅ integrated | render 59 |
+| M1-T5 | agent-ci (Sonnet) | Biome lint, e2e smoke, bundle budget, code-split, CI jobs | ✅ integrated | e2e 7 steps |
 
 All four agents hit an API usage limit once and were resumed from their saved work.
 
@@ -56,3 +62,18 @@ All four agents hit an API usage limit once and were resumed from their saved wo
   deploys to Pages.
 - **claude.ai artifact:** run `node scripts/build-artifact.mjs`, then publish
   `apps/web/dist-artifact/artifact.html` with `assets/app.js` and `assets/app.css`.
+
+## M1 integration notes (orchestrator)
+- **Contracts first:** I made the contract changes myself, with placeholder implementations, so every agent started from a green tree.
+- **Tutorial text:** its final memo now points to the system menu, where the INDUCTION button moved.
+- **Save probe:** added a test that `decodeSave`'s first-tick check runs on a throwaway copy.
+- **`git stash` incident:** agent-sim briefly ran `git stash` on the shared tree. All other deliverables were verified intact afterwards.
+- **End-to-end check (14 points, Chromium):**
+  - building in a paused tick
+  - malformed commands rejected
+  - the Esc menu pauses the game
+  - save slot → reload → load gives an identical hash
+  - settings persist across a reload
+  - a bad import keeps the running game
+- **CI concurrency:** superseded PR runs are cancelled; deploys from main always finish.
+- **Bundle:** Pixi is not split into its own chunk. Split chunks became circular and broke at runtime, and a single Pixi chunk is over budget. The reasoning is in `apps/web/vite.config.ts`.

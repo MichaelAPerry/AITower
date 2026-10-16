@@ -101,6 +101,7 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 			{!collapsed && (
 				<div className="ui-seg" role="radiogroup" aria-label="Overlay">
 					{MODES.map((m) => (
+						// biome-ignore lint/a11y/useSemanticElements: styled button group acts as a radio group; native radio inputs would change the markup and CSS
 						<button
 							key={m.id}
 							type="button"

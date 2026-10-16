@@ -110,6 +110,7 @@ export function Dial({ min, max, needles, size = 56, zones = [], majors = 4, min
 			)}
 			{[...needles].reverse().map((nd, i) => (
 				<g
+					// biome-ignore lint/suspicious/noArrayIndexKey: needles are an ordered, reversed copy with no stable id
 					key={i}
 					className={`ui-dial-needle n-${nd.kind ?? "red"}`}
 					style={{ transform: `rotate(${dialAngle(nd.value, min, max).toFixed(2)}deg)`, transformOrigin: `${C}px ${C}px` }}

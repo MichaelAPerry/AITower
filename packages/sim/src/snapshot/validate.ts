@@ -261,14 +261,22 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 
 	// ── nets, economy, history ──
 	const powerNets = array(s, "powerNets");
-	powerNets.forEach((n, i) => fields(n, NET, `powerNets[${i}]`));
+	powerNets.forEach((n, i) => {
+		fields(n, NET, `powerNets[${i}]`);
+	});
 	const coolantNets = array(s, "coolantNets");
-	coolantNets.forEach((n, i) => fields(n, COOLANT_NET, `coolantNets[${i}]`));
+	coolantNets.forEach((n, i) => {
+		fields(n, COOLANT_NET, `coolantNets[${i}]`);
+	});
 	const ledger = array(s, "ledger");
-	ledger.forEach((d, i) => fields(d, LEDGER_DAY, `ledger[${i}]`));
+	ledger.forEach((d, i) => {
+		fields(d, LEDGER_DAY, `ledger[${i}]`);
+	});
 	fields(s.today, LEDGER_DAY, "today");
 	const history = array(s, "history");
-	history.forEach((d, i) => fields(d, SAMPLE, `history[${i}]`));
+	history.forEach((d, i) => {
+		fields(d, SAMPLE, `history[${i}]`);
+	});
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
 	fields(s.rng, { contracts: "num", reliability: "num" }, "rng");

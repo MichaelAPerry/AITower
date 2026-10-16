@@ -38,13 +38,17 @@ describe("colour", () => {
 	});
 
 	it("rack temperature ramp hits its stops and clamps at the ends", () => {
-		[40, 60, 75, 85, 92, 100].forEach((c, i) => expect(rackTempColor(c)).toBe(HEAT_RAMP[i]));
+		[40, 60, 75, 85, 92, 100].forEach((c, i) => {
+			expect(rackTempColor(c)).toBe(HEAT_RAMP[i]);
+		});
 		expect(rackTempColor(10)).toBe(HEAT_RAMP[0]);
 		expect(rackTempColor(200)).toBe(HEAT_RAMP[5]);
 	});
 
 	it("colour-blind mapping swaps only the palette: same °C stops, plasma colours", () => {
-		[18, 24, 30, 36, 42, 50].forEach((c, i) => expect(heatColor(c, true)).toBe(HEAT_RAMP_CB[i]));
+		[18, 24, 30, 36, 42, 50].forEach((c, i) => {
+			expect(heatColor(c, true)).toBe(HEAT_RAMP_CB[i]);
+		});
 		expect(rackTempColor(40, true)).toBe(HEAT_RAMP_CB[0]);
 		expect(rackTempColor(100, true)).toBe(HEAT_RAMP_CB[5]);
 		expect(rackTempColor(85, true)).toBe(HEAT_RAMP_CB[3]);

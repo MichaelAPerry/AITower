@@ -19,6 +19,7 @@ export function StampBtn({
 	title?: string;
 }) {
 	return (
+		// biome-ignore lint/a11y/noAutofocus: dialog action buttons deliberately take focus when the dialog opens
 		<button type="button" className={`ui-stampbtn stamp-${tone}`} onClick={onClick} disabled={disabled} autoFocus={autoFocus} title={title} aria-label={rest}>
 			<span className="rest">{rest}</span>
 			<span className="hot">{hot ?? rest}</span>

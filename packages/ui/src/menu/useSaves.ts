@@ -18,6 +18,7 @@ export function useSaves(store: GameStore, refreshKey: unknown): { saves: SaveSl
 			setError(e instanceof Error ? e.message : String(e));
 		}
 	}, [store]);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only: tracks liveness for the async reload guard; reload is re-created only when the store changes
 	useEffect(() => {
 		alive.current = true;
 		void reload();

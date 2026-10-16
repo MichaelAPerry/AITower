@@ -34,5 +34,22 @@ export default defineConfig(({ mode }) => ({
 						},
 					},
 				}
-			: { target: "es2022", chunkSizeWarningLimit: 2000 },
+			: {
+					target: "es2022",
+					chunkSizeWarningLimit: 500,
+					rollupOptions: {
+						output: {
+							// React and the pure-TS packages get their own long-cached chunks. PixiJS is deliberately NOT a manual chunk:
+							// claiming it makes Rollup pull its lazily imported back ends (WebGL/WebGPU/Canvas, ~270 kB) into the eager
+							// chunk, and a manual split of Pixi's circular modules breaks at runtime. Left to Rollup, Pixi's core stays
+							// in the entry chunk with the render glue, and the back ends load on demand.
+							manualChunks(id) {
+								if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "react";
+								if (/\/packages\/(sim|content|shared)\//.test(id)) return "sim";
+								if (/\/packages\/ui\//.test(id)) return "ui";
+								return undefined;
+							},
+						},
+					},
+				},
 }));

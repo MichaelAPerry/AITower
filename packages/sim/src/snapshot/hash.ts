@@ -27,14 +27,20 @@ class Fnv {
 const num = (n: number): string => (Object.is(n, -0) ? "0" : String(n));
 
 function feed(h: Fnv, v: unknown): void {
-	if (v === null || v === undefined) return h.update("n");
+	if (v === null || v === undefined) {
+		h.update("n");
+		return;
+	}
 	switch (typeof v) {
 		case "number":
-			return h.update(`#${num(v)}`);
+			h.update(`#${num(v)}`);
+			return;
 		case "boolean":
-			return h.update(v ? "T" : "F");
+			h.update(v ? "T" : "F");
+			return;
 		case "string":
-			return h.update(`"${v.length}:${v}`);
+			h.update(`"${v.length}:${v}`);
+			return;
 		case "object":
 			break;
 		default:
@@ -44,7 +50,8 @@ function feed(h: Fnv, v: unknown): void {
 		const arr = v as unknown as ArrayLike<number>;
 		h.update(`[${arr.length}`);
 		for (let i = 0; i < arr.length; i++) h.update(`,${num(arr[i])}`);
-		return h.update("]");
+		h.update("]");
+		return;
 	}
 	if (Array.isArray(v)) {
 		h.update(`[${v.length}`);
@@ -52,7 +59,8 @@ function feed(h: Fnv, v: unknown): void {
 			h.update(",");
 			feed(h, e);
 		}
-		return h.update("]");
+		h.update("]");
+		return;
 	}
 	const obj = v as Record<string, unknown>;
 	const keys = Object.keys(obj)

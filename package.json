@@ -14,8 +14,11 @@
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "check:boundaries": "node scripts/check-boundaries.mjs",
-    "check": "npm run typecheck && npm run check:boundaries && npm test",
-    "sim": "tsx tools/sim-cli/src/main.ts"
+    "check": "npm run typecheck && npm run check:boundaries && npm run lint && npm test",
+    "sim": "tsx tools/sim-cli/src/main.ts",
+    "lint": "biome lint .",
+    "budget": "node scripts/bundle-budget.mjs",
+    "e2e": "node e2e/smoke.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

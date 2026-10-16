@@ -40,7 +40,9 @@ setTimeout(() => store.emit([{ type: "commandRejected", command: { type: "buyBot
 
 // Click a bottom tab via ?tab=jobs (harness convenience for screenshots).
 const tab = q.get("tab");
-if (tab) setTimeout(() => (document.querySelectorAll<HTMLButtonElement>(".ui-bottom-tabs .ui-tab")).forEach((b) => b.textContent?.toLowerCase().startsWith(tab) && b.click()), 50);
+if (tab) setTimeout(() => (document.querySelectorAll<HTMLButtonElement>(".ui-bottom-tabs .ui-tab")).forEach((b) => {
+		if (b.textContent?.toLowerCase().startsWith(tab)) b.click();
+	}), 50);
 
 // Open the system menu on a section via ?menu=… (Esc twice: clear the selection, then open).
 const menuSection = q.get("menu");
@@ -51,7 +53,9 @@ if (menuSection) {
 		esc();
 		setTimeout(() => {
 			const names: Record<string, string> = { save: "save game", load: "load game", settings: "settings", controls: "controls", new: "new game" };
-			document.querySelectorAll<HTMLButtonElement>(".ui-drawer").forEach((b) => b.textContent?.toLowerCase() === names[menuSection] && b.click());
+			document.querySelectorAll<HTMLButtonElement>(".ui-drawer").forEach((b) => {
+				if (b.textContent?.toLowerCase() === names[menuSection]) b.click();
+			});
 		}, 120);
 	}, 300);
 }

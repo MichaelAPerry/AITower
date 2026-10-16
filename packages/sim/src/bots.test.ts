@@ -3,7 +3,7 @@ import type { BotState } from "./api";
 import { BOT_STUCK_TICKS } from "./core/constants";
 import { backoffTicks } from "./logistics/bots";
 import { failRack } from "./reliability/reliabilityStep";
-import { type SimImpl } from "./sim";
+import type { SimImpl } from "./sim";
 import { chainContent, type ChainOptions } from "./test/chain";
 import { exec, facilityOf, newSim, run } from "./test/fixture";
 

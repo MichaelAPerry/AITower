@@ -56,7 +56,7 @@ export class Overlays {
 		}
 		for (const fv of view.facilities) {
 			const def = this.content.facilities[fv.defId];
-			if (!def || def.kind !== "rack") continue;
+			if (def?.kind !== "rack") continue;
 			const x = fv.x * TILE;
 			const y = floorTop(view, fv.floor) + FAC_TOP;
 			const c = rackTempColor(fv.tempC, cb);

@@ -46,6 +46,7 @@ export function TopBar({ store, content, state, openMenu }: PanelProps) {
 				<span className="ui-label">DAY {view.day}</span>
 				<span className="ui-big">{clock(view.minuteOfDay)}</span>
 			</div>
+			{/* biome-ignore lint/a11y/useSemanticElements: a div group of buttons; a fieldset would bring unwanted default styling and semantics */}
 			<div className="ui-speeds" role="group" aria-label="Simulation speed">
 				{SPEEDS.map((s, i) => (
 					<button
@@ -115,6 +116,7 @@ export function TopBar({ store, content, state, openMenu }: PanelProps) {
 				<span className="ui-dymo">CLEARANCE</span>
 				<span className="ui-lamps">
 					{Array.from({ length: maxTier }, (_, i) => (
+						// biome-ignore lint/suspicious/noArrayIndexKey: fixed row of tier lamps; index is the identity
 						<Lamp key={i} on={i < view.tier} tone="amber" plain />
 					))}
 				</span>

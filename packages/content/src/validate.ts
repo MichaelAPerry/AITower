@@ -127,7 +127,9 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	if (!Array.isArray(b.energyPriceByHour) || b.energyPriceByHour.length !== 24) {
 		p.push(`balance.energyPriceByHour: expected 24 entries, got ${Array.isArray(b.energyPriceByHour) ? b.energyPriceByHour.length : "none"}`);
 	} else {
-		b.energyPriceByHour.forEach((m, i) => num(p, `balance.energyPriceByHour[${i}]`, m, { gt: 0 }));
+		b.energyPriceByHour.forEach((m, i) => {
+			num(p, `balance.energyPriceByHour[${i}]`, m, { gt: 0 });
+		});
 	}
 	num(p, "balance.ambientMeanC", b.ambientMeanC);
 	num(p, "balance.ambientSwingC", b.ambientSwingC, { min: 0 });
@@ -186,8 +188,12 @@ function validateBalance(p: Problems, db: ContentDB): void {
 		num(p, `balance.tiers.pflops[${i}]`, v, { min: 0 });
 		if (i > 0 && v < tr.pflops[i - 1]) p.push(`balance.tiers.pflops: must be non-decreasing at ${i}`);
 	});
-	tr.uptime.forEach((v, i) => num(p, `balance.tiers.uptime[${i}]`, v, { min: 0, max: 1 }));
-	tr.reward.forEach((v, i) => num(p, `balance.tiers.reward[${i}]`, v, { min: 0 }));
+	tr.uptime.forEach((v, i) => {
+		num(p, `balance.tiers.uptime[${i}]`, v, { min: 0, max: 1 });
+	});
+	tr.reward.forEach((v, i) => {
+		num(p, `balance.tiers.reward[${i}]`, v, { min: 0 });
+	});
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 
@@ -325,7 +331,10 @@ export function validateContent(db: ContentDB): string[] {
 		num(p, `${w}.minTier`, c.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
 		num(p, `${w}.payMultiplier`, c.payMultiplier, { gt: 0 });
 		if (!Array.isArray(c.kinds) || c.kinds.length === 0) p.push(`${w}.kinds: at least one job kind required`);
-		else c.kinds.forEach((k) => JOB_KINDS.includes(k) || p.push(`${w}.kinds: unknown kind "${k}"`));
+		else
+			c.kinds.forEach((k) => {
+				if (!JOB_KINDS.includes(k)) p.push(`${w}.kinds: unknown kind "${k}"`);
+			});
 	});
 	if (clients.length > 0 && !clients.some((c) => c.minTier <= 1)) p.push("clients: at least one client must be available at tier 1");
 

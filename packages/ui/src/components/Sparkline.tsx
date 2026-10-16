@@ -18,9 +18,11 @@ export function Sparkline({ values, width = 200, height = 48, color, min, max, r
 	const grid = (
 		<g className="ui-spark-grid">
 			{Array.from({ length: 9 }, (_, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: static graticule lines; index is the identity
 				<line key={`v${i}`} x1={(width * (i + 1)) / 10} x2={(width * (i + 1)) / 10} y1="0" y2={height} vectorEffect="non-scaling-stroke" />
 			))}
 			{Array.from({ length: 3 }, (_, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: static graticule lines; index is the identity
 				<line key={`h${i}`} x1="0" x2={width} y1={(height * (i + 1)) / 4} y2={(height * (i + 1)) / 4} vectorEffect="non-scaling-stroke" className={i === 1 ? "axis" : ""} />
 			))}
 		</g>

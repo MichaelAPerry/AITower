@@ -10,7 +10,7 @@ import type { SimView } from "@aitower/sim";
 import { Graphics } from "pixi.js";
 import { floorTop } from "../camera";
 import { TILE, TUBE_Y } from "../constants";
-import { BRASS, PAPER, T, lt } from "../palette";
+import { BRASS, T, lt } from "../palette";
 import { receiverX } from "./facilityArt";
 import { px } from "./draw";
 
@@ -38,7 +38,7 @@ export class Pneumatics {
 		const seen = new Set<number>();
 		for (const f of view.facilities) {
 			const def = this.content.facilities[f.defId];
-			if (!def || def.kind !== "rack") continue;
+			if (def?.kind !== "rack") continue;
 			seen.add(f.id);
 			const had = this.jobs.has(f.id);
 			const prev = this.jobs.get(f.id) ?? null;

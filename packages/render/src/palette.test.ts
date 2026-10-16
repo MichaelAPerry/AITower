@@ -13,13 +13,17 @@ describe("palette", () => {
 	});
 
 	it("heat ramp hits the STYLE.md stops", () => {
-		[18, 24, 30, 36, 42, 50].forEach((c, i) => expect(heatColor(c)).toBe(HEAT_RAMP[i]));
+		[18, 24, 30, 36, 42, 50].forEach((c, i) => {
+			expect(heatColor(c)).toBe(HEAT_RAMP[i]);
+		});
 	});
 
 	it("colour-blind heat ramp is plasma, stop for stop with the default ramp", () => {
 		expect(HEAT_RAMP_CB).toEqual([0x0d0887, 0x6a00a8, 0xb12a90, 0xe16462, 0xfca636, 0xf0f921]);
 		expect(HEAT_RAMP_CB).toHaveLength(HEAT_RAMP.length);
-		[18, 24, 30, 36, 42, 50].forEach((c, i) => expect(heatColor(c, true)).toBe(HEAT_RAMP_CB[i]));
+		[18, 24, 30, 36, 42, 50].forEach((c, i) => {
+			expect(heatColor(c, true)).toBe(HEAT_RAMP_CB[i]);
+		});
 	});
 
 	it("colour-blind tokens are the Okabe-Ito blue and orange plus a vermilion fault", () => {

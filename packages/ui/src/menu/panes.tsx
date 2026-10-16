@@ -228,6 +228,7 @@ export function SettingsPane({ store, state }: PaneProps) {
 			<SettingRow label="Horror intensity" hint="Body-horror presentation (used from later milestones).">
 				<span className="ui-choice" role="radiogroup" aria-label="Horror intensity">
 					{HORROR.map((h) => (
+						// biome-ignore lint/a11y/useSemanticElements: styled button group acts as a radio group; native radio inputs would change the markup and CSS
 						<button key={h.id} type="button" role="radio" aria-checked={s.horrorIntensity === h.id} className={`ui-btn ${s.horrorIntensity === h.id ? "is-on" : ""}`} onClick={() => set({ horrorIntensity: h.id })}>
 							{h.label}
 						</button>

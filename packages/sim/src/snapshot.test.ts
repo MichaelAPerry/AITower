@@ -4,7 +4,8 @@ import { SNAPSHOT_VERSION, type SimImpl, simFromSnapshot } from "./sim";
 import { migrations } from "./snapshot/migrate";
 import { exec, makeContent, newSim, rowCells } from "./test/fixture";
 
-type Json = Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any -- test helper over untyped JSON
+// biome-ignore lint/suspicious/noExplicitAny: test helper over untyped JSON
+type Json = Record<string, any>;
 
 const content = () => makeContent();
 
@@ -122,7 +123,7 @@ describe("snapshot validation", () => {
 
 	it("rejects non-finite and mistyped numbers", () => {
 		expectInvalid((s) => (s.state.cash = null), /cash must be a finite number/); // NaN becomes null in JSON
-		expectInvalid((s) => (s.state.airTemp.v[3] = 1e999), /non-numeric entry at 3/); // parses as Infinity
+		expectInvalid((s) => (s.state.airTemp.v[3] = Number.POSITIVE_INFINITY), /non-numeric entry at 3/); // parses as Infinity
 		expectInvalid((s) => (s.state.cash = "lots"), /cash must be a finite number/);
 		expectInvalid((s) => (s.state.tick = 1.5), /tick must be an integer/);
 		expectInvalid((s) => (s.state.tick = -4), /tick is negative/);

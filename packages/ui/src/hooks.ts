@@ -43,6 +43,7 @@ export function useGameState(store: GameStore): GameState {
 export function useViewport(): { width: number; height: number } {
 	const read = (): { width: number; height: number } => (typeof window === "undefined" ? { width: 1440, height: 900 } : { width: window.innerWidth, height: window.innerHeight });
 	const [size, setSize] = useState(read);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: `read` is a pure function of window and is deliberately not a dependency
 	useEffect(() => {
 		const on = (): void => setSize((s) => {
 			const n = read();

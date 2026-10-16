@@ -15,7 +15,6 @@ import { BRASS, COPPER, CRATE, GLASS, type Mat, PAPER, SCREEN, STEEL, T, VERDI, 
 import { CRT_GLYPHS, badgeFor, crtGlyph, flicker, isActive, ledCue, phosphorFor } from "../status";
 import {
 	bevel,
-	box,
 	cornerBracket,
 	crt,
 	dialFace,
@@ -116,23 +115,32 @@ export function drawBody(g: Graphics, def: FacilityDef, x: number, top: number):
 	const y = top + FAC_TOP;
 	switch (def.kind) {
 		case "rack":
-			return rackBody(g, def, x, y, top, c, a);
+			rackBody(g, def, x, y, top, c, a);
+			return;
 		case "crah":
-			return crahBody(g, x, y, W, c, a);
+			crahBody(g, x, y, W, c, a);
+			return;
 		case "chiller":
-			return chillerBody(g, x, y, top, W, c, a);
+			chillerBody(g, x, y, top, W, c, a);
+			return;
 		case "cdu":
-			return cduBody(g, x, y, top, W, c, a);
+			cduBody(g, x, y, top, W, c, a);
+			return;
 		case "grid_tie":
-			return gridTieBody(g, x, y, top, W, c, a);
+			gridTieBody(g, x, y, top, W, c, a);
+			return;
 		case "genset":
-			return gensetBody(g, x, y, top, W, c, a);
+			gensetBody(g, x, y, top, W, c, a);
+			return;
 		case "ups":
-			return upsBody(g, x, y, W, c, a);
+			upsBody(g, x, y, W, c, a);
+			return;
 		case "depot":
-			return depotBody(g, x, y, W, c, a);
+			depotBody(g, x, y, W, c, a);
+			return;
 		case "charger":
-			return chargerBody(g, x, y, W, c, a);
+			chargerBody(g, x, y, W, c, a);
+			return;
 	}
 }
 
@@ -648,7 +656,9 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 						? l === 0
 						: calm || flicker(f.id, i * 8 + l, slot + l) < 0.3 + f.clock * 0.55;
 		if (v === "storage") {
-			[14, 18, 22].forEach((ly, l) => lamp(g, cx + 11, y + ly, l === 2 && cue.mode === "activity" ? cue.accent : cue.color, lampOn(l)));
+			[14, 18, 22].forEach((ly, l) => {
+				lamp(g, cx + 11, y + ly, l === 2 && cue.mode === "activity" ? cue.accent : cue.color, lampOn(l));
+			});
 			// Spinning tape reels.
 			const ang = active && !calm ? t * (f.status === "idle" ? 1.2 : 5) * (i ? 1 : -0.8) : 0;
 			for (const [k, ry] of [y + 14, y + 20].entries()) {
@@ -662,7 +672,9 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 			}
 			px(g, cx + 9, y + 16, 1, 8, TAPE);
 		} else {
-			[3, 6, 9].forEach((lx, l) => lamp(g, cx + lx, y + LAMP_Y, cue.color, lampOn(l)));
+			[3, 6, 9].forEach((lx, l) => {
+				lamp(g, cx + lx, y + LAMP_Y, cue.color, lampOn(l));
+			});
 			// Punch card feeding through the slot.
 			const feed = active && !calm && f.jobId !== null ? Math.floor(t * 1.5 + i) % 3 : 0;
 			const kx = cx + 4 + ((f.id + i) % 3);

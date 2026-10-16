@@ -83,6 +83,7 @@ export function Toggle({
 	children?: ReactNode;
 }) {
 	return (
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: role is switch or radio (both support aria-checked); the lint cannot see through the prop
 		<button type="button" role={role} aria-checked={on} className={`ui-toggle ${on ? "is-on" : "is-off"} ${className}`} onClick={onClick} title={title}>
 			{lamp && <Lamp on={on} tone={lamp} plain />}
 			<span className="ui-toggle-plate" aria-hidden="true">
@@ -105,8 +106,10 @@ export function Stamp({ tone = "red", children, className = "" }: { tone?: "red"
 /** Mechanical drum counter: each character on its own wheel. */
 export function Counter({ text, className = "" }: { text: string; className?: string }) {
 	return (
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: aria-label on a text span reads the whole counter as one string; the per-character wheels are decorative
 		<span className={`ui-counter ${className}`} aria-label={text}>
 			{Array.from(text).map((ch, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: characters are positional wheels with no identity beyond their index
 				<span key={i} className={/[0-9]/.test(ch) ? "d" : "s"}>
 					{ch}
 				</span>
