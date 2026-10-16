@@ -31,12 +31,13 @@ lamps at row 14, louvres 17–24, card slot 26, kick plate 27–29); storage swa
 | `src/index.ts` | `createRenderer` + re-exports of pure camera/colour helpers |
 | `src/constants.ts` | world geometry (TILE 16 px, FLOOR_H 48 px, in-floor layout), zoom steps, margins |
 | `src/camera.ts` | **pure** camera math: screen↔world↔cell, clamp, zoom-at-cursor, pan |
-| `src/palette.ts` | **pure** STYLE.md tokens, heat ramp, `mix`/`dk`/`lt`, material ramps (BRASS, COPPER, VERDI, STEEL, PAPER…) |
-| `src/color.ts` | **pure** colour helpers: heat ramp, rack temp ramp, satisfaction/load ramps, net palette, sky keyframes (top/horizon/night/city/cityFar/haze) |
+| `src/palette.ts` | **pure** STYLE.md tokens, heat ramp, colour-blind plasma ramp (`HEAT_RAMP_CB`) and blue/orange tokens (`CB`), `mix`/`dk`/`lt`, material ramps (BRASS, COPPER, VERDI, STEEL, PAPER…) |
+| `src/color.ts` | **pure** colour helpers: heat ramp, rack temp ramp, satisfaction/load ramps, alert colour, net palette, sky keyframes (top/horizon/night/city/cityFar/haze). Heat, rack temp, satisfaction and load take `colorBlind` (default false) |
+| `src/presentation.ts` | **pure** `Presentation` store for `RenderOptions`: `set()` returns the keys that changed (empty = no-op); `horrorIntensity` getter (stored for M3, no visual yet) |
 | `src/interp.ts` | **pure** `Interpolator` (last two samples per id), `effectiveAlpha`, FNV `hashArrays` |
-| `src/status.ts` | **pure** status → lamp/phosphor colour + mode, badge, activity flicker |
+| `src/status.ts` | **pure** status → lamp cue (`color`, `mode`, health `tone`, `accent`; `colorBlind` aware), `phosphorFor(tone)`, CRT glyph (`crtGlyph`, `CRT_GLYPHS` 3×3 bitmaps), badge, activity flicker |
 | `src/pixi/renderer.ts` | composition root: Pixi `Application`, scene graph, caches, per-frame draw |
-| `src/pixi/draw.ts` | pixel primitives (see Art direction) |
+| `src/pixi/draw.ts` | pixel primitives (see Art direction); `crt(..., steady)` and `glyph3` |
 | `src/pixi/labels.ts` | `WORLD_FONT` (VT323) and `TextPool` (reused Pixi `Text`s per frame) |
 | `src/pixi/background.ts` | screen-space dithered smog sky, smog streaks, searchlights, 2 parallax brutalist skyline layers (body/shade/lights/sign `GraphicsContext`s), aircraft lamps, haze |
 | `src/pixi/structure.ts` | earth (soil strata, old pipes, cable runs), shell (green-grey tile, wainscot, duct, pneumatic tube, pendant lamps, I-beam slabs, parapet, concrete ends) + floor plates |
@@ -45,12 +46,30 @@ lamps at row 14, louvres 17–24, card slot 26, kick plate 27–29); storage swa
 | `src/pixi/facilityArt.ts` | per-kind facility bodies (static) and live details (CRTs, lamps, reels, fans, needles, knife switch, crates, badges) |
 | `src/pixi/pneumatics.ts` | per-tick `jobId` change detection → brass capsules along the floor's tube (decorative) |
 | `src/pixi/bots.ts` | 12×12 dome-headed automatons; exposes welding `torches` for effects |
-| `src/pixi/effects.ts` | rack heat shimmer, chiller steam, genset smoke, welding sparks, coolant drips |
-| `src/pixi/overlays.ts` | heat / power (amber nets) / coolant (copper-verdigris) overlays |
+| `src/pixi/effects.ts` | rack heat shimmer, chiller steam, genset smoke, welding sparks, coolant drips (shimmer/steam/smoke/drips stop under reduced motion) |
+| `src/pixi/overlays.ts` | heat / power (amber nets) / coolant (copper-verdigris) overlays; colour-blind satisfaction/load/heat ramps |
 | `src/pixi/markers.ts` | cyanotype ghost (valid) / red-stamped "DENIED" ghost (invalid), VT323 price tag, pulsing brass selection brackets |
 | `src/pixi/input.ts` | DOM input: right/middle drag, WASD/arrows, wheel zoom, left-button `CellPointerEvent`s |
 | `src/dev/fixtureView.ts` | hand-built fake `SimView` + stub content for the harness/tests |
 | `dev/index.html`, `dev/main.ts` | dev harness |
+
+## Presentation options (`Renderer.setOptions`, M1-T4)
+- `renderer.ts` keeps one `Presentation`; `setOptions` is a four-field diff. Only a real change does work: `colorBlind`
+  marks the overlay base dirty and `crtEffects` toggles the screen-space overlay. Repeat calls every frame are free.
+  Nothing else is cached by option, so per-frame layers read `pres.options` each draw.
+- **`reducedMotion`:** decorative motion stops. Frozen: smog drift, star twinkle and searchlight sweep (time held at 0),
+  fan blades and ribbon, reels, genset flywheel and flap, UPS bubbles, charger pantograph, CRT flicker, shimmer,
+  steam, smoke, drips, badge blink. Hidden: pneumatic capsules (queued, resume when off). Status lamps (rack LEDs,
+  lift direction lamp, aircraft lamps, grid-tie lamp) hold lit instead of blinking. Bots, lift cars, welding sparks and
+  the selection/ghost pulse still move (game state or not on the list).
+- **`crtEffects`:** false hides the scanline + vignette layer and stops the rack CRT flicker (`crt(..., steady)`).
+- **`colorBlind`:** heat overlay and rack temperature tint use `HEAT_RAMP_CB` (plasma, same °C stops). Rack LEDs and CRT
+  phosphor use blue (ok) / orange (warn) / vermilion (fault) / dim blue (idle). Each CRT carries a 3×3 glyph:
+  ✓ ok, ▲ throttled (also brownout and noCoolant), ✕ tripped/failed, ○ idle; nothing for unpowered/disabled.
+  Power and coolant overlays use blue (satisfied / light load) to vermilion (unsatisfied / overloaded).
+  Other facility lamps (chiller, genset, UPS, grid-tie) keep green/red; only rack status and overlays are remapped.
+- **`horrorIntensity`:** stored in `Presentation`, no visual effect until M3.
+- Dev harness: `?cb=1&rm=1&crt=0` (any combination) calls `setOptions` once at start.
 
 ## Layer order (back → front)
 Screen space: sky bands → stars → city silhouette (half-speed parallax).
@@ -73,10 +92,12 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
   `leave` with `cell: null`. Right/middle drag pans; wheel steps zoom toward the cursor.
 
 ## Testing
-- `npx vitest run packages/render`: pure helpers (camera, colour, interpolation, status, fixture). No WebGL needed.
+- `npx vitest run packages/render`: pure helpers (camera, colour, colour-blind mapping, interpolation, status cues and
+  glyph selection, presentation diff/idempotence, fixture). No WebGL needed.
 - Visual: `npx vite packages/render/dev --port 5174`, then
   `node scripts/screenshot.mjs "http://localhost:5174/?overlay=heat" out.png 1280 800 2000`.
   Query params: `overlay=heat|power|coolant`, `minute=1150` (dusk) / `1300` (night), `mpt=0` (freeze the clock),
-  `zoom=1..4`, `focus=x,floor`, `select=facility:12`, `ghost=1|bad`, `real=1` (real content via `loadContent()`;
+  `zoom=1..4`, `focus=x,floor`, `select=facility:12`, `ghost=1|bad`, `cb=1` (colour-blind), `rm=1` (reduced motion),
+  `crt=0` (CRT effects off), `real=1` (real content via `loadContent()`;
   the fixture already uses the real colours). Keys 1–4 switch overlay. The fixture cycles rack jobs every 25 ticks
   so capsules fly. Real game: `npx vite apps/web --port 5176`, `?new&seed=7&speed=10[&overlay=heat]`.

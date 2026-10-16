@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { heatColor, hex, lerpColor, netColor, ramp, rgb, satisfactionColor, skyColors } from "./color";
+import { alertColor, heatColor, hex, lerpColor, loadColor, netColor, rackTempColor, ramp, rgb, satisfactionColor, skyColors } from "./color";
+import { CB, HEAT_RAMP, HEAT_RAMP_CB, T } from "./palette";
 
 const r = (c: number) => (c >> 16) & 0xff;
 const b = (c: number) => c & 0xff;
@@ -34,6 +35,44 @@ describe("colour", () => {
 		expect(b(hot)).toBeLessThan(80);
 		expect(heatColor(50)).toBe(0xfff2c4);
 		expect(heatColor(60)).toBe(0xfff2c4);
+	});
+
+	it("rack temperature ramp hits its stops and clamps at the ends", () => {
+		[40, 60, 75, 85, 92, 100].forEach((c, i) => expect(rackTempColor(c)).toBe(HEAT_RAMP[i]));
+		expect(rackTempColor(10)).toBe(HEAT_RAMP[0]);
+		expect(rackTempColor(200)).toBe(HEAT_RAMP[5]);
+	});
+
+	it("colour-blind mapping swaps only the palette: same °C stops, plasma colours", () => {
+		[18, 24, 30, 36, 42, 50].forEach((c, i) => expect(heatColor(c, true)).toBe(HEAT_RAMP_CB[i]));
+		expect(rackTempColor(40, true)).toBe(HEAT_RAMP_CB[0]);
+		expect(rackTempColor(100, true)).toBe(HEAT_RAMP_CB[5]);
+		expect(rackTempColor(85, true)).toBe(HEAT_RAMP_CB[3]);
+		expect(rackTempColor(-50, true)).toBe(HEAT_RAMP_CB[0]);
+		expect(rackTempColor(500, true)).toBe(HEAT_RAMP_CB[5]);
+		expect(heatColor(30, false)).toBe(0xffb000);
+	});
+
+	it("colour-blind satisfaction: vermilion at 0, paper at 0.5, blue at 1 (no red or green)", () => {
+		expect(satisfactionColor(0, true)).toBe(CB.vermilion);
+		expect(satisfactionColor(0.5, true)).toBe(T.paper);
+		expect(satisfactionColor(1, true)).toBe(CB.blue);
+		for (let s = 0; s <= 1; s += 0.05) expect([T.red, T.green, T.amber]).not.toContain(satisfactionColor(s, true));
+		expect(satisfactionColor(0)).toBe(T.red);
+	});
+
+	it("colour-blind load: blue when light, orange at 0.8, vermilion at full", () => {
+		expect(loadColor(0, true)).toBe(CB.blue);
+		expect(loadColor(0.8, true)).toBe(CB.orange);
+		expect(loadColor(1, true)).toBe(CB.vermilion);
+		expect(loadColor(2, true)).toBe(CB.vermilion);
+		expect(loadColor(0)).toBe(T.green);
+		expect(loadColor(1)).toBe(T.red);
+	});
+
+	it("alert colour follows the scheme", () => {
+		expect(alertColor(false)).toBe(T.red);
+		expect(alertColor(true)).toBe(CB.vermilion);
 	});
 
 	it("satisfaction: red at 0, green at 1", () => {

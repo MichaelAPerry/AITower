@@ -1,6 +1,7 @@
 // Dev harness: renders the hand-built fixture and animates it.
 // Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
 //               ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
+//               ?cb=1 (colour-blind)  ?rm=1 (reduced motion)  ?crt=0 (CRT effects off)
 import "@fontsource/vt323";
 import { loadContent } from "@aitower/content";
 import type { OverlayMode, Selection } from "@aitower/shared";
@@ -24,6 +25,12 @@ if (params.has("real")) {
 await document.fonts.load('16px "VT323"').catch(() => []);
 const renderer = await createRenderer(host, content);
 renderer.resize(window.innerWidth, window.innerHeight);
+renderer.setOptions({
+	reducedMotion: params.get("rm") === "1",
+	crtEffects: params.get("crt") !== "0",
+	colorBlind: params.get("cb") === "1",
+	horrorIntensity: "full",
+});
 const focus = params.get("focus");
 if (focus) {
 	const [fx0, ff0] = focus.split(",").map(Number);

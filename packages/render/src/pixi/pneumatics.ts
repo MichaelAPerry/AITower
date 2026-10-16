@@ -5,6 +5,7 @@
  * happens here (renderer side), once per sim tick.
  */
 import type { ContentDB } from "@aitower/content";
+import type { RenderOptions } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { Graphics } from "pixi.js";
 import { floorTop } from "../camera";
@@ -71,9 +72,11 @@ export class Pneumatics {
 		for (const id of this.jobs.keys()) if (!seen.has(id)) this.jobs.delete(id);
 	}
 
-	draw(t: number): void {
+	/** Capsules are hidden under reduced motion (they are decorative); they stay queued and resume when it is off. */
+	draw(t: number, opt: RenderOptions): void {
 		const g = this.g;
 		g.clear();
+		if (opt.reducedMotion) return;
 		let w = 0;
 		for (const c of this.caps) {
 			const u = (t - c.start) / c.dur;

@@ -1,5 +1,5 @@
 /** Pure colour helpers (numbers are 0xRRGGBB). Ramps use the STYLE.md tokens from `palette.ts`. */
-import { HEAT_RAMP as R, T, dk, lt, mix } from "./palette";
+import { CB, HEAT_RAMP as R, HEAT_RAMP_CB as RCB, T, dk, lt, mix } from "./palette";
 
 export const hex = (s: string): number => {
 	const m = /^#?([0-9a-f]{6})$/i.exec(s.trim());
@@ -39,54 +39,57 @@ export const ramp = (stops: readonly (readonly [number, number])[], v: number): 
 	return stops[stops.length - 1][1];
 };
 
-/** Air temperature ramp (STYLE.md §2): ≤18 deep blue → 24 verdigris → 30 amber → 36 sodium → 42 red → ≥50 cream-hot. */
-export const HEAT_STOPS = [
-	[18, R[0]],
-	[24, R[1]],
-	[30, R[2]],
-	[36, R[3]],
-	[42, R[4]],
-	[50, R[5]],
-] as const;
+/** Pairs the six colours of a ramp with the shared °C stops (`cols[i]` sits at `temps[i]`). */
+const spread = (temps: readonly number[], cols: readonly number[]): [number, number][] => temps.map((x, i) => [x, cols[i]]);
 
-export const heatColor = (tempC: number): number => ramp(HEAT_STOPS, tempC);
+const HEAT_TEMPS = [18, 24, 30, 36, 42, 50] as const;
+const RACK_TEMPS = [40, 60, 75, 85, 92, 100] as const;
+
+/** Air temperature ramp (STYLE.md §2): ≤18 deep blue → 24 verdigris → 30 amber → 36 sodium → 42 red → ≥50 cream-hot. */
+export const HEAT_STOPS = spread(HEAT_TEMPS, R);
+/** Same °C stops on the colour-blind plasma ramp. */
+export const HEAT_STOPS_CB = spread(HEAT_TEMPS, RCB);
+
+export const heatColor = (tempC: number, colorBlind = false): number => ramp(colorBlind ? HEAT_STOPS_CB : HEAT_STOPS, tempC);
 
 /** Overlay alpha for a heat cell: cool air faint, hot air stronger. */
 export const heatAlpha = (tempC: number): number => 0.42 + 0.3 * clamp01((tempC - 18) / 27);
 
 /** Rack die temperature ramp (°C), aligned with typical ok/throttle/trip limits; same hues as the heat ramp. */
-export const RACK_TEMP_STOPS = [
-	[40, R[0]],
-	[60, R[1]],
-	[75, R[2]],
-	[85, R[3]],
-	[92, R[4]],
-	[100, R[5]],
+export const RACK_TEMP_STOPS = spread(RACK_TEMPS, R);
+export const RACK_TEMP_STOPS_CB = spread(RACK_TEMPS, RCB);
+
+export const rackTempColor = (tempC: number, colorBlind = false): number =>
+	ramp(colorBlind ? RACK_TEMP_STOPS_CB : RACK_TEMP_STOPS, tempC);
+
+/** Satisfaction / health: 0 red → 0.5 amber → 1 green (colour-blind: vermilion → paper → blue). */
+const SATISFACTION = [
+	[0, T.red],
+	[0.5, T.amber],
+	[1, T.green],
 ] as const;
+const SATISFACTION_CB = [
+	[0, CB.vermilion],
+	[0.5, T.paper],
+	[1, CB.blue],
+] as const;
+export const satisfactionColor = (s: number, colorBlind = false): number => ramp(colorBlind ? SATISFACTION_CB : SATISFACTION, s);
 
-export const rackTempColor = (tempC: number): number => ramp(RACK_TEMP_STOPS, tempC);
+/** Load ratio: 0 green → 0.8 amber → ≥1 red (colour-blind: blue → orange → vermilion). */
+const LOAD = [
+	[0, T.green],
+	[0.8, T.amber],
+	[1, T.red],
+] as const;
+const LOAD_CB = [
+	[0, CB.blue],
+	[0.8, CB.orange],
+	[1, CB.vermilion],
+] as const;
+export const loadColor = (r: number, colorBlind = false): number => ramp(colorBlind ? LOAD_CB : LOAD, r);
 
-/** Satisfaction / health: 0 red → 0.5 amber → 1 green. */
-export const satisfactionColor = (s: number): number =>
-	ramp(
-		[
-			[0, T.red],
-			[0.5, T.amber],
-			[1, T.green],
-		],
-		s,
-	);
-
-/** Load ratio: 0 green → 0.8 amber → ≥1 red. */
-export const loadColor = (r: number): number =>
-	ramp(
-		[
-			[0, T.green],
-			[0.8, T.amber],
-			[1, T.red],
-		],
-		r,
-	);
+/** Alarm colour for "no data / fault" marks (red, or vermilion when colour-blind). */
+export const alertColor = (colorBlind = false): number => (colorBlind ? CB.vermilion : T.red);
 
 /** Network tints, all phosphor/metal tokens: amber first (power), verdigris second (coolant). */
 const NET_PALETTE = [T.amber, T.verdigris, T.paper, T.sodium, T.green, T.copper, lt(T.verdigris, 0.45), T.brass];

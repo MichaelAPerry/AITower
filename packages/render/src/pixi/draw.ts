@@ -92,6 +92,7 @@ export const lamp = (g: Graphics, x: number, y: number, color: number, on: boole
 /**
  * Flickering CRT telemetry: scrolling bar graph inside a w×h screen at (x, y).
  * `lit`/`dim` are the phosphor pair; `level` 0..1 scales bar heights; `speed` scrolls (0 = frozen).
+ * `steady` (reduced motion or CRT effects off) disables the brightness flicker.
  */
 export const crt = (
 	g: Graphics,
@@ -106,10 +107,11 @@ export const crt = (
 	seed: number,
 	speed: number,
 	on: boolean,
+	steady = false,
 ): void => {
 	if (!on) return;
 	// 1–3 Hz brightness flicker: a stable pseudo-random slot per screen.
-	const fl = hash(seed, Math.floor(t * 2.3)) < 0.18 ? 0.55 : 1;
+	const fl = !steady && hash(seed, Math.floor(t * 2.3)) < 0.18 ? 0.55 : 1;
 	px(g, x, y, w, h, dim, 0.35 * fl);
 	const shift = Math.floor(t * speed);
 	for (let i = 0; i < w; i++) {
@@ -228,3 +230,13 @@ export const dither = (g: Graphics, x: number, y: number, w: number, h: number, 
 };
 
 export { mix };
+
+/**
+ * 3×3 pixel glyph (see `CRT_GLYPHS`) at (x, y): an ink backing square, then the glyph in `color`.
+ */
+export const glyph3 = (g: Graphics, x: number, y: number, rows: readonly string[], color: number): void => {
+	px(g, x, y, 3, 3, T.ink, 0.85);
+	rows.forEach((row, ry) => {
+		for (let rx = 0; rx < row.length; rx++) if (row[rx] === "X") px(g, x + rx, y + ry, 1, 1, color);
+	});
+};

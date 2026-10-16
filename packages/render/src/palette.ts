@@ -33,6 +33,22 @@ export const T = {
 /** STYLE.md heat ramp stops (overlay): ≤18 → 24 → 30 → 36 → 42 → ≥50 °C. */
 export const HEAT_RAMP = [0x1b3a5c, 0x3f7f6a, 0xffb000, 0xff8a3d, 0xff3b2f, 0xfff2c4] as const;
 
+/**
+ * Colour-blind heat ramp (matplotlib "plasma", deuteranopia-safe): same six °C stops as `HEAT_RAMP`.
+ * The `colorBlind` option swaps this in for the heat overlay and the rack temperature tint.
+ */
+export const HEAT_RAMP_CB = [0x0d0887, 0x6a00a8, 0xb12a90, 0xe16462, 0xfca636, 0xf0f921] as const;
+
+/**
+ * Colour-blind status scheme (Okabe-Ito blue / orange): replaces green/red for rack LEDs, CRT phosphor,
+ * power and coolant satisfaction/load when the `colorBlind` option is on. Shapes (CRT glyphs) carry the rest.
+ */
+export const CB = {
+	blue: 0x56b4e9,
+	orange: 0xe69f00,
+	vermilion: 0xff6a1a,
+} as const;
+
 const c8 = (c: number, s: number): number => (c >> s) & 0xff;
 
 /** Linear mix of two 0xRRGGBB colours (local copy so this module has no imports). */
