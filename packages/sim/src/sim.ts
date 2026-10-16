@@ -78,6 +78,11 @@ export class SimImpl implements Sim {
 		return hashValue(this.state);
 	}
 
+	canBuild(cmd: SimCommand): CommandResult {
+		// Placeholder until agent-sim makes validation queue-aware (M1-T1).
+		return toResult(planCommand(this, cmd));
+	}
+
 	canPlace(defId: string, floor: number, x: number): CommandResult {
 		return toResult(withFunds(this, planPlace(this, defId, floor, x)));
 	}

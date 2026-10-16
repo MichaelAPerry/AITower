@@ -1,6 +1,6 @@
 import type { ContentDB } from "@aitower/content";
 import { type Sim, type SimEvent, type SimSnapshot, createSim, simFromSnapshot } from "@aitower/sim";
-import type { AudioEngine, GameState, GameStore, Ghost, OverlayMode, Renderer, Selection, Speed, Tool } from "@aitower/shared";
+import { type AudioEngine, DEFAULT_SETTINGS, type GameState, type GameStore, type Ghost, type OverlayMode, type Renderer, type Selection, type Speed, type Tool } from "@aitower/shared";
 
 export const SCENARIO = "starter";
 const LOG_CAP = 200;
@@ -27,6 +27,8 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		selection: null,
 		log: [],
 		muted: false,
+		settings: { ...DEFAULT_SETTINGS },
+		saveStatus: { lastSavedAt: null, error: null, busy: false },
 	};
 	const subs = new Set<() => void>();
 	let lastNotify = 0;
@@ -76,9 +78,19 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		setGhost: (g: Ghost | null) => renderer?.setGhost(g),
 		focus: (cell) => renderer?.focus(cell),
 		setMuted(muted) {
-			audio?.setMuted(muted);
-			patch({ muted });
+			store.setSettings({ muted });
 		},
+		// Placeholders until agent-platform implements settings persistence and save slots (M1-T3).
+		setSettings(p) {
+			const settings = { ...state.settings, ...p };
+			audio?.setMuted(settings.muted);
+			patch({ settings, muted: settings.muted });
+		},
+		canBuild: (cmd) => sim.canBuild(cmd),
+		listSaves: async () => [],
+		saveTo: async () => ({ ok: false, reason: "save slots not implemented yet" }),
+		loadFrom: async () => ({ ok: false, reason: "save slots not implemented yet" }),
+		deleteSave: async () => {},
 		save: () => JSON.stringify(sim.snapshot()),
 		load(json) {
 			replaceSim(simFromSnapshot(content, JSON.parse(json) as SimSnapshot));

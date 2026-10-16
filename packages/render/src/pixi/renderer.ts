@@ -222,6 +222,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	};
 
 	const renderer: Renderer = {
+		setOptions() {
+			// Placeholder until agent-render implements presentation options (M1-T4).
+		},
 		draw(view, alpha) {
 			const now = performance.now();
 			const dt = Math.min((now - lastFrame) / 1000, 0.25);

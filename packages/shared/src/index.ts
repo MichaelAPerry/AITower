@@ -35,6 +35,86 @@ export interface CellPointerEvent {
 	shift: boolean;
 }
 
+// ─── Settings & saves ──────────────────────────────────────────────────
+
+export type HorrorIntensity = "full" | "mild" | "off";
+
+/** Player preferences. Persisted by the app (localStorage), independent of save games. */
+export interface Settings {
+	/** 0..1 */
+	masterVolume: number;
+	muted: boolean;
+	/** Stop non-essential animation (CRT flicker, shimmer, needle overshoot, camera easing). */
+	reducedMotion: boolean;
+	/** Scanlines, vignette and CRT flicker. */
+	crtEffects: boolean;
+	/** HUD text scale, 0.85..1.5. */
+	textScale: number;
+	/** Colour-blind-safe heat ramp and status colours, plus glyphs on status lamps. */
+	colorBlind: boolean;
+	/** Body-horror presentation intensity (used from M3 onward). */
+	horrorIntensity: HorrorIntensity;
+	/** Autosave at each new game day. */
+	autosave: boolean;
+	/** Show the "best on desktop" notice on small screens. */
+	showDesktopNotice: boolean;
+}
+
+export const DEFAULT_SETTINGS: Settings = {
+	masterVolume: 0.8,
+	muted: false,
+	reducedMotion: false,
+	crtEffects: true,
+	textScale: 1,
+	colorBlind: false,
+	horrorIntensity: "full",
+	autosave: true,
+	showDesktopNotice: true,
+};
+
+/** Clamp/repair a possibly partial or stale settings object (e.g. from storage). */
+export function normalizeSettings(raw: unknown): Settings {
+	const r = (raw && typeof raw === "object" ? raw : {}) as Partial<Record<keyof Settings, unknown>>;
+	const num = (v: unknown, d: number, lo: number, hi: number) => (typeof v === "number" && Number.isFinite(v) ? Math.min(hi, Math.max(lo, v)) : d);
+	const bool = (v: unknown, d: boolean) => (typeof v === "boolean" ? v : d);
+	const d = DEFAULT_SETTINGS;
+	return {
+		masterVolume: num(r.masterVolume, d.masterVolume, 0, 1),
+		muted: bool(r.muted, d.muted),
+		reducedMotion: bool(r.reducedMotion, d.reducedMotion),
+		crtEffects: bool(r.crtEffects, d.crtEffects),
+		textScale: num(r.textScale, d.textScale, 0.85, 1.5),
+		colorBlind: bool(r.colorBlind, d.colorBlind),
+		horrorIntensity: r.horrorIntensity === "mild" || r.horrorIntensity === "off" ? r.horrorIntensity : "full",
+		autosave: bool(r.autosave, d.autosave),
+		showDesktopNotice: bool(r.showDesktopNotice, d.showDesktopNotice),
+	};
+}
+
+/** Save slot ids: "auto" is the rolling autosave; "slot1".."slot3" are manual. */
+export type SaveSlotId = "auto" | "slot1" | "slot2" | "slot3";
+export const SAVE_SLOTS: SaveSlotId[] = ["auto", "slot1", "slot2", "slot3"];
+
+export interface SaveSlotInfo {
+	id: SaveSlotId;
+	/** Player-given name (manual slots) or "Autosave". */
+	name: string;
+	/** Epoch ms when written. */
+	savedAt: number;
+	day: number;
+	cash: number;
+	tier: number;
+}
+
+export interface SaveStatus {
+	/** Epoch ms of the last successful write (any slot), or null. */
+	lastSavedAt: number | null;
+	/** Human-readable error from the last failed save/load, or null. */
+	error: string | null;
+	/** True while an async save/load is running. */
+	busy: boolean;
+}
+
 // ─── Renderer (implemented by @aitower/render) ─────────────────────────
 
 export interface Renderer {
@@ -46,8 +126,17 @@ export interface Renderer {
 	/** Centre the camera on a cell. */
 	focus(cell: CellRef): void;
 	onPointer(cb: (e: CellPointerEvent) => void): () => void;
+	/** Apply presentation settings. Must be cheap and safe to call every time settings change. */
+	setOptions(o: RenderOptions): void;
 	resize(width: number, height: number): void;
 	destroy(): void;
+}
+
+export interface RenderOptions {
+	reducedMotion: boolean;
+	crtEffects: boolean;
+	colorBlind: boolean;
+	horrorIntensity: HorrorIntensity;
 }
 
 /** Factory signature exported by @aitower/render as `createRenderer`. */
@@ -74,7 +163,10 @@ export interface GameState {
 	selection: Selection;
 	/** Recent events, newest last, capped (~200). */
 	log: { tick: number; event: SimEvent }[];
+	/** Mirrors settings.muted (kept for older callers). */
 	muted: boolean;
+	settings: Settings;
+	saveStatus: SaveStatus;
 }
 
 export interface GameStore {
@@ -89,10 +181,23 @@ export interface GameStore {
 	setSelection(s: Selection): void;
 	setGhost(g: Ghost | null): void;
 	focus(cell: CellRef): void;
+	/** Same as setSettings({ muted }). */
 	setMuted(m: boolean): void;
+	/** Merge, normalise, persist and apply (audio volume, renderer options) the given settings. */
+	setSettings(patch: Partial<Settings>): void;
+	/** Same validation as dispatch() without queueing (for ghosts). Never throws. */
+	canBuild(cmd: SimCommand): CommandResult;
+	/** Export the current game as JSON text (for "export to file"). */
 	save(): string;
+	/** Replace the current game from exported JSON. Throws Error("Invalid save: …") on bad input; the running game is kept. */
 	load(json: string): void;
 	newGame(seed?: number): void;
+	/** Slots that currently hold a save, newest first. */
+	listSaves(): Promise<SaveSlotInfo[]>;
+	saveTo(slot: SaveSlotId, name?: string): Promise<CommandResult>;
+	/** On failure the running game is kept and saveStatus.error is set. */
+	loadFrom(slot: SaveSlotId): Promise<CommandResult>;
+	deleteSave(slot: SaveSlotId): Promise<void>;
 }
 
 // ─── Helpers ───────────────────────────────────────────────────────────

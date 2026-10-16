@@ -4,7 +4,7 @@
  */
 import type { ContentDB, FacilityDef } from "@aitower/content";
 import type { CommandResult, FacilityView, JobView, LedgerDay, MetricSample, SimCommand, SimEvent, SimView } from "@aitower/sim";
-import { type GameState, type GameStore, type Ghost, cellIndex, inBounds } from "@aitower/shared";
+import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds } from "@aitower/shared";
 
 const fac = (d: Partial<FacilityDef> & Pick<FacilityDef, "id" | "name" | "kind" | "category" | "cost" | "color" | "accent">): FacilityDef => ({
 	description: "",
@@ -168,7 +168,7 @@ export function createFakeStore(content: ContentDB = createFakeContent()): FakeS
 		{ tick: view.tick - 40, event: { type: "rackThrottled", facilityId: 9 } },
 		{ tick: view.tick - 10, event: { type: "contractOffered", contractId: 42 } },
 	];
-	let state: GameState = { view, speed: 3, overlay: "normal", tool: { kind: "select" }, selection: { kind: "facility", id: 9 }, log: initialLog, muted: false };
+	let state: GameState = { view, speed: 3, overlay: "normal", tool: { kind: "select" }, selection: { kind: "facility", id: 9 }, log: initialLog, muted: false, settings: { ...DEFAULT_SETTINGS }, saveStatus: { lastSavedAt: null, error: null, busy: false } };
 	const subs = new Set<() => void>();
 	const set = (patch: Partial<GameState>): void => {
 		state = { ...state, ...patch };
@@ -246,6 +246,13 @@ export function createFakeStore(content: ContentDB = createFakeContent()): FakeS
 			}
 		},
 		canPlace,
+		// Placeholders until agent-ui builds the menus against them (M1-T2).
+		setSettings: (patch) => set({ settings: { ...state.settings, ...patch } }),
+		canBuild: () => ok,
+		listSaves: async () => [],
+		saveTo: async () => ok,
+		loadFrom: async () => ok,
+		deleteSave: async () => {},
 		setSpeed: (speed) => set({ speed }),
 		setOverlay: (overlay) => set({ overlay }),
 		setTool: (tool) => set({ tool }),
