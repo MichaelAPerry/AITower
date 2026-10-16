@@ -106,3 +106,12 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 - **Bottom-panel tabs:** clicking the open tab no longer collapses the panel.
 - **Tutorial:** 15 memos (about 670 words) cut to 9 of at most 40 words each, enforced by a test. It points at CURRENT ORDERS, and the memo avoids covering the strip.
 - **Verified in the real build:** a new-player journey (title, induction, accept the highlighted offer, the job starts, the steps advance, money rises over two days with zero penalties). e2e now follows the same path.
+
+## Liquid-cooling report (owner: "the liquid cooled computes don't seem to work")
+- **The sim was correct.** With a chiller, a CDU and liquid racks on one coolant pipe, the racks cool (about 32 °C) and run jobs. Nothing told the player *why* a cabinet sat dark, though: idle, a pipe not reaching a chiller or CDU, or an unpowered chiller.
+- **Diagnosis everywhere** (`packages/ui/src/objective/diagnose.ts`):
+  - Every non-working rack now has a one-sentence reason and fix in its dossier: no pipe, a loop missing its chiller or CDU, a chiller or CDU without power, a loop over capacity, idle with no job, broken.
+  - CURRENT ORDERS raises "N compute cabinets can't run" with the reason, ahead of contract advice.
+- **Clearance hint:** once unlocked, liquid cabinets are offered alongside air ones, and idle cabinets are counted.
+- **Second money trap closed.** A training job could be accepted onto the one rack left idle and was then certain to miss its deadline (penalty). Acceptance now requires the racks the job would get to finish it within 90% of the deadline. Otherwise the offer shows "too slow for the deadline: your idle racks (X PF) need about N h, the deadline allows M h".
+- **Verified in the real build:** a save with F1 liquid racks on a pipe that reaches nothing shows the alert and the dossier reason. Laying the joining pipe cools the racks and clears the alert. Auto-player over 15 days on 3 seeds: cash $3.0M → $5.2–5.6M.

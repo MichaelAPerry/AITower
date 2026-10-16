@@ -45,6 +45,13 @@ function acceptSpec(sim: SimImpl, spec: ContractSpec): number {
 	return started.jobId;
 }
 
+function pushOffer(sim: SimImpl, spec: ContractSpec): number {
+	const id = sim.state.nextId.contract++;
+	sim.state.offers.push({ id, spec, expiresAt: sim.state.tick + 1000 });
+	sim.invalidateProjection();
+	return id;
+}
+
 const noOffers = () => makeContent([farm], { economy: { slaPenaltyFactor: 1.5, maxOffers: 0, offerIntervalTicks: 100, offerExpiryTicks: 100 } });
 
 describe("jobs", () => {
@@ -67,7 +74,7 @@ describe("jobs", () => {
 
 	it("rolls back to the last checkpoint when an allocated rack fails", () => {
 		const sim = newSim(noOffers(), "farm");
-		const jobId = acceptSpec(sim, training({ work: 1_000_000 }));
+		const jobId = acceptSpec(sim, training({ work: 1000 }));
 		const job = sim.state.jobs.find((j) => j.id === jobId);
 		if (!job) throw new Error("no job");
 		run(sim, 90);
@@ -108,7 +115,7 @@ describe("jobs", () => {
 
 	it("datasets need storage racks; contracts that don't fit are refused, and running jobs stall if storage goes", () => {
 		const sim = newSim(noOffers(), "farm");
-		const a = acceptSpec(sim, training({ work: 1e6, storageTB: 1500 }));
+		const a = acceptSpec(sim, training({ work: 1000, storageTB: 1500 }));
 		run(sim, 3);
 		const ja = sim.state.jobs.find((j) => j.id === a);
 		expect(ja?.status).toBe("running");
@@ -116,7 +123,7 @@ describe("jobs", () => {
 
 		// A second dataset that does not fit is refused up front instead of queueing behind the first.
 		const id = sim.state.nextId.contract++;
-		sim.state.offers.push({ id, spec: training({ work: 1e6, storageTB: 1000 }), expiresAt: sim.state.tick + 1000 });
+		sim.state.offers.push({ id, spec: training({ work: 1000, storageTB: 1000 }), expiresAt: sim.state.tick + 1000 });
 		const r = sim.submit({ type: "acceptContract", contractId: id });
 		expect(r.ok).toBe(false);
 
@@ -144,7 +151,7 @@ describe("jobs", () => {
 		// Liquid-only work with no liquid racks installed.
 		expect(offer(training({ needsLiquid: true }))).toEqual({ ok: false, reason: "needs liquid-cooled racks (none installed)" });
 		// Training takes every idle rack (≤ 8); after that, further work is refused rather than queued.
-		expect(offer(training({ work: 1e6 })).ok).toBe(true);
+		expect(offer(training({ work: 1000 })).ok).toBe(true);
 		run(sim, 1);
 		const after = offer({ ...training(), kind: "inference", work: 10, sustainedPflops: 10 });
 		expect(after.ok).toBe(false);
@@ -172,16 +179,18 @@ describe("jobs", () => {
 
 	it("training that misses its deadline fails with a penalty", () => {
 		const sim = newSim(noOffers(), "farm");
-		const jobId = acceptSpec(sim, training({ work: 1e6, durationTicks: 50 }));
+		const jobId = acceptSpec(sim, training({ work: 30, durationTicks: 30 }));
+		// Feasible when accepted; then every compute rack is switched off, so it can never finish.
+		for (const f of sim.state.facilities) if (f.defId === "rack_air_gpu") exec(sim, { type: "setEnabled", facilityId: f.id, enabled: false });
 		const pen0 = sim.state.today.penalties;
-		const events = run(sim, 60);
+		const events = run(sim, 40);
 		expect(events.find((e) => e.type === "jobFailed")).toEqual({ type: "jobFailed", jobId, penalty: 30_000 });
 		expect(sim.state.today.penalties - pen0).toBe(30_000);
 	});
 
 	it("cancelJob frees racks and charges the training penalty", () => {
 		const sim = newSim(noOffers(), "farm");
-		const jobId = acceptSpec(sim, training({ work: 1e6 }));
+		const jobId = acceptSpec(sim, training({ work: 1000 }));
 		run(sim, 5);
 		const ev = exec(sim, { type: "cancelJob", jobId });
 		expect(ev.find((e) => e.type === "jobFailed")).toEqual({ type: "jobFailed", jobId, penalty: 30_000 });
@@ -200,6 +209,30 @@ describe("contract offers", () => {
 		expect(sim.view().offers.length).toBeLessThanOrEqual(4);
 		const offer = sim.view().offers[0];
 		expect(offer.expiresAt).toBeGreaterThan(sim.state.tick);
+	});
+});
+
+describe("deadline feasibility on acceptance", () => {
+	it("refuses a training offer the idle racks cannot finish in time, and says how long it would take", () => {
+		const sim = newSim(noOffers(), "farm");
+		sim.step();
+		// 4 idle racks × 20 PF = 80 PF; 1440 PF·h needs 18 h but the deadline is 12 h.
+		const r = sim.canBuild({ type: "acceptContract", contractId: pushOffer(sim, training({ work: 1440, durationTicks: 720 })) });
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.reason).toMatch(/too slow for the deadline: your idle racks \(80 PF\) need about 18 h, the deadline allows 12 h/);
+	});
+	it("accepts the same work with a deadline it can meet", () => {
+		const sim = newSim(noOffers(), "farm");
+		sim.step();
+		expect(sim.canBuild({ type: "acceptContract", contractId: pushOffer(sim, training({ work: 1440, durationTicks: 1440 })) }).ok).toBe(true);
+	});
+	it("only counts racks left over after running jobs take theirs", () => {
+		const sim = newSim(noOffers(), "farm");
+		acceptSpec(sim, { ...training({ work: 40 }), kind: "inference", sustainedPflops: 60, work: 60 }); // 3 racks
+		// 1 rack left (20 PF): 100 PF·h needs 5 h; deadline 4 h is too short.
+		const r = sim.canBuild({ type: "acceptContract", contractId: pushOffer(sim, training({ work: 100, durationTicks: 240 })) });
+		expect(r.ok).toBe(false);
+		if (!r.ok) expect(r.reason).toMatch(/20 PF/);
 	});
 });
 
