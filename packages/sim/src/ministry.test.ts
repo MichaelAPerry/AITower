@@ -567,12 +567,15 @@ describe("standing", () => {
 		expect(count(done, "jobCompleted")).toBe(1);
 		expect(done.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 51, delta: 1 }]);
 
-		accept(sim, training({ work: 1_000_000, durationTicks: 30 }));
+		accept(sim, training({ work: 30, durationTicks: 30 }));
+		// Feasible when accepted; switching the racks off makes it miss the deadline.
+		for (const f of sim.state.facilities) if (f.defId === "rack_air_gpu") exec(sim, { type: "setEnabled", facilityId: f.id, enabled: false });
 		const failed = run(sim, 40);
 		expect(count(failed, "jobFailed")).toBe(1);
 		expect(failed.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 47, delta: -4 }]);
 
-		const jobId = accept(sim, training({ work: 1_000_000 }));
+		for (const f of sim.state.facilities) if (f.defId === "rack_air_gpu") exec(sim, { type: "setEnabled", facilityId: f.id, enabled: true });
+		const jobId = accept(sim, training({ work: 1000 }));
 		const cancelled = exec(sim, { type: "cancelJob", jobId });
 		expect(cancelled.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 43, delta: -4 }]);
 		expect(sim.view().standing).toBe(43);

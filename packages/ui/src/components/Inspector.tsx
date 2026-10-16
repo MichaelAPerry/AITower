@@ -3,6 +3,7 @@ import type { Balance } from "@aitower/content";
 import type { BotState, FacilityView, SimView } from "@aitower/sim";
 import { fmtDuration, fmtEnergy, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
+import { rackProblem } from "../objective/diagnose";
 import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { Dial } from "./Dial";
@@ -108,6 +109,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 	const thermal = content.balance.thermal;
 	const job = f.jobId === null ? undefined : view.jobs.find((j) => j.id === f.jobId);
 	const wo = view.workOrders.find((w) => w.facilityId === f.id);
+	const problem = rackProblem(view, content, f);
 	const send = (r: ReturnType<typeof store.dispatch>): void => {
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `insp:${r.reason}` });
 	};
@@ -124,6 +126,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				</div>
 				<Pill status tone={statusTone[f.status]}>{statusLabel[f.status]}</Pill>
 			</div>
+			{problem && <p className={`ui-insp-why tone-${statusTone[f.status]}`}>{problem}</p>}
 			<TempBar tempC={f.tempC} thermal={thermal} label={def?.rack ? "Die temp" : "Air temp"} />
 			<div className="ui-section ui-crt crt-amber">
 				{def?.rack && (

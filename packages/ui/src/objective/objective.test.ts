@@ -60,6 +60,20 @@ describe("current orders", () => {
 		expect(o.detail).toMatch(/now 80/);
 		expect(o.detail).toMatch(/build 2 more Mk\.I Cabinets/);
 	});
+	it("cabinets that can't run (no coolant loop) are flagged with the reason, before offers", () => {
+		const c = { ...content, facilities: { ...content.facilities, rack_dlc_gpu: { id: "rack_dlc_gpu", name: "Mk.II Liquid", kind: "rack", rack: { pflops: 130, liquidFraction: 0.8 } } } } as unknown as ContentDB;
+		const dlc = { id: 7, defId: "rack_dlc_gpu", status: "noCoolant", enabled: true, floor: 1, x: 30, coolantNet: 0, powerNet: 0 };
+		const o = currentObjective(view({ facilities: [rack(1), dlc], offers: [{ id: 5, clientName: "X" }], coolantNets: [] }), c, yes);
+		expect(o.tone).toBe("alert");
+		expect(o.title).toBe("1 compute cabinet can't run");
+		expect(o.detail).toMatch(/Mk\.II Liquid on F1 \(x30\): Its coolant pipe reaches no chiller or CDU/);
+	});
+	it("once liquid cabinets are unlocked the clearance hint offers them, and idle cabinets are counted", () => {
+		const c = { ...content, facilities: { ...content.facilities, rack_dlc_gpu: { id: "rack_dlc_gpu", name: "Mk.II Liquid", cost: 1_400_000, unlockTier: 1, rack: { pflops: 130, liquidFraction: 0.8 } } } } as unknown as ContentDB;
+		const o = currentObjective(view({ jobs: running, facilities: [rack(1), rack(2, "idle")] }), c, yes);
+		expect(o.detail).toMatch(/or 1 Mk\.II Liquid \(\$1\.40M each\) on a coolant loop with a chiller and a CDU/);
+		expect(o.detail).toMatch(/1 cabinet is idle/);
+	});
 	it("installed PFLOPS ignores failed and disabled racks", () => {
 		expect(installedPflops(view({ facilities: [rack(1), rack(2, "failed"), rack(3, "ok", false)] }), content)).toBe(20);
 	});

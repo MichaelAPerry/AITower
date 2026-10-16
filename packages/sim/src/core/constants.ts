@@ -71,3 +71,5 @@ export const EPS = 1e-9;
 
 /** Share of a training/finetune payout billed progressively at checkpoints; the rest is paid on completion. */
 export const TRAINING_PROGRESS_PAY_SHARE = 0.8;
+/** A training/finetune offer is accepted only if its idle racks would finish it within this share of the deadline (headroom for throttling and rollbacks). */
+export const ACCEPT_DEADLINE_MARGIN = 0.9;

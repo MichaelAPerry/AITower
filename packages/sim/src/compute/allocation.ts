@@ -1,7 +1,7 @@
 /** Rack ↔ job allocation: release of bad racks (with checkpoint rollback), storage gating, auto-scheduler. */
 import type { ContentDB, ContractSpec } from "@aitower/content";
 import type { SimEvent } from "../api";
-import { MIN_POWERED_SATISFACTION, TRAINING_MAX_RACKS } from "../core/constants";
+import { ACCEPT_DEADLINE_MARGIN, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR, TRAINING_MAX_RACKS } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Facility, Job, SimState } from "../core/state";
 import { getDef, isComputeRack, isStorageRack } from "../world/defs";
@@ -156,6 +156,8 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 
 	let idlePflops = 0;
 	let idleRacks = 0;
+	/** What a new training job would get: the first idle racks, up to its cap (as allocateRacks hands them out). */
+	let trainPflops = 0;
 	let anyCompatible = false;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
@@ -166,6 +168,7 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 		const d = getDef(content, r.defId);
 		if (spec.needsLiquid && d.rack?.cooling === "air") continue;
 		idlePflops += d.rack?.pflops ?? 0;
+		if (idleRacks < TRAINING_MAX_RACKS) trainPflops += d.rack?.pflops ?? 0;
 		idleRacks++;
 	}
 	const pf = (n: number) => `${Math.round(n * 10) / 10} PF`;
@@ -184,6 +187,14 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 		}
 		const parts = [busy ? `${busy} busy with current jobs` : "", offline ? `${offline} offline (unpowered, failed, tripped or uncooled)` : ""].filter(Boolean);
 		return { ok: false, reason: `no idle racks${parts.length ? `: ${parts.join(", ")}` : ""}` };
+	} else {
+		// Would it finish in time on the racks it gets now? Otherwise it is a guaranteed missed-deadline penalty.
+		const needHours = trainPflops > 0 ? spec.work / trainPflops : Number.POSITIVE_INFINITY;
+		const haveHours = (spec.durationTicks * ACCEPT_DEADLINE_MARGIN) / TICKS_PER_HOUR;
+		if (needHours > haveHours) {
+			const h = (n: number) => `${Math.ceil(n)} h`;
+			return { ok: false, reason: `too slow for the deadline: your idle racks (${pf(trainPflops)}) need about ${h(needHours)}, the deadline allows ${h(spec.durationTicks / TICKS_PER_HOUR)}` };
+		}
 	}
 
 	if (spec.storageTB > 0) {

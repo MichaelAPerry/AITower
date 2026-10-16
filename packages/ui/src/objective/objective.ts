@@ -5,6 +5,7 @@
 import type { ContentDB } from "@aitower/content";
 import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
+import { rackProblem } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
 
@@ -60,6 +61,18 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		};
 	}
 
+	// Cabinets that can't run at all (no power, no working coolant loop) are money sunk for nothing: say why, first.
+	const dead = view.facilities.filter((f) => f.enabled && (f.status === "unpowered" || f.status === "noCoolant") && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
+	if (dead.length > 0) {
+		const f = dead[0];
+		const name = content.facilities[f.defId]?.name ?? "cabinet";
+		return {
+			tone: "alert",
+			title: `${dead.length} compute cabinet${dead.length === 1 ? " can't" : "s can't"} run`,
+			detail: `${name} on F${f.floor} (x${f.x}): ${rackProblem(view, content, f) ?? "it is not running."}`,
+		};
+	}
+
 	// Idle racks earn nothing: whenever an offer can start on them, taking it is the best next step.
 	const fitting = view.offers.find((o) => canBuild({ type: "acceptContract", contractId: o.id }).ok);
 	if (fitting) {
@@ -90,10 +103,22 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			const air = content.facilities.rack_air_gpu;
 			const per = air?.rack?.pflops ?? 20;
 			const more = Math.ceil((need - have) / per);
+			const plural = (n: number) => (n === 1 ? "" : "s");
+			let build = `build ${more} more ${air?.name ?? "compute cabinet"}${plural(more)} (Racks tab, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler`;
+			// Once liquid cabinets are unlocked, offer them too (fewer, bigger, but they need a coolant loop).
+			let best: { name: string; cost: number; pflops: number } | undefined;
+			for (const d of Object.values(content.facilities))
+				if (d.rack && d.rack.liquidFraction > 0 && d.rack.pflops > per && d.unlockTier <= view.tier && (!best || d.rack.pflops > best.pflops)) best = { name: d.name, cost: d.cost, pflops: d.rack.pflops };
+			if (best) {
+				const k = Math.ceil((need - have) / best.pflops);
+				build += `, or ${k} ${best.name}${plural(k)} (${fmtMoney(best.cost)} each) on a coolant loop with a chiller and a CDU`;
+			}
+			const idle = view.facilities.filter((f) => f.status === "idle" && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0).length;
+			const idleNote = idle > 0 ? ` ${idle} cabinet${idle === 1 ? " is" : "s are"} idle, waiting for an offer that fits.` : "";
 			return {
 				tone: "progress",
 				title: `Next: Clearance ${next + 1}`,
-				detail: `Install ${need} PFLOPS (now ${have}): build ${more} more ${air?.name ?? "compute cabinet"}${more === 1 ? "" : "s"} (Racks tab, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler. Uptime must stay ≥ ${Math.round(uptime * 100)}%.`,
+				detail: `Install ${need} PFLOPS (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${idleNote}`,
 			};
 		}
 		return {
