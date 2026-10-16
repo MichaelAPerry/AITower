@@ -14,6 +14,7 @@
 | 2026-10-15 | 6 | Ministry Induction tutorial (13 steps, `packages/ui/src/tutorial`) | ✅ |
 | 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
 | 2026-10-16 | M1 | Foundations: contracts, then T1 sim, T2 ui, T3 platform, T4 render, T5 CI (see `tasks/m1/`) | ✅ |
+| 2026-10-16 | M2a | Ministry memos, standing, game over, economy retune, title screen, tutorial rework, music v1 (see `tasks/m2/`) | ✅ |
 
 ## Sub-agent assignments
 | Task | Agent | Scope | Status | Tests |
@@ -77,3 +78,14 @@ All four agents hit an API usage limit once and were resumed from their saved wo
   - a bad import keeps the running game
 - **CI concurrency:** superseded PR runs are cancelled; deploys from main always finish.
 - **Bundle:** Pixi is not split into its own chunk. Split chunks became circular and broke at runtime, and a single Pixi chunk is over budget. The reasoning is in `apps/web/vite.config.ts`.
+
+## M2a integration notes (orchestrator)
+- **Agents:** three Sonnet agents (sim+content, ui, audio), cut from five to save tokens. The tech tree and T2–T4 hardware moved to M2b.
+- **Bug found in the real-game browser check:** a fresh game sat at tick 0, paused behind the title screen and the induction, before power had ever been solved. Every rack showed "unpowered".
+  - Fix: `apps/web` now settles new games by one ordinary tick (`freshSim`), and a test covers it.
+- **Real-build checks (Chromium, 12):**
+  - the title screen pauses the game and offers CONTINUE once a save exists
+  - NEW GAME starts the induction
+  - the clock stays paused while reading, and ✕ CLOSE resumes it
+  - a real heatwave memo arrives and is answered
+  - standing stays in range

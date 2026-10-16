@@ -16,6 +16,12 @@
 		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ink) 50%, transparent), color-mix(in srgb, var(--ink) 88%, transparent));
 	animation: ui-menu-in 0.16s ease-out both;
 }
+/* Over the title screen the backdrop is solid, so the title does not show through the drawers. */
+.aitower-hud .ui-menu-backdrop.is-over-title {
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		linear-gradient(180deg, color-mix(in srgb, var(--ink) 94%, var(--smog)), var(--ink));
+}
 @keyframes ui-menu-in {
 	from {
 		opacity: 0;

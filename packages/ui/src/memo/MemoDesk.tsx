@@ -139,7 +139,7 @@ export function InboxButton({ state, ui, setUi }: { state: GameState; ui: UiStat
 	return (
 		<button type="button" className={`ui-btn ui-inbox ${ui.inboxOpen ? "is-on" : ""}`} data-tut="inbox" onClick={() => setUi({ inboxOpen: !ui.inboxOpen })} aria-expanded={ui.inboxOpen} title={n ? `${n} Ministry memo${n === 1 ? "" : "s"} waiting` : "Ministry inbox: no memos waiting"}>
 			<Lamp on={n > 0} tone="red" blink={n > 0} plain />
-			<span className="ui-inbox-label">INBOX</span>
+			<span className="ui-inbox-label ui-hide-narrow">INBOX</span>
 			<span className={`ui-inbox-count ${n ? "has" : ""}`}>{n}</span>
 		</button>
 	);
@@ -152,7 +152,7 @@ export function StandingMeter({ standing }: { standing: number }) {
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: a custom needle meter; a native <meter> cannot be styled into this gauge
 		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Ministry standing" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Ministry standing ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Ministry shuts you down.`}>
-			<span className="ui-dymo">MINISTRY STANDING</span>
+			<span className="ui-dymo">STANDING</span>
 			<span className="ui-standing-row">
 				<span className="ui-standing-scale" aria-hidden="true">
 					<i className="ui-standing-red" />
@@ -164,7 +164,7 @@ export function StandingMeter({ standing }: { standing: number }) {
 	);
 }
 
-const MAX_CHIPS = 3;
+const MAX_CHIPS = 2;
 
 /** Active temporary effects, e.g. "HEATWAVE +8 °C · 14h". */
 export function ModifierChips({ modifiers, tick }: { modifiers: readonly ModifierView[]; tick: number }) {

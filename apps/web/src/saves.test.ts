@@ -207,7 +207,7 @@ describe("boot", () => {
 		await store.saveTo("auto");
 		expect(backend.data.has("auto")).toBe(true);
 		await store.boot({ fresh: true, seed: 0 });
-		expect(store.get().view.tick).toBe(0);
+		expect(store.get().view.tick).toBe(1); // fresh games are settled one tick (see freshSim)
 		expect(store.sim().snapshot().seed).toBe(0);
 	});
 
@@ -226,7 +226,7 @@ describe("boot", () => {
 		const { store, backend } = setup();
 		backend.data.set("auto", "totally broken");
 		await store.boot();
-		expect(store.get().view.tick).toBe(0);
+		expect(store.get().view.tick).toBe(1); // fresh games are settled one tick (see freshSim)
 		expect(store.get().saveStatus.error).toMatch(/Invalid save/);
 	});
 });
@@ -250,5 +250,18 @@ describe("decodeSave probe isolation", () => {
 			loaded.step();
 		}
 		expect(loaded.hash()).toBe(sim.hash());
+	});
+});
+
+describe("fresh games", () => {
+	it("start one tick in, so power and statuses are solved before the first (paused) frame", () => {
+		const { store } = setup();
+		store.newGame(5);
+		const v = store.sim().view();
+		expect(v.tick).toBe(1);
+		const racks = v.facilities.filter((f) => content.facilities[f.defId]?.kind === "rack");
+		expect(racks.length).toBeGreaterThan(0);
+		expect(racks.every((f) => f.status !== "unpowered")).toBe(true);
+		expect(v.powerNets.length).toBeGreaterThan(0);
 	});
 });

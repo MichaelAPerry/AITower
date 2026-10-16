@@ -2,6 +2,7 @@ import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { describeEvent } from "./events";
+import { easiestOffer } from "./components/BottomPanel";
 import { createMenuController } from "./menu/menuController";
 import { SystemMenu } from "./menu/SystemMenu";
 import { Hud } from "./Hud";
@@ -158,5 +159,17 @@ describe("SystemMenu (server render)", () => {
 		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
 		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");
 		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");
+	});
+
+	it("the induction points at an offer the starter site can serve (no liquid cooling, no stored data first)", () => {
+		const offers = [
+			{ id: 1, needsLiquid: true, storageTB: 0 },
+			{ id: 2, needsLiquid: false, storageTB: 120 },
+			{ id: 3, needsLiquid: false, storageTB: 0 },
+		];
+		expect(easiestOffer(offers)?.id).toBe(3);
+		expect(easiestOffer(offers.slice(0, 2))?.id).toBe(2);
+		expect(easiestOffer(offers.slice(0, 1))?.id).toBe(1);
+		expect(easiestOffer([])).toBeUndefined();
 	});
 });

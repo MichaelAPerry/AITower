@@ -222,6 +222,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 					✕ CLOSE
 				</button>
 			</header>
+			<div className="tut-scroll">
 			<h3 className="tut-title">{current.title}</h3>
 			{current.body.map((p) => (
 				<p key={p} className="tut-body">
@@ -248,6 +249,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 					))}
 				</ol>
 			)}
+			</div>
 			<div className={`tut-clock ${clock.running ? "is-running" : "is-stopped"}`} role="status">
 				<span className="tut-clock-lamp" aria-hidden="true" />
 				{clock.text}

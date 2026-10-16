@@ -23,6 +23,20 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   StampBtn/Slider/ConfirmBar; `menu.css`). Pure parts: `escape.ts` (Esc order), `menuController.ts` (open/close + pause/restore),
   `slots.ts` (slot rows, time/date text, save lamp, export file name, import error text), `controls.ts` (the key list),
   `focus.ts`, `fileIO.ts` (Blob download, FileReader import with try/catch), `useSaves.ts`.
+- `title/`: the title screen (`TitleScreen.tsx`, `title.css`; pure `titleState.ts`: `showTitleAtBoot(search)`, `titleItems(saves)`, `startGame`).
+  Shown at boot over a paused game unless the URL has `?new` (the e2e smoke test needs that). `<Hud title>` overrides it (the dev
+  harness uses `?title=1`; SSR tests have no `location`, so no title). Only Continue, New game and Load leave it; Esc does nothing.
+  The system menu opened from it has only Load, Settings and Controls (`SystemMenu fromTitle`) and calls `onReplaced` after a load.
+- `memo/`: the Ministry memo desk. `memoDesk.ts` (pure: countdown, default stamp, standing tone, modifier chips, history rows),
+  `MemoDesk.tsx` (`MemoCard`, `MemoPop` slip, `MemoDrawer` inbox + history, `InboxButton`, `StandingMeter`, `ModifierChips`), `memo.css`.
+  `resolveMemo` is queued by the sim until the next tick, so a stamped memo is hidden at once (`ui.stamped`) and the player is told
+  it is filed when the clock runs. Outcome toasts come from the `memoResolved` event (`events.ts` reads `memoHistory`).
+- `gameover/`: `gameOver.ts` (pure: `gameOverToShow`/`keepDismissed` give once-only, stats, copy), `GameOverScreen.tsx`. Bankrupt and
+  shutdown are final (Load game / New game); victory has Continue in sandbox. Pauses once when it appears.
+- `tutorial/`: `steps.ts` (data + predicates), `Tutorial.tsx`, `clock.ts` (`applyClock`: pause on entry, run at 3x only for steps
+  with `clock: "run"`, applied on mode change only), `placement.ts` (`pickCorner`: the memo moves away from the highlighted element).
+  Highlights use `data-tut` hooks (`speed-3`, `tab-rack`, `card-<defId>`, `btab-contracts`, `accept`, `overlay-heat`, `inbox`, `standing`)
+  and the attribute `data-tut-target` (never a class: React rewrites className). Closing the induction restarts a stopped clock at 1x.
 - `hooks.ts`: `useGameState` (useSyncExternalStore). View-only churn is throttled to 10 Hz; changes to
   speed, tool, overlay, selection or mute re-render at once.
 - `keyboard.ts`: pure `keyAction` map, `runKey` (the testable dispatcher) and the `useHudKeyboard` hook. It does not use
@@ -43,6 +57,8 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   `dev/fakeSaves.ts` gives it in-memory async save slots, export/import text and `newGame`.
 - `dev/` (package root): Vite harness. Run `npx vite packages/ui/dev --port 5175`, then
   `node scripts/screenshot.mjs http://localhost:5175 out.png 1440 900 1500`.
+  Extra params: `?title=1` (&`saves=0` for a first visit), `?memo=N` (&`hist=1`), `?standing=N`, `?mod=1`, `?over=bankrupt|shutdown|victory`,
+  `?tut=<step id>|none`, `?toasts=0`. The fake store has `issueMemo`, `setStanding`, `addModifier`, `triggerGameOver`.
   Query params: `?tab=jobs|telemetry|finance|alerts`, `?overlay=heat`, `?sel=<facilityId>|bot|lift|none`,
   `?tool=<defId>`, `?menu=save|load|settings|controls|new` (opens the menu on that drawer), `?scale=0.85..1.5`, `?cb=1`,
   `?crt=0`, `?motion=1`, `?notice=0`. `window.__store` exposes the fake store to probe scripts. The harness imports the
@@ -63,8 +79,9 @@ for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, for
   are remapped to ink colours inside `.ui-form`.
 - Motion: CRT flicker, lamp blink, needle overshoot (`.ui-dial-needle` transition), lever flip and the
   teletype toast reveal are all switched off under `prefers-reduced-motion`.
-- Layout budget: the top bar fits at 1280 px only because the brand plate and the grid price hide below
-  1480 px, the density class `is-density-tight` compacts gaps and dials, and the induction button moved into the menu.
+- Layout budget: the top bar fits at 1280 px (and at 1280 with text scale 1.5) only because the brand plate and grid price hide below
+  1800 px, the outside temperature below 1640 px, the clearance lamps and the audio toggle at the tight density, and the standing
+  meter and inbox shrink with the density; `is-density-tight` also compacts gaps and dials, and the induction button lives in the menu.
   Measure `.ui-topbar` (scrollWidth vs clientWidth) after adding anything to it, at 1280 and at text scale 1.5.
 - Settings the HUD honours (all driven from `state.settings` in `Hud.tsx`): `textScale` sets `--hud-scale` and the root uses
   `zoom: var(--hud-scale)`, so every px size scales; `vh` units inside the HUD must divide by `--hud-scale`, and fixed

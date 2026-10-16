@@ -82,7 +82,18 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 	const initialSettings = loadSettings(storage, opts.prefersReducedMotion ?? systemPrefersReducedMotion());
 	applySettings(initialSettings);
 
-	let sim = createSim(content, SCENARIO, 1);
+	/**
+	 * A new game, advanced one ordinary tick (one game-minute). Power, cooling and statuses are only solved inside a
+	 * tick, so a game shown at tick 0 — paused behind the title screen or the induction — would display every rack as
+	 * unpowered. Stepping through the normal pipeline keeps it deterministic; the first tick's events are not shown.
+	 */
+	const freshSim = (seed: number): Sim => {
+		const next = createSim(content, SCENARIO, seed);
+		next.step();
+		return next;
+	};
+
+	let sim = freshSim(1);
 	let state: GameState = {
 		view: sim.view(),
 		speed: 1,
@@ -234,7 +245,7 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			replaceSim(next);
 		},
 		newGame(seed = (Math.random() * 2 ** 31) | 0) {
-			replaceSim(createSim(content, SCENARIO, seed));
+			replaceSim(freshSim(seed));
 		},
 
 		async listSaves() {

@@ -81,7 +81,7 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop; key handling implements the focus trap
-		<div className="ui-menu-backdrop" ref={root} onKeyDown={onKeyDown} onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}>
+		<div className={`ui-menu-backdrop ${fromTitle ? "is-over-title" : ""}`} ref={root} onKeyDown={onKeyDown} onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}>
 			<div className="ui-menu ui-panel" role="dialog" aria-modal="true" aria-label="System menu">
 				<header className="ui-menu-head ui-panel-title">
 					<span className="ui-menu-plate">

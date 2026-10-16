@@ -52,7 +52,7 @@ const FAKE_EVENTS: EventDef[] = [
 
 export function createFakeContent(): ContentDB {
 	const facilities: FacilityDef[] = [
-		fac({ id: "rack_gpu_air", name: "GPU Rack (air)", kind: "rack", category: "rack", cost: 42_000, color: "#2b3442", accent: "#4fd8ff", width: 1, description: "8× air-cooled accelerators. Cheap and simple, but dumps all its heat into the room.", rack: { cooling: "air", powerKw: 18, liquidFraction: 0, pflops: 2.4, storageTB: 0, failurePerDay: 0.01 } }),
+		fac({ id: "rack_air_gpu", name: "GPU Rack (air)", kind: "rack", category: "rack", cost: 42_000, color: "#2b3442", accent: "#4fd8ff", width: 1, description: "8× air-cooled accelerators. Cheap and simple, but dumps all its heat into the room.", rack: { cooling: "air", powerKw: 18, liquidFraction: 0, pflops: 2.4, storageTB: 0, failurePerDay: 0.01 } }),
 		fac({ id: "rack_gpu_dlc", name: "GPU Rack (DLC)", kind: "rack", category: "rack", cost: 95_000, color: "#26303e", accent: "#59a8ff", width: 1, unlockTier: 2, facilityKw: 0.4, description: "Direct-liquid-cooled dense rack. 80% of the heat leaves through the coolant loop.", rack: { cooling: "dlc", powerKw: 45, liquidFraction: 0.8, pflops: 7.2, storageTB: 0, failurePerDay: 0.012 }, placement: { needsCoolant: true } }),
 		fac({ id: "rack_storage", name: "Storage Array", kind: "rack", category: "rack", cost: 28_000, color: "#2f2f3a", accent: "#b08cff", description: "Dense NVMe shelves holding training datasets.", rack: { cooling: "air", powerKw: 6, liquidFraction: 0, pflops: 0, storageTB: 400, failurePerDay: 0.006 } }),
 		fac({ id: "grid_tie", name: "Grid Tie 1 MW", kind: "grid_tie", category: "power", cost: 60_000, color: "#3a3320", accent: "#ffb547", width: 2, description: "Utility connection. Imports up to 1 MW at the market price.", power: { capacityKw: 1000 } }),
@@ -153,7 +153,7 @@ function buildView(content: ContentDB): SimView {
 	put("grid_tie", 0, 6);
 	put("genset", 0, 9, { running: false, powerKw: 0 });
 	put("ups", 0, 13, { charge: 0.8 });
-	for (let i = 0; i < 8; i++) put("rack_gpu_air", 2, 8 + i, { tempC: 58 + i * 2.2, jobId: i < 6 ? 7 : null, status: i < 6 ? "ok" : "idle" });
+	for (let i = 0; i < 8; i++) put("rack_air_gpu", 2, 8 + i, { tempC: 58 + i * 2.2, jobId: i < 6 ? 7 : null, status: i < 6 ? "ok" : "idle" });
 	v.facilities[5].status = "failed";
 	v.facilities[5].health = 0;
 	v.facilities[8].status = "throttled";

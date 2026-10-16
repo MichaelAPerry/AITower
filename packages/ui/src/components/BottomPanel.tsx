@@ -15,8 +15,14 @@ const report = (r: CommandResult): void => {
 	if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `bp:${r.reason}` });
 };
 
+/** The offer the induction points at: one that needs neither liquid cooling nor stored data, so the starter site can serve it. */
+export function easiestOffer<T extends { needsLiquid: boolean; storageTB: number }>(offers: readonly T[]): T | undefined {
+	return offers.find((o) => !o.needsLiquid && o.storageTB === 0) ?? offers.find((o) => !o.needsLiquid) ?? offers[0];
+}
+
 function Contracts({ store, state }: PanelProps) {
 	const { view } = state;
+	const easy = easiestOffer(view.offers);
 	if (!view.offers.length) return <div className="ui-empty ui-pad">No offers right now — new contracts arrive every few hours.</div>;
 	return (
 		<div className="ui-form">
@@ -63,7 +69,7 @@ function Contracts({ store, state }: PanelProps) {
 									<button
 										type="button"
 										className="ui-stampbtn stamp-green"
-										data-tut="accept"
+										data-tut={o.id === easy?.id ? "accept" : undefined}
 										aria-label="Accept"
 										title="Accept contract"
 										onClick={() => report(store.dispatch({ type: "acceptContract", contractId: o.id }))}

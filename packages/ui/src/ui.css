@@ -1969,10 +1969,26 @@
 		display: none;
 	}
 }
-@media (max-width: 1480px) {
+/* Room for the standing meter and the inbox: the brand plate, the grid price and the outside temperature go first. */
+@media (max-width: 1800px) {
 	.aitower-hud .ui-brand,
 	.aitower-hud .ui-hide-narrow {
 		display: none;
+	}
+}
+@media (max-width: 1640px) {
+	.aitower-hud .ui-topbar > .ui-env {
+		display: none;
+	}
+}
+@media (max-width: 1500px) {
+	.aitower-hud .ui-topbar {
+		gap: 8px;
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+	.aitower-hud .ui-speed {
+		width: 30px;
 	}
 }
 @media (max-width: 1360px) {
@@ -1981,7 +1997,7 @@
 	}
 	.aitower-hud .ui-topbar {
 		gap: 8px;
-		padding: 6px 14px;
+		padding: 6px 9px;
 	}
 	.aitower-hud .ui-gauges {
 		gap: 6px;
@@ -1990,7 +2006,10 @@
 		gap: 10px !important;
 	}
 	.aitower-hud .ui-speed {
-		width: 34px;
+		width: 28px;
+	}
+	.aitower-hud .ui-mute {
+		display: none;
 	}
 	.aitower-hud .ui-tooltip {
 		left: 258px;
@@ -2034,7 +2053,9 @@
 	width: min(340px, calc(100% - 20px));
 	/* Leave the overlay strip at the top of the world visible. */
 	max-height: calc(100% - 56px);
-	overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
 	pointer-events: auto;
 	background:
 		repeating-linear-gradient(180deg, transparent 0 21px, color-mix(in srgb, var(--beige) 35%, transparent) 21px 22px),
@@ -2074,27 +2095,35 @@
 	font: 16px/1 var(--f-crt);
 	color: var(--brass-dk);
 }
+/* Header, clock strip and buttons stay in view; only the text scrolls. */
+.aitower-hud .tut-scroll {
+	min-height: 0;
+	overflow-y: auto;
+	padding-right: 2px;
+}
 .aitower-hud .tut-title {
-	font: 19px/1.2 var(--f-type);
-	margin: 6px 0 8px;
+	font: 17px/1.2 var(--f-type);
+	margin: 4px 0 6px;
 	text-decoration: underline;
 	text-decoration-color: var(--brass-dk);
 	text-wrap: balance;
 }
 .aitower-hud .tut-body {
-	margin: 0 0 8px;
-	font-size: 15px;
+	margin: 0 0 6px;
+	font-size: 14px;
+	line-height: 1.25;
 }
 .aitower-hud .tut-task {
 	position: relative;
 	display: flex;
 	align-items: center;
 	gap: 8px;
-	margin: 10px 0 6px;
-	padding: 7px 8px;
+	margin: 8px 0 6px;
+	padding: 6px 8px;
 	border: 1px dashed var(--brass-dk);
 	background: color-mix(in srgb, var(--amber) 10%, var(--paper));
-	font-size: 15px;
+	font-size: 14px;
+	line-height: 1.25;
 }
 .aitower-hud .tut-task.is-done {
 	background: color-mix(in srgb, var(--green-dim) 14%, var(--paper));
@@ -2128,9 +2157,10 @@
 	margin-right: 2px;
 }
 .aitower-hud .tut-how {
-	margin: 4px 0 6px;
-	padding-left: 26px;
-	font-size: 15px;
+	margin: 4px 0 4px;
+	padding-left: 24px;
+	font-size: 14px;
+	line-height: 1.25;
 }
 .aitower-hud .tut-how li {
 	margin: 2px 0;
@@ -2182,8 +2212,9 @@
 }
 /* The element the current memo talks about. */
 .aitower-hud [data-tut-target] {
-	outline: 2px solid var(--amber);
+	outline: 3px solid var(--amber);
 	outline-offset: 2px;
+	z-index: 3;
 	animation: tut-pulse 1.2s ease-in-out infinite;
 }
 @keyframes tut-pulse {
@@ -2411,7 +2442,7 @@
 	gap: 4px;
 }
 .aitower-hud.is-density-cramped .ui-speed {
-	width: 30px;
+	width: 26px;
 }
 .aitower-hud.is-density-cramped .ui-cash {
 	min-width: 0;

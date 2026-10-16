@@ -137,11 +137,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "contract",
 		title: "Form AT-7: Contract Requisition",
 		body: [
-			"Labs post contracts in the CONTRACTS form at the bottom. Training and fine-tune jobs pay when finished. Inference jobs pay per minute while you supply the compute they asked for.",
-			"Accept only what your idle racks can serve. Missed deadlines and unserved inference cost penalties.",
+			"Labs post contracts in the CONTRACTS form at the bottom. Training and fine-tune jobs pay when finished; inference pays per minute while you serve it.",
+			"Offers tagged LIQUID need liquid cooling you do not have yet. Missed deadlines cost penalties.",
 		],
-		task: "In the CONTRACTS form at the bottom, press the green ACCEPT stamp on any offer",
-		how: ["Open the CONTRACTS tab at the bottom of the screen", "Press ACCEPT on an offer (the highlighted stamp)"],
+		task: "In the CONTRACTS form at the bottom, press the green ACCEPT stamp on the highlighted offer",
+		how: ["Open the CONTRACTS tab at the bottom of the screen", "Press ACCEPT on the highlighted offer (it needs nothing your site lacks)"],
 		phase: (_s, ui) => (bottomShows(ui, "contracts") ? 1 : 0),
 		targets: (s, ui) => (!bottomShows(ui, "contracts") ? [t("btab-contracts")] : s.view.offers.length > 0 ? [t("accept")] : [".ui-bottom"]),
 		// An empty board needs time to pass; the moment an offer is posted the clock stops again so the player can read it.
@@ -192,8 +192,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "build-rack",
 		title: "Requisition of Additional Capacity",
 		body: [
-			"Equipment needs a floor, power cable underneath, and cooling nearby. The spot marked on F1 has all three: the air handler reaches it.",
-			"Afterwards press Esc to put the tool away. The clock stays stopped until you finish.",
+			"Equipment needs a floor, power cable underneath and cooling nearby; the marked spot on F1 has all three. Afterwards press Esc to put the tool away.",
 		],
 		task: "Build one more compute cabinet on F1, just right of the tape archive",
 		how: ["Click the RACKS tab in the left panel", "Click the first card: Mk.I Air-Cooled Compute Cabinet", "Click on F1 just right of the tape archive (the blue blueprint)"],
@@ -219,8 +218,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "slab",
 		title: "Vertical Expansion",
 		body: [
-			"Towers grow upward. A new floor must sit on an existing one, so you build along the empty row directly above F1.",
-			"The blue strip in the world shows where to drag. The clock stays stopped.",
+			"Towers grow upward. A new floor must sit on an existing one, so you build on the empty row directly above F1.",
 		],
 		task: "Build floor slab on F2: drag along the blue strip above F1",
 		how: ["Click the BUILD tab in the left panel", "Click the Floor slab card", "Press on F2 at the left end of the blue strip and drag right to its end"],
@@ -235,8 +233,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "conduit",
 		title: "Extending the Mains",
 		body: [
-			"Power conduit that touches the conduit on the floor below joins the same power network automatically. Turn on the power overlay (P) afterwards to see which network each cable belongs to.",
-			"The clock stays stopped.",
+			"Power conduit that touches the conduit on the floor below joins the same power network automatically. Press P afterwards to see the networks.",
 		],
 		task: "Lay power conduit on F2: drag along the blue strip on the new slab",
 		how: ["Click the BUILD tab in the left panel", "Click the Power conduit card", "Press on F2 at the left end of the blue strip and drag right to its end"],
