@@ -317,6 +317,12 @@ export interface Sim {
 	canBuild(cmd: SimCommand): CommandResult;
 	/** Advance exactly one tick. Returns events emitted during it. */
 	step(): SimEvent[];
+	/**
+	 * Apply queued commands now, without advancing time (used while the game is paused, so a stamped contract or a
+	 * placed cabinet appears at once). Equivalent to the command stage at the start of the next step(): same final
+	 * state and hash. Power, cooling and statuses still update on the next tick.
+	 */
+	flush(): SimEvent[];
 	/** Cheap read-only view; arrays may be reused between calls, don't mutate. */
 	view(): SimView;
 	snapshot(): SimSnapshot;

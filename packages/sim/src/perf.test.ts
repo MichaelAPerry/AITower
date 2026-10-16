@@ -4,6 +4,13 @@ import { SimImpl } from "./sim";
 import { makeContent, scenario } from "./test/fixture";
 import { TOWER_FLOORS, TOWER_WIDTH, towerContent } from "./test/tower";
 
+/**
+ * Wall-clock budgets. Shared CI runners are noisy and slower than a dev machine, and a timing assert there once
+ * blocked two deploys at 2.1 ms vs 2 ms. CI keeps a 3× margin, which still catches the order-of-magnitude
+ * regressions these tests exist for; local runs keep the tight budget.
+ */
+const SLACK = process.env.CI ? 3 : 1;
+
 /** 48 × 13 lot (floors −2..10), 60 air racks on floors 1..6, CRAHs, 4 bots, one lift. */
 function bigScenario() {
 	const facilities: { defId: string; floor: number; x: number }[] = [
@@ -42,7 +49,7 @@ describe("perf", () => {
 		}
 		const ms = Number(process.hrtime.bigint() - t0) / 1e6;
 		console.log(`perf: 1440 ticks in ${ms.toFixed(1)} ms (${((ms / 1440) * 1000).toFixed(1)} µs/tick)`);
-		expect(ms).toBeLessThan(1500);
+		expect(ms).toBeLessThan(1500 * SLACK);
 	});
 
 	it("60 floors × 64 wide, ~1,000 racks, 30 bots, chained lifts: mean step() < 2 ms", () => {
@@ -75,6 +82,6 @@ describe("perf", () => {
 		console.log(`perf tower: mean step() per window [${windows.map((x) => x.toFixed(3)).join(", ")}] ms, best ${best.toFixed(3)} ms; repaired ${repaired}, peak work orders ${maxOrders}`);
 		expect(repaired).toBeGreaterThan(20); // bots really worked (incl. across the lift transfer)
 		expect(maxOrders).toBeGreaterThan(50); // the queue was deep, i.e. the claim path was exercised
-		expect(best).toBeLessThan(2);
+		expect(best).toBeLessThan(2 * SLACK);
 	});
 });

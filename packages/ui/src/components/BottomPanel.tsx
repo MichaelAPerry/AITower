@@ -22,7 +22,9 @@ export function easiestOffer<T extends { needsLiquid: boolean; storageTB: number
 
 function Contracts({ store, state }: PanelProps) {
 	const { view } = state;
-	const easy = easiestOffer(view.offers);
+	// Ask the sim whether each offer can start on today's idle racks; ones that can't are shown blocked with the reason.
+	const fit = new Map(view.offers.map((o) => [o.id, store.canBuild({ type: "acceptContract", contractId: o.id })]));
+	const easy = view.offers.find((o) => fit.get(o.id)?.ok) ?? easiestOffer(view.offers);
 	if (!view.offers.length) return <div className="ui-empty ui-pad">No offers right now — new contracts arrive every few hours.</div>;
 	return (
 		<div className="ui-form">
@@ -47,9 +49,18 @@ function Contracts({ store, state }: PanelProps) {
 				<tbody>
 					{view.offers.map((o) => {
 						const left = o.expiresAt - view.tick;
+						const f = fit.get(o.id);
+						const blocked = f && !f.ok ? f.reason : null;
 						return (
-							<tr key={o.id}>
-								<td className="strong">{o.clientName}</td>
+							<tr key={o.id} className={blocked ? "is-blocked" : undefined}>
+								<td className="strong">
+									{o.clientName}
+									{blocked ? (
+										<span className="ui-offer-why">Can't start: {blocked}</span>
+									) : (
+										<span className="ui-offer-ok">Fits your idle racks</span>
+									)}
+								</td>
 								<td>
 									<Pill tone={o.kind === "inference" ? "info" : "cyan"}>{o.kind}</Pill>
 								</td>
@@ -71,7 +82,8 @@ function Contracts({ store, state }: PanelProps) {
 										className="ui-stampbtn stamp-green"
 										data-tut={o.id === easy?.id ? "accept" : undefined}
 										aria-label="Accept"
-										title="Accept contract"
+										title={blocked ? `Can't accept: ${blocked}` : "Accept contract"}
+										disabled={!!blocked}
 										onClick={() => report(store.dispatch({ type: "acceptContract", contractId: o.id }))}
 									>
 										<span className="rest">Accept</span>
@@ -280,7 +292,8 @@ export function BottomPanel(props: PanelProps) {
 						role="tab"
 						aria-selected={ui.bottomTab === t.id}
 						className={`ui-tab ${ui.bottomTab === t.id && ui.bottomOpen ? "is-on" : ""}`}
-						onClick={() => setUi(ui.bottomTab === t.id && ui.bottomOpen ? { bottomOpen: false } : { bottomTab: t.id, bottomOpen: true })}
+						// A tab only ever opens or switches; collapsing is the PANEL toggle (or `), so "open the Contracts tab" can never hide it.
+						onClick={() => setUi({ bottomTab: t.id, bottomOpen: true })}
 					>
 						{t.label}
 						{!!badge[t.id] && <span className={`ui-badge ${t.id === "alerts" ? "is-alert" : ""}`}>{badge[t.id]}</span>}

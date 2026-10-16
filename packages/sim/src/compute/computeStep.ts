@@ -4,7 +4,7 @@
  * racks start contributing next tick, when their full power is drawn.
  */
 import type { TickCtx } from "../core/context";
-import { EPS, FINISHED_JOB_RETENTION_TICKS, TICKS_PER_HOUR } from "../core/constants";
+import { EPS, FINISHED_JOB_RETENTION_TICKS, TICKS_PER_HOUR, TRAINING_PROGRESS_PAY_SHARE } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Job, SimState } from "../core/state";
 import { earn, spend } from "../economy/ledger";
@@ -56,7 +56,11 @@ export function computeStep(ctx: TickCtx): void {
 			if (delivered + EPS >= sustainedPflops(job)) {
 				earn(state, rate);
 				job.earned += rate;
-			} else spend(state, "penalties", content.balance.economy.slaPenaltyFactor * rate);
+			} else if (job.earned > 0) {
+				// SLA breach: the service was running and fell short (failures, brownout). A job that has not started
+				// serving yet is not penalised; acceptance already checked that it can start.
+				spend(state, "penalties", content.balance.economy.slaPenaltyFactor * rate);
+			}
 			if (job.progress >= job.total) {
 				finish(state, job, "completed");
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.earned });
@@ -69,11 +73,17 @@ export function computeStep(ctx: TickCtx): void {
 				if (job.sinceCheckpoint >= job.spec.checkpointTicks) {
 					job.lastCheckpoint = job.progress;
 					job.sinceCheckpoint = 0;
+					// Milestone billing: checkpointed (rollback-safe) work is paid as it lands, so a long run shows income.
+					const due = job.spec.payout * TRAINING_PROGRESS_PAY_SHARE * Math.min(1, job.lastCheckpoint / job.total) - job.earned;
+					if (due > 0) {
+						earn(state, due);
+						job.earned += due;
+					}
 				}
 			}
 			if (job.progress + EPS >= job.total) {
 				job.progress = job.total;
-				earn(state, job.spec.payout);
+				earn(state, job.spec.payout - job.earned); // the balance not already paid at checkpoints
 				job.earned = job.spec.payout;
 				finish(state, job, "completed");
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.spec.payout });

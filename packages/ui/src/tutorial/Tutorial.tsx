@@ -177,7 +177,8 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		if (!area || !me || !current) return;
 		const avoid: Rect[] = [];
 		for (const el of document.querySelectorAll(`.aitower-hud [${HL}]`)) avoid.push(toRect(el.getBoundingClientRect()));
-		for (const el of document.querySelectorAll(".aitower-hud .ui-memo-pop, .aitower-hud .ui-memo-drawer")) avoid.push(toRect(el.getBoundingClientRect()));
+		// Never sit on a Ministry memo or on CURRENT ORDERS (the induction points at it in step 3).
+		for (const el of document.querySelectorAll(".aitower-hud .ui-memo-pop, .aitower-hud .ui-memo-drawer, .aitower-hud .ui-objective")) avoid.push(toRect(el.getBoundingClientRect()));
 		if (current.focus || ghostKey) avoid.push(centreBox(toRect(area)));
 		const c = pickCorner(current.corner ?? "br", toRect(area), { w: me.width, h: me.height }, avoid);
 		setCorner((old) => (old === c ? old : c));

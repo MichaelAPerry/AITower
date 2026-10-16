@@ -35,6 +35,14 @@ const step = (id: string) => {
 };
 
 describe("Ministry induction steps", () => {
+	it("stays short: at most 9 numbered memos of at most 40 words each (owner: the old one was thick as mud)", () => {
+		expect(TUTORIAL_STEPS.length).toBeLessThanOrEqual(9);
+		for (const step of [...TUTORIAL_STEPS, MEMO_EXPLAINER]) {
+			const words = step.body.join(" ").split(/\s+/).filter(Boolean).length;
+			expect(words, step.id).toBeLessThanOrEqual(40);
+		}
+	});
+
 	it("has unique ids and ends with an informational memo", () => {
 		expect(new Set(TUTORIAL_STEPS.map((s) => s.id)).size).toBe(TUTORIAL_STEPS.length);
 		expect(TUTORIAL_STEPS.at(-1)?.task).toBeUndefined();
@@ -54,26 +62,11 @@ describe("Ministry induction steps", () => {
 		expect(s.done?.(state({ jobs: [0, 1, 2] }), b, ctx)).toBe(true);
 	});
 
-	it("inspect step needs a rack selected, not other machines", () => {
-		const s = step("inspect");
-		const b = baselineOf(state({}), ctx);
-		expect(s.done?.(state({ select: 100 }), b, ctx)).toBe(false);
-		expect(s.done?.(state({ select: 2 }), b, ctx)).toBe(true);
-	});
-
 	it("build-rack step compares rack count to the baseline", () => {
 		const s = step("build-rack");
 		const b = baselineOf(state({ racks: 4 }), ctx);
 		expect(s.done?.(state({ racks: 4 }), b, ctx)).toBe(false);
 		expect(s.done?.(state({ racks: 5 }), b, ctx)).toBe(true);
-	});
-
-	it("expansion steps look at floor F2", () => {
-		const b = baselineOf(state({}), ctx);
-		expect(step("slab").done?.(state({}), b, ctx)).toBe(false);
-		expect(step("slab").done?.(state({ slabF2: true }), b, ctx)).toBe(true);
-		expect(step("conduit").done?.(state({ slabF2: true }), b, ctx)).toBe(false);
-		expect(step("conduit").done?.(state({ powerF2: true }), b, ctx)).toBe(true);
 	});
 
 	it("heat and compute steps", () => {
@@ -95,7 +88,7 @@ describe("Ministry induction steps", () => {
 		const running = TUTORIAL_STEPS.filter((t) => stepClock(t, state({})) === "run").map((t) => t.id);
 		expect(running).toEqual(["contract", "compute"]);
 		// hands-on steps never run the clock
-		for (const id of ["clock", "inspect", "heat", "build-rack", "slab", "conduit"]) expect(stepClock(TUTORIAL_STEPS.find((t) => t.id === id)!, idle)).toBe("pause");
+		for (const id of ["orders", "clock", "heat", "build-rack", "memos", "finale"]) expect(stepClock(TUTORIAL_STEPS.find((t) => t.id === id)!, idle)).toBe("pause");
 		// the first two memos are read with the clock stopped
 		expect(stepClock(TUTORIAL_STEPS[0], idle)).toBe("pause");
 		expect(stepClock(MEMO_EXPLAINER, idle)).toBe("pause");
@@ -129,19 +122,9 @@ describe("Ministry induction steps", () => {
 		expect(s?.phase?.(st, armed)).toBe(2);
 		expect(s?.ghost?.(st, ui({ paletteTab: "rack" }))).toBeNull();
 		expect(s?.ghost?.(st, armed)).toMatchObject({ valid: true, defId: "rack_air_gpu", cells: [{ x: 18, floor: 1 }, { x: 19, floor: 1 }] });
-		expect(s?.task).toContain("just right of the tape archive");
+		expect(s?.task).toContain("F1");
+		expect(s?.how?.[2]).toContain("blueprint");
 		expect(s?.how?.[0]).toContain("RACKS tab");
-	});
-
-	it("slab and conduit steps highlight the matching palette card and mark F2", () => {
-		const slab = TUTORIAL_STEPS.find((t) => t.id === "slab");
-		const conduit = TUTORIAL_STEPS.find((t) => t.id === "conduit");
-		expect(slab?.targets?.(state({}), ui({ paletteTab: "rack" }))).toEqual(['[data-tut="tab-structure"]']);
-		expect(slab?.targets?.(state({}), ui())).toEqual(['[data-tut="card-slab"]']);
-		expect(slab?.ghost?.(state({}), ui({ tool: { kind: "slab" } }))?.cells.every((c) => c.floor === 2)).toBe(true);
-		expect(conduit?.targets?.(state({}), ui())).toEqual(['[data-tut="card-bolt-power"]']);
-		expect(conduit?.ghost?.(state({}), ui({ tool: { kind: "conduit", layer: "coolant" } }))).toBeNull();
-		expect(conduit?.ghost?.(state({}), ui({ tool: { kind: "conduit", layer: "power" } }))).not.toBeNull();
 	});
 
 	it("the memo explainer interrupts only once, only while the induction is live and a memo is open", () => {

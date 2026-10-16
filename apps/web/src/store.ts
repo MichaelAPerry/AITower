@@ -211,7 +211,17 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			subs.add(cb);
 			return () => subs.delete(cb);
 		},
-		dispatch: (cmd) => sim.submit(cmd),
+		dispatch(cmd) {
+			const r = sim.submit(cmd);
+			// While paused, apply at once: otherwise an accepted contract or a placed cabinet would sit invisibly in the
+			// queue until the clock runs (and the induction keeps the clock stopped while you work).
+			if (r.ok && state.speed === 0) {
+				pushLog(sim.flush());
+				dirty = true;
+				store.publish(0, true);
+			}
+			return r;
+		},
 		canPlace: (defId, floor, x) => sim.canPlace(defId, floor, x),
 		setSpeed: (speed: Speed) => patch({ speed }),
 		setOverlay(overlay: OverlayMode) {

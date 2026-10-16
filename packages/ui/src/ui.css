@@ -2556,3 +2556,82 @@
 .aitower-hud.is-density-cramped .ui-supply .ui-v {
 	min-width: 26px;
 }
+
+/* Offers that cannot start on today's idle racks (sim's acceptContract check). */
+.aitower-hud .ui-table tr.is-blocked td {
+	opacity: 0.62;
+}
+.aitower-hud .ui-table tr.is-blocked td.actions {
+	opacity: 1;
+}
+.aitower-hud .ui-offer-why,
+.aitower-hud .ui-offer-ok {
+	display: block;
+	font: 13px/1.2 var(--f-crt);
+	letter-spacing: 0.02em;
+}
+.aitower-hud .ui-offer-why {
+	color: var(--red);
+}
+.aitower-hud .ui-offer-ok {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-stampbtn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
+	filter: grayscale(1);
+}
+
+/* ── Current orders (objective strip) ── */
+.aitower-hud .ui-objective {
+	position: absolute;
+	right: 8px;
+	bottom: 8px;
+	z-index: 4;
+	width: min(440px, calc(100% - 16px));
+	pointer-events: auto;
+	background: var(--paper);
+	color: var(--ink);
+	border: 1px solid var(--brass-dk);
+	border-left: 6px solid var(--brass);
+	box-shadow: 0 0 0 2px var(--housing), 0 6px 16px color-mix(in srgb, var(--ink) 60%, transparent);
+	padding: 8px 12px 9px;
+	font: 15px/1.3 var(--f-type);
+}
+.aitower-hud .ui-objective.tone-alert {
+	border-left-color: var(--red);
+}
+.aitower-hud .ui-objective.tone-action {
+	border-left-color: var(--amber);
+}
+.aitower-hud .ui-objective-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 4px;
+}
+.aitower-hud .ui-objective-net {
+	font: 16px/1 var(--f-crt);
+	letter-spacing: 0.03em;
+}
+.aitower-hud .ui-objective-net.is-neg {
+	color: color-mix(in srgb, var(--red) 80%, var(--ink));
+}
+.aitower-hud .ui-objective-net.is-pos {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-objective-title {
+	display: block;
+	font-size: 17px;
+	margin-bottom: 2px;
+}
+.aitower-hud .ui-objective-detail,
+.aitower-hud .ui-objective-costs {
+	margin: 0;
+}
+.aitower-hud .ui-objective-costs {
+	margin-top: 3px;
+	font: 14px/1.2 var(--f-crt);
+	color: var(--brass-dk);
+}

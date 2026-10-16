@@ -88,7 +88,8 @@ describe("guaranteed offers", () => {
 
 	it("after an offer is accepted, declined or expires, the next comes within 6 hours", () => {
 		for (const how of ["accept", "decline", "expire"] as const) {
-			const sim = newSim(slow(), "empty", 3);
+			// Accepting needs idle racks, so the accept case runs on the fixture's starter site.
+			const sim = newSim(slow(), how === "accept" ? "starter" : "empty", 3);
 			const log: number[] = [];
 			const gone: number[] = [];
 			for (let i = 0; i < 4000; i++) {
@@ -96,9 +97,14 @@ describe("guaranteed offers", () => {
 				for (const e of sim.step()) {
 					if (e.type === "contractOffered") {
 						log.push(t);
-						if (how === "accept") sim.submit({ type: "acceptContract", contractId: e.contractId });
-						if (how === "decline") sim.submit({ type: "declineContract", contractId: e.contractId });
-						if (how !== "expire") gone.push(t + 1);
+						// An offer leaves the board when accepted/declined (next tick) or, if acceptance is refused, on expiry.
+						const r =
+							how === "accept"
+								? sim.submit({ type: "acceptContract", contractId: e.contractId })
+								: how === "decline"
+									? sim.submit({ type: "declineContract", contractId: e.contractId })
+									: { ok: false };
+						if (r.ok) gone.push(t + 1);
 					}
 					if (e.type === "contractExpired") gone.push(t);
 				}
