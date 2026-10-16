@@ -61,3 +61,62 @@ describe("economy & progression", () => {
 		expect(() => newSim(makeContent([bad]), "bad")).toThrow(/power conduit/);
 	});
 });
+
+describe("guaranteed offers", () => {
+	const slow = () => makeContent([], { economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 5000, offerExpiryTicks: 400 } });
+
+	/** Ticks (state.tick at step time) of every contractOffered over `ticks` steps. */
+	function offerTicks(sim: ReturnType<typeof newSim>, ticks: number, react?: (id: number) => void): number[] {
+		const out: number[] = [];
+		for (let i = 0; i < ticks; i++) {
+			const t = sim.state.tick;
+			for (const e of sim.step()) if (e.type === "contractOffered") {
+				out.push(t);
+				react?.(e.contractId);
+			}
+		}
+		return out;
+	}
+
+	it("with no open offer, one arrives within 6 hours, even if the interval roll said much later", () => {
+		const sim = newSim(slow(), "empty", 3);
+		expect(sim.state.nextOfferTick).toBeGreaterThan(360);
+		const first = offerTicks(sim, 400);
+		expect(first).toHaveLength(1);
+		expect(first[0]).toBeLessThanOrEqual(360);
+	});
+
+	it("after an offer is accepted, declined or expires, the next comes within 6 hours", () => {
+		for (const how of ["accept", "decline", "expire"] as const) {
+			const sim = newSim(slow(), "empty", 3);
+			const log: number[] = [];
+			const gone: number[] = [];
+			for (let i = 0; i < 4000; i++) {
+				const t = sim.state.tick;
+				for (const e of sim.step()) {
+					if (e.type === "contractOffered") {
+						log.push(t);
+						if (how === "accept") sim.submit({ type: "acceptContract", contractId: e.contractId });
+						if (how === "decline") sim.submit({ type: "declineContract", contractId: e.contractId });
+						if (how !== "expire") gone.push(t + 1);
+					}
+					if (e.type === "contractExpired") gone.push(t);
+				}
+			}
+			expect(log.length, how).toBeGreaterThan(4);
+			for (let k = 0; k < log.length - 1; k++) {
+				expect(log[k + 1] - gone[k], `${how} #${k}`).toBeLessThanOrEqual(360);
+			}
+		}
+	});
+
+	it("does not speed up generation while offers are still open", () => {
+		const sim = newSim(slow(), "empty", 3);
+		offerTicks(sim, 400);
+		expect(sim.state.offers).toHaveLength(1);
+		const next = sim.state.nextOfferTick;
+		expect(next).toBeGreaterThan(sim.state.tick + 360);
+		run(sim, 10);
+		expect(sim.state.nextOfferTick).toBe(next);
+	});
+});

@@ -6,6 +6,7 @@ import { TICKS_PER_DAY } from "../api";
 import type { TickCtx } from "../core/context";
 import { HISTORY_INTERVAL_TICKS, HISTORY_LENGTH, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR } from "../core/constants";
 import { offersStep } from "../compute/offers";
+import { setGameOver } from "../ministry/standing";
 import { getDef } from "../world/defs";
 import { spend } from "./ledger";
 
@@ -48,6 +49,7 @@ export function economyStep(ctx: TickCtx): void {
 		if (state.negativeCashTicks >= TICKS_PER_DAY && !state.bankrupt) {
 			state.bankrupt = true;
 			events.push({ type: "bankrupt" });
+			setGameOver(state, "bankrupt", events);
 		}
 	} else {
 		state.negativeCashTicks = 0;

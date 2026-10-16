@@ -220,8 +220,8 @@ describe("snapshot migrations", () => {
 		delete migrations[0];
 	});
 
-	it("is at version 2 and a v1 save (before bot routing fields) migrates", () => {
-		expect(SNAPSHOT_VERSION).toBe(2);
+	it("is at the current version and a v1 save (before bot routing fields) migrates", () => {
+		expect(SNAPSHOT_VERSION).toBe(3);
 		const snap = clone(savedJson()) as unknown as Json;
 		// Rewrite as a genuine v1 save: no topologyRev, no routing fields.
 		snap.version = 1;

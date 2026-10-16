@@ -1,0 +1,1895 @@
+[
+ {
+  "id": "form_27b6",
+  "category": "ministry",
+  "title": "Form 27B/6: Declaration of Declarations",
+  "body": "It has come to the attention of the Ministry that this facility has declared things without first declaring that it intended to declare them.\n\nForm 27B/6 must be completed, countersigned and retroactively pre-approved.",
+  "weight": 10,
+  "minTier": 1,
+  "cooldownDays": 8,
+  "timeoutTicks": 1080,
+  "defaultChoice": "deny",
+  "choices": [
+   {
+    "id": "approve",
+    "label": "APPROVE",
+    "hint": "-$25k now · standing +3",
+    "outcome": "The form was approved, stamped and filed under 'Approved'. Nobody will read it again.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -25000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "DENY",
+    "hint": "+$30k now · standing -5",
+    "outcome": "The form was denied. The Ministry notes your confidence.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 30000
+     },
+     {
+      "type": "standing",
+      "amount": -5
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$70k now · standing +6",
+    "outcome": "Three copies were filed. Two were lost; the third was lost more carefully.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -70000
+     },
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "surprise_audit",
+  "category": "ministry",
+  "title": "Notice of Scheduled Surprise Audit",
+  "body": "The Bureau of Verification will arrive unannounced at a time it has already announced. Please ensure the facility looks as though it has always been ready.",
+  "weight": 8,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 10,
+  "timeoutTicks": 1080,
+  "defaultChoice": "stall",
+  "choices": [
+   {
+    "id": "cooperate",
+    "label": "COOPERATE",
+    "hint": "-$120k now · standing +5",
+    "outcome": "Auditors found nothing, then billed you for the finding.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -120000
+     },
+     {
+      "type": "standing",
+      "amount": 5
+     }
+    ]
+   },
+   {
+    "id": "stall",
+    "label": "STALL",
+    "hint": "-$30k now · standing -6",
+    "outcome": "The audit was rescheduled to a date that does not exist. Goodwill was not.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": -6
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$60k now · standing +1 · rack failure rate x0.9 for 2d",
+    "outcome": "A provisional compliance certificate was issued, valid for the period it is displayed.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.9,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "misplaced_compute",
+  "category": "ministry",
+  "title": "Department of Misplaced Compute: Claim 4471",
+  "body": "The Department of Misplaced Compute asserts that four spare components in your depot were inventoried to the wrong department in 1987.\n\nThe Department requests their return, or a letter explaining why not.",
+  "weight": 7,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 12,
+  "timeoutTicks": 1080,
+  "defaultChoice": "deny",
+  "choices": [
+   {
+    "id": "approve",
+    "label": "RETURN THE PARTS",
+    "hint": "-4 spare parts · standing +3",
+    "outcome": "The parts were returned. A receipt was issued for a different set of parts.",
+    "effects": [
+     {
+      "type": "spareParts",
+      "count": -4
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "DENY",
+    "hint": "+$40k now · standing -4",
+    "outcome": "The claim was denied. A counter-claim has been prepared, in advance, against you.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 40000
+     },
+     {
+      "type": "standing",
+      "amount": -4
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$20k now · -1 spare parts · standing +1",
+    "outcome": "A letter was written. It was long. The Department stopped reading at the second page.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -20000
+     },
+     {
+      "type": "spareParts",
+      "count": -1
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "compute_subsidy",
+  "category": "ministry",
+  "title": "Subsidy for Domestic Computational Enthusiasm",
+  "body": "A subsidy is available to facilities that demonstrably enthuse. Enthusiasm will be measured by the Department of Enthusiasm Measurement.\n\nConditions apply. The conditions are the subsidy.",
+  "weight": 8,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 10,
+  "timeoutTicks": 1440,
+  "defaultChoice": "decline",
+  "choices": [
+   {
+    "id": "apply",
+    "label": "APPLY",
+    "hint": "+$180k now · standing -4",
+    "outcome": "Funds arrived. So did the reporting requirements.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 180000
+     },
+     {
+      "type": "standing",
+      "amount": -4
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "DECLINE",
+    "hint": "standing +2",
+    "outcome": "You declined a subsidy. The Ministry has never seen this before and is concerned.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "+$90k now · new contract payouts x0.9 for 1d",
+    "outcome": "A reduced grant was awarded, with a reduced obligation to be pleased about it.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 90000
+     },
+     {
+      "type": "payout",
+      "factor": 0.9,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fire_inspection",
+  "category": "ministry",
+  "title": "Fire Safety Inspection (Annual, Biannual)",
+  "body": "An inspector will verify that the facility is fire-safe. In doing so, the inspector will bring a lighter, as is customary.\n\nPlacards are required on every wall that has a wall.",
+  "weight": 7,
+  "minTier": 1,
+  "cooldownDays": 12,
+  "timeoutTicks": 1080,
+  "defaultChoice": "contest",
+  "choices": [
+   {
+    "id": "pass",
+    "label": "PAY THE FEES",
+    "hint": "-$80k now · standing +2",
+    "outcome": "Fees paid. The facility is now certified safe, by decree.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -80000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "contest",
+    "label": "CONTEST",
+    "hint": "-$20k now · standing -5",
+    "outcome": "The inspector filed a formal disagreement with the existence of your argument.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -20000
+     },
+     {
+      "type": "standing",
+      "amount": -5
+     }
+    ]
+   },
+   {
+    "id": "placards",
+    "label": "INSTALL PLACARDS",
+    "hint": "-$45k now · standing +3 · -1 spare parts",
+    "outcome": "Four hundred placards were installed. The walls feel crowded.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -45000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     },
+     {
+      "type": "spareParts",
+      "count": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rebrand",
+  "category": "ministry",
+  "title": "Memo: The Ministry Has Been Renamed",
+  "body": "Effective yesterday, the Ministry is now the Ministry of Compute and Adjacent Matters. All stationery, signage and letterheads must reflect this, retroactively.\n\nThe old name is to be forgotten collectively.",
+  "weight": 6,
+  "minTier": 1,
+  "cooldownDays": 15,
+  "timeoutTicks": 1440,
+  "defaultChoice": "ignore",
+  "choices": [
+   {
+    "id": "comply",
+    "label": "REPRINT STATIONERY",
+    "hint": "-$60k now · standing +4",
+    "outcome": "Stationery reprinted. The new letterhead is indistinguishable from the old.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "IGNORE",
+    "hint": "standing -3",
+    "outcome": "You continue to use the old name. The Ministry has noted that it continues to exist.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   },
+   {
+    "id": "overdo",
+    "label": "REBRAND THE ENTIRE FACILITY",
+    "hint": "-$100k now · standing +6",
+    "outcome": "Every sign was replaced. Two were replaced twice.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -100000
+     },
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "census",
+  "category": "ministry",
+  "title": "National Census of Compute (Optional, Mandatory)",
+  "body": "All facilities must report their exact number of computers. Facilities reporting inaccurate figures will be corrected by the Ministry.\n\nThe Ministry's figure is final, and will be provided after yours.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 4,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "honest",
+  "choices": [
+   {
+    "id": "honest",
+    "label": "REPORT HONESTLY",
+    "hint": "-$40k now · standing +4",
+    "outcome": "Your figure was accepted and entered into a ledger that has since been mislaid.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "under",
+    "label": "UNDERREPORT",
+    "hint": "+$60k now · standing -6",
+    "outcome": "A smaller figure was filed. The Ministry was moved by your modesty and your taxes.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 60000
+     },
+     {
+      "type": "standing",
+      "amount": -6
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$90k now · standing +7",
+    "outcome": "Three different figures were filed. The Ministry averaged them.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "standing",
+      "amount": 7
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "stamp_shortage",
+  "category": "ministry",
+  "title": "Notice: Official Stamp Shortage",
+  "body": "The Ministry has run out of the stamp that confirms receipt of stamp requests. Requests for stamps will be stamped once stamps resume.\n\nIn the meantime, please surrender any spare parts that resemble stamps.",
+  "weight": 6,
+  "minTier": 1,
+  "cooldownDays": 10,
+  "timeoutTicks": 1080,
+  "defaultChoice": "deny",
+  "choices": [
+   {
+    "id": "approve",
+    "label": "APPROVE REQUISITION",
+    "hint": "-3 spare parts · standing +2",
+    "outcome": "Parts were requisitioned as stamps. They are now stamps.",
+    "effects": [
+     {
+      "type": "spareParts",
+      "count": -3
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "DENY",
+    "hint": "+$20k now · standing -3",
+    "outcome": "You retained your parts. The shortage was reclassified as a surplus of absences.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 20000
+     },
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   },
+   {
+    "id": "buy",
+    "label": "PURCHASE PRIVATE STAMPS",
+    "hint": "-$50k now · standing +1 · +2 spare parts",
+    "outcome": "Private stamps were bought at a ministerial markup.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "spareParts",
+      "count": 2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "energy_levy",
+  "category": "ministry",
+  "title": "Special Levy on Electricity Consumed While Consuming",
+  "body": "A one-time levy has been introduced to recover the cost of introducing it. Facilities may pay immediately, or later, with more.\n\nThe levy will be refunded as soon as it is understood.",
+  "weight": 6,
+  "minTier": 2,
+  "minDay": 5,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "pay",
+  "choices": [
+   {
+    "id": "pay",
+    "label": "PAY IN FULL",
+    "hint": "-$100k now · standing +2",
+    "outcome": "Paid. The Ministry issued you a receipt for the receipt.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -100000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "dispute",
+    "label": "DISPUTE",
+    "hint": "energy price x1.3 for 1d",
+    "outcome": "The dispute was filed. Energy prices were adjusted while it is pending.",
+    "effects": [
+     {
+      "type": "energyPrice",
+      "factor": 1.3,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$40k now · energy price x1.1 for 2d · standing +1",
+    "outcome": "A payment plan was agreed. It has no end and no beginning.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.1,
+      "durationTicks": 2880
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "delegation",
+  "category": "ministry",
+  "title": "Visiting Delegation from the Ministry of Visits",
+  "body": "A delegation will inspect your facility, your hospitality, and the relationship between them.\n\nPlease prepare refreshments that are neither lavish nor insufficient, as defined in an appendix not yet written.",
+  "weight": 6,
+  "minTier": 2,
+  "minDay": 6,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "tour",
+  "choices": [
+   {
+    "id": "banquet",
+    "label": "HOST A BANQUET",
+    "hint": "-$150k now · standing +6",
+    "outcome": "The delegation ate. Standing rose. Several guests remain in the building.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   },
+   {
+    "id": "tour",
+    "label": "TOUR ONLY",
+    "hint": "-$30k now · standing +1",
+    "outcome": "A brisk tour was conducted. The delegation noted the briskness.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "DECLINE POLITELY",
+    "hint": "standing -5",
+    "outcome": "The delegation was disappointed to be declined in a way they could not appeal.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -5
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cooling_regulation",
+  "category": "ministry",
+  "title": "Regulation 14(c): Cooling Must Be Seen to Be Done",
+  "body": "All facilities must now demonstrate cooling in a form that can be photographed.\n\nCompliance is optional. Non-compliance is also optional. Consequences are mandatory.",
+  "weight": 6,
+  "minTier": 2,
+  "minDay": 7,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "petition",
+  "choices": [
+   {
+    "id": "comply",
+    "label": "COMPLY",
+    "hint": "-$200k now · standing +5 · rack failure rate x0.8 for 3d",
+    "outcome": "Photographs were taken of every fan. Reliability measurably improved from the attention.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -200000
+     },
+     {
+      "type": "standing",
+      "amount": 5
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.8,
+      "durationTicks": 4320
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "IGNORE",
+    "hint": "standing -6",
+    "outcome": "The regulation continues to exist at you.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -6
+     }
+    ]
+   },
+   {
+    "id": "petition",
+    "label": "PETITION FOR EXEMPTION",
+    "hint": "-$50k now · standing -1",
+    "outcome": "A petition was filed. It will be heard when it has been read.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "performance_review",
+  "category": "ministry",
+  "title": "Annual Performance Review (Quarterly)",
+  "body": "Your facility will be reviewed against targets which are confidential, so as not to influence performance.\n\nPlease submit a self-assessment that is accurate, flattering and brief.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 8,
+  "cooldownDays": 20,
+  "timeoutTicks": 1440,
+  "defaultChoice": "honest",
+  "choices": [
+   {
+    "id": "flatter",
+    "label": "SUBMIT A FLATTERING REPORT",
+    "hint": "-$40k now · standing +8",
+    "outcome": "The Ministry loved it. The Ministry loves most things it did not write.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "standing",
+      "amount": 8
+     }
+    ]
+   },
+   {
+    "id": "honest",
+    "label": "SUBMIT AN HONEST REPORT",
+    "hint": "+$100k now · standing -2",
+    "outcome": "The report was honest. A grant was issued to compensate for the shock.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 100000
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE IN TRIPLICATE",
+    "hint": "-$120k now · standing +10",
+    "outcome": "Three self-assessments were filed, none matching. The average was commended.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -120000
+     },
+     {
+      "type": "standing",
+      "amount": 10
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "heatwave",
+  "category": "environmental",
+  "title": "Weather Advisory: Heatwave",
+  "body": "The Met Office advises that it will be hot, and has asked the sun to reconsider.\n\nCooling plants are reminded that ambient temperature is not a suggestion.",
+  "weight": 9,
+  "minTier": 1,
+  "cooldownDays": 5,
+  "timeoutTicks": 720,
+  "defaultChoice": "ride",
+  "choices": [
+   {
+    "id": "ride",
+    "label": "RIDE IT OUT",
+    "hint": "ambient +9°C for 1d",
+    "outcome": "You did nothing. The weather continued doing something.",
+    "effects": [
+     {
+      "type": "ambient",
+      "deltaC": 9,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "cooling",
+    "label": "HIRE EMERGENCY COOLING",
+    "hint": "-$80k now · ambient +4°C for 1d",
+    "outcome": "Rented chillers arrived on a truck marked 'FRAGILE (EMOTIONALLY)'.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -80000
+     },
+     {
+      "type": "ambient",
+      "deltaC": 4,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "appeal",
+    "label": "ISSUE A PUBLIC APPEAL",
+    "hint": "standing +2 · ambient +7°C for 1d · energy price x1.2 for 1d",
+    "outcome": "Citizens were asked to use less electricity. They used more, then felt better.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "ambient",
+      "deltaC": 7,
+      "durationTicks": 1440
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.2,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "cold_snap",
+  "category": "environmental",
+  "title": "Weather Advisory: Cold Snap",
+  "body": "Temperatures are falling faster than your standing. Free cooling is available to any facility that can survive it.\n\nPlease note that condensation is a form of regret.",
+  "weight": 7,
+  "minTier": 1,
+  "cooldownDays": 6,
+  "timeoutTicks": 720,
+  "defaultChoice": "enjoy",
+  "choices": [
+   {
+    "id": "enjoy",
+    "label": "ENJOY FREE COOLING",
+    "hint": "ambient -8°C for 1d · rack failure rate x1.3 for 1d",
+    "outcome": "Fans idled and the air was crisp. Condensation filed a quiet complaint.",
+    "effects": [
+     {
+      "type": "ambient",
+      "deltaC": -8,
+      "durationTicks": 1440
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.3,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "winterise",
+    "label": "WINTERISE",
+    "hint": "-$40k now · ambient -8°C for 12h",
+    "outcome": "Gaskets, blankets and a sternly worded sign were installed.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "ambient",
+      "deltaC": -8,
+      "durationTicks": 720
+     }
+    ]
+   },
+   {
+    "id": "heaters",
+    "label": "RUN SPACE HEATERS",
+    "hint": "-$30k now · energy price x1.2 for 1d",
+    "outcome": "Heaters negated the cold snap at some expense to the cold snap.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.2,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "brownout",
+  "category": "environmental",
+  "title": "Grid Notice: Scheduled Unscheduled Brownout",
+  "body": "The grid operator regrets to announce a brownout. The brownout regrets to announce you.\n\nImports will be reduced until the brownout has finished expressing itself.",
+  "weight": 8,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 5,
+  "timeoutTicks": 480,
+  "defaultChoice": "ride",
+  "choices": [
+   {
+    "id": "ride",
+    "label": "RIDE IT OUT",
+    "hint": "grid import x0.5 for 8h",
+    "outcome": "You waited. The grid waited with you, but less.",
+    "effects": [
+     {
+      "type": "gridCap",
+      "factor": 0.5,
+      "durationTicks": 480
+     }
+    ]
+   },
+   {
+    "id": "fuel",
+    "label": "TOP UP THE GENSETS",
+    "hint": "-$50k now · grid import x0.5 for 4h",
+    "outcome": "Fuel was bought. Gensets were thanked in writing.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "gridCap",
+      "factor": 0.5,
+      "durationTicks": 240
+     }
+    ]
+   },
+   {
+    "id": "protest",
+    "label": "LODGE A FORMAL PROTEST",
+    "hint": "standing +2 · grid import x0.5 for 8h · -$10k now",
+    "outcome": "A protest was lodged. It lowered no one's voltage.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "gridCap",
+      "factor": 0.5,
+      "durationTicks": 480
+     },
+     {
+      "type": "cash",
+      "amount": -10000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "blackout",
+  "category": "environmental",
+  "title": "Grid Notice: Regional Blackout",
+  "body": "The regional grid has become a regional suggestion. Imports are suspended pending the return of electricity.\n\nThe Ministry recommends calm and, where applicable, batteries.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 6,
+  "cooldownDays": 10,
+  "timeoutTicks": 360,
+  "defaultChoice": "endure",
+  "choices": [
+   {
+    "id": "endure",
+    "label": "ENDURE",
+    "hint": "grid offline for 4h",
+    "outcome": "The lights went out and the Ministry sent a note saying so.",
+    "effects": [
+     {
+      "type": "gridCap",
+      "factor": 0,
+      "durationTicks": 240
+     }
+    ]
+   },
+   {
+    "id": "emergency",
+    "label": "BUY EMERGENCY POWER",
+    "hint": "-$150k now · grid offline for 2h",
+    "outcome": "A truck of generators arrived. It was not the truck you ordered, but it worked.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "gridCap",
+      "factor": 0,
+      "durationTicks": 120
+     }
+    ]
+   },
+   {
+    "id": "blame",
+    "label": "BLAME THE UTILITY",
+    "hint": "+$100k now · standing -3 · grid offline for 4h",
+    "outcome": "The utility paid compensation to stop you describing it.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 100000
+     },
+     {
+      "type": "standing",
+      "amount": -3
+     },
+     {
+      "type": "gridCap",
+      "factor": 0,
+      "durationTicks": 240
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "flood",
+  "category": "environmental",
+  "title": "Basement Advisory: Moisture Has Opinions",
+  "body": "Groundwater has been observed on the lower levels, mostly in places it does not belong.\n\nThe Ministry classifies this as a leak, a flood or a reflection, depending on who is paying.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 4,
+  "cooldownDays": 10,
+  "timeoutTicks": 720,
+  "defaultChoice": "ignore",
+  "choices": [
+   {
+    "id": "pump",
+    "label": "PUMP IT OUT",
+    "hint": "-$90k now · -2 spare parts",
+    "outcome": "Pumps ran for hours. A few parts did not survive the experience.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "spareParts",
+      "count": -2
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "IGNORE",
+    "hint": "2 racks fail · standing -2",
+    "outcome": "The water noticed. Equipment noticed the water.",
+    "effects": [
+     {
+      "type": "failRacks",
+      "count": 2
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "claim",
+    "label": "FILE AN INSURANCE CLAIM",
+    "hint": "+$120k now · 1 rack fails · standing -3",
+    "outcome": "The insurer paid and sent a note about the hydrological nature of claims.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 120000
+     },
+     {
+      "type": "failRacks",
+      "count": 1
+     },
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "supply_shortage",
+  "category": "environmental",
+  "title": "Supply Notice: Component Shortage",
+  "body": "A shortage of spare components has been declared by the people who stock them.\n\nSuppliers wish to remind customers that shortages are a natural phenomenon, like tides, and are billed accordingly.",
+  "weight": 6,
+  "minTier": 1,
+  "cooldownDays": 8,
+  "timeoutTicks": 1080,
+  "defaultChoice": "wait",
+  "choices": [
+   {
+    "id": "spot",
+    "label": "BUY ON THE SPOT MARKET",
+    "hint": "-$90k now · +10 spare parts",
+    "outcome": "Parts were bought at a price that was described as 'firm and slightly rude'.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "spareParts",
+      "count": 10
+     }
+    ]
+   },
+   {
+    "id": "wait",
+    "label": "WAIT IT OUT",
+    "hint": "-2 spare parts · standing -1",
+    "outcome": "Nothing was bought. The shelves looked emptier, but also cleaner.",
+    "effects": [
+     {
+      "type": "spareParts",
+      "count": -2
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "ration",
+    "label": "FILE A RATIONING ORDER",
+    "hint": "-$30k now · +4 spare parts · rack failure rate x1.2 for 12h",
+    "outcome": "Some parts were secured under a ration card that you are the only holder of.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "spareParts",
+      "count": 4
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.2,
+      "durationTicks": 720
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "price_spike",
+  "category": "environmental",
+  "title": "Market Notice: Energy Price Spike",
+  "body": "Electricity prices are climbing for reasons the market describes as 'vibrant'.\n\nFacilities may hedge, absorb, or take comfort in the fact that this was predicted by someone.",
+  "weight": 7,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 6,
+  "timeoutTicks": 720,
+  "defaultChoice": "absorb",
+  "choices": [
+   {
+    "id": "hedge",
+    "label": "HEDGE",
+    "hint": "-$70k now · energy price x1.3 for 1d",
+    "outcome": "A hedge was purchased. It hedged.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -70000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.3,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "absorb",
+    "label": "ABSORB THE COST",
+    "hint": "energy price x2 for 1d",
+    "outcome": "You paid the price. The price was surprised.",
+    "effects": [
+     {
+      "type": "energyPrice",
+      "factor": 2,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "lobby",
+    "label": "LOBBY THE REGULATOR",
+    "hint": "-$30k now · standing +2 · energy price x1.6 for 1d",
+    "outcome": "The regulator agreed to look into it, which is where it stayed.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.6,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "gpu_recall",
+  "category": "operational",
+  "title": "Vendor Notice: GPU Batch 7B Recall",
+  "body": "A manufacturing defect was discovered in a batch of accelerators, shortly after it was discovered by customers.\n\nAffected units will fail 'at an unspecified time of the vendor's choosing'.",
+  "weight": 7,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 10,
+  "timeoutTicks": 1080,
+  "defaultChoice": "replace",
+  "choices": [
+   {
+    "id": "replace",
+    "label": "REPLACE PROACTIVELY",
+    "hint": "-$120k now · -3 spare parts",
+    "outcome": "Units were swapped in an orderly fashion. The vendor sent a gift basket of cables.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -120000
+     },
+     {
+      "type": "spareParts",
+      "count": -3
+     }
+    ]
+   },
+   {
+    "id": "monitor",
+    "label": "MONITOR AND PRAY",
+    "hint": "1 rack fails",
+    "outcome": "You watched the logs and hoped. One rack decided otherwise.",
+    "effects": [
+     {
+      "type": "failRacks",
+      "count": 1
+     }
+    ]
+   },
+   {
+    "id": "refund",
+    "label": "DEMAND A REFUND",
+    "hint": "+$80k now · 1 rack fails · standing -2",
+    "outcome": "The vendor refunded part of the cost and part of the dignity.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 80000
+     },
+     {
+      "type": "failRacks",
+      "count": 1
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "firmware_bug",
+  "category": "operational",
+  "title": "Firmware Advisory: Thermal Governor Errata",
+  "body": "A firmware update corrects an error in the thermal governor, introduced by the previous update correcting an error.\n\nInstalling the update is recommended. Not installing it is also recommended.",
+  "weight": 7,
+  "minTier": 1,
+  "cooldownDays": 8,
+  "timeoutTicks": 720,
+  "defaultChoice": "skip",
+  "choices": [
+   {
+    "id": "install",
+    "label": "INSTALL NOW",
+    "hint": "-$30k now · rack failure rate x0.85 for 3d",
+    "outcome": "The update installed after three reboots and one apology.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.85,
+      "durationTicks": 4320
+     }
+    ]
+   },
+   {
+    "id": "skip",
+    "label": "SKIP IT",
+    "hint": "rack failure rate x1.4 for 2d",
+    "outcome": "The update was skipped. The bug was not.",
+    "effects": [
+     {
+      "type": "failureRate",
+      "factor": 1.4,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "stage",
+    "label": "STAGE THE ROLLOUT",
+    "hint": "-$60k now · rack failure rate x0.95 for 3d · standing +1",
+    "outcome": "A careful rollout was run. It was careful, and long, and billed by the hour.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.95,
+      "durationTicks": 4320
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ransomware_scare",
+  "category": "operational",
+  "title": "Security Alert: Message From An Unknown Benefactor",
+  "body": "A message arrived demanding payment in exchange for not having done something. It is unclear whether it has been done.\n\nThe Ministry will remain uninvolved and will assess the damage afterwards.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 7,
+  "cooldownDays": 14,
+  "timeoutTicks": 720,
+  "defaultChoice": "ignore",
+  "choices": [
+   {
+    "id": "pay",
+    "label": "PAY THE RANSOM",
+    "hint": "-$160k now · standing -4",
+    "outcome": "The benefactor thanked you. You are on a list now.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -160000
+     },
+     {
+      "type": "standing",
+      "amount": -4
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "IGNORE IT",
+    "hint": "2 racks fail",
+    "outcome": "Nothing happened, loudly. Two racks went offline for 'unrelated' reasons.",
+    "effects": [
+     {
+      "type": "failRacks",
+      "count": 2
+     }
+    ]
+   },
+   {
+    "id": "harden",
+    "label": "HARDEN THE PERIMETER",
+    "hint": "-$200k now · standing +3",
+    "outcome": "Passwords were rotated. Staff were rotated. The threat was rotated out.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -200000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "parts_theft",
+  "category": "operational",
+  "title": "Incident Report: Parts Have Left The Building",
+  "body": "A count of the depot shows that parts are no longer in it. They are presumed to be somewhere that is not here.\n\nA report may be filed with the department that handles missing things, which is also missing.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 4,
+  "cooldownDays": 10,
+  "timeoutTicks": 1080,
+  "defaultChoice": "report",
+  "choices": [
+   {
+    "id": "report",
+    "label": "FILE A REPORT",
+    "hint": "-$10k now · -3 spare parts · standing +1",
+    "outcome": "A report was filed. Two parts were returned in the report's honour.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -10000
+     },
+     {
+      "type": "spareParts",
+      "count": -3
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "lock",
+    "label": "INSTALL NEW LOCKS",
+    "hint": "-$45k now · -4 spare parts",
+    "outcome": "New locks were fitted. The parts remain elsewhere, but the doors are proud.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -45000
+     },
+     {
+      "type": "spareParts",
+      "count": -4
+     }
+    ]
+   },
+   {
+    "id": "shrug",
+    "label": "WRITE IT OFF",
+    "hint": "-6 spare parts · +$60k now",
+    "outcome": "Parts were written off. The auditor called it 'mature'.",
+    "effects": [
+     {
+      "type": "spareParts",
+      "count": -6
+     },
+     {
+      "type": "cash",
+      "amount": 60000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "fibre_cut",
+  "category": "operational",
+  "title": "Network Notice: Fibre Cut By Persons Unknown",
+  "body": "A digger has found your fibre. Your fibre was not looking for a digger.\n\nThe ISP regrets the inconvenience and the repair estimate, which will be revised upward by the time you have read this.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 8,
+  "timeoutTicks": 720,
+  "defaultChoice": "wait",
+  "choices": [
+   {
+    "id": "repair",
+    "label": "PAY FOR PRIORITY REPAIR",
+    "hint": "-$110k now",
+    "outcome": "A crew arrived within hours and left a very small invoice and a very large one.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -110000
+     }
+    ]
+   },
+   {
+    "id": "wait",
+    "label": "WAIT FOR THE ISP",
+    "hint": "new contract payouts x0.85 for 36h",
+    "outcome": "Service resumed eventually. Clients found the wait memorable.",
+    "effects": [
+     {
+      "type": "payout",
+      "factor": 0.85,
+      "durationTicks": 2160
+     }
+    ]
+   },
+   {
+    "id": "reroute",
+    "label": "REROUTE THROUGH A NEIGHBOUR",
+    "hint": "-$45k now · new contract payouts x0.95 for 1d · standing -1",
+    "outcome": "Traffic ran through a neighbour's line and was thanked, then charged.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -45000
+     },
+     {
+      "type": "payout",
+      "factor": 0.95,
+      "durationTicks": 1440
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "rat_in_tray",
+  "category": "operational",
+  "title": "Facilities Note: Rat Found In Cable Tray",
+  "body": "A rodent has been identified in a cable tray. The rodent has identified the cables.\n\nThe Ministry classifies the animal as 'a stakeholder'.",
+  "weight": 5,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 12,
+  "timeoutTicks": 1080,
+  "defaultChoice": "trap",
+  "choices": [
+   {
+    "id": "trap",
+    "label": "SET HUMANE TRAPS",
+    "hint": "-$15k now · standing +1",
+    "outcome": "The rat was relocated and has since written a short memoir.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -15000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "DO NOTHING",
+    "hint": "1 rack fails",
+    "outcome": "The rat continued its work. A rack lost its signal and its composure.",
+    "effects": [
+     {
+      "type": "failRacks",
+      "count": 1
+     }
+    ]
+   },
+   {
+    "id": "exterminate",
+    "label": "CALL THE EXTERMINATOR",
+    "hint": "-$60k now · standing -2 · rack failure rate x0.9 for 2d",
+    "outcome": "The exterminator was thorough, expensive and unnecessarily dramatic.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.9,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "overtime_dispute",
+  "category": "operational",
+  "title": "Staff Memo: Overtime, Defined",
+  "body": "Staff have noted that overtime is any time spent beyond the time the Ministry says exists.\n\nA resolution is requested before the next shift is replaced by the previous one.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 6,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "pay",
+  "choices": [
+   {
+    "id": "pay",
+    "label": "PAY THE OVERTIME",
+    "hint": "-$90k now · +2 spare parts · rack failure rate x0.9 for 2d",
+    "outcome": "Staff were paid. They were so pleased they fixed two things.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "spareParts",
+      "count": 2
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.9,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "REFUSE",
+    "hint": "rack failure rate x1.25 for 2d · standing -2",
+    "outcome": "Staff worked to rule. The rule was surprisingly strict.",
+    "effects": [
+     {
+      "type": "failureRate",
+      "factor": 1.25,
+      "durationTicks": 2880
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "comp",
+    "label": "OFFER TIME IN LIEU",
+    "hint": "-$30k now · standing -1",
+    "outcome": "Staff received time in lieu, to be taken at a time that never arrives.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_rush",
+  "category": "client",
+  "title": "Client Request: Urgent, Please, By Yesterday",
+  "body": "A major client needs capacity urgently. They will pay for it, and they will remember how it went.\n\nTheir words were 'please', 'now' and 'surely'.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 8,
+  "timeoutTicks": 1080,
+  "defaultChoice": "ignore",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "ACCEPT THE RUSH",
+    "hint": "new contract payouts x1.4 for 1d · standing -2",
+    "outcome": "Rates were agreed at a premium. The rush promptly became a pace.",
+    "effects": [
+     {
+      "type": "payout",
+      "factor": 1.4,
+      "durationTicks": 1440
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "ignore",
+    "label": "POLITELY IGNORE",
+    "hint": "standing -1",
+    "outcome": "You did not reply. The client replied to your not replying.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "negotiate",
+    "label": "NEGOTIATE",
+    "hint": "-$15k now · new contract payouts x1.2 for 36h",
+    "outcome": "A moderate premium was agreed after a moderate dispute.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -15000
+     },
+     {
+      "type": "payout",
+      "factor": 1.2,
+      "durationTicks": 2160
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_complaint",
+  "category": "client",
+  "title": "Client Complaint: Concerning Concerns",
+  "body": "A client has written to raise concerns about concerns. They request a response, a response to the response, and a direct line to whoever is responsible.\n\nThat person has been identified. It is you.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 8,
+  "timeoutTicks": 1080,
+  "defaultChoice": "apologise",
+  "choices": [
+   {
+    "id": "apologise",
+    "label": "APOLOGISE",
+    "hint": "-$25k now · standing +2",
+    "outcome": "A letter of apology was sent. It was apologetic in a way the client has since quoted.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -25000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "rebut",
+    "label": "REBUT",
+    "hint": "standing -3 · new contract payouts x0.9 for 1d",
+    "outcome": "A rebuttal was sent. The client rebutted the rebuttal in a longer letter.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -3
+     },
+     {
+      "type": "payout",
+      "factor": 0.9,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "credit",
+    "label": "OFFER A SERVICE CREDIT",
+    "hint": "-$70k now · standing +4",
+    "outcome": "A credit was issued against future services that will be rendered.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -70000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_bonus",
+  "category": "client",
+  "title": "Client Notice: Unexpected Gratitude",
+  "body": "A client was pleased. This has not happened before and the paperwork is therefore missing.\n\nThey propose a bonus, a testimonial, or a long lunch.",
+  "weight": 5,
+  "minTier": 1,
+  "minDay": 4,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "ACCEPT THE BONUS",
+    "hint": "+$110k now · standing -1",
+    "outcome": "The bonus arrived. It had a note attached that said 'don't make it weird'.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 110000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "testimonial",
+    "label": "ACCEPT THE TESTIMONIAL",
+    "hint": "standing +4",
+    "outcome": "A glowing review was published. It was glowing at an angle.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "lunch",
+    "label": "ATTEND THE LONG LUNCH",
+    "hint": "new contract payouts x1.25 for 2d · -$20k now",
+    "outcome": "The lunch lasted until the following quarter. Contracts improved.",
+    "effects": [
+     {
+      "type": "payout",
+      "factor": 1.25,
+      "durationTicks": 2880
+     },
+     {
+      "type": "cash",
+      "amount": -20000
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_poach",
+  "category": "client",
+  "title": "Client Notice: A Rival Has Made An Offer",
+  "body": "A rival facility has approached one of your clients with prices that cannot be real and terms that cannot be read.\n\nYour client is mentioning this to you to be helpful.",
+  "weight": 4,
+  "minTier": 2,
+  "minDay": 8,
+  "cooldownDays": 14,
+  "timeoutTicks": 1080,
+  "defaultChoice": "match",
+  "choices": [
+   {
+    "id": "match",
+    "label": "MATCH THE OFFER",
+    "hint": "new contract payouts x0.85 for 3d · standing +2",
+    "outcome": "Prices were matched. The margin was matched too, somewhere below zero.",
+    "effects": [
+     {
+      "type": "payout",
+      "factor": 0.85,
+      "durationTicks": 4320
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "hold",
+    "label": "HOLD YOUR PRICES",
+    "hint": "standing -3",
+    "outcome": "You held your prices. The client held its breath, then its contract.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   },
+   {
+    "id": "charm",
+    "label": "SEND A GIFT BASKET",
+    "hint": "-$60k now · standing +1 · new contract payouts x1.1 for 1d",
+    "outcome": "A gift basket was sent. It was a very good basket.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "payout",
+      "factor": 1.1,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ }
+]

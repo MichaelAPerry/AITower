@@ -41,7 +41,7 @@
    "cooling": "dlc",
    "powerKw": 120,
    "liquidFraction": 0.8,
-   "pflops": 90,
+   "pflops": 130,
    "storageTB": 0,
    "failurePerDay": 0.25
   },
