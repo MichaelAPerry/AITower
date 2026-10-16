@@ -59,6 +59,8 @@ export const balance: Balance = {
 	},
 	economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 180, offerExpiryTicks: 720 },
 	tiers: { pflops: [0, 60, 300, 1000], uptime: [0, 0.95, 0.98, 0.995], reward: [0, 500_000, 2_000_000, 5_000_000] },
+	standing: { start: 50, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 },
+	events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
 };
 
 /** Deterministic, tiny contract generator (rng only). */
@@ -161,6 +163,7 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 		lift: { speed: 0.2, capacity: 2, dwellTicks: 4, facilityKw: 10 },
 		balance: { ...balance, ...balanceOverride },
 		scenarios,
+		events: [],
 		generateContract: fixtureGenerator,
 	};
 }

@@ -229,6 +229,9 @@ export function createAudio(): AudioEngine {
 			if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.05);
 		},
 
+		setMusicVolume() {
+			// Placeholder until M2-T3 adds the music engine.
+		},
 		setVolume(v: number) {
 			volume = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : volume;
 			if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.05);

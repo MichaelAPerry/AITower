@@ -24,6 +24,7 @@ const commandName: Record<SimCommand["type"], string> = {
 	cancelJob: "Cancel job",
 	buyParts: "Buy parts",
 	buyBot: "Buy bot",
+	resolveMemo: "Answer memo",
 };
 
 /** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
@@ -103,6 +104,15 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 			return { text: `Day ${ev.day} begins`, severity: "info", toast: false };
 		case "bankrupt":
 			return { text: "BANKRUPT — cash below zero for a full day", severity: "error", toast: true };
+		// Placeholder wording until M2-T2 designs the memo desk.
+		case "memoIssued":
+			return { text: `Ministry memo received (${ev.eventId})`, severity: "info", toast: false };
+		case "memoResolved":
+			return { text: `Memo ${ev.auto ? "auto-filed" : "answered"}: ${ev.choiceId}`, severity: "info", toast: false };
+		case "standingChanged":
+			return { text: `Ministry standing ${ev.delta >= 0 ? "+" : ""}${ev.delta} → ${ev.standing}`, severity: ev.delta < 0 ? "warn" : "info", toast: false };
+		case "gameOver":
+			return { text: `GAME OVER — ${ev.kind}`, severity: ev.kind === "victory" ? "info" : "error", toast: true };
 	}
 }
 

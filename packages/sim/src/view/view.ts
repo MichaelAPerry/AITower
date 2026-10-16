@@ -137,5 +137,11 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		ledger: [...state.ledger, state.today],
 		history: state.history,
 		bankrupt: state.bankrupt,
+		// Placeholders until M2-T1 implements Ministry memos, standing and game over.
+		memos: [],
+		memoHistory: [],
+		modifiers: [],
+		standing: 50,
+		gameOver: null,
 	};
 }

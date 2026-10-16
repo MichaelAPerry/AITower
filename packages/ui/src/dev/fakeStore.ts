@@ -46,8 +46,11 @@ export function createFakeContent(): ContentDB {
 			thermal: { airCellHeatCapacity: 50, airConductance: 1, slabConductance: 0.3, envelopeConductance: 0.2, buoyancy: 0.2, rackEase: 0.05, rackDeltaC: 25, okC: 65, throttleC: 80, tripC: 92, tripHysteresisC: 8, minClock: 0.4, tripCooldownTicks: 30, coolantSupplyC: 30, hazardPerDegree: 0.1 },
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 240, offerExpiryTicks: 720 },
 			tiers: { pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
+			standing: { start: 50, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 },
+			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
 		},
 		scenarios: {},
+		events: [],
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
@@ -98,6 +101,11 @@ function buildView(content: ContentDB): SimView {
 		ledger: [],
 		history: [],
 		bankrupt: false,
+		memos: [],
+		memoHistory: [],
+		modifiers: [],
+		standing: 50,
+		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
 	for (let f = 0; f <= 4; f++) for (let x = 0; x < 34; x++) v.power[cellIndex(v, x, f)] = 1;

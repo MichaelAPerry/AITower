@@ -215,6 +215,11 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		ledger: [],
 		history: [],
 		bankrupt: false,
+		memos: [],
+		memoHistory: [],
+		modifiers: [],
+		standing: 50,
+		gameOver: null,
 	};
 
 	const computeAir = () => {

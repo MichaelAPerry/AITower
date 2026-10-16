@@ -38,7 +38,9 @@ export type SimCommand =
 	| { type: "cancelJob"; jobId: number }
 	| { type: "buyParts"; count: number }
 	/** Spawn a bot at the first charger with space. */
-	| { type: "buyBot"; defId: string };
+	| { type: "buyBot"; defId: string }
+	/** Answer an open Ministry memo with one of its choice ids. */
+	| { type: "resolveMemo"; memoId: number; choiceId: string };
 
 export interface CellRef {
 	x: number;
@@ -71,7 +73,12 @@ export type SimEvent =
 	| { type: "liftArrived"; liftId: number; floor: number }
 	| { type: "tierUp"; tier: number; reward: number }
 	| { type: "newDay"; day: number }
-	| { type: "bankrupt" };
+	| { type: "bankrupt" }
+	| { type: "memoIssued"; memoId: number; eventId: string }
+	/** `auto` = timed out and resolved with the default choice. */
+	| { type: "memoResolved"; memoId: number; eventId: string; choiceId: string; auto: boolean }
+	| { type: "standingChanged"; standing: number; delta: number }
+	| { type: "gameOver"; kind: GameOverKind };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -211,6 +218,28 @@ export interface MetricSample {
 	maxRackC: number;
 }
 
+export type GameOverKind = "bankrupt" | "shutdown" | "victory";
+
+export interface MemoView {
+	id: number;
+	eventId: string;
+	category: import("@aitower/content").EventCategory;
+	title: string;
+	body: string;
+	choices: { id: string; label: string; hint: string }[];
+	defaultChoice: string;
+	issuedAt: number;
+	expiresAt: number;
+}
+
+/** A temporary effect currently in force (from a resolved memo). */
+export interface ModifierView {
+	label: string;
+	kind: "ambient" | "gridCap" | "energyPrice" | "payout" | "failureRate";
+	value: number;
+	endsAt: number;
+}
+
 export interface SimView {
 	tick: number;
 	day: number;
@@ -253,6 +282,18 @@ export interface SimView {
 	/** One sample every 10 ticks, last 1440 samples. */
 	history: MetricSample[];
 	bankrupt: boolean;
+	/** Open (unanswered) Ministry memos, oldest first. */
+	memos: MemoView[];
+	/** Last 20 resolved memos, newest last, with the outcome text shown to the player. */
+	memoHistory: { memoId: number; eventId: string; title: string; choiceId: string; outcome: string; tick: number; auto: boolean }[];
+	modifiers: ModifierView[];
+	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
+	standing: number;
+	/**
+	 * Set once when the game ends. "victory" = reached the top tier (play may continue in sandbox: the sim keeps running).
+	 * "bankrupt" / "shutdown" are final; the sim keeps stepping but the UI should offer load / new game.
+	 */
+	gameOver: { kind: GameOverKind; tick: number } | null;
 }
 
 // ─── Snapshot & façade ───────────────────────────────────────────────────

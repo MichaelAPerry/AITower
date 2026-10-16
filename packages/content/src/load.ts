@@ -24,9 +24,10 @@ export function loadContent(): ContentDB {
 	// JSON imports widen string unions to `string`; validateContent checks the real shapes.
 	const raw = structuredClone({ facilities, bots, clients, structure, lift, balance, scenarios }) as unknown as Omit<
 		ContentDB,
-		"generateContract"
+		"generateContract" | "events"
 	>;
-	const db: ContentDB = { ...raw, generateContract };
+	// Placeholder until M2-T1 adds data/events.json.
+	const db: ContentDB = { ...raw, events: [], generateContract };
 	const problems = validateContent(db);
 	if (problems.length > 0) {
 		throw new Error(`Invalid content (${problems.length} problem${problems.length === 1 ? "" : "s"}):\n- ${problems.join("\n- ")}`);
