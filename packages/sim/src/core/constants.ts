@@ -42,6 +42,16 @@ export const BOT_RESUME_BATTERY = 0.5;
 /** Charging is this many times faster than draining. */
 export const BOT_CHARGE_RATE_MULTIPLIER = 5;
 
+/** A bot that makes no progress toward its goal for this many ticks gives up: the order is released and retried later. */
+export const BOT_STUCK_TICKS = 360;
+/** Backoff before a released / unreachable work order (or a stranded bot) is retried: base × 2^(failures-1), capped. */
+export const BOT_RETRY_BACKOFF_BASE_TICKS = 30;
+export const BOT_RETRY_BACKOFF_MAX_TICKS = 720;
+/** A bot waiting at an empty depot looks for a better-stocked one this often (ticks, staggered by bot id). */
+export const BOT_DEPOT_RECHECK_TICKS = 10;
+/** An idle bot plans routes for at most this many work orders per tick (the rest wait for the next tick). */
+export const BOT_MAX_CLAIM_PLANS_PER_TICK = 6;
+
 /** Demolition refunds this share of the build cost. */
 export const DEMOLISH_REFUND = 0.5;
 

@@ -52,6 +52,7 @@ export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: Con
 		if (floor + 1 <= s.floorMax && floor + 1 > 0 && s.slab[cellIdx(s, x, floor + 1)]) return reject("slab supports the floor above");
 		return accept(-slabCost(ctx, floor) * DEMOLISH_REFUND, (events) => {
 			s.slab[i] = 0;
+			s.topologyRev++;
 			done(events);
 		});
 	}

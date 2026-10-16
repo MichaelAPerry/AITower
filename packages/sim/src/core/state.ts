@@ -101,6 +101,16 @@ export interface Bot {
 	homeId: number;
 	/** Repair ticks remaining. */
 	timer: number;
+	/** Floor at which the current lift ride ends (a transfer floor on multi-lift routes; = goalFloor on the last hop). */
+	exitFloor: number;
+	/** Consecutive ticks without progress toward the goal; the bot gives up at BOT_STUCK_TICKS. */
+	stuck: number;
+	/** Tick before which an idle bot does not retry (stranded / no depot reachable). */
+	retryAt: number;
+	/** Consecutive failed attempts, drives the bot-level backoff. */
+	fails: number;
+	/** `SimState.topologyRev` the current path was planned against; a mismatch triggers a re-plan. */
+	routeRev: number;
 }
 
 export interface Offer {
@@ -134,6 +144,12 @@ export interface WorkOrder {
 	facilityId: number;
 	botId: number;
 	createdAt: number;
+	/** Times a bot gave up on this order (unreachable / timed out). */
+	attempts: number;
+	/** Tick before which the order is not offered to bots again (backoff after a failed attempt). */
+	retryAt: number;
+	/** `SimState.topologyRev` when the backoff was set; any later topology change lifts the backoff immediately. */
+	retryRev: number;
 }
 
 export interface PowerNet {
@@ -190,6 +206,8 @@ export interface SimState {
 	powerNetCount: number;
 	coolantNetCount: number;
 	netsDirty: boolean;
+	/** Bumped when anything bots route over changes (slab, lift or facility added/removed); triggers path re-validation. */
+	topologyRev: number;
 	// ── entities ──
 	facilities: Facility[];
 	lifts: Lift[];

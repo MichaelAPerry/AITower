@@ -44,6 +44,7 @@ export function addFacility(state: SimState, content: ContentDB, defId: string, 
 	for (let i = 0; i < d.width; i++) state.facilityAt[cellIdx(state, x + i, floor)] = id;
 	state.facilities.push(f);
 	state.netsDirty = true;
+	state.topologyRev++;
 	return f;
 }
 
@@ -52,6 +53,7 @@ export function removeFacility(state: SimState, content: ContentDB, f: Facility)
 	for (let i = 0; i < f.width; i++) state.facilityAt[cellIdx(state, f.x + i, f.floor)] = -1;
 	removeById(state.facilities, f.id);
 	state.netsDirty = true;
+	state.topologyRev++;
 	// Job allocations referencing it are released (with rollback) by the next compute step.
 	// Work orders on it (bots notice the missing order and drop the task).
 	state.workOrders = state.workOrders.filter((w) => w.facilityId !== f.id);
@@ -89,6 +91,7 @@ export function addLift(state: SimState, x: number, floorMin: number, floorMax: 
 	for (let fl = floorMin; fl <= floorMax; fl++) state.liftAt[cellIdx(state, x, fl)] = lift.id;
 	state.lifts.push(lift);
 	state.netsDirty = true;
+	state.topologyRev++;
 	return lift;
 }
 
@@ -96,6 +99,7 @@ export function removeLift(state: SimState, lift: Lift): void {
 	for (let fl = lift.floorMin; fl <= lift.floorMax; fl++) state.liftAt[cellIdx(state, lift.x, fl)] = -1;
 	removeById(state.lifts, lift.id);
 	state.netsDirty = true;
+	state.topologyRev++;
 	const stop = Math.min(lift.floorMax, Math.max(lift.floorMin, Math.round(lift.carFloor)));
 	for (const b of state.bots) {
 		if (b.liftId !== lift.id) continue;
@@ -126,6 +130,11 @@ export function addBot(state: SimState, defId: string, floor: number, x: number,
 		workOrderId: -1,
 		homeId,
 		timer: 0,
+		exitFloor: floor,
+		stuck: 0,
+		retryAt: 0,
+		fails: 0,
+		routeRev: state.topologyRev,
 	};
 	state.bots.push(bot);
 	return bot;

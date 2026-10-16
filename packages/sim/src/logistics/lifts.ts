@@ -8,13 +8,20 @@ import { EPS, MIN_POWERED_SATISFACTION } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Lift, SimState } from "../core/state";
 
-function stopsFor(state: SimState, lift: Lift): Set<number> {
+/** Where a rider gets off: its route's exit floor, kept inside the shaft so a bad value cannot strand it. */
+const exitOf = (lift: Lift, b: { exitFloor: number }): number => Math.min(lift.floorMax, Math.max(lift.floorMin, Math.round(b.exitFloor)));
+
+/**
+ * Floors the car must visit: riders' exits, plus hall calls while there is room. A full car ignores calls (it cannot
+ * board anyone), otherwise it would reopen its doors at a crowded floor forever instead of delivering its riders.
+ */
+function stopsFor(state: SimState, lift: Lift, capacity: number): Set<number> {
 	const stops = new Set<number>();
 	for (const id of lift.riders) {
 		const b = findById(state.bots, id);
-		if (b) stops.add(b.goalFloor);
+		if (b) stops.add(exitOf(lift, b));
 	}
-	for (const b of state.bots) if (b.leg === "waitLift" && b.liftId === lift.id) stops.add(b.floor);
+	if (lift.riders.length < capacity) for (const b of state.bots) if (b.leg === "waitLift" && b.liftId === lift.id) stops.add(b.floor);
 	return stops;
 }
 
@@ -24,7 +31,7 @@ function exchange(ctx: TickCtx, lift: Lift, floor: number): void {
 	lift.riders = lift.riders.filter((id) => {
 		const b = findById(state.bots, id);
 		if (!b) return false;
-		if (b.goalFloor !== floor) return true;
+		if (exitOf(lift, b) !== floor) return true;
 		b.floor = floor;
 		b.x = lift.x;
 		b.leg = "walk";
@@ -56,7 +63,7 @@ function stepLift(ctx: TickCtx, lift: Lift): void {
 		if (lift.doorTimer <= 0) lift.doorsOpen = false;
 		return;
 	}
-	const stops = stopsFor(ctx.state, lift);
+	const stops = stopsFor(ctx.state, lift, ctx.content.lift.capacity);
 	if (stops.size === 0) {
 		lift.dir = 0;
 		return;

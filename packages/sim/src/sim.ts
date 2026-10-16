@@ -3,9 +3,9 @@
  */
 import type { ContentDB } from "@aitower/content";
 import type { CommandResult, Sim, SimCommand, SimEvent, SimSnapshot, SimView } from "./api";
-import { applyCommands, planCommand } from "./commands/apply";
-import { toResult, withFunds } from "./commands/plan";
-import { planPlace } from "./commands/placement";
+import { applyCommands, planCommand, planNormalized } from "./commands/apply";
+import { toResult } from "./commands/plan";
+import { normalizeCommand } from "./commands/shape";
 import { computeStep } from "./compute/computeStep";
 import { type Scratch, type TickCtx, createScratch } from "./core/context";
 import { cellCount } from "./core/grid";
@@ -13,6 +13,7 @@ import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
 import { coolingSolve } from "./cooling/coolingSolve";
 import { economyStep } from "./economy/economyStep";
+import { spend } from "./economy/ledger";
 import { stepBots } from "./logistics/bots";
 import { stepLifts } from "./logistics/lifts";
 import { rebuildNetworks } from "./networks/rebuild";
@@ -20,14 +21,17 @@ import { powerSolve } from "./power/powerSolve";
 import { progressionStep } from "./progression/tier";
 import { advanceTime } from "./progression/time";
 import { reliabilityStep } from "./reliability/reliabilityStep";
-import { decode, encode } from "./snapshot/codec";
+import { encode } from "./snapshot/codec";
+import { deepClone } from "./snapshot/clone";
+import { loadSnapshot } from "./snapshot/load";
+import { SNAPSHOT_VERSION } from "./snapshot/migrate";
 import { hashValue } from "./snapshot/hash";
 import { airFieldStep } from "./thermal/airField";
 import { rackThermalStep } from "./thermal/rackThermal";
 import { buildView } from "./view/view";
 import { createState } from "./world/init";
 
-export const SNAPSHOT_VERSION = 1;
+export { SNAPSHOT_VERSION };
 
 /** Internal implementation; `state` is public for tests and tools (not part of the contract). */
 export class SimImpl implements Sim {
@@ -40,13 +44,65 @@ export class SimImpl implements Sim {
 		this.scratch = createScratch(cellCount(state));
 	}
 
+	/**
+	 * Lazily created copy of the state with every queued command already applied, so validation sees what the
+	 * next step() will see (buildSlab then place on it; two purchases that together exceed cash). Dropped by
+	 * step(). Invariant: it only diverges from `state` through accepted commands, hence code that edits `state`
+	 * directly between submits (tests, tools) must call `invalidateProjection()`.
+	 */
+	private projected: SimState | null = null;
+
+	private projection(): SimState {
+		if (this.projected) return this.projected;
+		const p = deepClone(this.state);
+		const queued = p.pending;
+		p.pending = [];
+		this.projected = p;
+		// Replay commands that were queued before the projection existed (e.g. restored from a save).
+		for (const cmd of queued) this.advance(p, planCommand({ state: p, content: this.content }, cmd));
+		return p;
+	}
+
+	private advance(p: SimState, plan: ReturnType<typeof planCommand>): void {
+		if (!plan.ok) return;
+		if (plan.cost !== 0) spend(p, "construction", plan.cost);
+		plan.apply([]);
+	}
+
+	invalidateProjection(): void {
+		this.projected = null;
+	}
+
 	submit(cmd: SimCommand): CommandResult {
-		const plan = planCommand(this, cmd);
-		if (plan.ok) this.state.pending.push(JSON.parse(JSON.stringify(cmd)) as SimCommand);
-		return toResult(plan);
+		const norm = normalizeCommand(cmd);
+		if (!norm.ok) return { ok: false, reason: norm.reason };
+		try {
+			const p = this.projection();
+			const plan = planNormalized({ state: p, content: this.content }, norm.cmd);
+			if (!plan.ok) return toResult(plan);
+			this.advance(p, plan);
+			this.state.pending.push(norm.cmd);
+			return { ok: true };
+		} catch {
+			this.projected = null;
+			return { ok: false, reason: "internal error while validating command" };
+		}
+	}
+
+	canBuild(cmd: SimCommand): CommandResult {
+		const norm = normalizeCommand(cmd);
+		if (!norm.ok) return { ok: false, reason: norm.reason };
+		try {
+			// Only clone when something is queued; a bare state is validated in place.
+			const st = this.projected ?? (this.state.pending.length > 0 ? this.projection() : this.state);
+			return toResult(planNormalized({ state: st, content: this.content }, norm.cmd));
+		} catch {
+			return { ok: false, reason: "internal error while validating command" };
+		}
 	}
 
 	step(): SimEvent[] {
+		this.projected = null;
 		const events: SimEvent[] = [];
 		const ctx: TickCtx = { state: this.state, content: this.content, events, scratch: this.scratch };
 		this.state.ambientC = ambientAt(this.content.balance, this.state.tick);
@@ -78,13 +134,8 @@ export class SimImpl implements Sim {
 		return hashValue(this.state);
 	}
 
-	canBuild(cmd: SimCommand): CommandResult {
-		// Placeholder until agent-sim makes validation queue-aware (M1-T1).
-		return toResult(planCommand(this, cmd));
-	}
-
 	canPlace(defId: string, floor: number, x: number): CommandResult {
-		return toResult(withFunds(this, planPlace(this, defId, floor, x)));
+		return this.canBuild({ type: "place", defId, floor, x });
 	}
 }
 
@@ -93,6 +144,5 @@ export function createSim(content: ContentDB, scenarioId: string, seed: number):
 }
 
 export function simFromSnapshot(content: ContentDB, snap: SimSnapshot): Sim {
-	if (!snap || snap.version !== SNAPSHOT_VERSION) throw new Error(`unsupported snapshot version ${snap?.version}`);
-	return new SimImpl(content, decode(snap.state) as SimState);
+	return new SimImpl(content, loadSnapshot(content, snap));
 }

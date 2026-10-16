@@ -36,6 +36,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		powerNetCount: 0,
 		coolantNetCount: 0,
 		netsDirty: true,
+		topologyRev: 0,
 		facilities: [],
 		lifts: [],
 		bots: [],

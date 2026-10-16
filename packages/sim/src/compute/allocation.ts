@@ -78,6 +78,14 @@ function isFreeRack(content: ContentDB, f: Facility): boolean {
 
 /** Auto-scheduler: oldest job first; inference until sustainedPflops is met, training up to 8 racks. */
 export function allocateRacks(state: SimState, content: ContentDB, runnable: Set<number>): void {
+	let wanted = false;
+	for (const job of state.jobs) {
+		if (isActive(job) && runnable.has(job.id)) {
+			wanted = true;
+			break;
+		}
+	}
+	if (!wanted) return; // nothing to place: skip the facility scan
 	const free = state.facilities.filter((f) => isFreeRack(content, f));
 	if (free.length === 0) return;
 	for (const job of state.jobs) {

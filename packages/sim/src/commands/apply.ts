@@ -13,11 +13,28 @@ import {
 } from "./operations";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
+import { normalizeCommand } from "./shape";
 import { planConduit, planLift, planSlab } from "./structure";
 
-/** Pure validation of one command against the current state (includes the cash check). */
-export function planCommand(ctx: PlanCtx, cmd: SimCommand): Plan {
-	if (!cmd || typeof cmd !== "object") return reject("malformed command");
+/**
+ * Pure validation of one command against `ctx.state` (includes the cash check). Accepts untrusted input and never
+ * throws: structurally bad commands are rejected, and any unexpected error inside a validator becomes a rejection.
+ */
+export function planCommand(ctx: PlanCtx, raw: unknown): Plan {
+	const norm = normalizeCommand(raw);
+	return norm.ok ? planNormalized(ctx, norm.cmd) : reject(norm.reason);
+}
+
+/** Like `planCommand` for a command that already went through `normalizeCommand`. */
+export function planNormalized(ctx: PlanCtx, cmd: SimCommand): Plan {
+	try {
+		return planChecked(ctx, cmd);
+	} catch {
+		return reject("malformed command");
+	}
+}
+
+function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 	let plan: Plan;
 	switch (cmd.type) {
 		case "buildSlab":

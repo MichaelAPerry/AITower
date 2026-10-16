@@ -11,7 +11,7 @@ export interface PlaceOptions {
 
 export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number, opts: PlaceOptions = {}): Plan {
 	const s = ctx.state;
-	const d = ctx.content.facilities[defId];
+	const d = Object.hasOwn(ctx.content.facilities, defId) ? ctx.content.facilities[defId] : undefined;
 	if (!d) return reject(`unknown facility '${defId}'`);
 	if (!inBounds(s, x, floor) || !inBounds(s, x + d.width - 1, floor)) return reject("out of bounds");
 	const p = d.placement ?? {};
