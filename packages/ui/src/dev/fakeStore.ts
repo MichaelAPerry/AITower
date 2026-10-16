@@ -2,8 +2,8 @@
  * Dev-only fake GameStore backed by a hand-built SimView fixture. Uses content *types* only and a small
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
-import type { ContentDB, FacilityDef } from "@aitower/content";
-import type { CommandResult, FacilityView, JobView, LedgerDay, MetricSample, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { ContentDB, EventDef, FacilityDef } from "@aitower/content";
+import type { CommandResult, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -16,9 +16,43 @@ const fac = (d: Partial<FacilityDef> & Pick<FacilityDef, "id" | "name" | "kind" 
 	...d,
 });
 
+const FAKE_EVENTS: EventDef[] = [
+	{
+		id: "heatwave",
+		category: "environmental",
+		title: "Notice of Unseasonable Warmth",
+		body: "The Weather Bureau advises that the outside air will be 8 °C warmer than the Ministry considers reasonable for the next fourteen hours.\n\nYou may purchase emergency chilled-water credits, or endure.",
+		weight: 1,
+		minTier: 1,
+		cooldownDays: 5,
+		timeoutTicks: 720,
+		defaultChoice: "endure",
+		choices: [
+			{ id: "credits", label: "BUY CREDITS", hint: "Pay $12k now. The heatwave is only +4 °C for 14 h.", outcome: "Credits purchased. The Weather Bureau thanks you for your cheque.", effects: [] },
+			{ id: "endure", label: "FILE IN TRIPLICATE", hint: "Free. Outside air +8 °C for 14 h; failures run higher.", outcome: "Filed. The heat is noted and will not be discussed further.", effects: [] },
+		],
+	},
+	{
+		id: "audit",
+		category: "ministry",
+		title: "Form A-9: Surprise Inspection",
+		body: "An Inspector will visit tomorrow to count your cables.",
+		weight: 1,
+		minTier: 1,
+		cooldownDays: 5,
+		timeoutTicks: 360,
+		defaultChoice: "comply",
+		choices: [
+			{ id: "bribe", label: "OFFER TEA", hint: "Pay $5k. Standing +0, no inspection.", outcome: "The Inspector enjoyed the tea.", effects: [] },
+			{ id: "comply", label: "COMPLY", hint: "Free. Standing −5 if uptime is under target.", outcome: "The Inspector counted 4,112 cables and left.", effects: [] },
+			{ id: "protest", label: "PROTEST", hint: "Standing −10. The Inspector notes your attitude.", outcome: "Your protest was received and shredded.", effects: [] },
+		],
+	},
+];
+
 export function createFakeContent(): ContentDB {
 	const facilities: FacilityDef[] = [
-		fac({ id: "rack_gpu_air", name: "GPU Rack (air)", kind: "rack", category: "rack", cost: 42_000, color: "#2b3442", accent: "#4fd8ff", width: 1, description: "8× air-cooled accelerators. Cheap and simple, but dumps all its heat into the room.", rack: { cooling: "air", powerKw: 18, liquidFraction: 0, pflops: 2.4, storageTB: 0, failurePerDay: 0.01 } }),
+		fac({ id: "rack_air_gpu", name: "GPU Rack (air)", kind: "rack", category: "rack", cost: 42_000, color: "#2b3442", accent: "#4fd8ff", width: 1, description: "8× air-cooled accelerators. Cheap and simple, but dumps all its heat into the room.", rack: { cooling: "air", powerKw: 18, liquidFraction: 0, pflops: 2.4, storageTB: 0, failurePerDay: 0.01 } }),
 		fac({ id: "rack_gpu_dlc", name: "GPU Rack (DLC)", kind: "rack", category: "rack", cost: 95_000, color: "#26303e", accent: "#59a8ff", width: 1, unlockTier: 2, facilityKw: 0.4, description: "Direct-liquid-cooled dense rack. 80% of the heat leaves through the coolant loop.", rack: { cooling: "dlc", powerKw: 45, liquidFraction: 0.8, pflops: 7.2, storageTB: 0, failurePerDay: 0.012 }, placement: { needsCoolant: true } }),
 		fac({ id: "rack_storage", name: "Storage Array", kind: "rack", category: "rack", cost: 28_000, color: "#2f2f3a", accent: "#b08cff", description: "Dense NVMe shelves holding training datasets.", rack: { cooling: "air", powerKw: 6, liquidFraction: 0, pflops: 0, storageTB: 400, failurePerDay: 0.006 } }),
 		fac({ id: "grid_tie", name: "Grid Tie 1 MW", kind: "grid_tie", category: "power", cost: 60_000, color: "#3a3320", accent: "#ffb547", width: 2, description: "Utility connection. Imports up to 1 MW at the market price.", power: { capacityKw: 1000 } }),
@@ -46,8 +80,11 @@ export function createFakeContent(): ContentDB {
 			thermal: { airCellHeatCapacity: 50, airConductance: 1, slabConductance: 0.3, envelopeConductance: 0.2, buoyancy: 0.2, rackEase: 0.05, rackDeltaC: 25, okC: 65, throttleC: 80, tripC: 92, tripHysteresisC: 8, minClock: 0.4, tripCooldownTicks: 30, coolantSupplyC: 30, hazardPerDegree: 0.1 },
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 240, offerExpiryTicks: 720 },
 			tiers: { pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
+			standing: { start: 50, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 },
+			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
 		},
 		scenarios: {},
+		events: FAKE_EVENTS,
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
@@ -98,6 +135,11 @@ function buildView(content: ContentDB): SimView {
 		ledger: [],
 		history: [],
 		bankrupt: false,
+		memos: [],
+		memoHistory: [],
+		modifiers: [],
+		standing: 50,
+		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
 	for (let f = 0; f <= 4; f++) for (let x = 0; x < 34; x++) v.power[cellIndex(v, x, f)] = 1;
@@ -111,7 +153,7 @@ function buildView(content: ContentDB): SimView {
 	put("grid_tie", 0, 6);
 	put("genset", 0, 9, { running: false, powerKw: 0 });
 	put("ups", 0, 13, { charge: 0.8 });
-	for (let i = 0; i < 8; i++) put("rack_gpu_air", 2, 8 + i, { tempC: 58 + i * 2.2, jobId: i < 6 ? 7 : null, status: i < 6 ? "ok" : "idle" });
+	for (let i = 0; i < 8; i++) put("rack_air_gpu", 2, 8 + i, { tempC: 58 + i * 2.2, jobId: i < 6 ? 7 : null, status: i < 6 ? "ok" : "idle" });
 	v.facilities[5].status = "failed";
 	v.facilities[5].health = 0;
 	v.facilities[8].status = "throttled";
@@ -219,6 +261,13 @@ export interface FakeStore extends GameStore {
 	ghost: Ghost | null;
 	/** Put a save into a slot without going through saveTo (harness and tests). */
 	seedSlot: ReturnType<typeof createFakeSaves>["seedSlot"];
+	/** Open a fake Ministry memo from the fixture events (`eventId` default: heatwave) expiring in `ticks`. */
+	issueMemo(eventId?: string, ticks?: number): number;
+	/** Set Ministry standing (0..100). Reaching 0 triggers the shutdown game over, like the real sim. */
+	setStanding(standing: number): void;
+	addModifier(m: ModifierView): void;
+	/** End the game as the real sim would. */
+	triggerGameOver(kind: GameOverKind): void;
 }
 
 export function createFakeStore(content: ContentDB = createFakeContent(), opts: { saveDelayMs?: number } = {}): FakeStore {
@@ -256,8 +305,54 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 
 	const canPlace = (defId: string, floor: number, x: number): CommandResult => canPlaceFor(view, content, defId, floor, x);
 
+	// Memos and standing, mimicking the sim: resolveMemo is queued and applied on the next advance().
+	let nextMemo = 1;
+	const queued: { memoId: number; choiceId: string }[] = [];
+	const memoByEvent = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
+	const fileMemo = (memoId: number, choiceId: string, auto: boolean): void => {
+		const m = view.memos.find((x) => x.id === memoId);
+		if (!m) return;
+		const def = memoByEvent(m.eventId);
+		const outcome = def.choices.find((c) => c.id === choiceId)?.outcome ?? "Filed.";
+		newView({
+			memos: view.memos.filter((x) => x.id !== memoId),
+			memoHistory: [...view.memoHistory, { memoId, eventId: m.eventId, title: m.title, choiceId, outcome, tick: view.tick, auto }].slice(-20),
+		});
+		pushEvents([{ type: "memoResolved", memoId, eventId: m.eventId, choiceId, auto }]);
+	};
+
 	const store: FakeStore = {
 		ghost: null,
+		issueMemo(eventId = "heatwave", ticks = 720) {
+			const def = memoByEvent(eventId);
+			const memo: MemoView = {
+				id: nextMemo++,
+				eventId: def.id,
+				category: def.category,
+				title: def.title,
+				body: def.body,
+				choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
+				defaultChoice: def.defaultChoice,
+				issuedAt: view.tick,
+				expiresAt: view.tick + ticks,
+			};
+			newView({ memos: [...view.memos, memo] });
+			pushEvents([{ type: "memoIssued", memoId: memo.id, eventId: def.id }]);
+			return memo.id;
+		},
+		setStanding(standing) {
+			const next = Math.min(100, Math.max(0, standing));
+			const delta = next - view.standing;
+			newView({ standing: next });
+			if (delta !== 0) pushEvents([{ type: "standingChanged", standing: next, delta }]);
+			if (next <= 0 && !view.gameOver) store.triggerGameOver("shutdown");
+		},
+		addModifier: (m) => newView({ modifiers: [...view.modifiers, m] }),
+		triggerGameOver(kind) {
+			if (view.gameOver) return;
+			newView({ gameOver: { kind, tick: view.tick }, bankrupt: kind === "bankrupt" || view.bankrupt });
+			pushEvents([{ type: "gameOver", kind }]);
+		},
 		get: () => state,
 		subscribe(cb) {
 			subs.add(cb);
@@ -302,6 +397,13 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 				case "demolish":
 					newView({ facilities: view.facilities.filter((f) => !(f.floor === cmd.floor && cmd.x >= f.x && cmd.x < f.x + f.width)) });
 					return ok;
+				case "resolveMemo": {
+					const m = view.memos.find((x) => x.id === cmd.memoId);
+					if (!m || queued.some((q) => q.memoId === cmd.memoId)) return no("That memo is no longer on file");
+					if (!m.choices.some((c) => c.id === cmd.choiceId)) return no("Unknown choice");
+					queued.push({ memoId: cmd.memoId, choiceId: cmd.choiceId });
+					return ok;
+				}
 				default:
 					return ok;
 			}
@@ -331,6 +433,11 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 		setMuted: (muted) => store.setSettings({ muted }),
 		advance(minutes) {
 			const tick = view.tick + minutes;
+			// Like the sim, queued commands apply only when the clock actually advances.
+			if (minutes > 0) {
+				for (const q of queued.splice(0)) fileMemo(q.memoId, q.choiceId, false);
+				for (const m of view.memos) if (m.expiresAt <= tick) fileMemo(m.id, m.defaultChoice, true);
+			}
 			const ph = tick / 97;
 			const facilities = view.facilities.map((f) => {
 				const d = content.facilities[f.defId];

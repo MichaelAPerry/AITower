@@ -2,7 +2,7 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { BuildCategory, ContentDB, FacilityDef, FacilityKind, JobKind, Scenario } from "./schema";
+import type { BuildCategory, ContentDB, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario } from "./schema";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -296,6 +296,114 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	}
 }
 
+const EVENT_CATEGORIES = ["ministry", "environmental", "operational", "client", "horror"];
+const ID_RE = /^[a-z0-9_]+$/;
+
+function validateEffect(p: Problems, w: string, e: EventEffect): void {
+	const dur = (d: unknown): void => num(p, `${w}.durationTicks`, d, { gt: 0, int: true });
+	const t = (e as { type?: unknown } | null)?.type;
+	switch (t) {
+		case "cash":
+			num(p, `${w}.amount`, (e as { amount: number }).amount);
+			break;
+		case "standing":
+			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
+			break;
+		case "ambient":
+			num(p, `${w}.deltaC`, (e as { deltaC: number }).deltaC, { min: -40, max: 40 });
+			dur((e as { durationTicks: number }).durationTicks);
+			break;
+		case "gridCap":
+			num(p, `${w}.factor`, (e as { factor: number }).factor, { min: 0, max: 1 });
+			dur((e as { durationTicks: number }).durationTicks);
+			break;
+		case "energyPrice":
+		case "payout":
+		case "failureRate":
+			num(p, `${w}.factor`, (e as { factor: number }).factor, { gt: 0 });
+			dur((e as { durationTicks: number }).durationTicks);
+			break;
+		case "failRacks":
+			num(p, `${w}.count`, (e as { count: number }).count, { min: 1, int: true });
+			break;
+		case "spareParts": {
+			const c = (e as { count: number }).count;
+			num(p, `${w}.count`, c, { int: true });
+			if (c === 0) p.push(`${w}.count: must not be 0`);
+			break;
+		}
+		default:
+			p.push(`${w}.type: unknown effect type ${JSON.stringify(t)}`);
+	}
+}
+
+function validateEventChoice(p: Problems, w: string, c: EventChoice): void {
+	str(p, `${w}.id`, c.id);
+	str(p, `${w}.label`, c.label);
+	str(p, `${w}.hint`, c.hint);
+	str(p, `${w}.outcome`, c.outcome);
+	if (!Array.isArray(c.effects)) {
+		p.push(`${w}.effects: expected an array`);
+		return;
+	}
+	c.effects.forEach((e, i) => {
+		validateEffect(p, `${w}.effects[${i}]`, e);
+	});
+}
+
+function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, seen: Set<string>): void {
+	const w = `events[${i}] (${e?.id})`;
+	str(p, `${w}.id`, e.id);
+	if (typeof e.id === "string" && !ID_RE.test(e.id)) p.push(`${w}.id: use lowercase letters, digits and underscores`);
+	if (seen.has(e.id)) p.push(`${w}: duplicate id`);
+	seen.add(e.id);
+	if (!EVENT_CATEGORIES.includes(e.category)) p.push(`${w}.category: unknown "${e.category}"`);
+	str(p, `${w}.title`, e.title);
+	str(p, `${w}.body`, e.body);
+	num(p, `${w}.weight`, e.weight, { gt: 0 });
+	num(p, `${w}.minTier`, e.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
+	if (e.maxTier !== undefined) {
+		num(p, `${w}.maxTier`, e.maxTier, { min: 1, int: true });
+		if (isNum(e.maxTier) && isNum(e.minTier) && e.maxTier < e.minTier) p.push(`${w}: maxTier is below minTier`);
+	}
+	if (e.minDay !== undefined) num(p, `${w}.minDay`, e.minDay, { min: 0, int: true });
+	num(p, `${w}.cooldownDays`, e.cooldownDays, { min: 0, int: true });
+	num(p, `${w}.timeoutTicks`, e.timeoutTicks, { gt: 0, int: true });
+	if (!Array.isArray(e.choices) || e.choices.length < 1) {
+		p.push(`${w}.choices: at least one choice required`);
+		return;
+	}
+	const ids = new Set<string>();
+	e.choices.forEach((c, k) => {
+		validateEventChoice(p, `${w}.choices[${k}]`, c);
+		if (ids.has(c.id)) p.push(`${w}.choices[${k}]: duplicate choice id "${c.id}"`);
+		ids.add(c.id);
+	});
+	if (!ids.has(e.defaultChoice)) p.push(`${w}.defaultChoice: "${e.defaultChoice}" is not one of the choices`);
+}
+
+function validateEvents(p: Problems, db: ContentDB): void {
+	const b = db.balance;
+	if (b?.standing) {
+		num(p, "balance.standing.start", b.standing.start, { min: 1, max: 100 });
+		for (const k of ["dailyGood", "dailyBad", "jobFailed", "jobCompleted"] as const) num(p, `balance.standing.${k}`, b.standing[k]);
+	} else p.push("balance.standing: missing");
+	if (b?.events) {
+		num(p, "balance.events.intervalTicks", b.events.intervalTicks, { min: 1, int: true });
+		num(p, "balance.events.maxOpen", b.events.maxOpen, { min: 1, int: true });
+		num(p, "balance.events.graceTicks", b.events.graceTicks, { min: 0, int: true });
+	} else p.push("balance.events: missing");
+	if (!Array.isArray(db.events)) {
+		p.push("events: expected an array");
+		return;
+	}
+	const tierCount = b?.tiers?.pflops?.length ?? 1;
+	const seen = new Set<string>();
+	db.events.forEach((e, i) => {
+		validateEvent(p, i, e, tierCount, seen);
+	});
+}
+
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
 	const tierCount = db.balance?.tiers?.pflops?.length ?? 1;
@@ -364,6 +472,7 @@ export function validateContent(db: ContentDB): string[] {
 	}
 
 	validateBalance(p, db);
+	validateEvents(p, db);
 
 	const scenarios = db.scenarios ?? {};
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");

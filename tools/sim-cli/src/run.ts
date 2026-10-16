@@ -1,6 +1,7 @@
 /**
  * Headless runner. Player policy: accept an offer only when idle capacity can serve it (see
- * `shouldAccept`); when work orders are waiting and no spare parts are left, buy 2.
+ * `shouldAccept`); when work orders are waiting and no spare parts are left, buy 2; resolve each Ministry memo
+ * with the choice of best cash outcome (`bestMemoChoice`).
  * Collects per-day metrics. Pure (no I/O).
  */
 import type { ContentDB } from "@aitower/content";
@@ -27,6 +28,23 @@ export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB
 }
 
 
+/** Auto-player memo policy: the choice with the best direct cash outcome (ties: better standing, then first listed). */
+export function bestMemoChoice(content: ContentDB, eventId: string): string | null {
+	const def = content.events.find((e) => e.id === eventId);
+	if (!def) return null;
+	let best: { id: string; cash: number; standing: number } | null = null;
+	for (const c of def.choices) {
+		let cash = 0;
+		let standing = 0;
+		for (const e of c.effects) {
+			if (e.type === "cash") cash += e.amount;
+			else if (e.type === "standing") standing += e.amount;
+		}
+		if (!best || cash > best.cash || (cash === best.cash && standing > best.standing)) best = { id: c.id, cash, standing };
+	}
+	return best?.id ?? null;
+}
+
 export interface DayRow {
 	day: number;
 	cash: number;
@@ -40,6 +58,10 @@ export interface DayRow {
 	maxRackC: number;
 	failures: number;
 	tier: number;
+	standing: number;
+	/** Memos issued so far. */
+	memos: number;
+	gameOver: string | null;
 }
 
 export interface RunResult {
@@ -51,6 +73,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 	const sim = createSim(content, scenarioId, seed);
 	const rackIds = new Set(Object.values(content.facilities).filter((d) => d.kind === "rack").map((d) => d.id));
 	const rows: DayRow[] = [];
+	let memos = 0;
 	for (let day = 0; day < days; day++) {
 		let failures = 0;
 		let pflopsSum = 0;
@@ -64,6 +87,11 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 					if (offer && shouldAccept(offer, v, content)) sim.submit({ type: "acceptContract", contractId: e.contractId });
 				}
 				else if (e.type === "componentFailed") failures++;
+				else if (e.type === "memoIssued") {
+					memos++;
+					const choice = bestMemoChoice(content, e.eventId);
+					if (choice) sim.submit({ type: "resolveMemo", memoId: e.memoId, choiceId: choice });
+				}
 			}
 			const v = sim.view();
 			if (v.spareParts === 0 && v.workOrders.length > 0 && t % 60 === 0) sim.submit({ type: "buyParts", count: 2 });
@@ -85,6 +113,9 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			maxRackC: Number.isFinite(maxRackC) ? maxRackC : Number.NaN,
 			failures,
 			tier: v.tier,
+			standing: v.standing,
+			memos,
+			gameOver: v.gameOver?.kind ?? null,
 		});
 	}
 	return { rows, hash: sim.hash() };
@@ -93,7 +124,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 const money = (n: number): string => `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
 export function formatTable(rows: DayRow[]): string {
-	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier"];
+	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "memos", "over"];
 	const body = rows.map((r) => [
 		String(r.day),
 		money(r.cash),
@@ -106,6 +137,9 @@ export function formatTable(rows: DayRow[]): string {
 		Number.isNaN(r.maxRackC) ? "-" : r.maxRackC.toFixed(1),
 		String(r.failures),
 		String(r.tier),
+		r.standing.toFixed(0),
+		String(r.memos),
+		r.gameOver ?? "-",
 	]);
 	const widths = head.map((h, i) => Math.max(h.length, ...body.map((row) => row[i].length)));
 	const line = (cells: string[]): string => cells.map((c, i) => c.padStart(widths[i])).join("  ");

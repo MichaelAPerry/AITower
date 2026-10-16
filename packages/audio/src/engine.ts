@@ -6,6 +6,9 @@
 import type { AudioEngine } from "@aitower/shared";
 import type { SimEvent, SimView } from "@aitower/sim";
 import { humParams, maxRackTemp } from "./hum";
+import { clamp01, createMixer, type Mixer, shouldDuck } from "./mixer";
+import { musicParams, type MusicParams } from "./music/director";
+import { createMusic, type Music } from "./music";
 import { createPauseDetector } from "./pause";
 import { createRateLimiter } from "./rateLimit";
 import { SOUNDS, type SoundSpec, soundDuration, soundsForEvents, type Voice } from "./sounds";
@@ -36,12 +39,15 @@ interface HumGraph {
 
 export function createAudio(): AudioEngine {
 	let ctx: AudioContext | null = null;
-	let master: GainNode | null = null;
+	let mixer: Mixer | null = null;
+	let music: Music | null = null;
+	let lastMusic: MusicParams | undefined;
 	let fx: GainNode | null = null;
 	let hum: HumGraph | null = null;
 	let noiseBuffer: AudioBuffer | null = null;
 	let muted = false;
 	let volume = 0.7;
+	let musicVolume = 0.6;
 	let destroyed = false;
 	const limiter = createRateLimiter();
 	const pause = createPauseDetector();
@@ -62,21 +68,15 @@ export function createAudio(): AudioEngine {
 	}
 
 	function buildGraph(c: AudioContext): void {
-		const comp = c.createDynamicsCompressor();
-		comp.threshold.value = -14;
-		comp.ratio.value = 4;
-		comp.connect(c.destination);
-		master = c.createGain();
-		master.gain.value = masterLevel();
-		master.connect(comp);
+		mixer = createMixer(c, masterLevel(), musicVolume);
 		fx = c.createGain();
 		fx.gain.value = 1;
-		fx.connect(master);
+		fx.connect(mixer.buses.sfx);
 		noiseBuffer = makeNoiseBuffer(c);
 
 		const bus = c.createGain();
 		bus.gain.value = 0;
-		bus.connect(master);
+		bus.connect(mixer.buses.ambience);
 
 		const droneFilter = c.createBiquadFilter();
 		droneFilter.type = "lowpass";
@@ -111,13 +111,22 @@ export function createAudio(): AudioEngine {
 		whine.frequency.value = 1800;
 		const whineGain = c.createGain();
 		whineGain.gain.value = 0;
-		whine.connect(whineGain).connect(master);
+		whine.connect(whineGain).connect(mixer.buses.ambience);
 
 		drone.start();
 		droneOctave.start();
 		noise.start();
 		whine.start();
 		hum = { bus, drone, droneOctave, droneGain, noise, noiseFilter, noiseGain, whine, whineGain };
+		music = createMusic(c, mixer.buses.music);
+		syncMusic();
+	}
+
+	/** The music timer runs only while the music volume is above zero. */
+	function syncMusic(): void {
+		if (!music) return;
+		if (musicVolume > 0) music.run();
+		else music.stop();
 	}
 
 	function setSmooth(param: AudioParam, value: number, now: number): void {
@@ -214,9 +223,17 @@ export function createAudio(): AudioEngine {
 			setSmooth(hum.whine.frequency, p.whineHz, now);
 			setSmooth(hum.whineGain.gain, p.whineGain, now);
 
+			if (shouldDuck(events)) mixer?.duck();
+			const musicOn = musicVolume > 0 && music !== null;
+			if (music && musicOn) {
+				lastMusic = musicParams(view, events, paused, lastMusic);
+				music.update(lastMusic);
+			}
+
 			let shots = 0;
 			for (const id of soundsForEvents(events)) {
 				if (shots >= MAX_SHOTS_PER_UPDATE) break;
+				if (id === "fanfare" && musicOn) continue; // the music stinger replaces the one-shot
 				const spec = SOUNDS[id];
 				if (!limiter.allow(id, nowMs, spec.minIntervalMs)) continue;
 				play(spec);
@@ -226,16 +243,24 @@ export function createAudio(): AudioEngine {
 
 		setMuted(m: boolean) {
 			muted = m;
-			if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.05);
+			mixer?.setMaster(masterLevel());
 		},
 
+		setMusicVolume(v: number) {
+			musicVolume = clamp01(v, musicVolume);
+			mixer?.setMusic(musicVolume);
+			syncMusic();
+		},
 		setVolume(v: number) {
-			volume = Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : volume;
-			if (ctx && master) master.gain.setTargetAtTime(masterLevel(), ctx.currentTime, 0.05);
+			volume = clamp01(v, volume);
+			mixer?.setMaster(masterLevel());
 		},
 
 		destroy() {
 			destroyed = true;
+			music?.destroy();
+			music = null;
+			lastMusic = undefined;
 			if (hum) {
 				for (const n of [hum.drone, hum.droneOctave, hum.noise, hum.whine]) {
 					try {
@@ -248,7 +273,8 @@ export function createAudio(): AudioEngine {
 			const c = ctx;
 			ctx = null;
 			hum = null;
-			master = null;
+			mixer?.dispose();
+			mixer = null;
 			fx = null;
 			limiter.reset();
 			if (c && c.state !== "closed") void c.close().catch(() => undefined);

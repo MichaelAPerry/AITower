@@ -1,9 +1,11 @@
 /** Contract offers: expiry and seeded generation roughly every `offerIntervalTicks` (±50 % jitter). */
 import type { ContentDB } from "@aitower/content";
 import type { TickCtx } from "../core/context";
+import { GUARANTEED_OFFER_TICKS } from "../core/constants";
 import { nextRandom } from "../core/rng";
 import type { SimState } from "../core/state";
 import { dayOf } from "../core/time";
+import { modFactor } from "../ministry/modifiers";
 import { installedPflops } from "./allocation";
 
 export function nextOfferDelay(state: SimState, content: ContentDB): number {
@@ -21,6 +23,7 @@ export function offersStep(ctx: TickCtx): void {
 			return false;
 		});
 	}
+	if (state.offers.length === 0 && state.nextOfferTick > state.tick + GUARANTEED_OFFER_TICKS) state.nextOfferTick = state.tick + GUARANTEED_OFFER_TICKS;
 	if (state.tick < state.nextOfferTick) return;
 	state.nextOfferTick = state.tick + nextOfferDelay(state, content);
 	if (state.offers.length >= eco.maxOffers) return;
@@ -28,6 +31,7 @@ export function offersStep(ctx: TickCtx): void {
 	const generated = content.generateContract(rng, { tier: state.tier, capacityPflops: installedPflops(state, content), day: dayOf(state.tick) }, content);
 	// Defensive copy so content code can't alias sim state.
 	const spec = JSON.parse(JSON.stringify(generated)) as typeof generated;
+	spec.payout *= modFactor(state, "payout");
 	const id = state.nextId.contract++;
 	state.offers.push({ id, spec, expiresAt: state.tick + eco.offerExpiryTicks });
 	events.push({ type: "contractOffered", contractId: id });

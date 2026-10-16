@@ -8,6 +8,8 @@ export interface RngState {
 	contracts: number;
 	/** Component failure rolls. */
 	reliability: number;
+	/** Ministry memos: timing, event choice, failRacks selection. (Added in snapshot v3.) */
+	events: number;
 }
 
 export type RngStream = keyof RngState;
@@ -22,7 +24,7 @@ export function nextRandom(rng: RngState, stream: RngStream): number {
 }
 
 /** splitmix32-style mix: derive independent stream seeds from one user seed. */
-function mixSeed(seed: number, salt: number): number {
+export function mixSeed(seed: number, salt: number): number {
 	let z = (seed + Math.imul(salt, 0x9e3779b9)) | 0;
 	z = Math.imul(z ^ (z >>> 16), 0x85ebca6b);
 	z = Math.imul(z ^ (z >>> 13), 0xc2b2ae35);
@@ -30,5 +32,5 @@ function mixSeed(seed: number, salt: number): number {
 }
 
 export function createRng(seed: number): RngState {
-	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2) };
+	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2), events: mixSeed(seed, 3) };
 }

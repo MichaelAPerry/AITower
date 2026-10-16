@@ -3,6 +3,7 @@ import "@fontsource/special-elite";
 import "@fontsource/silkscreen";
 import { createRoot } from "react-dom/client";
 import { Hud } from "../src/Hud";
+import { TUTORIAL_STEPS } from "../src/tutorial/steps";
 import { createFakeContent, createFakeStore, type FakeStoreWithEmit } from "../src/dev/fakeStore";
 
 const content = createFakeContent();
@@ -28,15 +29,44 @@ store.setSettings({
 	...(q.get("motion") === "1" ? { reducedMotion: true } : {}),
 	...(q.get("notice") === "0" ? { showDesktopNotice: false } : {}),
 });
-store.seedSlot("auto", { name: "Autosave", savedAt: Date.now() - 3 * 3600_000, day: 11, cash: 1_103_200, tier: 2 });
-store.seedSlot("slot1", { name: "Before the chiller", savedAt: Date.now() - 26 * 3600_000, day: 9, cash: 640_000, tier: 1 });
-createRoot(document.getElementById("hud") as HTMLElement).render(<Hud store={store} content={content} />);
+if (q.get("saves") !== "0") {
+	store.seedSlot("auto", { name: "Autosave", savedAt: Date.now() - 3 * 3600_000, day: 11, cash: 1_103_200, tier: 2 });
+	store.seedSlot("slot1", { name: "Before the chiller", savedAt: Date.now() - 26 * 3600_000, day: 9, cash: 640_000, tier: 1 });
+}
+// Memo desk and game-over states: ?memo=2 (open memos) &standing=18 &mod=1 &over=bankrupt|shutdown|victory &inbox=1
+for (let i = 0; i < Number(q.get("memo") ?? 0); i++) store.issueMemo(i % 2 ? "audit" : "heatwave", 840 - i * 300);
+if (q.get("memo") && q.get("hist") === "1") {
+	const id = store.issueMemo("audit");
+	store.dispatch({ type: "resolveMemo", memoId: id, choiceId: "bribe" });
+	store.advance(1);
+}
+if (num("standing") !== null) store.setStanding(num("standing") as number);
+if (q.get("mod") === "1") {
+	const t = store.get().view.tick;
+	store.addModifier({ label: "Heatwave", kind: "ambient", value: 8, endsAt: t + 840 });
+	store.addModifier({ label: "Brownout", kind: "gridCap", value: 0.5, endsAt: t + 300 });
+	store.addModifier({ label: "Subsidy", kind: "payout", value: 1.25, endsAt: t + 2000 });
+}
+if (q.get("over")) store.triggerGameOver(q.get("over") as "bankrupt");
+// Induction: ?tut=<step id> jumps to that step, ?tut=none closes it (default: step 1, as on a first visit).
+try {
+	const tut = q.get("tut");
+	if (tut === "none") localStorage.setItem("aitower.induction.v1", JSON.stringify({ step: 0, done: true }));
+	else if (tut) localStorage.setItem("aitower.induction.v1", JSON.stringify({ step: Math.max(0, TUTORIAL_STEPS.findIndex((t) => t.id === tut)), done: false }));
+	else if (!q.has("keeptut")) localStorage.removeItem("aitower.induction.v1");
+} catch {
+	/* storage blocked */
+}
+// ?title=1 shows the title screen; ?saves=0 removes the seeded saves (first-visit title).
+createRoot(document.getElementById("hud") as HTMLElement).render(<Hud store={store} content={content} title={q.get("title") === "1"} />);
 
 // Keep the HUD alive: advance the fake clock and drop a few events for toasts.
 setInterval(() => store.advance(store.get().speed), 250);
-setTimeout(() => store.emit([{ type: "rackTripped", facilityId: 9 }]), 400);
-setTimeout(() => store.emit([{ type: "jobCompleted", jobId: 7, payout: 520_000 }]), 700);
-setTimeout(() => store.emit([{ type: "commandRejected", command: { type: "buyBot", defId: "techbot" }, reason: "All bot docks are full" }]), 900);
+if (q.get("toasts") !== "0") {
+	setTimeout(() => store.emit([{ type: "rackTripped", facilityId: 9 }]), 400);
+	setTimeout(() => store.emit([{ type: "jobCompleted", jobId: 7, payout: 520_000 }]), 700);
+	setTimeout(() => store.emit([{ type: "commandRejected", command: { type: "buyBot", defId: "techbot" }, reason: "All bot docks are full" }]), 900);
+}
 
 // Click a bottom tab via ?tab=jobs (harness convenience for screenshots).
 const tab = q.get("tab");

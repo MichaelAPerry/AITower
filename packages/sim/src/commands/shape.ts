@@ -26,6 +26,7 @@ const NUMERIC: Record<string, readonly string[]> = {
 	cancelJob: ["jobId"],
 	buyParts: ["count"],
 	buyBot: [],
+	resolveMemo: ["memoId"],
 };
 
 export function normalizeCommand(raw: unknown): Normalized {
@@ -50,6 +51,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 		const keys = Object.hasOwn(NUMERIC, type) ? NUMERIC[type] : undefined;
 		if (!keys) return { ok: false, reason: "unknown command type" };
 		if ((type === "place" || type === "buyBot") && typeof raw.defId !== "string") return bad("defId must be a string");
+		if (type === "resolveMemo" && typeof raw.choiceId !== "string") return bad("choiceId must be a string");
 		const out: Record<string, unknown> = { type };
 		for (const k of keys) {
 			const v = raw[k];
@@ -57,6 +59,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 			out[k] = v;
 		}
 		if (type === "place" || type === "buyBot") out.defId = raw.defId;
+		if (type === "resolveMemo") out.choiceId = raw.choiceId;
 		if (type === "demolish") {
 			const layer = raw.layer;
 			if (layer !== undefined) {

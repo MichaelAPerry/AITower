@@ -6,6 +6,7 @@ import type { PowerBucket, TickCtx } from "../core/context";
 import { EPS, GENSET_STOP_SURPLUS_TICKS, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR } from "../core/constants";
 import { type Facility, GensetMode, type PowerNet } from "../core/state";
 import { energyPriceAt } from "../core/time";
+import { modFactor } from "../ministry/modifiers";
 import { getDef, isComputeRack, needsPower } from "../world/defs";
 import { facilityDemandKw } from "./demand";
 
@@ -43,7 +44,8 @@ export function powerSolve(ctx: TickCtx): void {
 	}
 	for (const lift of state.lifts) if (lift.powerNet >= 0) buckets[lift.powerNet].liftKw += content.lift.facilityKw;
 
-	const price = energyPriceAt(content.balance, state.tick);
+	const price = energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice");
+	const gridFactor = modFactor(state, "gridCap");
 	let gridTotal = 0;
 	let gensetTotal = 0;
 	let energyCost = 0;
@@ -57,6 +59,7 @@ export function powerSolve(ctx: TickCtx): void {
 		const cap = (f: Facility): number => getDef(content, f.defId).power?.capacityKw ?? 0;
 		let gridCap = 0;
 		for (const g of b.grids) if (isUsableSource(g)) gridCap += cap(g);
+		gridCap *= gridFactor;
 
 		// Genset control.
 		let committed = gridCap;

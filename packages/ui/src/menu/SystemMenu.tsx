@@ -22,15 +22,19 @@ export interface SystemMenuProps {
 	store: GameStore;
 	state: GameState;
 	menu: MenuController;
-	/** Drawer to show first (dev harness / tests). */
+	/** Drawer to show first (dev harness / tests, title screen, game-over screen). */
 	initial?: MenuSection;
+	/** Opened from the title screen: only Load, Settings and Controls (there is no game to save or discard yet). */
+	fromTitle?: boolean;
+	/** The running game was replaced by a load or import (the title screen leaves on this). */
+	onReplaced?: () => void;
 }
 
 /**
  * The system menu: a bakelite filing cabinet. Modal: focus is trapped, Esc closes (restoring the game
  * speed), and key presses never reach the game's hotkeys or the camera while it is open.
  */
-export function SystemMenu({ store, state, menu, initial = "save" }: SystemMenuProps) {
+export function SystemMenu({ store, state, menu, initial = "save", fromTitle = false, onReplaced }: SystemMenuProps) {
 	const [section, setSection] = useState<MenuSection>(initial);
 	const [flash, setFlash] = useState<Flash | null>(null);
 	const root = useRef<HTMLDivElement>(null);
@@ -71,19 +75,20 @@ export function SystemMenu({ store, state, menu, initial = "save" }: SystemMenuP
 		setSection(id);
 		setFlash(null);
 	};
-	const active = DRAWERS.find((d) => d.id === section) ?? DRAWERS[0];
-	const common = { store, state, menu, flash: setFlash };
+	const drawers = fromTitle ? DRAWERS.filter((d) => d.id === "load" || d.id === "settings" || d.id === "controls") : DRAWERS;
+	const active = drawers.find((d) => d.id === section) ?? drawers[0];
+	const common = { store, state, menu, flash: setFlash, onReplaced };
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop; key handling implements the focus trap
-		<div className="ui-menu-backdrop" ref={root} onKeyDown={onKeyDown} onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}>
+		<div className={`ui-menu-backdrop ${fromTitle ? "is-over-title" : ""}`} ref={root} onKeyDown={onKeyDown} onMouseDown={(e) => e.target === e.currentTarget && e.preventDefault()}>
 			<div className="ui-menu ui-panel" role="dialog" aria-modal="true" aria-label="System menu">
 				<header className="ui-menu-head ui-panel-title">
 					<span className="ui-menu-plate">
 						<b>MINISTRY OF COMPUTATION</b>
 						<i>FILING CABINET · DRAWER 7</i>
 					</span>
-					<span className="ui-dymo ui-menu-paused">GAME PAUSED</span>
+					{!fromTitle && <span className="ui-dymo ui-menu-paused">GAME PAUSED</span>}
 					<span className="ui-grow" />
 					<button type="button" className="ui-btn ui-icon-btn" onClick={menu.close} aria-label="Close menu" title="Close menu (Esc)">
 						<Icon name="close" size={12} />
@@ -92,14 +97,15 @@ export function SystemMenu({ store, state, menu, initial = "save" }: SystemMenuP
 				<div className="ui-menu-body">
 					<nav className="ui-menu-rail" aria-label="Menu sections">
 						<button ref={resume} type="button" className="ui-btn is-go ui-resume" onClick={menu.close}>
-							<Icon name="play" size={11} /> Resume
+							<Icon name="play" size={11} /> {fromTitle ? "Back" : "Resume"}
 						</button>
-						{DRAWERS.map((d) => (
+						{drawers.map((d) => (
 							<button key={d.id} type="button" className={`ui-drawer ${section === d.id ? "is-open" : ""}`} aria-current={section === d.id ? "page" : undefined} onClick={() => go(d.id)}>
 								<span className="ui-drawer-label">{d.label}</span>
 							</button>
 						))}
 						<span className="ui-grow" />
+						{!fromTitle && (
 						<button
 							type="button"
 							className="ui-btn ui-induct-btn"
@@ -111,6 +117,7 @@ export function SystemMenu({ store, state, menu, initial = "save" }: SystemMenuP
 						>
 							Restart induction
 						</button>
+						)}
 					</nav>
 					<section className="ui-menu-pane ui-form" aria-label={active.label}>
 						<div className="ui-form-head">

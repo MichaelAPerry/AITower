@@ -185,6 +185,24 @@ export interface Balance {
 	};
 	/** Tier thresholds: tier n requires totalPflops ≥ pflops[n-1] AND uptime ≥ uptime[n-1] (rolling day). */
 	tiers: { pflops: number[]; uptime: number[]; reward: number[] };
+	/** Ministry standing (0..100). Reaching 0 ends the game ("shutdown"). */
+	standing: {
+		start: number;
+		/** Change per completed day with uptime ≥ the current tier's uptime target (+) or below it (−). */
+		dailyGood: number;
+		dailyBad: number;
+		/** Change on a missed training deadline / completed job. */
+		jobFailed: number;
+		jobCompleted: number;
+	};
+	events: {
+		/** Mean ticks between new memos (seeded jitter ±50%). */
+		intervalTicks: number;
+		/** At most this many unresolved memos at once. */
+		maxOpen: number;
+		/** First memo no earlier than this tick (lets the player settle in). */
+		graceTicks: number;
+	};
 }
 
 export type JobKind = "training" | "finetune" | "inference";
@@ -258,6 +276,64 @@ export interface Scenario {
 	spareParts: number;
 }
 
+// ─── Ministry memos (events) ──────────────────────────────────────────
+
+export type EventCategory = "ministry" | "environmental" | "operational" | "client" | "horror";
+
+/**
+ * Effects are applied by the sim when a memo choice is resolved (or when the memo times out with its default choice).
+ * Durations are in ticks. Multipliers stack multiplicatively while active.
+ */
+export type EventEffect =
+	| { type: "cash"; amount: number }
+	| { type: "standing"; amount: number }
+	/** Ambient temperature offset (heatwave / cold snap). */
+	| { type: "ambient"; deltaC: number; durationTicks: number }
+	/** Grid import capacity multiplier (brownout = 0.5, blackout = 0). */
+	| { type: "gridCap"; factor: number; durationTicks: number }
+	/** Grid energy price multiplier. */
+	| { type: "energyPrice"; factor: number; durationTicks: number }
+	/** Contract payout multiplier for new offers. */
+	| { type: "payout"; factor: number; durationTicks: number }
+	/** Rack failure-rate multiplier. */
+	| { type: "failureRate"; factor: number; durationTicks: number }
+	/** Immediately fail N random healthy racks (seeded). */
+	| { type: "failRacks"; count: number }
+	| { type: "spareParts"; count: number };
+
+export interface EventChoice {
+	/** Stable id, e.g. "approve" | "deny" | "file". */
+	id: string;
+	/** Button label in Ministry voice, e.g. "APPROVE", "DENY", "FILE IN TRIPLICATE". */
+	label: string;
+	/** One-line plain-English consequence shown under the button (must state the real numbers). */
+	hint: string;
+	/** Memo shown after resolving. */
+	outcome: string;
+	effects: EventEffect[];
+}
+
+export interface EventDef {
+	id: string;
+	category: EventCategory;
+	/** Memo heading. */
+	title: string;
+	/** Memo body: dry Ministry prose, 1–3 short paragraphs separated by "\n\n". */
+	body: string;
+	/** Relative pick weight among eligible events. */
+	weight: number;
+	minTier: number;
+	maxTier?: number;
+	/** Not before this game day. */
+	minDay?: number;
+	/** Min days before the same event may recur. */
+	cooldownDays: number;
+	/** Auto-resolve with `defaultChoice` after this many ticks unanswered. */
+	timeoutTicks: number;
+	defaultChoice: string;
+	choices: EventChoice[];
+}
+
 export interface ContentDB {
 	facilities: Record<string, FacilityDef>;
 	bots: Record<string, BotDef>;
@@ -266,5 +342,6 @@ export interface ContentDB {
 	lift: LiftSpec;
 	balance: Balance;
 	scenarios: Record<string, Scenario>;
+	events: EventDef[];
 	generateContract: ContractGenerator;
 }

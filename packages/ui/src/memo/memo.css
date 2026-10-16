@@ -1,0 +1,398 @@
+/* ── Ministry memo desk: inbox lamp, standing meter, memo slips, inbox drawer, modifier chips ── */
+.aitower-hud .ui-inbox {
+	flex: none;
+	gap: 6px;
+	padding: 7px 9px 6px;
+}
+.aitower-hud .ui-inbox.is-on .ui-inbox-count.has {
+	color: var(--ink);
+	text-shadow: none;
+}
+.aitower-hud .ui-inbox.is-on {
+	background: linear-gradient(180deg, color-mix(in srgb, var(--amber) 22%, var(--housing-hi)), var(--housing));
+}
+.aitower-hud .ui-inbox-count {
+	font: 18px/1 var(--f-crt);
+	color: var(--amber-dim);
+	min-width: 12px;
+	text-align: center;
+}
+.aitower-hud .ui-inbox-count.has {
+	color: var(--amber);
+	text-shadow: 0 0 6px color-mix(in srgb, var(--amber) 70%, transparent);
+}
+
+.aitower-hud .ui-standing {
+	flex: none;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 5px 8px 5px;
+	background: color-mix(in srgb, var(--ink) 55%, var(--housing));
+	border: 1px solid var(--ink);
+	border-radius: 3px;
+	box-shadow: inset 0 1px 0 var(--gleam);
+}
+.aitower-hud .ui-standing .ui-dymo {
+	font-size: 7px;
+	white-space: nowrap;
+}
+.aitower-hud .ui-standing-row {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.aitower-hud .ui-standing-scale {
+	position: relative;
+	display: block;
+	width: 64px;
+	height: 14px;
+	background:
+		repeating-linear-gradient(90deg, var(--ink) 0 1px, transparent 1px 9.2px) bottom / 100% 5px no-repeat,
+		linear-gradient(180deg, var(--paper), color-mix(in srgb, var(--beige) 70%, var(--paper)));
+	border: 1px solid var(--ink);
+	border-radius: 2px;
+	box-shadow: 0 0 0 1px var(--brass-dk);
+}
+.aitower-hud .ui-standing-red {
+	position: absolute;
+	left: 0;
+	top: 0;
+	bottom: 0;
+	width: 25%;
+	background: repeating-linear-gradient(135deg, var(--red) 0 3px, color-mix(in srgb, var(--red) 55%, var(--paper)) 3px 6px);
+	opacity: 0.85;
+}
+.aitower-hud .ui-standing-needle {
+	position: absolute;
+	top: -3px;
+	bottom: -3px;
+	width: 3px;
+	margin-left: -1px;
+	background: var(--red);
+	border: 1px solid var(--ink);
+	transition: left 0.5s cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.aitower-hud .ui-standing-read {
+	min-width: 30px;
+	padding: 2px 4px 1px;
+	font: 20px/1 var(--f-crt);
+	text-align: center;
+}
+.aitower-hud .ui-standing.tone-red {
+	animation: ui-standing-warn 1.2s steps(2) infinite;
+}
+@keyframes ui-standing-warn {
+	50% {
+		box-shadow: inset 0 0 0 1px var(--red), 0 0 10px color-mix(in srgb, var(--red) 55%, transparent);
+	}
+}
+
+/* Modifier chips: top right of the world. */
+.aitower-hud .ui-modchips {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 4;
+	display: flex;
+	flex-wrap: nowrap;
+	justify-content: flex-end;
+	gap: 5px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	max-width: calc(100% - 400px);
+	min-width: 0;
+	overflow: hidden;
+	pointer-events: none;
+}
+.aitower-hud .ui-modchip {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.04em;
+	padding: 5px 6px 4px;
+	color: var(--ink);
+	background: var(--paper);
+	border: 1px solid var(--ink);
+	border-left-width: 5px;
+	border-radius: 2px;
+	box-shadow: 0 2px 0 var(--ink);
+	white-space: nowrap;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.aitower-hud .ui-modchip.is-more {
+	flex: none;
+	border-left-color: var(--amber);
+	pointer-events: auto;
+}
+.aitower-hud .ui-modchip.is-bad {
+	border-left-color: var(--red);
+}
+.aitower-hud .ui-modchip.is-good {
+	border-left-color: var(--green-dim);
+}
+
+/* The paper slip. */
+.aitower-hud .ui-memo-pop {
+	position: absolute;
+	top: 38px;
+	right: 0;
+	z-index: 8;
+	width: min(430px, 100%);
+	max-height: calc(100% - 48px);
+	overflow-y: auto;
+	pointer-events: auto;
+	animation: memo-slide 340ms cubic-bezier(0.2, 0.9, 0.3, 1.05) both;
+	filter: drop-shadow(0 8px 14px color-mix(in srgb, var(--ink) 70%, transparent));
+}
+@keyframes memo-slide {
+	from {
+		transform: translateY(-26px) rotate(1.4deg);
+		opacity: 0;
+	}
+	to {
+		transform: none;
+		opacity: 1;
+	}
+}
+.aitower-hud .memo-card {
+	position: relative;
+	color: var(--ink);
+	font: 15px/1.3 var(--f-type);
+	padding: 10px 14px 10px;
+	background:
+		repeating-linear-gradient(180deg, transparent 0 21px, color-mix(in srgb, var(--beige) 35%, transparent) 21px 22px),
+		linear-gradient(90deg, transparent 0 10px, color-mix(in srgb, var(--red) 40%, var(--paper)) 10px 11px, transparent 11px),
+		var(--paper);
+	border: 1px solid var(--brass-dk);
+	box-shadow: 0 0 0 3px var(--housing);
+	margin-bottom: 8px;
+}
+.aitower-hud .memo-card.is-urgent {
+	border-color: var(--red);
+}
+.aitower-hud .memo-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	color: var(--brass-dk);
+	padding-left: 8px;
+}
+.aitower-hud .memo-urgent {
+	position: static;
+	color: var(--red);
+	font-size: 11px;
+}
+.aitower-hud .memo-title {
+	font: 19px/1.2 var(--f-type);
+	margin: 8px 0 6px 8px;
+	text-wrap: balance;
+	text-decoration: underline;
+	text-decoration-color: var(--brass-dk);
+}
+.aitower-hud .memo-body {
+	margin: 0 0 6px 8px;
+}
+.aitower-hud .memo-clock {
+	margin: 8px 0 8px 8px;
+	display: grid;
+	gap: 3px;
+	padding: 6px 8px;
+	background: color-mix(in srgb, var(--amber) 9%, var(--paper));
+	border: 1px dashed var(--brass-dk);
+}
+.aitower-hud .memo-bar {
+	display: block;
+	height: 6px;
+	background: color-mix(in srgb, var(--ink) 15%, var(--paper));
+	border: 1px solid var(--ink);
+}
+.aitower-hud .memo-bar i {
+	display: block;
+	height: 100%;
+	background: var(--brass-dk);
+}
+.aitower-hud .memo-card.is-urgent .memo-bar i {
+	background: var(--red);
+}
+.aitower-hud .memo-left {
+	font: 17px/1 var(--f-crt);
+	color: var(--ink);
+}
+.aitower-hud .memo-default {
+	font-size: 13px;
+}
+.aitower-hud .memo-choices {
+	display: grid;
+	gap: 8px;
+	margin: 6px 0 2px 8px;
+}
+.aitower-hud .memo-choice {
+	display: grid;
+	grid-template-columns: minmax(118px, 40%) 1fr;
+	gap: 10px;
+	align-items: center;
+}
+.aitower-hud .memo-stamp {
+	width: 100%;
+	min-height: 32px;
+	white-space: normal;
+}
+.aitower-hud .memo-stamp.is-default {
+	outline: 1px dotted var(--ink);
+	outline-offset: 2px;
+}
+.aitower-hud .memo-hint {
+	font-size: 14px;
+	line-height: 1.2;
+}
+.aitower-hud .memo-foot {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 8px;
+}
+.aitower-hud .memo-more {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.08em;
+	text-align: right;
+	color: var(--amber);
+	margin-top: -2px;
+}
+
+/* Inbox drawer. */
+.aitower-hud .ui-memo-drawer.ui-panel {
+	position: absolute;
+	top: 38px;
+	right: 0;
+	z-index: 9;
+	width: min(460px, 100%);
+	max-height: calc(100% - 44px);
+	display: flex;
+	flex-direction: column;
+}
+.aitower-hud .ui-memo-drawer .ui-panel-title {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.aitower-hud .memo-drawer-title {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--brass);
+}
+.aitower-hud .memo-drawer-scroll {
+	overflow-y: auto;
+	padding: 6px 12px 12px;
+	min-height: 0;
+}
+.aitower-hud .memo-sect {
+	margin: 10px 0 6px;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--amber);
+}
+.aitower-hud .memo-empty {
+	margin: 4px 0 8px;
+	font: 15px/1.3 var(--f-type);
+	color: var(--beige);
+}
+.aitower-hud .memo-history {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+}
+.aitower-hud .memo-hist {
+	color: var(--ink);
+	background: var(--paper);
+	border-left: 4px solid var(--brass-dk);
+	padding: 6px 9px;
+	font: 14px/1.25 var(--f-type);
+}
+.aitower-hud .memo-hist-top {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	align-items: baseline;
+}
+.aitower-hud .memo-hist-stamp {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	color: var(--green-dim);
+	white-space: nowrap;
+}
+.aitower-hud .memo-hist-stamp.is-auto {
+	color: var(--brass-dk);
+}
+.aitower-hud .memo-hist-out {
+	margin-top: 3px;
+}
+.aitower-hud .memo-hist-when {
+	margin-top: 3px;
+	font: 15px/1 var(--f-crt);
+	color: var(--brass-dk);
+}
+
+.aitower-hud.is-density-tight .memo-choice,
+.aitower-hud.is-density-cramped .memo-choice {
+	grid-template-columns: 1fr;
+	gap: 3px;
+}
+/* Top-bar budget: below ~1380 px (effective) the clearance lamps give way to the standing meter and the inbox lamp. */
+.aitower-hud.is-density-tight .ui-topbar .ui-tier {
+	display: none;
+}
+.aitower-hud.is-density-tight .ui-standing-scale {
+	width: 46px;
+}
+.aitower-hud.is-density-cramped .ui-standing {
+	padding: 3px 3px;
+}
+.aitower-hud.is-density-cramped .ui-standing-scale {
+	display: none;
+}
+.aitower-hud.is-density-cramped .ui-standing .ui-dymo {
+	font-size: 6px;
+	letter-spacing: 0;
+	padding: 2px 3px;
+}
+.aitower-hud.is-density-cramped .ui-standing-row {
+	justify-content: center;
+}
+.aitower-hud.is-density-cramped .ui-savelamp-text {
+	display: none;
+}
+.aitower-hud.is-density-cramped .ui-standing-read {
+	min-width: 24px;
+	font-size: 18px;
+}
+.aitower-hud.is-density-cramped .ui-inbox {
+	padding: 6px 7px 5px;
+	gap: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-memo-pop,
+	.aitower-hud .ui-standing.tone-red {
+		animation: none;
+	}
+	.aitower-hud .ui-standing-needle {
+		transition: none;
+	}
+}
+.aitower-hud.is-reduced-motion .ui-memo-pop,
+.aitower-hud.is-reduced-motion .ui-standing.tone-red {
+	animation: none;
+}
+.aitower-hud.is-reduced-motion .ui-standing-needle {
+	transition: none;
+}
+.aitower-hud .memo-stamp {
+	opacity: 1;
+	font-size: 15px;
+	padding: 6px 8px 5px;
+}

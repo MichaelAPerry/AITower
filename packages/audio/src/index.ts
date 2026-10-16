@@ -3,3 +3,9 @@ export { HUM_TUNING, humParams, maxRackTemp, type HumInput, type HumParams } fro
 export { createPauseDetector, type PauseDetector } from "./pause";
 export { createRateLimiter, MIN_REPEAT_MS, type RateLimiter } from "./rateLimit";
 export { eventToSound, SOUNDS, soundDuration, soundsForEvents, type SoundId, type SoundSpec, type Voice, type Wave } from "./sounds";
+export { clamp01, createMixer, DUCK, duckLinear, duckSteps, MUSIC_TRIM, shouldDuck, type Mixer } from "./mixer";
+export { createMusic, type Music } from "./music";
+export { DIRECTOR, isNight, musicParams, type MusicParams, type StingerId } from "./music/director";
+export { SCORE, type Score, type ScoreNote, type Stem } from "./music/score";
+export { createSequencer, type Sequencer } from "./music/sequencer";
+export { nextDropout, tapeParams } from "./music/tape";

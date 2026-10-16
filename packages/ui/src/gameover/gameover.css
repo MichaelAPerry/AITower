@@ -1,0 +1,122 @@
+/* ── Game-over notices ── */
+.aitower-hud .ui-over {
+	position: absolute;
+	inset: 0;
+	z-index: 55;
+	pointer-events: auto;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+	overflow: auto;
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--red) 14%, var(--ink)), color-mix(in srgb, var(--ink) 94%, var(--red)));
+	animation: ui-menu-in 0.4s ease-out both;
+}
+.aitower-hud .ui-over.is-victory {
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--green-dim) 30%, var(--ink)), color-mix(in srgb, var(--ink) 94%, var(--green-dim)));
+}
+.aitower-hud .ui-over-memo {
+	position: relative;
+	width: min(640px, 100%);
+	padding: 22px 30px 20px 38px;
+	color: var(--ink);
+	font: 17px/1.35 var(--f-type);
+	background:
+		repeating-linear-gradient(180deg, transparent 0 23px, color-mix(in srgb, var(--beige) 35%, transparent) 23px 24px),
+		linear-gradient(90deg, transparent 0 22px, color-mix(in srgb, var(--red) 40%, var(--paper)) 22px 23px, transparent 23px),
+		var(--paper);
+	border: 1px solid var(--brass-dk);
+	box-shadow: 0 0 0 4px var(--housing), 0 18px 40px var(--shade-hard);
+}
+.aitower-hud .ui-over-head {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	flex-wrap: wrap;
+	font: 8px/1.2 var(--f-stamp);
+	letter-spacing: 0.08em;
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-over-title {
+	margin: 14px 0 12px;
+	font: 34px/1.1 var(--f-type);
+	letter-spacing: 0.04em;
+	text-decoration: underline;
+	text-decoration-color: var(--brass-dk);
+	text-wrap: balance;
+}
+.aitower-hud .ui-over-line {
+	margin: 0 0 8px;
+	font-size: 17px;
+}
+.aitower-hud .ui-over-record {
+	margin: 14px 0 6px;
+	padding: 8px 12px 8px;
+	background: color-mix(in srgb, var(--amber) 9%, var(--paper));
+	border: 1px dashed var(--brass-dk);
+}
+.aitower-hud .ui-over-record h3 {
+	margin: 0 0 6px;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-over-record dl {
+	margin: 0;
+	display: grid;
+	gap: 2px;
+}
+.aitower-hud .ui-over-record dl div {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	border-bottom: 1px dotted var(--brass-dk);
+}
+.aitower-hud .ui-over-record dt {
+	font-size: 15px;
+}
+.aitower-hud .ui-over-record dd {
+	margin: 0;
+	font: 22px/1 var(--f-crt);
+}
+.aitower-hud .ui-over-stamp {
+	position: absolute;
+	right: 26px;
+	top: 58px;
+	font-size: 22px;
+	padding: 6px 12px 4px;
+	transform: rotate(-9deg);
+}
+.aitower-hud .ui-over-acts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px;
+	justify-content: flex-end;
+	margin-top: 16px;
+}
+.aitower-hud.is-density-cramped .ui-over-memo {
+	padding: 14px 16px 14px 24px;
+}
+.aitower-hud.is-density-cramped .ui-over-title {
+	font-size: 24px;
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-over {
+		animation: none;
+	}
+}
+.aitower-hud.is-reduced-motion .ui-over {
+	animation: none;
+}
+.aitower-hud .ui-over-acts .ui-stampbtn {
+	min-width: 190px;
+	padding: 9px 12px 7px;
+	font-size: 19px;
+	opacity: 1;
+}
+.aitower-hud .ui-over-acts .ui-stampbtn.stamp-red {
+	color: color-mix(in srgb, var(--red) 72%, var(--ink));
+}

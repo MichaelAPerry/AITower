@@ -105,6 +105,7 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 						<button
 							key={m.id}
 							type="button"
+							data-tut={`overlay-${m.id}`}
 							role="radio"
 							aria-checked={state.overlay === m.id}
 							className={`ui-btn ui-ov ov-${m.id} ${state.overlay === m.id ? "is-on" : ""}`}

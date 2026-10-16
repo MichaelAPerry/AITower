@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { ContractSpec } from "@aitower/content";
-import type { JobStatus, LedgerDay, MetricSample, SimCommand } from "../api";
+import type { GameOverKind, JobStatus, LedgerDay, MetricSample, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -152,6 +152,34 @@ export interface WorkOrder {
 	retryRev: number;
 }
 
+/** An open Ministry memo; the text lives in `ContentDB.events[eventId]`. */
+export interface Memo {
+	id: number;
+	eventId: string;
+	issuedAt: number;
+	expiresAt: number;
+}
+
+export interface MemoRecord {
+	memoId: number;
+	eventId: string;
+	title: string;
+	choiceId: string;
+	outcome: string;
+	tick: number;
+	auto: boolean;
+}
+
+export type ModifierKind = "ambient" | "gridCap" | "energyPrice" | "payout" | "failureRate";
+
+/** A timed effect from a resolved memo; active while `tick < endsAt`. ambient adds `value` °C, the others multiply by `value`. */
+export interface Modifier {
+	kind: ModifierKind;
+	value: number;
+	endsAt: number;
+	label: string;
+}
+
 export interface PowerNet {
 	id: number;
 	supplyKw: number;
@@ -215,7 +243,7 @@ export interface SimState {
 	offers: Offer[];
 	jobs: Job[];
 	workOrders: WorkOrder[];
-	nextId: { facility: number; lift: number; bot: number; contract: number; job: number; workOrder: number };
+	nextId: { facility: number; lift: number; bot: number; contract: number; job: number; workOrder: number; memo: number };
 	powerNets: PowerNet[];
 	coolantNets: CoolantNet[];
 	/** Share of storage-rack capacity in use (drives storage rack power). */
@@ -232,6 +260,18 @@ export interface SimState {
 	metrics: Metrics;
 	ambientC: number;
 	rng: RngState;
+	// ── Ministry ──
+	memos: Memo[];
+	/** Last 20 resolved memos, oldest first. */
+	memoHistory: MemoRecord[];
+	modifiers: Modifier[];
+	/** Earliest tick for the next memo roll. */
+	nextMemoTick: number;
+	/** Game day each event was last issued (cooldowns). */
+	lastIssuedDay: Record<string, number>;
+	/** 0..100; 0 ends the game ("shutdown"). */
+	standing: number;
+	gameOver: { kind: GameOverKind; tick: number } | null;
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];
 }

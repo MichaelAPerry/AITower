@@ -5,8 +5,13 @@
  *
  * History:
  *  - v1 → v2 (M1-T1): `topologyRev`, per-bot routing/backoff fields, per-work-order retry fields.
+
+ *  - v2 → v3 (M2-T1): Ministry memos (`memos`, `memoHistory`, `modifiers`, `nextMemoTick`, `lastIssuedDay`, `nextId.memo`),
+ *    `standing`, `gameOver`, and the `events` RNG stream.
  */
-export const SNAPSHOT_VERSION = 2;
+import { mixSeed } from "../core/rng";
+
+export const SNAPSHOT_VERSION = 3;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -45,8 +50,23 @@ function migrateV1(state: RawState): RawState {
 	return state;
 }
 
+/** Defaults for a pre-memo save: neutral standing, no memos for one game day, bankrupt saves keep their game over. */
+function migrateV2(state: RawState): RawState {
+	const tick = typeof state.tick === "number" ? state.tick : 0;
+	if (!Array.isArray(state.memos)) state.memos = [];
+	if (!Array.isArray(state.memoHistory)) state.memoHistory = [];
+	if (!Array.isArray(state.modifiers)) state.modifiers = [];
+	if (typeof state.nextMemoTick !== "number") state.nextMemoTick = tick + 1440;
+	if (!isObj(state.lastIssuedDay)) state.lastIssuedDay = {};
+	if (typeof state.standing !== "number") state.standing = 50;
+	if (state.gameOver === undefined) state.gameOver = state.bankrupt === true ? { kind: "bankrupt", tick } : null;
+	if (isObj(state.nextId) && typeof state.nextId.memo !== "number") state.nextId.memo = 1;
+	if (isObj(state.rng) && typeof state.rng.events !== "number") state.rng.events = mixSeed(typeof state.seed === "number" ? state.seed : 0, 3);
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

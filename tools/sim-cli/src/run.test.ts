@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadContent } from "@aitower/content";
 import { createSim, simFromSnapshot, TICKS_PER_DAY } from "@aitower/sim";
 import { makeContent } from "../../../packages/sim/src/test/fixture";
-import { formatTable, runHeadless } from "./run";
+import { bestMemoChoice, formatTable, runHeadless } from "./run";
 
 describe("sim-cli runHeadless", () => {
 	it("produces one row per day and a deterministic hash", () => {
@@ -43,5 +43,40 @@ describe("sim-cli runHeadless", () => {
 			b.step();
 		}
 		expect(b.hash()).toBe(a.hash());
+	});
+});
+
+describe("sim-cli memo policy", () => {
+	it("bestMemoChoice picks the best direct cash outcome, then standing, then the first listed", () => {
+		const c = makeContent();
+		const choice = (id: string, effects: { type: "cash" | "standing"; amount: number }[]) => ({ id, label: id, hint: "", outcome: "", effects });
+		c.events = [
+			{
+				id: "e",
+				category: "ministry",
+				title: "t",
+				body: "b",
+				weight: 1,
+				minTier: 1,
+				cooldownDays: 0,
+				timeoutTicks: 100,
+				defaultChoice: "x",
+				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("y", [{ type: "cash", amount: 50 }, { type: "standing", amount: -5 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }])],
+			},
+		];
+		expect(bestMemoChoice(c, "e")).toBe("z");
+		expect(bestMemoChoice(c, "nope")).toBeNull();
+	});
+
+	it("real content: memos arrive and are resolved by the auto-player; the run is deterministic and reports standing", () => {
+		const a = runHeadless(loadContent(), "starter", 8, 3);
+		const b = runHeadless(loadContent(), "starter", 8, 3);
+		expect(a.hash).toBe(b.hash);
+		expect(a.rows.at(-1)?.memos).toBeGreaterThan(3);
+		for (const r of a.rows) {
+			expect(r.standing).toBeGreaterThanOrEqual(0);
+			expect(r.standing).toBeLessThanOrEqual(100);
+		}
+		expect(formatTable(a.rows)).toContain("standing");
 	});
 });

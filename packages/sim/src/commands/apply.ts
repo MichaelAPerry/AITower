@@ -11,6 +11,7 @@ import {
 	planDeclineContract,
 	planSetEnabled,
 } from "./operations";
+import { planResolveMemo } from "../ministry/memos";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
 import { normalizeCommand } from "./shape";
@@ -69,6 +70,9 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "buyBot":
 			plan = planBuyBot(ctx, cmd.defId);
+			break;
+		case "resolveMemo":
+			plan = planResolveMemo(ctx, cmd.memoId, cmd.choiceId);
 			break;
 		default:
 			return reject("unknown command type");

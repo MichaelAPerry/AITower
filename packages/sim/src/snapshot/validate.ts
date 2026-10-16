@@ -133,7 +133,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	const s = fields(raw, {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
-		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num",
+		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextMemoTick: "num", standing: "num",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
 	if ((s.tick as number) < 0) fail("tick is negative");
@@ -166,7 +166,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	}
 
 	// ── id allocator ──
-	const nextId = fields(s.nextId, { facility: "int", lift: "int", bot: "int", contract: "int", job: "int", workOrder: "int" }, "nextId") as Record<string, number>;
+	const nextId = fields(s.nextId, { facility: "int", lift: "int", bot: "int", contract: "int", job: "int", workOrder: "int", memo: "int" }, "nextId") as Record<string, number>;
 	for (const [k, v] of Object.entries(nextId)) if (v < 1) fail(`nextId.${k} must be at least 1`);
 
 	// ── facilities ──
@@ -279,12 +279,46 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	});
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
-	fields(s.rng, { contracts: "num", reliability: "num" }, "rng");
+	fields(s.rng, { contracts: "num", reliability: "num", events: "num" }, "rng");
+	validateMinistry(content, s, nextId.memo);
 	array(s, "pending");
 
 	// Catch-all: any non-finite number anywhere (including float arrays) is corruption.
 	finiteDeep(s, "state");
 	return s as unknown as SimState;
+}
+
+const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];
+const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory"];
+
+function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {
+	const standing = s.standing as number;
+	if (standing < 0 || standing > 100) fail(`standing ${standing} is outside 0..100`);
+	const memos = array(s, "memos") as { id: number; eventId: string }[];
+	memos.forEach((m, i) => {
+		fields(m, { id: "int", eventId: "str", issuedAt: "num", expiresAt: "num" }, `memos[${i}]`);
+		const def = content.events.find((e) => e.id === m.eventId);
+		if (!def) fail(`memos[${i}] uses unknown event '${m.eventId}'`);
+		else if (!def.choices.some((c) => c.id === def.defaultChoice)) fail(`memos[${i}] event '${m.eventId}' has no default choice`);
+	});
+	checkIds(memos, nextMemo, "memo");
+	array(s, "memoHistory").forEach((h, i) => {
+		fields(h, { memoId: "int", eventId: "str", title: "str", choiceId: "str", outcome: "str", tick: "num", auto: "bool" }, `memoHistory[${i}]`);
+	});
+	if ((s.memoHistory as unknown[]).length > 20) fail("memoHistory is too long");
+	array(s, "modifiers").forEach((m, i) => {
+		const o = fields(m, { kind: "str", value: "num", endsAt: "num", label: "str" }, `modifiers[${i}]`);
+		if (!MODIFIER_KINDS.includes(o.kind as string)) fail(`modifiers[${i}].kind is invalid`);
+		if (o.kind !== "ambient" && (o.value as number) < 0) fail(`modifiers[${i}].value must not be negative`);
+	});
+	const last = s.lastIssuedDay;
+	if (!isObj(last)) fail("lastIssuedDay must be an object");
+	else for (const [k, v] of Object.entries(last)) if (!check("int", v)) fail(`lastIssuedDay.${k} must be an integer`);
+	const go = s.gameOver;
+	if (go !== null) {
+		const o = fields(go, { kind: "str", tick: "num" }, "gameOver");
+		if (!GAME_OVER_KINDS.includes(o.kind as string)) fail("gameOver.kind is invalid");
+	}
 }
 
 function checkSpec(spec: unknown, where: string): void {

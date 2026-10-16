@@ -1,5 +1,5 @@
 import type { SimView } from "@aitower/sim";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAudio } from "./engine";
 
 /** Minimal fake of the WebAudio surface the engine uses; records started sources. */
@@ -13,6 +13,10 @@ class FakeParam {
 		this.targets.push(v);
 		this.value = v;
 	}
+	linearRampToValueAtTime(v: number) {
+		this.value = v;
+	}
+	cancelScheduledValues() {}
 	exponentialRampToValueAtTime(v: number) {
 		if (!(v > 0)) throw new RangeError("exponential ramp target must be > 0");
 		this.value = v;
@@ -22,6 +26,10 @@ class FakeNode {
 	gain = new FakeParam();
 	frequency = new FakeParam();
 	Q = new FakeParam();
+	detune = new FakeParam();
+	delayTime = new FakeParam();
+	curve: unknown = null;
+	oversample = "";
 	threshold = new FakeParam();
 	ratio = new FakeParam();
 	type = "";
@@ -35,8 +43,11 @@ class FakeNode {
 	disconnect() {}
 	start() {
 		this.ctx.started++;
+		this.ctx.sources.add(this);
 	}
-	stop() {}
+	stop() {
+		this.ctx.sources.delete(this);
+	}
 }
 class FakeContext {
 	static last: FakeContext | null = null;
@@ -45,6 +56,7 @@ class FakeContext {
 	sampleRate = 8000;
 	destination = {};
 	started = 0;
+	sources = new Set<FakeNode>();
 	constructor() {
 		FakeContext.last = this;
 	}
@@ -63,6 +75,12 @@ class FakeContext {
 		return new FakeNode(this);
 	}
 	createBiquadFilter() {
+		return new FakeNode(this);
+	}
+	createWaveShaper() {
+		return new FakeNode(this);
+	}
+	createDelay() {
 		return new FakeNode(this);
 	}
 	createDynamicsCompressor() {
@@ -96,7 +114,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 		const ctx = FakeContext.last!;
 		expect(ctx.state).toBe("running");
 		const humSources = ctx.started;
-		expect(humSources).toBe(4);
+		expect(humSources).toBe(4 + 3); // hum + the tape's wow/drift/flutter LFOs
 
 		a.update(view(2), [{ type: "jobCompleted", jobId: 1, payout: 1 }]);
 		const afterFirst = ctx.started;
@@ -112,6 +130,59 @@ describe("createAudio with a (fake) AudioContext", () => {
 		a.destroy();
 		expect(ctx.state).toBe("closed");
 		a.update(view(5), [{ type: "tierUp", tier: 2, reward: 1 }]);
+	});
+
+	it("starts the music timer on resume, stops it at music volume 0, and leaves none after destroy", async () => {
+		vi.useFakeTimers();
+		try {
+			g.AudioContext = FakeContext;
+			const a = createAudio();
+			a.setMusicVolume(0.5);
+			expect(vi.getTimerCount()).toBe(0); // nothing before resume
+			await a.resume();
+			const ctx = FakeContext.last!;
+			const base = vi.getTimerCount();
+			expect(base).toBeGreaterThanOrEqual(1);
+			a.update(view(1), []);
+			ctx.currentTime = 0.5;
+			const before = ctx.started;
+			vi.advanceTimersByTime(100);
+			expect(ctx.started).toBeGreaterThan(before); // notes scheduled
+
+			a.setMusicVolume(0);
+			const stopped = vi.getTimerCount();
+			expect(stopped).toBeLessThan(base);
+			ctx.currentTime = 1;
+			const n = ctx.started;
+			vi.advanceTimersByTime(500);
+			expect(ctx.started).toBe(n); // scheduling stopped
+			a.setMusicVolume(0.5);
+			expect(vi.getTimerCount()).toBe(base);
+
+			a.update(view(2), [{ type: "memoIssued", memoId: 1, eventId: "x" }, { type: "tierUp", tier: 2, reward: 1 }, { type: "rackTripped", facilityId: 1 }]);
+			a.update(view(3, { gameOver: { kind: "shutdown", tick: 3 } } as Partial<SimView>), [{ type: "gameOver", kind: "shutdown" }]);
+			a.destroy();
+			vi.advanceTimersByTime(60_000);
+			expect(vi.getTimerCount()).toBe(0);
+			expect(ctx.sources.size).toBe(0);
+			a.setMusicVolume(1);
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
+	});
+
+	it("is a no-op without an AudioContext", () => {
+		vi.useFakeTimers();
+		try {
+			const a = createAudio();
+			a.setMusicVolume(0.5);
+			a.update(view(1), [{ type: "rackTripped", facilityId: 1 }]);
+			a.destroy();
+			expect(vi.getTimerCount()).toBe(0);
+		} finally {
+			vi.useRealTimers();
+		}
 	});
 
 	it("plays every sound recipe without throwing", async () => {

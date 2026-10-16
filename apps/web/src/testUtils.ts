@@ -22,6 +22,7 @@ export function fakeAudio() {
 		update: () => {},
 		setMuted: (m) => calls.push(`muted:${m}`),
 		setVolume: (v) => calls.push(`volume:${v}`),
+		setMusicVolume: (v) => calls.push(`music:${v}`),
 		destroy: () => {},
 	};
 	return { audio, calls };

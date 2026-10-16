@@ -3,10 +3,12 @@
  * entity arrays are rebuilt small each call.
  */
 import type { ContentDB } from "@aitower/content";
-import type { BotState, BotView, FacilityView, JobView, SimView } from "../api";
+import type { BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
+import { eventDef } from "../ministry/memos";
+import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 import { facilityStatus } from "./status";
 
@@ -27,6 +29,26 @@ function botState(b: Bot): BotState {
 		default:
 			return "idle";
 	}
+}
+
+function memoViews(state: SimState, content: ContentDB): MemoView[] {
+	const out: MemoView[] = [];
+	for (const m of state.memos) {
+		const def = eventDef(content, m.eventId);
+		if (!def) continue;
+		out.push({
+			id: m.id,
+			eventId: m.eventId,
+			category: def.category,
+			title: def.title,
+			body: def.body,
+			choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
+			defaultChoice: def.defaultChoice,
+			issuedAt: m.issuedAt,
+			expiresAt: m.expiresAt,
+		});
+	}
+	return out;
 }
 
 export function buildView(state: SimState, content: ContentDB): SimView {
@@ -128,7 +150,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		cash: state.cash,
 		spareParts,
 		tier: state.tier,
-		energyPrice: energyPriceAt(content.balance, state.tick),
+		energyPrice: energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice"),
 		pue: m.pue,
 		uptime: m.uptime,
 		itKw: m.itKw,
@@ -137,5 +159,12 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		ledger: [...state.ledger, state.today],
 		history: state.history,
 		bankrupt: state.bankrupt,
+		memos: memoViews(state, content),
+		memoHistory: state.memoHistory.map((h) => ({ ...h })),
+		modifiers: state.modifiers
+			.filter((m) => m.endsAt > state.tick)
+			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
+		standing: state.standing,
+		gameOver: state.gameOver ? { ...state.gameOver } : null,
 	};
 }

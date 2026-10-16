@@ -10,6 +10,14 @@ export interface UiState {
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */
 	alertsSeenTick: number;
+	/** Build palette tab (lifted so the induction can point at the right one). */
+	paletteTab: string;
+	/** Ministry inbox drawer is open. */
+	inboxOpen: boolean;
+	/** Memos the player has stamped; the sim files them at the next tick, so they are hidden meanwhile. */
+	stamped: number[];
+	/** Memos the player set aside (no slip pops up for them; they stay in the inbox). */
+	aside: number[];
 }
 
 /** Everything a HUD panel needs. Passed explicitly (no React context) to keep panels easy to test. */

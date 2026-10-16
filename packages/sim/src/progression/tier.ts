@@ -6,13 +6,16 @@
 import { installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
 import { isLastTickOfDay } from "../core/time";
+import { dailyStanding, setGameOver } from "../ministry/standing";
 import { earn } from "../economy/ledger";
 
 export function progressionStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	if (!isLastTickOfDay(state.tick)) return;
+	dailyStanding(ctx);
 	const tiers = content.balance.tiers;
 	const pflops = installedPflops(state, content);
+	const before = state.tier;
 	while (state.tier < tiers.pflops.length) {
 		const n = state.tier + 1;
 		if (pflops < tiers.pflops[n - 1] || state.metrics.uptime < tiers.uptime[n - 1]) break;
@@ -21,4 +24,5 @@ export function progressionStep(ctx: TickCtx): void {
 		earn(state, reward);
 		events.push({ type: "tierUp", tier: n, reward });
 	}
+	if (state.tier > before && state.tier >= tiers.pflops.length) setGameOver(state, "victory", events);
 }

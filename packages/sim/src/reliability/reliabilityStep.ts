@@ -9,6 +9,7 @@ import { TICKS_PER_DAY } from "../api";
 import type { TickCtx } from "../core/context";
 import { nextRandom } from "../core/rng";
 import type { Facility, SimState } from "../core/state";
+import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 
 /** Mark a rack failed and open a work order (also used by tests to inject failures). */
@@ -20,19 +21,20 @@ export function failRack(state: SimState, f: Facility, events: SimEvent[]): void
 	events.push({ type: "componentFailed", facilityId: f.id });
 }
 
-export function rackHazard(content: ContentDB, f: Facility): number {
+export function rackHazard(content: ContentDB, f: Facility, factor = 1): number {
 	const d = getDef(content, f.defId);
 	if (!d.rack) return 0;
 	const th = content.balance.thermal;
-	return (d.rack.failurePerDay / TICKS_PER_DAY) * (1 + th.hazardPerDegree * Math.max(0, f.tempC - th.okC));
+	return (d.rack.failurePerDay / TICKS_PER_DAY) * (1 + th.hazardPerDegree * Math.max(0, f.tempC - th.okC)) * factor;
 }
 
 export function reliabilityStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
+	const factor = modFactor(state, "failureRate");
 	for (const f of state.facilities) {
 		if (!f.enabled || f.failed) continue;
 		const d = getDef(content, f.defId);
 		if (d.kind !== "rack") continue;
-		if (nextRandom(state.rng, "reliability") < rackHazard(content, f)) failRack(state, f, events);
+		if (nextRandom(state.rng, "reliability") < rackHazard(content, f, factor)) failRack(state, f, events);
 	}
 }

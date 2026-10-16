@@ -9,7 +9,7 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 | `sim.ts` | Façade `SimImpl` (submit/canBuild/step/view/snapshot/hash/canPlace), the queue-aware *projection*, and the tick pipeline |
 | `core/state.ts` | `SimState` — the complete serialisable state (entities, typed-array grid layers, RNG, queued commands) |
 | `core/constants.ts` | Spec-mandated literals with no `Balance` field (idle 15 %, genset 60-tick stop, bot 20 %/5×, …) |
-| `core/rng.ts` | mulberry32 streams (`contracts`, `reliability`) stored in state |
+| `core/rng.ts` | mulberry32 streams (`contracts`, `reliability`, `events`) stored in state; adding a stream never shifts the others |
 | `core/grid.ts`, `core/time.ts`, `core/context.ts` | Index helpers / id lookup, clock + ambient + energy price, tick context & scratch buffers |
 | `world/defs.ts`, `world/entities.ts`, `world/init.ts` | Def helpers (`needsPower`, `serviceTile`…), add/remove entities, scenario → state |
 | `commands/*` | Each command = pure `plan*` (validate + cost) returning an `apply` closure; `apply.ts` dispatches; `shape.ts` = `normalizeCommand` (structural validation of untrusted input, never throws) |
@@ -21,6 +21,7 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 | `reliability/*` | Failure hazard rolls, `failRack` (work orders) |
 | `logistics/*` | Routing (Dijkstra over walk + multi-lift transfers, cached in `Scratch.nav`), lift SCAN dispatch, bot state machine with timeouts/backoff |
 | `economy/*`, `progression/*` | Ledger, upkeep/energy/PUE/uptime/bankruptcy/history; tier at day end; time advance |
+| `ministry/*` | `memos.ts` (seeded issue cadence/eligibility, `resolveMemo` plan, effects, timeout auto-resolve), `modifiers.ts` (timed modifiers: `modFactor`, `ambientOffset`, labels, expiry), `standing.ts` (standing 0..100, one-shot `gameOver`) |
 | `view/*` | `SimView` builder and facility status precedence |
 | `snapshot/*` | Typed-array-aware JSON codec; canonical FNV-1a hash; `load.ts` (decode ▸ migrate ▸ validate), `migrate.ts` (`SNAPSHOT_VERSION`, `migrations`), `validate.ts`, `clone.ts` (deep copy for the projection) |
 | `test/fixture.ts` | Self-contained `ContentDB` + helpers for tests |
@@ -37,8 +38,15 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 7. `reliabilityStep` — failure rolls (one RNG draw per enabled, non-failed rack, id order)
 8. `stepLifts` then `stepBots`
 9. `economyStep` — upkeep, energy bill, rolling 24 h PUE/uptime, bankruptcy, offers (expire/generate), history
-10. `progressionStep` — tier on the last tick of each day
+9b. `memoStep` — expire modifiers, auto-resolve timed-out memos, roll for a new memo (own `events` RNG stream); 9c. `jobStanding` — one standing change from this tick's `jobCompleted`/`jobFailed`
+10. `progressionStep` — on the last tick of each day: daily standing (uptime vs the *current* tier's target), then tier-up (reaching the top tier ⇒ `gameOver` victory)
 11. `advanceTime` — tick++, ledger roll + `newDay` at day change
+
+## Ministry (M2)
+- **Memos**: first no earlier than `graceTicks` (+ jitter), then every `intervalTicks` ±50 % (one `events` draw for the delay, one for the weighted pick); at most `maxOpen` open, never two of the same event, eligibility = `minTier/maxTier/minDay/cooldownDays` (`lastIssuedDay`). Memo text lives in `ContentDB.events`; state holds only `{id,eventId,issuedAt,expiresAt}`, so a save whose memo names an event missing from the content is rejected.
+- **Effects** (`resolveMemo`, or the `defaultChoice` at `expiresAt` with `auto: true`): cash via the ledger (gain = revenue, loss = penalties, may go negative), `standing`, `failRacks` (seeded, healthy racks only), `spareParts` (± , depot capacity), and timed `Modifier`s (active while `tick < endsAt`): ambient (added in `sim.step`, visible from the *next* tick), gridCap (`powerSolve`), energyPrice (`powerSolve` + view), payout (offers generated while active), failureRate (`rackHazard`). Same-kind multipliers stack.
+- **Standing**: clamped 0..100; every change emits `standingChanged` with the applied delta; 0 ⇒ `gameOver` "shutdown". `gameOver` is set once ("bankrupt" | "shutdown" | "victory"); the sim keeps stepping and memos keep coming.
+- **Offers**: with no open offer the next one is forced within `GUARANTEED_OFFER_TICKS` (6 h).
 
 ## Invariants
 - Everything that affects the future is in `SimState`; scratch buffers are overwritten every tick.
@@ -69,5 +77,5 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 `npx vitest run packages/sim tools/sim-cli` — placement/costs, networks, power, thermal, coolant, jobs,
 offers, logistics (`logistics.test.ts` single lift, `bots.test.ts` multi-lift/timeouts/topology changes, `routing.test.ts`), economy/progression,
 determinism (3 days, hash every 100 ticks; snapshot round-trip), `commands.test.ts` (queue-aware validation), `fuzz.test.ts` (seeded, 2,000
-malformed + valid commands), `snapshot.test.ts` (validation, migrations), perf (48×13 / 60 racks / 4 bots: 1440 ticks < 1.5 s; 60×64 tower,
+malformed + valid commands, incl. `resolveMemo` against expiring memos), `snapshot.test.ts` (validation, migrations; v2 → v3 is tested in `ministry.test.ts`), `ministry.test.ts` (memos, effects, standing, game over, determinism, v3 validation), perf (48×13 / 60 racks / 4 bots: 1440 ticks < 1.5 s; 60×64 tower,
 ~1,000 racks, 30 bots: best-window mean `step()` < 2 ms). Headless run with real content: `npm run sim -- starter 10`.

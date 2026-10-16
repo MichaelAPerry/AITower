@@ -8,6 +8,9 @@ export const SECONDS_PER_TICK = 60;
 /** Ticks per game hour; converts kW per tick into kWh. */
 export const TICKS_PER_HOUR = 60;
 
+/** With no open offer, the next one arrives at most this many ticks later (6 game hours), whatever the interval roll said. */
+export const GUARANTEED_OFFER_TICKS = 360;
+
 /** Idle racks (no job) draw this share of their rated power. */
 export const IDLE_RACK_POWER_FRACTION = 0.15;
 /** Below this power satisfaction, loads on the net switch off ("unpowered"). */

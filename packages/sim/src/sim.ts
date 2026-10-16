@@ -11,6 +11,9 @@ import { type Scratch, type TickCtx, createScratch } from "./core/context";
 import { cellCount } from "./core/grid";
 import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
+import { memoStep } from "./ministry/memos";
+import { ambientOffset } from "./ministry/modifiers";
+import { jobStanding } from "./ministry/standing";
 import { coolingSolve } from "./cooling/coolingSolve";
 import { economyStep } from "./economy/economyStep";
 import { spend } from "./economy/ledger";
@@ -105,7 +108,7 @@ export class SimImpl implements Sim {
 		this.projected = null;
 		const events: SimEvent[] = [];
 		const ctx: TickCtx = { state: this.state, content: this.content, events, scratch: this.scratch };
-		this.state.ambientC = ambientAt(this.content.balance, this.state.tick);
+		this.state.ambientC = ambientAt(this.content.balance, this.state.tick) + ambientOffset(this.state);
 		applyCommands(ctx); //  1
 		rebuildNetworks(ctx); //  2 (dirty only)
 		powerSolve(ctx); //  3
@@ -117,6 +120,8 @@ export class SimImpl implements Sim {
 		stepLifts(ctx); //  8a
 		stepBots(ctx); //  8b
 		economyStep(ctx); //  9 (incl. contract offers)
+		memoStep(ctx); //  9b modifiers expire, memos time out / are issued
+		jobStanding(ctx); //  9c standing from this tick's job outcomes
 		progressionStep(ctx); // 10
 		advanceTime(ctx); // 11
 		return events;

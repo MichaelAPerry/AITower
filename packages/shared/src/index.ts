@@ -58,6 +58,8 @@ export interface Settings {
 	autosave: boolean;
 	/** Show the "best on desktop" notice on small screens. */
 	showDesktopNotice: boolean;
+	/** Music volume relative to master, 0..1. */
+	musicVolume: number;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -70,6 +72,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	horrorIntensity: "full",
 	autosave: true,
 	showDesktopNotice: true,
+	musicVolume: 0.6,
 };
 
 /** Clamp/repair a possibly partial or stale settings object (e.g. from storage). */
@@ -88,6 +91,7 @@ export function normalizeSettings(raw: unknown): Settings {
 		horrorIntensity: r.horrorIntensity === "mild" || r.horrorIntensity === "off" ? r.horrorIntensity : "full",
 		autosave: bool(r.autosave, d.autosave),
 		showDesktopNotice: bool(r.showDesktopNotice, d.showDesktopNotice),
+		musicVolume: num(r.musicVolume, d.musicVolume, 0, 1),
 	};
 }
 
@@ -150,6 +154,8 @@ export interface AudioEngine {
 	update(view: SimView, events: SimEvent[]): void;
 	setMuted(muted: boolean): void;
 	setVolume(v: number): void;
+	/** Music level relative to master (0..1). 0 stops the music engine's scheduling. */
+	setMusicVolume(v: number): void;
 	destroy(): void;
 }
 

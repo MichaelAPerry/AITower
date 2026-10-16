@@ -9,7 +9,7 @@ import { toolKey } from "../tools/controller";
 import { FormLabel, Icon, Stamp, Swatch } from "./common";
 import type { PanelProps } from "./context";
 
-type Tab = "structure" | BuildCategory;
+export type Tab = "structure" | BuildCategory;
 const TABS: { id: Tab; label: string }[] = [
 	{ id: "structure", label: "Build" },
 	{ id: "rack", label: "Racks" },
@@ -92,8 +92,8 @@ export function tooltipTop(rectTop: number, viewportH: number, scale: number): n
 	return Math.max(60 / scale, Math.min(rectTop, viewportH - 320 * scale) / scale);
 }
 
-export function BuildPalette({ store, content, state }: PanelProps) {
-	const [tab, setTab] = useState<Tab>("structure");
+export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
+	const tab = ui.paletteTab as Tab;
 	const [hover, setHover] = useState<Hover | null>(null);
 	const { view, tool } = state;
 	const active = toolKey(tool);
@@ -142,8 +142,8 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 			</div>
 			<div className="ui-tabs ui-tabs-5" role="tablist">
 				{TABS.map((t) => (
-					<button key={t.id} type="button" role="tab" aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => {
-							setTab(t.id);
+					<button key={t.id} type="button" role="tab" data-tut={`tab-${t.id}`} aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => {
+							setUi({ paletteTab: t.id });
 							setHover(null);
 						}}>
 						{t.label}
@@ -156,6 +156,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 						<button
 							key={s.name}
 							type="button"
+							data-tut={`card-${s.icon}${s.tool.kind === "conduit" ? `-${s.tool.layer}` : ""}`}
 							className={`ui-item ui-card ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
 							onClick={() => pick(s.tool)}
 							onMouseLeave={() => setHover(null)}
@@ -183,6 +184,7 @@ export function BuildPalette({ store, content, state }: PanelProps) {
 							<button
 								key={d.id}
 								type="button"
+								data-tut={`card-${d.id}`}
 								aria-disabled={locked || poor}
 								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
 								onClick={() => {

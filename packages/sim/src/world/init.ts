@@ -4,6 +4,7 @@ import { TICKS_PER_DAY } from "../api";
 import { placeScenarioFacility } from "../commands/placement";
 import { stockParts } from "../commands/operations";
 import { nextOfferDelay } from "../compute/offers";
+import { nextMemoDelay } from "../ministry/memos";
 import { createScratch } from "../core/context";
 import { cellCount, cellIdx, inBounds } from "../core/grid";
 import { createRng } from "../core/rng";
@@ -43,7 +44,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		offers: [],
 		jobs: [],
 		workOrders: [],
-		nextId: { facility: 1, lift: 1, bot: 1, contract: 1, job: 1, workOrder: 1 },
+		nextId: { facility: 1, lift: 1, bot: 1, contract: 1, job: 1, workOrder: 1, memo: 1 },
 		powerNets: [],
 		coolantNets: [],
 		storageUtil: 0,
@@ -72,6 +73,13 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		},
 		ambientC: ambient,
 		rng: createRng(seed),
+		memos: [],
+		memoHistory: [],
+		modifiers: [],
+		nextMemoTick: 0,
+		lastIssuedDay: {},
+		standing: content.balance.standing.start,
+		gameOver: null,
 		pending: [],
 	};
 
@@ -111,5 +119,6 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 	attachToNets(state);
 	state.netsDirty = false;
 	state.nextOfferTick = nextOfferDelay(state, content);
+	state.nextMemoTick = content.balance.events.graceTicks + nextMemoDelay(state, content);
 	return state;
 }

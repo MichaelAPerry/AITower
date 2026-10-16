@@ -43,7 +43,7 @@ describe("store settings", () => {
 
 	it("applies initial settings to audio and renderer at boot", () => {
 		const { store, calls, options } = make({}, true);
-		expect(calls).toEqual(["muted:false", "volume:0.8"]);
+		expect(calls).toEqual(["muted:false", "volume:0.8", "music:0.6"]);
 		expect(options).toEqual([{ reducedMotion: true, crtEffects: true, colorBlind: false, horrorIntensity: "full" }]);
 		expect(store.get().settings.reducedMotion).toBe(true);
 	});
@@ -54,7 +54,7 @@ describe("store settings", () => {
 		const s = store.get().settings;
 		expect(s).toMatchObject({ masterVolume: 0.3, colorBlind: true, crtEffects: false, horrorIntensity: "off", textScale: 1.5 });
 		expect(JSON.parse(storage.data.get(SETTINGS_KEY) as string)).toEqual(s);
-		expect(calls.slice(-2)).toEqual(["muted:false", "volume:0.3"]);
+		expect(calls.slice(-3)).toEqual(["muted:false", "volume:0.3", "music:0.6"]);
 		expect(options.at(-1)).toEqual({ reducedMotion: false, crtEffects: false, colorBlind: true, horrorIntensity: "off" });
 	});
 
@@ -63,7 +63,7 @@ describe("store settings", () => {
 		store.setMuted(true);
 		expect(store.get().muted).toBe(true);
 		expect(store.get().settings.muted).toBe(true);
-		expect(calls.at(-2)).toBe("muted:true");
+		expect(calls.at(-3)).toBe("muted:true");
 		expect(JSON.parse(storage.data.get(SETTINGS_KEY) as string).muted).toBe(true);
 	});
 
@@ -78,7 +78,7 @@ describe("store settings", () => {
 	it("does not throw when storage or audio fail", () => {
 		const { store } = make();
 		expect(() => store.setSettings({ muted: true })).not.toThrow();
-		const bad = createGameStore(content, null, { resume: async () => {}, update: () => {}, destroy: () => {}, setMuted: () => { throw new Error("x"); }, setVolume: () => {} }, { backend: createMemoryBackend(), storage: null, prefersReducedMotion: false });
+		const bad = createGameStore(content, null, { resume: async () => {}, update: () => {}, destroy: () => {}, setMuted: () => { throw new Error("x"); }, setVolume: () => {}, setMusicVolume: () => {} }, { backend: createMemoryBackend(), storage: null, prefersReducedMotion: false });
 		expect(() => bad.setSettings({ muted: true })).not.toThrow();
 		expect(bad.get().settings.muted).toBe(true);
 	});
