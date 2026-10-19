@@ -1,3 +1,7 @@
+import { payPerPflopHour } from "@aitower/sim";
+import { ClerkPanel } from "../clerk/ClerkPanel";
+import { clerkRowText, clerkVerdict, fmtRate } from "../clerk/clerk";
+import { FinanceTab } from "../finance/FinanceTab";
 import { fmtDuration, fmtMoney, fmtPflops, fmtPower, fmtPue, fmtTemp } from "../format";
 import { describeEvent, isNoise } from "../events";
 import { pushNotice } from "../notices";
@@ -20,13 +24,23 @@ export function easiestOffer<T extends { needsLiquid: boolean; storageTB: number
 	return offers.find((o) => !o.needsLiquid && o.storageTB === 0) ?? offers.find((o) => !o.needsLiquid) ?? offers[0];
 }
 
-function Contracts({ store, state }: PanelProps) {
+function Contracts(props: PanelProps) {
+	const { store, state } = props;
 	const { view } = state;
 	// Ask the sim whether each offer can start on today's idle racks; ones that can't are shown blocked with the reason.
 	const fit = new Map(view.offers.map((o) => [o.id, store.canBuild({ type: "acceptContract", contractId: o.id })]));
 	const easy = view.offers.find((o) => fit.get(o.id)?.ok) ?? easiestOffer(view.offers);
-	if (!view.offers.length) return <div className="ui-empty ui-pad">No offers right now — new contracts arrive every few hours.</div>;
+	const clerk = view.clerk?.unlocked ? view.clerk : null;
+	if (!view.offers.length)
+		return (
+			<>
+				<ClerkPanel {...props} />
+				<div className="ui-empty ui-pad">No offers right now — new contracts arrive every few hours.</div>
+			</>
+		);
 	return (
+		<>
+			<ClerkPanel {...props} />
 		<div className="ui-form">
 			<div className="ui-form-head">
 				<span>FORM AT-7 · CONTRACT REQUISITION</span>
@@ -40,6 +54,7 @@ function Contracts({ store, state }: PanelProps) {
 						<th>Size</th>
 						<th>Window</th>
 						<th className="num">Payout</th>
+						<th className="num" title="Dollars of payout per PFLOP-hour of work">$/PF·h</th>
 						<th className="num">Penalty</th>
 						<th>Needs</th>
 						<th>Expires</th>
@@ -51,6 +66,7 @@ function Contracts({ store, state }: PanelProps) {
 						const left = o.expiresAt - view.tick;
 						const f = fit.get(o.id);
 						const blocked = f && !f.ok ? f.reason : null;
+						const verdict = clerk ? clerkVerdict(clerk.policy, o, f) : null;
 						return (
 							<tr key={o.id} className={blocked ? "is-blocked" : undefined}>
 								<td className="strong">
@@ -60,6 +76,7 @@ function Contracts({ store, state }: PanelProps) {
 									) : (
 										<span className="ui-offer-ok">Fits your idle racks</span>
 									)}
+									{clerk && <span className={`ui-offer-clerk ${verdict?.takes && clerk.policy.enabled ? "is-take" : ""}`}>{clerkRowText(clerk.policy.enabled, verdict as NonNullable<typeof verdict>)}</span>}
 								</td>
 								<td>
 									<Pill tone={o.kind === "inference" ? "info" : "cyan"}>{o.kind}</Pill>
@@ -67,6 +84,7 @@ function Contracts({ store, state }: PanelProps) {
 								<td>{o.kind === "inference" ? `${fmtPflops(o.sustainedPflops ?? o.work)} sustained` : `${Math.round(o.work).toLocaleString()} PF·h`}</td>
 								<td>{fmtDuration(o.durationTicks)}</td>
 								<td className="num is-pos">{fmtMoney(o.payout)}</td>
+								<td className="num">{fmtRate(payPerPflopHour(o), false)}</td>
 								<td className="num is-neg-soft">{o.penalty ? fmtMoney(o.penalty) : "—"}</td>
 								<td>
 									<span className="ui-tags">
@@ -106,6 +124,7 @@ function Contracts({ store, state }: PanelProps) {
 				</tbody>
 			</table>
 		</div>
+		</>
 	);
 }
 
@@ -202,44 +221,6 @@ function Telemetry({ content, state }: PanelProps) {
 	);
 }
 
-function Finance({ state }: PanelProps) {
-	const rows = state.view.ledger.slice(-8).reverse();
-	const net = (d: (typeof rows)[number]): number => d.revenue - d.energy - d.upkeep - d.construction - d.penalties;
-	const today = state.view.day;
-	return (
-		<table className="ui-table ui-ledger">
-			<caption>MINISTRY OF COMPUTATION · GENERAL LEDGER · DAILY ABSTRACT</caption>
-			<thead>
-				<tr>
-					<th>Day</th>
-					<th className="num">Revenue</th>
-					<th className="num">Energy</th>
-					<th className="num">Upkeep</th>
-					<th className="num">Construction</th>
-					<th className="num">Penalties</th>
-					<th className="num">Net</th>
-				</tr>
-			</thead>
-			<tbody>
-				{rows.map((d) => {
-					const n = net(d);
-					return (
-						<tr key={d.day} className={d.day === today ? "is-today" : ""}>
-							<td className="strong">{d.day === today ? `Today (${d.day})` : `Day ${d.day}`}</td>
-							<td className="num is-pos">{fmtMoney(d.revenue)}</td>
-							<td className="num">{fmtMoney(-d.energy)}</td>
-							<td className="num">{fmtMoney(-d.upkeep)}</td>
-							<td className="num">{fmtMoney(-d.construction)}</td>
-							<td className="num">{d.penalties ? fmtMoney(-d.penalties) : "—"}</td>
-							<td className={`num strong ${n < 0 ? "is-neg" : "is-pos"}`}>{fmtMoney(n)}</td>
-						</tr>
-					);
-				})}
-			</tbody>
-		</table>
-	);
-}
-
 function Alerts({ store, content, state }: PanelProps) {
 	const items = state.log.filter((e) => !isNoise(e.event)).slice(-80).reverse();
 	if (!items.length) return <div className="ui-empty ui-pad">All quiet.</div>;
@@ -307,7 +288,7 @@ export function BottomPanel(props: PanelProps) {
 					{ui.bottomTab === "contracts" && <Contracts {...props} />}
 					{ui.bottomTab === "jobs" && <Jobs {...props} />}
 					{ui.bottomTab === "telemetry" && <Telemetry {...props} />}
-					{ui.bottomTab === "finance" && <Finance {...props} />}
+					{ui.bottomTab === "finance" && <FinanceTab {...props} />}
 					{ui.bottomTab === "alerts" && <Alerts {...props} />}
 				</div>
 			)}

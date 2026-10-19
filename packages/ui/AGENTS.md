@@ -37,11 +37,24 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   with `clock: "run"`, applied on mode change only), `placement.ts` (`pickCorner`: the memo moves away from the highlighted element).
   Highlights use `data-tut` hooks (`speed-3`, `tab-rack`, `card-<defId>`, `btab-contracts`, `accept`, `overlay-heat`, `inbox`, `standing`)
   and the attribute `data-tut-target` (never a class: React rewrites className). Closing the induction restarts a stopped clock at 1x.
+- `research/`: the Department of Research. `tech.ts` (pure: `nodeState` researched/available/poor/locked with reason, `effectText` perks as "−10 % failure rate",
+  `unlocksFor` scans `content.facilities`/`bots` for `tech`, `cheapestAvailable`, `techGate` = "Requires research: <name>" for the build palette and bot shop),
+  `ResearchSheet.tsx` (full screen, five branch columns of index cards, RESEARCH dispatches `{type:"research"}`), `research.css` (also the top-bar button and palette gating styles).
+  **R** toggles it; the Hud holds it in a `createMenuController` (pauses on open, restores the speed on close, like the menu). While open `runKey` ignores every key except Esc and R.
+  The top-bar research button shares a column (`.ui-deskcol`) with the inbox so the bar keeps its width (measured at 1280 and 1280×1.5).
+- `clerk/`: Contracts Clerk. `clerk.ts` (pure: `clerkVerdict` = would the clerk take this offer, with the reason; `toggleKind` never empties the list; `parseAmount`),
+  `ClerkPanel.tsx` (top of the Contracts tab: hire-me slip while locked, standing-order form once unlocked; every change dispatches `setClerk`, built on the
+  policy read from the store at that moment). Offer rows get a `$/PF·h` column and a "Clerk will take it / skips: why / is off" line.
+- `finance/`: `finance.ts` (pure: `ledgerNet`/`ledgerCosts` include taxes, interest and fees; loan presets 25 %/50 %/ALL of the headroom or principal; audit copy;
+  `lifetimeRows`), `FinanceTab.tsx` (sections Ledger, Credit Office, Audits, Record; `ui.financeTab`), `AuditSheet.tsx` (modal QUARTERLY AUDIT: figures, grade stamp,
+  standing and cash change, remark; does NOT pause; button or Esc closes; game hotkeys still work), `auditTrigger.ts` (log cursor: a sheet pops once per
+  `quarterReport` that arrives after mount, never for entries already in the log or after a load), `finance.css`.
+- CSS for these three folders is imported by `Hud.tsx` after `ui.css`, so it can refine ui.css base rules at equal specificity.
 - `hooks.ts`: `useGameState` (useSyncExternalStore). View-only churn is throttled to 10 Hz; changes to
   speed, tool, overlay, selection or mute re-render at once.
 - `keyboard.ts`: pure `keyAction` map, `runKey` (the testable dispatcher) and the `useHudKeyboard` hook. It does not use
   WASD or the arrow keys, because the renderer uses them for the camera. While the menu is open `runKey` ignores every
-  key except Esc.
+  key except Esc. `R` opens/closes the research sheet (`KeyEnv.research`); `KeyEnv.audit` lets Esc close the audit sheet.
 - `tools/controller.ts`, `tools/geometry.ts`, `tools/pick.ts`: tool logic, span/path geometry, selection picking.
 - `events.ts`: SimEvent → text, severity, focus cell and whether to toast; plus coalescing keys.
 - `notices.ts`: module-level bus. The controller and HUD buttons push rejection reasons here, and `<Toasts>` shows them.
@@ -52,13 +65,18 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   printout / Alerts teletype), Sparkline (oscilloscope trace), Toasts (memo slips), PueGauge (also the
   generic `Gauge` = Dial + Dymo label + CRT readout), Dial (SVG needle gauge, `niceMax`), common
   (Pill/Meter/Swatch/Icon/Row/Kbd plus the hardware primitives Crt/Lamp/Toggle/Stamp/Counter/FormLabel).
-- `dev/fakeStore.ts`: a fake GameStore with a hand-built SimView and local content fixture. It is for
+- `dev/walk.ts`: test helpers (no DOM here): call hook-free function components directly, walk the returned element tree, find a control by text/title/`rest`
+  and call its handler; `panelProps()` builds `PanelProps`. `m2b.test.tsx` uses them for the research, clerk, finance, audit and key tests.
+- `dev/fakeStore.ts`: a fake GameStore with a hand-built SimView and local content fixture (11 tech nodes `FAKE_TECH`, a gated chiller and a gated drone bot, a loan,
+  a filed audit, lifetime stats; it implements research / setClerk / takeLoan / repayLoan like the sim, plus `fileQuarterReport`, `unlockClerk`, `addResearchPoints`). It is for
   development and tests only and is not exported. `canBuild` mirrors the sim's structure rules and reason wording;
   `dev/fakeSaves.ts` gives it in-memory async save slots, export/import text and `newGame`.
 - `dev/` (package root): Vite harness. Run `npx vite packages/ui/dev --port 5175`, then
   `node scripts/screenshot.mjs http://localhost:5175 out.png 1440 900 1500`.
   Extra params: `?title=1` (&`saves=0` for a first visit), `?memo=N` (&`hist=1`), `?standing=N`, `?mod=1`, `?over=bankrupt|shutdown|victory`,
   `?tut=<step id>|none`, `?toasts=0`. The fake store has `issueMemo`, `setStanding`, `addModifier`, `triggerGameOver`.
+  M2b params: `?clerk=1|on` (clerk hired, or switched on with limits), `?rp=N` research points, `?research=1` opens the sheet, `?audit=A..E` files an audit
+  after load, `?fin=credit|audits|record` (with `?tab=finance`).
   Query params: `?tab=jobs|telemetry|finance|alerts`, `?overlay=heat`, `?sel=<facilityId>|bot|lift|none`,
   `?tool=<defId>`, `?menu=save|load|settings|controls|new` (opens the menu on that drawer), `?scale=0.85..1.5`, `?cb=1`,
   `?crt=0`, `?motion=1`, `?notice=0`. `window.__store` exposes the fake store to probe scripts. The harness imports the
@@ -108,12 +126,15 @@ for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, for
   the label is the sim's reason (capitalised) when refused, or the cost label (computed locally for display only) when
   allowed. A lift hover without a drag is valid if the cell can pair with the floor above or below. Place ghosts use
   `store.canPlace`. Rejections are still toasted on dispatch.
-- Esc order: close the menu, else cancel the armed tool, else clear the selection, else open the menu (`menu/escape.ts`).
+- Esc order: close the menu, else the research sheet, else the audit sheet, else cancel the armed tool, else clear the selection, else open the menu (`menu/escape.ts`).
+- Full-screen sheets are modal on purpose (research z 52, audit z 48, below the menu 60 and game over 55); the memo slip and CURRENT ORDERS are not covered by anything else.
+- Build gating: a facility or bot whose `tech` is not researched is disabled with "Requires research: <name>" (decided from `content.tech` and `view.techResearched`).
 - Import never throws: the file is read with FileReader and `store.load(text)` runs in try/catch; failures show
   "Invalid save: …" in the menu and the running game is kept.
 
 ## Test
-`npx vitest run packages/ui`: controller (each tool, L-path, span normalisation, picking, rejections, ghosts via
+`npx vitest run packages/ui`: research node states / effect text / unlocks, clerk verdicts, loan presets, `moneyToday`, audit trigger and copy,
+R / Esc / pause behaviour, component dispatches (`m2b.test.tsx`), controller (each tool, L-path, span normalisation, picking, rejections, ghosts via
 `canBuild`), format helpers, Esc state machine, menu pause/restore, hotkeys ignored while the menu is open, save-slot
 formatting, import/export, settings → CSS variables/classes, heat ramps, density, the fake store's saves, throttled
 subscribe, and Hud/SystemMenu server-render tests. There is no DOM test environment: DOM behaviour (focus trap, file

@@ -1,5 +1,6 @@
 /** Game-over screens: which one to show, once, and what to put on it. */
 import type { GameOverKind, SimView } from "@aitower/sim";
+import { type StatRow, lifetimeRows } from "../finance/finance";
 import { fmtMoney, fmtPflops } from "../format";
 
 export type GameOver = NonNullable<SimView["gameOver"]>;
@@ -48,22 +49,24 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 	},
 };
 
-export interface StatRow {
-	label: string;
-	value: string;
-}
+export type { StatRow };
 
-/** Lifetime figures for the service record. Contracts completed is shown only when the view still lists any. */
+/**
+ * The service record: where the run ended, then the lifetime figures from the sim (the same rows as the Finance tab's
+ * Record section). A view without `stats` (an old fixture) falls back to what the view itself can tell.
+ */
 export function lifetimeStats(view: SimView): StatRow[] {
-	const peak = Math.max(view.pflops, ...view.history.map((h) => h.pflops));
-	const completed = view.jobs.filter((j) => j.status === "completed").length;
-	const rows: StatRow[] = [
+	const head: StatRow[] = [
 		{ label: "Days in service", value: String(view.day) },
-		{ label: "Peak compute", value: fmtPflops(peak) },
 		{ label: "Clearance reached", value: `Tier ${view.tier}` },
 		{ label: "Ministry standing", value: `${Math.round(view.standing)} / 100` },
 		{ label: "Final treasury", value: fmtMoney(view.cash) },
 	];
-	if (completed > 0) rows.splice(2, 0, { label: "Contracts completed", value: String(completed) });
+	const life = lifetimeRows(view.stats);
+	if (life.length) return [...head, ...life];
+	const peak = Math.max(view.pflops, ...view.history.map((h) => h.pflops));
+	const completed = view.jobs.filter((j) => j.status === "completed").length;
+	const rows = [...head, { label: "Peak compute", value: fmtPflops(peak) }];
+	if (completed > 0) rows.push({ label: "Contracts completed", value: String(completed) });
 	return rows;
 }

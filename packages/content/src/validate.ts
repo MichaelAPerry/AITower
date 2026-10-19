@@ -62,6 +62,9 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	}
 	if (d.category !== KIND_CATEGORY[d.kind]) p.push(`${w}.category: "${d.category}" should be "${KIND_CATEGORY[d.kind]}" for kind ${d.kind}`);
 	num(p, `${w}.width`, d.width, { min: 1, int: true });
+	// The renderer draws these bodies at a fixed native width; narrower defs would overflow their tiles.
+	const minWidth = MIN_WIDTH_BY_KIND[d.kind];
+	if (minWidth !== undefined && isNum(d.width) && d.width < minWidth) p.push(`${w}.width: a ${d.kind} must be at least ${minWidth} tiles wide (art width)`);
 	num(p, `${w}.cost`, d.cost, { min: 0 });
 	num(p, `${w}.upkeepPerDay`, d.upkeepPerDay, { min: 0 });
 	num(p, `${w}.unlockTier`, d.unlockTier, { min: 1, max: Math.max(1, tierCount), int: true });
@@ -521,6 +524,9 @@ function validateTech(p: Problems, db: ContentDB): void {
 		if (b.tech !== undefined && !byId.has(b.tech)) p.push(`bots.${key}.tech: unknown tech "${b.tech}"`);
 	}
 }
+
+/** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
+const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2 };
 
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];

@@ -2,8 +2,8 @@
  * Dev-only fake GameStore backed by a hand-built SimView fixture. Uses content *types* only and a small
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
-import type { ContentDB, EventDef, FacilityDef } from "@aitower/content";
-import type { CommandResult, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { ContentDB, EventDef, FacilityDef, TechNode } from "@aitower/content";
+import type { AuditGrade, CommandResult, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -50,6 +50,23 @@ const FAKE_EVENTS: EventDef[] = [
 	},
 ];
 
+const tn = (t: Partial<TechNode> & Pick<TechNode, "id" | "name" | "branch" | "cost">): TechNode => ({ description: "Filed in triplicate.", minTier: 1, requires: [], effects: [], ...t });
+
+/** A small tree for the dev harness and tests: two or three nodes per branch, the clerk first. */
+export const FAKE_TECH: TechNode[] = [
+	tn({ id: "adm_clerk", name: "Form 9: Delegation of Signature", branch: "administration", cost: 30, description: "Hire a Contracts Clerk to stamp offers on your behalf. The clerk keeps a share of each job.", effects: [{ type: "feature", feature: "contractsClerk" }] }),
+	tn({ id: "adm_filing", name: "Pneumatic Filing", branch: "administration", cost: 60, minTier: 2, requires: ["adm_clerk"], description: "Research moves faster when the tubes do not jam.", effects: [{ type: "perk", kind: "researchRate", factor: 1.2 }] }),
+	tn({ id: "cmp_burnin", name: "Burn-in Protocol", branch: "compute", cost: 20, description: "Racks are tortured before use so they fail less in service.", effects: [{ type: "perk", kind: "failureRate", factor: 0.9 }] }),
+	tn({ id: "cmp_binning", name: "Silicon Binning", branch: "compute", cost: 90, minTier: 2, requires: ["cmp_burnin"], description: "Only the best chips reach clients.", effects: [{ type: "perk", kind: "payout", factor: 1.05 }, { type: "perk", kind: "failureRate", factor: 0.95 }] }),
+	tn({ id: "cmp_cluster", name: "Cluster Fabric", branch: "compute", cost: 240, minTier: 3, requires: ["cmp_binning"], description: "A cable per rack, in triplicate.", effects: [{ type: "perk", kind: "payout", factor: 1.1 }] }),
+	tn({ id: "cool_exchange", name: "Heat Exchange Theory", branch: "cooling", cost: 25, description: "Teaches the Ministry what a chiller is.", effects: [{ type: "perk", kind: "coolingCapacity", factor: 1.1 }] }),
+	tn({ id: "cool_loops", name: "Closed Loop Plumbing", branch: "cooling", cost: 120, minTier: 2, requires: ["cool_exchange"], description: "Less water on the floor.", effects: [{ type: "perk", kind: "coolingCapacity", factor: 1.15 }, { type: "perk", kind: "upkeep", factor: 0.95 }] }),
+	tn({ id: "pow_tariff", name: "Off-peak Tariff Forms", branch: "power", cost: 35, description: "A form that lowers the electricity bill.", effects: [{ type: "perk", kind: "energyPrice", factor: 0.92 }] }),
+	tn({ id: "pow_storage", name: "Battery Lobbying", branch: "power", cost: 150, minTier: 3, requires: ["pow_tariff"], description: "More lobbying, less price.", effects: [{ type: "perk", kind: "energyPrice", factor: 0.9 }] }),
+	tn({ id: "log_wrench", name: "Torque Wrench Standard", branch: "logistics", cost: 25, description: "Bots repair faster with the right wrench.", effects: [{ type: "perk", kind: "repairSpeed", factor: 1.25 }] }),
+	tn({ id: "log_drone", name: "Rotary Aviation Licence", branch: "logistics", cost: 110, minTier: 2, requires: ["log_wrench"], description: "Bots may now fly between floors, with paperwork.", effects: [{ type: "perk", kind: "botSpeed", factor: 1.2 }] }),
+];
+
 export function createFakeContent(): ContentDB {
 	const facilities: FacilityDef[] = [
 		fac({ id: "rack_air_gpu", name: "GPU Rack (air)", kind: "rack", category: "rack", cost: 42_000, color: "#2b3442", accent: "#4fd8ff", width: 1, description: "8× air-cooled accelerators. Cheap and simple, but dumps all its heat into the room.", rack: { cooling: "air", powerKw: 18, liquidFraction: 0, pflops: 2.4, storageTB: 0, failurePerDay: 0.01 } }),
@@ -59,7 +76,7 @@ export function createFakeContent(): ContentDB {
 		fac({ id: "genset", name: "Diesel Genset", kind: "genset", category: "power", cost: 85_000, color: "#3b2a1e", accent: "#ff8a4c", width: 3, description: "Backup generator. Starts 2 minutes after a shortfall.", power: { capacityKw: 500, startDelayTicks: 2, costPerKwh: 0.32 } }),
 		fac({ id: "ups", name: "UPS Battery", kind: "ups", category: "power", cost: 38_000, color: "#1f3328", accent: "#3ff2a0", width: 2, description: "Bridges the gap until the genset spins up.", power: { capacityKw: 300, storageKwh: 120, efficiency: 0.94 } }),
 		fac({ id: "crah", name: "CRAH Unit", kind: "crah", category: "cooling", cost: 24_000, color: "#1d3038", accent: "#7fe3ff", width: 2, facilityKw: 4, description: "Computer-room air handler. Pulls room air toward 20 °C within its reach.", cooling: { capacityKw: 120, radius: 6 } }),
-		fac({ id: "chiller", name: "Chiller", kind: "chiller", category: "cooling", cost: 110_000, color: "#1b2c3f", accent: "#59a8ff", width: 3, unlockTier: 2, description: "Rejects coolant-loop heat outdoors. COP derates in hot weather.", cooling: { capacityKw: 400, cop: 5 } }),
+		fac({ id: "chiller", name: "Chiller", kind: "chiller", category: "cooling", cost: 110_000, color: "#1b2c3f", accent: "#59a8ff", width: 3, unlockTier: 2, tech: "cool_exchange", description: "Rejects coolant-loop heat outdoors. COP derates in hot weather.", cooling: { capacityKw: 400, cop: 5 } }),
 		fac({ id: "cdu", name: "CDU", kind: "cdu", category: "cooling", cost: 32_000, color: "#1a2836", accent: "#4fd8ff", unlockTier: 2, facilityKw: 2, description: "Coolant distribution unit feeding liquid racks.", cooling: { capacityKw: 300 }, placement: { needsCoolant: true } }),
 		fac({ id: "immersion", name: "Immersion Tank", kind: "rack", category: "rack", cost: 240_000, color: "#14303a", accent: "#3ff2a0", width: 2, unlockTier: 3, description: "Two-phase immersion. Absurd density.", rack: { cooling: "immersion", powerKw: 120, liquidFraction: 1, pflops: 20, storageTB: 0, failurePerDay: 0.008 } }),
 		fac({ id: "depot", name: "Parts Depot", kind: "depot", category: "logistics", cost: 12_000, color: "#2d2a22", accent: "#ffd34d", width: 2, description: "Shelving for spare parts.", logistics: { capacity: 40 } }),
@@ -67,7 +84,10 @@ export function createFakeContent(): ContentDB {
 	];
 	return {
 		facilities: Object.fromEntries(facilities.map((f) => [f.id, f])),
-		bots: { techbot: { id: "techbot", name: "TechBot", cost: 15_000, speed: 0.5, batteryTicks: 600, repairTicks: 30, color: "#8fffdd" } },
+		bots: {
+			techbot: { id: "techbot", name: "TechBot", cost: 15_000, speed: 0.5, batteryTicks: 600, repairTicks: 30, color: "#8fffdd" },
+			drone: { id: "drone", name: "Rotor Drone", cost: 30_000, speed: 0.8, batteryTicks: 400, repairTicks: 30, color: "#ffd34d", tech: "log_drone", flying: true, carry: 2 },
+		},
 		clients: [],
 		structure: { slabPerTile: 1_200, basementSlabPerTile: 3_000, powerConduitPerTile: 150, coolantConduitPerTile: 400, liftPerFloor: 6_000, liftBase: 20_000, sparePart: 800 },
 		lift: { speed: 0.1, capacity: 2, dwellTicks: 2, facilityKw: 3 },
@@ -90,7 +110,7 @@ export function createFakeContent(): ContentDB {
 		},
 		scenarios: {},
 		events: FAKE_EVENTS,
-		tech: [],
+		tech: FAKE_TECH,
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
@@ -145,12 +165,14 @@ function buildView(content: ContentDB): SimView {
 		memoHistory: [],
 		modifiers: [],
 		standing: 50,
-		researchPoints: 0,
+		researchPoints: 42,
 		techResearched: [],
-		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
-		loan: { principal: 0, max: 0, dailyRate: 0 },
-		reports: [],
-		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
+		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true }, acceptedTotal: 0 },
+		loan: { principal: 400_000, max: 6_000_000, dailyRate: 0.004 },
+		reports: [
+			{ quarter: 1, fromDay: 0, toDay: 6, revenue: 310_000, costs: 1_420_000, uptime: 0.981, pue: 1.52, jobsCompleted: 3, jobsFailed: 1, penalties: 25_000, grade: "D", standingDelta: -3, cashDelta: -20_000, remark: "The Ministry notes that construction is not, strictly speaking, a revenue stream." },
+		],
+		stats: { revenue: 2_120_000, pflopHours: 8_450, jobsCompleted: 21, jobsFailed: 2, peakPflops: 61.2, facilitiesBuilt: 47, componentFailures: 6, repairs: 5, memosAnswered: 3, researchPointsEarned: 42 },
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
@@ -190,9 +212,9 @@ function buildView(content: ContentDB): SimView {
 		revenue: d < 2 ? 0 : 80_000 + d * 9_000 + ((d * 7919) % 30_000),
 		energy: 18_000 + d * 1_400,
 		upkeep: 6_200 + d * 300,
-		taxes: 0,
-		interest: 0,
-		fees: 0,
+		taxes: d >= 5 ? Math.round(d * 420) : 0,
+		interest: d >= 8 ? 1_600 : 0,
+		fees: d >= 10 ? 900 + d * 40 : 0,
 		construction: d === 0 ? 900_000 : d % 4 === 1 ? 160_000 : (d * 3301) % 20_000,
 		penalties: d === 9 ? 25_000 : 0,
 	}));
@@ -260,6 +282,7 @@ function canPlaceFor(view: SimView, content: ContentDB, defId: string, floor: nu
 	const d = content.facilities[defId];
 	if (!d) return no("Unknown facility");
 	if (d.unlockTier > view.tier) return no(`Requires Tier ${d.unlockTier}`);
+	if (d.tech && !view.techResearched.includes(d.tech)) return no(`requires research: ${content.tech.find((t) => t.id === d.tech)?.name ?? d.tech}`);
 	for (let i = 0; i < d.width; i++) {
 		if (!inBounds(view, x + i, floor)) return no("Out of bounds");
 		if (!view.slab[cellIndex(view, x + i, floor)]) return no("Needs floor slab");
@@ -283,6 +306,12 @@ export interface FakeStore extends GameStore {
 	addModifier(m: ModifierView): void;
 	/** End the game as the real sim would. */
 	triggerGameOver(kind: GameOverKind): void;
+	/** File a quarterly audit: appends a report and emits `quarterReport` (like the sim at midnight). */
+	fileQuarterReport(grade?: AuditGrade): QuarterReport;
+	/** Add research points (harness and tests). */
+	addResearchPoints(n: number): void;
+	/** Research a node as if the player had (no RP or prerequisite checks); unlocks the clerk if the node does. */
+	unlockClerk(): void;
 }
 
 export function createFakeStore(content: ContentDB = createFakeContent(), opts: { saveDelayMs?: number } = {}): FakeStore {
@@ -368,6 +397,34 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			newView({ gameOver: { kind, tick: view.tick }, bankrupt: kind === "bankrupt" || view.bankrupt });
 			pushEvents([{ type: "gameOver", kind }]);
 		},
+		fileQuarterReport(grade = "B") {
+			const last = view.reports.at(-1);
+			const quarter = (last?.quarter ?? 0) + 1;
+			const good = grade <= "B";
+			const rep: QuarterReport = {
+				quarter,
+				fromDay: last ? last.toDay + 1 : 0,
+				toDay: (last ? last.toDay : -1) + 7,
+				revenue: 1_240_000,
+				costs: good ? 780_000 : 1_460_000,
+				uptime: good ? 0.9984 : 0.972,
+				pue: good ? 1.41 : 1.63,
+				jobsCompleted: good ? 14 : 6,
+				jobsFailed: good ? 0 : 3,
+				penalties: good ? 0 : 90_000,
+				grade,
+				standingDelta: grade === "A" ? 4 : grade === "B" ? 2 : grade === "C" ? 0 : grade === "D" ? -3 : -6,
+				cashDelta: grade === "A" ? 62_000 : grade === "B" ? 24_800 : grade === "C" ? 0 : grade === "D" ? -29_000 : -73_000,
+				remark: good ? "The Ministry is, on balance, not displeased." : "The Ministry has filed your results under 'regrettable'.",
+			};
+			newView({ reports: [...view.reports, rep].slice(-8) });
+			pushEvents([{ type: "quarterReport", quarter, grade }]);
+			return rep;
+		},
+		addResearchPoints: (n) => newView({ researchPoints: view.researchPoints + n }),
+		unlockClerk() {
+			newView({ clerk: { ...view.clerk, unlocked: true }, techResearched: view.techResearched.includes("adm_clerk") ? view.techResearched : [...view.techResearched, "adm_clerk"] });
+		},
 		get: () => state,
 		subscribe(cb) {
 			subs.add(cb);
@@ -407,8 +464,11 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (view.cash < content.structure.sparePart * cmd.count) return no("Not enough cash");
 					newView({ cash: view.cash - content.structure.sparePart * cmd.count, spareParts: view.spareParts + cmd.count });
 					return ok;
-				case "buyBot":
+				case "buyBot": {
+					const b = content.bots[cmd.defId];
+					if (b?.tech && !view.techResearched.includes(b.tech)) return no(`requires research: ${content.tech.find((t) => t.id === b.tech)?.name ?? b.tech}`);
 					return no("All bot docks are full");
+				}
 				case "demolish":
 					newView({ facilities: view.facilities.filter((f) => !(f.floor === cmd.floor && cmd.x >= f.x && cmd.x < f.x + f.width)) });
 					return ok;
@@ -417,6 +477,42 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (!m || queued.some((q) => q.memoId === cmd.memoId)) return no("That memo is no longer on file");
 					if (!m.choices.some((c) => c.id === cmd.choiceId)) return no("Unknown choice");
 					queued.push({ memoId: cmd.memoId, choiceId: cmd.choiceId });
+					return ok;
+				}
+				case "research": {
+					const n = content.tech.find((t) => t.id === cmd.techId);
+					if (!n) return no(`Unknown research: ${cmd.techId}`);
+					if (view.techResearched.includes(n.id)) return no(`${n.name} is already filed`);
+					const missing = n.requires.find((r) => !view.techResearched.includes(r));
+					if (missing) return no(`Requires ${content.tech.find((t) => t.id === missing)?.name ?? missing} first`);
+					if (view.tier < n.minTier) return no(`Requires Clearance ${n.minTier}`);
+					if (view.researchPoints < n.cost) return no(`Needs ${n.cost} RP, have ${Math.floor(view.researchPoints)}`);
+					const clerk = n.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk") ? { ...view.clerk, unlocked: true } : view.clerk;
+					newView({ researchPoints: view.researchPoints - n.cost, techResearched: [...view.techResearched, n.id], clerk });
+					pushEvents([{ type: "researched", techId: n.id }]);
+					return ok;
+				}
+				case "setClerk": {
+					if (!view.clerk.unlocked) return no("The Contracts Clerk has not been hired");
+					const p = cmd.policy;
+					if (!p.kinds.length) return no("The clerk needs at least one job kind");
+					if (![p.minPayPerPflopHour, p.maxPenalty].every((x) => Number.isFinite(x) && x >= 0)) return no("Clerk limits must be zero or more");
+					newView({ clerk: { ...view.clerk, policy: { ...p, kinds: [...p.kinds] } } });
+					return ok;
+				}
+				case "takeLoan": {
+					if (!(cmd.amount > 0)) return no("Loan amount must be positive");
+					if (view.loan.principal + cmd.amount > view.loan.max + 1e-9) return no("That is over your credit limit");
+					newView({ cash: view.cash + cmd.amount, loan: { ...view.loan, principal: view.loan.principal + cmd.amount } });
+					pushEvents([{ type: "loanTaken", amount: cmd.amount }]);
+					return ok;
+				}
+				case "repayLoan": {
+					const pay = Math.min(cmd.amount, view.loan.principal);
+					if (!(pay > 0)) return no("Nothing to repay");
+					if (view.cash < pay) return no("Not enough cash to repay that much");
+					newView({ cash: view.cash - pay, loan: { ...view.loan, principal: view.loan.principal - pay } });
+					pushEvents([{ type: "loanRepaid", amount: pay }]);
 					return ok;
 				}
 				default:

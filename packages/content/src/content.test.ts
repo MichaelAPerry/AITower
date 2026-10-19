@@ -76,6 +76,11 @@ describe("validateContent", () => {
 		expect(broken((db) => (db.facilities.cdu.category = "rack")).join()).toMatch(/category/);
 	});
 
+	it("flags facilities narrower than their kind's art", () => {
+		expect(broken((db) => (db.facilities.chiller.width = 3)).join()).toMatch(/chiller must be at least 4 tiles wide/);
+		expect(broken((db) => (db.facilities.cdu.width = 1)).join()).toMatch(/cdu must be at least 2 tiles wide/);
+	});
+
 	it("flags bad numbers and array lengths", () => {
 		expect(broken((db) => (db.facilities.rack_air_gpu.rack!.powerKw = -1)).join()).toMatch(/powerKw/);
 		expect(broken((db) => db.balance.energyPriceByHour.push(1)).join()).toMatch(/24 entries/);

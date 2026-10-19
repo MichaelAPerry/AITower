@@ -1,6 +1,6 @@
 import type { GameStore, OverlayMode, Speed } from "@aitower/shared";
 import { useEffect, useRef } from "react";
-import { applyEscape } from "./menu/escape";
+import { applyEscape, type Closable } from "./menu/escape";
 import type { MenuController } from "./menu/menuController";
 
 export type KeyAction =
@@ -10,6 +10,7 @@ export type KeyAction =
 	| { type: "mute" }
 	| { type: "escape" }
 	| { type: "demolish" }
+	| { type: "research" }
 	| { type: "toggleBottom" };
 
 const SPEED_KEYS: Record<string, Speed> = { "1": 0, "2": 1, "3": 3, "4": 10, "5": 30 };
@@ -28,6 +29,7 @@ export function keyAction(key: string): KeyAction | null {
 	if (k in OVERLAY_KEYS) return { type: "overlay", mode: OVERLAY_KEYS[k] };
 	if (k === "m") return { type: "mute" };
 	if (k === "x") return { type: "demolish" };
+	if (k === "r") return { type: "research" };
 	return null;
 }
 
@@ -37,6 +39,10 @@ const typing = (t: EventTarget | null): boolean =>
 export interface KeyEnv {
 	menu: MenuController;
 	toggleBottom: () => void;
+	/** The research sheet: R toggles it (opening pauses the game, closing restores the speed). */
+	research?: MenuController;
+	/** The quarterly audit sheet: only Esc closes it; the game keeps running under it. */
+	audit?: Closable;
 	/** Last non-zero speed, for the space-bar toggle. */
 	lastSpeed: { current: Speed };
 }
@@ -48,9 +54,16 @@ export interface KeyEnv {
 export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	const a = keyAction(key);
 	if (!a) return false;
+	const sheets = { research: env.research, audit: env.audit };
 	if (env.menu.isOpen()) {
-		if (a.type === "escape") applyEscape(store, env.menu);
+		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		return a.type === "escape";
+	}
+	// The research sheet is modal: only Esc and R (both close it) act while it is open.
+	if (env.research?.isOpen()) {
+		if (a.type === "escape") applyEscape(store, env.menu, sheets);
+		else if (a.type === "research") env.research.close();
+		return a.type === "escape" || a.type === "research";
 	}
 	const s = store.get();
 	if (s.speed !== 0) env.lastSpeed.current = s.speed;
@@ -68,7 +81,10 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 			store.setMuted(!s.muted);
 			break;
 		case "escape":
-			applyEscape(store, env.menu);
+			applyEscape(store, env.menu, sheets);
+			break;
+		case "research":
+			env.research?.open();
 			break;
 		case "demolish":
 			store.setGhost(null);
@@ -82,14 +98,15 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 }
 
 /** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
-export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false): void {
+export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; audit?: Closable } = {}): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggleBottom);
 	toggleRef.current = toggleBottom;
 	const blockedRef = useRef(blocked);
 	blockedRef.current = blocked;
+	const { research, audit } = sheets;
 	useEffect(() => {
-		const env: KeyEnv = { menu, lastSpeed, toggleBottom: () => toggleRef.current() };
+		const env: KeyEnv = { menu, research, audit, lastSpeed, toggleBottom: () => toggleRef.current() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 			if (blockedRef.current() && !menu.isOpen()) return;
@@ -99,5 +116,5 @@ export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu:
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [store, menu]);
+	}, [store, menu, research, audit]);
 }

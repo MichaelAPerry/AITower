@@ -1,0 +1,262 @@
+/* ── Department of Research: full-screen sheet, five branch columns of index cards ── */
+.aitower-hud .ui-research-backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: 52;
+	pointer-events: auto;
+	display: grid;
+	grid-template-rows: minmax(0, 1fr);
+	padding: 14px;
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ink) 60%, transparent), color-mix(in srgb, var(--ink) 92%, transparent));
+	animation: ui-menu-in 0.16s ease-out both;
+}
+.aitower-hud .ui-research {
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	color: var(--ink);
+	background:
+		repeating-linear-gradient(180deg, transparent 0 23px, color-mix(in srgb, var(--beige) 28%, transparent) 23px 24px),
+		var(--paper);
+	border: 1px solid var(--brass-dk);
+	box-shadow: 0 0 0 4px var(--housing), 0 0 0 5px var(--brass-dk), 0 20px 50px var(--shade-hard);
+}
+.aitower-hud .ui-research-head {
+	flex: none;
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 10px 16px 8px;
+	border-bottom: 3px double var(--ink);
+}
+.aitower-hud .ui-research-titles {
+	flex: 1;
+	min-width: 0;
+}
+.aitower-hud .ui-research-form {
+	display: block;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-research-head h2 {
+	margin: 4px 0 0;
+	font: 28px/1.1 var(--f-type);
+	letter-spacing: 0.06em;
+}
+.aitower-hud .ui-research-rp {
+	flex: none;
+	padding: 4px 12px 3px;
+}
+.aitower-hud .ui-research-pause {
+	flex: none;
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--red);
+}
+.aitower-hud .ui-research-close {
+	flex: none;
+}
+.aitower-hud .ui-research-cols {
+	flex: 1;
+	min-height: 0;
+	display: grid;
+	grid-template-columns: repeat(5, minmax(0, 1fr));
+	gap: 10px;
+	padding: 10px 14px 14px;
+	overflow: auto;
+	scrollbar-width: thin;
+	scrollbar-color: var(--brass-dk) var(--paper);
+}
+.aitower-hud .ui-research-col {
+	min-width: 180px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.aitower-hud .ui-research-branch {
+	margin: 0;
+	padding: 4px 8px 3px;
+	font: 9px/1.2 var(--f-stamp);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--paper);
+	background: var(--housing);
+	border-bottom: 3px solid var(--brass);
+}
+.aitower-hud .ui-research-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 9px;
+}
+
+/* An index card. */
+.aitower-hud .ui-tech {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 7px 9px 8px;
+	font: 14px/1.3 var(--f-type);
+	background: color-mix(in srgb, var(--putty) 30%, var(--paper));
+	border: 1px solid var(--ink);
+	border-top: 3px solid var(--copper);
+	box-shadow: 0 2px 0 var(--beige), 0 3px 5px color-mix(in srgb, var(--ink) 45%, transparent);
+}
+.aitower-hud .ui-tech.is-available {
+	border-top-color: var(--green-dim);
+	background: color-mix(in srgb, var(--green) 8%, var(--paper));
+}
+.aitower-hud .ui-tech.is-researched {
+	border-top-color: var(--verdigris);
+	background: color-mix(in srgb, var(--verdigris) 14%, var(--paper));
+}
+.aitower-hud .ui-tech.is-locked {
+	border-top-color: var(--steel);
+}
+.aitower-hud .ui-tech.is-locked > :not(.ui-tech-foot):not(.ui-tech-head),
+.aitower-hud .ui-tech.is-poor > .ui-tech-desc {
+	opacity: 0.72;
+}
+.aitower-hud .ui-tech-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+}
+.aitower-hud .ui-tech-name {
+	font: 16px/1.15 var(--f-type);
+	text-decoration: underline;
+	text-decoration-color: var(--beige);
+	text-underline-offset: 3px;
+}
+.aitower-hud .ui-tech-cost {
+	flex: none;
+	font: 19px/1 var(--f-crt);
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-tech-meta {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.aitower-hud .ui-tech-tier {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-tech-fx {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	font: 17px/1.15 var(--f-crt);
+	color: var(--green-dim);
+}
+.aitower-hud .ui-tech-fx li::before {
+	content: "▸ ";
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-tech-unlocks,
+.aitower-hud .ui-tech-reqs,
+.aitower-hud .ui-tech-desc {
+	margin: 0;
+}
+.aitower-hud .ui-tech-unlocks,
+.aitower-hud .ui-tech-reqs {
+	font-size: 14px;
+}
+.aitower-hud .ui-tech-reqs .is-done {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-tech-reqs .is-missing {
+	color: var(--copper);
+}
+.aitower-hud .ui-tech-desc {
+	font-size: 13px;
+	font-style: italic;
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-tech-foot {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	min-height: 30px;
+	margin-top: 2px;
+}
+.aitower-hud .ui-tech-state {
+	font: 14px/1.25 var(--f-type);
+	text-align: right;
+}
+.aitower-hud .ui-tech-state.is-poor {
+	color: var(--copper);
+}
+.aitower-hud .ui-tech-state.is-locked {
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-tech-filed {
+	font-size: 15px;
+}
+.aitower-hud .ui-tech-foot .ui-stampbtn {
+	margin-left: 0;
+}
+
+/* Build palette and bot shop: items that wait on research. */
+.aitower-hud .ui-item.is-tech-locked {
+	opacity: 0.62;
+	cursor: not-allowed;
+	filter: grayscale(0.6);
+}
+.aitower-hud .ui-item-sub.is-tech {
+	color: var(--copper);
+}
+
+/* Top bar: the inbox and the research button share one column so the bar keeps its width. */
+.aitower-hud .ui-deskcol {
+	flex: none;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	justify-content: center;
+	gap: 3px;
+}
+.aitower-hud .ui-deskcol .ui-btn {
+	justify-content: center;
+	padding: 3px 8px 2px;
+}
+.aitower-hud .ui-research-btn {
+	flex: none;
+	gap: 6px;
+}
+.aitower-hud .ui-research-btn.is-ready .ui-research-count {
+	color: var(--green);
+	text-shadow: 0 0 6px color-mix(in srgb, var(--green) 70%, transparent);
+}
+.aitower-hud .ui-research-count {
+	font: 18px/1 var(--f-crt);
+	color: var(--amber);
+	text-shadow: 0 0 6px color-mix(in srgb, var(--amber) 60%, transparent);
+}
+@media (max-width: 1100px) {
+	.aitower-hud .ui-research-cols {
+		grid-template-columns: repeat(5, 220px);
+	}
+}
+.aitower-hud .ui-supply-gate {
+	grid-column: 1 / -1;
+	margin-top: -3px;
+	font: 13px/1.2 var(--f-type);
+	color: var(--copper);
+}
+.aitower-hud.is-density-cramped .ui-deskcol .ui-btn {
+	padding: 3px 4px 2px;
+	gap: 4px;
+}
+.aitower-hud.is-density-cramped .ui-research-count {
+	font-size: 16px;
+}

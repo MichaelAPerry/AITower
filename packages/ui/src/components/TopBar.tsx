@@ -1,7 +1,9 @@
 import type { ReactNode } from "react";
 import type { Speed } from "@aitower/shared";
 import { clock } from "@aitower/shared";
+import { ledgerNet } from "../finance/finance";
 import { fmtMoney, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
+import { cheapestAvailable, fmtRp } from "../research/tech";
 import { Icon, Lamp, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { niceMax } from "./Dial";
@@ -21,7 +23,7 @@ function Stat({ label, children, title, className = "" }: { label: string; child
 	);
 }
 
-export function TopBar({ store, content, state, openMenu, ui, setUi }: PanelProps) {
+export function TopBar({ store, content, state, openMenu, openResearch, ui, setUi }: PanelProps) {
 	const { view, speed, muted } = state;
 	const lamp = saveLamp(state.saveStatus);
 	const maxTier = Math.max(1, content.balance.tiers.pflops.length);
@@ -31,9 +33,10 @@ export function TopBar({ store, content, state, openMenu, ui, setUi }: PanelProp
 	const itMax = niceMax(Math.max(headroom, view.totalKw, view.itKw, 1) * 1.05);
 	// Today's net cash flow (same definition as the Finance tab's Net column).
 	const today = view.ledger.find((d) => d.day === view.day) ?? view.ledger[view.ledger.length - 1];
-	const net = (d: (typeof view.ledger)[number]): number => d.revenue - d.energy - d.upkeep - d.construction - d.penalties;
-	const todayNet = today ? net(today) : 0;
-	const flowMax = niceMax(Math.max(1_000, ...view.ledger.slice(-8).map((d) => Math.abs(net(d)))));
+	const todayNet = today ? ledgerNet(today) : 0;
+	const flowMax = niceMax(Math.max(1_000, ...view.ledger.slice(-8).map((d) => Math.abs(ledgerNet(d)))));
+	const rp = view.researchPoints ?? 0;
+	const nextTech = cheapestAvailable(view, content);
 
 	return (
 		<header className="ui-topbar ui-panel">
@@ -99,7 +102,7 @@ export function TopBar({ store, content, state, openMenu, ui, setUi }: PanelProp
 						{ from: 0, to: flowMax, color: "var(--green-dim)" },
 					]}
 					needles={[{ value: todayNet }]}
-					title={`Cash flow today: revenue − energy − upkeep − construction − penalties = ${fmtMoney(todayNet)}. Scale ±${fmtMoney(flowMax)}.`}
+					title={`Cash flow today: revenue − energy − upkeep − construction − penalties − taxes − interest − fees = ${fmtMoney(todayNet)}. Scale ±${fmtMoney(flowMax)}.`}
 					tone={todayNet < 0 ? "red" : "green"}
 				>
 					{todayNet > 0 ? "+" : ""}
@@ -124,7 +127,19 @@ export function TopBar({ store, content, state, openMenu, ui, setUi }: PanelProp
 				</span>
 			</div>
 			<StandingMeter standing={view.standing} />
-			<InboxButton state={state} ui={ui} setUi={setUi} />
+			<div className="ui-deskcol">
+				<InboxButton state={state} ui={ui} setUi={setUi} />
+				<button
+					type="button"
+					className={`ui-btn ui-research-btn ${nextTech ? "is-ready" : ""}`}
+					data-tut="research"
+					onClick={openResearch}
+					title={nextTech ? `Department of Research (R): ${fmtRp(rp)}. You can afford ${nextTech.name}.` : `Department of Research (R): ${fmtRp(rp)} to spend`}
+				>
+					<span className="ui-research-label ui-hide-narrow">RESEARCH</span>
+					<span className="ui-research-count">{fmtRp(rp)}</span>
+				</button>
+			</div>
 			<div className="ui-grow" />
 			<div className="ui-crt crt-amber ui-statbank ui-env">
 				<Stat label="OUTSIDE" title="Outdoor ambient temperature">

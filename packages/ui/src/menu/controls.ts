@@ -18,6 +18,7 @@ export const CONTROLS: ControlGroup[] = [
 		rows: [
 			{ keys: ["N", "H", "P", "C"], what: "Normal · Heat · Power · Coolant" },
 			{ keys: ["M"], what: "Mute audio" },
+			{ keys: ["R"], what: "Department of Research (pauses while open)" },
 			{ keys: ["`"], what: "Show / hide the bottom panel" },
 		],
 	},

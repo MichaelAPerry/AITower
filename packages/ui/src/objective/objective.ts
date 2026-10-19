@@ -5,6 +5,7 @@
 import type { ContentDB } from "@aitower/content";
 import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
+import { cheapestAvailable, effectText, fmtRp } from "../research/tech";
 import { rackProblem } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
@@ -40,10 +41,12 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	const active = view.jobs.filter((j) => ACTIVE.has(j.status));
 
 	if (view.cash < 0) {
+		const room = view.loan ? view.loan.max - view.loan.principal : 0;
+		const credit = room > 0 ? ` Or borrow up to ${fmtMoney(room)} from the Ministry Credit Office (Finance tab): it is interest, not income.` : "";
 		return {
 			tone: "alert",
 			title: "The Treasury is in the red",
-			detail: "Accept a contract marked “Fits your idle racks”, and stop spending until cash is positive. A full day below $0 means bankruptcy.",
+			detail: `Accept a contract marked “Fits your idle racks”, and stop spending until cash is positive. A full day below $0 means bankruptcy.${credit}`,
 		};
 	}
 
@@ -93,6 +96,24 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return { tone: "action", title: "Waiting for contract offers", detail: "New offers arrive every few game-hours. Speed up the clock (3× or 10×) to get one sooner." };
 	}
 
+	// Slow-burn nudges, only once the racks are busy: a clerk that was hired but never switched on, and research points going to waste.
+	if (view.clerk?.unlocked && !view.clerk.policy.enabled) {
+		return {
+			tone: "action",
+			title: "Switch on your Contracts Clerk",
+			detail: "Contracts tab: flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
+		};
+	}
+	const tech = cheapestAvailable(view, content);
+	if (tech) {
+		const fx = tech.effects.map((e) => effectText(e, content)).join(", ");
+		return {
+			tone: "action",
+			title: "File a research request (R)",
+			detail: `Department of Research: ${tech.name} costs ${tech.cost} RP and you have ${fmtRp(view.researchPoints)}.${fx ? ` It gives ${fx}.` : ""}`,
+		};
+	}
+
 	const tiers = content.balance.tiers;
 	const next = view.tier; // tiers.pflops[view.tier] is the requirement for tier + 1
 	if (next < tiers.pflops.length) {
@@ -139,6 +160,9 @@ export function moneyToday(view: SimView): MoneyLine {
 		["upkeep", d.upkeep],
 		["penalties", d.penalties],
 		["construction", d.construction],
+		["taxes", d.taxes ?? 0],
+		["interest", d.interest ?? 0],
+		["fees", d.fees ?? 0],
 	];
 	const costs = parts.reduce((s, [, v]) => s + v, 0);
 	const breakdown = parts

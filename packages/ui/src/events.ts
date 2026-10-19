@@ -1,6 +1,8 @@
 import type { ContentDB } from "@aitower/content";
-import type { CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { AuditGrade, CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPct } from "./format";
+import { gradeTone } from "./finance/finance";
+import { effectText, unlocksFor } from "./research/tech";
 import type { Severity } from "./notices";
 
 export interface Described {
@@ -29,6 +31,11 @@ const commandName: Record<SimCommand["type"], string> = {
 	setClerk: "Clerk orders",
 	takeLoan: "Take loan",
 	repayLoan: "Repay loan",
+};
+
+const gradeSeverity = (g: AuditGrade): Severity => {
+	const t = gradeTone(g);
+	return t === "green" ? "good" : t === "amber" ? "info" : "warn";
 };
 
 /** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
@@ -131,17 +138,25 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 				severity: ev.kind === "victory" ? "good" : "error",
 				toast: false,
 			};
-		// M2b placeholders (M2b-T3 words these properly).
-		case "researched":
-			return { text: `Research filed: ${content.tech.find((t) => t.id === ev.techId)?.name ?? ev.techId}`, severity: "good", toast: true };
-		case "clerkAccepted":
-			return { text: `The clerk accepted ${job(ev.jobId)}`, severity: "info", toast: false };
-		case "loanTaken":
-			return { text: `Loan drawn: ${fmtMoney(ev.amount)}`, severity: "info", toast: false };
+		case "researched": {
+			const node = content.tech?.find((t) => t.id === ev.techId);
+			const gives = [...(node?.effects.map((e) => effectText(e, content)) ?? []), ...(unlocksFor(ev.techId, content).length ? [`new in the build menu: ${unlocksFor(ev.techId, content).join(", ")}`] : [])];
+			return { text: `Research filed: ${node?.name ?? ev.techId}${gives.length ? `. ${gives.join("; ")}` : ""}`, severity: "good", toast: true };
+		}
+		case "clerkAccepted": {
+			const fee = content.balance?.clerk?.feeShare;
+			return { text: `The Contracts Clerk accepted ${job(ev.jobId)}${fee ? ` (fee ${Math.round(fee * 1000) / 10} % of its earnings)` : ""}`, severity: "info", toast: false };
+		}
+		case "loanTaken": {
+			const rate = view.loan?.dailyRate;
+			return { text: `Credit Office: loan of ${fmtMoney(ev.amount)} approved${rate ? `; interest accrues at ${Math.round(rate * 10000) / 100} % a day` : ""}`, severity: "info", toast: false };
+		}
 		case "loanRepaid":
-			return { text: `Loan repaid: ${fmtMoney(ev.amount)}`, severity: "good", toast: false };
-		case "quarterReport":
-			return { text: `Quarter ${ev.quarter} audit filed: grade ${ev.grade}`, severity: ev.grade <= "B" ? "good" : ev.grade === "C" ? "info" : "warn", toast: true };
+			return { text: `Credit Office: ${fmtMoney(ev.amount)} repaid. The Ministry thanks you for your promptness`, severity: "good", toast: false };
+		case "quarterReport": {
+			const r = view.reports?.find((r) => r.quarter === ev.quarter);
+			return { text: `Quarterly audit ${ev.quarter} filed: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
+		}
 	}
 }
 
