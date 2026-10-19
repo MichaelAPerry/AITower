@@ -1146,12 +1146,16 @@
 }
 .aitower-hud .ui-supply {
 	display: grid;
-	grid-template-columns: 1fr auto auto;
+	/* minmax(0, …): long bot names wrap instead of pushing the button out of the panel. */
+	grid-template-columns: minmax(0, 1fr) auto auto;
 	align-items: center;
 	gap: 9px;
 }
 .aitower-hud .ui-supply .ui-k {
-	font: 14px/1 var(--f-type);
+	font: 14px/1.15 var(--f-type);
+	min-width: 0;
+	white-space: normal;
+	overflow-wrap: anywhere;
 	color: var(--putty);
 }
 .aitower-hud .ui-supply .ui-v {

@@ -252,6 +252,7 @@
 	margin-top: -3px;
 	font: 13px/1.2 var(--f-type);
 	color: var(--copper);
+	overflow-wrap: anywhere;
 }
 .aitower-hud.is-density-cramped .ui-deskcol .ui-btn {
 	padding: 3px 4px 2px;
