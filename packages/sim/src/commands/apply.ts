@@ -1,7 +1,10 @@
 /** Tick stage 1: validate & apply queued commands. */
 import type { SimCommand } from "../api";
 import type { TickCtx } from "../core/context";
+import { planSetClerk } from "../economy/clerk";
+import { planRepayLoan, planTakeLoan } from "../economy/credit";
 import { spend } from "../economy/ledger";
+import { planResearch } from "../research/research";
 import { planDemolish } from "./demolish";
 import {
 	planAcceptContract,
@@ -75,10 +78,17 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			plan = planResolveMemo(ctx, cmd.memoId, cmd.choiceId);
 			break;
 		case "research":
+			plan = planResearch(ctx, cmd.techId);
+			break;
 		case "setClerk":
+			plan = planSetClerk(ctx, cmd.policy);
+			break;
 		case "takeLoan":
+			plan = planTakeLoan(ctx, cmd.amount);
+			break;
 		case "repayLoan":
-			return reject("not available yet"); // M2b-T1 placeholder
+			plan = planRepayLoan(ctx, cmd.amount);
+			break;
 		default:
 			return reject("unknown command type");
 	}

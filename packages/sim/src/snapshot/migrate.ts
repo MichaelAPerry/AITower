@@ -8,10 +8,13 @@
 
  *  - v2 → v3 (M2-T1): Ministry memos (`memos`, `memoHistory`, `modifiers`, `nextMemoTick`, `lastIssuedDay`, `nextId.memo`),
  *    `standing`, `gameOver`, and the `events` RNG stream.
+ *  - v3 → v4 (M2b-T1): research (`researchPoints`, `techResearched`), Contracts Clerk (`clerkPolicy`, `clerkAccepted`, `job.clerk`),
+ *    loans (`loanPrincipal`), quarterly audits (`reports`, `audit`), lifetime `stats`, `scriptedIssued`, `bot.parts`, and the
+ *    `taxes` / `interest` / `fees` ledger fields on every stored day.
  */
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 3;
+export const SNAPSHOT_VERSION = 4;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -65,8 +68,38 @@ function migrateV2(state: RawState): RawState {
 	return state;
 }
 
+const NEW_LEDGER_FIELDS = ["taxes", "interest", "fees"] as const;
+
+const addLedgerFields = (d: unknown): void => {
+	if (!isObj(d)) return;
+	for (const k of NEW_LEDGER_FIELDS) if (typeof d[k] !== "number") d[k] = 0;
+};
+
+/**
+ * Defaults for a pre-research save: nothing researched, clerk locked and off, no loan, no reports, zeroed lifetime stats,
+ * an empty audit period (the first audit after loading covers only the days seen since), and zero for the new ledger fields.
+ */
+function migrateV3(state: RawState): RawState {
+	if (typeof state.researchPoints !== "number") state.researchPoints = 0;
+	if (!Array.isArray(state.techResearched)) state.techResearched = [];
+	if (!isObj(state.clerkPolicy)) state.clerkPolicy = { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true };
+	if (typeof state.clerkAccepted !== "number") state.clerkAccepted = 0;
+	if (typeof state.loanPrincipal !== "number") state.loanPrincipal = 0;
+	if (!Array.isArray(state.reports)) state.reports = [];
+	if (!isObj(state.audit)) state.audit = { samples: 0, uptimeSum: 0, pueSum: 0, days: [], jobsCompleted: 0, jobsFailed: 0 };
+	if (!isObj(state.stats)) {
+		state.stats = { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 };
+	}
+	if (!Array.isArray(state.scriptedIssued)) state.scriptedIssued = [];
+	if (Array.isArray(state.ledger)) for (const d of state.ledger) addLedgerFields(d);
+	addLedgerFields(state.today);
+	if (Array.isArray(state.jobs)) for (const j of state.jobs) if (isObj(j) && typeof j.clerk !== "boolean") j.clerk = false;
+	if (Array.isArray(state.bots)) for (const b of state.bots) if (isObj(b) && typeof b.parts !== "number") b.parts = b.carrying === true ? 1 : 0;
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

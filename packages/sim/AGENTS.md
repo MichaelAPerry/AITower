@@ -21,6 +21,8 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 | `reliability/*` | Failure hazard rolls, `failRack` (work orders) |
 | `logistics/*` | Routing (Dijkstra over walk + multi-lift transfers, cached in `Scratch.nav`), lift SCAN dispatch, bot state machine with timeouts/backoff |
 | `economy/*`, `progression/*` | Ledger, upkeep/energy/PUE/uptime/bankruptcy/history; tier at day end; time advance |
+| `research/research.ts` | Tech perks (`perk()`, product of researched factors, cached per list), `techGate` ("requires research: <name>"), `planResearch`, `clerkUnlocked`, RP earning |
+| `economy/clerk.ts`, `credit.ts`, `audit.ts`, `stats.ts` | Contracts Clerk (`planSetClerk`, `clerkStep`), loans + midnight interest/levy, quarterly audit + grading, lifetime stats helpers |
 | `ministry/*` | `memos.ts` (seeded issue cadence/eligibility, `resolveMemo` plan, effects, timeout auto-resolve), `modifiers.ts` (timed modifiers: `modFactor`, `ambientOffset`, labels, expiry), `standing.ts` (standing 0..100, one-shot `gameOver`) |
 | `view/*` | `SimView` builder and facility status precedence |
 | `snapshot/*` | Typed-array-aware JSON codec; canonical FNV-1a hash; `load.ts` (decode ▸ migrate ▸ validate), `migrate.ts` (`SNAPSHOT_VERSION`, `migrations`), `validate.ts`, `clone.ts` (deep copy for the projection) |
@@ -47,6 +49,15 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 - **Effects** (`resolveMemo`, or the `defaultChoice` at `expiresAt` with `auto: true`): cash via the ledger (gain = revenue, loss = penalties, may go negative), `standing`, `failRacks` (seeded, healthy racks only), `spareParts` (± , depot capacity), and timed `Modifier`s (active while `tick < endsAt`): ambient (added in `sim.step`, visible from the *next* tick), gridCap (`powerSolve`), energyPrice (`powerSolve` + view), payout (offers generated while active), failureRate (`rackHazard`). Same-kind multipliers stack.
 - **Standing**: clamped 0..100; every change emits `standingChanged` with the applied delta; 0 ⇒ `gameOver` "shutdown". `gameOver` is set once ("bankrupt" | "shutdown" | "victory"); the sim keeps stepping and memos keep coming.
 - **Offers**: with no open offer the next one is forced within `GUARANTEED_OFFER_TICKS` (6 h).
+
+## M2b (research, clerk, credit, audits)
+- **Stage 9** also runs `clerkStep` right after offers (one acceptance per tick, same path as `acceptContract`, job marked `clerk`) and samples uptime/PUE for the audit.
+- **Midnight** (`progressionStep`, last tick of the day): daily standing ▸ tier-up (reward = revenue) ▸ `midnightCredit` (interest, then levy = `profitShare` × positive profit incl. interest/fees) ▸ `closeAuditDay` (records the day; files the `QuarterReport` when `(day+1) % periodDays == 0`, graded against the tier held during the day; grant = revenue, fine = penalties).
+- **RP**: delivered PF-hours × `pointsPerPflopHour` × `researchRate` perk (+ `pointsPerJob` unmultiplied) in `computeStep`. **Perks** (failureRate, energyPrice, payout, coolingCapacity, upkeep, botSpeed, repairSpeed as divisor) are applied beside memo modifiers.
+- **Clerk fee**: `earnJob` in computeStep; revenue stays gross, fee → cash and `today.fees`.
+- **Scripted events** (`scriptedDay`): `issueScripted` in `memoStep`, at `minuteOfDay == 540` (tick `day*1440 + 180`, day 0 starts 06:00); never in the random pool; `state.scriptedIssued`.
+- **Bots**: `def.flying` flies a straight line (x and floor, `speed` per axis per tick, no nav/lifts, view state `flying` while `floor != goalFloor`); `def.carry` = parts per trip (`bot.parts`, `carrying = parts > 0`), chains onto the oldest claimable orders (`tryClaim(..., chain)`).
+- Snapshot v4 (`migrateV3`); new state fields are validated in `validateManagement`. Test helpers: `test/m2b.ts`; fixture has a small tech tree, gated rack/bot, drone and hauler.
 
 ## Invariants
 - Everything that affects the future is in `SimState`; scratch buffers are overwritten every tick.
@@ -77,5 +88,5 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 `npx vitest run packages/sim tools/sim-cli` — placement/costs, networks, power, thermal, coolant, jobs,
 offers, logistics (`logistics.test.ts` single lift, `bots.test.ts` multi-lift/timeouts/topology changes, `routing.test.ts`), economy/progression,
 determinism (3 days, hash every 100 ticks; snapshot round-trip), `commands.test.ts` (queue-aware validation), `fuzz.test.ts` (seeded, 2,000
-malformed + valid commands, incl. `resolveMemo` against expiring memos), `snapshot.test.ts` (validation, migrations; v2 → v3 is tested in `ministry.test.ts`), `ministry.test.ts` (memos, effects, standing, game over, determinism, v3 validation), perf (48×13 / 60 racks / 4 bots: 1440 ticks < 1.5 s; 60×64 tower,
+malformed + valid commands, incl. `resolveMemo` against expiring memos), `snapshot.test.ts` (validation, migrations; v2 → v3 is tested in `ministry.test.ts`, v3 → v4 in `m2bSave.test.ts`), `research.test.ts`, `management.test.ts` (clerk, loans, levy, audits, stats), `m2bBots.test.ts`, `scripted.test.ts`, `m2bSave.test.ts`, `ministry.test.ts` (memos, effects, standing, game over, determinism, v3 validation), perf (48×13 / 60 racks / 4 bots: 1440 ticks < 1.5 s; 60×64 tower,
 ~1,000 racks, 30 bots: best-window mean `step()` < 2 ms). Headless run with real content: `npm run sim -- starter 10`.

@@ -11,12 +11,14 @@ import { nextRandom } from "../core/rng";
 import type { Facility, SimState } from "../core/state";
 import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
+import { perk } from "../research/research";
 
 /** Mark a rack failed and open a work order (also used by tests to inject failures). */
 export function failRack(state: SimState, f: Facility, events: SimEvent[]): void {
 	if (f.failed) return;
 	f.failed = true;
 	f.health = 0;
+	state.stats.componentFailures++;
 	state.workOrders.push({ id: state.nextId.workOrder++, facilityId: f.id, botId: -1, createdAt: state.tick, attempts: 0, retryAt: 0, retryRev: 0 });
 	events.push({ type: "componentFailed", facilityId: f.id });
 }
@@ -30,7 +32,7 @@ export function rackHazard(content: ContentDB, f: Facility, factor = 1): number 
 
 export function reliabilityStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
-	const factor = modFactor(state, "failureRate");
+	const factor = modFactor(state, "failureRate") * perk(state, content, "failureRate");
 	for (const f of state.facilities) {
 		if (!f.enabled || f.failed) continue;
 		const d = getDef(content, f.defId);

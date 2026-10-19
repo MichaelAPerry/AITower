@@ -7,6 +7,7 @@ import type { SimState } from "../core/state";
 import { dayOf } from "../core/time";
 import { modFactor } from "../ministry/modifiers";
 import { installedPflops } from "./allocation";
+import { perk } from "../research/research";
 
 export function nextOfferDelay(state: SimState, content: ContentDB): number {
 	const interval = content.balance.economy.offerIntervalTicks;
@@ -31,7 +32,7 @@ export function offersStep(ctx: TickCtx): void {
 	const generated = content.generateContract(rng, { tier: state.tier, capacityPflops: installedPflops(state, content), day: dayOf(state.tick) }, content);
 	// Defensive copy so content code can't alias sim state.
 	const spec = JSON.parse(JSON.stringify(generated)) as typeof generated;
-	spec.payout *= modFactor(state, "payout");
+	spec.payout *= modFactor(state, "payout") * perk(state, content, "payout");
 	const id = state.nextId.contract++;
 	state.offers.push({ id, spec, expiresAt: state.tick + eco.offerExpiryTicks });
 	events.push({ type: "contractOffered", contractId: id });

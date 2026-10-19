@@ -27,7 +27,25 @@ const NUMERIC: Record<string, readonly string[]> = {
 	buyParts: ["count"],
 	buyBot: [],
 	resolveMemo: ["memoId"],
+	research: [],
+	setClerk: [],
+	takeLoan: ["amount"],
+	repayLoan: ["amount"],
 };
+
+/**
+ * `setClerk`: only the shape is checked here (so the copy is plain, serialisable data); whether the kinds are real job
+ * kinds, the numbers are ≥ 0 and the clerk is unlocked is decided by the plan, with a plain reason.
+ */
+function normalizeClerk(raw: unknown): Normalized {
+	if (!isObj(raw)) return bad("policy must be an object");
+	const { enabled, allowLiquid, kinds, minPayPerPflopHour, maxPenalty } = raw;
+	if (typeof enabled !== "boolean" || typeof allowLiquid !== "boolean") return bad("policy.enabled and policy.allowLiquid must be booleans");
+	if (!Array.isArray(kinds) || kinds.length > 16) return bad("policy.kinds must be a short array");
+	if (!isNum(minPayPerPflopHour) || !isNum(maxPenalty)) return bad("policy numbers must be finite");
+	const policy = { enabled, kinds: kinds.map((k: unknown) => (typeof k === "string" ? k : "")), minPayPerPflopHour, maxPenalty, allowLiquid };
+	return { ok: true, cmd: { type: "setClerk", policy } as unknown as SimCommand };
+}
 
 export function normalizeCommand(raw: unknown): Normalized {
 	try {
@@ -52,6 +70,8 @@ export function normalizeCommand(raw: unknown): Normalized {
 		if (!keys) return { ok: false, reason: "unknown command type" };
 		if ((type === "place" || type === "buyBot") && typeof raw.defId !== "string") return bad("defId must be a string");
 		if (type === "resolveMemo" && typeof raw.choiceId !== "string") return bad("choiceId must be a string");
+		if (type === "research" && typeof raw.techId !== "string") return bad("techId must be a string");
+		if (type === "setClerk") return normalizeClerk(raw.policy);
 		const out: Record<string, unknown> = { type };
 		for (const k of keys) {
 			const v = raw[k];
@@ -60,6 +80,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 		}
 		if (type === "place" || type === "buyBot") out.defId = raw.defId;
 		if (type === "resolveMemo") out.choiceId = raw.choiceId;
+		if (type === "research") out.techId = raw.techId;
 		if (type === "demolish") {
 			const layer = raw.layer;
 			if (layer !== undefined) {

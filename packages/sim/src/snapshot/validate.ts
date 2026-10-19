@@ -59,14 +59,14 @@ const LIFT: Record<Exclude<keyof Lift, "riders">, Kind> = {
 	doorsOpen: "bool", doorTimer: "num",
 };
 const BOT: Record<keyof Bot, Kind> = {
-	id: "int", defId: "str", x: "num", floor: "num", battery: "num", carrying: "bool", task: "str", leg: "str", goalId: "int",
+	id: "int", defId: "str", x: "num", floor: "num", battery: "num", carrying: "bool", parts: "int", task: "str", leg: "str", goalId: "int",
 	goalX: "num", goalFloor: "num", liftId: "int", workOrderId: "int", homeId: "int", timer: "num", exitFloor: "num",
 	stuck: "num", retryAt: "num", fails: "num", routeRev: "num",
 };
 const WORK_ORDER: Record<keyof WorkOrder, Kind> = { id: "int", facilityId: "int", botId: "int", createdAt: "num", attempts: "num", retryAt: "num", retryRev: "num" };
 const JOB: Record<Exclude<keyof Job, "spec" | "rackIds">, Kind> = {
 	id: "int", contractId: "int", status: "str", acceptedAt: "num", deadline: "num", progress: "num", total: "num",
-	lastCheckpoint: "num", sinceCheckpoint: "num", pflops: "num", earned: "num", finishedAt: "num",
+	lastCheckpoint: "num", sinceCheckpoint: "num", pflops: "num", earned: "num", clerk: "bool", finishedAt: "num",
 };
 const SPEC: Record<string, Kind> = {
 	clientId: "str", clientName: "str", kind: "str", work: "num", durationTicks: "num", payout: "num", penalty: "num",
@@ -77,7 +77,9 @@ const NET: Record<string, Kind> = {
 	gridImportKw: "num", gensetKw: "num",
 };
 const COOLANT_NET: Record<string, Kind> = { id: "int", capacityKw: "num", loadKw: "num", supplyTempC: "num" };
-const LEDGER_DAY: Record<string, Kind> = { day: "int", revenue: "num", energy: "num", upkeep: "num", construction: "num", penalties: "num" };
+const LEDGER_DAY: Record<string, Kind> = {
+	day: "int", revenue: "num", energy: "num", upkeep: "num", construction: "num", penalties: "num", taxes: "num", interest: "num", fees: "num",
+};
 const SAMPLE: Record<string, Kind> = { tick: "num", pue: "num", itKw: "num", totalKw: "num", pflops: "num", cash: "num", maxRackC: "num" };
 const METRIC_NUMS: Record<string, Kind> = {
 	itKw: "num", totalKw: "num", gridKw: "num", gensetKw: "num", pflops: "num", energyCost: "num", pue: "num", uptime: "num", maxRackC: "num",
@@ -133,7 +135,8 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	const s = fields(raw, {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
-		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextMemoTick: "num", standing: "num",
+		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextMemoTick: "num", standing: "num", researchPoints: "num", clerkAccepted: "int",
+		loanPrincipal: "num",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
 	if ((s.tick as number) < 0) fail("tick is negative");
@@ -281,11 +284,59 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
 	fields(s.rng, { contracts: "num", reliability: "num", events: "num" }, "rng");
 	validateMinistry(content, s, nextId.memo);
+	validateManagement(content, s);
 	array(s, "pending");
 
 	// Catch-all: any non-finite number anywhere (including float arrays) is corruption.
 	finiteDeep(s, "state");
 	return s as unknown as SimState;
+}
+
+const GRADES = ["A", "B", "C", "D", "E"];
+const STATS: Record<string, Kind> = {
+	revenue: "num", pflopHours: "num", jobsCompleted: "int", jobsFailed: "int", peakPflops: "num", facilitiesBuilt: "int", componentFailures: "int",
+	repairs: "int", memosAnswered: "int", researchPointsEarned: "num",
+};
+const REPORT: Record<string, Kind> = {
+	quarter: "int", fromDay: "int", toDay: "int", revenue: "num", costs: "num", uptime: "num", pue: "num", jobsCompleted: "int", jobsFailed: "int",
+	penalties: "num", grade: "str", standingDelta: "num", cashDelta: "num", remark: "str",
+};
+const AUDIT_DAY: Record<string, Kind> = { day: "int", uptime: "num", pue: "num", revenue: "num", costs: "num", penalties: "num" };
+
+/** Research, clerk, loans, audits, stats (snapshot v4). */
+function validateManagement(content: ContentDB, s: Obj): void {
+	if ((s.researchPoints as number) < 0) fail("researchPoints is negative");
+	if ((s.clerkAccepted as number) < 0) fail("clerkAccepted is negative");
+	if ((s.loanPrincipal as number) < 0) fail("loanPrincipal is negative");
+	const seen = new Set<string>();
+	array(s, "techResearched").forEach((id, i) => {
+		if (typeof id !== "string") fail(`techResearched[${i}] must be a string`);
+		else if (!content.tech.some((t) => t.id === id)) fail(`techResearched[${i}] names unknown tech '${id}'`);
+		else if (seen.has(id)) fail(`techResearched[${i}] repeats '${id}'`);
+		else seen.add(id);
+	});
+	const p = fields(s.clerkPolicy, { enabled: "bool", minPayPerPflopHour: "num", maxPenalty: "num", allowLiquid: "bool" }, "clerkPolicy");
+	if ((p.minPayPerPflopHour as number) < 0 || (p.maxPenalty as number) < 0) fail("clerkPolicy numbers must not be negative");
+	const kinds = p.kinds;
+	if (!Array.isArray(kinds) || kinds.length === 0 || kinds.some((k) => !JOB_KINDS.includes(k as string))) fail("clerkPolicy.kinds must list job kinds");
+	const reports = array(s, "reports");
+	if (reports.length > 8) fail("reports is too long");
+	reports.forEach((r, i) => {
+		const o = fields(r, REPORT, `reports[${i}]`);
+		if (!GRADES.includes(o.grade as string)) fail(`reports[${i}].grade is invalid`);
+	});
+	const a = fields(s.audit, { samples: "num", uptimeSum: "num", pueSum: "num", jobsCompleted: "int", jobsFailed: "int" }, "audit");
+	if ((a.samples as number) < 0) fail("audit.samples is negative");
+	if (!Array.isArray(a.days)) fail("audit.days must be an array");
+	else {
+		a.days.forEach((d, i) => {
+			fields(d, AUDIT_DAY, `audit.days[${i}]`);
+		});
+	}
+	fields(s.stats, STATS, "stats");
+	array(s, "scriptedIssued").forEach((id, i) => {
+		if (typeof id !== "string") fail(`scriptedIssued[${i}] must be a string`);
+	});
 }
 
 const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];

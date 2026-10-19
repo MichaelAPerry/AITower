@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { ContractSpec } from "@aitower/content";
-import type { GameOverKind, JobStatus, LedgerDay, MetricSample, SimCommand } from "../api";
+import type { ClerkPolicy, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -88,6 +88,8 @@ export interface Bot {
 	floor: number;
 	battery: number;
 	carrying: boolean;
+	/** Spare parts held (≥ 1 while `carrying`; more than 1 only for bots with `carry` > 1). */
+	parts: number;
 	task: BotTask;
 	leg: BotLeg;
 	/** Facility the bot is heading to (-1 none). */
@@ -134,8 +136,10 @@ export interface Job {
 	sinceCheckpoint: number;
 	pflops: number;
 	rackIds: number[];
-	/** Revenue earned so far (inference streams, training on completion). */
+	/** Gross revenue earned so far (inference streams, training at checkpoints / completion). */
 	earned: number;
+	/** Accepted by the Contracts Clerk: every payment withholds `balance.clerk.feeShare`. */
+	clerk: boolean;
 	finishedAt: number;
 }
 
@@ -215,6 +219,31 @@ export interface Metrics {
 	maxRackC: number;
 }
 
+/** One closed day, kept until the quarterly audit that covers it. */
+export interface AuditDay {
+	day: number;
+	/** Mean of the per-tick samples of the rolling 24 h uptime / PUE. */
+	uptime: number;
+	pue: number;
+	revenue: number;
+	/** energy + upkeep + construction + penalties + taxes + interest + fees. */
+	costs: number;
+	penalties: number;
+}
+
+/** Running totals for the next quarterly audit. */
+export interface AuditTracker {
+	/** Today's per-tick samples. */
+	samples: number;
+	uptimeSum: number;
+	pueSum: number;
+	/** Closed days of the current audit period. */
+	days: AuditDay[];
+	/** Jobs completed / failed in the current audit period. */
+	jobsCompleted: number;
+	jobsFailed: number;
+}
+
 export interface SimState {
 	scenarioId: string;
 	seed: number;
@@ -272,6 +301,22 @@ export interface SimState {
 	/** 0..100; 0 ends the game ("shutdown"). */
 	standing: number;
 	gameOver: { kind: GameOverKind; tick: number } | null;
+	// ── Research, clerk, credit, audits (snapshot v4) ──
+	/** Unspent research points (float). */
+	researchPoints: number;
+	/** Researched tech ids, in research order. */
+	techResearched: string[];
+	clerkPolicy: ClerkPolicy;
+	/** Contracts accepted by the clerk so far. */
+	clerkAccepted: number;
+	/** Outstanding loan principal. */
+	loanPrincipal: number;
+	/** Filed quarterly audits, oldest first (last 8). */
+	reports: QuarterReport[];
+	audit: AuditTracker;
+	stats: LifetimeStats;
+	/** Ids of scripted events already issued. */
+	scriptedIssued: string[];
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];
 }

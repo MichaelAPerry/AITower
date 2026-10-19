@@ -5,6 +5,8 @@ import { spend } from "../economy/ledger";
 import { getDef } from "../world/defs";
 import { addBot, chargerSpot, findChargerWithSpace } from "../world/entities";
 import { acceptCheck, releaseJobRacks } from "../compute/allocation";
+import { recordJobOutcome } from "../economy/stats";
+import { techGate } from "../research/research";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
 export function planSetEnabled(ctx: PlanCtx, facilityId: number, enabled: boolean): Plan {
@@ -15,7 +17,8 @@ export function planSetEnabled(ctx: PlanCtx, facilityId: number, enabled: boolea
 	});
 }
 
-export function planAcceptContract(ctx: PlanCtx, contractId: number): Plan {
+/** `byClerk`: the Contracts Clerk is accepting; the job is marked so its earnings carry the clerk's fee. */
+export function planAcceptContract(ctx: PlanCtx, contractId: number, byClerk = false): Plan {
 	const s = ctx.state;
 	const offer = findById(s.offers, contractId);
 	if (!offer) return reject("no such offer");
@@ -39,6 +42,7 @@ export function planAcceptContract(ctx: PlanCtx, contractId: number): Plan {
 			pflops: 0,
 			rackIds: [],
 			earned: 0,
+			clerk: byClerk,
 			finishedAt: -1,
 		};
 		s.jobs.push(job);
@@ -66,6 +70,7 @@ export function planCancelJob(ctx: PlanCtx, jobId: number): Plan {
 		job.status = "failed";
 		job.finishedAt = s.tick;
 		job.pflops = 0;
+		recordJobOutcome(s, "failed");
 		events.push({ type: "jobFailed", jobId, penalty });
 	});
 }
@@ -102,6 +107,8 @@ export function planBuyBot(ctx: PlanCtx, defId: string): Plan {
 	const s = ctx.state;
 	const def = Object.hasOwn(ctx.content.bots, defId) ? ctx.content.bots[defId] : undefined;
 	if (!def) return reject(`unknown bot '${defId}'`);
+	const gate = techGate(s, ctx.content, def.tech);
+	if (gate) return reject(gate);
 	const chargerId = findChargerWithSpace(s, ctx.content);
 	if (chargerId < 0) return reject("no charger with a free dock");
 	return accept(def.cost, () => {

@@ -9,6 +9,7 @@ import { energyPriceAt } from "../core/time";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, isComputeRack, needsPower } from "../world/defs";
 import { facilityDemandKw } from "./demand";
+import { perk } from "../research/research";
 
 /** Share of requested power a load actually gets at satisfaction `sat`. */
 export const powerFactor = (sat: number): number => (sat >= MIN_POWERED_SATISFACTION ? sat : 0);
@@ -44,7 +45,7 @@ export function powerSolve(ctx: TickCtx): void {
 	}
 	for (const lift of state.lifts) if (lift.powerNet >= 0) buckets[lift.powerNet].liftKw += content.lift.facilityKw;
 
-	const price = energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice");
+	const price = energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice") * perk(state, content, "energyPrice");
 	const gridFactor = modFactor(state, "gridCap");
 	let gridTotal = 0;
 	let gensetTotal = 0;

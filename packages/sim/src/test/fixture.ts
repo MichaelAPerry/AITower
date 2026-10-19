@@ -2,7 +2,7 @@
  * Self-contained ContentDB for sim tests (does not depend on @aitower/content data, types only).
  * Numbers mirror the MVP balance targets in tasks/agent-assets.md.
  */
-import type { Balance, ContentDB, ContractSpec, FacilityDef, Scenario } from "@aitower/content";
+import type { Balance, BotDef, ContentDB, ContractSpec, FacilityDef, PerkKind, Scenario, TechNode } from "@aitower/content";
 import type { SimCommand, SimEvent } from "../api";
 import { SimImpl } from "../sim";
 import { createState } from "../world/init";
@@ -30,9 +30,51 @@ export const facilities: Record<string, FacilityDef> = Object.fromEntries(
 		fac({ id: "ups_battery", kind: "ups", category: "power", width: 3, cost: 200_000, facilityKw: 0, power: { capacityKw: 500, storageKwh: 250, efficiency: 0.95 } }),
 		fac({ id: "parts_depot", kind: "depot", category: "logistics", width: 3, cost: 50_000, facilityKw: 0, logistics: { capacity: 20 } }),
 		fac({ id: "bot_charger", kind: "charger", category: "logistics", width: 2, cost: 40_000, facilityKw: 0, logistics: { capacity: 2, chargeKw: 5 } }),
+		fac({ id: "rack_gated", kind: "rack", category: "rack", width: 2, cost: 100_000, facilityKw: 0, tech: "t_racks", rack: { cooling: "air", powerKw: 40, liquidFraction: 0, pflops: 20, storageTB: 0, failurePerDay: 0.02 } }),
 		fac({ id: "tier2_thing", kind: "depot", category: "logistics", width: 1, cost: 1, facilityKw: 0, unlockTier: 2, logistics: { capacity: 1 } }),
 	].map((d) => [d.id, d]),
 );
+
+export const bots: Record<string, BotDef> = {
+	rover: { id: "rover", name: "Rover", cost: 50_000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#00aaaa" },
+	/** Flies straight between floors (no lift). */
+	drone: { id: "drone", name: "Drone", cost: 80_000, speed: 0.5, batteryTicks: 600, repairTicks: 30, color: "#aa00aa", flying: true },
+	/** Carries three parts per depot trip. */
+	hauler: { id: "hauler", name: "Hauler", cost: 90_000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#aaaa00", carry: 3 },
+	/** Needs research. */
+	gated_bot: { id: "gated_bot", name: "Gated bot", cost: 10_000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#ffffff", tech: "t_bots" },
+};
+
+const node = (id: string, over: Partial<TechNode> = {}): TechNode => ({
+	id,
+	name: `Node ${id}`,
+	description: id,
+	branch: "administration",
+	minTier: 1,
+	cost: 10,
+	requires: [],
+	effects: [],
+	...over,
+});
+const perkNode = (id: string, kind: PerkKind, factor: number): TechNode => node(id, { cost: 1, effects: [{ type: "perk", kind, factor }] });
+
+/** A small tech tree for tests: the clerk, gating nodes, a prerequisite chain, a tier-gated node and one node per perk. */
+export const tech: TechNode[] = [
+	node("t_clerk", { name: "Contracts Clerk", cost: 10, effects: [{ type: "feature", feature: "contractsClerk" }] }),
+	node("t_racks", { name: "Cheap Racks", cost: 20, branch: "compute" }),
+	node("t_bots", { name: "Gated Bots", cost: 15, branch: "logistics" }),
+	node("t_chain", { name: "Chained Node", cost: 5, requires: ["t_clerk"] }),
+	node("t_tier2", { name: "Clearance Node", cost: 5, minTier: 2 }),
+	perkNode("p_fail", "failureRate", 0.5),
+	perkNode("p_energy", "energyPrice", 0.5),
+	perkNode("p_payout", "payout", 2),
+	perkNode("p_cool", "coolingCapacity", 2),
+	perkNode("p_repair", "repairSpeed", 2),
+	perkNode("p_upkeep", "upkeep", 0.5),
+	perkNode("p_rate", "researchRate", 2),
+	perkNode("p_speed", "botSpeed", 2),
+	perkNode("p_payout2", "payout", 1.5),
+];
 
 export const balance: Balance = {
 	startingCash: 50_000_000,
@@ -154,9 +196,9 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 	for (const s of extraScenarios) scenarios[s.id] = s;
 	return {
 		facilities: JSON.parse(JSON.stringify(facilities)) as Record<string, FacilityDef>,
-		bots: { rover: { id: "rover", name: "Rover", cost: 50_000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#00aaaa" } },
+		bots: JSON.parse(JSON.stringify(bots)) as Record<string, BotDef>,
 		clients: [],
-		tech: [],
+		tech: JSON.parse(JSON.stringify(tech)) as TechNode[],
 		structure: {
 			slabPerTile: 2_000,
 			basementSlabPerTile: 5_000,

@@ -1,11 +1,12 @@
 /** Facility placement rules (also exposed as the pure `canPlace`). */
 import { cellIdx, inBounds } from "../core/grid";
+import { techGate } from "../research/research";
 import { needsPower } from "../world/defs";
 import { addFacility } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
 export interface PlaceOptions {
-	/** Scenario setup: skip tier gating. */
+	/** Scenario setup: skip tier and research gating (and the facilities-built statistic). */
 	ignoreTier?: boolean;
 }
 
@@ -18,6 +19,10 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	if (p.minFloor !== undefined && floor < p.minFloor) return reject(`must be on floor ${p.minFloor} or above`);
 	if (p.maxFloor !== undefined && floor > p.maxFloor) return reject(`must be on floor ${p.maxFloor} or below`);
 	if (!opts.ignoreTier && d.unlockTier > s.tier) return reject(`requires tier ${d.unlockTier}`);
+	if (!opts.ignoreTier) {
+		const gate = techGate(s, ctx.content, d.tech);
+		if (gate) return reject(gate);
+	}
 	let hasPower = false;
 	let hasCoolant = false;
 	for (let cx = x; cx < x + d.width; cx++) {
@@ -32,6 +37,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	if (p.needsCoolant && !hasCoolant) return reject("needs a coolant conduit under it");
 	return accept(d.cost, (events) => {
 		addFacility(s, ctx.content, defId, floor, x);
+		if (!opts.ignoreTier) s.stats.facilitiesBuilt++;
 		events.push({ type: "built", what: "facility", floor, x });
 	});
 }

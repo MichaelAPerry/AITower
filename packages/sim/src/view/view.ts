@@ -2,17 +2,20 @@
  * Read-only SimView. Grid typed arrays are the live state arrays (reused, don't mutate);
  * entity arrays are rebuilt small each call.
  */
-import type { ContentDB } from "@aitower/content";
+import type { BotDef, ContentDB } from "@aitower/content";
 import type { BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
+import { loanMax } from "../economy/credit";
 import { eventDef } from "../ministry/memos";
 import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 import { facilityStatus } from "./status";
+import { clerkUnlocked, perk } from "../research/research";
 
-function botState(b: Bot): BotState {
+function botState(b: Bot, def: BotDef | undefined): BotState {
+	if (def?.flying && b.leg === "walk" && b.floor !== b.goalFloor && (b.task === "depot" || b.task === "target" || b.task === "charger")) return "flying";
 	if (b.leg === "ride") return "riding";
 	if (b.leg === "waitLift") return "waitingLift";
 	switch (b.task) {
@@ -82,7 +85,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		defId: b.defId,
 		x: b.x,
 		floor: b.floor,
-		state: botState(b),
+		state: botState(b, content.bots[b.defId]),
 		battery: b.battery,
 		carrying: b.carrying,
 		workOrderId: b.workOrderId >= 0 ? b.workOrderId : null,
@@ -150,7 +153,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		cash: state.cash,
 		spareParts,
 		tier: state.tier,
-		energyPrice: energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice"),
+		energyPrice: energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice") * perk(state, content, "energyPrice"),
 		pue: m.pue,
 		uptime: m.uptime,
 		itKw: m.itKw,
@@ -165,13 +168,12 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
 		standing: state.standing,
-		// M2b placeholders (M2b-T1 implements).
-		researchPoints: 0,
-		techResearched: [],
-		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
-		loan: { principal: 0, max: 0, dailyRate: 0 },
-		reports: [],
-		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
+		researchPoints: state.researchPoints,
+		techResearched: state.techResearched.slice(),
+		clerk: { unlocked: clerkUnlocked(state, content), policy: { ...state.clerkPolicy, kinds: state.clerkPolicy.kinds.slice() }, acceptedTotal: state.clerkAccepted },
+		loan: { principal: state.loanPrincipal, max: loanMax(state, content), dailyRate: content.balance.loans.dailyRate },
+		reports: state.reports.map((r) => ({ ...r })),
+		stats: { ...state.stats },
 		gameOver: state.gameOver ? { ...state.gameOver } : null,
 	};
 }
