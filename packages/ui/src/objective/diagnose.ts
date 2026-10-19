@@ -75,7 +75,7 @@ export function rackProblem(view: SimView, content: ContentDB, f: FacilityView):
 			return "Running hot and slowed down. Add cooling near it.";
 		}
 		case "idle":
-			return def.rack.pflops > 0 ? "Idle: no job is using it. Accept a contract marked “Fits your idle racks” (Contracts tab)." : null;
+			return def.rack.pflops > 0 ? "Idle: no job is using it. Accept a contract marked “Fits your idle racks” (Contracts drawer, C)." : null;
 		default:
 			return null;
 	}

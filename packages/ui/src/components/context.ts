@@ -2,15 +2,19 @@ import type { ContentDB } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
 import type { PathFiled } from "../ascension/ascension";
+import type { DrawerId } from "../calm/calm";
 
-export type BottomTab = "contracts" | "jobs" | "telemetry" | "finance" | "alerts";
 /** Sections of the Finance tab. */
 export type FinanceTab = "ledger" | "credit" | "audits" | "record";
 
 export interface UiState {
-	bottomTab: BottomTab;
-	bottomOpen: boolean;
-	/** Job highlighted in the Jobs tab (set by the inspector's job link). */
+	/** The edge drawer that is open (one at a time), or null. */
+	drawer: DrawerId | null;
+	/** The full build palette popover (the dock's "More") is open. */
+	paletteOpen: boolean;
+	/** The clerk's standing-order form is expanded in the Contracts drawer. */
+	clerkEdit?: boolean;
+	/** Job highlighted in the Contracts drawer (set by the inspector's job link). */
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */
 	alertsSeenTick: number;

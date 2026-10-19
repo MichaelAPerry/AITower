@@ -19,6 +19,8 @@ export interface Objective {
 	detail: string;
 	/** A button the orders offer: open FORM A-5 (the Ascension sheet). */
 	action?: "ascension";
+	/** Hotkey that opens where to act (shown on the NEXT chip): "C" contracts, "R" research. */
+	key?: string;
 }
 
 export interface MoneyLine {
@@ -63,7 +65,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "alert",
 			title: `${broken} rack${broken === 1 ? " is" : "s are"} broken and the parts cage is empty`,
-			detail: "Buy spare parts (bottom of the left panel) so the maintenance automaton can repair them.",
+			detail: "Buy spare parts (the build dock, bottom left) so the maintenance automaton can repair them.",
 		};
 	}
 
@@ -107,7 +109,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "action",
 			title: active.length === 0 ? "Accept a contract" : "Accept another contract",
-			detail: `Contracts tab (bottom panel): stamp ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
+			key: "C",
+			detail: `Contracts drawer (C): stamp ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
 		};
 	}
 	if (active.length === 0) {
@@ -115,7 +118,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			return {
 				tone: "action",
 				title: "No offer fits your idle racks",
-				detail: "Each offer shows why it can't start. Decline it, wait for a smaller one, or build more compute cabinets (Racks tab).",
+				detail: "Each offer shows why it can't start. Decline it, wait for a smaller one, or build more compute cabinets (build dock, More).",
 			};
 		}
 		return { tone: "action", title: "Waiting for contract offers", detail: "New offers arrive every few game-hours. Speed up the clock (3× or 10×) to get one sooner." };
@@ -126,7 +129,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "action",
 			title: "Switch on your Contracts Clerk",
-			detail: "Contracts tab: flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
+			key: "C",
+			detail: "Contracts drawer (C): flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
 		};
 	}
 	const tech = cheapestAvailable(view, content);
@@ -134,7 +138,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		const fx = tech.effects.map((e) => effectText(e, content)).join(", ");
 		return {
 			tone: "action",
-			title: "File a research request (R)",
+			title: "File a research request",
+			key: "R",
 			detail: `Department of Research: ${tech.name} costs ${tech.cost} RP and you have ${fmtRp(view.researchPoints)}.${fx ? ` It gives ${fx}.` : ""}`,
 		};
 	}
@@ -150,7 +155,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			const per = air?.rack?.pflops ?? 20;
 			const more = Math.ceil((need - have) / per);
 			const plural = (n: number) => (n === 1 ? "" : "s");
-			let build = `build ${more} more ${air?.name ?? "compute cabinet"}${plural(more)} (Racks tab, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler`;
+			let build = `build ${more} more ${air?.name ?? "compute cabinet"}${plural(more)} (build dock, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler`;
 			// Once liquid cabinets are unlocked, offer them too (fewer, bigger, but they need a coolant loop).
 			let best: { name: string; cost: number; pflops: number } | undefined;
 			for (const d of Object.values(content.facilities))
