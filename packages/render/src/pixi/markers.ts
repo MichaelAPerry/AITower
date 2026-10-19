@@ -6,7 +6,8 @@ import { Container, Graphics, Text } from "pixi.js";
 import { floorTop } from "../camera";
 import { FAC_BOTTOM, FAC_TOP, FLOOR_H, TILE } from "../constants";
 import type { Sample } from "../interp";
-import { BOT_H, BOT_W, botBox } from "./bots";
+import { botDims, botKind } from "../botArt";
+import { BOT_H, botBox } from "./bots";
 import { box, px } from "./draw";
 import { drawBody } from "./facilityArt";
 import { WORLD_FONT } from "./labels";
@@ -150,8 +151,10 @@ export function selectionRect(
 	if (sel.kind === "bot") {
 		const p = botPos(sel.id);
 		if (!p) return null;
-		const b = botBox(view, p.x, p.y);
-		return { x: b.x - 2, y: b.y - 5, w: BOT_W + 4, h: BOT_H + 6 };
+		const def = content.bots[view.bots.find((v) => v.id === sel.id)?.defId ?? ""];
+		const w = botDims(botKind(def)).w;
+		const b = botBox(view, p.x, p.y, w);
+		return { x: b.x - 2, y: b.y - 5, w: w + 4, h: BOT_H + 6 };
 	}
 	const l = view.lifts.find((v) => v.id === sel.id);
 	if (!l) return null;

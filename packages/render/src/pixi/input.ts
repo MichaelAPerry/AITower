@@ -22,6 +22,13 @@ export interface InputHost {
 	camera(): Camera;
 	setCamera(cam: Camera): void;
 	grid(): GridDims | null;
+	/**
+	 * Screen-space widgets (the off-screen alert arrows). Called on a left press: return true when the press hit one
+	 * and was handled; the press (and its release) then never reach the tool listeners.
+	 */
+	press?(sx: number, sy: number): boolean;
+	/** Whether a screen point is over such a widget (pointer cursor). */
+	over?(sx: number, sy: number): boolean;
 }
 
 const isTyping = (t: EventTarget | null): boolean => {
@@ -34,6 +41,8 @@ export class Input {
 	private listeners = new Set<(e: CellPointerEvent) => void>();
 	private keys = new Set<string>();
 	private drag: { id: number; x: number; y: number } | null = null;
+	/** Pointer whose left press was consumed by a screen-space widget; its release is swallowed too. */
+	private swallowed: number | null = null;
 	private off: (() => void)[] = [];
 	private wheelAcc = 0;
 
@@ -112,7 +121,14 @@ export class Input {
 			this.canvas.setPointerCapture?.(e.pointerId);
 			return;
 		}
-		if (e.button === 0) this.emit("down", e, this.cellAt(e), 0);
+		if (e.button === 0) {
+			const p = this.local(e);
+			if (this.host.press?.(p.x, p.y)) {
+				this.swallowed = e.pointerId;
+				return;
+			}
+			this.emit("down", e, this.cellAt(e), 0);
+		}
 	}
 
 	private move(e: PointerEvent): void {
@@ -121,6 +137,10 @@ export class Input {
 			this.host.setCamera(panBy(this.host.camera(), p.x - this.drag.x, p.y - this.drag.y));
 			this.drag.x = p.x;
 			this.drag.y = p.y;
+		}
+		if (this.host.over) {
+			const p = this.local(e);
+			this.canvas.style.cursor = this.host.over(p.x, p.y) ? "pointer" : "";
 		}
 		// `button` on move: 0 while the left button is held, -1 otherwise.
 		this.emit("move", e, this.cellAt(e), e.buttons & 1 ? 0 : -1);
@@ -132,7 +152,13 @@ export class Input {
 			this.canvas.releasePointerCapture?.(e.pointerId);
 			return;
 		}
-		if (e.button === 0) this.emit("up", e, this.cellAt(e), 0);
+		if (e.button === 0) {
+			if (this.swallowed === e.pointerId) {
+				this.swallowed = null;
+				return;
+			}
+			this.emit("up", e, this.cellAt(e), 0);
+		}
 	}
 
 	private wheel(e: WheelEvent): void {

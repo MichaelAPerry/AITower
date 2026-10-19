@@ -35,6 +35,10 @@ lamps at row 14, louvres 17–24, card slot 26, kick plate 27–29); storage swa
 | `src/color.ts` | **pure** colour helpers: heat ramp, rack temp ramp, satisfaction/load ramps, alert colour, net palette, sky keyframes (top/horizon/night/city/cityFar/haze). Heat, rack temp, satisfaction and load take `colorBlind` (default false) |
 | `src/presentation.ts` | **pure** `Presentation` store for `RenderOptions`: `set()` returns the keys that changed (empty = no-op); `horrorIntensity` getter (stored for M3, no visual yet) |
 | `src/interp.ts` | **pure** `Interpolator` (last two samples per id), `effectiveAlpha`, FNV `hashArrays` |
+| `src/alerts.ts` | **pure** off-screen alert arrows: `alertSeverity` (failed/tripped 3, unpowered 2, noCoolant 1), `alertArrowColor`, `isOffscreen`, `edgePoint` (clamped to the inset viewport), `computeArrows` (greedy grouping within `mergeDist`, worst + nearest is the representative), `hitArrow`, `arrowPixels` |
+| `src/feedback.ts` | **pure** failure-effect rules: `facilityFx` (status + tempC + net satisfaction → steam/strobe/wrench/sparks/fire/smoke/blackout/brownout; fire when failed and `tempC >= tripC - 3`), `lightRuns` (floor runs on nets with satisfaction < 1), `leakDrips` (conduit cells of coolant nets with `loadKw > capacityKw`, via `coolantNetOf`) |
+| `src/art.ts` | **pure** art selection: `rackVariant` (air/dlc/immersion/storage), `artTier` (unlockTier → 1..4), `cabinetDetail` (cornice/gauge/hopper/pilasters/crest per cabinet by tier and width), `trimDetail` (edge trim of non-racks), `NATIVE_WIDTH`/`bodyWidth`/`annexTiles` (non-rack bodies keep native width; extra tiles get an enamel annex bay) |
+| `src/botArt.ts` | **pure** bot art: `botKind` (flying -> drone, carry > 1 -> lifter), `botDims`, `crateCount`, `rotorSpeed`, `hoverOffset` |
 | `src/status.ts` | **pure** status → lamp cue (`color`, `mode`, health `tone`, `accent`; `colorBlind` aware), `phosphorFor(tone)`, CRT glyph (`crtGlyph`, `CRT_GLYPHS` 3×3 bitmaps), badge, activity flicker |
 | `src/pixi/renderer.ts` | composition root: Pixi `Application`, scene graph, caches, per-frame draw |
 | `src/pixi/draw.ts` | pixel primitives (see Art direction); `crt(..., steady)` and `glyph3` |
@@ -45,13 +49,32 @@ lamps at row 14, louvres 17–24, card slot 26, kick plate 27–29); storage swa
 | `src/pixi/lifts.ts` | shafts (cached: brass posts, bracing, head house + dial) and cars (per frame: cage, accordion gate, dial needle, drum) |
 | `src/pixi/facilityArt.ts` | per-kind facility bodies (static) and live details (CRTs, lamps, reels, fans, needles, knife switch, crates, badges) |
 | `src/pixi/pneumatics.ts` | per-tick `jobId` change detection → brass capsules along the floor's tube (decorative) |
-| `src/pixi/bots.ts` | 12×12 dome-headed automatons; exposes welding `torches` for effects |
+| `src/pixi/bots.ts` | 12×12 dome-headed rover, 12×12 rotor drone (`BotDef.flying`, hovers, drawn at a fractional floor while `"flying"`), 14×12 lifter with crate stack (`BotDef.carry > 1`); exposes welding `torches` for effects |
+| `src/pixi/feedback.ts` | failure feedback per frame: red strobe + beacon + steam bursts (tripped), wrench + sparks (failed), flames + smoke (failed and hot), dark floors with emergency lamps (net satisfaction 0), flicker (brownout), coolant-leak drips + wet streaks + puddles |
+| `src/pixi/arrows.ts` | screen-space edge arrows (2×2 px per arrow pixel) for off-screen alert facilities; `at(sx, sy)` for hover/click |
 | `src/pixi/effects.ts` | rack heat shimmer, chiller steam, genset smoke, welding sparks, coolant drips (shimmer/steam/smoke/drips stop under reduced motion) |
 | `src/pixi/overlays.ts` | heat / power (amber nets) / coolant (copper-verdigris) overlays; colour-blind satisfaction/load/heat ramps |
 | `src/pixi/markers.ts` | cyanotype ghost (valid) / red-stamped "DENIED" ghost (invalid), VT323 price tag, pulsing brass selection brackets |
-| `src/pixi/input.ts` | DOM input: right/middle drag, WASD/arrows, wheel zoom, left-button `CellPointerEvent`s |
+| `src/pixi/input.ts` | DOM input: right/middle drag, WASD/arrows, wheel zoom, left-button `CellPointerEvent`s; `InputHost.press/over` let screen-space widgets (the alert arrows) consume a left press (and its release) and set a pointer cursor |
 | `src/dev/fixtureView.ts` | hand-built fake `SimView` + stub content for the harness/tests |
+| `src/dev/varietyScene.ts` | `?scene=variety`: every kind (racks by cooling flavour) × tier 1-4 × widths, one row per floor, plus a failure row, blackout floor, brownout floor, overloaded coolant floor and rover/lifter/drone bots; synthetic defs layered over any base content |
 | `dev/index.html`, `dev/main.ts` | dev harness |
+
+## Failure feedback, alert arrows, new bots, rack variety (M2b-T4)
+- **Feedback** (`pixi/feedback.ts`, rules in `src/feedback.ts`): tripped = steam burst every ~2.4 s + red strobe/beacon; failed =
+  brass wrench + sparks, plus flames and smoke when `tempC >= balance.thermal.tripC - 3` (95 if the content has none);
+  floors whose power net has satisfaction 0 are darkened with blinking red emergency lamps, 0 < satisfaction < 1 flickers;
+  overloaded coolant nets drip from every conduit cell (drops land on the facility top where one stands below).
+  Reduced motion: steady strobe tint, frozen steam cloud, fixed sparks/flames/smoke, steady lamps and dim, hanging drop + puddle.
+- **Arrows** (`pixi/arrows.ts`): one per facility with status failed/tripped/unpowered/noCoolant whose rect is fully outside the
+  viewport, clamped to the viewport inset by 22 px; arrows within 26 px merge into the worst/nearest (shows `xN`). Colour by severity
+  (red / sodium / verdigris; vermilion / orange / blue when colour-blind). Click focuses the camera on the representative facility
+  (the press never reaches the tool listeners). Critical arrows pulse; steady under reduced motion.
+- **Rack variety**: `unlockTier` 2 = brass cornice + a gauge, 3 = hopper (first and, for width >= 3, last cabinet) + gauges, 4 = pilasters,
+  gauges everywhere, hopper(s) and a crest on the second cabinet. Immersion racks draw a glass tank (fluid tinted from `def.accent`)
+  with bubbles (fixed under reduced motion). Non-rack kinds get edge trim by tier (rail, plinth, pilasters, finials).
+  A non-rack def wider than its native width (`NATIVE_WIDTH`) gets an annex bay; narrower than native is NOT supported (the art would overflow).
+- Frame budget: arrows and feedback iterate facilities/alert lists only; particles capped at 400; leaks/lights culled to the viewport.
 
 ## Presentation options (`Renderer.setOptions`, M1-T4)
 - `renderer.ts` keeps one `Presentation`; `setOptions` is a four-field diff. Only a real change does work: `colorBlind`
@@ -92,12 +115,12 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
   `leave` with `cell: null`. Right/middle drag pans; wheel steps zoom toward the cursor.
 
 ## Testing
-- `npx vitest run packages/render`: pure helpers (camera, colour, colour-blind mapping, interpolation, status cues and
+- `npx vitest run packages/render`: pure helpers (alerts, feedback rules, art selection, bot art, camera, colour, colour-blind mapping, interpolation, status cues and
   glyph selection, presentation diff/idempotence, fixture). No WebGL needed.
 - Visual: `npx vite packages/render/dev --port 5174`, then
   `node scripts/screenshot.mjs "http://localhost:5174/?overlay=heat" out.png 1280 800 2000`.
   Query params: `overlay=heat|power|coolant`, `minute=1150` (dusk) / `1300` (night), `mpt=0` (freeze the clock),
   `zoom=1..4`, `focus=x,floor`, `select=facility:12`, `ghost=1|bad`, `cb=1` (colour-blind), `rm=1` (reduced motion),
-  `crt=0` (CRT effects off), `real=1` (real content via `loadContent()`;
+  `crt=0` (CRT effects off), `scene=variety` (art/feedback/bot test scene; combine with `focus=x,floor`, floors 12-15 are failure rows), `real=1` (real content via `loadContent()`;
   the fixture already uses the real colours). Keys 1–4 switch overlay. The fixture cycles rack jobs every 25 ticks
   so capsules fly. Real game: `npx vite apps/web --port 5176`, `?new&seed=7&speed=10[&overlay=heat]`.

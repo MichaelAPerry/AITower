@@ -1,17 +1,20 @@
 // Dev harness: renders the hand-built fixture and animates it.
 // Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
 //               ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
+//               ?scene=variety (every kind x tier x width, failure rows, new bots; focus=x,floor to jump)
 //               ?cb=1 (colour-blind)  ?rm=1 (reduced motion)  ?crt=0 (CRT effects off)
 import "@fontsource/vt323";
 import { loadContent } from "@aitower/content";
 import type { OverlayMode, Selection } from "@aitower/shared";
 import { createRenderer } from "../src/index";
 import { createFixture, fixtureContent } from "../src/dev/fixtureView";
+import { createVarietyScene, varietyContent } from "../src/dev/varietyScene";
 
 const params = new URLSearchParams(location.search);
 const host = document.getElementById("world") as HTMLElement;
 const hud = document.getElementById("hud") as HTMLElement;
-const fx = createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
+const variety = params.get("scene") === "variety";
+const fx = variety ? createVarietyScene() : createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
 // ?real=1 draws the fixture with the real content colours (falls back to the local stub).
 let content = fixtureContent;
 if (params.has("real")) {
@@ -21,6 +24,7 @@ if (params.has("real")) {
 		console.warn("loadContent failed, using fixture content", err);
 	}
 }
+if (variety) content = varietyContent(content);
 // The app loads the fonts before creating the renderer; do the same here.
 await document.fonts.load('16px "VT323"').catch(() => []);
 const renderer = await createRenderer(host, content);

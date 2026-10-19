@@ -6,10 +6,12 @@ import { Application, Container, Graphics, Sprite, Texture, TextureSource, Tilin
 import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
 import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
 import { Interpolator, effectiveAlpha, hashArrays } from "../interp";
+import { Arrows } from "./arrows";
 import { Background } from "./background";
 import { Bots } from "./bots";
 import { drawCoolant, drawPower, dripCells } from "./conduits";
 import { Effects, dripFloorY } from "./effects";
+import { Feedback } from "./feedback";
 import { drawBody, drawLive } from "./facilityArt";
 import { Input } from "./input";
 import { TextPool } from "./labels";
@@ -103,6 +105,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const pneumatics = new Pneumatics(content);
 	const bots = new Bots(content);
 	const effects = new Effects(content);
+	const feedback = new Feedback(content);
+	const arrows = new Arrows(content);
 	const overlays = new Overlays(content);
 	const ghost = new GhostLayer(content);
 	const selectionG = new Graphics();
@@ -116,16 +120,18 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		facBodies,
 		facLive,
 		facLabels.root,
+		feedback.dark,
 		pneumatics.g,
 		bots.g,
 		effects.g,
+		feedback.g,
 		overlays.root,
 		ghost.root,
 		selectionG,
 	);
 	const screenFx = makeScreenFx();
 	screenFx.resize(w0, h0);
-	app.stage.addChild(background.root, world, screenFx.root);
+	app.stage.addChild(background.root, world, arrows.root, screenFx.root);
 
 	// ─── State ─────────────────────────────────────────────────────────
 	let cam: Camera = { cx: 0, cy: 0, zoom: DEFAULT_ZOOM, vw: w0, vh: h0 };
@@ -150,7 +156,19 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			cam = grid ? clampCamera(c, grid) : c;
 		},
 		grid: () => grid,
+		// Alert arrows live in screen space: a click focuses the camera on the facility they point at.
+		press: (sx, sy) => {
+			const hit = arrows.at(sx, sy);
+			if (!hit) return false;
+			centreOnPoint(hit.focus.x, hit.focus.y);
+			return true;
+		},
+		over: (sx, sy) => arrows.at(sx, sy) !== null,
 	});
+
+	const centreOnPoint = (x: number, y: number): void => {
+		if (grid) cam = clampCamera({ ...cam, cx: x, cy: y }, grid);
+	};
 
 	const centreOn = (cell: CellRef): void => {
 		if (!grid) {
@@ -219,6 +237,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				if (def) drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor));
 			}
 		}
+		feedback.onTick(view);
 		pneumatics.onTick(view, (now - t0) / 1000);
 		overlayDirty = true;
 	};
@@ -272,8 +291,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			const liftPos = (id: number): number | null => liftInterp.get(id, a)?.y ?? null;
 			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t, opt);
 			const botPos = (b: { id: number; x: number; floor: number }) => botInterp.get(b.id, a) ?? { x: b.x, y: b.floor };
-			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t);
+			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t, opt);
 			effects.update(view, bots.torches, dt, t, opt);
+			feedback.update(view, { x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, dt, t, opt);
 
 			overlays.root.visible = overlay !== "normal";
 			if (overlayDirty) {
@@ -293,6 +313,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				liftPos,
 			);
 			drawSelection(selectionG, rect, t);
+			arrows.update(view, cam, t, opt);
 
 			app.render();
 		},
