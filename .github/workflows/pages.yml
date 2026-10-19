@@ -45,6 +45,8 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run budget
+      # One self-contained HTML file (apps/web/dist/AItower.html), published next to the site as an offline download.
+      - run: npm run build:single
       # Playwright is not a project dependency; install the pinned version for this job only.
       - name: Install Playwright and Chromium
         run: |
