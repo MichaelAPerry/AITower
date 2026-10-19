@@ -28,6 +28,10 @@ export const T = {
 	red: 0xff3b2f,
 	sodium: 0xff8a3d,
 	smog: 0x4a5a55,
+	// M3 body-horror tokens (docs/review/ux-art.md): flesh (pink-beige), bile (olive), blood (deep desaturated red-brown).
+	flesh: 0xb5877a,
+	bile: 0x8a8a3a,
+	blood: 0x6a2c22,
 } as const;
 
 /** STYLE.md heat ramp stops (overlay): ≤18 → 24 → 30 → 36 → 42 → ≥50 °C. */
@@ -85,6 +89,9 @@ export const COPPER = mat(T.copper);
 export const VERDI = mat(T.verdigris);
 export const STEEL = mat(T.steel);
 export const PAPER = mat(T.paper);
+export const FLESH = mat(T.flesh);
+export const BILE = mat(T.bile);
+export const BLOOD = mat(T.blood);
 
 /** Phosphor colours for CRTs and lamps: [lit, dim]. */
 export const PHOSPHOR = {

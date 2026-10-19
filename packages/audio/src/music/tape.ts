@@ -1,7 +1,8 @@
 /**
  * Decaying-tape master chain: saturation → wow/flutter delay → "age" low-pass →
  * dropout gain. One `corruption` value (0..1) scales detune, wow depth and
- * dropouts (fixed ~0.05 for now; M3 will drive it).
+ * dropouts (the director maps view.corruption onto it; 0.05 is a clean tape),
+ * and `chew` (0..1) adds chewed-tape stutters and pitch lurches on top.
  */
 import type { Rng } from "./rng";
 
@@ -38,11 +39,18 @@ export function tapeParams(corruption: number): TapeParams {
 	};
 }
 
-/** Next dropout: exponential gap (min 4 s), depth and length. */
-export function nextDropout(rng: Rng, corruption: number): { gapS: number; depth: number; durS: number } {
+/**
+ * Next dropout: exponential gap (min 4 s, down to 1 s when chewing), depth and length, plus
+ * 0..3 quick stutter dips after it (only when `chew` > 0.3; no extra rng draws otherwise).
+ */
+export function nextDropout(rng: Rng, corruption: number, chew = 0): { gapS: number; depth: number; durS: number; stutters: number } {
 	const p = tapeParams(corruption);
+	const ch = clamp01(chew);
 	const u = Math.min(0.999, rng());
-	return { gapS: Math.max(4, -Math.log(1 - u) / p.dropoutRate), depth: p.dropoutDepth, durS: p.dropoutDurS * (0.7 + rng() * 0.6) };
+	const gapS = Math.max(4 - 3 * ch, -Math.log(1 - u) / (p.dropoutRate * (1 + 4 * ch)));
+	const durS = p.dropoutDurS * (0.7 + rng() * 0.6);
+	const stutters = ch > 0.3 ? 1 + Math.floor(rng() * 3) : 0;
+	return { gapS, depth: p.dropoutDepth, durS, stutters };
 }
 
 export function saturationCurve(n = 1024, drive = 1.4): Float32Array<ArrayBuffer> {
@@ -56,6 +64,8 @@ export interface Tape {
 	input: AudioNode;
 	output: AudioNode;
 	setCorruption(c: number): void;
+	/** Chewed-tape strength 0..1 (stutter dropouts and pitch lurches). */
+	setChew(c: number): void;
 	/** Max per-note detune in cents for the current corruption. */
 	detuneCents(): number;
 	/** Age low-pass cutoff (smoothed). */
@@ -110,6 +120,11 @@ export function createTape(ctx: BaseAudioContext, rng: Rng, corruption: number):
 
 	let nextAt: number | null = null;
 	let stopped = false;
+	let chew = 0;
+	const dip = (t: number, depth: number, durS: number) => {
+		drop.gain.setTargetAtTime(1 - depth, t, 0.012);
+		drop.gain.setTargetAtTime(1, t + durS, 0.05);
+	};
 
 	return {
 		input,
@@ -118,19 +133,32 @@ export function createTape(ctx: BaseAudioContext, rng: Rng, corruption: number):
 			corr = clamp01(c);
 			applyDepth();
 		},
+		setChew(c) {
+			chew = clamp01(c);
+		},
 		detuneCents: () => tapeParams(corr).detuneCents,
 		setAgeHz(hz, now) {
 			if (!stopped) age.frequency.setTargetAtTime(Math.max(200, hz), now, 2);
 		},
 		pump(now, horizon) {
 			if (stopped) return;
-			if (nextAt === null || nextAt < now - 1) nextAt = now + nextDropout(rng, corr).gapS;
+			if (nextAt === null || nextAt < now - 1) nextAt = now + nextDropout(rng, corr, chew).gapS;
 			if (nextAt > now + horizon) return;
-			const d = nextDropout(rng, corr);
+			const d = nextDropout(rng, corr, chew);
 			const t = Math.max(now, nextAt);
-			drop.gain.setTargetAtTime(1 - d.depth, t, 0.012);
-			drop.gain.setTargetAtTime(1, t + d.durS, 0.05);
-			nextAt = t + d.durS + d.gapS;
+			dip(t, d.depth, d.durS);
+			let end = t + d.durS;
+			for (let k = 0; k < d.stutters; k++) {
+				const at = end + 0.08;
+				dip(at, Math.min(0.95, d.depth + 0.1), 0.06);
+				end = at + 0.06;
+			}
+			if (chew > 0) {
+				// Pitch lurch: the tape stretches for a moment, then snaps back.
+				delay.delayTime.setTargetAtTime(BASE_DELAY_S + 0.02 * chew, t, 0.01);
+				delay.delayTime.setTargetAtTime(BASE_DELAY_S, t + d.durS, 0.08);
+			}
+			nextAt = end + d.gapS;
 		},
 		stop(now, secs) {
 			if (stopped) return;

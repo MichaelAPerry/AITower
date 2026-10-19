@@ -10,6 +10,7 @@ import { niceMax } from "./Dial";
 import { Gauge, PueGauge } from "./PueGauge";
 import { saveLamp } from "../menu/slots";
 import { InboxButton, StandingMeter } from "../memo/MemoDesk";
+import { GrowthIndex } from "../bio/GrowthIndex";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
@@ -127,6 +128,7 @@ export function TopBar({ store, content, state, openMenu, openResearch, ui, setU
 				</span>
 			</div>
 			<StandingMeter standing={view.standing} />
+			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<div className="ui-deskcol">
 				<InboxButton state={state} ui={ui} setUi={setUi} />
 				<button

@@ -14,10 +14,11 @@ export type KeyAction =
 	| { type: "toggleBottom" };
 
 const SPEED_KEYS: Record<string, Speed> = { "1": 0, "2": 1, "3": 3, "4": 10, "5": 30 };
-const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "power", c: "coolant" };
+const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "power", c: "coolant", b: "nutrient", g: "contamination" };
 
 /**
  * Pure key → action map. WASD and arrows are deliberately unused (the renderer pans the camera with them).
+ * Overlay keys: N normal, H heat, P power, C coolant, B nutrient ("bio feed"), G contamination ("growth").
  * Speed keys follow the button order: 1 = pause, 2 = 1×, 3 = 3×, 4 = 10×, 5 = 30×.
  */
 export function keyAction(key: string): KeyAction | null {
@@ -41,6 +42,8 @@ export interface KeyEnv {
 	toggleBottom: () => void;
 	/** The research sheet: R toggles it (opening pauses the game, closing restores the speed). */
 	research?: MenuController;
+	/** FORM A-5, the ascension sheet: modal like research, but only Esc acts (its own handler closes it too). */
+	ascension?: MenuController;
 	/** The quarterly audit sheet: only Esc closes it; the game keeps running under it. */
 	audit?: Closable;
 	/** Last non-zero speed, for the space-bar toggle. */
@@ -54,7 +57,7 @@ export interface KeyEnv {
 export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	const a = keyAction(key);
 	if (!a) return false;
-	const sheets = { research: env.research, audit: env.audit };
+	const sheets = { research: env.research, ascension: env.ascension, audit: env.audit };
 	if (env.menu.isOpen()) {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		return a.type === "escape";
@@ -64,6 +67,11 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		else if (a.type === "research") env.research.close();
 		return a.type === "escape" || a.type === "research";
+	}
+	// The ascension sheet is modal as well: only Esc acts, and it closes the sheet.
+	if (env.ascension?.isOpen()) {
+		if (a.type === "escape") applyEscape(store, env.menu, sheets);
+		return a.type === "escape";
 	}
 	const s = store.get();
 	if (s.speed !== 0) env.lastSpeed.current = s.speed;
@@ -98,15 +106,15 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 }
 
 /** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
-export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; audit?: Closable } = {}): void {
+export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable } = {}): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggleBottom);
 	toggleRef.current = toggleBottom;
 	const blockedRef = useRef(blocked);
 	blockedRef.current = blocked;
-	const { research, audit } = sheets;
+	const { research, ascension, audit } = sheets;
 	useEffect(() => {
-		const env: KeyEnv = { menu, research, audit, lastSpeed, toggleBottom: () => toggleRef.current() };
+		const env: KeyEnv = { menu, research, ascension, audit, lastSpeed, toggleBottom: () => toggleRef.current() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 			if (blockedRef.current() && !menu.isOpen()) return;
@@ -116,5 +124,5 @@ export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu:
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [store, menu, research, audit]);
+	}, [store, menu, research, ascension, audit]);
 }

@@ -76,3 +76,30 @@ export const ACCEPT_DEADLINE_MARGIN = 0.9;
 
 /** Scripted events are issued at 09:00 (minute of day) on their `scriptedDay`. */
 export const SCRIPTED_MINUTE_OF_DAY = 9 * 60;
+
+// ── Biotech (M3) ──
+/** Fleshed bots repair in this share of the normal ticks. */
+export const FLESHED_REPAIR_FACTOR = 0.6;
+/** Contamination a fleshed bot leaves at the tile where it finishes a repair. */
+export const FLESHED_REPAIR_CONTAMINATION = 0.2;
+/** A tendriled bot carries this many extra parts per depot trip. */
+export const TENDRILED_EXTRA_CARRY = 2;
+/** Bot speed never drops below this share of normal in contamination. */
+export const BOT_MIN_CONTAMINATION_SPEED = 0.3;
+/** A growth that failed comes back by itself after this many ticks (3 game hours). */
+export const GROWTH_RECOVER_TICKS = 180;
+/** Culling rooms clear growths once a day at this minute of day (03:00). */
+export const CULL_MINUTE_OF_DAY = 3 * 60;
+/** Contamination below this is flushed to zero (so the field can go quiet). */
+export const CONTAMINATION_FLOOR = 1e-6;
+/** A cell counts as contaminated at or above this level. */
+export const CONTAMINATED_CELL = 0.5;
+/** Corruption target weights: contaminated share (relative to the irreversible share), organoid share of compute, growths. */
+export const CORRUPTION_W_SHARE = 0.5;
+export const CORRUPTION_W_ORGANOID = 0.3;
+export const CORRUPTION_W_GROWTHS = 0.2;
+/** This many growths saturate the growth term of the corruption target. */
+export const CORRUPTION_GROWTHS_SATURATION = 20;
+/** Corruption moves toward its target by at most this much per day up / down. */
+export const CORRUPTION_RISE_PER_DAY = 0.1;
+export const CORRUPTION_FALL_PER_DAY = 0.02;

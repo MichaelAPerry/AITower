@@ -1,14 +1,19 @@
 /** Pure mapping from sim status to visual cues. */
 import type { FacilityStatus } from "@aitower/sim";
-import { CB, T, dk, lt } from "./palette";
+import { CB, HEAT_RAMP, T, dk, lt } from "./palette";
 
-/** Indicator lamp / phosphor colours (STYLE.md tokens). */
+/** Pale frost blue for `tooCold` (the heat ramp's cold stop, lightened): derived, not a new token. */
+export const FROST = lt(HEAT_RAMP[0], 0.72);
+
+/** Indicator lamp / phosphor colours (STYLE.md tokens). `starved` (noNutrient) is bile, `cold` (tooCold) frost. */
 export const LED = {
 	ok: T.green,
 	amber: T.amber,
 	red: T.red,
 	idle: T.greenDim,
 	off: dk(T.housing, 0.35),
+	starved: T.bile,
+	cold: FROST,
 } as const;
 
 /** Colour-blind lamp scheme: blue ok, orange warning, vermilion fault. Same roles as `LED`. */
@@ -18,10 +23,12 @@ export const LED_CB = {
 	red: lt(CB.vermilion, 0.15),
 	idle: dk(CB.blue, 0.5),
 	off: LED.off,
+	starved: lt(CB.orange, 0.35),
+	cold: lt(CB.blue, 0.55),
 } as const;
 
 /** Health bucket of a rack: drives phosphor colour and CRT speed; colour-independent. */
-export type LedTone = "ok" | "warn" | "fault" | "idle" | "off";
+export type LedTone = "ok" | "warn" | "fault" | "idle" | "off" | "starved" | "cold";
 
 export type LedMode = "activity" | "steady" | "blink" | "off";
 
@@ -52,9 +59,11 @@ export const ledCue = (status: FacilityStatus, enabled: boolean, colorBlind = fa
 		case "brownout":
 			return cue(L.amber, "activity", "warn");
 		case "noCoolant":
-		case "noNutrient": // M3 placeholder (M3-T3 may refine)
-		case "tooCold":
 			return cue(L.amber, "blink", "warn");
+		case "noNutrient": // organoid tissue without feed: slow bile blink
+			return cue(L.starved, "blink", "starved");
+		case "tooCold": // below its band: steady pale-blue frost lamp
+			return cue(L.cold, "steady", "cold");
 		case "tripped":
 		case "failed":
 			return cue(L.red, "blink", "fault");
@@ -74,6 +83,10 @@ export const phosphorFor = (tone: LedTone, colorBlind = false): readonly [number
 			return [L.amber, dk(L.amber, 0.45)];
 		case "fault":
 			return [L.red, dk(L.red, 0.6)];
+		case "starved":
+			return [L.starved, dk(L.starved, 0.5)];
+		case "cold":
+			return [L.cold, dk(L.cold, 0.6)];
 		case "idle":
 		case "off":
 			return [L.idle, dk(L.idle, 0.5)];
@@ -81,13 +94,17 @@ export const phosphorFor = (tone: LedTone, colorBlind = false): readonly [number
 };
 
 /** 3×3 CRT glyphs (STYLE.md-style pixel icons): ✓ ok, ▲ throttled, ✕ tripped/failed, ○ idle. */
-export type CrtGlyph = "ok" | "throttled" | "fault" | "idle";
+export type CrtGlyph = "ok" | "throttled" | "fault" | "idle" | "starved" | "frost";
 
 export const CRT_GLYPHS: Record<CrtGlyph, readonly string[]> = {
 	ok: ["..X", ".X.", "X.."],
 	throttled: [".X.", "X.X", "XXX"],
 	fault: ["X.X", ".X.", "X.X"],
 	idle: [".X.", "X.X", ".X."],
+	/** noNutrient: an empty feed tube (open top, one drop falling). */
+	starved: ["X.X", "X.X", ".X."],
+	/** tooCold: a snowflake. */
+	frost: [".X.", "XXX", ".X."],
 };
 
 /** Glyph shown on a rack CRT, or null for states with no screen (unpowered / disabled). Matches `ledCue` tones. */
@@ -100,9 +117,11 @@ export const crtGlyph = (status: FacilityStatus): CrtGlyph | null => {
 		case "throttled":
 		case "brownout":
 		case "noCoolant":
-		case "noNutrient":
-		case "tooCold":
 			return "throttled";
+		case "noNutrient":
+			return "starved";
+		case "tooCold":
+			return "frost";
 		case "tripped":
 		case "failed":
 			return "fault";
@@ -112,7 +131,7 @@ export const crtGlyph = (status: FacilityStatus): CrtGlyph | null => {
 	}
 };
 
-export type Badge = "wrench" | "noCoolant" | "noPower" | null;
+export type Badge = "wrench" | "noCoolant" | "noPower" | "noNutrient" | "tooCold" | null;
 
 export const badgeFor = (status: FacilityStatus): Badge => {
 	switch (status) {
@@ -123,6 +142,10 @@ export const badgeFor = (status: FacilityStatus): Badge => {
 			return "noCoolant";
 		case "unpowered":
 			return "noPower";
+		case "noNutrient":
+			return "noNutrient";
+		case "tooCold":
+			return "tooCold";
 		default:
 			return null;
 	}

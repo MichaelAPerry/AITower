@@ -86,8 +86,9 @@ export function MemoPop({ store, state, ui, setUi }: { store: GameStore; state: 
 	const memo = ui.inboxOpen ? null : memoToPop(memos, ui.stamped, ui.aside);
 	if (!memo) return null;
 	const waiting = openMemos(memos, ui.stamped).length;
+	const stain = memoStain(state.view.corruption ?? 0, state.settings.horrorIntensity);
 	return (
-		<div className="ui-memo-pop" role="dialog" aria-label="Incoming Ministry memo" key={memo.id}>
+		<div className={`ui-memo-pop ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-label="Incoming Ministry memo" key={memo.id}>
 			<MemoCard memo={memo} tick={tick} onAnswer={(c) => answer(store, ui, setUi, memo, c)} onAside={() => setUi({ aside: [...ui.aside, memo.id] })} />
 			{waiting > 1 && <div className="memo-more">{waiting - 1} more in the inbox</div>}
 		</div>

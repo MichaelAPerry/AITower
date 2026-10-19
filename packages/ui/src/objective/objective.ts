@@ -6,6 +6,7 @@ import type { ContentDB } from "@aitower/content";
 import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 import { cheapestAvailable, effectText, fmtRp } from "../research/tech";
+import { ascensionDue, type PathFiled, pathPending } from "../ascension/ascension";
 import { rackProblem } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
@@ -16,6 +17,8 @@ export interface Objective {
 	title: string;
 	/** One sentence saying exactly where and why. */
 	detail: string;
+	/** A button the orders offer: open FORM A-5 (the Ascension sheet). */
+	action?: "ascension";
 }
 
 export interface MoneyLine {
@@ -37,7 +40,7 @@ export function installedPflops(view: SimView, content: ContentDB): number {
 	return p;
 }
 
-export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult): Objective {
+export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult, filed: PathFiled | null = null): Objective {
 	const active = view.jobs.filter((j) => ACTIVE.has(j.status));
 
 	if (view.cash < 0) {
@@ -65,7 +68,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	}
 
 	// Cabinets that can't run at all (no power, no working coolant loop) are money sunk for nothing: say why, first.
-	const dead = view.facilities.filter((f) => f.enabled && (f.status === "unpowered" || f.status === "noCoolant") && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
+	const dead = view.facilities.filter((f) => f.enabled && (f.status === "unpowered" || f.status === "noCoolant" || f.status === "noNutrient") && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
 	if (dead.length > 0) {
 		const f = dead[0];
 		const name = content.facilities[f.defId]?.name ?? "cabinet";
@@ -73,6 +76,28 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			tone: "alert",
 			title: `${dead.length} compute cabinet${dead.length === 1 ? " can't" : "s can't"} run`,
 			detail: `${name} on F${f.floor} (x${f.x}): ${rackProblem(view, content, f) ?? "it is not running."}`,
+		};
+	}
+
+	// Organoid tissue below its band runs slow or dies: say where and how to warm it.
+	const cold = view.facilities.filter((f) => f.enabled && f.status === "tooCold" && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
+	if (cold.length > 0) {
+		const f = cold[0];
+		const name = content.facilities[f.defId]?.name ?? "organoid rack";
+		return {
+			tone: "alert",
+			title: `${cold.length} organoid rack${cold.length === 1 ? " is" : "s are"} too cold`,
+			detail: `${name} on F${f.floor} (x${f.x}): ${rackProblem(view, content, f) ?? "it is below its band."}`,
+		};
+	}
+
+	// Clearance reached for the Ascension: the one irreversible decision of the game.
+	if (ascensionDue(view, content) && !pathPending(filed, view)) {
+		return {
+			tone: "action",
+			title: "FORM A-5: choose your Ascension path",
+			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the form below to read the options.`,
+			action: "ascension",
 		};
 	}
 
@@ -149,6 +174,15 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		};
 	}
 	return { tone: "progress", title: "Top clearance reached", detail: "Keep the Treasury growing and the Ministry's standing high." };
+}
+
+/** "Living Tower: 2 of 3 days" for the ending the tower is closest to; null when none (the secret ending is never announced). */
+export function endingLine(view: SimView, content: ContentDB): string | null {
+	const p = view.endingProgress;
+	if (!p || p.ending === "absorbed") return null;
+	const title = content.endings?.find((e) => e.id === p.ending)?.title ?? p.ending;
+	const days = Math.min(Math.floor(p.days), p.needed);
+	return `${title}: ${days} of ${p.needed} day${p.needed === 1 ? "" : "s"}`;
 }
 
 /** Today's money so far: what came in, what went out, and on what. */

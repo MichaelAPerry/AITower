@@ -227,7 +227,7 @@ function Alerts({ store, content, state }: PanelProps) {
 	return (
 		<ul className="ui-alerts ui-crt crt-amber">
 			{items.map((e, i) => {
-				const d = describeEvent(e.event, state.view, content);
+				const d = describeEvent(e.event, state.view, content, state.settings.horrorIntensity);
 				const cell = d.cell;
 				const day = Math.floor(e.tick / 1440);
 				const min = (e.tick + 360) % 1440;

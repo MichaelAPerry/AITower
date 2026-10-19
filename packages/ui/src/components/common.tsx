@@ -152,7 +152,7 @@ export function Row({ k, children }: { k: string; children: ReactNode }) {
 	);
 }
 
-type IconName = "lock" | "close" | "chevUp" | "chevDown" | "sound" | "mute" | "pause" | "play" | "slab" | "bolt" | "drop" | "lift" | "demolish" | "pointer" | "star";
+type IconName = "lock" | "close" | "chevUp" | "chevDown" | "sound" | "mute" | "pause" | "play" | "slab" | "bolt" | "drop" | "leaf" | "lift" | "demolish" | "pointer" | "star";
 
 const paths: Record<IconName, ReactNode> = {
 	lock: (
@@ -191,6 +191,7 @@ const paths: Record<IconName, ReactNode> = {
 	),
 	bolt: <path d="M9 1L3 9h4l-1 6 6-8H8z" />,
 	drop: <path d="M8 1.5C8 1.5 3 7 3 10a5 5 0 0 0 10 0c0-3-5-8.5-5-8.5z" />,
+	leaf: <path d="M13 3C6 3 3 6 3 10a5 5 0 0 0 1.5 3.6C5 10.5 7 8 10 6.5 8 8.5 6.8 10.8 6.5 13.5 11.5 12.5 13 8 13 3z" />,
 	lift: (
 		<>
 			<rect x="3" y="1.5" width="10" height="13" fill="none" />

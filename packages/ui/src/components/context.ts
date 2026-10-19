@@ -1,6 +1,7 @@
 import type { ContentDB } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
+import type { PathFiled } from "../ascension/ascension";
 
 export type BottomTab = "contracts" | "jobs" | "telemetry" | "finance" | "alerts";
 /** Sections of the Finance tab. */
@@ -23,6 +24,8 @@ export interface UiState {
 	financeTab: FinanceTab;
 	/** Memos the player set aside (no slip pops up for them; they stay in the inbox). */
 	aside: number[];
+	/** The ascension path just filed (the sim applies it on the next tick), so CURRENT ORDERS stops offering FORM A-5 meanwhile. */
+	pathFiled?: PathFiled | null;
 }
 
 /** Everything a HUD panel needs. Passed explicitly (no React context) to keep panels easy to test. */
@@ -36,6 +39,8 @@ export interface PanelProps {
 	openMenu: () => void;
 	/** Open the Department of Research sheet (pauses the game). */
 	openResearch: () => void;
+	/** Open FORM A-5, the Ascension sheet (pauses the game). */
+	openAscension: () => void;
 	/** Show a filed quarterly audit on the audit sheet. */
 	openAudit: (report: QuarterReport) => void;
 }

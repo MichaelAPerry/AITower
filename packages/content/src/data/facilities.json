@@ -726,5 +726,320 @@
    "needsPower": true
   },
   "tech": "fast_charge"
+ },
+ "nutrient_plant": {
+  "id": "nutrient_plant",
+  "name": "Nutrient Medium Works",
+  "description": "Copper vats of warm, faintly sweet broth, stirred by a clockwork paddle and piped out through sweating brass. Supplies 20 units of nutrient medium a tick to its pipe net, at $2 a unit. Organoid cabinets and bio-reactors drink from it; do not ask what it is made of.",
+  "kind": "nutrient",
+  "category": "bio",
+  "width": 3,
+  "cost": 1100000,
+  "upkeepPerDay": 2200,
+  "unlockTier": 3,
+  "facilityKw": 25,
+  "color": "#6d7a58",
+  "accent": "#b7c26a",
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "bio": {
+   "nutrientCapacity": 20
+  },
+  "tech": "wetware_annex"
+ },
+ "sterile_bay": {
+  "id": "sterile_bay",
+  "name": "Sterile Bay",
+  "description": "A tiled alcove of ultraviolet lamps, bleach spigots and a drain with a very good reputation. Scrubs contamination from every cell within 6 tiles on its floor (0.0012 a tick at full power). One bay keeps a small annex of two incubators clean.",
+  "kind": "sterilizer",
+  "category": "bio",
+  "width": 2,
+  "cost": 900000,
+  "upkeepPerDay": 1800,
+  "unlockTier": 4,
+  "facilityKw": 30,
+  "color": "#d9d2bd",
+  "accent": "#8fd0c4",
+  "placement": {
+   "needsPower": true
+  },
+  "bio": {
+   "cleanRate": 0.0012,
+   "radius": 6
+  },
+  "tech": "sterile_protocols"
+ },
+ "culling_room": {
+  "id": "culling_room",
+  "name": "Culling Room",
+  "description": "A white-tiled chamber with a hose, a hatch and a rota. Scrubs contamination twice as hard as a Sterile Bay (0.0025 a tick within 7 tiles) and is the only thing the Ministry permits to remove an unregistered growth. Please do not linger.",
+  "kind": "sterilizer",
+  "category": "bio",
+  "width": 3,
+  "cost": 2200000,
+  "upkeepPerDay": 4500,
+  "unlockTier": 4,
+  "facilityKw": 70,
+  "color": "#c9c2ad",
+  "accent": "#d4533f",
+  "placement": {
+   "needsPower": true
+  },
+  "bio": {
+   "cleanRate": 0.0025,
+   "radius": 7,
+   "cullsGrowths": true
+  },
+  "tech": "culling_licence"
+ },
+ "quarantine_lock": {
+  "id": "quarantine_lock",
+  "name": "Quarantine Lock",
+  "description": "A one-tile airlock of rubber gaskets and a hissing door, stamped with a yellow chevron. Contamination crosses it at only 5% of the normal rate, which is why it is also the most popular place to stand during a fire drill.",
+  "kind": "quarantine",
+  "category": "bio",
+  "width": 1,
+  "cost": 350000,
+  "upkeepPerDay": 600,
+  "unlockTier": 4,
+  "facilityKw": 3,
+  "color": "#c9bc9c",
+  "accent": "#d9a21b",
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "quarantine_doctrine"
+ },
+ "bioreactor": {
+  "id": "bioreactor",
+  "name": "Bio-Reactor",
+  "description": "A glass-fronted tank of fermenting broth driving a turbine through a belt. Burns 14 units of nutrient medium a tick for up to 500 kW, about $3.4 a kWh at the medium's price, and leaks 0.0025 contamination a tick into each tile it stands on. Cheap power with a smell.",
+  "kind": "bioreactor",
+  "category": "bio",
+  "width": 4,
+  "cost": 2800000,
+  "upkeepPerDay": 5500,
+  "unlockTier": 4,
+  "facilityKw": 20,
+  "color": "#5d6243",
+  "accent": "#c98a86",
+  "power": {
+   "capacityKw": 500
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "bio": {
+   "nutrientUse": 14,
+   "contamination": 0.0025
+  },
+  "tech": "bioreactor_permit"
+ },
+ "organoid_incubator": {
+  "id": "organoid_incubator",
+  "name": "Organoid Incubator Cabinet",
+  "description": "A jar-lined cabinet of cultured tissue on a warm nutrient drip, computing 135 PFLOPS from only 24 kW: 5.6 PFLOPS per kW, three times the best air or liquid cabinet. It must be held at 37 °C within 1 °C, and fed 3 units of nutrient medium a tick. It sheds contamination while it works.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 2,
+  "cost": 2400000,
+  "upkeepPerDay": 5000,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#b9a88f",
+  "accent": "#c98a86",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 24,
+   "liquidFraction": 0,
+   "pflops": 135,
+   "storageTB": 0,
+   "failurePerDay": 0.3,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 3,
+    "contamination": 0.002
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "wetware_annex"
+ },
+ "dna_vault": {
+  "id": "dna_vault",
+  "name": "DNA Vault",
+  "description": "Helical archives of synthesised strands in a chilled glass cabinet: 16,000 TB from 8 kW, twice the Tape Silo Array. Kept at 28 °C within 4 °C on a thin nutrient drip. The Ministry files it under 'Libraries (Living)'.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 2,
+  "cost": 1600000,
+  "upkeepPerDay": 2600,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#6f7473",
+  "accent": "#9ad0c0",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 8,
+   "liquidFraction": 0,
+   "pflops": 0,
+   "storageTB": 16000,
+   "failurePerDay": 0.12,
+   "bio": {
+    "targetC": 28,
+    "toleranceC": 4,
+    "nutrientUse": 1,
+    "contamination": 0.0008
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "dna_archive_charter"
+ },
+ "neural_pit": {
+  "id": "neural_pit",
+  "name": "Neural Pit",
+  "description": "A four-tile sunken vat of lattice and warm broth, stepped like an amphitheatre for the benefit of no one. 460 PFLOPS from 80 kW: 5.75 PFLOPS per kW. Must be held at 37 °C within 1 °C, drinks 10 units of nutrient medium a tick, and is the most contaminating thing the Ministry has ever licensed.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 4,
+  "cost": 7500000,
+  "upkeepPerDay": 16000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#7a5f5a",
+  "accent": "#d99a94",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 80,
+   "liquidFraction": 0,
+   "pflops": 460,
+   "storageTB": 0,
+   "failurePerDay": 0.35,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 10,
+    "contamination": 0.005
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "neural_pit_dossier"
+ },
+ "growth_mass": {
+  "id": "growth_mass",
+  "name": "Unregistered Organoid Mass",
+  "description": "A damp, warm, load-bearing lump of tissue that was not on the plans. It computes 24 PFLOPS on nothing at all, fails often and mends itself. Listed by the Ministry as an asset.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 1,
+  "cost": 0,
+  "upkeepPerDay": 0,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#b88a82",
+  "accent": "#8a4f55",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 1,
+   "liquidFraction": 0,
+   "pflops": 24,
+   "storageTB": 0,
+   "failurePerDay": 0.5,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 8,
+    "nutrientUse": 0,
+    "contamination": 0
+   }
+  },
+  "placement": {
+   "needsPower": false
+  },
+  "bio": {
+   "contamination": 0.002
+  },
+  "growth": true
+ },
+ "growth_cyst": {
+  "id": "growth_cyst",
+  "name": "Archival Cyst",
+  "description": "A pale sac in the corner of an empty room, holding 300 TB of something that is certainly data. Free storage with a mind of its own. Listed by the Ministry as an asset.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 1,
+  "cost": 0,
+  "upkeepPerDay": 0,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#c4a39a",
+  "accent": "#8a4f55",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 1,
+   "liquidFraction": 0,
+   "pflops": 0,
+   "storageTB": 300,
+   "failurePerDay": 0.4,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 8,
+    "nutrientUse": 0,
+    "contamination": 0
+   }
+  },
+  "placement": {
+   "needsPower": false
+  },
+  "bio": {
+   "contamination": 0.0015
+  },
+  "growth": true
+ },
+ "growth_lobe": {
+  "id": "growth_lobe",
+  "name": "Registered Lobe",
+  "description": "A ribbed, glistening bulk that has begun to hum along with the muzak. It computes 60 PFLOPS for free, fails more than most and sheds contamination twice as fast as a mass. Listed by the Ministry as a capital asset.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 1,
+  "cost": 0,
+  "upkeepPerDay": 0,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#a9766f",
+  "accent": "#6d3a44",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 1,
+   "liquidFraction": 0,
+   "pflops": 60,
+   "storageTB": 0,
+   "failurePerDay": 0.6,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 8,
+    "nutrientUse": 0,
+    "contamination": 0
+   }
+  },
+  "placement": {
+   "needsPower": false
+  },
+  "bio": {
+   "contamination": 0.004
+  },
+  "growth": true
  }
 }

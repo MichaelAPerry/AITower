@@ -10,6 +10,8 @@ import { Inspector } from "./components/Inspector";
 import { OverlaySwitcher } from "./components/OverlaySwitcher";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
+import { AscensionSheet } from "./ascension/AscensionSheet";
+import { ascensionDue } from "./ascension/ascension";
 import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { ResearchSheet } from "./research/ResearchSheet";
@@ -26,12 +28,14 @@ import { createMenuController } from "./menu/menuController";
 import { newSaveError } from "./menu/slots";
 import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
+import { conduitName } from "./tools/controller";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
 // After ui.css, so these can refine its base rules.
 import "./clerk/clerk.css";
 import "./finance/finance.css";
 import "./research/research.css";
+import "./bio/bio.css";
 
 export interface HudProps {
 	store: GameStore;
@@ -50,6 +54,9 @@ export function Hud({ store, content, title }: HudProps) {
 	// The research sheet pauses like the menu (and restores the speed on close).
 	const [researchOpen, setResearchOpen] = useState(false);
 	const research = useMemo(() => createMenuController(store, setResearchOpen), [store]);
+	// FORM A-5 (ascension) pauses the same way: the choice is irreversible, so nothing may happen while it is read.
+	const [ascensionOpen, setAscensionOpen] = useState(false);
+	const ascension = useMemo(() => createMenuController(store, setAscensionOpen), [store]);
 	// The quarterly audit sheet does not pause. `auditRef` lets the Esc handler (a stable object) see the current report.
 	const [audit, setAudit] = useState<QuarterReport | null>(null);
 	const auditRef = useRef<QuarterReport | null>(null);
@@ -74,12 +81,13 @@ export function Hud({ store, content, title }: HudProps) {
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
 	useEffect(() => () => research.close(), [research]);
+	useEffect(() => () => ascension.close(), [ascension]);
 	useHudKeyboard(
 		store,
 		useCallback(() => setUiState((u) => ({ ...u, bottomOpen: !u.bottomOpen })), []),
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current, []),
-		{ research, audit: auditSheet },
+		{ research, ascension, audit: auditSheet },
 	);
 
 	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
@@ -94,6 +102,7 @@ export function Hud({ store, content, title }: HudProps) {
 	useEffect(() => {
 		if (overId) {
 			research.close(); // restores its remembered speed first, so the pause below is the last word
+			ascension.close();
 			store.setSpeed(0);
 		}
 	}, [overId]);
@@ -133,7 +142,13 @@ export function Hud({ store, content, title }: HudProps) {
 		if (alertsOpen) setUi({ alertsSeenTick: tick });
 	}, [alertsOpen, tick, setUi]);
 
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAudit: setAudit };
+	// The sheet has nothing to offer once a path is chosen (or after a load of a game that has one): close it.
+	const ascensionStale = ascensionOpen && !ascensionDue(state.view, content);
+	useEffect(() => {
+		if (ascensionStale) ascension.close();
+	}, [ascensionStale, ascension]);
+
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
@@ -157,12 +172,26 @@ export function Hud({ store, content, title }: HudProps) {
 			<BottomPanel {...props} />
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
 			{researchOpen && !titleOpen && <ResearchSheet store={store} content={content} view={state.view} onClose={research.close} />}
+			{ascensionOpen && !titleOpen && !over && (
+				<AscensionSheet
+					store={store}
+					content={content}
+					view={state.view}
+					onClose={ascension.close}
+					onFiled={(f) => {
+						setUi({ pathFiled: f });
+						ascension.close();
+					}}
+				/>
+			)}
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
 			{titleOpen && <TitleScreen store={store} state={state} menuOpen={menuOpen} openMenu={openMenuAt} onStart={() => setTitleOpen(false)} />}
 			{over && (
 				<GameOverScreen
 					over={over}
 					view={state.view}
+					content={content}
+					horror={settings.horrorIntensity}
 					menuOpen={menuOpen}
 					onLoad={() => openMenuAt("load")}
 					onNewGame={() => {
@@ -188,7 +217,7 @@ function ToolHint({ content, state }: PanelProps) {
 			: t.kind === "slab"
 				? "Slab — drag along a floor"
 				: t.kind === "conduit"
-					? `${t.layer === "power" ? "Power" : "Coolant"} conduit — drag across, then up/down`
+					? `${conduitName(t.layer)} — drag across, then up/down`
 					: t.kind === "lift"
 						? "Lift — drag vertically on a column"
 						: t.kind === "demolish"

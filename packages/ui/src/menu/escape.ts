@@ -1,21 +1,22 @@
 import type { GameStore, Selection, Tool } from "@aitower/shared";
 import type { MenuController } from "./menuController";
 
-export type EscapeStep = "closeMenu" | "closeResearch" | "closeAudit" | "cancelTool" | "clearSelection" | "openMenu";
+export type EscapeStep = "closeMenu" | "closeResearch" | "closeAscension" | "closeAudit" | "cancelTool" | "clearSelection" | "openMenu";
 
-/** A sheet that Esc can close (the research sheet, the audit sheet). */
+/** A sheet that Esc can close (the research, ascension and audit sheets). */
 export interface Closable {
 	isOpen(): boolean;
 	close(): void;
 }
 
 /**
- * Esc order: close the menu, else the research sheet, else the audit sheet, else cancel the armed tool, else clear the
- * selection, else open the menu.
+ * Esc order: close the menu, else the research sheet, else the ascension sheet, else the audit sheet, else cancel the
+ * armed tool, else clear the selection, else open the menu.
  */
-export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; auditOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
+export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; ascensionOpen?: boolean; auditOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
 	if (ctx.menuOpen) return "closeMenu";
 	if (ctx.researchOpen) return "closeResearch";
+	if (ctx.ascensionOpen) return "closeAscension";
 	if (ctx.auditOpen) return "closeAudit";
 	if (ctx.tool.kind !== "select") return "cancelTool";
 	if (ctx.selection) return "clearSelection";
@@ -23,15 +24,18 @@ export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; aud
 }
 
 /** Run one Esc press against the store and the menu controller. Returns the step taken. */
-export function applyEscape(store: GameStore, menu: MenuController, sheets: { research?: Closable; audit?: Closable } = {}): EscapeStep {
+export function applyEscape(store: GameStore, menu: MenuController, sheets: { research?: Closable; ascension?: Closable; audit?: Closable } = {}): EscapeStep {
 	const s = store.get();
-	const step = escapeStep({ menuOpen: menu.isOpen(), researchOpen: sheets.research?.isOpen(), auditOpen: sheets.audit?.isOpen(), tool: s.tool, selection: s.selection });
+	const step = escapeStep({ menuOpen: menu.isOpen(), researchOpen: sheets.research?.isOpen(), ascensionOpen: sheets.ascension?.isOpen(), auditOpen: sheets.audit?.isOpen(), tool: s.tool, selection: s.selection });
 	switch (step) {
 		case "closeMenu":
 			menu.close();
 			break;
 		case "closeResearch":
 			sheets.research?.close();
+			break;
+		case "closeAscension":
+			sheets.ascension?.close();
 			break;
 		case "closeAudit":
 			sheets.audit?.close();

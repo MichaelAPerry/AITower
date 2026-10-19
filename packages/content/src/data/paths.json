@@ -2,19 +2,19 @@
  {
   "id": "biotech",
   "name": "Biotech",
-  "description": "M3 placeholder.",
-  "available": true
+  "available": true,
+  "description": "Cultured tissue computes at about three times the PFLOPS per kilowatt of any cabinet the Ministry has ever stamped. Feed the Annex, hold the jars at 37 °C and the numbers climb quickly, along with the contamination, the mutations and the unregistered assets. Embrace the flesh for the Living Tower, or hold the line with bleach and quarantine locks for the Clean Tower. The Ministry assures you that the tissue is entirely under control, and has stopped answering when asked by whom."
  },
  {
   "id": "greentech",
   "name": "Greentech",
-  "description": "Coming soon.",
-  "available": false
+  "available": false,
+  "description": "Coming soon. Heat pipelines, algae façades and carbon credits, for a tower that gives back more than it takes. The Department of Weather is still drafting the forms."
  },
  {
   "id": "synthetic",
   "name": "Synthetic Mind",
-  "description": "Coming soon.",
-  "available": false
+  "available": false,
+  "description": "Coming soon. Hosted minds, continuity audits and a lattice that remembers you. The Ethics Office is still deciding whether it is permitted to exist."
  }
 ]

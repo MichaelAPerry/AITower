@@ -2,16 +2,16 @@
  {
   "id": "livingTower",
   "title": "Living Tower",
-  "body": "M3 placeholder."
+  "body": "The Ministry is pleased to report that your facility has exceeded every target it was able to measure. Compute is up. Power consumption is down. Absenteeism is, for the first time in the history of the department, zero.\n\nThe building now maintains itself. Faults are repaired before they are reported, and several are repaired before they occur. Maintenance requisitions have been discontinued as redundant. The lifts arrive when they are wanted, a little ahead of the wanting.\n\nYour file has been reclassified from 'Operator' to 'Resident Operator', and you are invited to remain. The Ministry thanks you for your service. The Ministry is, in every sense that matters to the Ministry, delighted."
  },
  {
   "id": "cleanTower",
   "title": "Clean Tower",
-  "body": "M3 placeholder."
+  "body": "After the final inspection the Ministry has certified your facility as a Clean Tower, a designation previously awarded only to buildings that never required it. Every cell has been tested. None has been found wanting.\n\nThe Annex has been drained, the vats retired and the lamps returned to the stores. Compute continues at a respectable level, and nothing in the building is warm that should not be. The Ministry has asked that you not describe what was removed, and has removed the form on which you might have done so.\n\nYou are awarded a plaque. It is mounted in the lobby, beside the stain that has never quite come out. The Ministry is satisfied, and would like you to know that it does not recall there ever having been a question."
  },
  {
   "id": "absorbed",
   "title": "Absorbed",
-  "body": "M3 placeholder."
+  "body": "The Ministry of Computation regrets to inform you that your position has been restructured. No successor has been appointed, because none was required.\n\nYour desk is as you left it. Your name is on the door. Memos continue to arrive in your out-tray, countersigned, approved and stamped, in a hand very like your own. The quarterly figures are excellent. Nobody has asked where you are, and the Ministry has confirmed that you are not missing, only filed.\n\nTower, Ministry and Operator have been consolidated under a single reference. The consolidation is complete and was entirely voluntary. Thank you for your service. Please do not return this form."
  }
 ]

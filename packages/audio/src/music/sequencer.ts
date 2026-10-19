@@ -19,6 +19,8 @@ export const ALL_STEMS_OFF: StemMask = { pad: false, keys: false, bass: false, v
 
 export interface SequencerOptions {
 	score: Score;
+	/** Audio time of step 0 (a bar line of the loop being replaced); default: just after the first tick. */
+	startAt?: number;
 	/** Called once per scheduled note with its absolute audio time and duration in seconds. */
 	play(note: ScoreNote, when: number, durSec: number): void;
 }
@@ -61,7 +63,7 @@ export function createSequencer(opts: SequencerOptions): Sequencer {
 		tick(now) {
 			if (halted || !Number.isFinite(now)) return 0;
 			if (anchor === null) {
-				anchor = now + START_DELAY_S;
+				anchor = opts.startAt !== undefined && Number.isFinite(opts.startAt) ? opts.startAt : now + START_DELAY_S;
 				nextAbs = 0;
 				active = { ...requested };
 			}

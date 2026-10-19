@@ -1,14 +1,19 @@
+import type { ContentDB } from "@aitower/content";
+import type { HorrorIntensity } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
 import { Stamp } from "../components/common";
 import { focusables, nextFocusIndex } from "../menu/focus";
 import { StampBtn } from "../menu/parts";
-import { type GameOver, isFinal, lifetimeStats, OVER_COPY } from "./gameOver";
+import { endingOf, type GameOver, isFinal, lifetimeStats, overCopyFor } from "./gameOver";
 import "./gameover.css";
 
 export interface GameOverScreenProps {
 	over: GameOver;
 	view: SimView;
+	content: ContentDB;
+	/** settings.horrorIntensity: "off" prints the plain forms. */
+	horror?: HorrorIntensity;
 	/** Open the load drawer of the system menu. */
 	onLoad: () => void;
 	onNewGame: () => void;
@@ -18,10 +23,11 @@ export interface GameOverScreenProps {
 	menuOpen: boolean;
 }
 
-/** Full-screen notice: NOTICE OF TERMINATION (bankrupt, shutdown) or COMMENDATION (victory). */
-export function GameOverScreen({ over, view, onLoad, onNewGame, onContinue, menuOpen }: GameOverScreenProps) {
+/** Full-screen notice: NOTICE OF TERMINATION (bankrupt, shutdown), COMMENDATION (victory), or the text of the ending reached (living / clean / absorbed). */
+export function GameOverScreen({ over, view, content, horror = "full", onLoad, onNewGame, onContinue, menuOpen }: GameOverScreenProps) {
 	const root = useRef<HTMLDivElement>(null);
-	const copy = OVER_COPY[over.kind];
+	const copy = overCopyFor(over, content, horror);
+	const ending = endingOf(over);
 	const final = isFinal(over.kind);
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: refocus the first button when the notice appears and when the menu hands control back
@@ -42,7 +48,7 @@ export function GameOverScreen({ over, view, onLoad, onNewGame, onContinue, menu
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal; the key handler implements the focus loop
-		<div className={`ui-over is-${over.kind}`} ref={root} onKeyDown={onKeyDown}>
+		<div className={`ui-over is-${over.kind}${ending ? ` ending-${ending}` : ""}`} ref={root} onKeyDown={onKeyDown}>
 			<article className="ui-over-memo" role="alertdialog" aria-modal="true" aria-labelledby="over-title">
 				<header className="ui-over-head">
 					<span className="ui-over-from">MINISTRY OF COMPUTATION · OFFICE OF THE MINISTER</span>

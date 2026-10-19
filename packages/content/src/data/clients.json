@@ -21,5 +21,9 @@
 	{ "id": "ouro_preto_proteome", "name": "Ouro Preto Proteome Works", "sector": "biotech", "weight": 2, "kinds": ["training", "inference"], "minTier": 3, "payMultiplier": 1.4, "needsLiquid": true },
 	{ "id": "santos_arbitrage", "name": "Santos Exchange Arbitrage Syndicate", "sector": "finance", "weight": 2, "kinds": ["inference"], "minTier": 3, "payMultiplier": 1.5 },
 	{ "id": "strategic_cognition", "name": "Ministry of Strategic Cognition", "sector": "gov", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 1.6, "needsLiquid": true },
-	{ "id": "paulista_foundation", "name": "Paulista Foundation Models Consortium", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.7, "needsLiquid": true }
+	{ "id": "paulista_foundation", "name": "Paulista Foundation Models Consortium", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.7, "needsLiquid": true },
+	{ "id": "vitoria_regia", "name": "Vitória-Régia Proteomics Foundry", "sector": "biotech", "weight": 1, "kinds": ["training", "inference"], "minTier": 3, "payMultiplier": 1.8, "needsBio": true },
+	{ "id": "orquidea_coop", "name": "Orquídea Cell-Culture Cooperative", "sector": "biotech", "weight": 1, "kinds": ["finetune", "inference"], "minTier": 3, "payMultiplier": 1.9, "needsBio": true },
+	{ "id": "morfologia_nacional", "name": "National Institute of Computational Morphology", "sector": "gov", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 2.2, "needsBio": true },
+	{ "id": "mata_atlantica_trust", "name": "Mata Atlântica Longevity Trust", "sector": "biotech", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 2.1, "needsBio": true }
 ]

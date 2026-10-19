@@ -548,5 +548,130 @@
     "factor": 1.05
    }
   ]
+ },
+ {
+  "id": "wetware_annex",
+  "name": "Form 9-B: Wetware Annex",
+  "description": "A new annex off the plant room, with a drain in the floor and a brochure. Unlocks the Organoid Incubator Cabinet and the Nutrient Medium Works, and lets you lay nutrient pipe like coolant.",
+  "branch": "wetware",
+  "minTier": 3,
+  "cost": 4200,
+  "requires": [
+   "chilled_loop"
+  ],
+  "effects": []
+ },
+ {
+  "id": "sterile_protocols",
+  "name": "Sterile Protocols",
+  "description": "Boots, bleach and a laminated chart of when to use each. Unlocks the Sterile Bay.",
+  "branch": "wetware",
+  "minTier": 4,
+  "cost": 17000,
+  "requires": [
+   "wetware_annex"
+  ],
+  "effects": []
+ },
+ {
+  "id": "quarantine_doctrine",
+  "name": "Quarantine Doctrine",
+  "description": "Doors that close behind you whether or not you have finished. Unlocks the Quarantine Lock.",
+  "branch": "wetware",
+  "minTier": 4,
+  "cost": 17500,
+  "requires": [
+   "sterile_protocols"
+  ],
+  "effects": []
+ },
+ {
+  "id": "culling_licence",
+  "name": "Culling Licence",
+  "description": "A permit with a very small print run. Unlocks the Culling Room.",
+  "branch": "wetware",
+  "minTier": 4,
+  "cost": 18500,
+  "requires": [
+   "quarantine_doctrine"
+  ],
+  "effects": []
+ },
+ {
+  "id": "dna_archive_charter",
+  "name": "DNA Archive Charter",
+  "description": "Storage that grows its own shelves. Unlocks the DNA Vault: 16,000 TB per cabinet.",
+  "branch": "wetware",
+  "minTier": 4,
+  "cost": 18000,
+  "requires": [
+   "wetware_annex"
+  ],
+  "effects": []
+ },
+ {
+  "id": "bioreactor_permit",
+  "name": "Bio-Reactor Permit",
+  "description": "Power from fermentation, under licence 41-C. Unlocks the Bio-Reactor: 500 kW for 14 units of nutrient medium a tick.",
+  "branch": "wetware",
+  "minTier": 4,
+  "cost": 20000,
+  "requires": [
+   "wetware_annex",
+   "accumulator_charter"
+  ],
+  "effects": []
+ },
+ {
+  "id": "neural_pit_dossier",
+  "name": "Neural Pit Dossier",
+  "description": "Forty pages, none of them dated. Unlocks the Neural Pit: 460 PFLOPS per vat.",
+  "branch": "wetware",
+  "minTier": 5,
+  "cost": 42000,
+  "requires": [
+   "dna_archive_charter",
+   "quarantine_doctrine"
+  ],
+  "effects": [],
+  "path": "biotech"
+ },
+ {
+  "id": "tissue_scaffolds",
+  "name": "Tissue Scaffolds",
+  "description": "Lattices that teach the tissue where to stay. Rack failure rate -7%.",
+  "branch": "wetware",
+  "minTier": 5,
+  "cost": 30000,
+  "requires": [
+   "neural_pit_dossier"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "failureRate",
+    "factor": 0.93
+   }
+  ],
+  "path": "biotech"
+ },
+ {
+  "id": "asset_register",
+  "name": "Register of Assets",
+  "description": "Everything the Ministry now owns, in your building, in an index. Contract payouts +6%.",
+  "branch": "wetware",
+  "minTier": 5,
+  "cost": 34000,
+  "requires": [
+   "neural_pit_dossier"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.06
+   }
+  ],
+  "path": "biotech"
  }
 ]

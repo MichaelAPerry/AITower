@@ -4,7 +4,8 @@
  */
 import type { ContentDB } from "@aitower/content";
 import type { FacilityView, SimView } from "@aitower/sim";
-import { fmtPower } from "../format";
+import { bandText, organoidBand } from "../bio/bio";
+import { fmtPower, fmtTemp } from "../format";
 
 const kindOf = (content: ContentDB, f: FacilityView): string | undefined => content.facilities[f.defId]?.kind;
 
@@ -21,6 +22,20 @@ export function coolantLoopProblem(view: SimView, content: ContentDB, net: numbe
 	if (cdus.length === 0) return `Its coolant loop has a chiller but no CDU (Coolant Distribution Manifold). ${pipe}`;
 	if (!chillers.some(working)) return "The chiller on its loop is off or has no power: lay a power conduit under it.";
 	if (!cdus.some(working)) return "The CDU on its loop is off or has no power: lay a power conduit under it.";
+	return null;
+}
+
+const units = (n: number): string => String(Math.round(n * 10) / 10);
+
+/** What is wrong with the nutrient line `net` (null = no pipe at all), or null if a powered plant feeds enough. */
+export function nutrientLoopProblem(view: SimView, content: ContentDB, net: number | null): string | null {
+	const plantName = Object.values(content.facilities).find((d) => d.kind === "nutrient")?.name ?? "Nutrient Plant";
+	if (net === null) return `No nutrient pipe under it. Lay a nutrient conduit beneath it and run it to a ${plantName} (Wetware tab).`;
+	const plants = view.facilities.filter((f) => f.nutrientNet === net && kindOf(content, f) === "nutrient");
+	if (plants.length === 0) return `Its nutrient pipe reaches no ${plantName}. Build one on the same pipe (Wetware tab).`;
+	if (!plants.some((f) => f.enabled && f.status !== "unpowered")) return `The ${plantName} on its line is off or has no power: lay a power conduit under it.`;
+	const n = view.nutrientNets?.find((x) => x.id === net);
+	if (n && n.satisfaction < 1) return `Its nutrient line is short: ${units(n.supply)} of ${units(n.demand)} units a tick. Add another ${plantName}, or take some racks off the line.`;
 	return null;
 }
 
@@ -45,6 +60,14 @@ export function rackProblem(view: SimView, content: ContentDB, f: FacilityView):
 				: "No power. Its power net has no supply left: add a grid tie or genset to that net.";
 		case "noCoolant":
 			return coolantLoopProblem(view, content, f.coolantNet) ?? "Its coolant loop has no capacity: add a chiller and a CDU to it.";
+		case "noNutrient":
+			return nutrientLoopProblem(view, content, f.nutrientNet) ?? "Its nutrient line has run dry. Add a nutrient plant to the line.";
+		case "tooCold": {
+			const bio = def.rack.bio;
+			if (!bio) return "Too cold to run. Put it near warm racks or heat the room.";
+			const b = organoidBand(bio);
+			return `Too cold: the tissue wants ${bandText(bio)} (full speed from ${fmtTemp(b.lo, 0)}) and it is at ${fmtTemp(f.tempC)}. Put it near warm racks or heat the room.`;
+		}
 		case "throttled": {
 			const net = f.coolantNet === null ? undefined : view.coolantNets.find((n) => n.id === f.coolantNet);
 			if (def.rack.liquidFraction > 0 && net && net.loadKw > net.capacityKw)

@@ -57,7 +57,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 		for (const e of log) {
 			if (e.tick < c.tick) continue;
 			if (e.tick === c.tick && ++atTick <= c.n) continue;
-			const d = describeEvent(e.event, state.view, content);
+			const d = describeEvent(e.event, state.view, content, state.settings.horrorIntensity);
 			if (d.toast) add({ text: d.text, severity: d.severity, key: eventKey(e.event) });
 		}
 		cursor.current = { tick: last.tick, n: countAt(last.tick) };

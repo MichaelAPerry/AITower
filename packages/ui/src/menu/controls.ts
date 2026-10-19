@@ -17,6 +17,7 @@ export const CONTROLS: ControlGroup[] = [
 		title: "Overlays",
 		rows: [
 			{ keys: ["N", "H", "P", "C"], what: "Normal · Heat · Power · Coolant" },
+			{ keys: ["B", "G"], what: "Nutrient lines · Asset growth (contamination)" },
 			{ keys: ["M"], what: "Mute audio" },
 			{ keys: ["R"], what: "Department of Research (pauses while open)" },
 			{ keys: ["`"], what: "Show / hide the bottom panel" },

@@ -1,5 +1,6 @@
-import type { OverlayMode } from "@aitower/shared";
+import type { HorrorIntensity, OverlayMode } from "@aitower/shared";
 import { useState } from "react";
+import { bioWords } from "../bio/bio";
 import { heatRamp } from "../settings";
 import { Icon, Lamp } from "./common";
 import type { PanelProps } from "./context";
@@ -20,14 +21,25 @@ const writeCollapsed = (v: boolean): void => {
 	}
 };
 
-const MODES: { id: OverlayMode; label: string; key: string }[] = [
+export const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "normal", label: "Normal", key: "N" },
 	{ id: "heat", label: "Heat", key: "H" },
 	{ id: "power", label: "Power", key: "P" },
 	{ id: "coolant", label: "Coolant", key: "C" },
+	{ id: "nutrient", label: "Nutrient", key: "B" },
+	{ id: "contamination", label: "Growth", key: "G" },
 ];
 
-function Legend({ mode, colorBlind }: { mode: OverlayMode; colorBlind: boolean }) {
+/** Button label and tooltip of an overlay: the contamination overlay is "Growth" (Ministry wording) unless horror is off. */
+export function overlayLabel(m: { id: OverlayMode; label: string; key: string }, horror: HorrorIntensity): { label: string; title: string } {
+	if (m.id === "contamination") {
+		const w = bioWords(horror);
+		return { label: w.overlayButton, title: `${horror === "off" ? "Contamination" : "Asset growth"} overlay (${m.key})` };
+	}
+	return { label: m.label, title: `${m.label} overlay (${m.key})` };
+}
+
+function Legend({ mode, colorBlind, horror }: { mode: OverlayMode; colorBlind: boolean; horror: HorrorIntensity }) {
 	if (mode === "heat") {
 		const ramp = heatRamp(colorBlind);
 		const lo = ramp[0][0];
@@ -70,6 +82,28 @@ function Legend({ mode, colorBlind }: { mode: OverlayMode; colorBlind: boolean }
 				</div>
 			</div>
 		);
+	if (mode === "nutrient")
+		return (
+			<div className="ui-legend ui-crt crt-amber" title="Nutrient overlay: lines coloured by how much of their demand the plants supply">
+				<div className="ui-legend-bar nutrient" />
+				<div className="ui-legend-ticks">
+					<span style={{ left: 0 }}>0%</span>
+					<span style={{ left: "50%" }}>supplied</span>
+					<span style={{ left: "100%" }}>100%</span>
+				</div>
+			</div>
+		);
+	if (mode === "contamination")
+		return (
+			<div className="ui-legend ui-crt crt-amber" title={bioWords(horror).overlayLegend}>
+				<div className="ui-legend-bar contam" />
+				<div className="ui-legend-ticks">
+					<span style={{ left: 0 }}>0</span>
+					<span style={{ left: "50%" }}>0.5</span>
+					<span style={{ left: "100%" }}>1</span>
+				</div>
+			</div>
+		);
 	return null;
 }
 
@@ -79,6 +113,7 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 		writeCollapsed(!collapsed);
 		setCollapsed(!collapsed);
 	};
+	const horror = state.settings.horrorIntensity;
 	const cur = MODES.find((m) => m.id === state.overlay) ?? MODES[0];
 	return (
 		<div className={`ui-overlay ui-panel ${collapsed ? "is-collapsed" : ""}`}>
@@ -94,7 +129,7 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 				{collapsed && (
 					<span className="ui-overlay-cur">
 						<Lamp on={state.overlay !== "normal"} tone="amber" plain />
-						{cur.label}
+						{overlayLabel(cur, horror).label}
 					</span>
 				)}
 			</button>
@@ -110,15 +145,15 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 							aria-checked={state.overlay === m.id}
 							className={`ui-btn ui-ov ov-${m.id} ${state.overlay === m.id ? "is-on" : ""}`}
 							onClick={() => store.setOverlay(m.id)}
-							title={`${m.label} overlay (${m.key})`}
+							title={overlayLabel(m, horror).title}
 						>
 							<b>{m.key}</b>
-							{m.label}
+							{overlayLabel(m, horror).label}
 						</button>
 					))}
 				</div>
 			)}
-			{state.overlay !== "normal" && !collapsed && <Legend mode={state.overlay} colorBlind={state.settings.colorBlind} />}
+			{state.overlay !== "normal" && !collapsed && <Legend mode={state.overlay} colorBlind={state.settings.colorBlind} horror={horror} />}
 		</div>
 	);
 }
