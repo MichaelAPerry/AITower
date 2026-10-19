@@ -3,7 +3,7 @@
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
 import type { ContentDB, EventDef, FacilityDef, TechNode } from "@aitower/content";
-import type { AuditGrade, CommandResult, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { AscensionPath, AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -28,7 +28,7 @@ const FAKE_EVENTS: EventDef[] = [
 		timeoutTicks: 720,
 		defaultChoice: "endure",
 		choices: [
-			{ id: "credits", label: "BUY CREDITS", hint: "Pay $12k now. The heatwave is only +4 °C for 14 h.", outcome: "Credits purchased. The Weather Bureau thanks you for your cheque.", effects: [] },
+			{ id: "credits", label: "BUY CREDITS", hint: "Pay $12k now. The heatwave is only +4 °C for 14 h.", outcome: "Credits purchased. The Weather Bureau thanks you for your cheque.", effects: [{ type: "cash", amount: -12_000 }] },
 			{ id: "endure", label: "FILE IN TRIPLICATE", hint: "Free. Outside air +8 °C for 14 h; failures run higher.", outcome: "Filed. The heat is noted and will not be discussed further.", effects: [] },
 		],
 	},
@@ -81,6 +81,10 @@ export function createFakeContent(): ContentDB {
 		fac({ id: "immersion", name: "Immersion Tank", kind: "rack", category: "rack", cost: 240_000, color: "#14303a", accent: "#3ff2a0", width: 2, unlockTier: 3, description: "Two-phase immersion. Absurd density.", rack: { cooling: "immersion", powerKw: 120, liquidFraction: 1, pflops: 20, storageTB: 0, failurePerDay: 0.008 } }),
 		fac({ id: "depot", name: "Parts Depot", kind: "depot", category: "logistics", cost: 12_000, color: "#2d2a22", accent: "#ffd34d", width: 2, description: "Shelving for spare parts.", logistics: { capacity: 40 } }),
 		fac({ id: "charger", name: "Bot Dock", kind: "charger", category: "logistics", cost: 9_000, color: "#22303a", accent: "#8fffdd", description: "Bots spawn and recharge here.", logistics: { capacity: 2, chargeKw: 3 } }),
+		fac({ id: "nutrient_plant", name: "Nutrient Plant", kind: "nutrient", category: "bio", cost: 180_000, color: "#1d3a2a", accent: "#7cf0b0", width: 2, unlockTier: 3, facilityKw: 20, description: "Feeds a nutrient line. Organoid racks starve without it.", bio: { nutrientCapacity: 20 } }),
+		fac({ id: "organoid_incubator", name: "Organoid Incubator", kind: "rack", category: "bio", cost: 320_000, color: "#2a3a33", accent: "#9b8cff", unlockTier: 3, description: "Cultured tissue that computes. Wants 37 °C and a nutrient line.", rack: { cooling: "bio", powerKw: 12, liquidFraction: 0, pflops: 30, storageTB: 0, failurePerDay: 0.01, bio: { targetC: 37, toleranceC: 1, nutrientUse: 3, contamination: 0.002 } }, placement: { needsNutrient: true } }),
+		fac({ id: "sterile_bay", name: "Sterile Bay", kind: "sterilizer", category: "bio", cost: 90_000, color: "#243a40", accent: "#5fd4e6", unlockTier: 3, facilityKw: 6, description: "Removes contamination within reach.", bio: { cleanRate: 0.0012, radius: 6 } }),
+		fac({ id: "growth_mass", name: "Growth Mass", kind: "rack", category: "bio", cost: 0, color: "#3a2a33", accent: "#ff5d5d", growth: true, description: "", rack: { cooling: "bio", powerKw: 0, liquidFraction: 0, pflops: 0, storageTB: 0, failurePerDay: 0, bio: { targetC: 37, toleranceC: 8, nutrientUse: 0, contamination: 0 } }, bio: { contamination: 0.002 } }),
 	];
 	return {
 		facilities: Object.fromEntries(facilities.map((f) => [f.id, f])),
@@ -88,8 +92,16 @@ export function createFakeContent(): ContentDB {
 			techbot: { id: "techbot", name: "TechBot", cost: 15_000, speed: 0.5, batteryTicks: 600, repairTicks: 30, color: "#8fffdd" },
 			drone: { id: "drone", name: "Rotor Drone", cost: 30_000, speed: 0.8, batteryTicks: 400, repairTicks: 30, color: "#ffd34d", tech: "log_drone", flying: true, carry: 2 },
 		},
-		paths: [],
-		endings: [],
+		paths: [
+			{ id: "biotech", name: "Biotech", description: "Cultured tissue computes cheaply. Feed the Annex, hold the jars at 37 °C. The Ministry assures you it is under control.", available: true },
+			{ id: "greentech", name: "Greentech", description: "Coming soon.", available: false },
+			{ id: "synthetic", name: "Synthetic Mind", description: "Coming soon.", available: false },
+		],
+		endings: [
+			{ id: "livingTower", title: "Living Tower", body: "The Ministry is pleased to report that your facility has exceeded every target it could measure.\n\nAbsenteeism is, for the first time, zero." },
+			{ id: "cleanTower", title: "Clean Tower", body: "The Ministry commends the facility's hygiene.\n\nThe Annex has been closed and its paperwork burned." },
+			{ id: "absorbed", title: "Absorbed", body: "The facility and its superintendent have been reclassified as Ministry assets.\n\nNo further correspondence is required." },
+		],
 		clients: [],
 		structure: { slabPerTile: 1_200, basementSlabPerTile: 3_000, powerConduitPerTile: 150, coolantConduitPerTile: 400, liftPerFloor: 6_000, liftBase: 20_000, sparePart: 800 },
 		lift: { speed: 0.1, capacity: 2, dwellTicks: 2, facilityKw: 3 },
@@ -262,7 +274,7 @@ export function fakeCanBuild(view: SimView, content: ContentDB, cmd: SimCommand)
 			return funds(n * (cmd.floor < 0 ? st.basementSlabPerTile : st.slabPerTile));
 		}
 		case "buildConduit": {
-			const grid = cmd.layer === "power" ? view.power : view.coolant;
+			const grid = cmd.layer === "power" ? view.power : cmd.layer === "coolant" ? view.coolant : view.nutrient;
 			if (!cmd.cells.length) return no("no cells");
 			let n = 0;
 			for (const c of cmd.cells) {
@@ -320,7 +332,13 @@ export interface FakeStore extends GameStore {
 	setStanding(standing: number): void;
 	addModifier(m: ModifierView): void;
 	/** End the game as the real sim would. */
-	triggerGameOver(kind: GameOverKind): void;
+	triggerGameOver(kind: GameOverKind, ending?: EndingId): void;
+	/** Set the corruption scalar 0..1 (harness and tests). */
+	setCorruption(c: number): void;
+	/** Put the tower at Clearance `tier` with no path chosen (harness and tests). */
+	setTier(tier: number): void;
+	/** Add a nutrient net with organoid racks (one starving, one too cold), contamination, a growth and a mutated bot. */
+	seedBio(): void;
 	/** File a quarterly audit: appends a report and emits `quarterReport` (like the sim at midnight). */
 	fileQuarterReport(grade?: AuditGrade): QuarterReport;
 	/** Add research points (harness and tests). */
@@ -367,6 +385,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 	// Memos and standing, mimicking the sim: resolveMemo is queued and applied on the next advance().
 	let nextMemo = 1;
 	const queued: { memoId: number; choiceId: string }[] = [];
+	let queuedPath: AscensionPath | null = null;
 	const memoByEvent = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
 	const fileMemo = (memoId: number, choiceId: string, auto: boolean): void => {
 		const m = view.memos.find((x) => x.id === memoId);
@@ -407,10 +426,45 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			if (next <= 0 && !view.gameOver) store.triggerGameOver("shutdown");
 		},
 		addModifier: (m) => newView({ modifiers: [...view.modifiers, m] }),
-		triggerGameOver(kind) {
+		triggerGameOver(kind, ending) {
 			if (view.gameOver) return;
-			newView({ gameOver: { kind, tick: view.tick }, bankrupt: kind === "bankrupt" || view.bankrupt });
-			pushEvents([{ type: "gameOver", kind }]);
+			newView({ gameOver: { kind, tick: view.tick, ...(ending ? { ending } : {}) }, bankrupt: kind === "bankrupt" || view.bankrupt });
+			pushEvents([{ type: "gameOver", kind, ...(ending ? { ending } : {}) }]);
+		},
+		setCorruption: (c) => newView({ corruption: c, contaminatedShare: c / 2 }),
+		setTier: (tier) => newView({ tier }),
+		seedBio() {
+			const nutrient = new Uint8Array(view.nutrient);
+			const netOf = new Int32Array(view.nutrientNetOf);
+			for (let x = 10; x < 26; x++) {
+				nutrient[cellIndex(view, x, 4)] = 1;
+				netOf[cellIndex(view, x, 4)] = 1;
+			}
+			const contamination = new Float32Array(view.contamination);
+			for (let x = 12; x < 20; x++) contamination[cellIndex(view, x, 4)] = 0.3 + (x - 12) * 0.08;
+			let id = Math.max(0, ...view.facilities.map((f) => f.id)) + 1;
+			const mk = (defId: string, x: number, extra: Partial<FacilityView>): FacilityView => {
+				const d = content.facilities[defId];
+				return { id: id++, defId, floor: 4, x, width: d.width, enabled: true, status: "ok", tempC: 37, clock: 1, health: 1, powerKw: d.rack?.powerKw ?? d.facilityKw, heatKw: 0, jobId: null, powerNet: 1, coolantNet: null, nutrientNet: 1, grown: false, contamination: 0, ...extra };
+			};
+			newView({
+				nutrient,
+				nutrientNetOf: netOf,
+				contamination,
+				nutrientNets: [{ id: 1, supply: 20, demand: 26, satisfaction: 0.77 }],
+				facilities: [
+					...view.facilities,
+					mk("nutrient_plant", 10, {}),
+					mk("organoid_incubator", 13, { contamination: 0.45 }),
+					mk("organoid_incubator", 14, { status: "noNutrient", nutrientNet: null }),
+					mk("organoid_incubator", 15, { status: "tooCold", tempC: 33.4 }),
+					mk("growth_mass", 18, { grown: true, contamination: 0.8, powerNet: null }),
+				],
+				bots: view.bots.map((b, i) => (i === 0 ? { ...b, trait: "fleshed" as const } : b)),
+				corruption: 0.45,
+				contaminatedShare: 0.2,
+				tier: Math.max(view.tier, 3),
+			});
 		},
 		fileQuarterReport(grade = "B") {
 			const last = view.reports.at(-1);
@@ -507,6 +561,13 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					pushEvents([{ type: "researched", techId: n.id }]);
 					return ok;
 				}
+				case "choosePath": {
+					if (view.path) return no("A path has already been chosen");
+					if (view.tier < content.balance.ascension.minTier) return no(`Requires Clearance ${content.balance.ascension.minTier}`);
+					if (!content.paths.find((p) => p.id === cmd.path)?.available) return no("That path is not available yet");
+					queuedPath = cmd.path;
+					return ok;
+				}
 				case "setClerk": {
 					if (!view.clerk.unlocked) return no("The Contracts Clerk has not been hired");
 					const p = cmd.policy;
@@ -562,6 +623,12 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			// Like the sim, queued commands apply only when the clock actually advances.
 			if (minutes > 0) {
 				for (const q of queued.splice(0)) fileMemo(q.memoId, q.choiceId, false);
+				if (queuedPath) {
+					const path = queuedPath;
+					queuedPath = null;
+					newView({ path });
+					pushEvents([{ type: "pathChosen", path }]);
+				}
 				for (const m of view.memos) if (m.expiresAt <= tick) fileMemo(m.id, m.defaultChoice, true);
 			}
 			const ph = tick / 97;

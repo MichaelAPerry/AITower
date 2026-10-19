@@ -117,20 +117,20 @@ async function run(url) {
 		await page.getByRole("button", { name: "Continue" }).click();
 		await at(2);
 		// The induction runs the clock until an offer is posted, then stops it and highlights the ACCEPT stamp.
-		await page.locator('[data-tut="btab-contracts"]').click();
+		await page.locator('[data-tut="dtab-contracts"]').click();
 		const stamp = page.locator('[data-tut="accept"]');
 		await stamp.waitFor({ timeout: 60_000 });
 		assert(await stamp.isEnabled(), "the highlighted offer must fit the idle racks");
 		await stamp.click({ force: true }); // hover tilts the stamp, which Playwright reads as "unstable"
-		await at(4); // step 3 (compute) ticks itself off once the racks start; step 4 is the standing-orders memo
+		await at(4); // step 3 (compute) ticks itself off once the racks start; step 4 is the NEXT-chip memo
 		await page.getByRole("button", { name: "Skip induction" }).click();
 		await page.locator(".ui-tutorial").waitFor({ state: "detached" });
 		log("welcome read, contract accepted through the induction, induction skipped at step 4");
 
-		stage("3. the accepted contract is running and CURRENT ORDERS is shown");
+		stage("3. the accepted contract is running and the NEXT chip is shown");
 		const running = await game(() => ({ jobs: window.aitower.store.get().view.jobs.length, pflops: window.aitower.store.get().view.pflops }));
 		assert(running.jobs > 0 && running.pflops > 0, `expected a running job, got ${JSON.stringify(running)}`);
-		assert((await page.locator(".ui-objective").count()) === 1, "CURRENT ORDERS strip missing");
+		assert((await page.locator(".ui-next").count()) === 1, "NEXT chip missing");
 		log(`job running at ${running.pflops} PF`);
 
 		stage("4. place a rack through window.aitower.store.dispatch");
@@ -153,6 +153,10 @@ async function run(url) {
 
 		stage("5. open the Esc menu");
 		await game(() => window.aitower.store.setSelection(null));
+		if ((await page.locator("[data-drawer]").count()) > 0) {
+			await page.keyboard.press("Escape"); // the Contracts drawer from the induction is still open; Esc closes it first
+			await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		}
 		await page.keyboard.press("Escape");
 		await page.locator("[role=dialog]").waitFor();
 		assert((await game(() => window.aitower.store.get().speed)) === 0, "Esc menu should pause the game");
@@ -161,13 +165,17 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("menu opened and closed");
 
-		stage("5b. open the Department of Research with R and close it with Esc");
+		stage("5b. open the research drawer with R, then the full Department from it, and close it with Esc");
 		await page.keyboard.press("r");
+		await page.locator('[data-drawer="research"]').waitFor();
+		await page.getByRole("button", { name: "Open the full Department of Research" }).click();
 		await page.locator(".ui-research").waitFor();
 		const cards = await page.locator(".ui-tech").count();
 		assert(cards >= 30, `expected the full tech tree, found ${cards} cards`);
 		await page.keyboard.press("Escape");
 		await page.locator(".ui-research").waitFor({ state: "detached" });
+		await page.keyboard.press("Escape"); // closes the research drawer that is still open
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		log(`${cards} research cards`);
 

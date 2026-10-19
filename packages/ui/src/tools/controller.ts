@@ -211,14 +211,8 @@ export const conduitGrid = (view: SimView, layer: ConduitLayer): Uint8Array => (
 
 export const conduitName = (layer: ConduitLayer): string => (layer === "power" ? "Power conduit" : layer === "coolant" ? "Coolant conduit" : "Nutrient conduit");
 
-/**
- * Cost per new tile (display only; the sim charges). The nutrient price is read from `structure.nutrientConduitPerTile`
- * when the content defines it; the frozen StructureCosts type has no such field yet, so it falls back to the coolant price.
- */
-export function conduitUnitCost(content: ContentDB, layer: ConduitLayer): number {
-	const st = content.structure as ContentDB["structure"] & { nutrientConduitPerTile?: number };
-	return layer === "power" ? st.powerConduitPerTile : layer === "coolant" ? st.coolantConduitPerTile : (st.nutrientConduitPerTile ?? st.coolantConduitPerTile);
-}
+/** Cost per new tile (display only; the sim charges). Nutrient pipes cost the same as coolant pipes. */
+export const conduitUnitCost = (content: ContentDB, layer: ConduitLayer): number => (layer === "power" ? content.structure.powerConduitPerTile : content.structure.coolantConduitPerTile);
 
 function conduitGhost(store: GameStore, view: SimView, content: ContentDB, layer: ConduitLayer, cells: CellRef[]): Ghost {
 	const r = store.canBuild({ type: "buildConduit", layer, cells });

@@ -186,6 +186,7 @@ export function isRoutine(ev: SimEvent, view: Pick<SimView, "spareParts">): bool
 		case "newDay":
 		case "liftArrived":
 		case "clerkAccepted":
+		case "memoIssued": // the inbox count and the slip announce it
 			return true;
 		case "componentFailed":
 			return view.spareParts > 0;

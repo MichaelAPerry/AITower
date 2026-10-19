@@ -3,6 +3,7 @@ import type { Balance } from "@aitower/content";
 import type { BotState, FacilityView, SimView } from "@aitower/sim";
 import { fmtDuration, fmtEnergy, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
+import { bioWords, facilityName, tissueState, traitInfo, organoidBand } from "../bio/bio";
 import { rackProblem } from "../objective/diagnose";
 import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
@@ -19,6 +20,41 @@ const botStateLabel: Record<BotState, string> = {
 	riding: "riding lift",
 	flying: "flying",
 };
+
+/** Dial for organoid tissue: the green band is full speed, amber slows the tissue, red fails it. */
+export function OrganoidTemp({ tempC, spec }: { tempC: number; spec: Parameters<typeof organoidBand>[0] }) {
+	const b = organoidBand(spec);
+	const lo = Math.floor(b.failLo - 4);
+	const hi = Math.ceil(b.failHi + 4);
+	const t = tissueState(tempC, spec);
+	return (
+		<div className="ui-tempgauge" title={`full speed ${b.lo}–${b.hi} °C · slowed to ${b.slowLo}–${b.slowHi} °C · fails beyond ${b.failLo}–${b.failHi} °C`}>
+			<Dial
+				size={64}
+				min={lo}
+				max={hi}
+				majors={4}
+				minors={5}
+				face="°C"
+				ends={[String(lo), String(hi)]}
+				zones={[
+					{ from: lo, to: b.failLo, color: "var(--bad)" },
+					{ from: b.failLo, to: b.lo, color: "var(--warn)" },
+					{ from: b.lo, to: b.hi, color: "var(--good)" },
+					{ from: b.hi, to: b.failHi, color: "var(--warn)" },
+					{ from: b.failHi, to: hi, color: "var(--bad)" },
+				]}
+				needles={[{ value: tempC }]}
+				title={`Tissue temperature: ${fmtTemp(tempC)}`}
+			/>
+			<div className={`ui-crt crt-${t.kind === "inBand" ? "green" : t.kind === "slow" ? "amber" : "red"} ui-tempgauge-crt`}>
+				<span className="ui-label">Tissue temp</span>
+				<span className="ui-big">{fmtTemp(tempC)}</span>
+				<span className="ui-tempgauge-legend">band {b.lo}–{b.hi}</span>
+			</div>
+		</div>
+	);
+}
 
 /** Round temperature dial (ok / throttle / trip bands) with a CRT readout. */
 export function TempBar({ tempC, thermal, label = "Die temp" }: { tempC: number; thermal: Balance["thermal"]; label?: string }) {
@@ -111,6 +147,10 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 	const job = f.jobId === null ? undefined : view.jobs.find((j) => j.id === f.jobId);
 	const wo = view.workOrders.find((w) => w.facilityId === f.id);
 	const problem = rackProblem(view, content, f);
+	const horror = state.settings.horrorIntensity;
+	const words = bioWords(horror);
+	const organoid = def?.rack?.bio;
+	const tissue = organoid ? tissueState(f.tempC, organoid) : null;
 	const send = (r: ReturnType<typeof store.dispatch>): void => {
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `insp:${r.reason}` });
 	};
@@ -119,16 +159,17 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 			<div className="ui-insp-head">
 				{def && <Swatch color={def.color} accent={def.accent} size={28} />}
 				<div className="ui-insp-name">
-					<span>{def?.name ?? f.defId}</span>
+					<span>{facilityName(content, f.defId, f.grown, horror)}</span>
 					<span className="ui-dim">
-						#{f.id} · F{f.floor} x{f.x}
+						{f.grown ? `${def?.name ?? f.defId} · ` : ""}#{f.id} · F{f.floor} x{f.x}
 						{f.width > 1 ? `–${f.x + f.width - 1}` : ""}
 					</span>
 				</div>
 				<Pill status tone={statusTone[f.status]}>{statusLabel[f.status]}</Pill>
 			</div>
 			{problem && <p className={`ui-insp-why tone-${statusTone[f.status]}`}>{problem}</p>}
-			<TempBar tempC={f.tempC} thermal={thermal} label={def?.rack ? "Die temp" : "Air temp"} />
+			{organoid ? <OrganoidTemp tempC={f.tempC} spec={organoid} /> : <TempBar tempC={f.tempC} thermal={thermal} label={def?.rack ? "Die temp" : "Air temp"} />}
+			{tissue && <p className={`ui-tissue is-${tissue.kind === "inBand" ? "ok" : tissue.kind}`}>{tissue.text}</p>}
 			<div className="ui-section ui-crt crt-amber">
 				{def?.rack && (
 					<>
@@ -152,7 +193,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				{def?.rack && (
 					<Row k="Job">
 						{job ? (
-							<button type="button" className="ui-link" onClick={() => setUi({ bottomTab: "jobs", bottomOpen: true, focusJobId: job.id })}>
+							<button type="button" className="ui-link" onClick={() => setUi({ drawer: "contracts", focusJobId: job.id })}>
 								{job.clientName} · {job.kind}
 							</button>
 						) : (
@@ -165,9 +206,16 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 						#{wo.id} · {wo.botId === null ? "unassigned" : `bot #${wo.botId}`} · {fmtDuration(view.tick - wo.createdAt)} ago
 					</Row>
 				)}
+				{f.contamination > 0.005 && (
+					<>
+						<Row k={words.contamination}>{fmtPct(f.contamination, 0)}</Row>
+						<Meter value={f.contamination} tone={f.contamination > 0.5 ? "error" : "warn"} />
+					</>
+				)}
 				<Row k="Nets">
 					<span className="ui-dim">
 						power {f.powerNet ?? "—"} · coolant {f.coolantNet ?? "—"}
+						{f.nutrientNet !== null ? ` · nutrient ${f.nutrientNet}` : ""}
 					</span>
 				</Row>
 			</div>
@@ -222,6 +270,11 @@ export function Inspector(props: PanelProps) {
 						</div>
 						<Pill tone={b.state === "idle" || b.state === "charging" ? "dim" : "cyan"}>{botStateLabel[b.state]}</Pill>
 					</div>
+					{b.trait && (
+						<p className="ui-trait" title={traitInfo(b.trait, state.settings.horrorIntensity).effect}>
+							<Pill tone="warn">{traitInfo(b.trait, state.settings.horrorIntensity).label}</Pill> {traitInfo(b.trait, state.settings.horrorIntensity).effect}
+						</p>
+					)}
 					<div className="ui-section ui-crt crt-amber">
 						<Row k="Battery">{fmtPct(b.battery, 0)}</Row>
 						<Meter value={b.battery} tone={b.battery < 0.2 ? "error" : b.battery < 0.5 ? "warn" : "good"} />

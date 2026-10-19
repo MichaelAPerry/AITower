@@ -14,6 +14,8 @@ export interface UiState {
 	paletteOpen: boolean;
 	/** The clerk's standing-order form is expanded in the Contracts drawer. */
 	clerkEdit?: boolean;
+	/** Memo whose prose is expanded on the slip ("read memo"). */
+	readMemo?: number | null;
 	/** Job highlighted in the Contracts drawer (set by the inspector's job link). */
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */

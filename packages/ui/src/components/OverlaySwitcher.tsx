@@ -26,7 +26,7 @@ export const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "heat", label: "Heat", key: "H" },
 	{ id: "power", label: "Power", key: "P" },
 	{ id: "coolant", label: "Coolant", key: "C" },
-	{ id: "nutrient", label: "Nutrient", key: "B" },
+	{ id: "nutrient", label: "Nutrient", key: "U" },
 	{ id: "contamination", label: "Growth", key: "G" },
 ];
 
@@ -107,7 +107,7 @@ function Legend({ mode, colorBlind, horror }: { mode: OverlayMode; colorBlind: b
 	return null;
 }
 
-export function OverlaySwitcher({ store, state }: PanelProps) {
+export function OverlaySwitcher({ store, state, embedded = false }: PanelProps & { embedded?: boolean }) {
 	const [collapsed, setCollapsed] = useState(readCollapsed);
 	const toggle = (): void => {
 		writeCollapsed(!collapsed);
@@ -116,7 +116,8 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 	const horror = state.settings.horrorIntensity;
 	const cur = MODES.find((m) => m.id === state.overlay) ?? MODES[0];
 	return (
-		<div className={`ui-overlay ui-panel ${collapsed ? "is-collapsed" : ""}`}>
+		<div className={`ui-overlay ${embedded ? "is-embedded" : `ui-panel ${collapsed ? "is-collapsed" : ""}`}`}>
+			{!embedded && (
 			<button
 				type="button"
 				className="ui-overlay-fold"
@@ -133,7 +134,8 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 					</span>
 				)}
 			</button>
-			{!collapsed && (
+			)}
+			{(embedded || !collapsed) && (
 				<div className="ui-seg" role="radiogroup" aria-label="Overlay">
 					{MODES.map((m) => (
 						// biome-ignore lint/a11y/useSemanticElements: styled button group acts as a radio group; native radio inputs would change the markup and CSS
@@ -153,7 +155,7 @@ export function OverlaySwitcher({ store, state }: PanelProps) {
 					))}
 				</div>
 			)}
-			{state.overlay !== "normal" && !collapsed && <Legend mode={state.overlay} colorBlind={state.settings.colorBlind} horror={horror} />}
+			{state.overlay !== "normal" && (embedded || !collapsed) && <Legend mode={state.overlay} colorBlind={state.settings.colorBlind} horror={horror} />}
 		</div>
 	);
 }

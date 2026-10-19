@@ -2,6 +2,7 @@ import type { GameStore, OverlayMode, Speed } from "@aitower/shared";
 import { useEffect, useRef } from "react";
 import { applyEscape, type Closable } from "./menu/escape";
 import type { MenuController } from "./menu/menuController";
+import { type DrawerId, drawerForKey } from "./calm/calm";
 
 export type KeyAction =
 	| { type: "togglePause" }
@@ -10,27 +11,29 @@ export type KeyAction =
 	| { type: "mute" }
 	| { type: "escape" }
 	| { type: "demolish" }
-	| { type: "research" }
-	| { type: "toggleBottom" };
+	| { type: "drawer"; id: DrawerId }
+	| { type: "palette" };
 
 const SPEED_KEYS: Record<string, Speed> = { "1": 0, "2": 1, "3": 3, "4": 10, "5": 30 };
-const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "power", c: "coolant", b: "nutrient", g: "contamination" };
+const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "power", o: "coolant", u: "nutrient", g: "contamination" };
 
 /**
  * Pure key → action map. WASD and arrows are deliberately unused (the renderer pans the camera with them).
- * Overlay keys: N normal, H heat, P power, C coolant, B nutrient ("bio feed"), G contamination ("growth").
+ * Overlay keys: N normal, H heat, P power, O coolant, U nutrient, G contamination ("growth").
+ * Drawers: C contracts, R research, F finance, I gauges (one open at a time). B opens the full build palette.
  * Speed keys follow the button order: 1 = pause, 2 = 1×, 3 = 3×, 4 = 10×, 5 = 30×.
  */
 export function keyAction(key: string): KeyAction | null {
 	if (key === " " || key === "Spacebar") return { type: "togglePause" };
 	if (key === "Escape") return { type: "escape" };
-	if (key === "`") return { type: "toggleBottom" };
 	if (key in SPEED_KEYS) return { type: "speed", speed: SPEED_KEYS[key] };
 	const k = key.toLowerCase();
 	if (k in OVERLAY_KEYS) return { type: "overlay", mode: OVERLAY_KEYS[k] };
 	if (k === "m") return { type: "mute" };
 	if (k === "x") return { type: "demolish" };
-	if (k === "r") return { type: "research" };
+	if (k === "b") return { type: "palette" };
+	const d = drawerForKey(k);
+	if (d) return { type: "drawer", id: d };
 	return null;
 }
 
@@ -39,13 +42,18 @@ const typing = (t: EventTarget | null): boolean =>
 
 export interface KeyEnv {
 	menu: MenuController;
-	toggleBottom: () => void;
+	/** Open the drawer, or close it if it is the one already open. */
+	toggleDrawer: (id: DrawerId) => void;
+	/** Open or close the full build palette. */
+	togglePalette: () => void;
 	/** The research sheet: R toggles it (opening pauses the game, closing restores the speed). */
 	research?: MenuController;
 	/** FORM A-5, the ascension sheet: modal like research, but only Esc acts (its own handler closes it too). */
 	ascension?: MenuController;
 	/** The quarterly audit sheet: only Esc closes it; the game keeps running under it. */
 	audit?: Closable;
+	/** The open edge drawer or build palette: Esc closes it before cancelling the tool. */
+	drawer?: Closable;
 	/** Last non-zero speed, for the space-bar toggle. */
 	lastSpeed: { current: Speed };
 }
@@ -57,7 +65,7 @@ export interface KeyEnv {
 export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	const a = keyAction(key);
 	if (!a) return false;
-	const sheets = { research: env.research, ascension: env.ascension, audit: env.audit };
+	const sheets = { research: env.research, ascension: env.ascension, audit: env.audit, drawer: env.drawer };
 	if (env.menu.isOpen()) {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		return a.type === "escape";
@@ -65,8 +73,8 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	// The research sheet is modal: only Esc and R (both close it) act while it is open.
 	if (env.research?.isOpen()) {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
-		else if (a.type === "research") env.research.close();
-		return a.type === "escape" || a.type === "research";
+		else if (a.type === "drawer" && a.id === "research") env.research.close();
+		return a.type === "escape" || (a.type === "drawer" && a.id === "research");
 	}
 	// The ascension sheet is modal as well: only Esc acts, and it closes the sheet.
 	if (env.ascension?.isOpen()) {
@@ -91,30 +99,30 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 		case "escape":
 			applyEscape(store, env.menu, sheets);
 			break;
-		case "research":
-			env.research?.open();
+		case "drawer":
+			env.toggleDrawer(a.id);
+			break;
+		case "palette":
+			env.togglePalette();
 			break;
 		case "demolish":
 			store.setGhost(null);
 			store.setTool(s.tool.kind === "demolish" ? { kind: "select" } : { kind: "demolish" });
-			break;
-		case "toggleBottom":
-			env.toggleBottom();
 			break;
 	}
 	return true;
 }
 
 /** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
-export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable } = {}): void {
+export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: DrawerId) => void; togglePalette: () => void }, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable; drawer?: Closable } = {}): void {
 	const lastSpeed = useRef<Speed>(1);
-	const toggleRef = useRef(toggleBottom);
-	toggleRef.current = toggleBottom;
+	const toggleRef = useRef(toggles);
+	toggleRef.current = toggles;
 	const blockedRef = useRef(blocked);
 	blockedRef.current = blocked;
-	const { research, ascension, audit } = sheets;
+	const { research, ascension, audit, drawer } = sheets;
 	useEffect(() => {
-		const env: KeyEnv = { menu, research, ascension, audit, lastSpeed, toggleBottom: () => toggleRef.current() };
+		const env: KeyEnv = { menu, research, ascension, audit, drawer, lastSpeed, toggleDrawer: (id) => toggleRef.current.toggleDrawer(id), togglePalette: () => toggleRef.current.togglePalette() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 			if (blockedRef.current() && !menu.isOpen()) return;
@@ -124,5 +132,5 @@ export function useHudKeyboard(store: GameStore, toggleBottom: () => void, menu:
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [store, menu, research, ascension, audit]);
+	}, [store, menu, research, ascension, audit, drawer]);
 }

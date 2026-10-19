@@ -54,7 +54,14 @@ if (q.get("clerk")) {
 	if (q.get("clerk") === "on") store.dispatch({ type: "setClerk", policy: { ...store.get().view.clerk.policy, enabled: true, kinds: ["training", "inference"], allowLiquid: false, minPayPerPflopHour: 100 } });
 }
 if (num("rp") !== null) store.addResearchPoints((num("rp") as number) - store.get().view.researchPoints);
-if (q.get("over")) store.triggerGameOver(q.get("over") as "bankrupt");
+// M3: ?bio=1 (wetware fixtures) &corr=0..1 corruption &asc=1 (Clearance 5, FORM A-5 due) &over=bankrupt|shutdown|victory|absorbed|living|clean
+if (q.get("bio") === "1") store.seedBio();
+if (num("corr") !== null) store.setCorruption(num("corr") as number);
+if (q.get("asc") === "1") store.setTier(5);
+const over = q.get("over");
+if (over === "living" || over === "clean") store.triggerGameOver("victory", over === "living" ? "livingTower" : "cleanTower");
+else if (over === "absorbed") store.triggerGameOver("absorbed", "absorbed");
+else if (over) store.triggerGameOver(over as "bankrupt");
 // Induction: ?tut=<step id> jumps to that step, ?tut=none closes it (default: step 1, as on a first visit).
 try {
 	const tut = q.get("tut");
@@ -77,7 +84,7 @@ if (q.get("toasts") !== "0") {
 
 // Click a bottom tab via ?tab=jobs (harness convenience for screenshots).
 const tab = q.get("tab");
-if (tab) setTimeout(() => (document.querySelectorAll<HTMLButtonElement>(".ui-bottom-tabs .ui-tab")).forEach((b) => {
+if (tab) setTimeout(() => (document.querySelectorAll<HTMLButtonElement>(".ui-dtab")).forEach((b) => {
 		if (b.textContent?.toLowerCase().startsWith(tab)) b.click();
 	}), 50);
 
@@ -107,3 +114,15 @@ if (fin)
 			if (b.textContent?.toLowerCase().startsWith(fin)) b.click();
 		});
 	}, 150);
+
+// M3 harness: ?palette=bio|rack|... opens the full palette popover on that tab; ?drawer=gauges|finance|research|log opens that drawer.
+const pal = q.get("palette");
+if (pal)
+	setTimeout(() => {
+		press("b");
+		setTimeout(() => document.querySelectorAll<HTMLButtonElement>(".ui-palette .ui-tab").forEach((b) => {
+			if (b.textContent?.toLowerCase().startsWith(pal.slice(0, 4))) b.click();
+		}), 100);
+	}, 300);
+const drawerKeys: Record<string, string> = { contracts: "c", research: "r", finance: "f", gauges: "i" };
+if (q.get("drawer")) setTimeout(() => press(drawerKeys[q.get("drawer") as string] ?? "c"), 300);

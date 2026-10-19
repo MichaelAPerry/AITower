@@ -16,7 +16,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	const rate = perHour(view);
 	const cl = clearanceProgress(view, content);
 	return (
-		<header className="ui-strip" aria-label="Status">
+		<header className="ui-strip">
 			<div className="ui-chip ui-clock" title="Game day and time (1 tick = 1 minute)">
 				<span className="ui-label">DAY {view.day}</span>
 				<span className="ui-big">{clock(view.minuteOfDay)}</span>

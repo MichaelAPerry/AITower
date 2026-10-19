@@ -30,7 +30,7 @@ function setup(speed: Speed = 3, tool: Tool = { kind: "select" }, selection: typ
 	const states: boolean[] = [];
 	const menu = createMenuController(store, (o) => states.push(o));
 	const lastSpeed = { current: 1 as Speed };
-	const key = (k: string) => runKey(store, k, { menu, toggleBottom: () => {}, lastSpeed });
+	const key = (k: string) => runKey(store, k, { menu, toggleDrawer: () => {}, togglePalette: () => {}, lastSpeed });
 	return { store, menu, states, key };
 }
 
@@ -111,7 +111,7 @@ describe("hotkeys while the menu is open", () => {
 		const { store, menu, key } = setup(3, { kind: "select" }, null);
 		menu.open();
 		const before = store.get();
-		for (const k of ["1", "2", "3", "4", "5", " ", "h", "p", "c", "n", "m", "x", "`"]) expect(key(k)).toBe(false);
+		for (const k of ["1", "2", "3", "4", "5", " ", "h", "p", "c", "r", "f", "i", "b", "n", "m", "x"]) expect(key(k)).toBe(false);
 		expect(store.get()).toBe(before);
 		expect(store.get().speed).toBe(0);
 	});

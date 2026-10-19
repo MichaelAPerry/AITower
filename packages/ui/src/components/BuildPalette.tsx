@@ -138,7 +138,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	];
 
 	const defs = Object.values(content.facilities)
-		.filter((d) => d.category === tab)
+		.filter((d) => d.category === tab && !d.growth)
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost);
 
 	const bots = Object.values(content.bots);

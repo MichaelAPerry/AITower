@@ -82,7 +82,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "componentFailed": {
 			const f = fac(ev.facilityId);
-			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: true };
+			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: view.spareParts === 0 };
 		}
 		case "repaired": {
 			const f = fac(ev.facilityId);
@@ -109,7 +109,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		case "jobStarted":
 			return { text: `${job(ev.jobId)} started`, severity: "info", toast: false };
 		case "jobCompleted":
-			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: true };
+			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: false };
 		case "jobFailed":
 			return { text: `${job(ev.jobId)} failed · penalty ${fmtMoney(ev.penalty)}`, severity: "error", toast: true };
 		case "jobRolledBack":

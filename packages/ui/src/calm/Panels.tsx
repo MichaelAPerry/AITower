@@ -6,9 +6,9 @@ import { describeEvent, isNoise } from "../events";
 import { fmtDuration, fmtMoney, fmtPflops, fmtPower, fmtPue, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
 import { cheapestAvailable, nodeState, techList } from "../research/tech";
-import { Meter, Pill, type Tone } from "./common";
-import type { PanelProps } from "./context";
-import { downsample, Sparkline } from "./Sparkline";
+import { Meter, Pill, type Tone } from "../components/common";
+import type { PanelProps } from "../components/context";
+import { downsample, Sparkline } from "../components/Sparkline";
 
 const jobTone: Record<JobStatus, Tone> = { queued: "dim", running: "good", stalled: "warn", completed: "cyan", failed: "error" };
 
@@ -44,7 +44,7 @@ export function ContractsDrawer(props: PanelProps) {
 					</button>
 				</div>
 			)}
-			{clerk && ui.clerkEdit && <ClerkPanel {...props} />}
+			{(!clerk || ui.clerkEdit) && <ClerkPanel {...props} />}
 			<h4 className="ui-dh">
 				<span>OFFERS</span>
 				<span>{view.offers.length}</span>
@@ -85,7 +85,7 @@ export function ContractsDrawer(props: PanelProps) {
 							</button>
 						</span>
 						{blocked && <span className="ui-rc-why">{blocked}</span>}
-						{!blocked && clerk && <span className="ui-rc-why is-soft">{clerkRowText(clerk.policy.enabled, verdict as NonNullable<typeof verdict>)}</span>}
+						{clerk && <span className="ui-rc-why is-soft">{clerkRowText(clerk.policy.enabled, verdict as NonNullable<typeof verdict>)}</span>}
 						{left < 120 && <span className="ui-rc-why is-soft">expires in {fmtDuration(left)}</span>}
 					</div>
 				);
@@ -222,11 +222,3 @@ export function AlertsLog({ store, content, state }: PanelProps) {
 		</ul>
 	);
 }
-
-const TABS: { id: BottomTab; label: string }[] = [
-	{ id: "contracts", label: "Contracts" },
-	{ id: "jobs", label: "Jobs" },
-	{ id: "telemetry", label: "Telemetry" },
-	{ id: "finance", label: "Finance" },
-	{ id: "alerts", label: "Alerts" },
-];

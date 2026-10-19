@@ -1,0 +1,129 @@
+/*
+ * Synthetic look (docs/STYLE_SYNTHETIC.md): glass, graphite and cold light. This file is the only place that holds the
+ * palette values for the HUD. Components and calm.css use these tokens, so a later restyle is a token swap.
+ * It is imported last: it also remaps the legacy cassette tokens (ink, housing, brass, paper, ...) so older panels follow.
+ * Fonts load from Google Fonts when online; the fallbacks keep the layout when offline.
+ */
+@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+.aitower-hud {
+	/* ── synthetic tokens ── */
+	--bg: #0a0e13;
+	--panel: rgba(18, 26, 34, 0.86);
+	--panel-edge: rgba(140, 200, 220, 0.18);
+	--text: #dfe9ee;
+	--text-dim: #8a9ba6;
+	--accent: #5fd4e6;
+	--accent-2: #9b8cff;
+	--good: #4ee08a;
+	--warn: #f2b84b;
+	--bad: #ff5d5d;
+	--money: #7cf0b0;
+	--radius: 6px;
+	--radius-sm: 4px;
+	--f-display: "Chakra Petch", system-ui, sans-serif;
+	--f-body: "IBM Plex Sans", system-ui, sans-serif;
+	--f-num: "IBM Plex Mono", ui-monospace, monospace;
+	/* spacing and sizes */
+	--gap: 8px;
+	--strip-h: 52px;
+	--drawer-w: 420px;
+	--dock-w: 224px;
+	--fs-label: 10px;
+	--fs-body: 14px;
+	--fs-num: 20px;
+	--fs-big: 24px;
+	--tracking: 0.08em;
+
+	/* ── legacy tokens remapped onto the synthetic ones ── */
+	--ink: var(--bg);
+	--housing: #131b23;
+	--housing-hi: #1b2631;
+	--housing-lo: #0e1419;
+	--putty: var(--text-dim);
+	--beige: var(--text-dim);
+	--olive: #1d2a33;
+	--wall: #17222b;
+	--brass: var(--accent);
+	--brass-dk: #2e7686;
+	--copper: var(--accent);
+	--verdigris: var(--accent);
+	--steel: var(--text-dim);
+	--paper: #dbe6ec;
+	--amber: var(--warn);
+	--amber-dim: #6b5520;
+	--green: var(--good);
+	--green-dim: #1f6b46;
+	--red: var(--bad);
+	--sodium: var(--warn);
+	--smog: #2c3a44;
+	--f-crt: var(--f-num);
+	--f-type: var(--f-body);
+	--f-stamp: var(--f-display);
+	font-family: var(--f-body);
+}
+
+/* Flat glass instead of bakelite: no textures, no screws, no scanlines. */
+.aitower-hud .ui-panel,
+.aitower-hud .ui-glass {
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	box-shadow: none;
+	backdrop-filter: blur(6px);
+}
+.aitower-hud .ui-panel::before,
+.aitower-hud .ui-panel::after {
+	display: none;
+}
+.aitower-hud .ui-crt {
+	background: color-mix(in srgb, var(--bg) 72%, transparent);
+	border-radius: var(--radius-sm);
+	box-shadow: inset 0 0 0 1px var(--panel-edge);
+	text-shadow: none;
+	animation: none;
+}
+.aitower-hud .ui-crt::after {
+	display: none;
+}
+.aitower-hud .ui-crt.crt-amber {
+	--ph: var(--text);
+	--ph-lo: var(--text-dim);
+	--ph-grid: var(--panel-edge);
+}
+.aitower-hud .ui-crt.crt-green {
+	--ph: var(--good);
+}
+.aitower-hud .ui-crt.crt-red {
+	--ph: var(--bad);
+}
+.aitower-hud .ui-btn,
+.aitower-hud .ui-tab {
+	border-radius: var(--radius-sm);
+	background: var(--housing-hi);
+	border: 1px solid var(--panel-edge);
+	box-shadow: none;
+	color: var(--text);
+}
+.aitower-hud .ui-tab.is-on,
+.aitower-hud .ui-btn.is-on {
+	background: var(--accent);
+	color: var(--bg);
+}
+.aitower-hud .ui-stampbtn,
+.aitower-hud .ui-stamp {
+	border-radius: var(--radius-sm);
+	font-family: var(--f-display);
+}
+.aitower-hud .ui-stampbtn.stamp-green,
+.aitower-hud .stamp-green {
+	color: var(--good);
+	border-color: var(--good);
+	background: transparent;
+}
+.aitower-hud .ui-stampbtn.stamp-red,
+.aitower-hud .stamp-red {
+	color: var(--bad);
+	border-color: var(--bad);
+	background: transparent;
+}

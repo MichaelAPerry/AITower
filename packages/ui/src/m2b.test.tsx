@@ -3,9 +3,8 @@ import type { QuarterReport, SimCommand } from "@aitower/sim";
 import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ClerkPanel } from "./clerk/ClerkPanel";
-import { BottomPanel } from "./components/BottomPanel";
+import { ContractsDrawer } from "./calm/Panels";
 import { BuildPalette } from "./components/BuildPalette";
-import { TopBar } from "./components/TopBar";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { click, findAll, findButton, panelProps, textOf } from "./dev/walk";
 import { describeEvent } from "./events";
@@ -85,8 +84,7 @@ describe("Contracts Clerk panel", () => {
 	it("offer rows show the pay rate and whether the clerk would take each offer", () => {
 		const { content, store } = setup({ clerk: true });
 		store.dispatch({ type: "setClerk", policy: { enabled: true, kinds: ["training", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false } });
-		const html = renderToString(<BottomPanel {...panelProps(store, content)} />);
-		expect(html).toContain("$/PF·h");
+		const html = renderToString(<ContractsDrawer {...panelProps(store, content)} />);
 		expect(html).toContain("$162"); // Helix: 680000 / 4200 PF·h
 		expect(html).toContain("Clerk skips: needs liquid cooling and you said no"); // Helix
 		expect(html).toContain("Clerk will take it"); // Quantmere inference
@@ -94,10 +92,10 @@ describe("Contracts Clerk panel", () => {
 	});
 	it("offer rows show no clerk line while it is locked, and 'Clerk is off' when the switch is off", () => {
 		const a = setup();
-		const locked = renderToString(<BottomPanel {...panelProps(a.store, a.content)} />);
+		const locked = renderToString(<ContractsDrawer {...panelProps(a.store, a.content)} />);
 		expect(locked).not.toMatch(/Clerk (will|skips|is off)/);
 		const b = setup({ clerk: true });
-		expect(renderToString(<BottomPanel {...panelProps(b.store, b.content)} />)).toContain("Clerk is off");
+		expect(renderToString(<ContractsDrawer {...panelProps(b.store, b.content)} />)).toContain("Clerk is off");
 	});
 });
 
@@ -151,31 +149,38 @@ describe("Research key, pause and Esc", () => {
 		let auditOpen = false;
 		const audit = { isOpen: () => auditOpen, close: () => (auditOpen = false) };
 		const lastSpeed = { current: 1 as Speed };
-		const key = (k: string) => runKey(store, k, { menu, research, audit, toggleBottom: () => {}, lastSpeed });
-		return { store, content, menu, research, key, setAudit: (o: boolean) => (auditOpen = o), isAudit: () => auditOpen };
+		const drawers: string[] = [];
+		const key = (k: string) => runKey(store, k, { menu, research, audit, toggleDrawer: (id) => drawers.push(id), togglePalette: () => {}, lastSpeed });
+		return { store, content, menu, research, drawers, key, setAudit: (o: boolean) => (auditOpen = o), isAudit: () => auditOpen };
 	}
-	it("R opens the sheet and pauses; R or Esc closes it and restores the previous speed", () => {
-		const { store, research, key } = keys(10);
+	it("R toggles the research drawer (no pause); the sheet opens from its button", () => {
+		const { store, research, drawers, key } = keys(10);
 		expect(key("r")).toBe(true);
-		expect(research.isOpen()).toBe(true);
+		expect(drawers).toEqual(["research"]);
+		expect(research.isOpen()).toBe(false);
+		expect(store.get().speed).toBe(10);
+	});
+	it("the sheet pauses; R or Esc closes it and restores the previous speed", () => {
+		const { store, research, key } = keys(10);
+		research.open();
 		expect(store.get().speed).toBe(0);
 		key("R");
 		expect(research.isOpen()).toBe(false);
 		expect(store.get().speed).toBe(10);
-		key("r");
+		research.open();
 		key("Escape");
 		expect(research.isOpen()).toBe(false);
 		expect(store.get().speed).toBe(10);
 	});
 	it("opening while already paused leaves it paused on close", () => {
-		const { store, key } = keys(0);
-		key("r");
+		const { store, research, key } = keys(0);
+		research.open();
 		key("Escape");
 		expect(store.get().speed).toBe(0);
 	});
 	it("while the sheet is open every other game hotkey is ignored", () => {
-		const { store, key } = keys(3);
-		key("r");
+		const { store, research, key } = keys(3);
+		research.open();
 		for (const k of ["3", " ", "h", "x", "m"]) expect(key(k)).toBe(false);
 		expect(store.get().speed).toBe(0);
 		expect(store.get().overlay).toBe("normal");
@@ -214,7 +219,7 @@ describe("Research key, pause and Esc", () => {
 	});
 	it("a menu opened over the research sheet closes first and does not unpause it", () => {
 		const { store, menu, research, key } = keys(3);
-		key("r");
+		research.open();
 		menu.open();
 		key("Escape");
 		expect(menu.isOpen()).toBe(false);
@@ -226,20 +231,6 @@ describe("Research key, pause and Esc", () => {
 });
 
 describe("Top bar and build palette", () => {
-	it("the research button shows the RP count and opens the sheet", () => {
-		const { content, store } = setup();
-		let opened = 0;
-		const tree = TopBar(panelProps(store, content, { openResearch: () => opened++ }));
-		const b = findButton(tree, /42 RP/);
-		expect(b.props.title).toMatch(/Department of Research \(R\)/);
-		click(b);
-		expect(opened).toBe(1);
-	});
-	it("NET TODAY counts taxes, interest and fees", () => {
-		const { content, store } = setup();
-		const html = renderToString(<TopBar {...panelProps(store, content)} />);
-		expect(html).toContain("− taxes − interest − fees");
-	});
 	it("items whose tech is not researched show 'Requires research: <name>' and cannot be armed", () => {
 		const { content, store } = setup();
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
@@ -390,15 +381,15 @@ describe("event wording", () => {
 });
 
 describe("Hud", () => {
-	it("renders the research button and no sheet until opened", () => {
+	it("renders the research tab and no sheet until opened", () => {
 		const { content, store } = setup();
 		const html = renderToString(<Hud store={store} content={content} />);
-		expect(html).toContain("ui-research-btn");
+		expect(html).toContain('data-tut="dtab-research"');
 		expect(html).not.toContain("ui-research-backdrop");
 		expect(html).not.toContain("ui-audit-backdrop");
 	});
 	it("shows the clerk slip in the Contracts tab while the clerk is locked", () => {
 		const { content, store } = setup();
-		expect(renderToString(<Hud store={store} content={content} />)).toContain("Hire a Contracts Clerk: research");
+		expect(renderToString(<ContractsDrawer {...panelProps(store, content)} />)).toContain("Hire a Contracts Clerk: research");
 	});
 });

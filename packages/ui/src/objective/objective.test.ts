@@ -87,7 +87,8 @@ describe("current orders", () => {
 	it("an affordable research node names itself and the R key, once racks are busy", () => {
 		const c = { ...content, tech: [{ id: "x", name: "Form 9", cost: 20, branch: "compute", minTier: 1, requires: [], effects: [{ type: "perk", kind: "failureRate", factor: 0.9 }] }, { id: "y", name: "Costly", cost: 90, branch: "power", minTier: 1, requires: [], effects: [] }] } as unknown as ContentDB;
 		const o = currentObjective(view({ jobs: running, researchPoints: 25, techResearched: [] }), c, yes);
-		expect(o.title).toBe("File a research request (R)");
+		expect(o.title).toBe("File a research request");
+		expect(o.key).toBe("R");
 		expect(o.detail).toMatch(/Form 9/);
 		expect(o.detail).toMatch(/−10 % failure rate/);
 		expect(o.detail).not.toMatch(/Costly/);
