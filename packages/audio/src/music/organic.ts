@@ -57,3 +57,10 @@ export function createOrganic(opts: OrganicOptions): Organic {
 		},
 	};
 }
+
+/** Cluster chords (corruption > 0.7): a pad/keys note sometimes gains a neighbour a semitone or tone away. */
+export function clusterExtra(midi: number, level: number, rng: Rng): number | null {
+	if (!(level > 0) || !(midi > 0)) return null;
+	if (rng() >= Math.min(1, level) * 0.5) return null;
+	return midi + (rng() < 0.5 ? 1 : 2);
+}
