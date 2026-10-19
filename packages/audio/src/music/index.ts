@@ -30,8 +30,8 @@ export interface MusicOptions {
 }
 
 export interface Music {
-	/** Apply director output: track, stems (bar-aligned), level, tape, horror layers, stingers. */
-	update(params: MusicParams): void;
+	/** Apply director output: track, stems (bar-aligned), level, tape, horror layers, stingers. Returns the longest stinger started, seconds (0 if none), so the caller can duck. */
+	update(params: MusicParams): number;
 	/** Start the lookahead timer (idempotent; no-op once halted or destroyed). */
 	run(): void;
 	/** Stop the timer (notes already scheduled still ring out). */
@@ -135,18 +135,19 @@ export function createMusic(ctx: BaseAudioContext, out: AudioNode, opts: MusicOp
 		timer = null;
 	}
 
-	function stinger(id: StingerId, horror: number): void {
+	function stinger(id: StingerId, horror: number): number {
 		const now = ctx.currentTime;
 		if (id === "tapeStop") {
 			tape.stop(now, TAPE_STOP_S);
 			level.gain.setTargetAtTime(0, now + TAPE_STOP_S * 0.35, TAPE_STOP_S * 0.2);
-			return;
+			return TAPE_STOP_S;
 		}
 		const last = lastStinger.get(id);
-		if (!NO_GAP.has(id) && last !== undefined && now - last < STINGER_MIN_GAP_S) return;
+		if (!NO_GAP.has(id) && last !== undefined && now - last < STINGER_MIN_GAP_S) return 0;
 		lastStinger.set(id, now);
 		const scale = HORROR_STINGERS.has(id) ? 0.4 + 0.6 * horror : 1;
 		for (const n of STINGER_NOTES[id]) stingerInst.play(n.inst, n.midi, now + 0.02 + n.t, n.dur, Math.min(1, n.vel * scale), { force: true });
+		return stingerDuration(id);
 	}
 
 	/** The "under" layer: a low, beating, not-quite-pitched drone that breathes. Built on first use. */
@@ -196,7 +197,7 @@ export function createMusic(ctx: BaseAudioContext, out: AudioNode, opts: MusicOp
 
 	return {
 		update(p) {
-			if (destroyed) return;
+			if (destroyed) return 0;
 			const now = ctx.currentTime;
 			if (!halted) {
 				stems = p.stems;
@@ -211,9 +212,10 @@ export function createMusic(ctx: BaseAudioContext, out: AudioNode, opts: MusicOp
 				setUnder(p.layers.under, now);
 				level.gain.setTargetAtTime(p.level, now, p.level < 0.5 ? 0.5 : 0.8);
 			}
-			if (halted) return;
+			if (halted) return 0;
 			const stops = p.stingers.includes("tapeStop");
-			for (const s of stops ? (["tapeStop"] as const) : p.stingers) stinger(s, p.horror);
+			let played = 0;
+			for (const s of stops ? (["tapeStop"] as const) : p.stingers) played = Math.max(played, stinger(s, p.horror));
 			if (p.silent) {
 				// A final stinger (absorbed) finishes before the muzak fades out; tapeStop fades itself.
 				const wait = stops ? TAPE_STOP_S * 0.35 : Math.max(0, ...p.stingers.map(stingerDuration));
@@ -221,6 +223,7 @@ export function createMusic(ctx: BaseAudioContext, out: AudioNode, opts: MusicOp
 				if (under) under.gain.gain.setTargetAtTime(0, now + wait, 0.3);
 				halt();
 			}
+			return played;
 		},
 		run() {
 			if (timer !== null || halted || destroyed) return;

@@ -6,7 +6,7 @@
 import type { AudioEngine, HorrorIntensity } from "@aitower/shared";
 import type { SimEvent, SimView } from "@aitower/sim";
 import { humParams, maxRackTemp } from "./hum";
-import { clamp01, createMixer, type Mixer, shouldDuck } from "./mixer";
+import { clamp01, createMixer, duckPlan, type Mixer, shouldDuck } from "./mixer";
 import { musicParams, type MusicParams } from "./music/director";
 import { createMusic, type Music } from "./music";
 import { createPauseDetector } from "./pause";
@@ -19,6 +19,12 @@ type AudioContextCtor = new () => AudioContext;
 const HUM_SMOOTHING = 0.6;
 /** Cap on one-shots started per update (a 30× frame can carry many events). */
 const MAX_SHOTS_PER_UPDATE = 4;
+/** Hz of the corruption "breathing" on the hum (about 13 breaths a minute). */
+const BREATH_HZ = 0.22;
+/** Peak breathing depth as a fraction of the hum level at full organic layer. */
+const BREATH_DEPTH = 0.4;
+/** Longest gap fed to the corruption smoothing, seconds (a throttled tab must not snap it). */
+const MAX_DT_S = 5;
 
 function findAudioContext(): AudioContextCtor | null {
 	const g = globalThis as { AudioContext?: AudioContextCtor; webkitAudioContext?: AudioContextCtor };
@@ -35,6 +41,9 @@ interface HumGraph {
 	noiseGain: GainNode;
 	whine: OscillatorNode;
 	whineGain: GainNode;
+	/** Slow LFO on the hum level: the building breathes (corruption > 0.45). */
+	breath: OscillatorNode;
+	breathDepth: GainNode;
 }
 
 export function createAudio(): AudioEngine {
@@ -49,6 +58,8 @@ export function createAudio(): AudioEngine {
 	let volume = 0.7;
 	let musicVolume = 0.6;
 	let destroyed = false;
+	let horror: HorrorIntensity = "full";
+	let lastUpdateS: number | null = null;
 	const limiter = createRateLimiter();
 	const pause = createPauseDetector();
 
@@ -113,12 +124,20 @@ export function createAudio(): AudioEngine {
 		whineGain.gain.value = 0;
 		whine.connect(whineGain).connect(mixer.buses.ambience);
 
+		const breath = c.createOscillator();
+		breath.type = "sine";
+		breath.frequency.value = BREATH_HZ;
+		const breathDepth = c.createGain();
+		breathDepth.gain.value = 0;
+		breath.connect(breathDepth).connect(bus.gain);
+
 		drone.start();
 		droneOctave.start();
 		noise.start();
 		whine.start();
-		hum = { bus, drone, droneOctave, droneGain, noise, noiseFilter, noiseGain, whine, whineGain };
-		music = createMusic(c, mixer.buses.music);
+		breath.start();
+		hum = { bus, drone, droneOctave, droneGain, noise, noiseFilter, noiseGain, whine, whineGain, breath, breathDepth };
+		music = createMusic(c, mixer.buses.music, { stingerOut: mixer.buses.stinger });
 		syncMusic();
 	}
 
@@ -223,12 +242,16 @@ export function createAudio(): AudioEngine {
 			setSmooth(hum.whine.frequency, p.whineHz, now);
 			setSmooth(hum.whineGain.gain, p.whineGain, now);
 
-			if (shouldDuck(events)) mixer?.duck();
+			const dtS = lastUpdateS === null ? undefined : Math.min(MAX_DT_S, Math.max(0, now - lastUpdateS));
+			lastUpdateS = now;
+			// Pure and cheap, so it also runs with the music off: the corruption smoothing stays continuous.
+			lastMusic = musicParams(view, events, paused, lastMusic, { intensity: horror, dtS });
+			setSmooth(hum.breathDepth.gain, lastMusic.layers.organic * BREATH_DEPTH * p.gain, now);
 			const musicOn = musicVolume > 0 && music !== null;
-			if (music && musicOn) {
-				lastMusic = musicParams(view, events, paused, lastMusic);
-				music.update(lastMusic);
-			}
+			let stingerS = 0;
+			if (music && musicOn) stingerS = music.update(lastMusic);
+			const plan = duckPlan(shouldDuck(events), stingerS);
+			if (plan) mixer?.duck(plan);
 
 			let shots = 0;
 			for (const id of soundsForEvents(events)) {
@@ -246,8 +269,9 @@ export function createAudio(): AudioEngine {
 			mixer?.setMaster(masterLevel());
 		},
 
-		setHorrorIntensity(_i: HorrorIntensity) {
-			// M3 placeholder (M3-T5 drives the corruption layers from it).
+		setHorrorIntensity(i: HorrorIntensity) {
+			// "off" = clean tape, no organic sounds or horror stingers; "mild" = about half the depth.
+			horror = i === "off" || i === "mild" ? i : "full";
 		},
 		setMusicVolume(v: number) {
 			musicVolume = clamp01(v, musicVolume);
@@ -264,8 +288,9 @@ export function createAudio(): AudioEngine {
 			music?.destroy();
 			music = null;
 			lastMusic = undefined;
+			lastUpdateS = null;
 			if (hum) {
-				for (const n of [hum.drone, hum.droneOctave, hum.noise, hum.whine]) {
+				for (const n of [hum.drone, hum.droneOctave, hum.noise, hum.whine, hum.breath]) {
 					try {
 						n.stop();
 					} catch {

@@ -105,7 +105,7 @@ export const STINGER_NOTES: Record<Exclude<StingerId, "tapeStop">, StingerNote[]
 	victory: [
 		...[72, 76, 79, 83, 86, 88, 91].map((midi, i) => n(i * 0.14, "vibes", midi, 0.4, 0.55 + i * 0.04)),
 		n(1.1, "pluck", 36, 2.4, 0.85),
-		...chord(1.1, "rhodes", [60, 64, 67, 71, 74], 2.6, 0.65),
+		...chord(1.1, "rhodes", [60, 64, 67, 71, 74], 2.4, 0.65),
 		...[52, 59, 62, 67, 71].map((midi) => n(1.1, "pad", midi, 2.5, 0.5)),
 		n(1.1, "vibes", 88, 2.0, 0.7),
 	],
