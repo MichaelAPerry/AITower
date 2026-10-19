@@ -92,6 +92,28 @@
 	background: var(--accent);
 	color: var(--bg);
 }
+/* Neutralise the old cassette key-cap styling (ui.css) inside the strip: plain flat labels. */
+.aitower-hud .ui-strip .ui-speed {
+	position: relative;
+	width: auto;
+	padding: 0 7px;
+	box-shadow: none;
+}
+.aitower-hud .ui-strip .ui-speed .ui-speed-cap,
+.aitower-hud .ui-strip .ui-speed:hover .ui-speed-cap,
+.aitower-hud .ui-strip .ui-speed:active .ui-speed-cap,
+.aitower-hud .ui-strip .ui-speed.is-on .ui-speed-cap {
+	position: static;
+	inset: auto;
+	display: inline-grid;
+	place-items: center;
+	font: inherit;
+	color: inherit;
+	background: none;
+	box-shadow: none;
+	transform: none;
+	border-radius: 0;
+}
 .aitower-hud .ui-clearance {
 	flex: 1;
 	min-width: 120px;

@@ -143,3 +143,36 @@ All four agents hit an API usage limit once and were resumed from their saved wo
   - The first audit (grade A) shows its sheet, and Esc closes it.
   - The scripted heat alarm arrives on day 2, and lifetime stats fill in.
   - No page errors.
+
+## M3: the Biotech path, the body-horror arc, the Calm HUD, the synthetic look
+- **Owner decisions this milestone:**
+  - Declutter the HUD ("too much going on … text no one reads").
+  - Move from cassette-futurism to a clean **synthetic** neutral look, for both world and HUD (`docs/STYLE_SYNTHETIC.md`).
+  - Each path reskins every device at 25 / 50 / 75 / 100 % of its path score. Biotech turns fleshy (score = corruption); Greentech grows fungus, plants and fish; Synthetic gets more refined (both M4).
+  - Keep three paths, and keep standing in the top bar.
+- **Agents (Sonnet), run one at a time after five parallel agents hit the usage limit twice:**
+  - **sim:** nutrient network, organoid incubators, contamination field, quarantine and sterile bays, mutations, growths, corruption, `choosePath`, three endings, snapshot v5.
+  - **content:** 8 biotech facilities and 3 growths, a wetware tech branch, Clearance 5, 4 bio clients, 25 memos running from early seeds to horror, paths and endings.
+  - **ui:** the Calm HUD (`tasks/m3/T4b-redesign.md`, mockup in `docs/mockups/`).
+    - a top strip with PER HOUR and standing
+    - a NEXT chip, a one-line ticker, and memo stamps with costs as numbers
+    - the C/R/F/I drawers and a build dock
+    - the Wetware tab, nutrient tool, Ascension sheet, ending copy and diagnosis
+  - **render:** the synthetic base look and the stage system with the Biotech stages, plus wetware art, the nutrient layer and the contamination overlay.
+  - **audio:** corruption layers on the tape chain, tier 2–3 tracks, and 10 stingers with ducking.
+- **Orchestrator fixes found in the real build:**
+  - **Organoid incubators were unplayable.** Tissue used the GPU heat formula, so a new incubator in a normal room died on its first tick, and again after every repair. Incubators now regulate (+25 °C / −6 °C around the room air) and die only when settling outside ±3× tolerance (for example a power cut). Tests cover both.
+  - **Nutrient piping** now needs the research that unlocks the nutrient plant.
+  - **Speed buttons:** the old key-cap CSS crushed them in the new strip.
+  - **Bundle:** audio moved to its own chunk, and the budget rose to 1.45 MB because the path added content.
+- **Real-build checks (Chromium):**
+  - the induction walks all 9 steps, each with its highlight
+  - the strip shows PER HOUR and standing
+  - C/R/F/I open their drawers
+  - a Clearance-5 save offers FORM A-5; choosing Biotech sets the path and shows the growth gauge
+  - an organoid bay holds 37 °C for 3 days
+  - the offline `AItower.html` runs from `file://`
+  - no page errors
+- **Notes:**
+  - Overlay keys are now O (coolant), U (nutrient) and G (contamination). R opens the Research drawer, and the full sheet is a button inside it.
+  - **M4 carries:** the Greentech and Synthetic stage art, the Greentech growth score, and a per-hour value that ignores construction.
