@@ -1,6 +1,7 @@
 /** buildSlab, buildConduit, buildLift. */
 import type { CellRef, ConduitLayer } from "../api";
 import { cellIdx, inBounds } from "../core/grid";
+import { techGate } from "../research/research";
 import { addLift } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
@@ -39,6 +40,12 @@ export function planConduit(ctx: PlanCtx, layer: ConduitLayer, cells: CellRef[])
 	const s = ctx.state;
 	if (layer !== "power" && layer !== "coolant" && layer !== "nutrient") return reject("unknown conduit layer");
 	if (!Array.isArray(cells) || cells.length === 0) return reject("no cells");
+	if (layer === "nutrient") {
+		// Nutrient piping arrives with the research that unlocks the nutrient plant (data-driven, no hard-coded id).
+		const plant = Object.values(ctx.content.facilities).find((d) => d.kind === "nutrient" && d.tech);
+		const gate = techGate(s, ctx.content, plant?.tech);
+		if (gate) return reject(gate);
+	}
 	const grid = layerGrid(s, layer);
 	// Unique new cells in input order.
 	const wanted = new Set<number>();
