@@ -1,9 +1,11 @@
 import type { ContentDB } from "@aitower/content";
-import type { AuditGrade, CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { AuditGrade, CellRef, EndingId, GameOverKind, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPct } from "./format";
 import { gradeTone } from "./finance/finance";
+import { traitName } from "./bio/bio";
 import { effectText, unlocksFor } from "./research/tech";
 import type { Severity } from "./notices";
+import type { HorrorIntensity } from "@aitower/shared";
 
 export interface Described {
 	text: string;
@@ -39,8 +41,12 @@ const gradeSeverity = (g: AuditGrade): Severity => {
 	return t === "green" ? "good" : t === "amber" ? "info" : "warn";
 };
 
-/** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
-export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): Described {
+/**
+ * Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). `horror` is `settings.horrorIntensity`:
+ * "off" gives plain wording for the biotech events; otherwise the Ministry's euphemism (it never admits anything).
+ */
+export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, horror: HorrorIntensity = "full"): Described {
+	const plain = horror === "off";
 	const fac = (id: number): { name: string; cell?: CellRef } => {
 		const f = view.facilities.find((f) => f.id === id);
 		if (!f) return { name: `facility #${id}` };
@@ -76,7 +82,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 		}
 		case "componentFailed": {
 			const f = fac(ev.facilityId);
-			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: true };
+			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: view.spareParts === 0 };
 		}
 		case "repaired": {
 			const f = fac(ev.facilityId);
@@ -103,7 +109,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 		case "jobStarted":
 			return { text: `${job(ev.jobId)} started`, severity: "info", toast: false };
 		case "jobCompleted":
-			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: true };
+			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: false };
 		case "jobFailed":
 			return { text: `${job(ev.jobId)} failed · penalty ${fmtMoney(ev.penalty)}`, severity: "error", toast: true };
 		case "jobRolledBack":
@@ -135,7 +141,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 			};
 		case "gameOver":
 			return {
-				text: ev.kind === "victory" ? "COMMENDATION issued by the Ministry" : ev.kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, Ministry standing is zero" : "NOTICE OF TERMINATION: foreclosed for insolvency",
+				text: gameOverText(ev.kind, ev.ending, content, plain),
 				severity: ev.kind === "victory" ? "good" : "error",
 				toast: false,
 			};
@@ -154,20 +160,41 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 		}
 		case "loanRepaid":
 			return { text: `Credit Office: ${fmtMoney(ev.amount)} repaid. The Ministry thanks you for your promptness`, severity: "good", toast: false };
-		// M3 placeholders (M3-T4 words these properly).
-		case "pathChosen":
-			return { text: `Ascension path filed: ${ev.path}`, severity: "info", toast: true };
-		case "growthSprouted":
-			return { text: `An asset has been registered at ${fac(ev.facilityId).name}`, severity: "info", toast: false, cell: fac(ev.facilityId).cell };
-		case "botMutated":
-			return { text: `Automaton #${ev.botId} has been reclassified (${ev.trait})`, severity: "info", toast: false };
-		case "contaminationIrreversible":
-			return { text: "The building has been recertified as an organism", severity: "warn", toast: true };
+		case "pathChosen": {
+			const name = content.paths?.find((p) => p.id === ev.path)?.name ?? ev.path;
+			return { text: plain ? `Ascension path chosen: ${name}` : `FORM A-5 filed. The Ministry notes the tower's election of the ${name} programme, and congratulates it`, severity: "good", toast: true };
+		}
+		case "growthSprouted": {
+			const f = fac(ev.facilityId);
+			return { text: plain ? `A growth has appeared at ${f.cell ? `F${f.cell.floor} x${f.cell.x}` : f.name}` : `Inventory notice: an unregistered asset has been found at ${f.cell ? `F${f.cell.floor} x${f.cell.x}` : f.name}. It has been entered in the register`, severity: plain ? "warn" : "info", toast: false, cell: f.cell };
+		}
+		case "botMutated": {
+			const trait = traitName(ev.trait, horror);
+			return { text: plain ? `Automaton #${ev.botId} has mutated (${trait})` : `Automaton #${ev.botId} has been reclassified (${trait}). No action is required`, severity: plain ? "warn" : "info", toast: false };
+		}
+		case "contaminationIrreversible": {
+			const k = content.balance?.bio?.irreversibleCleanFactor;
+			const strength = k === undefined ? "" : ` Sterile bays now work at ${Math.round(k * 100)} % of rated effect.`;
+			return {
+				text: plain ? `Contamination can no longer be reversed.${strength}` : `Sanitation Bureau: the premises have been recertified as established.${strength}`,
+				severity: "warn",
+				toast: true,
+			};
+		}
 		case "quarterReport": {
 			const r = view.reports?.find((r) => r.quarter === ev.quarter);
 			return { text: `Quarterly audit ${ev.quarter} filed: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
 		}
 	}
+}
+
+function gameOverText(kind: GameOverKind, ending: EndingId | undefined, content: ContentDB, plain: boolean): string {
+	if (kind === "absorbed") return plain ? "The Ministry has taken over the facility: game over" : "NOTICE OF INCORPORATION: the facility has been reclassified as a Ministry asset";
+	if (kind === "victory") {
+		const title = ending ? content.endings?.find((e) => e.id === ending)?.title : undefined;
+		return title ? `COMMENDATION issued by the Ministry: ${title}` : "COMMENDATION issued by the Ministry";
+	}
+	return kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, Ministry standing is zero" : "NOTICE OF TERMINATION: foreclosed for insolvency";
 }
 
 /** Events too chatty for the alert feed. */

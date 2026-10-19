@@ -149,23 +149,16 @@ export class Structure {
 	private wallCell(g: Graphics, wx: number, top: number, x: number, f: number, below: boolean): void {
 		const m = below ? TILE_BELOW : TILE_ABOVE;
 		const grout = below ? GROUT_BELOW : GROUT_ABOVE;
-		// Tiled upper wall: 8×4 glazed tiles in a running bond.
+		// Glass façade panels: two 8-px panels per cell with a dark seam, a cold top edge and the odd lit panel.
 		const y0 = top + TUBE_Y + 2;
 		const y1 = top + WAINSCOT_Y;
 		px(g, wx, top, TILE, y1 - top, grout);
-		for (let ty = y0, row = 0; ty < y1; ty += 4, row++) {
-			const off = row % 2 ? 4 : 0;
-			for (let tx = -off; tx < TILE; tx += 8) {
-				const sx = Math.max(0, tx);
-				const ex = Math.min(TILE, tx + 7);
-				const h = Math.min(3, y1 - ty);
-				if (ex <= sx || h <= 0) continue;
-				const v = hash(x * 4 + ((tx + 8) >> 3), f * 40 + row);
-				const base = v < 0.1 ? m.lo : v > 0.93 ? mix(m.mid, T.olive, 0.4) : m.mid;
-				px(g, wx + sx, ty, ex - sx, h, base);
-				if (tx >= 0) px(g, wx + sx, ty, ex - sx, 1, mix(base, m.hi, 0.45));
-				if (v > 0.97 && h === 3) px(g, wx + sx + 2, ty + 1, 2, 1, grout); // chipped tile
-			}
+		for (let tx = 0; tx < TILE; tx += 8) {
+			const v = hash(x * 2 + (tx >> 3), f * 40);
+			const base = v > 0.93 ? mix(m.mid, T.brass, 0.22) : v < 0.1 ? m.lo : m.mid;
+			px(g, wx + tx, y0, 7, y1 - y0 - 1, base);
+			px(g, wx + tx, y0, 7, 1, mix(base, T.brass, 0.3));
+			px(g, wx + tx + 1, y0 + 1, 1, y1 - y0 - 3, mix(base, m.hi, 0.35));
 		}
 		// Water stains running down the basement walls.
 		if (below && hash(x, f * 7) < 0.25) {
@@ -198,21 +191,10 @@ export class Structure {
 			// Pool of light on the floor plate.
 			px(g, cx - 6, top + CABLE_Y - 1, 11, 1, lt(T.sodium, 0.5), 0.12);
 		}
-		// Occasional bureaucratic wall fittings: notice board, clock, conduit box.
-		const fit = hash(x * 13 + 5, f * 31 + 2);
-		if (fit < 0.025) {
-			// Yellowed memo pinned to the tiles.
-			const memo = mix(T.paper, T.beige, 0.55);
-			px(g, wx + 5, top + 14, 6, 8, dk(memo, 0.3));
-			px(g, wx + 5, top + 14, 5, 7, memo);
-			for (let k = 0; k < 3; k++) px(g, wx + 6, top + 16 + k * 2, 3 - (k % 2), 1, dk(memo, 0.45));
-			px(g, wx + 7, top + 14, 1, 1, dk(T.red, 0.2));
-		} else if (fit < 0.04) {
-			// Ministry wall clock.
-			px(g, wx + 5, top + 13, 6, 6, BRASS.lo);
-			px(g, wx + 6, top + 14, 4, 4, mix(T.paper, T.beige, 0.4));
-			px(g, wx + 7, top + 15, 1, 2, T.ink);
-			px(g, wx + 8, top + 16, 1, 1, T.ink);
+		// An occasional cold status dot on the façade (no memos, no clocks).
+		if (hash(x * 13 + 5, f * 31 + 2) < 0.04) {
+			px(g, wx + 7, top + 16, 2, 2, mix(T.brass, T.ink, 0.5));
+			px(g, wx + 7, top + 16, 1, 1, T.brass);
 		}
 	}
 
@@ -258,7 +240,8 @@ export class Structure {
 	private floorAndBeam(g: Graphics, wx: number, top: number, x: number, f: number): void {
 		// Floor plate + under-floor void (the cable tray sits in it).
 		const fy = top + CABLE_Y;
-		px(g, wx, fy, TILE, 1, FLOOR.hi);
+		px(g, wx, fy, TILE, 1, T.brass, 0.55); // thin cyan floor edge
+		px(g, wx, fy + 1, TILE, 1, FLOOR.hi);
 		px(g, wx, fy + 1, TILE, FLOOR_H - SLAB_H - CABLE_Y - 1, FLOOR.dk);
 		if ((x + f) % 2 === 0) px(g, wx + 3, fy + 2, 1, 1, FLOOR.line);
 		// Riveted steel I-beam slab.
@@ -266,7 +249,7 @@ export class Structure {
 		px(g, wx, sy, TILE, 1, BEAM.hi);
 		px(g, wx, sy + 1, TILE, 2, BEAM.lo);
 		px(g, wx, sy + 3, TILE, 1, BEAM.line);
-		for (let k = 2; k < TILE; k += 4) px(g, wx + k, sy + 1, 1, 1, BEAM.hi);
+		
 		if (x % 4 === 0) {
 			px(g, wx, sy + 1, 1, 2, BEAM.mid); // web stiffener
 			px(g, wx + 1, sy + 1, 1, 2, BEAM.dk);

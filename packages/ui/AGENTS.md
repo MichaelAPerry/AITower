@@ -139,3 +139,20 @@ R / Esc / pause behaviour, component dispatches (`m2b.test.tsx`), controller (ea
 formatting, import/export, settings → CSS variables/classes, heat ramps, density, the fake store's saves, throttled
 subscribe, and Hud/SystemMenu server-render tests. There is no DOM test environment: DOM behaviour (focus trap, file
 input, download) was verified in Chromium through the dev harness.
+
+## Calm HUD and synthetic look (M3-T4b; supersedes the layout notes above where they differ)
+Layout: a thin **top strip** (`calm/TopStrip.tsx`: day/clock, speed, TREASURY, PER HOUR, Clearance bar, STANDING, growth index, INBOX, MENU), the world, a **NEXT chip**
+(top centre, from `currentObjective`; tooltip = detail; click opens the drawer or FORM A-5), a **ticker** (bottom, click = alert log), a **build dock** (bottom left, 3 picks +
+More = the full `BuildPalette` as a popover, Wetware tab included) and **drawers on the right edge** (`calm/Parts.tsx`; one at a time; classes `ui-edge`, `data-drawer`):
+C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). The bottom panel, TopBar and CURRENT ORDERS are gone.
+- Keys: C/R/F/I drawers, B palette, N/H/P overlays, **O** coolant, **U** nutrient, **G** contamination ("growth"), M mute, X demolish. R no longer opens the research
+  sheet (that is a button in the Research drawer; the sheet still pauses). Esc order: menu, research sheet, ascension sheet, audit sheet, open drawer/palette, tool, selection, menu.
+- Pure helpers in `calm/calm.ts` (tested in `calm/calm.test.ts`): `perHour` (operating income over about 6 game-hours from the daily ledger; construction excluded),
+  `clearanceProgress`, `dockPicks`, `effectChip`/`choiceChips` (memo stamps as "−$160k · ★−4", from `content.events[].choices[].effects`), `isUrgentMemo` (expires within 12 h, or its
+  default choice fails racks / costs over 10 % of cash; only urgent memos pop up, the rest raise the inbox count), `isRoutine` (ticker filter).
+- `calm/Panels.tsx`: Contracts drawer (clerk in one line + Edit, compact offers and running jobs), Research drawer (affordable or half-funded nodes + button to the full sheet), alert log, telemetry.
+- Look: `calm/theme.css` holds every palette/font/size token (docs/STYLE_SYNTHETIC.md) and remaps the legacy cassette tokens, so a restyle is a token swap; `calm/calm.css` is the layout and uses tokens only.
+  Fonts (Chakra Petch, IBM Plex) load from Google Fonts with system fallbacks. Older panels (inspector, finance, palette cards) follow through the remapped tokens only.
+- Biotech: `bio/bio.ts` (wording per `horrorIntensity`, organoid band, trait text, growth gauge, memo stain), `objective/diagnose.ts` (noNutrient / tooCold reasons), `ascension/` (FORM A-5 sheet; the sim
+  applies `choosePath` on the next tick, so `ui.pathFiled` hides the offer meanwhile), `gameover/gameOver.ts` (`overCopyFor`: ending text from `content.endings`, plain forms at off).
+- Harness params added: `?bio=1 &corr=0..1 &asc=1 &over=living|clean|absorbed &drawer=contracts|research|finance|gauges &palette=wetw|rack|...`.

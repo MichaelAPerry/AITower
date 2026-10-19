@@ -4,6 +4,7 @@ import type { TickCtx } from "../core/context";
 import { planSetClerk } from "../economy/clerk";
 import { planRepayLoan, planTakeLoan } from "../economy/credit";
 import { spend } from "../economy/ledger";
+import { planChoosePath } from "../bio/path";
 import { planResearch } from "../research/research";
 import { planDemolish } from "./demolish";
 import {
@@ -88,6 +89,9 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "repayLoan":
 			plan = planRepayLoan(ctx, cmd.amount);
+			break;
+		case "choosePath":
+			plan = planChoosePath(ctx, cmd.path);
 			break;
 		default:
 			return reject("unknown command type");

@@ -1,4 +1,4 @@
-/** Tick stage 2: rebuild power/coolant nets and attach facilities & lifts, only when dirty. */
+/** Tick stage 2: rebuild power/coolant/nutrient nets and attach facilities & lifts, only when dirty. */
 import type { TickCtx } from "../core/context";
 import { cellIdx } from "../core/grid";
 import type { SimState } from "../core/state";
@@ -20,6 +20,7 @@ export function attachToNets(state: SimState): void {
 		for (let k = 0; k < f.width; k++) cells.push(cellIdx(state, f.x + k, f.floor));
 		f.powerNet = lowestNet(state.powerNetOf, cells);
 		f.coolantNet = lowestNet(state.coolantNetOf, cells);
+		f.nutrientNet = lowestNet(state.nutrientNetOf, cells);
 	}
 	for (const lift of state.lifts) {
 		const cells: number[] = [];
@@ -33,6 +34,7 @@ export function rebuildNetworks(ctx: TickCtx): void {
 	if (!state.netsDirty) return;
 	state.powerNetCount = labelLayer(state, state.power, state.powerNetOf, scratch.parent, scratch.label);
 	state.coolantNetCount = labelLayer(state, state.coolant, state.coolantNetOf, scratch.parent, scratch.label);
+	state.nutrientNetCount = labelLayer(state, state.nutrient, state.nutrientNetOf, scratch.parent, scratch.label);
 	attachToNets(state);
 	state.netsDirty = false;
 }

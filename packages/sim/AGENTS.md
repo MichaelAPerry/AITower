@@ -24,6 +24,7 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 | `research/research.ts` | Tech perks (`perk()`, product of researched factors, cached per list), `techGate` ("requires research: <name>"), `planResearch`, `clerkUnlocked`, RP earning |
 | `economy/clerk.ts`, `credit.ts`, `audit.ts`, `stats.ts` | Contracts Clerk (`planSetClerk`, `clerkStep`), loans + midnight interest/levy, quarterly audit + grading, lifetime stats helpers |
 | `ministry/*` | `memos.ts` (seeded issue cadence/eligibility, `resolveMemo` plan, effects, timeout auto-resolve), `modifiers.ts` (timed modifiers: `modFactor`, `ambientOffset`, labels, expiry), `standing.ts` (standing 0..100, one-shot `gameOver`) |
+| `bio/*` | M3: `index.ts` (facility index cache keyed by `topologyRev`, rack load, contamination lookups), `nutrient.ts` (stage 3b), `contamination.ts` (field, stage 8c), `growth.ts` (hourly sprouting, daily cull), `corruption.ts`, `path.ts` (`choosePath`, daily endings, `leadingEnding`) |
 | `view/*` | `SimView` builder and facility status precedence |
 | `snapshot/*` | Typed-array-aware JSON codec; canonical FNV-1a hash; `load.ts` (decode ▸ migrate ▸ validate), `migrate.ts` (`SNAPSHOT_VERSION`, `migrations`), `validate.ts`, `clone.ts` (deep copy for the projection) |
 | `test/fixture.ts` | Self-contained `ContentDB` + helpers for tests |
@@ -34,14 +35,16 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 1. `applyCommands` — re-validate queued commands, charge cost, apply (`commandRejected` on failure)
 2. `rebuildNetworks` — only when `netsDirty`
 3. `powerSolve` — demand (uses last tick's thermal clock / chiller heat / charger use) → genset control → satisfaction → draws → dispatch grid ▸ genset ▸ UPS → UPS charging → energy cost
+3b. `nutrientSolve` — nutrient nets (supply, demand, satisfaction, billing as upkeep)
 4. `coolingSolve` — loop capacity/load/supply temp, `noCoolant`, chiller heat for next tick's power
 5. `airFieldStep` then `rackThermalStep` — air field, then die temps / throttle / trip / recover
 6. `computeStep` — release down racks (+rollback), storage gating, clocks & delivered PFLOPS, allocation, progress/payouts/penalties
 7. `reliabilityStep` — failure rolls (one RNG draw per enabled, non-failed rack, id order)
 8. `stepLifts` then `stepBots`
+8c. `contaminationStep` (diffuse ▸ decay ▸ emit ▸ sterilize ▸ clamp; share, `irreversible`), 8d. `growthStep` (03:00 cull, hourly sprout), 8e. `corruptionStep`
 9. `economyStep` — upkeep, energy bill, rolling 24 h PUE/uptime, bankruptcy, offers (expire/generate), history
 9b. `memoStep` — expire modifiers, auto-resolve timed-out memos, roll for a new memo (own `events` RNG stream); 9c. `jobStanding` — one standing change from this tick's `jobCompleted`/`jobFailed`
-10. `progressionStep` — on the last tick of each day: daily standing (uptime vs the *current* tier's target), then tier-up (reaching the top tier ⇒ `gameOver` victory)
+10. `progressionStep` — on the last tick of each day: daily standing (uptime vs the *current* tier's target), then tier-up (no victory any more), then `endingsStep` (absorbed ▸ livingTower / cleanTower day counters)
 11. `advanceTime` — tick++, ledger roll + `newDay` at day change
 
 ## Ministry (M2)
@@ -58,6 +61,16 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 - **Scripted events** (`scriptedDay`): `issueScripted` in `memoStep`, at `minuteOfDay == 540` (tick `day*1440 + 180`, day 0 starts 06:00); never in the random pool; `state.scriptedIssued`.
 - **Bots**: `def.flying` flies a straight line (x and floor, `speed` per axis per tick, no nav/lifts, view state `flying` while `floor != goalFloor`); `def.carry` = parts per trip (`bot.parts`, `carrying = parts > 0`), chains onto the oldest claimable orders (`tryClaim(..., chain)`).
 - Snapshot v4 (`migrateV3`); new state fields are validated in `validateManagement`. Test helpers: `test/m2b.ts`; fixture has a small tech tree, gated rack/bot, drone and hauler.
+
+## Biotech (M3, snapshot v5, `migrateV4`)
+- **Nutrient layer** `state.nutrient` (build/demolish/label like coolant; cost = `coolantConduitPerTile`). Plants supply `bio.nutrientCapacity × powerFactor`; consumers = organoid racks (`rack.bio.nutrientUse × load`, load = busy 1 / idle 0.15 / down 0) and bioreactors (flat `bio.nutrientUse`). Satisfaction scales rack clock (`f.nutrientSat`); 0 ⇒ `noNutrient` (not allocatable). Supply is billed at `nutrientPrice` as upkeep.
+- **Organoid racks** (`cooling: "bio"` + `rack.bio`): own band in `rackThermalStep` (full ±tol, linear to `minClock` at ±2×, fail via `failRack` beyond ±3×, `tooCold` / `throttled`; never trips). `needsBio` jobs need `cooling: "bio"` (`rackSuits`); `needsLiquid` jobs now also exclude bio racks. `metrics.organoidPflops`.
+- **Bioreactors** are power sources dispatched before the grid (capacity × last tick's nutrient satisfaction), included in `totalKw`.
+- **Contamination** `state.contamination` (Float32, slab cells only, unbuilt = 0, no leak outdoors). Hazard ×(1 + k·c) in `rackHazard`; bot speed ×max(0.3, 1 − k·c). Quarantine = enabled facility; link leak applies if either end is a quarantine cell. `irreversible` is sticky: sterilizers × `irreversibleCleanFactor`, `closeAuditDay` records/files nothing.
+- **Bots**: exposure accumulates on cells ≥ `mutationThreshold`; trait = `(id + seed) % 2 == 0 ? fleshed : tendriled`. Fleshed: repair ×0.6, +0.2 contamination at the repair tile on completion. Tendriled: carry +2, `route` returns null for any other floor (no lifts, no flying).
+- **Growths** (`def.growth`, `f.grown`): own `growth` RNG stream (draw per qualifying cell on each hour, +1 for the def pick, none without growth defs); need no power/nutrient/coolant, no upkeep, no refund; failure (reliability roll) = `failed` + `recoverAt` (+180 ticks), no work order, `rackRecovered` on return; culling rooms remove them at 03:00 (`demolished` events).
+- **Corruption / endings / path**: see `bio/corruption.ts`, `bio/path.ts`. `gameOver.ending`; `absorbed` is a game over kind. Path gates: `TechNode.path` (`planResearch`), `EventDef.path` / `minCorruption` (pool and scripted).
+- Tests: `bio.test.ts`; fixture has small biotech defs (`nutrient_plant`, `sterile_bay`, `culling_room`, `quarantine_lock`, `bioreactor`, `organoid_rack`, `growth_mass`, `needy_depot`).
 
 ## Invariants
 - Everything that affects the future is in `SimState`; scratch buffers are overwritten every tick.

@@ -206,15 +206,22 @@ function slabGhost(store: GameStore, view: SimView, content: ContentDB, floor: n
 	return { cells, valid: true, label: `Slab ×${cells.length} · ${fmtMoney(cost)}` };
 }
 
+/** The cell grid a conduit layer occupies in the view (1 where a conduit of that layer exists). */
+export const conduitGrid = (view: SimView, layer: ConduitLayer): Uint8Array => (layer === "power" ? view.power : layer === "coolant" ? view.coolant : view.nutrient);
+
+export const conduitName = (layer: ConduitLayer): string => (layer === "power" ? "Power conduit" : layer === "coolant" ? "Coolant conduit" : "Nutrient conduit");
+
+/** Cost per new tile (display only; the sim charges). Nutrient pipes cost the same as coolant pipes. */
+export const conduitUnitCost = (content: ContentDB, layer: ConduitLayer): number => (layer === "power" ? content.structure.powerConduitPerTile : content.structure.coolantConduitPerTile);
+
 function conduitGhost(store: GameStore, view: SimView, content: ContentDB, layer: ConduitLayer, cells: CellRef[]): Ghost {
 	const r = store.canBuild({ type: "buildConduit", layer, cells });
 	if (!r.ok) return { cells, valid: false, label: sentence(r.reason) };
-	const grid = layer === "power" ? view.power : view.coolant;
-	const per = layer === "power" ? content.structure.powerConduitPerTile : content.structure.coolantConduitPerTile;
+	const grid = conduitGrid(view, layer);
+	const per = conduitUnitCost(content, layer);
 	let n = 0;
 	for (const c of cells) if (!grid[cellIndex(view, c.x, c.floor)]) n++;
-	const name = layer === "power" ? "Power conduit" : "Coolant conduit";
-	return { cells, valid: true, label: `${name} ×${cells.length} · ${fmtMoney(n * per)}` };
+	return { cells, valid: true, label: `${conduitName(layer)} ×${cells.length} · ${fmtMoney(n * per)}` };
 }
 
 function liftGhost(store: GameStore, content: ContentDB, span: ReturnType<typeof liftSpan>, dragging: boolean): Ghost {

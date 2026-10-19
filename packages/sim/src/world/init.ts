@@ -32,13 +32,17 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		slab: new Uint8Array(n),
 		power: new Uint8Array(n),
 		coolant: new Uint8Array(n),
+		nutrient: new Uint8Array(n),
 		facilityAt: new Int32Array(n).fill(-1),
 		liftAt: new Int32Array(n).fill(-1),
 		airTemp: new Float32Array(n).fill(ambient),
 		powerNetOf: new Int32Array(n).fill(-1),
 		coolantNetOf: new Int32Array(n).fill(-1),
+		nutrientNetOf: new Int32Array(n).fill(-1),
+		contamination: new Float32Array(n),
 		powerNetCount: 0,
 		coolantNetCount: 0,
+		nutrientNetCount: 0,
 		netsDirty: true,
 		topologyRev: 0,
 		facilities: [],
@@ -50,6 +54,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		nextId: { facility: 1, lift: 1, bot: 1, contract: 1, job: 1, workOrder: 1, memo: 1 },
 		powerNets: [],
 		coolantNets: [],
+		nutrientNets: [],
 		storageUtil: 0,
 		nextOfferTick: 0,
 		cash: content.balance.startingCash,
@@ -69,6 +74,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 			gridKw: 0,
 			gensetKw: 0,
 			pflops: 0,
+			organoidPflops: 0,
 			energyCost: 0,
 			pue: 1,
 			uptime: 1,
@@ -92,6 +98,11 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		audit: emptyAudit(),
 		stats: emptyStats(),
 		scriptedIssued: [],
+		contaminatedShare: 0,
+		irreversible: false,
+		corruption: 0,
+		path: null,
+		endingDays: { livingTower: 0, cleanTower: 0 },
 		pending: [],
 	};
 
@@ -128,6 +139,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 	const scratch = createScratch(n);
 	state.powerNetCount = labelLayer(state, state.power, state.powerNetOf, scratch.parent, scratch.label);
 	state.coolantNetCount = labelLayer(state, state.coolant, state.coolantNetOf, scratch.parent, scratch.label);
+	state.nutrientNetCount = labelLayer(state, state.nutrient, state.nutrientNetOf, scratch.parent, scratch.label);
 	attachToNets(state);
 	state.netsDirty = false;
 	state.nextOfferTick = nextOfferDelay(state, content);

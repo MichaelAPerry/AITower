@@ -1,20 +1,21 @@
 // Dev harness: renders the hand-built fixture and animates it.
-// Query params: ?overlay=heat|power|coolant  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
+// Query params: ?overlay=heat|power|coolant|nutrient|contamination  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
 //               ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
 //               ?scene=variety (every kind x tier x width, failure rows, new bots; focus=x,floor to jump)
+//               ?stage=0..4 (biotech skin stage in the variety scene; keys Q W E R T set it live)  ?horror=full|mild|off
 //               ?cb=1 (colour-blind)  ?rm=1 (reduced motion)  ?crt=0 (CRT effects off)
 import "@fontsource/vt323";
 import { loadContent } from "@aitower/content";
 import type { OverlayMode, Selection } from "@aitower/shared";
 import { createRenderer } from "../src/index";
 import { createFixture, fixtureContent } from "../src/dev/fixtureView";
-import { createVarietyScene, varietyContent } from "../src/dev/varietyScene";
+import { STAGE_SCORE, createVarietyScene, varietyContent } from "../src/dev/varietyScene";
 
 const params = new URLSearchParams(location.search);
 const host = document.getElementById("world") as HTMLElement;
 const hud = document.getElementById("hud") as HTMLElement;
 const variety = params.get("scene") === "variety";
-const fx = variety ? createVarietyScene() : createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
+const fx = variety ? createVarietyScene({ stage: Math.max(0, Math.min(4, Number(params.get("stage") ?? 0))) as 0 | 1 | 2 | 3 | 4 }) : createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
 // ?real=1 draws the fixture with the real content colours (falls back to the local stub).
 let content = fixtureContent;
 if (params.has("real")) {
@@ -33,7 +34,7 @@ renderer.setOptions({
 	reducedMotion: params.get("rm") === "1",
 	crtEffects: params.get("crt") !== "0",
 	colorBlind: params.get("cb") === "1",
-	horrorIntensity: "full",
+	horrorIntensity: (["full", "mild", "off"] as const).find((h) => h === params.get("horror")) ?? "full",
 });
 const focus = params.get("focus");
 if (focus) {
@@ -51,10 +52,12 @@ if (zoomTo !== 2) {
 }
 window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
 
-const modes: OverlayMode[] = ["normal", "heat", "power", "coolant"];
+const modes: OverlayMode[] = ["normal", "heat", "power", "coolant", "nutrient", "contamination"];
 let overlay = (params.get("overlay") as OverlayMode | null) ?? "normal";
 renderer.setOverlay(overlay);
 window.addEventListener("keydown", (e) => {
+	const stageKey = "qwert".indexOf(e.key.toLowerCase());
+	if (stageKey >= 0) fx.view.corruption = STAGE_SCORE[stageKey];
 	const i = Number(e.key) - 1;
 	if (i >= 0 && i < modes.length) {
 		overlay = modes[i];
@@ -93,7 +96,7 @@ const frame = (now: number) => {
 	}
 	renderer.draw(fx.view, acc / TICK_MS);
 	const m = fx.view.minuteOfDay;
-	hud.textContent = `tick ${fx.view.tick}  ${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}  overlay ${overlay} [1-4]  cell ${lastCell}`;
+	hud.textContent = `tick ${fx.view.tick}  ${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}  overlay ${overlay} [1-6]  stage ${fx.view.corruption} [q-t]  cell ${lastCell}`;
 	requestAnimationFrame(frame);
 };
 requestAnimationFrame(frame);

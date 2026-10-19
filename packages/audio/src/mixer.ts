@@ -30,11 +30,31 @@ export interface DuckStep {
 }
 
 /** setTargetAtTime steps for a duck triggered at `now`: dip, then release after the hold. */
-export function duckSteps(now: number): DuckStep[] {
+export function duckSteps(now: number, plan: DuckPlan = { db: DUCK.db, holdS: DUCK.holdS }): DuckStep[] {
 	return [
-		{ time: now, target: duckLinear(), tau: DUCK.attackTau },
-		{ time: now + DUCK.holdS, target: 1, tau: DUCK.releaseTau },
+		{ time: now, target: 10 ** (plan.db / 20), tau: DUCK.attackTau },
+		{ time: now + plan.holdS, target: 1, tau: DUCK.releaseTau },
 	];
+}
+
+export interface DuckPlan {
+	db: number;
+	holdS: number;
+}
+
+/** Music dip under a stinger, dB (stingers play on their own, un-ducked bus). */
+export const STINGER_DUCK_DB = -6;
+
+/**
+ * What to do to the music bus this frame: an alarm dips it (-8 dB, 1.5 s); stingers
+ * dip it (-6 dB) for most of their length. Both at once: the deeper dip, the longer hold.
+ */
+export function duckPlan(alarm: boolean, stingerS: number): DuckPlan | null {
+	const plans: DuckPlan[] = [];
+	if (alarm) plans.push({ db: DUCK.db, holdS: DUCK.holdS });
+	if (stingerS > 0) plans.push({ db: STINGER_DUCK_DB, holdS: stingerS * 0.75 });
+	if (plans.length === 0) return null;
+	return { db: Math.min(...plans.map((p) => p.db)), holdS: Math.max(...plans.map((p) => p.holdS)) };
 }
 
 export const clamp01 = (v: number, fallback = 0): number => (Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : fallback);
@@ -44,6 +64,8 @@ export interface Buses {
 	sfx: GainNode;
 	ambience: GainNode;
 	ui: GainNode;
+	/** Music stingers: follows the music volume but bypasses the duck. */
+	stinger: GainNode;
 }
 
 export interface Mixer {
@@ -51,8 +73,8 @@ export interface Mixer {
 	/** Master level 0..1 (mute is folded in by the caller). */
 	setMaster(v: number): void;
 	setMusic(v: number): void;
-	/** Dip the music bus for an alarm. */
-	duck(): void;
+	/** Dip the music bus (default: the alarm dip). */
+	duck(plan?: DuckPlan): void;
 	dispose(): void;
 }
 
@@ -70,25 +92,29 @@ export function createMixer(ctx: BaseAudioContext, master: number, music: number
 		g.gain.value = v;
 		return g;
 	};
-	const buses: Buses = { music: bus(music * MUSIC_TRIM), sfx: bus(1), ambience: bus(1), ui: bus(1) };
+	const buses: Buses = { music: bus(music * MUSIC_TRIM), sfx: bus(1), ambience: bus(1), ui: bus(1), stinger: bus(music * MUSIC_TRIM) };
 	const duckGain = bus(1);
 	buses.music.connect(duckGain);
 	duckGain.connect(masterGain);
 	buses.sfx.connect(masterGain);
 	buses.ambience.connect(masterGain);
 	buses.ui.connect(masterGain);
+	buses.stinger.connect(masterGain);
 
 	return {
 		buses,
 		setMaster: (v) => masterGain.gain.setTargetAtTime(v, ctx.currentTime, 0.05),
-		setMusic: (v) => buses.music.gain.setTargetAtTime(v * MUSIC_TRIM, ctx.currentTime, 0.05),
-		duck() {
+		setMusic(v) {
+			buses.music.gain.setTargetAtTime(v * MUSIC_TRIM, ctx.currentTime, 0.05);
+			buses.stinger.gain.setTargetAtTime(v * MUSIC_TRIM, ctx.currentTime, 0.05);
+		},
+		duck(plan) {
 			const now = ctx.currentTime;
 			duckGain.gain.cancelScheduledValues(now);
-			for (const s of duckSteps(now)) duckGain.gain.setTargetAtTime(s.target, s.time, s.tau);
+			for (const s of duckSteps(now, plan)) duckGain.gain.setTargetAtTime(s.target, s.time, s.tau);
 		},
 		dispose() {
-			for (const n of [buses.music, duckGain, buses.sfx, buses.ambience, buses.ui, masterGain, comp]) n.disconnect();
+			for (const n of [buses.music, duckGain, buses.sfx, buses.ambience, buses.ui, buses.stinger, masterGain, comp]) n.disconnect();
 		},
 	};
 }

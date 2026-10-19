@@ -11,9 +11,10 @@ import { Graphics } from "pixi.js";
 import { botDims, botKind, crateCount, hoverOffset, rotorSpeed } from "../botArt";
 import { floorTop } from "../camera";
 import { hex, satisfactionColor } from "../color";
+import type { HorrorStages } from "../horror";
 import { FAC_BOTTOM, TILE } from "../constants";
 import type { Sample } from "../interp";
-import { BRASS, CRATE, type Mat, STEEL, T, dk, lt, mat } from "../palette";
+import { BLOOD, BRASS, CRATE, FLESH, type Mat, STEEL, T, dk, lt, mat, mix } from "../palette";
 import { px } from "./draw";
 
 export const BOT_W = 12;
@@ -61,7 +62,8 @@ function batteryGauge(c: Ctx, y: number): void {
 	if (c.b.state === "charging") px(c.g, c.x + 10, y - 1, 1, 3, Math.floor(c.t * 3) % 2 ? T.amber : T.amberDim);
 }
 
-const eyeColor = (b: BotView): number => (b.state === "repairing" ? lt(T.amber, 0.6) : b.state === "charging" ? T.green : T.amber);
+/** One cyan eye; amber while repairing, green while charging. */
+const eyeColor = (b: BotView): number => (b.state === "repairing" ? lt(T.amber, 0.6) : b.state === "charging" ? T.green : T.brass);
 
 function drawRover(c: Ctx, crates: number): void {
 	const { R, m, b, t } = c;
@@ -233,6 +235,50 @@ function drawDrone(c: Ctx, crates: number, speed: number, hover: number, nearFlo
 	batteryGauge(c, y0 - 3);
 }
 
+/** Where the mutation art goes on each body: second-eye socket, flesh patch (x, y, w, h). */
+interface MutGeom {
+	eye: [number, number];
+	patch: [number, number, number, number];
+}
+const MUT: Record<"standard" | "lifter" | "drone", MutGeom> = {
+	standard: { eye: [3, 2], patch: [4, 1, 3, 2] },
+	lifter: { eye: [6, 2], patch: [7, 1, 3, 2] },
+	drone: { eye: [3, 5], patch: [4, 7, 3, 2] },
+};
+
+/**
+ * Mutated bots ("reclassified"): `fleshed` gets a flesh patch on the head, `tendriled` gets tendrils trailing from the back;
+ * the second, smaller eye needs the `eyes` stage (full intensity, stage 3). With horror off a plain amber band marks the trait.
+ */
+function mutate(c: Ctx, kind: "standard" | "lifter" | "drone", h: HorrorStages): void {
+	const trait = c.b.trait;
+	if (!trait) return;
+	const geo = MUT[kind];
+	const { R } = c;
+	if (h.alpha <= 0) {
+		R(geo.patch[0], geo.patch[1] - 1, 4, 1, T.amber);
+		return;
+	}
+	const a = h.alpha === 1 ? 1 : 0.6;
+	if (trait === "fleshed") {
+		const [px0, py0, pw, ph] = geo.patch;
+		R(px0, py0, pw, ph, FLESH.mid, a);
+		R(px0, py0, pw - 1, 1, FLESH.hi, a);
+		R(px0 + 1, py0 + 1, 1, 1, BLOOD.mid, a);
+	} else {
+		const base = kind === "drone" ? 8 : 6;
+		for (let j = 0; j < 3; j++)
+			for (let k = 0; k < 4; k++) {
+				const wig = c.calm ? 0 : Math.round(Math.sin(c.t * 3 + j * 1.7 + k * 0.8));
+				R(-1 - k, base + j * 2 + wig, 1, 1, k === 3 ? BLOOD.hi : FLESH.mid, a);
+			}
+	}
+	if (h.eyes) {
+		R(geo.eye[0], geo.eye[1], 2, 2, T.ink);
+		R(geo.eye[0], geo.eye[1], 1, 1, mix(T.bile, T.paper, 0.5));
+	}
+}
+
 export class Bots {
 	readonly g = new Graphics();
 	/** Welding-torch tips of repairing bots this frame (world px), for the sparks effect. */
@@ -241,7 +287,7 @@ export class Bots {
 
 	constructor(private readonly content: ContentDB) {}
 
-	draw(view: SimView, pos: (b: BotView) => Sample, vel: (b: BotView) => Sample, t: number, opt?: Pick<RenderOptions, "reducedMotion">): void {
+	draw(view: SimView, pos: (b: BotView) => Sample, vel: (b: BotView) => Sample, t: number, opt?: Pick<RenderOptions, "reducedMotion">, horror?: HorrorStages): void {
 		const g = this.g;
 		g.clear();
 		this.torches.length = 0;
@@ -252,7 +298,7 @@ export class Bots {
 			const kind = botKind(def);
 			const dims = botDims(kind);
 			const { x, y } = botBox(view, p.x, p.y, dims.w);
-			const m = mat(def ? hex(def.color) : T.steel);
+			const m = mat(mix(T.paper, def ? hex(def.color) : T.steel, 0.12));
 			const moving = Math.abs(v.x) > 1e-4 || Math.abs(v.y) > 1e-4;
 			if (v.x > 1e-4) this.facing.set(b.id, 1);
 			else if (v.x < -1e-4) this.facing.set(b.id, -1);
@@ -265,9 +311,16 @@ export class Bots {
 			const crates = crateCount(def, b.carrying);
 			if (kind === "drone") {
 				const near = Math.abs(p.y - Math.round(p.y)) < 0.05;
-				drawDrone(ctx, crates, rotorSpeed(b.state), hoverOffset(b.state), near);
-			} else if (kind === "lifter") drawLifter(ctx, crates);
-			else drawRover(ctx, crates);
+				const hover = hoverOffset(b.state);
+				drawDrone(ctx, crates, rotorSpeed(b.state), hover, near);
+				if (horror && b.trait) mutate({ ...ctx, R: (lx, ly, wd, h, c2, a2) => R(lx, ly - hover, wd, h, c2, a2) }, "drone", horror);
+			} else if (kind === "lifter") {
+				drawLifter(ctx, crates);
+				if (horror && b.trait) mutate(ctx, "lifter", horror);
+			} else {
+				drawRover(ctx, crates);
+				if (horror && b.trait) mutate(ctx, "standard", horror);
+			}
 		}
 	}
 }

@@ -5,7 +5,7 @@ import { cellIdx, findById, inBounds } from "../core/grid";
 import { getDef } from "../world/defs";
 import { removeFacility, removeLift } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
-import { conduitCost, liftCost, slabCost } from "./structure";
+import { conduitCost, layerGrid, liftCost, slabCost } from "./structure";
 
 export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: ConduitLayer): Plan {
 	const s = ctx.state;
@@ -19,7 +19,8 @@ export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: Con
 	if (facId >= 0) {
 		const f = findById(s.facilities, facId);
 		if (!f) return reject("internal: dangling facility cell");
-		return accept(-getDef(ctx.content, f.defId).cost * DEMOLISH_REFUND, (events) => {
+		// A growth is free: demolishing it refunds nothing.
+		return accept(f.grown ? 0 : -getDef(ctx.content, f.defId).cost * DEMOLISH_REFUND, (events) => {
 			removeFacility(s, ctx.content, f);
 			done(events);
 		});
@@ -35,18 +36,16 @@ export function planDemolish(ctx: PlanCtx, floor: number, x: number, layer?: Con
 		});
 	}
 
-	const layers: ConduitLayer[] = (layer ? [layer] : (["power", "coolant"] as ConduitLayer[])).filter((l) =>
-		l === "power" ? s.power[i] === 1 : s.coolant[i] === 1,
-	);
+	const layers: ConduitLayer[] = (layer ? [layer] : (["power", "coolant", "nutrient"] as ConduitLayer[])).filter((l) => layerGrid(s, l)[i] === 1);
 	if (layers.length > 0) {
 		const refund = layers.reduce((sum, l) => sum + conduitCost(ctx, l), 0) * DEMOLISH_REFUND;
 		return accept(-refund, (events) => {
-			for (const l of layers) (l === "power" ? s.power : s.coolant)[i] = 0;
+			for (const l of layers) layerGrid(s, l)[i] = 0;
 			s.netsDirty = true;
 			done(events);
 		});
 	}
-	if (s.power[i] || s.coolant[i]) return reject("remove the conduits on this tile first");
+	if (s.power[i] || s.coolant[i] || s.nutrient[i]) return reject("remove the conduits on this tile first");
 
 	if (s.slab[i]) {
 		if (floor + 1 <= s.floorMax && floor + 1 > 0 && s.slab[cellIdx(s, x, floor + 1)]) return reject("slab supports the floor above");

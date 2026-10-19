@@ -12,7 +12,7 @@ const PERC_VOICE_HEADROOM = 10;
 const NOISE_SECONDS = 4;
 const FLOOR = 0.0001;
 
-const PERC: ReadonlySet<InstId> = new Set(["brush", "rim", "tick"]);
+const PERC: ReadonlySet<InstId> = new Set(["brush", "rim", "tick", "wet", "heart"]);
 const hz = (midi: number): number => 440 * 2 ** ((midi - 69) / 12);
 
 export interface PlayOptions {
@@ -190,6 +190,41 @@ export function createInstruments(ctx: BaseAudioContext, out: AudioNode, rng: Rn
 				bp.connect(env);
 				clack.connect(env);
 				voice([n, clack], [bp, env], envelope(env.gain, t0, v * 0.06, 0.001, 0.008, 0.1, 0.012, 0.03));
+				break;
+			}
+			case "wet": {
+				// Wet click: a tiny rising "bubble" chirp with a soft, band-passed squelch. Unpitched notes (midi 0) pick a random pitch.
+				const base = midi > 0 ? f : hz(58 + Math.floor(rng() * 14));
+				const o = osc("sine", base * 0.6, t0);
+				o.frequency.setValueAtTime(base * 0.6, t0);
+				o.frequency.exponentialRampToValueAtTime(base * 1.6, t0 + 0.045);
+				const n = noiseSrc(t0);
+				const bp = filter("bandpass", base * 2.2, 2.5);
+				const ng = ctx.createGain();
+				ng.gain.value = 0.35;
+				n.connect(bp);
+				bp.connect(ng);
+				ng.connect(env);
+				o.connect(env);
+				voice([o, n], [bp, ng, env], envelope(env.gain, t0, v * 0.12, 0.002, 0.018, 0.1, 0.07, 0.05));
+				break;
+			}
+			case "heart": {
+				// Heartbeat thump: a falling sub-sine with a touch of triangle body, low-passed.
+				const o = osc("sine", 62, t0);
+				o.frequency.setValueAtTime(62, t0);
+				o.frequency.exponentialRampToValueAtTime(34, t0 + 0.14);
+				const body = osc("triangle", 62, t0);
+				body.frequency.setValueAtTime(62, t0);
+				body.frequency.exponentialRampToValueAtTime(34, t0 + 0.14);
+				const bg = ctx.createGain();
+				bg.gain.value = 0.3;
+				const lp = filter("lowpass", 150, 0.6);
+				o.connect(lp);
+				body.connect(bg);
+				bg.connect(lp);
+				lp.connect(env);
+				voice([o, body], [bg, lp, env], envelope(env.gain, t0, v * 0.55, 0.012, 0.05, 0.1, Math.min(dur, 0.25), 0.12));
 				break;
 			}
 		}

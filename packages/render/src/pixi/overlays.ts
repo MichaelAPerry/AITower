@@ -2,11 +2,12 @@
 import type { ContentDB } from "@aitower/content";
 import type { OverlayMode, RenderOptions } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
-import { Container, Graphics } from "pixi.js";
+import { Container, Graphics, Sprite, Texture } from "pixi.js";
 import { floorTop } from "../camera";
 import { alertColor, heatAlpha, heatColor, loadColor, netColor, rackTempColor, satisfactionColor } from "../color";
 import { FAC_BOTTOM, FAC_TOP, FLOOR_H, MARGIN_BOTTOM, MARGIN_TOP, MARGIN_X, TILE } from "../constants";
-import { drawCoolant, drawPower } from "./conduits";
+import { contaminationColor, contaminationTexels, nutrientNetColor, nutrientSatisfaction, TEXEL } from "../horror";
+import { drawCoolant, drawNutrient, drawPower } from "./conduits";
 import { box, px } from "./draw";
 import { T, dk, lt, mix } from "../palette";
 
@@ -22,16 +23,29 @@ export class Overlays {
 	readonly root = new Container();
 	private base = new Graphics();
 	private anim = new Graphics();
+	/** Contamination field: one dithered RGBA data texture for the whole tower, scaled 2× with nearest sampling. */
+	private field = new Sprite();
+	private canvas: HTMLCanvasElement | null = null;
+	private tex: Texture | null = null;
 
 	constructor(private readonly content: ContentDB) {
-		this.root.addChild(this.base, this.anim);
+		this.field.visible = false;
+		this.root.addChild(this.base, this.field, this.anim);
+	}
+
+	destroy(): void {
+		this.tex?.destroy(true);
+		this.tex = null;
 	}
 
 	/** Rebuilt once per tick (and when the mode or colour-blind option changes). */
 	rebuild(view: SimView, mode: OverlayMode, opt: RenderOptions): void {
 		const g = this.base;
 		g.clear();
-		if (mode === "heat") this.heat(view, opt.colorBlind);
+		this.field.visible = false;
+		if (mode === "nutrient") this.nutrient(view, opt.colorBlind);
+		else if (mode === "contamination") this.contamination(view, opt.colorBlind);
+		else if (mode === "heat") this.heat(view, opt.colorBlind);
 		else if (mode === "power") this.power(view, opt.colorBlind);
 		else if (mode === "coolant") this.coolant(view, opt.colorBlind);
 	}
@@ -62,6 +76,60 @@ export class Overlays {
 			const c = rackTempColor(fv.tempC, cb);
 			px(g, x + 1, y, def.width * TILE - 1, FAC_BOTTOM - FAC_TOP, c, 0.55);
 			box(g, x + 1, y, def.width * TILE - 1, FAC_BOTTOM - FAC_TOP, lt(c, 0.45), 0.9);
+		}
+	}
+
+	/** Nutrient nets (bile-pale lines) and a fed / starved box on every device that eats or makes feed. */
+	private nutrient(view: SimView, cb: boolean): void {
+		const g = this.base;
+		this.dim(view, 0.62);
+		const nets = new Map(view.nutrientNets.map((n) => [n.id, n]));
+		drawNutrient(g, view, (i) => (view.nutrientNetOf[i] >= 0 ? nutrientNetColor(view.nutrientNetOf[i]) : NONE));
+		for (const fv of view.facilities) {
+			const def = this.content.facilities[fv.defId];
+			if (!def) continue;
+			const needs = def.placement?.needsNutrient || def.kind === "nutrient" || def.kind === "bioreactor" || def.rack?.cooling === "bio";
+			if (!needs && fv.nutrientNet === null) continue;
+			const x = fv.x * TILE;
+			const y = floorTop(view, fv.floor) + FAC_TOP;
+			const w = def.width * TILE - 1;
+			const h = FAC_BOTTOM - FAC_TOP;
+			const sat = nutrientSatisfaction(fv.nutrientNet !== null ? nets.get(fv.nutrientNet) : undefined, fv.status);
+			const c = satisfactionColor(sat, cb);
+			px(g, x + 1, y, w, h, c, 0.3);
+			box(g, x + 1, y, w, h, fv.nutrientNet !== null ? nutrientNetColor(fv.nutrientNet) : alertColor(cb), 1);
+		}
+	}
+
+	/** Dithered contamination heat map (bile, flesh, blood; blue / orange when colour-blind) built from the data texture. */
+	private contamination(view: SimView, cb: boolean): void {
+		const g = this.base;
+		this.dim(view, 0.55);
+		const t = contaminationTexels(view.width, view.floorMin, view.floorMax, view.contamination, view.slab, cb);
+		if (typeof document !== "undefined") {
+			if (!this.canvas || this.canvas.width !== t.width || this.canvas.height !== t.height) {
+				this.canvas = document.createElement("canvas");
+				this.canvas.width = t.width;
+				this.canvas.height = t.height;
+				this.tex?.destroy(true);
+				this.tex = Texture.from(this.canvas);
+				this.tex.source.scaleMode = "nearest";
+				this.field.texture = this.tex;
+			}
+			const ctx = this.canvas.getContext("2d");
+			if (ctx && this.tex) {
+				ctx.putImageData(new ImageData(t.data, t.width, t.height), 0, 0);
+				this.tex.source.update();
+				this.field.position.set(0, floorTop(view, view.floorMax));
+				this.field.scale.set(TEXEL);
+				this.field.visible = true;
+			}
+		}
+		for (const fv of view.facilities) {
+			if (fv.contamination < 0.1 && !fv.grown) continue;
+			const def = this.content.facilities[fv.defId];
+			if (!def) continue;
+			box(g, fv.x * TILE + 1, floorTop(view, fv.floor) + FAC_TOP, def.width * TILE - 1, FAC_BOTTOM - FAC_TOP, contaminationColor(Math.max(0.5, fv.contamination), cb), 0.9);
 		}
 	}
 

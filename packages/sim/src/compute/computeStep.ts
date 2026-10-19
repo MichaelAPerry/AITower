@@ -16,14 +16,17 @@ import { allocateRacks, applyStorageLimit, isActive, releaseBadRacks, releaseJob
 
 function updateRackClocks(ctx: TickCtx): number {
 	let total = 0;
+	let organoid = 0;
 	for (const f of ctx.state.facilities) {
 		const d = getDef(ctx.content, f.defId);
 		if (d.kind !== "rack" || !d.rack) continue;
 		const down = !f.enabled || f.failed || f.tripped;
-		f.clock = down ? 0 : f.thermalClock * powerFactor(f.sat);
+		f.clock = down ? 0 : f.thermalClock * powerFactor(f.sat) * f.nutrientSat;
 		f.pflops = f.busy && f.jobId >= 0 ? d.rack.pflops * f.clock : 0;
 		total += f.pflops;
+		if (d.rack.cooling === "bio") organoid += f.pflops;
 	}
+	ctx.state.metrics.organoidPflops = organoid;
 	return total;
 }
 

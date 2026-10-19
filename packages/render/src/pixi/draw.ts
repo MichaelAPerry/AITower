@@ -1,6 +1,6 @@
 /** Tiny drawing primitives over Pixi Graphics for pixel art (all axis-aligned rects, no anti-aliasing). */
 import type { Graphics } from "pixi.js";
-import { BRASS, type Mat, PAPER, T, dk, lt, mix } from "../palette";
+import { BRASS, type Mat, T, dk, lt, mix } from "../palette";
 
 /** Filled axis-aligned rect. */
 export const px = (g: Graphics, x: number, y: number, w: number, h: number, color: number, alpha = 1): void => {
@@ -49,8 +49,8 @@ export const ring = (g: Graphics, x: number, y: number, d: number, rim: number, 
 };
 
 /** Brass rivet: 1px head with a highlight above-left when there is room. */
-export const rivet = (g: Graphics, x: number, y: number, m: Mat = BRASS): void => {
-	px(g, x, y, 1, 1, m.hi);
+export const rivet = (_g: Graphics, _x: number, _y: number, _m: Mat = BRASS): void => {
+	// Synthetic look: no rivets (kept so callers read the same).
 };
 
 /**
@@ -66,14 +66,12 @@ export const bevel = (g: Graphics, x: number, y: number, w: number, h: number, m
 	px(g, x + w - 2, y + 2, 1, h - 4, m.lo);
 };
 
-/** Riveted brass corner bracket (3×3 L) at a cabinet corner. `sx`/`sy` = ±1 pointing outward. */
+/** Thin cold-light corner tick (2×2 L, accent at low alpha) at a cabinet corner. `sx`/`sy` = ±1 pointing outward. */
 export const cornerBracket = (g: Graphics, x: number, y: number, sx: 1 | -1, sy: 1 | -1): void => {
-	const ox = sx < 0 ? x : x - 2;
-	const oy = sy < 0 ? y : y - 2;
-	px(g, ox, oy, 3, 3, BRASS.mid);
-	px(g, sx < 0 ? ox : ox + 2, oy, 1, 3, BRASS.lo);
-	px(g, ox, sy < 0 ? oy : oy + 2, 3, 1, BRASS.lo);
-	px(g, ox + 1, oy + 1, 1, 1, BRASS.hi);
+	const ox = sx < 0 ? x : x - 1;
+	const oy = sy < 0 ? y : y - 1;
+	px(g, ox, oy, 2, 1, BRASS.mid, 0.55);
+	px(g, ox + (sx < 0 ? 0 : 1), oy, 1, 2, BRASS.mid, 0.55);
 };
 
 /** Round indicator lamp (2×2) with a soft glow halo when lit. */
@@ -154,10 +152,13 @@ export const fanBlades = (g: Graphics, x: number, y: number, d: number, angle: n
 	px(g, Math.floor(cx) - 1, Math.floor(cy) - 1, 1, 1, BRASS.hi);
 };
 
-/** Analog dial face (cream with brass bezel) of diameter d; needle drawn separately with `needle`. */
+/** Dark glass face of a gauge. */
+const FACE = mix(T.ink, T.brassDk, 0.3);
+
+/** Gauge face (dark glass with a thin cyan bezel) of diameter d; needle drawn separately with `needle`. */
 export const dialFace = (g: Graphics, x: number, y: number, d: number): void => {
 	disc(g, x, y, d, BRASS.lo);
-	disc(g, x + 1, y + 1, d - 2, PAPER.mid);
+	disc(g, x + 1, y + 1, d - 2, FACE);
 	if (d >= 7) {
 		// Scale ticks along the inner rim of the sweep (8 o'clock → 4 o'clock), red zone at the end.
 		const cx = x + d / 2;
@@ -166,7 +167,7 @@ export const dialFace = (g: Graphics, x: number, y: number, d: number): void => 
 		const n = d >= 9 ? 6 : 4;
 		for (let i = 0; i <= n; i++) {
 			const a = Math.PI * (0.75 + (1.5 * i) / n);
-			px(g, Math.floor(cx + Math.cos(a) * r), Math.floor(cy + Math.sin(a) * r), 1, 1, i >= n - 1 ? T.red : dk(T.paper, 0.55));
+			px(g, Math.floor(cx + Math.cos(a) * r), Math.floor(cy + Math.sin(a) * r), 1, 1, i >= n - 1 ? T.red : mix(T.paper, FACE, 0.5));
 		}
 	}
 };
@@ -174,16 +175,16 @@ export const dialFace = (g: Graphics, x: number, y: number, d: number): void => 
 /** Rectangular panel meter (cream face, printed arc scale, red zone at the right); needle via `meterNeedle`. */
 export const panelMeter = (g: Graphics, x: number, y: number, w: number, h: number): void => {
 	px(g, x, y, w, h, BRASS.lo);
-	px(g, x + 1, y + 1, w - 2, h - 2, PAPER.mid);
-	px(g, x + 1, y + 1, w - 2, 1, PAPER.hi);
+	px(g, x + 1, y + 1, w - 2, h - 2, FACE);
+	px(g, x + 1, y + 1, w - 2, 1, lt(FACE, 0.2));
 	// Scale: an arc of dots across the upper face.
 	const n = w - 4;
 	for (let i = 0; i < n; i++) {
 		const u = i / (n - 1);
 		const ay = y + 2 + Math.round(Math.abs(u - 0.5) * 2 * Math.min(2, h - 5));
-		px(g, x + 2 + i, ay, 1, 1, u > 0.78 ? T.red : i % 2 ? dk(T.paper, 0.35) : dk(T.paper, 0.6));
+		px(g, x + 2 + i, ay, 1, 1, u > 0.78 ? T.red : i % 2 ? mix(T.paper, FACE, 0.35) : mix(T.paper, FACE, 0.65));
 	}
-	px(g, x + Math.floor(w / 2) - 1, y + h - 2, 2, 1, T.ink); // pivot
+	px(g, x + Math.floor(w / 2) - 1, y + h - 2, 2, 1, T.brass); // pivot
 };
 
 /** Needle for `panelMeter`: pivots at the bottom centre, `v` 0..1 left → right. */
@@ -192,17 +193,17 @@ export const meterNeedle = (g: Graphics, x: number, y: number, w: number, h: num
 	const cy = y + h - 1.5;
 	const a = Math.PI * (1.2 + 0.6 * Math.max(0, Math.min(1, v)));
 	const len = h - 3.2;
-	for (let s = 0.5; s <= len; s += 0.6) px(g, Math.floor(cx + Math.cos(a) * s), Math.floor(cy + Math.sin(a) * s), 1, 1, T.ink);
+	for (let s = 0.5; s <= len; s += 0.6) px(g, Math.floor(cx + Math.cos(a) * s), Math.floor(cy + Math.sin(a) * s), 1, 1, T.paper);
 };
 
 /** Dial needle from the dial centre; `v` 0..1 sweeps from 8 o'clock to 4 o'clock. */
-export const needle = (g: Graphics, x: number, y: number, d: number, v: number, color: number = T.red): void => {
+export const needle = (g: Graphics, x: number, y: number, d: number, v: number, color: number = T.paper): void => {
 	const cx = x + d / 2;
 	const cy = y + d / 2;
 	const a = Math.PI * (0.75 + 1.5 * Math.max(0, Math.min(1, v)));
 	const r = d / 2 - 1.2;
 	for (let s = 0.5; s <= r; s += 0.7) px(g, Math.floor(cx + Math.cos(a) * s), Math.floor(cy + Math.sin(a) * s), 1, 1, color);
-	px(g, Math.floor(cx - 0.5), Math.floor(cy - 0.5), 1, 1, T.ink);
+	px(g, Math.floor(cx - 0.5), Math.floor(cy - 0.5), 1, 1, T.brass);
 };
 
 /** Small brass valve wheel (5×5) with spokes; `phase` 0/1 rotates the spokes 45°. */

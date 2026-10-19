@@ -2,23 +2,23 @@ import type { ContentDB } from "@aitower/content";
 import type { GameStore } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { BottomPanel } from "./components/BottomPanel";
-import { BuildPalette } from "./components/BuildPalette";
 import type { PanelProps, UiState } from "./components/context";
 import { DesktopNotice } from "./components/DesktopNotice";
 import { Inspector } from "./components/Inspector";
-import { OverlaySwitcher } from "./components/OverlaySwitcher";
 import { Toasts } from "./components/Toasts";
-import { TopBar } from "./components/TopBar";
+import { BuildDock, Drawer, DrawerTabs, NextChip, PalettePopover, Ticker } from "./calm/Parts";
+import { TopStrip } from "./calm/TopStrip";
+import { nextDrawer } from "./calm/calm";
+import { AscensionSheet } from "./ascension/AscensionSheet";
+import { ascensionDue } from "./ascension/ascension";
 import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { ResearchSheet } from "./research/ResearchSheet";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
-import { MemoDrawer, MemoPop, ModifierChips } from "./memo/MemoDesk";
+import { MemoDrawer, MemoPop } from "./memo/MemoDesk";
 import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
-import { Objective } from "./objective/Objective";
 import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -26,12 +26,16 @@ import { createMenuController } from "./menu/menuController";
 import { newSaveError } from "./menu/slots";
 import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
+import { conduitName } from "./tools/controller";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
 // After ui.css, so these can refine its base rules.
 import "./clerk/clerk.css";
 import "./finance/finance.css";
 import "./research/research.css";
+import "./bio/bio.css";
+import "./calm/calm.css";
+import "./calm/theme.css";
 
 export interface HudProps {
 	store: GameStore;
@@ -43,18 +47,25 @@ export interface HudProps {
 /** The whole HUD, absolutely positioned over the world canvas; empty areas let pointer events through. */
 export function Hud({ store, content, title }: HudProps) {
 	const state = useGameState(store);
-	const [ui, setUiState] = useState<UiState>({ bottomTab: "contracts", bottomOpen: true, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
+	const [ui, setUiState] = useState<UiState>({ drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
 	// The research sheet pauses like the menu (and restores the speed on close).
 	const [researchOpen, setResearchOpen] = useState(false);
 	const research = useMemo(() => createMenuController(store, setResearchOpen), [store]);
+	// FORM A-5 (ascension) pauses the same way: the choice is irreversible, so nothing may happen while it is read.
+	const [ascensionOpen, setAscensionOpen] = useState(false);
+	const ascension = useMemo(() => createMenuController(store, setAscensionOpen), [store]);
 	// The quarterly audit sheet does not pause. `auditRef` lets the Esc handler (a stable object) see the current report.
 	const [audit, setAudit] = useState<QuarterReport | null>(null);
 	const auditRef = useRef<QuarterReport | null>(null);
 	auditRef.current = audit;
 	const auditSheet = useMemo(() => ({ isOpen: () => auditRef.current !== null, close: () => setAudit(null) }), []);
+	// Esc closes the open drawer or the palette popover (the key handler is a stable object, so it reads the state through a ref).
+	const uiRef = useRef(ui);
+	uiRef.current = ui;
+	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false })) }), []);
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
@@ -74,12 +85,16 @@ export function Hud({ store, content, title }: HudProps) {
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
 	useEffect(() => () => research.close(), [research]);
+	useEffect(() => () => ascension.close(), [ascension]);
 	useHudKeyboard(
 		store,
-		useCallback(() => setUiState((u) => ({ ...u, bottomOpen: !u.bottomOpen })), []),
+		{
+			toggleDrawer: useCallback((id) => setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false })), []),
+			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null })), []),
+		},
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current, []),
-		{ research, audit: auditSheet },
+		{ research, ascension, audit: auditSheet, drawer: drawerCloser },
 	);
 
 	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
@@ -94,6 +109,7 @@ export function Hud({ store, content, title }: HudProps) {
 	useEffect(() => {
 		if (overId) {
 			research.close(); // restores its remembered speed first, so the pause below is the last word
+			ascension.close();
 			store.setSpeed(0);
 		}
 	}, [overId]);
@@ -127,42 +143,63 @@ export function Hud({ store, content, title }: HudProps) {
 		if (r) setAudit(r);
 	}, [state.log]);
 
-	const alertsOpen = ui.bottomOpen && ui.bottomTab === "alerts";
+	const alertsOpen = ui.drawer === "log";
 	const tick = state.view.tick;
 	useEffect(() => {
 		if (alertsOpen) setUi({ alertsSeenTick: tick });
 	}, [alertsOpen, tick, setUi]);
 
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAudit: setAudit };
+	// The sheet has nothing to offer once a path is chosen (or after a load of a game that has one): close it.
+	const ascensionStale = ascensionOpen && !ascensionDue(state.view, content);
+	useEffect(() => {
+		if (ascensionStale) ascension.close();
+	}, [ascensionStale, ascension]);
+
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
-			<TopBar {...props} />
-			<BuildPalette {...props} />
+			<TopStrip {...props} />
 			<div className="ui-center">
-				<OverlaySwitcher {...props} />
-				<ModifierChips modifiers={state.view.modifiers} tick={state.view.tick} />
+				<NextChip {...props} />
 				<Toasts content={content} state={state} />
-				<MemoPop store={store} state={state} ui={ui} setUi={setUi} />
+				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
-				{!titleOpen && !over && <Objective {...props} />}
 				{!titleOpen && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
+				<PalettePopover {...props} />
+				<BuildDock {...props} />
+				<Ticker {...props} />
+				<div className="ui-right">
+					<Inspector {...props} />
+				</div>
+				<DrawerTabs ui={ui} setUi={setUi} />
+				<Drawer {...props} />
 			</div>
-			<div className="ui-right">
-				<Inspector {...props} />
-			</div>
-			<BottomPanel {...props} />
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
 			{researchOpen && !titleOpen && <ResearchSheet store={store} content={content} view={state.view} onClose={research.close} />}
+			{ascensionOpen && !titleOpen && !over && (
+				<AscensionSheet
+					store={store}
+					content={content}
+					view={state.view}
+					onClose={ascension.close}
+					onFiled={(f) => {
+						setUi({ pathFiled: f });
+						ascension.close();
+					}}
+				/>
+			)}
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
 			{titleOpen && <TitleScreen store={store} state={state} menuOpen={menuOpen} openMenu={openMenuAt} onStart={() => setTitleOpen(false)} />}
 			{over && (
 				<GameOverScreen
 					over={over}
 					view={state.view}
+					content={content}
+					horror={settings.horrorIntensity}
 					menuOpen={menuOpen}
 					onLoad={() => openMenuAt("load")}
 					onNewGame={() => {
@@ -188,7 +225,7 @@ function ToolHint({ content, state }: PanelProps) {
 			: t.kind === "slab"
 				? "Slab — drag along a floor"
 				: t.kind === "conduit"
-					? `${t.layer === "power" ? "Power" : "Coolant"} conduit — drag across, then up/down`
+					? `${conduitName(t.layer)} — drag across, then up/down`
 					: t.kind === "lift"
 						? "Lift — drag vertically on a column"
 						: t.kind === "demolish"

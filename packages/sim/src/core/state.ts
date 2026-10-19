@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { ContractSpec } from "@aitower/content";
-import type { ClerkPolicy, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
+import type { AscensionPath, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -17,6 +17,8 @@ export interface Facility {
 	/** Network ids (-1 = none). */
 	powerNet: number;
 	coolantNet: number;
+	/** Nutrient net id (-1 = none). */
+	nutrientNet: number;
 	/** Power satisfaction this tick (1 when the facility needs no power). */
 	sat: number;
 	/** Requested electrical draw this tick, kW. */
@@ -45,6 +47,17 @@ export interface Facility {
 	noCoolant: boolean;
 	/** Coolant supply temp seen by a liquid rack, °C. */
 	coolantC: number;
+	// ── biotech ──
+	/** Share of its nutrient demand the net meets (1 for facilities that draw none; 0 for a consumer off any net). */
+	nutrientSat: number;
+	/** Nutrient consumer with no nutrients at all. */
+	noNutrient: boolean;
+	/** Organoid rack below its temperature band. */
+	tooCold: boolean;
+	/** A growth (sprouted by the sim, never built). */
+	grown: boolean;
+	/** Growth that failed: the tick at which it comes back by itself (-1 = not failed). */
+	recoverAt: number;
 	// ── genset ──
 	gensetMode: GensetMode;
 	gensetTimer: number;
@@ -113,6 +126,10 @@ export interface Bot {
 	fails: number;
 	/** `SimState.topologyRev` the current path was planned against; a mismatch triggers a re-plan. */
 	routeRev: number;
+	/** Mutation from contamination exposure, or null. */
+	trait: BotTrait | null;
+	/** Ticks spent on cells at or above `balance.bio.mutationThreshold` (cumulative; frozen once mutated). */
+	exposure: number;
 }
 
 export interface Offer {
@@ -195,6 +212,13 @@ export interface PowerNet {
 	gensetKw: number;
 }
 
+export interface NutrientNet {
+	id: number;
+	supply: number;
+	demand: number;
+	satisfaction: number;
+}
+
 export interface CoolantNet {
 	id: number;
 	capacityKw: number;
@@ -213,6 +237,8 @@ export interface Metrics {
 	gridKw: number;
 	gensetKw: number;
 	pflops: number;
+	/** PFLOPS delivered by organoid (`cooling: "bio"`) racks this tick. */
+	organoidPflops: number;
 	energyCost: number;
 	pue: number;
 	uptime: number;
@@ -255,13 +281,19 @@ export interface SimState {
 	slab: Uint8Array;
 	power: Uint8Array;
 	coolant: Uint8Array;
+	/** Nutrient conduit layer (snapshot v5). */
+	nutrient: Uint8Array;
 	facilityAt: Int32Array;
 	liftAt: Int32Array;
 	airTemp: Float32Array;
 	powerNetOf: Int32Array;
 	coolantNetOf: Int32Array;
+	nutrientNetOf: Int32Array;
+	/** Contamination 0..1 per cell; only cells with slab hold any (snapshot v5). */
+	contamination: Float32Array;
 	powerNetCount: number;
 	coolantNetCount: number;
+	nutrientNetCount: number;
 	netsDirty: boolean;
 	/** Bumped when anything bots route over changes (slab, lift or facility added/removed); triggers path re-validation. */
 	topologyRev: number;
@@ -275,6 +307,7 @@ export interface SimState {
 	nextId: { facility: number; lift: number; bot: number; contract: number; job: number; workOrder: number; memo: number };
 	powerNets: PowerNet[];
 	coolantNets: CoolantNet[];
+	nutrientNets: NutrientNet[];
 	/** Share of storage-rack capacity in use (drives storage rack power). */
 	storageUtil: number;
 	nextOfferTick: number;
@@ -300,7 +333,7 @@ export interface SimState {
 	lastIssuedDay: Record<string, number>;
 	/** 0..100; 0 ends the game ("shutdown"). */
 	standing: number;
-	gameOver: { kind: GameOverKind; tick: number } | null;
+	gameOver: { kind: GameOverKind; tick: number; ending?: EndingId } | null;
 	// ── Research, clerk, credit, audits (snapshot v4) ──
 	/** Unspent research points (float). */
 	researchPoints: number;
@@ -317,6 +350,17 @@ export interface SimState {
 	stats: LifetimeStats;
 	/** Ids of scripted events already issued. */
 	scriptedIssued: string[];
+	// ── Biotech, ascension (snapshot v5) ──
+	/** Share of built cells at or above `CONTAMINATED_CELL`, as of the last contamination step. */
+	contaminatedShare: number;
+	/** The contaminated share crossed `balance.bio.irreversibleShare` once (sticky). */
+	irreversible: boolean;
+	/** Body-horror scalar 0..1. */
+	corruption: number;
+	/** Chosen ascension path. */
+	path: AscensionPath | null;
+	/** Consecutive daily checks each path ending's condition has held. */
+	endingDays: { livingTower: number; cleanTower: number };
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];
 }

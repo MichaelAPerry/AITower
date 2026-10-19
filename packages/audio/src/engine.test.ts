@@ -1,6 +1,8 @@
-import type { SimView } from "@aitower/sim";
+import type { SimEvent, SimView } from "@aitower/sim";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createAudio } from "./engine";
+import { createMusic } from "./music";
+import { musicParams } from "./music/director";
 
 /** Minimal fake of the WebAudio surface the engine uses; records started sources. */
 class FakeParam {
@@ -114,7 +116,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 		const ctx = FakeContext.last!;
 		expect(ctx.state).toBe("running");
 		const humSources = ctx.started;
-		expect(humSources).toBe(4 + 3); // hum + the tape's wow/drift/flutter LFOs
+		expect(humSources).toBe(5 + 3); // hum (incl. breath LFO) + the tape wow/drift/flutter LFOs
 
 		a.update(view(2), [{ type: "jobCompleted", jobId: 1, payout: 1 }]);
 		const afterFirst = ctx.started;
@@ -213,3 +215,102 @@ describe("createAudio with a (fake) AudioContext", () => {
 		a.destroy();
 	});
 });
+
+describe("corruption in the engine", () => {
+	const corrupt = (c: number) => view(1, { corruption: c, tier: 1, minuteOfDay: 720, gameOver: null } as Partial<SimView>);
+	const started = async (intensity: "full" | "mild" | "off", c: number): Promise<number> => {
+		g.AudioContext = FakeContext;
+		const a = createAudio();
+		a.setHorrorIntensity(intensity);
+		await a.resume();
+		const ctx = FakeContext.last!;
+		ctx.currentTime = 1;
+		const before = ctx.started;
+		a.update(corrupt(c), []);
+		const n = ctx.started - before;
+		a.destroy();
+		delete g.AudioContext;
+		return n;
+	};
+
+	it("builds the under drone only at full intensity and very high corruption", async () => {
+		expect(await started("full", 0.5)).toBe(0);
+		expect(await started("full", 0.95)).toBe(4); // three drone oscillators + the breathing LFO
+		expect(await started("mild", 1)).toBe(0); // 1.0 * 0.5 stays below 0.9
+		expect(await started("off", 1)).toBe(0);
+	});
+
+	it("accepts every intensity and an unknown one without throwing", async () => {
+		g.AudioContext = FakeContext;
+		const a = createAudio();
+		await a.resume();
+		FakeContext.last!.currentTime = 1;
+		for (const i of ["mild", "off", "full", "bogus" as unknown as "full"] as const) {
+			a.setHorrorIntensity(i);
+			expect(() => a.update(corrupt(0.8), [{ type: "growthSprouted", facilityId: 1 }])).not.toThrow();
+		}
+		a.destroy();
+	});
+});
+
+describe("music integration with a fake context", () => {
+	const mk = () => {
+		const ctx = new FakeContext();
+		ctx.state = "running";
+		const node = new FakeNode(ctx);
+		const music = createMusic(ctx as unknown as BaseAudioContext, node as unknown as AudioNode, { seed: 1 });
+		return { ctx, music };
+	};
+	const v = (tier: number, corruption = 0) => ({ itKw: 200, minuteOfDay: 720, gameOver: null, tier, corruption }) as Parameters<typeof musicParams>[0];
+
+	it("switches to the tier track on the next bar line", () => {
+		const { ctx, music } = mk();
+		expect(music.track()).toBe(1);
+		let prev = musicParams(v(1), [], false);
+		music.update(prev);
+		for (let t = 0; t <= 1; t += 0.025) {
+			ctx.currentTime = t;
+			music.pump(t);
+		}
+		ctx.currentTime = 1;
+		prev = musicParams(v(3), [], false, prev);
+		music.update(prev);
+		for (let t = 1; t <= 2.2; t += 0.025) music.pump(t);
+		expect(music.track()).toBe(1); // bar line (anchor 0.08 + 2.5 s) not reached
+		for (let t = 2.2; t <= 4; t += 0.025) music.pump(t);
+		expect(music.track()).toBe(3);
+		music.destroy();
+	});
+
+	it("plays stingers, rate-limits repeats and reports the duck length", () => {
+		const { ctx, music } = mk();
+		ctx.currentTime = 1;
+		const sting = (e: SimEvent) => music.update(musicParams(v(1), [e], false));
+		expect(sting({ type: "researched", techId: "x" })).toBeGreaterThan(1);
+		ctx.currentTime = 1.5;
+		expect(sting({ type: "researched", techId: "x" })).toBe(0);
+		ctx.currentTime = 4;
+		expect(sting({ type: "researched", techId: "x" })).toBeGreaterThan(1);
+		expect(music.update(musicParams(v(1), [], false))).toBe(0);
+		music.destroy();
+	});
+
+	it("halts after an absorbed ending and survives corruption layers while pumping", () => {
+		const { ctx, music } = mk();
+		let prev = musicParams(v(2, 1), [], false);
+		music.update(prev);
+		for (let t = 0; t < 6; t += 0.025) {
+			ctx.currentTime = t;
+			prev = musicParams(v(2, 1), [], false, prev, { dtS: 0.025 });
+			music.update(prev);
+			music.pump(t);
+			expect(music.voices()).toBeLessThanOrEqual(130);
+		}
+		const over = musicParams({ ...v(2, 1), gameOver: { kind: "absorbed", tick: 9 } }, [{ type: "gameOver", kind: "absorbed" }], false, prev);
+		expect(music.update(over)).toBeGreaterThan(1);
+		expect(music.isHalted()).toBe(true);
+		music.destroy();
+		expect(ctx.sources.size).toBe(0);
+	});
+});
+

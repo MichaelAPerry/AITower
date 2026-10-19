@@ -13,10 +13,12 @@ Synthesized WebAudio engine (no audio files). Depends on `sim` (types), `shared`
 | `src/mixer.ts` | Buses (music/sfx/ambience/ui) → master → compressor → destination; music duck gain (-8 dB, 1.5 s hold on `rackTripped`/`powerShortfall`/`gameOver`); pure `duckSteps`, `shouldDuck`. `setVolume`=master, `setMusicVolume`=music bus. |
 | `src/music/score.ts` | Data: 32-bar 96 BPM bossa/muzak loop (A A B A', ii-V-I in C) as sorted `ScoreNote`s on 16th steps; stems pad/keys/bass/vibes/brush/rim/hat. |
 | `src/music/sequencer.ts` | Pure lookahead core (25 ms tick / 100 ms horizon, caller-supplied clock). Bar-aligned stem latching; skips missed steps after a gap, stays on grid. |
-| `src/music/director.ts` | Pure `musicParams(view, events, paused, prev)` → stems (IT-load hysteresis), level (paused 0.3, game over 0), night filter/no hats, stingers. |
+| `src/music/director.ts` | Pure `musicParams(view, events, paused, prev, {intensity, dtS})` → stems (IT-load hysteresis), level (paused 0.3, final game over 0; victory keeps playing), night filter/no hats, stingers, `track` (by tier), smoothed `corruption` (× horror scale: full 1, mild 0.5, off 0) and `layers` {drift >0.2, organic >0.45, cluster >0.7, under >0.9}, `tapeCorruption` (0.05 = clean). |
+| `src/music/tracks.ts` | Tier 2 (104 BPM, F) and tier 3 (88 BPM, D minor) 64-bar scores built from chord/melody tables (`spell`, `buildTrack`); `trackForTier` (4-5 reuse 3). Music swaps track on a bar line (sequencer `startAt`). |
+| `src/music/organic.ts` | Pure scheduler for the organic layer: wet clicks + 60 BPM lub-dub heartbeat sub; `clusterExtra` (cluster chords). |
 | `src/music/instruments.ts` | Rhodes FM, nylon pluck, string-machine pad, vibes, brush/rim/teletype tick. Voice cap `MAX_VOICES`; every voice frees itself on `ended`; `dispose()` stops all. |
-| `src/music/tape.ts` | Saturation → wow/flutter delay → age low-pass → dropouts; `corruption` (fixed `TAPE_CORRUPTION`=0.05, M3 will drive it) scales detune/wow/dropouts; `stop()` = tape-stop. |
-| `src/music/stingers.ts` | Stinger note data (teletype, fanfare). `src/music/index.ts`: `createMusic(ctx, out)` glue (`run/stop/pump/update/destroy`). |
+| `src/music/tape.ts` | Saturation → wow/flutter delay → age low-pass → dropouts; `setCorruption` (director's `tapeCorruption`; 0.05 baseline) scales detune/wow/dropouts; `setChew` adds stutter dips + pitch lurches; `stop()` = tape-stop. |
+| `src/music/stingers.ts` | Stinger note data + pure event mapping (`stingersForEvents`, priority, max 2/frame, horror ones dropped at `off`): tierUp→fanfare, memoIssued→teletype, researched, quarterReport→auditGood (A/B)/auditBad, pathChosen, growthSprouted→sprout, botMutated→mutation, contaminationIrreversible→irreversible, gameOver→victory/absorbed/tapeStop. `src/music/index.ts`: `createMusic(ctx, out, {stingerOut})` glue (`run/stop/pump/update/destroy`); `update` returns the stinger length so the engine can duck; builds the "under" drone lazily; per-stinger 2 s rate limit. |
 | `dev/` | Offline-render harness: `npx vite packages/audio/dev --port 5186`, then `node packages/audio/dev/render.mjs <outDir>` writes music.wav and prints peak/RMS/NaN stats. Not part of the build. |
 | `src/*.test.ts` | Pure-module tests + engine tests with a fake `AudioContext`. |
 
@@ -26,6 +28,9 @@ Synthesized WebAudio engine (no audio files). Depends on `sim` (types), `shared`
 - Exponential ramps never target 0 (WebAudio throws) — envelopes go to 1e-4.
 
 - Music: nothing is created before `resume()`; the 25 ms timer runs only while music volume > 0 and is cleared by `setMusicVolume(0)` and `destroy()`. A music `tierUp` stinger replaces the old fanfare one-shot (the one-shot still plays when music volume is 0). Game over: tape-stop stinger, then the sequencer halts for good.
+
+- Horror: `setHorrorIntensity` feeds the director (off = clean tape, no organic sounds/horror stingers, no hum breathing; mild = corruption x0.5). Stingers use `buses.stinger` (follows music volume, bypasses the duck); music is ducked -6 dB under them (`duckPlan`). The hum has a breathing LFO (0.22 Hz) driven by the organic layer.
+- Music-volume 0: stingers other than the tierUp one-shot are silent (they are music).
 
 ## Event → sound
 rackTripped→alarm, componentFailed→zap, repaired→blip, liftArrived→ding, jobCompleted→cash, tierUp→fanfare,

@@ -41,7 +41,14 @@ describe("keyboard map", () => {
 		expect(keyAction("1")).toEqual({ type: "speed", speed: 0 });
 		expect(keyAction("5")).toEqual({ type: "speed", speed: 30 });
 		expect(keyAction("H")).toEqual({ type: "overlay", mode: "heat" });
-		expect(keyAction("c")).toEqual({ type: "overlay", mode: "coolant" });
+		expect(keyAction("o")).toEqual({ type: "overlay", mode: "coolant" });
+		expect(keyAction("u")).toEqual({ type: "overlay", mode: "nutrient" });
+		expect(keyAction("g")).toEqual({ type: "overlay", mode: "contamination" });
+		expect(keyAction("c")).toEqual({ type: "drawer", id: "contracts" });
+		expect(keyAction("R")).toEqual({ type: "drawer", id: "research" });
+		expect(keyAction("f")).toEqual({ type: "drawer", id: "finance" });
+		expect(keyAction("i")).toEqual({ type: "drawer", id: "gauges" });
+		expect(keyAction("b")).toEqual({ type: "palette" });
 		expect(keyAction("Escape")).toEqual({ type: "escape" });
 		for (const k of ["w", "a", "s", "d", "ArrowLeft"]) expect(keyAction(k)).toBeNull();
 	});

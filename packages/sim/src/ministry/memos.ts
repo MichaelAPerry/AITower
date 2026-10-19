@@ -25,11 +25,15 @@ export function nextMemoDelay(state: SimState, content: ContentDB): number {
 	return Math.max(1, Math.round(content.balance.events.intervalTicks * (0.5 + nextRandom(state.rng, "events"))));
 }
 
+/** Horror gates: `minCorruption` and `path`. */
+const bioGate = (state: SimState, e: EventDef): boolean => (e.minCorruption === undefined || state.corruption >= e.minCorruption) && (e.path === undefined || state.path === e.path);
+
 function eligible(state: SimState, content: ContentDB): EventDef[] {
 	const day = dayOf(state.tick);
 	const open = new Set(state.memos.map((m) => m.eventId));
 	return content.events.filter((e) => {
 		if (e.scriptedDay !== undefined) return false; // scripted events are never picked randomly
+		if (!bioGate(state, e)) return false;
 		if (open.has(e.id)) return false;
 		if (state.tier < e.minTier) return false;
 		if (e.maxTier !== undefined && state.tier > e.maxTier) return false;
@@ -52,7 +56,7 @@ function issueScripted(ctx: TickCtx): void {
 	if (minuteOfDay(state.tick) !== SCRIPTED_MINUTE_OF_DAY) return;
 	const day = dayOf(state.tick);
 	for (const e of content.events) {
-		if (e.scriptedDay !== day || state.scriptedIssued.includes(e.id)) continue;
+		if (e.scriptedDay !== day || state.scriptedIssued.includes(e.id) || !bioGate(state, e)) continue;
 		if (state.tier < e.minTier || (e.maxTier !== undefined && state.tier > e.maxTier)) continue;
 		state.scriptedIssued.push(e.id);
 		openMemo(state, e, events);

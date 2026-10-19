@@ -26,7 +26,7 @@ function state(p: { offers?: number; speed?: number; overlay?: string; racks?: n
 	} as unknown as GameState;
 }
 
-const ui = (p: Partial<TutorialUi> = {}): TutorialUi => ({ paletteTab: "structure", bottomTab: "contracts", bottomOpen: true, tool: { kind: "select" }, ...p });
+const ui = (p: Partial<TutorialUi> = {}): TutorialUi => ({ paletteTab: "structure", drawer: null, paletteOpen: false, tool: { kind: "select" }, ...p });
 
 const step = (id: string) => {
 	const s = TUTORIAL_STEPS.find((t) => t.id === id);
@@ -103,28 +103,32 @@ describe("Ministry induction steps", () => {
 
 	it("the contract step points at the tab, then the exact ACCEPT stamp", () => {
 		const s = TUTORIAL_STEPS.find((t) => t.id === "contract");
-		expect(s?.targets?.(state({ offers: 1 }), ui({ bottomTab: "jobs" }))).toEqual(['[data-tut="btab-contracts"]']);
-		expect(s?.targets?.(state({ offers: 1 }), ui({ bottomOpen: false }))).toEqual(['[data-tut="btab-contracts"]']);
-		expect(s?.targets?.(state({ offers: 1 }), ui())).toEqual(['[data-tut="accept"]']);
-		expect(s?.phase?.(state({}), ui({ bottomTab: "jobs" }))).toBe(0);
-		expect(s?.phase?.(state({}), ui())).toBe(1);
+		expect(s?.targets?.(state({ offers: 1 }), ui({ drawer: "finance" }))).toEqual(['[data-tut="dtab-contracts"]']);
+		expect(s?.targets?.(state({ offers: 1 }), ui())).toEqual(['[data-tut="dtab-contracts"]']);
+		expect(s?.targets?.(state({ offers: 1 }), ui({ drawer: "contracts" }))).toEqual(['[data-tut="accept"]']);
+		expect(s?.phase?.(state({}), ui({ drawer: "finance" }))).toBe(0);
+		expect(s?.phase?.(state({}), ui({ drawer: "contracts" }))).toBe(1);
 	});
+
 
 	it("build-rack walks tab, then card, then the world; the ghost marks the spot only once the tool is armed", () => {
 		const s = TUTORIAL_STEPS.find((t) => t.id === "build-rack");
 		const st = state({});
-		expect(s?.targets?.(st, ui({ paletteTab: "structure" }))).toEqual(['[data-tut="tab-rack"]']);
-		expect(s?.targets?.(st, ui({ paletteTab: "rack" }))).toEqual(['[data-tut="card-rack_air_gpu"]']);
-		const armed = ui({ paletteTab: "rack", tool: { kind: "place", defId: "rack_air_gpu" } });
+		expect(s?.targets?.(st, ui())).toEqual(['[data-tut="dock-more"]']);
+		expect(s?.targets?.(st, ui({ paletteOpen: true, paletteTab: "structure" }))).toEqual(['[data-tut="tab-rack"]']);
+		expect(s?.targets?.(st, ui({ paletteOpen: true, paletteTab: "rack" }))).toEqual(['[data-tut="card-rack_air_gpu"]']);
+		const armed = ui({ paletteOpen: true, paletteTab: "rack", tool: { kind: "place", defId: "rack_air_gpu" } });
 		expect(s?.targets?.(st, armed)).toEqual([]);
-		expect(s?.phase?.(st, ui({ paletteTab: "structure" }))).toBe(0);
-		expect(s?.phase?.(st, ui({ paletteTab: "rack" }))).toBe(1);
-		expect(s?.phase?.(st, armed)).toBe(2);
+		expect(s?.phase?.(st, ui())).toBe(0);
+		expect(s?.phase?.(st, ui({ paletteOpen: true, paletteTab: "structure" }))).toBe(1);
+		expect(s?.phase?.(st, ui({ paletteOpen: true, paletteTab: "rack" }))).toBe(2);
+		expect(s?.phase?.(st, armed)).toBe(3);
 		expect(s?.ghost?.(st, ui({ paletteTab: "rack" }))).toBeNull();
 		expect(s?.ghost?.(st, armed)).toMatchObject({ valid: true, defId: "rack_air_gpu", cells: [{ x: 18, floor: 1 }, { x: 19, floor: 1 }] });
 		expect(s?.task).toContain("F1");
-		expect(s?.how?.[2]).toContain("blueprint");
-		expect(s?.how?.[0]).toContain("RACKS tab");
+		expect(s?.how?.[3]).toContain("blueprint");
+		expect(s?.how?.[0]).toContain("MORE");
+		expect(s?.how?.[1]).toContain("RACKS tab");
 	});
 
 	it("the memo explainer interrupts only once, only while the induction is live and a memo is open", () => {

@@ -42,9 +42,7 @@ export class Presentation {
 		return changed;
 	}
 
-	/**
-	 * Horror intensity is stored for M3 and has no visual effect yet.
-	 */
+	/** Body-horror intensity: `full`, `mild` (half alpha, no eyes or faces) or `off` (plain synthetic look). */
 	get horrorIntensity(): HorrorIntensity {
 		return this.o.horrorIntensity;
 	}

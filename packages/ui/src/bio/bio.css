@@ -1,0 +1,22 @@
+/* Biotech bits: wetware tab icon, overlay legends, dossier rows. Tokens only (see calm/theme.css). */
+.aitower-hud .ic-leaf {
+	color: var(--good);
+}
+.aitower-hud .ui-legend-bar.nutrient {
+	background: linear-gradient(90deg, var(--bad), var(--warn) 50%, var(--good));
+}
+.aitower-hud .ui-legend-bar.contam {
+	background: linear-gradient(90deg, var(--housing-lo), var(--good) 55%, var(--accent-2));
+}
+.aitower-hud .ui-trait,
+.aitower-hud .ui-tissue {
+	margin: 0;
+	font: var(--fs-body) / 1.3 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-tissue.is-slow {
+	color: var(--warn);
+}
+.aitower-hud .ui-tissue.is-failing {
+	color: var(--bad);
+}

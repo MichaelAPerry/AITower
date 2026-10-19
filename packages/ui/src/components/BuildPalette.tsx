@@ -6,7 +6,8 @@ import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
 import { techGate } from "../research/tech";
 import { hudScale } from "../settings";
-import { toolKey } from "../tools/controller";
+import { conduitUnitCost, toolKey } from "../tools/controller";
+import { bandText } from "../bio/bio";
 import { FormLabel, Icon, Stamp, Swatch } from "./common";
 import type { PanelProps } from "./context";
 
@@ -17,6 +18,7 @@ const TABS: { id: Tab; label: string }[] = [
 	{ id: "power", label: "Power" },
 	{ id: "cooling", label: "Cool" },
 	{ id: "logistics", label: "Logis" },
+	{ id: "bio", label: "Wetware" },
 ];
 
 interface Hover {
@@ -35,6 +37,7 @@ export function defHeadline(def: FacilityDef): string {
 		if (def.rack.pflops) parts.push(fmtPflops(def.rack.pflops));
 		if (def.rack.storageTB) parts.push(`${def.rack.storageTB} TB`);
 		parts.push(def.rack.cooling.toUpperCase());
+		if (def.rack.bio) parts.push(bandText(def.rack.bio));
 	} else if (def.power) {
 		parts.push(`${fmtPower(def.power.capacityKw)} out`);
 		if (def.power.storageKwh) parts.push(`${def.power.storageKwh} kWh`);
@@ -44,6 +47,10 @@ export function defHeadline(def: FacilityDef): string {
 		if (def.cooling.cop) parts.push(`COP ${def.cooling.cop}`);
 	} else if (def.logistics) {
 		parts.push(`cap ${def.logistics.capacity}`);
+	}
+	if (def.bio && !def.rack) {
+		if (def.bio.nutrientCapacity) parts.push(`${def.bio.nutrientCapacity} nutrient/tick`);
+		if (def.bio.radius) parts.push(`r${def.bio.radius}`);
 	}
 	if (def.facilityKw) parts.push(`+${fmtPower(def.facilityKw)} aux`);
 	return parts.join(" · ");
@@ -79,8 +86,20 @@ function defSpecs(def: FacilityDef): [string, string][] {
 		s.push(["Capacity", String(def.logistics.capacity)]);
 		if (def.logistics.chargeKw) s.push(["Charge", fmtPower(def.logistics.chargeKw)]);
 	}
+	if (def.rack?.bio) {
+		const o = def.rack.bio;
+		s.push(["Tissue band", bandText(o)], ["Nutrient use", `${o.nutrientUse}/tick`]);
+	}
+	if (def.bio) {
+		const b = def.bio;
+		if (b.nutrientCapacity) s.push(["Nutrient out", `${b.nutrientCapacity}/tick`]);
+		if (b.nutrientUse) s.push(["Nutrient use", `${b.nutrientUse}/tick`]);
+		if (b.cleanRate) s.push(["Cleans", `${b.cleanRate}/tick, reach ${b.radius ?? 0} tiles`]);
+		if (b.cullsGrowths) s.push(["Culls", "growths in reach"]);
+	}
 	const p = def.placement;
 	if (p?.needsCoolant) s.push(["Needs", "coolant conduit"]);
+	if (p?.needsNutrient) s.push(["Needs", "nutrient conduit"]);
 	if (p?.minFloor !== undefined || p?.maxFloor !== undefined) s.push(["Floors", `${p?.minFloor ?? "…"} to ${p?.maxFloor ?? "…"}`]);
 	return s;
 }
@@ -109,16 +128,17 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 		setHover({ ...h, top: r.top });
 	};
 
-	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
+	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "leaf" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
 		{ tool: { kind: "slab" }, icon: "slab", name: "Floor slab", cost: `${fmtMoney(st.slabPerTile)}/tile`, hint: `basement ${fmtMoney(st.basementSlabPerTile)}/tile`, body: "Drag horizontally along one floor. Floors above ground need slab underneath." },
 		{ tool: { kind: "conduit", layer: "power" }, icon: "bolt", name: "Power conduit", cost: `${fmtMoney(st.powerConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Busway linking power sources, UPS and loads into one net. Vertical runs become risers." },
 		{ tool: { kind: "conduit", layer: "coolant" }, icon: "drop", name: "Coolant conduit", cost: `${fmtMoney(st.coolantConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Liquid loop piping between chillers, CDUs and liquid-cooled racks." },
+		{ tool: { kind: "conduit", layer: "nutrient" }, icon: "leaf", name: "Nutrient conduit", cost: `${fmtMoney(conduitUnitCost(content, "nutrient"))}/tile`, hint: "drag an L-shaped run", body: "Feed line from a nutrient plant to organoid racks and bioreactors. Vertical runs join floors." },
 		{ tool: { kind: "lift" }, icon: "lift", name: "Service lift", cost: `${fmtMoney(st.liftBase)}+${fmtMoney(st.liftPerFloor)}/fl`, hint: "drag vertically", body: "Lets bots change floors. Every floor in the span needs slab at that column." },
 		{ tool: { kind: "demolish" }, icon: "demolish", name: "Demolish", cost: "50% refund", hint: "click or drag", body: "Removes the top-most thing in a cell: facility ▸ lift ▸ conduit ▸ slab." },
 	];
 
 	const defs = Object.values(content.facilities)
-		.filter((d) => d.category === tab)
+		.filter((d) => d.category === tab && !d.growth)
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost);
 
 	const bots = Object.values(content.bots);
@@ -141,7 +161,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 					<Icon name="pointer" size={13} />
 				</button>
 			</div>
-			<div className="ui-tabs ui-tabs-5" role="tablist">
+			<div className="ui-tabs ui-tabs-6" role="tablist">
 				{TABS.map((t) => (
 					<button key={t.id} type="button" role="tab" data-tut={`tab-${t.id}`} aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => {
 							setUi({ paletteTab: t.id });

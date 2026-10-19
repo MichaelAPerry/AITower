@@ -6,6 +6,7 @@ import type { ContentDB } from "@aitower/content";
 import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 import { cheapestAvailable, effectText, fmtRp } from "../research/tech";
+import { ascensionDue, type PathFiled, pathPending } from "../ascension/ascension";
 import { rackProblem } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
@@ -16,6 +17,10 @@ export interface Objective {
 	title: string;
 	/** One sentence saying exactly where and why. */
 	detail: string;
+	/** A button the orders offer: open FORM A-5 (the Ascension sheet). */
+	action?: "ascension";
+	/** Hotkey that opens where to act (shown on the NEXT chip): "C" contracts, "R" research. */
+	key?: string;
 }
 
 export interface MoneyLine {
@@ -37,7 +42,7 @@ export function installedPflops(view: SimView, content: ContentDB): number {
 	return p;
 }
 
-export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult): Objective {
+export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult, filed: PathFiled | null = null): Objective {
 	const active = view.jobs.filter((j) => ACTIVE.has(j.status));
 
 	if (view.cash < 0) {
@@ -60,12 +65,12 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "alert",
 			title: `${broken} rack${broken === 1 ? " is" : "s are"} broken and the parts cage is empty`,
-			detail: "Buy spare parts (bottom of the left panel) so the maintenance automaton can repair them.",
+			detail: "Buy spare parts (the build dock, bottom left) so the maintenance automaton can repair them.",
 		};
 	}
 
 	// Cabinets that can't run at all (no power, no working coolant loop) are money sunk for nothing: say why, first.
-	const dead = view.facilities.filter((f) => f.enabled && (f.status === "unpowered" || f.status === "noCoolant") && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
+	const dead = view.facilities.filter((f) => f.enabled && (f.status === "unpowered" || f.status === "noCoolant" || f.status === "noNutrient") && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
 	if (dead.length > 0) {
 		const f = dead[0];
 		const name = content.facilities[f.defId]?.name ?? "cabinet";
@@ -76,13 +81,36 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		};
 	}
 
+	// Organoid tissue below its band runs slow or dies: say where and how to warm it.
+	const cold = view.facilities.filter((f) => f.enabled && f.status === "tooCold" && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0);
+	if (cold.length > 0) {
+		const f = cold[0];
+		const name = content.facilities[f.defId]?.name ?? "organoid rack";
+		return {
+			tone: "alert",
+			title: `${cold.length} organoid rack${cold.length === 1 ? " is" : "s are"} too cold`,
+			detail: `${name} on F${f.floor} (x${f.x}): ${rackProblem(view, content, f) ?? "it is below its band."}`,
+		};
+	}
+
+	// Clearance reached for the Ascension: the one irreversible decision of the game.
+	if (ascensionDue(view, content) && !pathPending(filed, view)) {
+		return {
+			tone: "action",
+			title: "FORM A-5: choose your Ascension path",
+			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the form below to read the options.`,
+			action: "ascension",
+		};
+	}
+
 	// Idle racks earn nothing: whenever an offer can start on them, taking it is the best next step.
 	const fitting = view.offers.find((o) => canBuild({ type: "acceptContract", contractId: o.id }).ok);
 	if (fitting) {
 		return {
 			tone: "action",
 			title: active.length === 0 ? "Accept a contract" : "Accept another contract",
-			detail: `Contracts tab (bottom panel): stamp ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
+			key: "C",
+			detail: `Contracts drawer (C): stamp ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
 		};
 	}
 	if (active.length === 0) {
@@ -90,7 +118,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			return {
 				tone: "action",
 				title: "No offer fits your idle racks",
-				detail: "Each offer shows why it can't start. Decline it, wait for a smaller one, or build more compute cabinets (Racks tab).",
+				detail: "Each offer shows why it can't start. Decline it, wait for a smaller one, or build more compute cabinets (build dock, More).",
 			};
 		}
 		return { tone: "action", title: "Waiting for contract offers", detail: "New offers arrive every few game-hours. Speed up the clock (3× or 10×) to get one sooner." };
@@ -101,7 +129,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "action",
 			title: "Switch on your Contracts Clerk",
-			detail: "Contracts tab: flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
+			key: "C",
+			detail: "Contracts drawer (C): flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
 		};
 	}
 	const tech = cheapestAvailable(view, content);
@@ -109,7 +138,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		const fx = tech.effects.map((e) => effectText(e, content)).join(", ");
 		return {
 			tone: "action",
-			title: "File a research request (R)",
+			title: "File a research request",
+			key: "R",
 			detail: `Department of Research: ${tech.name} costs ${tech.cost} RP and you have ${fmtRp(view.researchPoints)}.${fx ? ` It gives ${fx}.` : ""}`,
 		};
 	}
@@ -125,7 +155,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			const per = air?.rack?.pflops ?? 20;
 			const more = Math.ceil((need - have) / per);
 			const plural = (n: number) => (n === 1 ? "" : "s");
-			let build = `build ${more} more ${air?.name ?? "compute cabinet"}${plural(more)} (Racks tab, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler`;
+			let build = `build ${more} more ${air?.name ?? "compute cabinet"}${plural(more)} (build dock, ${air ? fmtMoney(air.cost) : ""} each) within reach of an air handler`;
 			// Once liquid cabinets are unlocked, offer them too (fewer, bigger, but they need a coolant loop).
 			let best: { name: string; cost: number; pflops: number } | undefined;
 			for (const d of Object.values(content.facilities))
@@ -149,6 +179,15 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		};
 	}
 	return { tone: "progress", title: "Top clearance reached", detail: "Keep the Treasury growing and the Ministry's standing high." };
+}
+
+/** "Living Tower: 2 of 3 days" for the ending the tower is closest to; null when none (the secret ending is never announced). */
+export function endingLine(view: SimView, content: ContentDB): string | null {
+	const p = view.endingProgress;
+	if (!p || p.ending === "absorbed") return null;
+	const title = content.endings?.find((e) => e.id === p.ending)?.title ?? p.ending;
+	const days = Math.min(Math.floor(p.days), p.needed);
+	return `${title}: ${days} of ${p.needed} day${p.needed === 1 ? "" : "s"}`;
 }
 
 /** Today's money so far: what came in, what went out, and on what. */

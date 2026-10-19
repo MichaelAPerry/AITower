@@ -14,6 +14,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	const s = ctx.state;
 	const d = Object.hasOwn(ctx.content.facilities, defId) ? ctx.content.facilities[defId] : undefined;
 	if (!d) return reject(`unknown facility '${defId}'`);
+	if (d.growth && !opts.ignoreTier) return reject("growths cannot be built");
 	if (!inBounds(s, x, floor) || !inBounds(s, x + d.width - 1, floor)) return reject("out of bounds");
 	const p = d.placement ?? {};
 	if (p.minFloor !== undefined && floor < p.minFloor) return reject(`must be on floor ${p.minFloor} or above`);
@@ -25,6 +26,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	}
 	let hasPower = false;
 	let hasCoolant = false;
+	let hasNutrient = false;
 	for (let cx = x; cx < x + d.width; cx++) {
 		const i = cellIdx(s, cx, floor);
 		if (!s.slab[i]) return reject("needs floor slab under every tile");
@@ -32,9 +34,11 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 		if (s.liftAt[i] >= 0) return reject("overlaps a lift shaft");
 		if (s.power[i]) hasPower = true;
 		if (s.coolant[i]) hasCoolant = true;
+		if (s.nutrient[i]) hasNutrient = true;
 	}
 	if (needsPower(d) && !hasPower) return reject("needs a power conduit under it");
 	if (p.needsCoolant && !hasCoolant) return reject("needs a coolant conduit under it");
+	if (p.needsNutrient && !hasNutrient) return reject("needs a nutrient conduit under it");
 	return accept(d.cost, (events) => {
 		addFacility(s, ctx.content, defId, floor, x);
 		if (!opts.ignoreTier) s.stats.facilitiesBuilt++;

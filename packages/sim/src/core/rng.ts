@@ -10,6 +10,8 @@ export interface RngState {
 	reliability: number;
 	/** Ministry memos: timing, event choice, failRacks selection. (Added in snapshot v3.) */
 	events: number;
+	/** Growth sprouting rolls and which growth def sprouts. (Added in snapshot v5.) */
+	growth: number;
 }
 
 export type RngStream = keyof RngState;
@@ -32,5 +34,5 @@ export function mixSeed(seed: number, salt: number): number {
 }
 
 export function createRng(seed: number): RngState {
-	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2), events: mixSeed(seed, 3) };
+	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2), events: mixSeed(seed, 3), growth: mixSeed(seed, 4) };
 }

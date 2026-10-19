@@ -18,6 +18,17 @@
 		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
 		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--green-dim) 30%, var(--ink)), color-mix(in srgb, var(--ink) 94%, var(--green-dim)));
 }
+/* Absorbed: the same red notice, gone sallow (olive instead of blood red). */
+.aitower-hud .ui-over.is-absorbed {
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--olive) 34%, var(--ink)), color-mix(in srgb, var(--ink) 94%, var(--olive)));
+}
+.aitower-hud .ui-over.ending-cleanTower {
+	background:
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 22%, transparent) 2px 3px),
+		radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--verdigris) 26%, var(--ink)), color-mix(in srgb, var(--ink) 94%, var(--verdigris)));
+}
 .aitower-hud .ui-over-memo {
 	position: relative;
 	width: min(640px, 100%);

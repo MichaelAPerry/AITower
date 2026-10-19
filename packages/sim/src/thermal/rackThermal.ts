@@ -5,8 +5,10 @@
  */
 import type { TickCtx } from "../core/context";
 import { cellIdx } from "../core/grid";
+import { INCUBATOR_COOL_C, INCUBATOR_LIFT_C, MIN_POWERED_SATISFACTION } from "../core/constants";
 import type { Facility } from "../core/state";
-import { getDef } from "../world/defs";
+import { failRack } from "../reliability/reliabilityStep";
+import { getDef, organoidSpec } from "../world/defs";
 
 function meanAir(ctx: TickCtx, f: Facility): number {
 	const s = ctx.state;
@@ -24,6 +26,28 @@ export function rackThermalStep(ctx: TickCtx): void {
 		const air = meanAir(ctx, f);
 		if (d.kind !== "rack" || !d.rack) {
 			f.tempC = air;
+			continue;
+		}
+		if (d.growth) {
+			// Growths ignore temperature: always at full clock, never throttled.
+			f.tempC = air;
+			f.thermalClock = 1;
+			f.throttled = false;
+			f.tooCold = false;
+			continue;
+		}
+		const bio = organoidSpec(d);
+		if (bio) {
+			// An incubator regulates its own tissue temperature while powered: it holds targetC as long as the room air is
+			// within [targetC − INCUBATOR_LIFT_C, targetC + INCUBATOR_COOL_C] (scaled by power satisfaction), and drifts with
+			// the air beyond that. Unpowered, the tissue simply follows the air. (GPU heat math would cook or chill it.)
+			const powered = f.enabled && !f.failed && f.sat >= MIN_POWERED_SATISFACTION;
+			const lift = INCUBATOR_LIFT_C * Math.min(1, f.sat);
+			const cool = INCUBATOR_COOL_C * Math.min(1, f.sat);
+			const want = !powered ? air : air < bio.targetC - lift ? air + lift : air > bio.targetC + cool ? air - cool : bio.targetC;
+			f.tempC += (want - f.tempC) * th.rackEase;
+			if (f.tempC > maxRackC) maxRackC = f.tempC;
+			organoidBand(ctx, f, bio, want);
 			continue;
 		}
 		const lf = d.rack.liquidFraction;
@@ -61,4 +85,26 @@ export function rackThermalStep(ctx: TickCtx): void {
 		}
 	}
 	state.metrics.maxRackC = Number.isFinite(maxRackC) ? maxRackC : state.ambientC;
+}
+
+/**
+ * Organoid tissue band: full clock within targetC ± toleranceC, linear down to `minClock` at ±2× tolerance (flat beyond),
+ * and beyond ±3× (and settling there) the tissue fails like a component (work order). Too cold sets `tooCold`, too hot `throttled`.
+ */
+export function organoidBand(ctx: Pick<TickCtx, "state" | "content" | "events">, f: Facility, bio: { targetC: number; toleranceC: number }, settleC = f.tempC): void {
+	const { state, content, events } = ctx;
+	const minClock = content.balance.thermal.minClock;
+	const dev = f.tempC - bio.targetC;
+	const a = Math.abs(dev) / Math.max(bio.toleranceC, 1e-6);
+	f.thermalClock = a <= 1 ? 1 : a >= 2 ? minClock : 1 - (1 - minClock) * (a - 1);
+	const out = a > 1;
+	const cold = out && dev < 0;
+	const hot = out && dev > 0;
+	if (out && !f.throttled && !f.tooCold && !f.failed) events.push({ type: "rackThrottled", facilityId: f.id });
+	f.throttled = hot;
+	f.tooCold = cold;
+	// Tissue dies only when it is beyond ±3× AND heading there (`settleC`): warming up after placement or a repair is safe,
+	// a power cut (settling to room air) or a room the incubator cannot hold is not.
+	const settled = Math.abs(settleC - bio.targetC) / Math.max(bio.toleranceC, 1e-6);
+	if (a > 3 && settled > 3 && !f.failed) failRack(state, f, events);
 }

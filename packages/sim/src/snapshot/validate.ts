@@ -12,7 +12,7 @@ import type { BotLeg, BotTask, SimState } from "../core/state";
 import type { Bot, Facility, Job, Lift, WorkOrder } from "../core/state";
 import { InvalidSaveError, type RawState } from "./migrate";
 
-type Kind = "int" | "num" | "bool" | "str";
+type Kind = "int" | "num" | "bool" | "str" | "trait";
 type Obj = Record<string, unknown>;
 
 /** Hard cap on grid size so a hostile save cannot make us allocate gigabytes. */
@@ -34,6 +34,8 @@ function check(kind: Kind, v: unknown): boolean {
 			return typeof v === "boolean";
 		case "str":
 			return typeof v === "string";
+		case "trait":
+			return v === null || v === "fleshed" || v === "tendriled";
 	}
 }
 
@@ -41,7 +43,7 @@ function check(kind: Kind, v: unknown): boolean {
 function fields(o: unknown, shape: Record<string, Kind>, where: string): Obj {
 	if (!isObj(o)) return fail(`${where} is not an object`);
 	for (const [k, kind] of Object.entries(shape)) {
-		if (!check(kind, o[k])) fail(`${where}.${k} must be ${kind === "int" ? "an integer" : kind === "num" ? "a finite number" : kind === "bool" ? "a boolean" : "a string"} (got ${String(o[k])})`);
+		if (!check(kind, o[k])) fail(`${where}.${k} must be ${kind === "int" ? "an integer" : kind === "num" ? "a finite number" : kind === "bool" ? "a boolean" : kind === "trait" ? "null, fleshed or tendriled" : "a string"} (got ${String(o[k])})`);
 	}
 	return o;
 }
@@ -52,7 +54,7 @@ const FACILITY: Record<keyof Facility, Kind> = {
 	sat: "num", demandKw: "num", powerKw: "num", heatKw: "num", tempC: "num", busy: "bool", thermalClock: "num", clock: "num",
 	pflops: "num", health: "num", jobId: "int", failed: "bool", tripped: "bool", cooldown: "num", throttled: "bool",
 	noCoolant: "bool", coolantC: "num", gensetMode: "int", gensetTimer: "num", surplusTicks: "num", storedKwh: "num",
-	stored: "num", charging: "bool",
+	stored: "num", charging: "bool", nutrientNet: "int", nutrientSat: "num", noNutrient: "bool", tooCold: "bool", grown: "bool", recoverAt: "num",
 };
 const LIFT: Record<Exclude<keyof Lift, "riders">, Kind> = {
 	id: "int", x: "int", floorMin: "int", floorMax: "int", powerNet: "int", sat: "num", carFloor: "num", dir: "int",
@@ -61,7 +63,7 @@ const LIFT: Record<Exclude<keyof Lift, "riders">, Kind> = {
 const BOT: Record<keyof Bot, Kind> = {
 	id: "int", defId: "str", x: "num", floor: "num", battery: "num", carrying: "bool", parts: "int", task: "str", leg: "str", goalId: "int",
 	goalX: "num", goalFloor: "num", liftId: "int", workOrderId: "int", homeId: "int", timer: "num", exitFloor: "num",
-	stuck: "num", retryAt: "num", fails: "num", routeRev: "num",
+	stuck: "num", retryAt: "num", fails: "num", routeRev: "num", trait: "trait", exposure: "num",
 };
 const WORK_ORDER: Record<keyof WorkOrder, Kind> = { id: "int", facilityId: "int", botId: "int", createdAt: "num", attempts: "num", retryAt: "num", retryRev: "num" };
 const JOB: Record<Exclude<keyof Job, "spec" | "rackIds">, Kind> = {
@@ -76,13 +78,14 @@ const NET: Record<string, Kind> = {
 	id: "int", supplyKw: "num", demandKw: "num", satisfaction: "num", storedKwh: "num", storageCapacityKwh: "num",
 	gridImportKw: "num", gensetKw: "num",
 };
+const NUTRIENT_NET: Record<string, Kind> = { id: "int", supply: "num", demand: "num", satisfaction: "num" };
 const COOLANT_NET: Record<string, Kind> = { id: "int", capacityKw: "num", loadKw: "num", supplyTempC: "num" };
 const LEDGER_DAY: Record<string, Kind> = {
 	day: "int", revenue: "num", energy: "num", upkeep: "num", construction: "num", penalties: "num", taxes: "num", interest: "num", fees: "num",
 };
 const SAMPLE: Record<string, Kind> = { tick: "num", pue: "num", itKw: "num", totalKw: "num", pflops: "num", cash: "num", maxRackC: "num" };
 const METRIC_NUMS: Record<string, Kind> = {
-	itKw: "num", totalKw: "num", gridKw: "num", gensetKw: "num", pflops: "num", energyCost: "num", pue: "num", uptime: "num", maxRackC: "num",
+	itKw: "num", totalKw: "num", gridKw: "num", gensetKw: "num", pflops: "num", organoidPflops: "num", energyCost: "num", pue: "num", uptime: "num", maxRackC: "num",
 };
 
 const TASKS: readonly BotTask[] = ["none", "depot", "target", "repair", "charger", "charge"];
@@ -136,7 +139,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
 		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextMemoTick: "num", standing: "num", researchPoints: "num", clerkAccepted: "int",
-		loanPrincipal: "num",
+		loanPrincipal: "num", nutrientNetCount: "int", contaminatedShare: "num", irreversible: "bool", corruption: "num",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
 	if ((s.tick as number) < 0) fail("tick is negative");
@@ -155,13 +158,20 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	typed(s, "slab", Uint8Array, cells);
 	typed(s, "power", Uint8Array, cells);
 	typed(s, "coolant", Uint8Array, cells);
+	typed(s, "nutrient", Uint8Array, cells);
+	const contamination = typed(s, "contamination", Float32Array, cells);
+	for (let i = 0; i < cells; i++) if (!(contamination[i] >= 0 && contamination[i] <= 1)) fail(`contamination[${i}] is outside 0..1`);
 	const facilityAt = typed(s, "facilityAt", Int32Array, cells);
 	const liftAt = typed(s, "liftAt", Int32Array, cells);
 	typed(s, "airTemp", Float32Array, cells);
 	const powerNetOf = typed(s, "powerNetOf", Int32Array, cells);
 	const coolantNetOf = typed(s, "coolantNetOf", Int32Array, cells);
+	const nutrientNetOf = typed(s, "nutrientNetOf", Int32Array, cells);
 	const pCount = s.powerNetCount as number;
 	const cCount = s.coolantNetCount as number;
+	const nCount = s.nutrientNetCount as number;
+	if (nCount < 0 || nCount > cells) fail("nutrient net count is out of range");
+	for (let i = 0; i < cells; i++) if (nutrientNetOf[i] < -1 || nutrientNetOf[i] >= nCount) fail(`nutrientNetOf[${i}] is out of range`);
 	if (pCount < 0 || cCount < 0 || pCount > cells || cCount > cells) fail("net counts are out of range");
 	for (let i = 0; i < cells; i++) {
 		if (powerNetOf[i] < -1 || powerNetOf[i] >= pCount) fail(`powerNetOf[${i}] is out of range`);
@@ -186,6 +196,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 		facilityCells += f.width;
 		if (f.powerNet < -1 || f.powerNet >= pCount) fail(`facilities[${n}].powerNet is out of range`);
 		if (f.coolantNet < -1 || f.coolantNet >= cCount) fail(`facilities[${n}].coolantNet is out of range`);
+		if (f.nutrientNet < -1 || f.nutrientNet >= nCount) fail(`facilities[${n}].nutrientNet is out of range`);
 		if (f.gensetMode < 0 || f.gensetMode > 2) fail(`facilities[${n}].gensetMode is invalid`);
 		facilityById.set(f.id, f);
 	}
@@ -271,6 +282,9 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	coolantNets.forEach((n, i) => {
 		fields(n, COOLANT_NET, `coolantNets[${i}]`);
 	});
+	array(s, "nutrientNets").forEach((n, i) => {
+		fields(n, NUTRIENT_NET, `nutrientNets[${i}]`);
+	});
 	const ledger = array(s, "ledger");
 	ledger.forEach((d, i) => {
 		fields(d, LEDGER_DAY, `ledger[${i}]`);
@@ -282,9 +296,10 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	});
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
-	fields(s.rng, { contracts: "num", reliability: "num", events: "num" }, "rng");
+	fields(s.rng, { contracts: "num", reliability: "num", events: "num", growth: "num" }, "rng");
 	validateMinistry(content, s, nextId.memo);
 	validateManagement(content, s);
+	validateBiotech(s);
 	array(s, "pending");
 
 	// Catch-all: any non-finite number anywhere (including float arrays) is corruption.
@@ -340,7 +355,20 @@ function validateManagement(content: ContentDB, s: Obj): void {
 }
 
 const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];
-const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory"];
+const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory", "absorbed"];
+const ENDINGS = ["livingTower", "cleanTower", "absorbed"];
+const PATHS = ["biotech", "greentech", "synthetic"];
+
+/** Contamination share, corruption, path, ending counters (snapshot v5). */
+function validateBiotech(s: Obj): void {
+	const share = s.contaminatedShare as number;
+	const corruption = s.corruption as number;
+	if (share < 0 || share > 1) fail("contaminatedShare is outside 0..1");
+	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
+	if (s.path !== null && !PATHS.includes(s.path as string)) fail("path is invalid");
+	const d = fields(s.endingDays, { livingTower: "int", cleanTower: "int" }, "endingDays");
+	if ((d.livingTower as number) < 0 || (d.cleanTower as number) < 0) fail("endingDays must not be negative");
+}
 
 function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {
 	const standing = s.standing as number;
@@ -369,6 +397,7 @@ function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {
 	if (go !== null) {
 		const o = fields(go, { kind: "str", tick: "num" }, "gameOver");
 		if (!GAME_OVER_KINDS.includes(o.kind as string)) fail("gameOver.kind is invalid");
+		if (o.ending !== undefined && !ENDINGS.includes(o.ending as string)) fail("gameOver.ending is invalid");
 	}
 }
 

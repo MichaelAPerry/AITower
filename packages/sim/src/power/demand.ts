@@ -11,6 +11,7 @@ import { getDef, isStorageRack } from "../world/defs";
 export function facilityDemandKw(state: SimState, content: ContentDB, f: Facility): number {
 	if (!f.enabled) return 0;
 	const d = getDef(content, f.defId);
+	if (d.growth) return 0;
 	let kw = d.facilityKw;
 	switch (d.kind) {
 		case "rack": {

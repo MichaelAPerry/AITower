@@ -641,17 +641,14 @@ describe("game over", () => {
 		expect(sim.view().gameOver).toEqual({ kind: "shutdown", tick: 1439 });
 	});
 
-	it("victory: reaching the top tier ends the game as a win; the sim keeps running", () => {
+	it("reaching the top tier is no longer a win: only the path endings end the game that way", () => {
 		const c = noOffers({ tiers: { pflops: [0, 1], uptime: [0, 0], reward: [0, 100] } });
 		const sim = newSim(c, "farm", 1);
 		expect(run(sim, 1000).filter((e) => e.type === "gameOver")).toHaveLength(0);
 		const events = run(sim, 440);
-		expect(events.map((e) => e.type).filter((t) => t === "tierUp" || t === "gameOver")).toEqual(["tierUp", "gameOver"]);
-		expect(events).toContainEqual({ type: "gameOver", kind: "victory" });
-		expect(sim.view().gameOver).toEqual({ kind: "victory", tick: 1439 });
-		const next = run(sim, 1440 * 2);
-		expect(count(next, "gameOver")).toBe(0);
-		expect(sim.view().gameOver?.kind).toBe("victory");
+		expect(events.map((e) => e.type).filter((t) => t === "tierUp" || t === "gameOver")).toEqual(["tierUp"]);
+		expect(sim.view().gameOver).toBeNull();
+		expect(count(run(sim, 1440 * 2), "gameOver")).toBe(0);
 	});
 
 	it("no victory just for sitting at the top tier of a one-tier ladder before earning it", () => {

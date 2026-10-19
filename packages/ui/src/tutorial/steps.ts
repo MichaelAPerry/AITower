@@ -24,8 +24,10 @@ export interface Baseline {
 /** The HUD-local state the induction needs in order to point at the right tab or card. */
 export interface TutorialUi {
 	paletteTab: string;
-	bottomTab: string;
-	bottomOpen: boolean;
+	/** The open edge drawer ("contracts", "gauges", ...) or null. */
+	drawer: string | null;
+	/** The full build palette popover is open. */
+	paletteOpen: boolean;
 	tool: Tool;
 }
 
@@ -81,7 +83,6 @@ const RACK_SPOT: CellRef[] = [
 	{ x: 19, floor: 1 },
 ];
 const placing = (ui: TutorialUi, defId: string): boolean => ui.tool.kind === "place" && ui.tool.defId === defId;
-const bottomShows = (ui: TutorialUi, tab: string): boolean => ui.bottomOpen && ui.bottomTab === tab;
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
 	{
@@ -98,9 +99,9 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		title: "Take a contract",
 		body: ["Money comes from contracts. Accept one your idle racks can start: those offers say “Fits your idle racks”."],
 		task: "Press the green ACCEPT stamp on the highlighted offer",
-		how: ["Open the CONTRACTS tab at the bottom", "Press ACCEPT on the highlighted offer"],
-		phase: (_s, ui) => (bottomShows(ui, "contracts") ? 1 : 0),
-		targets: (s, ui) => (!bottomShows(ui, "contracts") ? [t("btab-contracts")] : s.view.offers.length > 0 ? [t("accept")] : [".ui-bottom"]),
+		how: ["Open CONTRACTS on the right edge (key C)", "Press ACCEPT on the highlighted offer"],
+		phase: (_s, ui) => (ui.drawer === "contracts" ? 1 : 0),
+		targets: (s, ui) => (ui.drawer !== "contracts" ? [t("dtab-contracts")] : s.view.offers.length > 0 ? [t("accept")] : [".ui-drawer"]),
 		// An empty board needs time to pass; the moment an offer is posted the clock stops again so the player can read it.
 		clock: (s) => (s.view.offers.length > 0 ? "pause" : "run"),
 		runReason: "so that an offer arrives",
@@ -110,8 +111,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "compute",
 		title: "Watch it run",
 		body: ["The racks pick up the job by themselves. Training pays at each checkpoint; inference pays every minute."],
-		task: "Wait until COMPUTE in the top bar rises above 0 PF",
-		targets: () => [".ui-statbank"],
+		task: "Wait until the job is running: PER HOUR starts to move",
+		targets: () => [t("perhour")],
 		clock: "run",
 		runReason: "so the racks start the job",
 		focus: { x: 12, floor: 1 },
@@ -119,10 +120,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 	},
 	{
 		id: "orders",
-		title: "Your standing orders",
-		body: ["Lost? CURRENT ORDERS (bottom right) always says what to do next, and shows today's income against today's costs."],
-		targets: () => [".ui-objective"],
-		corner: "tl",
+		title: "What to do next",
+		body: ["Lost? NEXT, at the top of the world, always says what to do. Click it to jump there. Numbers turn amber or red when they need you."],
+		targets: () => [".ui-next"],
+		corner: "br",
 		clock: "pause",
 	},
 	{
@@ -139,9 +140,9 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		title: "Add a cabinet",
 		body: ["More racks, more contracts. The marked spot on F1 already has floor, power and cooling. Press Esc afterwards."],
 		task: "Build one more compute cabinet on F1",
-		how: ["Click the RACKS tab in the left panel", "Click the first card: Mk.I Air-Cooled Compute Cabinet", "Click the blue blueprint on F1"],
-		phase: (_s, ui) => (ui.paletteTab !== "rack" ? 0 : placing(ui, "rack_air_gpu") ? 2 : 1),
-		targets: (_s, ui) => (ui.paletteTab !== "rack" ? [t("tab-rack")] : placing(ui, "rack_air_gpu") ? [] : [t("card-rack_air_gpu")]),
+		how: ["Press MORE in the build dock (bottom left)", "Click the RACKS tab", "Click the first card: Mk.I Air-Cooled Compute Cabinet", "Click the blue blueprint on F1"],
+		phase: (_s, ui) => (placing(ui, "rack_air_gpu") ? 3 : !ui.paletteOpen ? 0 : ui.paletteTab !== "rack" ? 1 : 2),
+		targets: (_s, ui) => (placing(ui, "rack_air_gpu") ? [] : !ui.paletteOpen ? [t("dock-more")] : ui.paletteTab !== "rack" ? [t("tab-rack")] : [t("card-rack_air_gpu")]),
 		ghost: (_s, ui) => (placing(ui, "rack_air_gpu") ? { cells: RACK_SPOT, valid: true, defId: "rack_air_gpu", label: "CLICK HERE" } : null),
 		clock: "pause",
 		focus: { x: 19, floor: 1 },
@@ -152,15 +153,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "heat",
 		title: "Mind the heat",
 		body: ["Racks make heat. The air handler cools about eight tiles around it. Red means too hot: racks slow down, then shut off."],
-		task: "Click HEAT in the strip at the top-left of the world, or press H",
-		targets: () => [t("overlay-heat")],
+		task: "Open GAUGES (key I) and click HEAT, or just press H",
+		how: ["Open GAUGES on the right edge (key I)", "Click HEAT under OVERLAYS"],
+		phase: (_s, ui) => (ui.drawer === "gauges" ? 1 : 0),
+		targets: (_s, ui) => (ui.drawer === "gauges" ? [t("overlay-heat")] : [t("dtab-gauges")]),
 		clock: "pause",
 		done: (s) => s.overlay === "heat",
 	},
 	{
 		id: "memos",
 		title: "Ministry memos",
-		body: ["Memos arrive in the INBOX (top bar). Each stamp shows its real cost. Unanswered memos are filed under their default stamp."],
+		body: ["Memos arrive in the INBOX (top strip). Urgent ones pop up with their stamps; the figure on each stamp is its real cost. Unanswered memos are filed under the default stamp."],
 		targets: () => [t("inbox"), t("standing")],
 		clock: "pause",
 	},
@@ -168,10 +171,10 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "finale",
 		title: "Induction complete",
 		body: [
-			"Goal: Clearance 2 (120 PFLOPS installed) unlocks liquid cooling. Follow CURRENT ORDERS to get there.",
+			"Goal: Clearance 2 (120 PFLOPS installed) unlocks liquid cooling. The CLEARANCE bar in the top strip shows your progress; NEXT says what to do.",
 			"Esc opens saves, settings and controls. Closing this memo starts the clock at 1×.",
 		],
-		targets: () => [".ui-tier"],
+		targets: () => [t("clearance")],
 		clock: "pause",
 	},
 ];
@@ -184,10 +187,10 @@ export const MEMO_EXPLAINER: TutorialStep = {
 	id: "memo-explainer",
 	title: "A memo from the Ministry",
 	body: [
-		"A memo just arrived (top right). Read the small print under each stamp, then press one.",
+		"A memo just arrived. Urgent ones pop up at the top right; the rest wait in the INBOX. Each stamp shows what it costs.",
 		"Ignored memos are filed under their default stamp when the countdown ends.",
 	],
-	targets: () => [t("inbox"), ".ui-memo-pop"],
+	targets: () => [t("inbox")],
 	corner: "br",
 	clock: "pause",
 };

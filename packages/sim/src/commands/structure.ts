@@ -1,14 +1,19 @@
 /** buildSlab, buildConduit, buildLift. */
 import type { CellRef, ConduitLayer } from "../api";
 import { cellIdx, inBounds } from "../core/grid";
+import { techGate } from "../research/research";
 import { addLift } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
 export const slabCost = (ctx: PlanCtx, floor: number): number =>
 	floor < 0 ? ctx.content.structure.basementSlabPerTile : ctx.content.structure.slabPerTile;
 
+/** Nutrient pipes cost the same as coolant pipes (`coolantConduitPerTile`; the schema has no separate field). */
 export const conduitCost = (ctx: PlanCtx, layer: ConduitLayer): number =>
 	layer === "power" ? ctx.content.structure.powerConduitPerTile : ctx.content.structure.coolantConduitPerTile;
+
+export const layerGrid = (s: { power: Uint8Array; coolant: Uint8Array; nutrient: Uint8Array }, layer: ConduitLayer): Uint8Array =>
+	layer === "power" ? s.power : layer === "coolant" ? s.coolant : s.nutrient;
 
 export const liftCost = (ctx: PlanCtx, floors: number): number =>
 	ctx.content.structure.liftBase + ctx.content.structure.liftPerFloor * floors;
@@ -33,9 +38,15 @@ export function planSlab(ctx: PlanCtx, floor: number, x0: number, x1: number): P
 
 export function planConduit(ctx: PlanCtx, layer: ConduitLayer, cells: CellRef[]): Plan {
 	const s = ctx.state;
-	if (layer !== "power" && layer !== "coolant") return reject("unknown conduit layer");
+	if (layer !== "power" && layer !== "coolant" && layer !== "nutrient") return reject("unknown conduit layer");
 	if (!Array.isArray(cells) || cells.length === 0) return reject("no cells");
-	const grid = layer === "power" ? s.power : s.coolant;
+	if (layer === "nutrient") {
+		// Nutrient piping arrives with the research that unlocks the nutrient plant (data-driven, no hard-coded id).
+		const plant = Object.values(ctx.content.facilities).find((d) => d.kind === "nutrient" && d.tech);
+		const gate = techGate(s, ctx.content, plant?.tech);
+		if (gate) return reject(gate);
+	}
+	const grid = layerGrid(s, layer);
 	// Unique new cells in input order.
 	const wanted = new Set<number>();
 	const order: CellRef[] = [];

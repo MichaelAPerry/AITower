@@ -22,11 +22,12 @@ export function powerSolve(ctx: TickCtx): void {
 	const pool = ctx.scratch.power;
 	const buckets = pool.buckets;
 	const netCount = state.powerNetCount;
-	while (buckets.length < netCount) buckets.push({ loads: [], liftKw: 0, grids: [], gensets: [], upses: [] });
+	while (buckets.length < netCount) buckets.push({ loads: [], liftKw: 0, grids: [], reactors: [], gensets: [], upses: [] });
 	for (let n = 0; n < netCount; n++) {
 		const b = buckets[n];
 		b.loads.length = 0;
 		b.grids.length = 0;
+		b.reactors.length = 0;
 		b.gensets.length = 0;
 		b.upses.length = 0;
 		b.liftKw = 0;
@@ -36,12 +37,13 @@ export function powerSolve(ctx: TickCtx): void {
 		const d = getDef(content, f.defId);
 		f.busy = isComputeRack(d) && f.jobId >= 0 && f.enabled && !f.failed && !f.tripped;
 		f.demandKw = facilityDemandKw(state, content, f);
-		if (f.powerNet < 0) continue;
+		if (f.powerNet < 0 || d.growth) continue;
 		const b = buckets[f.powerNet];
 		b.loads.push(f);
 		if (d.kind === "grid_tie") b.grids.push(f);
 		else if (d.kind === "genset") b.gensets.push(f);
 		else if (d.kind === "ups") b.upses.push(f);
+		else if (d.kind === "bioreactor") b.reactors.push(f);
 	}
 	for (const lift of state.lifts) if (lift.powerNet >= 0) buckets[lift.powerNet].liftKw += content.lift.facilityKw;
 
@@ -49,6 +51,7 @@ export function powerSolve(ctx: TickCtx): void {
 	const gridFactor = modFactor(state, "gridCap");
 	let gridTotal = 0;
 	let gensetTotal = 0;
+	let reactorTotal = 0;
 	let energyCost = 0;
 	const nets: PowerNet[] = [];
 
@@ -61,9 +64,12 @@ export function powerSolve(ctx: TickCtx): void {
 		let gridCap = 0;
 		for (const g of b.grids) if (isUsableSource(g)) gridCap += cap(g);
 		gridCap *= gridFactor;
+		// Bioreactors: capacity scales with the nutrients their net delivered last tick.
+		let reactorCap = 0;
+		for (const r of b.reactors) if (isUsableSource(r)) reactorCap += cap(r) * r.nutrientSat;
 
 		// Genset control.
-		let committed = gridCap;
+		let committed = gridCap + reactorCap;
 		for (const g of b.gensets) if (isUsableSource(g) && g.gensetMode !== GensetMode.Off) committed += cap(g);
 		for (const g of b.gensets) {
 			if (!isUsableSource(g)) {
@@ -83,7 +89,7 @@ export function powerSolve(ctx: TickCtx): void {
 					events.push({ type: "gensetStarted", facilityId: g.id });
 				} else g.gensetTimer--;
 			} else if (g.gensetMode === GensetMode.Running) {
-				g.surplusTicks = gridCap >= demand ? g.surplusTicks + 1 : 0;
+				g.surplusTicks = gridCap + reactorCap >= demand ? g.surplusTicks + 1 : 0;
 				if (g.surplusTicks >= GENSET_STOP_SURPLUS_TICKS) {
 					g.gensetMode = GensetMode.Off;
 					g.surplusTicks = 0;
@@ -100,7 +106,7 @@ export function powerSolve(ctx: TickCtx): void {
 			if (isUsableSource(u)) upsAvail += Math.min(cap(u), u.storedKwh * TICKS_PER_HOUR);
 		}
 
-		const supply = gridCap + gensetCap + upsAvail;
+		const supply = gridCap + reactorCap + gensetCap + upsAvail;
 		const sat = demand > EPS ? Math.min(1, supply / demand) : 1;
 		const factor = powerFactor(sat);
 
@@ -114,6 +120,9 @@ export function powerSolve(ctx: TickCtx): void {
 
 		// Dispatch: grid ▸ gensets ▸ UPS.
 		let rest = served;
+		// Reactor power first: its nutrients are paid for whether or not it runs flat out.
+		const reactorKw = Math.min(reactorCap, rest);
+		rest -= reactorKw;
 		const gridKw = Math.min(gridCap, rest);
 		rest -= gridKw;
 		let gensetKw = 0;
@@ -140,7 +149,9 @@ export function powerSolve(ctx: TickCtx): void {
 
 		// Charge UPS from remaining grid ▸ genset headroom, only when they cover the full demand
 		// (charging a short net would make it flicker between powered and unpowered).
-		const discharged = gridCap + gensetCap < demand - EPS;
+		let reactorOut = reactorKw;
+		const discharged = reactorCap + gridCap + gensetCap < demand - EPS;
+		let reactorSpare = reactorCap - reactorKw;
 		let gridSpare = gridCap - gridKw;
 		let gridCharge = 0;
 		for (const u of b.upses) {
@@ -150,6 +161,9 @@ export function powerSolve(ctx: TickCtx): void {
 			const room = (d?.storageKwh ?? 0) - u.storedKwh;
 			if (room <= EPS || eff <= 0) continue;
 			let input = Math.min(cap(u), (room * TICKS_PER_HOUR) / eff);
+			const fromReactor = Math.min(input, reactorSpare);
+			reactorSpare -= fromReactor;
+			input -= fromReactor;
 			const fromGrid = Math.min(input, gridSpare);
 			gridSpare -= fromGrid;
 			input -= fromGrid;
@@ -166,12 +180,19 @@ export function powerSolve(ctx: TickCtx): void {
 			}
 			gridCharge += fromGrid;
 			gensetKw += fromGenset;
-			u.storedKwh = Math.min(d?.storageKwh ?? 0, u.storedKwh + ((fromGrid + fromGenset) / TICKS_PER_HOUR) * eff);
+			u.storedKwh = Math.min(d?.storageKwh ?? 0, u.storedKwh + ((fromReactor + fromGrid + fromGenset) / TICKS_PER_HOUR) * eff);
+			reactorOut += fromReactor;
 		}
 
 		const gridImport = gridKw + gridCharge;
 		gridTotal += gridImport;
 		gensetTotal += gensetKw;
+		reactorTotal += reactorOut;
+		if (reactorCap > 0) {
+			for (const r of b.reactors) {
+				if (isUsableSource(r)) energyCost += ((reactorOut * cap(r) * r.nutrientSat) / reactorCap / TICKS_PER_HOUR) * (getDef(content, r.defId).power?.costPerKwh ?? 0);
+			}
+		}
 		energyCost += (gridImport / TICKS_PER_HOUR) * price;
 		for (let gi = 0; gi < b.gensets.length; gi++) {
 			const g = b.gensets[gi];
@@ -199,7 +220,7 @@ export function powerSolve(ctx: TickCtx): void {
 	let itKw = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
-		if (f.powerNet < 0) {
+		if (f.powerNet < 0 || d.growth) {
 			if (needsPower(d)) {
 				f.sat = 0;
 				f.powerKw = 0;
@@ -220,6 +241,6 @@ export function powerSolve(ctx: TickCtx): void {
 	m.itKw = itKw;
 	m.gridKw = gridTotal;
 	m.gensetKw = gensetTotal;
-	m.totalKw = gridTotal + gensetTotal;
+	m.totalKw = gridTotal + gensetTotal + reactorTotal;
 	m.energyCost = energyCost;
 }

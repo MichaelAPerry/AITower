@@ -6,7 +6,7 @@
  */
 
 export type Stem = "pad" | "keys" | "bass" | "vibes" | "brush" | "rim" | "hat";
-export type InstId = "pad" | "rhodes" | "pluck" | "vibes" | "brush" | "rim" | "tick";
+export type InstId = "pad" | "rhodes" | "pluck" | "vibes" | "brush" | "rim" | "tick" | "wet" | "heart";
 
 export interface ScoreNote {
 	stem: Stem;

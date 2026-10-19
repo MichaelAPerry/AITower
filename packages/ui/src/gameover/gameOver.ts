@@ -1,5 +1,7 @@
 /** Game-over screens: which one to show, once, and what to put on it. */
-import type { GameOverKind, SimView } from "@aitower/sim";
+import type { ContentDB } from "@aitower/content";
+import type { HorrorIntensity } from "@aitower/shared";
+import type { EndingId, GameOverKind, SimView } from "@aitower/sim";
 import { type StatRow, lifetimeRows } from "../finance/finance";
 import { fmtMoney, fmtPflops } from "../format";
 
@@ -47,7 +49,7 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		tone: "green",
 		lines: ["You have reached the highest clearance the Ministry grants. The Minister has been informed and was, for a moment, almost pleased.", "The datacenter may continue to operate in the sandbox, without further inspection."],
 	},
-	// M3 placeholder (M3-T4 shows the ending text from content.endings).
+	// Fallback only: the sheet shows the text of content.endings (see `overCopyFor`).
 	absorbed: {
 		heading: "NOTICE OF INCORPORATION",
 		form: "FORM Ω: ASSET RECLASSIFICATION",
@@ -56,6 +58,45 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		lines: ["The facility and its superintendent have been reclassified as Ministry assets.", "No further correspondence is required."],
 	},
 };
+
+/** The frame (form number, stamp, tone) printed around an ending's own text. `plain` is the wording at horrorIntensity "off". */
+const ENDING_FRAME: Record<EndingId, { form: string; stamp: string; tone: "red" | "green"; plainForm: string; plainStamp: string }> = {
+	livingTower: { form: "FORM A-9: ASSET CERTIFICATION", stamp: "CERTIFIED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	cleanTower: { form: "FORM C-2: SANITARY COMMENDATION", stamp: "COMMENDED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	absorbed: { form: "FORM Ω: ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "FORM T-9: TAKEOVER", plainStamp: "TAKEN OVER" },
+};
+
+/** The ending shown for a game-over: `ending` when set, else the secret one for kind "absorbed", else none. */
+export const endingOf = (over: GameOver): EndingId | undefined => over.ending ?? (over.kind === "absorbed" ? "absorbed" : undefined);
+
+/** Ending text split into paragraphs ("\n\n"), blank ones dropped. */
+export const paragraphs = (body: string): string[] =>
+	body
+		.split(/\n\s*\n/)
+		.map((p) => p.trim())
+		.filter(Boolean);
+
+/**
+ * What the game-over sheet prints. Bankrupt and shutdown (and a victory without an ending) use `OVER_COPY`; a victory with
+ * `livingTower` / `cleanTower`, and `absorbed`, print the title and text of that ending from `content.endings`.
+ * An ending missing from the content falls back to the kind's own copy.
+ */
+export function overCopyFor(over: GameOver, content: ContentDB, horror: HorrorIntensity = "full"): OverCopy {
+	const base = OVER_COPY[over.kind];
+	const id = endingOf(over);
+	const def = id ? content.endings?.find((e) => e.id === id) : undefined;
+	if (!id || !def) return base;
+	const frame = ENDING_FRAME[id];
+	const plain = horror === "off";
+	const lines = paragraphs(def.body);
+	return {
+		heading: def.title.toUpperCase(),
+		form: plain ? frame.plainForm : frame.form,
+		stamp: plain ? frame.plainStamp : frame.stamp,
+		tone: frame.tone,
+		lines: lines.length ? lines : base.lines,
+	};
+}
 
 export type { StatRow };
 

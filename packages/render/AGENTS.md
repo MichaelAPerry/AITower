@@ -124,3 +124,22 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
   `crt=0` (CRT effects off), `scene=variety` (art/feedback/bot test scene; combine with `focus=x,floor`, floors 12-15 are failure rows), `real=1` (real content via `loadContent()`;
   the fixture already uses the real colours). Keys 1–4 switch overlay. The fixture cycles rack jobs every 25 ticks
   so capsules fly. Real game: `npx vite apps/web --port 5176`, `?new&seed=7&speed=10[&overlay=heat]`.
+
+## M3-T3b: synthetic base look, staged path skins, wetware (supersedes the cassette art above)
+- **Look** (`docs/STYLE_SYNTHETIC.md`): `palette.ts` `T` keeps its key names but holds the synthetic values (ink = bg, paper = text, brass = cyan
+  accent, copper/verdigris = coolant supply/return cyan, sodium = warm white, putty/beige/olive/wall = graphite glass); plus `accent2` and the three
+  horror tokens flesh/bile/blood. Content still ships cassette hexes: `color.ts` `skinColor`/`skinAccent` re-skin them to graphite glass. Racks are dark
+  glass cabinets with a vertical status light strip (height by tier, `stripHeight`), no CRTs; `draw.ts` primitives are restyled (`rivet` is a no-op).
+  Power = warm-white line, coolant = cyan, nutrient = pale green (`conduits.ts` `drawNutrient`, row 7, risers at x 14).
+- **Stage system** (`skin.ts`, pure): `pathSkin(view)` = `{path, stage 0..4, score}`; biotech score = `corruption`, applies before the path is chosen;
+  stages at 25/50/75/98 %. `skinTable`/`skinEffects(skin, kind)` say what a device shows (biotech: 1 damp+pulse, 2 veins+flesh+bile, 3 breathe+eyes,
+  4 tissue; sterilizer/quarantine hold out until 4; growths skip damp/tissue). Greentech and synthetic are M4 placeholders (empty table rows).
+- **Horror pipeline** (`horror.ts` pure: stages by skin stage x intensity, Bayer dither masks, lamp pulse, eyes/blink, breathing frame, sign word,
+  contamination ramps + data-texture builder; `pixi/horror.ts` `HorrorLayer`: static decals rebuilt on layout/stage-key change, breathing frame every
+  2.5 s, beads/vein pulses per frame; `pixi/bioArt.ts`: wetware bodies, growths, `skinBody` overlay painted into the cached body, status-light eyes).
+  Body cache key includes stage x intensity x grown. `mild` = half alpha, no eyes/faces; `off` = plain synthetic (growths neutral, bots get an amber band).
+- **Wetware art** by `art.ts` `bodyArt`/`rackVariant`: organoid incubator, DNA vault (storage-only bio rack or id dna/vault), neural pit (id neural/pit or
+  5+ tiles), nutrient plant, sterile bay, culling room (`bio.cullsGrowths`), quarantine lock, bioreactor, growth (`def.growth` or `FacilityView.grown`).
+- **Statuses:** `noNutrient` (bile blink, empty-tube glyph and badge) and `tooCold` (frost-blue lamp, snowflake glyph, badge, frost rime on the body).
+- **Overlays:** `nutrient` (nets + per-device satisfaction) and `contamination` (one dithered RGBA data texture, 2x nearest; colour-blind ramp).
+- **Dev:** `?scene=variety&stage=0..4&horror=full|mild|off`, keys Q-T set the stage live, keys 1-6 overlays. The variety scene has every wetware kind and growths.

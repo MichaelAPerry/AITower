@@ -6,10 +6,13 @@ import { Application, Container, Graphics, Sprite, Texture, TextureSource, Tilin
 import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
 import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
 import { Interpolator, effectiveAlpha, hashArrays } from "../interp";
+import { type HorrorStages, type LiveFx, SIGN_WORD, easeToward, horrorStages, signWord } from "../horror";
+import { pathSkin, skinEffects } from "../skin";
+import { HorrorLayer } from "./horror";
 import { Arrows } from "./arrows";
 import { Background } from "./background";
 import { Bots } from "./bots";
-import { drawCoolant, drawPower, dripCells } from "./conduits";
+import { drawCoolant, drawNutrient, drawPower, dripCells } from "./conduits";
 import { Effects, dripFloorY } from "./effects";
 import { Feedback } from "./feedback";
 import { drawBody, drawLive } from "./facilityArt";
@@ -68,7 +71,8 @@ function makeScreenFx(): { root: Container; resize: (w: number, h: number) => vo
 	};
 }
 
-const facilityKey = (view: SimView): string => view.facilities.map((f) => `${f.id}:${f.defId}:${f.floor}:${f.x}`).join("|");
+/** Cache key of the facility bodies: layout, growths, and the skin (stage x intensity) the cached art was drawn for. */
+const facilityKey = (view: SimView, skinKey: string): string => `${skinKey}#${view.facilities.map((f) => `${f.id}:${f.defId}:${f.floor}:${f.x}:${f.grown ? 1 : 0}`).join("|")}`;
 
 export async function createPixiRenderer(host: HTMLElement, content: ContentDB): Promise<Renderer> {
 	TextureSource.defaultOptions.scaleMode = "nearest";
@@ -106,6 +110,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const bots = new Bots(content);
 	const effects = new Effects(content);
 	const feedback = new Feedback(content);
+	const horror = new HorrorLayer();
 	const arrows = new Arrows(content);
 	const overlays = new Overlays(content);
 	const ghost = new GhostLayer(content);
@@ -114,12 +119,14 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		structure.earth,
 		structure.shell,
 		conduits,
+		horror.root,
 		structure.plates,
 		lifts.shafts,
 		lifts.cars,
 		facBodies,
 		facLive,
 		facLabels.root,
+		horror.live,
 		feedback.dark,
 		pneumatics.g,
 		bots.g,
@@ -149,6 +156,34 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const liftInterp = new Interpolator(3);
 	const t0 = performance.now();
 	const pres = new Presentation();
+	// Biotech skin: stage x intensity drive every horror layer (recomputed per tick and on option change only).
+	let stages: HorrorStages = horrorStages(0, 0, pres.options.horrorIntensity);
+	let skinKey = "0f";
+	let skinScore = 0;
+	const live: LiveFx = { stages, score: 0, stage: 0, cursor: null, paused: false };
+	const cursor = { x: 0, y: 0 };
+	let cursorSeen = false;
+	let pointer: { sx: number; sy: number } | null = null;
+	const onPointerMove = (e: PointerEvent): void => {
+		const r = canvas.getBoundingClientRect();
+		pointer = { sx: e.clientX - r.left, sy: e.clientY - r.top };
+	};
+	const onPointerLeave = (): void => {
+		pointer = null;
+	};
+	canvas.addEventListener("pointermove", onPointerMove);
+	canvas.addEventListener("pointerleave", onPointerLeave);
+	const refreshSkin = (view: SimView): void => {
+		const skin = pathSkin(view);
+		const off = pres.options.horrorIntensity === "off";
+		const stage = off || skin.path !== "biotech" ? 0 : skin.stage;
+		stages = horrorStages(stage, skin.score, pres.options.horrorIntensity);
+		skinScore = skin.score;
+		skinKey = `${stage}${pres.options.horrorIntensity[0]}`;
+		live.stages = stages;
+		live.stage = stage;
+		live.score = skinScore;
+	};
 
 	const input = new Input(canvas, {
 		camera: () => cam,
@@ -206,8 +241,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			keys.slab = sh;
 			structure.rebuild(view);
 		}
-		const ch = hashArrays(view.power, view.coolant);
-		const fk = facilityKey(view);
+		refreshSkin(view);
+		const ch = hashArrays(view.power, view.coolant, view.nutrient);
+		const fk = facilityKey(view, skinKey);
 		if (gridChanged || ch !== keys.conduit || fk !== keys.fac) {
 			// Drips only where no facility stands underneath.
 			const occupied = new Set<string>();
@@ -223,7 +259,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			conduits.clear();
 			drawPower(conduits, view);
 			drawCoolant(conduits, view);
+			drawNutrient(conduits, view);
 		}
+		if (horror.needsRebuild(sh ^ Math.imul(ch, 31), stages)) horror.rebuild(view, sh ^ Math.imul(ch, 31), stages);
 		const lk = liftKey(view.lifts);
 		if (gridChanged || lk !== keys.lift) {
 			keys.lift = lk;
@@ -232,9 +270,12 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		if (gridChanged || fk !== keys.fac) {
 			keys.fac = fk;
 			facBodies.clear();
+			const plain = pres.options.horrorIntensity === "off";
 			for (const f of view.facilities) {
 				const def = content.facilities[f.defId];
-				if (def) drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor));
+				if (!def) continue;
+				const eff = skinEffects({ path: stages.stage > 0 ? "biotech" : null, stage: stages.stage }, f.grown || def.growth ? "growth" : def.kind);
+				drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor), { grown: f.grown, plain, skin: { effects: eff, alpha: stages.alpha, seed: f.id } });
 			}
 		}
 		feedback.onTick(view);
@@ -248,6 +289,11 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			const changed = pres.set(o);
 			if (changed.length === 0) return;
 			if (changed.includes("colorBlind")) overlayDirty = true;
+			if (changed.includes("horrorIntensity") && lastView) {
+				// Cached bodies and decals depend on the intensity: force a rebuild on the next draw.
+				keys.fac = "";
+				lastTick = Number.NaN;
+			}
 			if (changed.includes("crtEffects")) screenFx.root.visible = pres.options.crtEffects;
 		},
 		draw(view, alpha) {
@@ -269,7 +315,23 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			world.position.set(o.x, o.y);
 			world.scale.set(cam.zoom);
 			const opt = pres.options;
-			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt);
+			const paused = now - lastTickAt > SETTLE_MS;
+			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt, signWord(stages, t, opt.reducedMotion) !== SIGN_WORD);
+			// Eyes follow the cursor slowly: ease a world-space point toward the pointer.
+			if (pointer && stages.eyes) {
+				const wx = (pointer.sx - o.x) / cam.zoom;
+				const wy = (pointer.sy - o.y) / cam.zoom;
+				if (!cursorSeen) {
+					cursor.x = wx;
+					cursor.y = wy;
+					cursorSeen = true;
+				} else {
+					cursor.x = easeToward(cursor.x, wx, dt);
+					cursor.y = easeToward(cursor.y, wy, dt);
+				}
+				live.cursor = cursor;
+			} else live.cursor = null;
+			live.paused = paused;
 
 			// Per-frame layers (facility details culled to the viewport).
 			const vx0 = -o.x / cam.zoom - 4 * TILE;
@@ -284,14 +346,16 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				const fx = f.x * TILE;
 				const ft = floorTop(view, f.floor);
 				if (fx > vx1 || fx + def.width * TILE < vx0 || ft > vy1 || ft < vy0) continue;
-				drawLive(facLive, def, f, fx, ft, t, opt, facLabels);
+				drawLive(facLive, def, f, fx, ft, t, opt, facLabels, live);
 			}
 			facLabels.end();
 			pneumatics.draw(t, opt);
 			const liftPos = (id: number): number | null => liftInterp.get(id, a)?.y ?? null;
 			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t, opt);
 			const botPos = (b: { id: number; x: number; floor: number }) => botInterp.get(b.id, a) ?? { x: b.x, y: b.floor };
-			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t, opt);
+			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t, opt, stages);
+			horror.updateBreath(view, stages, t, opt);
+			horror.update({ x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, stages, t, opt);
 			effects.update(view, bots.torches, dt, t, opt);
 			feedback.update(view, { x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, dt, t, opt);
 
@@ -344,6 +408,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		},
 		destroy() {
 			input.destroy();
+			canvas.removeEventListener("pointermove", onPointerMove);
+			canvas.removeEventListener("pointerleave", onPointerLeave);
+			overlays.destroy();
 			// Destroys the whole scene graph (all layer Graphics are children of the stage).
 			app.destroy({ removeView: true }, { children: true });
 			background.destroyShared();

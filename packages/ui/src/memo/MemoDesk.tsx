@@ -1,12 +1,14 @@
 import type { ContentDB } from "@aitower/content";
-import type { MemoView, ModifierView } from "@aitower/sim";
+import type { MemoView, ModifierView, SimView } from "@aitower/sim";
+import { memoStain } from "../bio/bio";
+import { choiceChips, effectsOf, isUrgentMemo } from "../calm/calm";
 import type { GameState, GameStore } from "@aitower/shared";
 import { useEffect } from "react";
 import { Icon, Lamp, Stamp } from "../components/common";
 import type { UiState } from "../components/context";
 import { fmtDuration } from "../format";
 import { pushNotice } from "../notices";
-import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoToPop, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
+import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
 import "./memo.css";
 
 type SetUi = (patch: Partial<UiState>) => void;
@@ -75,21 +77,71 @@ export function MemoCard({ memo, tick, onAnswer, onAside }: { memo: MemoView; ti
 	);
 }
 
-/** The newest unanswered memo slides in at the top right of the world; the player can answer it or set it aside in the inbox. */
-export function MemoPop({ store, state, ui, setUi }: { store: GameStore; state: GameState; ui: UiState; setUi: SetUi }) {
+/** The urgent memo to pop up: the oldest open, unset-aside one that is urgent. Others only raise the inbox count. */
+export const urgentToPop = (view: SimView, content: ContentDB, stamped: readonly number[], aside: readonly number[]): MemoView | null =>
+	openMemos(view.memos, stamped).find((m) => !aside.includes(m.id) && isUrgentMemo(m, view, content)) ?? null;
+
+/**
+ * The compact slip: category and countdown, a headline, and one stamp per choice with its effects as numbers and icons
+ * ("−$160k · ★−4"). The prose waits behind "read memo" (`ui.readMemo`).
+ */
+export function MemoSlip({ memo, content, tick, open, onRead, onAnswer, onAside }: { memo: MemoView; content: ContentDB; tick: number; open: boolean; onRead: () => void; onAnswer: (choiceId: string) => void; onAside: () => void }) {
+	return (
+		<article className="memo-slip" data-memo={memo.id} aria-label={memo.title}>
+			<header className="memo-slip-from">
+				<span>{CATEGORY[memo.category] ?? "MINISTRY"} · URGENT</span>
+				<span title="The memo is filed under its default stamp when the time runs out">{memoCountdown(memo, tick)}</span>
+			</header>
+			<h3 className="memo-slip-title">{memo.title}</h3>
+			<div className="memo-slip-stamps">
+				{memo.choices.map((c) => (
+					<button key={c.id} type="button" className={`memo-slip-stamp ${c.id === memo.defaultChoice ? "is-default" : ""}`} title={c.hint} onClick={() => onAnswer(c.id)}>
+						<span>{c.label}</span>
+						<em>{choiceChips(effectsOf(content, memo, c.id))}</em>
+					</button>
+				))}
+			</div>
+			<footer className="memo-slip-foot">
+				<button type="button" className="memo-slip-more" aria-expanded={open} onClick={onRead}>
+					{open ? "hide memo" : "read memo"}
+				</button>
+				<button type="button" className="memo-slip-more" onClick={onAside} title="Close this slip; the memo waits in the inbox">
+					later
+				</button>
+			</footer>
+			{open && (
+				<div className="memo-slip-body">
+					{memo.body.split(/\n\s*\n/).map((p) => (
+						<p key={p}>{p}</p>
+					))}
+				</div>
+			)}
+		</article>
+	);
+}
+
+/** An urgent unanswered memo pops up at the top right of the world; everything else raises the inbox count. */
+export function MemoPop({ store, content, state, ui, setUi }: { store: GameStore; content: ContentDB; state: GameState; ui: UiState; setUi: SetUi }) {
 	const { memos, tick } = state.view;
 	// Forget bookkeeping for memos the sim has resolved.
 	const stale = ui.stamped.length + ui.aside.length > 0 && (pruneIds(ui.stamped, memos).length !== ui.stamped.length || pruneIds(ui.aside, memos).length !== ui.aside.length);
 	useEffect(() => {
 		if (stale) setUi({ stamped: pruneIds(ui.stamped, memos), aside: pruneIds(ui.aside, memos) });
 	}, [stale, memos, ui.stamped, ui.aside, setUi]);
-	const memo = ui.inboxOpen ? null : memoToPop(memos, ui.stamped, ui.aside);
+	const memo = ui.inboxOpen ? null : urgentToPop(state.view, content, ui.stamped, ui.aside);
 	if (!memo) return null;
-	const waiting = openMemos(memos, ui.stamped).length;
+	const stain = memoStain(state.view.corruption ?? 0, state.settings.horrorIntensity);
 	return (
-		<div className="ui-memo-pop" role="dialog" aria-label="Incoming Ministry memo" key={memo.id}>
-			<MemoCard memo={memo} tick={tick} onAnswer={(c) => answer(store, ui, setUi, memo, c)} onAside={() => setUi({ aside: [...ui.aside, memo.id] })} />
-			{waiting > 1 && <div className="memo-more">{waiting - 1} more in the inbox</div>}
+		<div className={`ui-memo-pop ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-label="Incoming Ministry memo" key={memo.id}>
+			<MemoSlip
+				memo={memo}
+				content={content}
+				tick={tick}
+				open={ui.readMemo === memo.id}
+				onRead={() => setUi({ readMemo: ui.readMemo === memo.id ? null : memo.id })}
+				onAnswer={(c) => answer(store, ui, setUi, memo, c)}
+				onAside={() => setUi({ aside: [...ui.aside, memo.id] })}
+			/>
 		</div>
 	);
 }

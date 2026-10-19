@@ -47,6 +47,7 @@ export default defineConfig(({ mode }) => ({
 								if (/node_modules\/(react|react-dom|scheduler)\//.test(id)) return "react";
 								if (/\/packages\/(sim|content|shared)\//.test(id)) return "sim";
 								if (/\/packages\/ui\//.test(id)) return "ui";
+								if (/\/packages\/audio\//.test(id)) return "audio";
 								return undefined;
 							},
 						},

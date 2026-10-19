@@ -11,10 +11,12 @@
  *  - v3 → v4 (M2b-T1): research (`researchPoints`, `techResearched`), Contracts Clerk (`clerkPolicy`, `clerkAccepted`, `job.clerk`),
  *    loans (`loanPrincipal`), quarterly audits (`reports`, `audit`), lifetime `stats`, `scriptedIssued`, `bot.parts`, and the
  *    `taxes` / `interest` / `fees` ledger fields on every stored day.
+ *  - v4 → v5 (M3-T1): nutrient layer, contamination field, growths, mutations (`bot.trait`), corruption, ascension `path`,
+ *    `endingDays`, the `growth` RNG stream, `gameOver.ending`.
  */
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 4;
+export const SNAPSHOT_VERSION = 5;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -98,8 +100,52 @@ function migrateV3(state: RawState): RawState {
 	return state;
 }
 
+/**
+ * Defaults for a pre-biotech save: no nutrient layer, a clean field, no path, zero corruption, the `growth` RNG stream,
+ * and the new per-facility / per-bot fields.
+ */
+function migrateV4(state: RawState): RawState {
+	const { width, floorMin, floorMax } = state;
+	if (typeof width === "number" && typeof floorMin === "number" && typeof floorMax === "number" && Number.isInteger(width) && Number.isInteger(floorMin) && Number.isInteger(floorMax)) {
+		const n = width * (floorMax - floorMin + 1);
+		if (Number.isSafeInteger(n) && n >= 0 && n <= 2_000_000) {
+			if (!(state.nutrient instanceof Uint8Array)) state.nutrient = new Uint8Array(n);
+			if (!(state.nutrientNetOf instanceof Int32Array)) state.nutrientNetOf = new Int32Array(n).fill(-1);
+			if (!(state.contamination instanceof Float32Array)) state.contamination = new Float32Array(n);
+		}
+	}
+	if (typeof state.nutrientNetCount !== "number") state.nutrientNetCount = 0;
+	if (!Array.isArray(state.nutrientNets)) state.nutrientNets = [];
+	if (typeof state.contaminatedShare !== "number") state.contaminatedShare = 0;
+	if (typeof state.irreversible !== "boolean") state.irreversible = false;
+	if (typeof state.corruption !== "number") state.corruption = 0;
+	if (state.path === undefined) state.path = null;
+	if (!isObj(state.endingDays)) state.endingDays = { livingTower: 0, cleanTower: 0 };
+	if (isObj(state.rng) && typeof state.rng.growth !== "number") state.rng.growth = mixSeed(typeof state.seed === "number" ? state.seed : 0, 4);
+	if (isObj(state.metrics) && typeof state.metrics.organoidPflops !== "number") state.metrics.organoidPflops = 0;
+	if (Array.isArray(state.facilities)) {
+		for (const f of state.facilities) {
+			if (!isObj(f)) continue;
+			if (typeof f.nutrientNet !== "number") f.nutrientNet = -1;
+			if (typeof f.nutrientSat !== "number") f.nutrientSat = 1;
+			if (typeof f.noNutrient !== "boolean") f.noNutrient = false;
+			if (typeof f.tooCold !== "boolean") f.tooCold = false;
+			if (typeof f.grown !== "boolean") f.grown = false;
+			if (typeof f.recoverAt !== "number") f.recoverAt = -1;
+		}
+	}
+	if (Array.isArray(state.bots)) {
+		for (const b of state.bots) {
+			if (!isObj(b)) continue;
+			if (b.trait === undefined) b.trait = null;
+			if (typeof b.exposure !== "number") b.exposure = 0;
+		}
+	}
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;
