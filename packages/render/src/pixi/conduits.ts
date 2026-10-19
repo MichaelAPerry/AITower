@@ -1,5 +1,5 @@
 /**
- * Power: cloth-wrapped black/ochre cable bundle in a riveted tray on ceramic
+ * Power: a thin warm-white cable line in a graphite tray; nutrient: a pale-green line (row 7). Legacy note: cloth bundle on ceramic
  * standoffs (floor void). Coolant: exposed copper supply + verdigris return
  * pipes under the ceiling with flanges and pressure dials. Horizontal runs join
  * neighbouring cells; vertically linked cells get risers (one per stretch).
@@ -9,12 +9,16 @@ import type { SimView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
 import { floorTop } from "../camera";
 import { CABLE_Y, FLOOR_H, PIPE_H, PIPE_RETURN_Y, PIPE_SUPPLY_Y, TILE } from "../constants";
-import { BRASS, CLOTH, COPPER, PAPER, STEEL, T, VERDI, type Mat, lt } from "../palette";
+import { BRASS, CLOTH, COPPER, NUTRIENT, PAPER, STEEL, T, VERDI, type Mat, lt } from "../palette";
 import { dialFace, needle, px } from "./draw";
 
 export const POWER_COLOR = T.amber;
 export const SUPPLY_COLOR = T.copper;
 export const RETURN_COLOR = T.verdigris;
+export const NUTRIENT_COLOR = NUTRIENT.mid;
+/** Row of the thin nutrient line: the free pixel row between the coolant return and the pneumatic tube. */
+export const NUTRIENT_Y = 7;
+const NUTRIENT_RISER_X = 14;
 
 /** Riser column offsets within a tile. */
 const POWER_RISER_X = 1;
@@ -171,6 +175,50 @@ export function drawCoolant(g: Graphics, view: SimView, supply?: Colorer, ret?: 
 			// Blind end flanges.
 			if (!l) px(g, wx, top + PIPE_SUPPLY_Y - 1, 2, PIPE_RETURN_Y - PIPE_SUPPLY_Y + PIPE_H + 2, STEEL.line);
 			if (!r) px(g, wx + TILE - 2, top + PIPE_SUPPLY_Y - 1, 2, PIPE_RETURN_Y - PIPE_SUPPLY_Y + PIPE_H + 2, STEEL.line);
+		}
+	}
+}
+
+// ─── Nutrient ──────────────────────────────────────────────────────────
+
+/**
+ * Third conduit layer (`view.nutrient`): a thin pale-green line under the coolant pair with hanger dots and risers. With a
+ * colour callback the same geometry is drawn as a flat highlight (the nutrient overlay).
+ */
+export function drawNutrient(g: Graphics, view: SimView, color?: Colorer): void {
+	const arr = view.nutrient;
+	for (let f = view.floorMin; f <= view.floorMax; f++) {
+		const top = floorTop(view, f);
+		for (let x = 0; x < view.width; x++) {
+			if (!at(arr, view, x, f)) continue;
+			const i = (f - view.floorMin) * view.width + x;
+			const wx = x * TILE;
+			const l = at(arr, view, x - 1, f);
+			const r = at(arr, view, x + 1, f);
+			const up = riserUp(arr, view, x, f);
+			const x0 = l ? wx : wx + 2;
+			const x1 = r ? wx + TILE : wx + TILE - 2;
+			const y = top + NUTRIENT_Y;
+			const upY = top - FLOOR_H + NUTRIENT_Y;
+			if (color) {
+				const c = color(i);
+				px(g, x0, y - 2, x1 - x0, 5, c, 0.25);
+				px(g, x0, y - 1, x1 - x0, 3, c);
+				px(g, x0, y - 1, x1 - x0, 1, lt(c, 0.5));
+				if (up) {
+					px(g, wx + NUTRIENT_RISER_X - 1, upY, 4, y - upY, c, 0.25);
+					px(g, wx + NUTRIENT_RISER_X, upY, 2, y - upY, c);
+				}
+				continue;
+			}
+			px(g, x0, y, x1 - x0, 1, NUTRIENT.mid);
+			for (let k = x0 + 1; k < x1; k += 4) px(g, k, y, 1, 1, NUTRIENT.hi);
+			if (!l) px(g, wx + 1, y - 1, 2, 3, NUTRIENT.dk);
+			if (!r) px(g, wx + TILE - 3, y - 1, 2, 3, NUTRIENT.dk);
+			if (up) {
+				px(g, wx + NUTRIENT_RISER_X, upY, 1, y - upY, NUTRIENT.mid);
+				px(g, wx + NUTRIENT_RISER_X + 1, upY, 1, y - upY, NUTRIENT.lo, 0.7);
+			}
 		}
 	}
 }

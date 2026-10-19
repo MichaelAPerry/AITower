@@ -1,9 +1,9 @@
 import type { FacilityDef } from "@aitower/content";
 import { describe, expect, it } from "vitest";
-import { NATIVE_WIDTH, annexTiles, artSpec, artTier, bodyWidth, cabinetDetail, rackVariant, trimDetail, widthClass } from "./art";
+import { NATIVE_WIDTH, annexTiles, artSpec, artTier, bodyArt, bodyWidth, cabinetDetail, rackVariant, stripHeight, trimDetail, widthClass } from "./art";
 
 type RackDef = Pick<FacilityDef, "rack">;
-const rack = (cooling: "air" | "dlc" | "immersion", pflops = 20, storageTB = 0): RackDef => ({
+const rack = (cooling: "air" | "dlc" | "immersion" | "bio", pflops = 20, storageTB = 0): RackDef => ({
 	rack: { cooling, powerKw: 40, liquidFraction: 0, pflops, storageTB, failurePerDay: 0 },
 });
 
@@ -87,7 +87,7 @@ describe("widths and specs", () => {
 
 	it("artSpec: variant, tier, immersion flag and width class", () => {
 		const s = artSpec({ kind: "rack", width: 3, unlockTier: 3, ...rack("immersion") });
-		expect(s).toEqual({ kind: "rack", variant: "immersion", tier: 3, width: 3, widthClass: "standard", immersion: true });
+		expect(s).toEqual({ kind: "rack", body: "rack", variant: "immersion", tier: 3, width: 3, widthClass: "standard", immersion: true });
 		const c = artSpec({ kind: "chiller", width: 4, unlockTier: 2 });
 		expect(c).toMatchObject({ variant: null, tier: 2, immersion: false, widthClass: "wide" });
 	});
@@ -111,5 +111,32 @@ describe("widths and specs", () => {
 		expect(trimDetail(3, 4).pilasters).toBe(true);
 		expect(trimDetail(4, 4).finials).toBe(true);
 		expect(trimDetail(4, 1).finials).toBe(false);
+	});
+});
+
+describe("wetware art selection", () => {
+	it("bio racks: organoid incubator, DNA vault (storage-only or by name), neural pit (by name or 5+ tiles)", () => {
+		expect(rackVariant({ ...rack("bio"), id: "rack_organoid", width: 2 })).toBe("organoid");
+		expect(rackVariant({ ...rack("bio", 0, 500), id: "x", width: 2 })).toBe("dna");
+		expect(rackVariant({ ...rack("bio"), id: "dna_vault", width: 2 })).toBe("dna");
+		expect(rackVariant({ ...rack("bio"), id: "neural_pit", width: 3 })).toBe("neural");
+		expect(rackVariant({ ...rack("bio"), id: "big", width: 5 })).toBe("neural");
+		expect(rackVariant({ ...rack("bio"), id: "big", width: 4 })).toBe("organoid");
+		// Non-bio racks never turn into wetware, even with those names.
+		expect(rackVariant({ ...rack("air"), id: "neural", width: 6 })).toBe("air");
+	});
+
+	it("body art: growth overrides the kind, the culling room is a sterilizer that kills growths", () => {
+		expect(bodyArt({ kind: "rack", growth: true })).toBe("growth");
+		expect(bodyArt({ kind: "nutrient" }, true)).toBe("growth");
+		expect(bodyArt({ kind: "sterilizer" })).toBe("sterilizer");
+		expect(bodyArt({ kind: "sterilizer", bio: { cullsGrowths: true } })).toBe("culling_room");
+		expect(bodyArt({ kind: "quarantine" })).toBe("quarantine");
+		expect(bodyArt({ kind: "bioreactor" })).toBe("bioreactor");
+		expect(bodyArt({ kind: "chiller" })).toBe("chiller");
+	});
+
+	it("the status light strip gets taller with the tier", () => {
+		expect([1, 2, 3, 4].map((t) => stripHeight(t as 1 | 2 | 3 | 4))).toEqual([10, 14, 18, 22]);
 	});
 });

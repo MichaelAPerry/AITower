@@ -4,11 +4,23 @@
  */
 import type { FacilityDef } from "@aitower/content";
 
-/** Rack cabinet variant. Immersion racks get a glass tank; DLC racks a manifold; storage racks reels. */
-export type RackVariant = "air" | "dlc" | "storage" | "immersion";
+/**
+ * Rack cabinet variant. Immersion racks get a glass tank; DLC racks a manifold; storage racks data cells.
+ * Organoid racks (`cooling: "bio"`) are an incubator of glass jars with a pale mass, a DNA vault of stained tubes
+ * (storage-only bio rack, or id says dna / vault) or the big neural pit (id says neural / pit, or 5+ tiles wide).
+ */
+export type RackVariant = "air" | "dlc" | "storage" | "immersion" | "organoid" | "dna" | "neural";
 
-export const rackVariant = (def: Pick<FacilityDef, "rack">): RackVariant =>
-	(def.rack?.pflops ?? 0) === 0 && (def.rack?.storageTB ?? 0) > 0
+export const NEURAL_MIN_WIDTH = 5;
+
+export const rackVariant = (def: Pick<FacilityDef, "rack"> & Partial<Pick<FacilityDef, "id" | "width">>): RackVariant =>
+	def.rack?.cooling === "bio"
+		? /neural|pit/i.test(def.id ?? "") || (def.width ?? 0) >= NEURAL_MIN_WIDTH
+			? "neural"
+			: /dna|vault/i.test(def.id ?? "") || ((def.rack.pflops ?? 0) === 0 && (def.rack.storageTB ?? 0) > 0)
+				? "dna"
+				: "organoid"
+		: (def.rack?.pflops ?? 0) === 0 && (def.rack?.storageTB ?? 0) > 0
 		? "storage"
 		: def.rack?.cooling === "immersion"
 			? "immersion"
@@ -58,8 +70,16 @@ export const cabinetDetail = (tier: ArtTier, i: number, n: number): CabinetDetai
 export type WidthClass = "narrow" | "standard" | "wide";
 export const widthClass = (w: number): WidthClass => (w <= 1 ? "narrow" : w <= 3 ? "standard" : "wide");
 
+/** Which body is drawn. A growth is tissue whatever its kind; a sterilizer is a clinical bay, or a culling room when it kills growths. */
+export type BodyArt = FacilityDef["kind"] | "culling_room" | "growth";
+
+export const bodyArt = (def: Pick<FacilityDef, "kind"> & Partial<Pick<FacilityDef, "bio" | "growth">>, grown = false): BodyArt =>
+	def.growth || grown ? "growth" : def.kind === "sterilizer" && def.bio?.cullsGrowths ? "culling_room" : def.kind;
+
 export interface ArtSpec {
 	kind: FacilityDef["kind"];
+	/** The body the drawing code branches on (growth overrides the kind). */
+	body: BodyArt;
 	variant: RackVariant | null;
 	tier: ArtTier;
 	width: number;
@@ -68,10 +88,11 @@ export interface ArtSpec {
 }
 
 /** Everything the drawing code branches on, in one testable value. */
-export const artSpec = (def: Pick<FacilityDef, "kind" | "width" | "unlockTier" | "rack">): ArtSpec => {
+export const artSpec = (def: Pick<FacilityDef, "kind" | "width" | "unlockTier" | "rack"> & Partial<Pick<FacilityDef, "id" | "bio" | "growth">>): ArtSpec => {
 	const variant = def.kind === "rack" ? rackVariant(def) : null;
 	return {
 		kind: def.kind,
+		body: bodyArt(def),
 		variant,
 		tier: artTier(def.unlockTier),
 		width: def.width,
@@ -117,3 +138,6 @@ export const bodyWidth = (def: Pick<FacilityDef, "kind" | "width">): number => {
 
 /** Extra tiles to fill with the annex bay. */
 export const annexTiles = (def: Pick<FacilityDef, "kind" | "width">): number => def.width - bodyWidth(def);
+
+/** Height in px of a rack's vertical status light strip: a taller light means a higher unlock tier. */
+export const stripHeight = (tier: ArtTier): number => [10, 14, 18, 22][tier - 1];

@@ -2,12 +2,14 @@ import type { FacilityDef } from "@aitower/content";
 import type { FacilityStatus, FacilityView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
 import { describe, expect, it } from "vitest";
-import { artSpec } from "../art";
+import { artSpec, bodyArt } from "../art";
 import { FAC_BOTTOM, FAC_TOP, TILE, TUBE_Y } from "../constants";
 import { hex } from "../color";
 import { drawBody, drawLive } from "../pixi/facilityArt";
 import { fixtureContent } from "./fixtureView";
-import { VARIETY_ROWS, createVarietyScene, varietyContent, varietyId } from "./varietyScene";
+import { horrorStages } from "../horror";
+import { skinEffects } from "../skin";
+import { GROWTH_WIDTHS, VARIETY_ROWS, createVarietyScene, growthId, varietyContent, varietyId } from "./varietyScene";
 
 interface Rect {
 	x: number;
@@ -49,9 +51,10 @@ const body = (def: FacilityDef): Rect[] => {
 describe("variety scene", () => {
 	it("covers every facility kind, every rack cooling flavour, tiers 1-4 and several widths", () => {
 		const kinds = new Set(defs.map((d) => d.def.kind));
-		expect([...kinds].sort()).toEqual(["charger", "cdu", "chiller", "crah", "depot", "genset", "grid_tie", "rack", "ups"].sort());
+		expect([...kinds].sort()).toEqual(["bioreactor", "charger", "cdu", "chiller", "crah", "depot", "genset", "grid_tie", "nutrient", "quarantine", "rack", "sterilizer", "ups"].sort());
 		const flavours = new Set(defs.filter((d) => d.def.kind === "rack").map((d) => artSpec(d.def).variant));
-		expect([...flavours].sort()).toEqual(["air", "dlc", "immersion", "storage"]);
+		expect([...flavours].sort()).toEqual(["air", "dlc", "dna", "immersion", "neural", "organoid", "storage"]);
+		expect(defs.some((d) => bodyArt(d.def) === "culling_room")).toBe(true);
 		for (const row of VARIETY_ROWS) {
 			expect(row.widths.length).toBeGreaterThanOrEqual(2);
 			for (const tier of [1, 2, 3, 4]) for (const w of row.widths) expect(content.facilities[varietyId(row, tier, w)]).toMatchObject({ unlockTier: tier, width: w });
@@ -212,5 +215,151 @@ describe("facility art over kind x tier x width", () => {
 			expect(top).toBeGreaterThanOrEqual(TOP + FAC_TOP - 4);
 			if (tier === 1) expect(top).toBe(TOP + TUBE_Y - 1); // the pneumatic receiver, nothing else
 		}
+	});
+});
+
+describe("wetware art (M3)", () => {
+	const wet = defs.filter((d) => ["nutrient", "sterilizer", "quarantine", "bioreactor"].includes(d.def.kind) || artSpec(d.def).variant === "organoid" || artSpec(d.def).variant === "dna" || artSpec(d.def).variant === "neural");
+
+	it("the variety scene shows organoid, dna, neural, nutrient, sterile bay, culling room, quarantine and bioreactor", () => {
+		const arts = new Set(wet.map((d) => (d.def.kind === "rack" ? artSpec(d.def).variant : bodyArt(d.def))));
+		expect([...arts].sort()).toEqual(["bioreactor", "culling_room", "dna", "neural", "nutrient", "organoid", "quarantine", "sterilizer"]);
+	});
+
+	it("every wetware body stays inside its tiles at widths 1..6, plain or not, at every stage", () => {
+		const base = wet.map((d) => d.def).filter((d, i, a) => a.findIndex((q) => q.kind === d.kind && q.rack?.cooling === d.rack?.cooling && artSpec(q).variant === artSpec(d).variant && q.bio?.cullsGrowths === d.bio?.cullsGrowths) === i);
+		for (const d0 of base) {
+			for (const width of [1, 2, 3, 4, 5, 6]) {
+				if (d0.kind === "rack" && artSpec(d0).variant === "neural" && width < 5) continue;
+				const def = { ...d0, width };
+				for (const plain of [false, true]) {
+					for (const stage of [0, 1, 2, 3, 4] as const) {
+						const eff = skinEffects({ path: "biotech", stage }, def.kind);
+						const r = recorder();
+						drawBody(r.g, def, 0, TOP, { plain, skin: { effects: eff, alpha: 1, seed: 3 } });
+						expect(r.rects.length, def.id).toBeGreaterThan(10);
+						for (const q of r.rects) {
+							const id = `${def.id} w${width} s${stage}`;
+							expect(Number.isFinite(q.x + q.y + q.w + q.h), id).toBe(true);
+							expect(q.x, id).toBeGreaterThanOrEqual(0);
+							expect(q.x + q.w, id).toBeLessThanOrEqual(width * TILE);
+							expect(q.y, id).toBeGreaterThanOrEqual(TOP + 1);
+							expect(q.y + q.h, id).toBeLessThanOrEqual(TOP + FAC_BOTTOM);
+						}
+					}
+				}
+			}
+		}
+	});
+
+	it("growths are tissue whatever their kind; plain growths drop the veins; widths 1..4 stay inside", () => {
+		for (const w of GROWTH_WIDTHS) {
+			const def = content.facilities[growthId(w)];
+			expect(bodyArt(def)).toBe("growth");
+			const full = recorder();
+			drawBody(full.g, def, 0, TOP);
+			const plain = recorder();
+			drawBody(plain.g, def, 0, TOP, { plain: true });
+			expect(full.rects.length).toBeGreaterThan(w * 2);
+			expect(JSON.stringify(full.rects)).not.toBe(JSON.stringify(plain.rects));
+			expect(full.rects.some((q) => q.color === 0x6a2c22 || q.color !== plain.rects[0]?.color)).toBe(true);
+			for (const q of [...full.rects, ...plain.rects]) {
+				expect(q.x).toBeGreaterThanOrEqual(0);
+				expect(q.x + q.w).toBeLessThanOrEqual(w * TILE);
+				expect(q.y + q.h).toBeLessThanOrEqual(TOP + FAC_BOTTOM);
+			}
+		}
+		// A grown flag on any def draws the growth too.
+		const rack = content.facilities[varietyId(VARIETY_ROWS[0], 1, 2)];
+		const a = recorder();
+		drawBody(a.g, rack, 0, TOP, { grown: true });
+		const b = recorder();
+		drawBody(b.g, content.facilities[growthId(2)], 0, TOP);
+		expect(a.rects.length).toBeGreaterThan(0);
+		expect(JSON.stringify(a.rects)).toBe(JSON.stringify(b.rects));
+	});
+
+	it("stage overlays add detail and stay cached in the body: more rects at higher stages, none at stage 0", () => {
+		const def = content.facilities[varietyId(VARIETY_ROWS[0], 2, 2)];
+		const n = (stage: 0 | 1 | 2 | 3 | 4) => {
+			const r = recorder();
+			drawBody(r.g, def, 0, TOP, { skin: { effects: skinEffects({ path: "biotech", stage }, "rack"), alpha: 1, seed: 1 } });
+			return r.rects.length;
+		};
+		expect(n(0)).toBe(body(def).length);
+		expect(n(1)).toBeGreaterThan(n(0));
+		expect(n(2)).toBeGreaterThan(n(1));
+		expect(n(4)).toBeGreaterThan(n(2));
+		// Mild halves the alpha instead of the shapes.
+		const alphas = (a: number) => {
+			const out: number[] = [];
+			const g = { clear() {}, rect() { return g; }, fill(o: { alpha?: number }) { out.push(o.alpha ?? 1); return g; } };
+			drawBody(g as unknown as Graphics, def, 0, TOP, { skin: { effects: skinEffects({ path: "biotech", stage: 2 }, "rack"), alpha: a, seed: 1 } });
+			return out;
+		};
+		expect(alphas(0.5).length).toBe(alphas(1).length);
+		const tail = (a: number) => alphas(a).slice(body(def).length);
+		expect(tail(0.5).length).toBeGreaterThan(0);
+		expect(Math.max(...tail(0.5))).toBeLessThan(Math.max(...tail(1)));
+	});
+
+	it("a clean synthetic rack draws no CRT: a status light strip whose height follows the tier", () => {
+		const live = (tier: number): Rect[] => {
+			const def = content.facilities[varietyId(VARIETY_ROWS[0], tier, 1)];
+			const r = recorder();
+			const f = { id: 3, defId: def.id, floor: 0, x: 0, width: 1, enabled: true, status: "ok", tempC: 60, clock: 1, health: 1, powerKw: 10, heatKw: 50, jobId: null, powerNet: 0, coolantNet: null, nutrientNet: null, grown: false, contamination: 0 } as FacilityView;
+			drawLive(r.g, def, f, 0, TOP, 1, { reducedMotion: true, crtEffects: true, colorBlind: false, horrorIntensity: "full" });
+			return r.rects;
+		};
+		const strip = (rs: Rect[]) => rs.filter((q) => q.x === 3 && q.w === 1).reduce((m, q) => Math.max(m, q.h), 0);
+		expect(strip(live(1))).toBeGreaterThan(0);
+		expect(strip(live(4))).toBeGreaterThan(strip(live(1)));
+	});
+
+	it("live details draw for every status, option and stage without throwing", () => {
+		const statuses: FacilityStatus[] = ["ok", "idle", "unpowered", "noCoolant", "noNutrient", "tooCold", "throttled", "failed"];
+		for (const { def } of wet.filter((d) => d.tier === 3)) {
+			for (const status of statuses) {
+				for (const intensity of ["full", "mild", "off"] as const) {
+					for (const stage of [0, 2, 3, 4] as const) {
+						for (const rm of [false, true]) {
+							const stages = horrorStages(intensity === "off" ? 0 : stage, [0, 0, 0.5, 0.75, 1][stage], intensity);
+							const fx = { stages, score: 1, stage: stages.stage, cursor: { x: 10, y: 10 }, paused: stage === 3 };
+							const r = recorder();
+							const f = { id: 5, defId: def.id, floor: 0, x: 0, width: def.width, enabled: true, status, tempC: 37, clock: 0.8, health: 1, powerKw: 10, heatKw: 5, jobId: 1, powerNet: 0, coolantNet: null, nutrientNet: 0, grown: false, contamination: 0.2, running: true } as FacilityView;
+							drawLive(r.g, def, f, 0, TOP, 2.7, { reducedMotion: rm, crtEffects: true, colorBlind: rm, horrorIntensity: intensity }, undefined, fx);
+							for (const q of r.rects) expect(Number.isFinite(q.x + q.y + q.w + q.h)).toBe(true);
+						}
+					}
+				}
+			}
+		}
+	});
+
+	it("noNutrient and tooCold add cues: a badge, and frost for the cold", () => {
+		const def = content.facilities[varietyId(VARIETY_ROWS.find((r) => r.flavour === "organoid") as never, 3, 2)];
+		const count = (status: FacilityStatus): number => {
+			const r = recorder();
+			const f = { id: 5, defId: def.id, floor: 0, x: 0, width: 2, enabled: true, status, tempC: 37, clock: 0.8, health: 1, powerKw: 10, heatKw: 5, jobId: null, powerNet: 0, coolantNet: null, nutrientNet: 0, grown: false, contamination: 0 } as FacilityView;
+			drawLive(r.g, def, f, 0, TOP, 1, { reducedMotion: true, crtEffects: true, colorBlind: false, horrorIntensity: "full" });
+			return r.rects.length;
+		};
+		expect(count("noNutrient")).toBeGreaterThan(count("ok"));
+		expect(count("tooCold")).toBeGreaterThan(count("noNutrient"));
+	});
+
+	it("eyes appear in the status light at stage 3 (full), never at mild or off, and track the cursor", () => {
+		const def = content.facilities[varietyId(VARIETY_ROWS[0], 2, 2)];
+		const f = { id: 7, defId: def.id, floor: 0, x: 0, width: 2, enabled: true, status: "ok", tempC: 60, clock: 1, health: 1, powerKw: 10, heatKw: 50, jobId: null, powerNet: 0, coolantNet: null, nutrientNet: null, grown: false, contamination: 0 } as FacilityView;
+		const draw = (intensity: "full" | "mild" | "off", cursor: { x: number; y: number } | null, score = 1): string => {
+			const stages = horrorStages(intensity === "off" ? 0 : 3, score, intensity);
+			const r = recorder();
+			drawLive(r.g, def, f, 0, TOP, 1, { reducedMotion: false, crtEffects: true, colorBlind: false, horrorIntensity: intensity }, undefined, { stages, score, stage: stages.stage, cursor, paused: false });
+			return JSON.stringify(r.rects.filter((q) => q.y >= TOP + FAC_TOP + 7 && q.y <= TOP + FAC_TOP + 12 && q.x < 14 && q.x > 4));
+		};
+		const clean = draw("off", null);
+		expect(draw("full", { x: 0, y: 0 })).not.toBe(clean);
+		expect(draw("mild", { x: 0, y: 0 })).toBe(clean);
+		expect(draw("full", { x: 400, y: 0 })).not.toBe(draw("full", { x: -400, y: 0 }));
 	});
 });

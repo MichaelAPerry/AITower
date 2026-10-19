@@ -4,12 +4,26 @@ import { heatColor } from "./color";
 import { CB, HEAT_RAMP, HEAT_RAMP_CB, T, dk, lt, mat, mix } from "./palette";
 
 describe("palette", () => {
-	it("tokens match docs/STYLE.md §2 exactly", () => {
-		const style = readFileSync(new URL("../../../docs/STYLE.md", import.meta.url), "utf8");
-		const rows = [...style.matchAll(/\|\s*`--([a-z-]+)`\s*\|\s*`#([0-9a-f]{6})`/gi)];
-		expect(rows.length).toBeGreaterThanOrEqual(21);
-		const camel = (k: string) => k.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase());
-		for (const [, name, hexv] of rows) expect((T as Record<string, number>)[camel(name)], name).toBe(Number.parseInt(hexv, 16));
+	it("tokens match docs/STYLE_SYNTHETIC.md (bg, text, accent, accent-2, good, warn, bad)", () => {
+		const doc = readFileSync(new URL("../../../docs/STYLE_SYNTHETIC.md", import.meta.url), "utf8");
+		const val = (name: string): number => {
+			const m = new RegExp(`--${name}[\u0060][\\s|]*#([0-9a-f]{6})`, "i").exec(doc);
+			if (!m) throw new Error(`token ${name} missing`);
+			return Number.parseInt(m[1], 16);
+		};
+		expect(T.ink).toBe(val("bg"));
+		expect(T.paper).toBe(val("text"));
+		expect(T.brass).toBe(val("accent"));
+		expect(T.accent2).toBe(val("accent-2"));
+		expect(T.green).toBe(val("good"));
+		expect(T.red).toBe(val("bad"));
+		expect(T.amber).toBe(val("warn"));
+	});
+
+	it("keeps exactly three horror tokens: flesh, bile, blood", () => {
+		expect(T.flesh).toBe(0xb5877a);
+		expect(T.bile).toBe(0x8a8a3a);
+		expect(T.blood).toBe(0x6a2c22);
 	});
 
 	it("heat ramp hits the STYLE.md stops", () => {

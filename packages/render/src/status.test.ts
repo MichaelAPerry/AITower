@@ -2,7 +2,7 @@ import type { FacilityStatus } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
 import { heatColor, rackTempColor } from "./color";
 import { CB } from "./palette";
-import { CRT_GLYPHS, LED, LED_CB, type CrtGlyph, crtGlyph, ledCue, phosphorFor } from "./status";
+import { CRT_GLYPHS, FROST, LED, LED_CB, type CrtGlyph, badgeFor, crtGlyph, ledCue, phosphorFor } from "./status";
 
 const ALL: FacilityStatus[] = ["ok", "idle", "throttled", "brownout", "noCoolant", "tripped", "failed", "disabled", "unpowered"];
 
@@ -104,5 +104,35 @@ describe("colour-blind ramps are wired through status and temperature", () => {
 		expect(rackTempColor(100, true)).toBe(0xf0f921);
 		expect(heatColor(18, true)).toBe(0x0d0887);
 		expect(heatColor(50, true)).toBe(0xf0f921);
+	});
+});
+
+describe("wetware statuses (M3)", () => {
+	it("noNutrient: slow bile blink; tooCold: steady frost-blue lamp", () => {
+		expect(ledCue("noNutrient", true)).toMatchObject({ color: LED.starved, mode: "blink", tone: "starved" });
+		expect(ledCue("tooCold", true)).toMatchObject({ color: FROST, mode: "steady", tone: "cold" });
+		expect(LED.cold).toBe(FROST);
+		// Frost is pale blue: blue channel dominates and it is light.
+		expect(FROST & 0xff).toBeGreaterThan((FROST >> 16) & 0xff);
+		expect(FROST & 0xff).toBeGreaterThan(0xa0);
+	});
+	it("colour-blind scheme avoids the default greens and reds for the new statuses", () => {
+		for (const s of ["noNutrient", "tooCold"] as const) expect([LED.ok, LED.red, LED.idle, LED.amber, LED.starved, LED.cold]).not.toContain(ledCue(s, true, true).color);
+		expect(ledCue("noNutrient", true, true).color).toBe(LED_CB.starved);
+		expect(ledCue("tooCold", true, true).color).toBe(LED_CB.cold);
+	});
+	it("each gets its own CRT glyph and phosphor, plus a badge", () => {
+		expect(crtGlyph("noNutrient")).toBe("starved");
+		expect(crtGlyph("tooCold")).toBe("frost");
+		expect(phosphorFor("starved")[0]).toBe(LED.starved);
+		expect(phosphorFor("cold", true)[0]).toBe(LED_CB.cold);
+		for (const tone of ["starved", "cold"] as const) for (const cb of [false, true]) expect(phosphorFor(tone, cb)[0]).not.toBe(phosphorFor(tone, cb)[1]);
+		expect(badgeFor("noNutrient")).toBe("noNutrient");
+		expect(badgeFor("tooCold")).toBe("tooCold");
+		expect(badgeFor("ok")).toBeNull();
+	});
+	it("glyph choice still agrees with the tone", () => {
+		const tones: Record<string, CrtGlyph | null> = { starved: "starved", cold: "frost" };
+		for (const s of ["noNutrient", "tooCold"] as const) expect(crtGlyph(s)).toBe(tones[ledCue(s, true).tone]);
 	});
 });

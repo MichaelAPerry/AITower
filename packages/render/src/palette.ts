@@ -1,33 +1,39 @@
 /**
- * Cassette-futurism palette (docs/STYLE.md §2). Every colour the renderer draws
- * is either a token below or a shade derived from one (mixed toward `ink` for
- * shadows and toward `paper` for warm highlights), so the whole world stays in
- * one tobacco-stained key. Facility body / accent colours come from content.
+ * Palette. Every colour the renderer draws is either a token below or a shade derived from one (mixed toward `ink` for
+ * shadows and toward `paper` for highlights). Facility body / accent colours come from content and are re-skinned
+ * to graphite glass by `skinColor` (color.ts).
  */
 
-/** Exact STYLE.md tokens. */
+/**
+ * Synthetic neutral tokens (docs/STYLE_SYNTHETIC.md): glass, graphite and cold light. The key names are kept from the
+ * cassette palette so every draw call re-skins at once; the values are the synthetic ones:
+ * ink = `--bg`, paper = `--text`, brass = `--accent` (cyan fittings and edges), copper / verdigris = coolant supply / return
+ * (cyan lines), amber = power / warn, sodium = warm white, putty / beige / olive = glass cabinet shades, wall = graphite façade.
+ */
 export const T = {
-	ink: 0x0d0b08,
-	housing: 0x2a261d,
-	housingHi: 0x3b3528,
-	housingLo: 0x17140f,
-	putty: 0xc9bc9c,
-	beige: 0xa8987a,
-	olive: 0x5d6243,
-	wall: 0x3d4a3f,
-	brass: 0xc8a248,
-	brassDk: 0x7d6227,
-	copper: 0xc06a3b,
-	verdigris: 0x4f9a85,
-	steel: 0x6f7473,
-	paper: 0xe8dfc6,
-	amber: 0xffb000,
-	amberDim: 0x7a5400,
-	green: 0x33ff66,
-	greenDim: 0x14662a,
-	red: 0xff3b2f,
-	sodium: 0xff8a3d,
-	smog: 0x4a5a55,
+	ink: 0x0a0e13,
+	housing: 0x121a22,
+	housingHi: 0x1c2833,
+	housingLo: 0x0c1218,
+	putty: 0x3a4a58,
+	beige: 0x2c3a46,
+	olive: 0x26323c,
+	wall: 0x18222b,
+	brass: 0x5fd4e6,
+	brassDk: 0x2a7a88,
+	copper: 0x5fd4e6,
+	verdigris: 0x3a8fa3,
+	steel: 0x5a6b78,
+	paper: 0xdfe9ee,
+	amber: 0xf2b84b,
+	amberDim: 0x7a5a1f,
+	green: 0x4ee08a,
+	greenDim: 0x1d6a40,
+	red: 0xff5d5d,
+	sodium: 0xf0e2c8,
+	smog: 0x1a2630,
+	/** `--accent-2`: research. */
+	accent2: 0x9b8cff,
 	// M3 body-horror tokens (docs/review/ux-art.md): flesh (pink-beige), bile (olive), blood (deep desaturated red-brown).
 	flesh: 0xb5877a,
 	bile: 0x8a8a3a,
@@ -89,6 +95,9 @@ export const COPPER = mat(T.copper);
 export const VERDI = mat(T.verdigris);
 export const STEEL = mat(T.steel);
 export const PAPER = mat(T.paper);
+/** Nutrient conduit: pale green. */
+export const PALE_GREEN = mix(T.green, T.paper, 0.55);
+export const NUTRIENT = mat(PALE_GREEN);
 export const FLESH = mat(T.flesh);
 export const BILE = mat(T.bile);
 export const BLOOD = mat(T.blood);
@@ -106,7 +115,7 @@ export const GLASS = dk(T.verdigris, 0.82);
 export const SCREEN = mix(T.ink, T.greenDim, 0.18);
 
 /** Cloth cable bundle (black + ochre braid). */
-export const CLOTH = { black: mix(T.ink, T.housing, 0.7), ochre: mix(dk(T.amber, 0.45), T.brassDk, 0.4), ochreDk: mix(dk(T.amber, 0.62), T.housing, 0.3) } as const;
+export const CLOTH = { black: mix(T.ink, T.housing, 0.7), ochre: T.sodium, ochreDk: mix(T.sodium, T.housing, 0.6) } as const;
 
 /** Wooden crate (stamped "FORM 27B/6"). */
 export const CRATE = { hi: lt(T.beige, 0.25), mid: mix(T.beige, T.brassDk, 0.55), lo: dk(T.brassDk, 0.25), stamp: dk(T.red, 0.35) } as const;

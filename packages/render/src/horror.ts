@@ -1,6 +1,6 @@
 /**
  * Pure rules of the M3 body-horror overlay pipeline. Everything here is a function of
- * (tier, `view.corruption`, `RenderOptions.horrorIntensity`, time) and draws nothing: `pixi/horror.ts` and the
+ * (the biotech skin stage from `skin.ts`, `view.corruption`, `RenderOptions.horrorIntensity`, time) and draws nothing: `pixi/horror.ts` and the
  * facility / bot / background art read the results. Horror is wrongness, never gore: lamps out of step, damp,
  * veins, breathing walls, eyes that follow the cursor, tissue creeping over the slabs and a sign that says
  * another word. `mild` halves the alpha and drops eyes and faces; `off` disables all of it.
@@ -8,41 +8,40 @@
 import type { HorrorIntensity } from "@aitower/shared";
 import type { FacilityStatus } from "@aitower/sim";
 import { clamp01, lerpColor } from "./color";
-import { HEAT_RAMP, T, CB, dk, lt, mix } from "./palette";
+import { STAGE_AT, type SkinStage } from "./skin";
+import { CB, T, dk, lt, mix } from "./palette";
 
 // ─── Stage selection ──────────────────────────────────────────────────
 
-/** Corruption thresholds (strictly greater than). */
-export const STAGE_VEINS = 0.3;
-export const STAGE_BREATH = 0.6;
-export const STAGE_TISSUE = 0.85;
-
 export interface HorrorStages {
 	intensity: HorrorIntensity;
+	/** Skin stage in force (0 when off or no biotech skin). */
+	stage: SkinStage;
 	/** Alpha multiplier for every horror layer: 1 full, 0.5 mild, 0 off. */
 	alpha: number;
-	/** T2+: lamps pulse slightly out of sync. */
+	/** Stage 1 (25 %): lamps and organoids pulse faintly out of sync. */
 	lamps: boolean;
-	/** T3: damp stains and sweating copper. */
+	/** Stage 1: damp stains and sweating cooling pipes. */
 	damp: boolean;
-	/** corruption > 0.3: veined conduits, flesh-tone ducts, bile-green coolant return. */
+	/** Stage 2 (50 %): veined conduits and surfaces, flesh-tone panels, bile coolant return. */
 	veined: boolean;
-	/** corruption > 0.6: breathing walls. */
+	/** Stage 3 (75 %): breathing walls and housings. */
 	breathing: boolean;
-	/** corruption > 0.6 (full only): CRT eyes and faces, second eye on mutated bots. */
+	/** Stage 3 (full only): eyes in the status lights, faces, a second eye on mutated bots. */
 	eyes: boolean;
-	/** corruption > 0.85: tissue creeping over the slabs. */
+	/** Stage 4 (100 %): devices are tissue and the slabs creep. */
 	tissue: boolean;
-	/** corruption > 0.85: the MINISTRY sign flickers to another word. */
+	/** Stage 4: the MINISTRY sign flickers to another word. */
 	sign: boolean;
 	/** 0..1 growth of the veined stage above its threshold (drives coverage and tint). */
 	amount: number;
-	/** 0..1 growth of the tissue stage above its threshold (share of slab covered). */
+	/** 0..1 coverage of the slabs by tissue (0 before stage 4). */
 	creep: number;
 }
 
 const OFF: HorrorStages = {
 	intensity: "off",
+	stage: 0,
 	alpha: 0,
 	lamps: false,
 	damp: false,
@@ -55,23 +54,27 @@ const OFF: HorrorStages = {
 	creep: 0,
 };
 
-/** Which horror stages are active. Non-finite corruption counts as 0; `off` disables everything. */
-export const horrorStages = (tier: number, corruption: number, intensity: HorrorIntensity): HorrorStages => {
+/**
+ * Which horror layers are active for a biotech skin stage (`skin.ts`: the stage and the 0..1 score it came from).
+ * `mild` halves the alpha and drops eyes and faces; `off` disables everything (the plain synthetic look).
+ */
+export const horrorStages = (stage: SkinStage, score: number, intensity: HorrorIntensity): HorrorStages => {
 	if (intensity === "off") return OFF;
-	const c = Number.isFinite(corruption) ? corruption : 0;
+	const c = Number.isFinite(score) ? score : 0;
 	const full = intensity === "full";
 	return {
 		intensity,
+		stage,
 		alpha: full ? 1 : 0.5,
-		lamps: tier >= 2,
-		damp: tier >= 3,
-		veined: c > STAGE_VEINS,
-		breathing: c > STAGE_BREATH,
-		eyes: full && c > STAGE_BREATH,
-		tissue: c > STAGE_TISSUE,
-		sign: c > STAGE_TISSUE,
-		amount: clamp01((c - STAGE_VEINS) / (1 - STAGE_VEINS)),
-		creep: clamp01((c - STAGE_TISSUE) / (1 - STAGE_TISSUE)),
+		lamps: stage >= 1,
+		damp: stage >= 1,
+		veined: stage >= 2,
+		breathing: stage >= 3,
+		eyes: full && stage >= 3,
+		tissue: stage >= 4,
+		sign: stage >= 4,
+		amount: clamp01((c - STAGE_AT[1]) / (1 - STAGE_AT[1])),
+		creep: stage >= 4 ? Math.max(0.5, clamp01((c - STAGE_AT[2]) / (1 - STAGE_AT[2]))) : 0,
 	};
 };
 
@@ -131,7 +134,7 @@ export const lampFactor = (s: HorrorStages, id: number, lamp: number, t: number,
 /** Wainscot breathing frame (0/1): two frames at 0.2 Hz (2.5 s each); frame 0 held under reduced motion. */
 export const breathFrame = (t: number, reducedMotion: boolean): 0 | 1 => (reducedMotion ? 0 : Math.floor(t / 2.5) % 2 === 0 ? 0 : 1);
 
-/** Sky sign text: "MINISTRY", or a flicker to "HUNGRY" at the tissue stage (never under reduced motion). */
+/** Sky sign text: "MINISTRY", or a flicker to "HUNGRY" at the tissue stage (stage 4, never under reduced motion). */
 export const SIGN_WORD = "MINISTRY";
 export const SIGN_ALT = "HUNGRY";
 export const signWord = (s: HorrorStages, t: number, reducedMotion: boolean): string => {
@@ -143,12 +146,12 @@ export const signWord = (s: HorrorStages, t: number, reducedMotion: boolean): st
 export type CrtMotif = "none" | "eyes" | "face";
 
 /**
- * What a rack CRT shows instead of its scroll. Needs the `eyes` stage (so never at mild or off); faults keep their red
+ * What a status light strip shows instead of its glow. Needs the `eyes` stage (so never at mild or off); faults keep their red
  * alarm; the share of screens affected grows with corruption; about one in five of those is a face.
  */
-export const crtMotif = (s: HorrorStages, seed: number, corruption: number, fault: boolean): CrtMotif => {
+export const crtMotif = (s: HorrorStages, seed: number, score: number, fault: boolean): CrtMotif => {
 	if (!s.eyes || fault) return "none";
-	const share = 0.25 + 0.6 * clamp01((corruption - STAGE_BREATH) / (1 - STAGE_BREATH));
+	const share = 0.25 + 0.6 * clamp01((score - STAGE_AT[2]) / (1 - STAGE_AT[2]));
 	if (hash2(seed, 77) >= share) return "none";
 	return hash2(seed, 91) < 0.2 ? "face" : "eyes";
 };
@@ -220,7 +223,7 @@ export interface ContamTexture {
 	width: number;
 	height: number;
 	/** RGBA, row-major, top row = `floorMax`. Transparent where the dither is off. */
-	data: Uint8ClampedArray;
+	data: Uint8ClampedArray<ArrayBuffer>;
 }
 
 /**
@@ -240,7 +243,7 @@ export const contaminationTexels = (
 	const floors = floorMax - floorMin + 1;
 	const w = width * TEXELS_X;
 	const h = floors * TEXELS_Y;
-	const data = new Uint8ClampedArray(w * h * 4);
+	const data = new Uint8ClampedArray(new ArrayBuffer(w * h * 4));
 	const cell = (x: number, row: number): number => {
 		if (x < 0 || x >= width || row < 0 || row >= floors) return 0;
 		const i = (floorMax - row - floorMin) * width + x;
@@ -278,8 +281,30 @@ export const contaminationTexels = (
 /** Nutrient pipe / net tints: bile with a per-net nudge so separate nets read apart. */
 export const nutrientNetColor = (id: number): number => lt(mix(T.bile, [T.verdigris, T.amber, T.paper, T.flesh][((id % 4) + 4) % 4], 0.28), 0.18);
 
-/** Nutrient satisfaction of a facility for the overlay: 0 starved (no net / net short), 1 fed. Statuses the nutrient net does not decide are fed. */
-export const nutrientSatisfaction = (status: FacilityStatus, netId: number | null): number => (netId === null || status === "noNutrient" ? 0 : 1);
+/**
+ * Nutrient satisfaction of a facility for the overlay, 0 (starved) .. 1 (fed): the satisfaction of its nutrient net, 0 without
+ * a net, and never above 0.4 while the facility itself reports `noNutrient`.
+ */
+export const nutrientSatisfaction = (net: { satisfaction: number } | undefined, status: FacilityStatus): number => {
+	if (!net) return 0;
+	const s = clamp01(net.satisfaction);
+	return status === "noNutrient" ? Math.min(0.4, s) : s;
+};
 
-/** Pale heat-ramp cold stop used for frost (kept here so overlay and art agree). */
-export const FROST_BASE = HEAT_RAMP[0];
+// ─── Per-frame inputs of the facility art ─────────────────────────────
+
+/** What facility / bot art needs per frame to draw the horror layers: stages, path score, cursor in world px, paused. */
+export interface LiveFx {
+	stages: HorrorStages;
+	/** Path score 0..1 (corruption for the biotech skin). */
+	score: number;
+	stage: SkinStage;
+	cursor: { x: number; y: number } | null;
+	paused: boolean;
+}
+
+/** No horror: the plain synthetic look at full intensity (what the art tests and old callers get). */
+export const NO_FX: LiveFx = { stages: horrorStages(0, 0, "full"), score: 0, stage: 0, cursor: null, paused: false };
+
+/** Wetware art that is alive on its own (pulsing jars) holds still when horror is off. */
+export const isPlain = (fx: LiveFx): boolean => fx.stages.intensity === "off";

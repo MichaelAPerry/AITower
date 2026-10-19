@@ -154,3 +154,17 @@ export const skyColors = (minuteOfDay: number): SkyColors => {
 	const k = SKY_KEYS[0];
 	return { top: k[1], horizon: k[2], night: k[3], city: k[4], cityFar: k[5], haze: k[6] };
 };
+
+// ─── Synthetic skin for content colours ─────────────────────────────────
+
+/**
+ * Content still ships cassette body / accent hexes (`FacilityDef.color` / `accent`). The synthetic base look keeps their
+ * relative lightness and a trace of hue, but draws everything as graphite glass: dark, cool, never beige.
+ */
+export const skinColor = (c: number): number => {
+	const lum = (ch(c, 16) * 0.3 + ch(c, 8) * 0.59 + ch(c, 0) * 0.11) / 255;
+	return mix(mix(0x1d2832, 0x46586a, clamp01(lum)), c, 0.1);
+};
+
+/** Accent hexes become cold light: the def's hue pulled toward the cyan accent. */
+export const skinAccent = (c: number): number => mix(c, T.brass, 0.55);
