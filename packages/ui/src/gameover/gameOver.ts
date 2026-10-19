@@ -47,6 +47,14 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		tone: "green",
 		lines: ["You have reached the highest clearance the Ministry grants. The Minister has been informed and was, for a moment, almost pleased.", "The datacenter may continue to operate in the sandbox, without further inspection."],
 	},
+	// M3 placeholder (M3-T4 shows the ending text from content.endings).
+	absorbed: {
+		heading: "NOTICE OF INCORPORATION",
+		form: "FORM Ω: ASSET RECLASSIFICATION",
+		stamp: "ABSORBED",
+		tone: "red",
+		lines: ["The facility and its superintendent have been reclassified as Ministry assets.", "No further correspondence is required."],
+	},
 };
 
 export type { StatRow };

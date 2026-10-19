@@ -31,6 +31,7 @@ const commandName: Record<SimCommand["type"], string> = {
 	setClerk: "Clerk orders",
 	takeLoan: "Take loan",
 	repayLoan: "Repay loan",
+	choosePath: "Choose path",
 };
 
 const gradeSeverity = (g: AuditGrade): Severity => {
@@ -153,6 +154,15 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 		}
 		case "loanRepaid":
 			return { text: `Credit Office: ${fmtMoney(ev.amount)} repaid. The Ministry thanks you for your promptness`, severity: "good", toast: false };
+		// M3 placeholders (M3-T4 words these properly).
+		case "pathChosen":
+			return { text: `Ascension path filed: ${ev.path}`, severity: "info", toast: true };
+		case "growthSprouted":
+			return { text: `An asset has been registered at ${fac(ev.facilityId).name}`, severity: "info", toast: false, cell: fac(ev.facilityId).cell };
+		case "botMutated":
+			return { text: `Automaton #${ev.botId} has been reclassified (${ev.trait})`, severity: "info", toast: false };
+		case "contaminationIrreversible":
+			return { text: "The building has been recertified as an organism", severity: "warn", toast: true };
 		case "quarterReport": {
 			const r = view.reports?.find((r) => r.quarter === ev.quarter);
 			return { text: `Quarterly audit ${ev.quarter} filed: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };

@@ -54,6 +54,26 @@ function memoViews(state: SimState, content: ContentDB): MemoView[] {
 	return out;
 }
 
+/** M3 placeholders, cached per grid size so view() stays allocation-free. M3-T1 replaces these. */
+const m3Cache = new Map<number, { nutrient: Uint8Array; nutrientNetOf: Int32Array; contamination: Float32Array }>();
+function m3Placeholder(cells: number) {
+	let c = m3Cache.get(cells);
+	if (!c) {
+		c = { nutrient: new Uint8Array(cells), nutrientNetOf: new Int32Array(cells).fill(-1), contamination: new Float32Array(cells) };
+		m3Cache.set(cells, c);
+	}
+	return {
+		...c,
+		nutrientNets: [],
+		corruption: 0,
+		contaminatedShare: 0,
+		irreversible: false,
+		path: null,
+		organoidPflops: 0,
+		endingProgress: null,
+	};
+}
+
 export function buildView(state: SimState, content: ContentDB): SimView {
 	const m = state.metrics;
 	const facilities: FacilityView[] = state.facilities.map((f) => {
@@ -74,6 +94,10 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			jobId: f.jobId >= 0 ? f.jobId : null,
 			powerNet: f.powerNet >= 0 ? f.powerNet : null,
 			coolantNet: f.coolantNet >= 0 ? f.coolantNet : null,
+			// M3 placeholders (M3-T1 implements).
+			nutrientNet: null,
+			grown: false,
+			contamination: 0,
 		};
 		if (d.kind === "genset") v.running = f.gensetMode === GensetMode.Running;
 		if (d.kind === "ups") v.charge = (d.power?.storageKwh ?? 0) > 0 ? f.storedKwh / (d.power?.storageKwh ?? 1) : 0;
@@ -89,6 +113,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		battery: b.battery,
 		carrying: b.carrying,
 		workOrderId: b.workOrderId >= 0 ? b.workOrderId : null,
+		trait: null, // M3 placeholder
 	}));
 	const jobs: JobView[] = state.jobs.map((j) => ({
 		id: j.id,
@@ -119,6 +144,8 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		airTemp: state.airTemp,
 		powerNetOf: state.powerNetOf,
 		coolantNetOf: state.coolantNetOf,
+		// M3 placeholders (M3-T1 implements).
+		...m3Placeholder(state.coolant.length),
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({

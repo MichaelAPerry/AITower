@@ -7,7 +7,8 @@
  * Units: kW, kWh, °C, $, ticks (1 tick = 1 game-minute).
  */
 
-export type BuildCategory = "rack" | "power" | "cooling" | "logistics";
+/** `bio`: the Wetware tab (nutrient plant, sterile bay, quarantine, bioreactor, organoid racks may also live here). */
+export type BuildCategory = "rack" | "power" | "cooling" | "logistics" | "bio";
 
 export type FacilityKind =
 	| "rack" // IT load: produces FLOPS and heat
@@ -18,9 +19,27 @@ export type FacilityKind =
 	| "chiller" // coolant source: removes heat from a coolant net, uses power = Q / COP
 	| "cdu" // coolant distribution unit: adds coolant capacity cap for liquid racks on its net
 	| "depot" // parts depot: bots pick spare parts here
-	| "charger"; // bot dock: bots spawn & recharge here
+	| "charger" // bot dock: bots spawn & recharge here
+	// ── Biotech (M3) ──
+	| "nutrient" // nutrient plant: feeds a nutrient net (`bio.nutrientCapacity`)
+	| "sterilizer" // sterile bay / culling room: removes contamination within `bio.radius` (and growths if `bio.cullsGrowths`)
+	| "quarantine" // quarantine lock: contamination barely crosses its cells (`balance.bio.quarantineLeak`)
+	| "bioreactor"; // power source fed by the nutrient net (`power.capacityKw`), emits contamination
 
-export type CoolingMode = "air" | "dlc" | "immersion";
+/** `bio`: organoid tissue. Needs a nutrient net and a temperature band (`rack.bio`); too cold is also a fault. */
+export type CoolingMode = "air" | "dlc" | "immersion" | "bio";
+
+/** Organoid/wetware rack parameters (racks with `cooling: "bio"`). */
+export interface OrganoidSpec {
+	/** Ideal die (tissue) temperature, °C (e.g. 37). */
+	targetC: number;
+	/** Full speed within ±toleranceC; clock falls off linearly to `minClock` at ±2×tolerance; beyond 3× the tissue fails. */
+	toleranceC: number;
+	/** Nutrient units drawn per tick at full load. */
+	nutrientUse: number;
+	/** Contamination emitted into its own cells per tick at full load (0..1 units). */
+	contamination: number;
+}
 
 export interface RackSpec {
 	cooling: CoolingMode;
@@ -33,6 +52,24 @@ export interface RackSpec {
 	storageTB: number;
 	/** Base probability of a component failure per game-day at nominal temperature. */
 	failurePerDay: number;
+	/** cooling "bio" only. */
+	bio?: OrganoidSpec;
+}
+
+/** Biotech plant parameters for kinds nutrient / sterilizer / bioreactor (and growth sources). */
+export interface BioSpec {
+	/** nutrient: units per tick supplied to its nutrient net. */
+	nutrientCapacity?: number;
+	/** bioreactor: nutrient units per tick consumed at full output. */
+	nutrientUse?: number;
+	/** sterilizer: contamination removed per tick from each cell within `radius` (scaled by power satisfaction). */
+	cleanRate?: number;
+	/** sterilizer: reach in tiles on its own floor. */
+	radius?: number;
+	/** sterilizer: also kills growths within `radius` (culling room). */
+	cullsGrowths?: boolean;
+	/** Contamination emitted into its own cells per tick while running (bioreactor, growths). */
+	contamination?: number;
 }
 
 export interface PowerSpec {
@@ -72,6 +109,8 @@ export interface PlacementRules {
 	needsCoolant?: boolean;
 	/** Requires a power conduit under at least one of its cells (default true for anything drawing power). */
 	needsPower?: boolean;
+	/** Requires a nutrient conduit under at least one of its cells. */
+	needsNutrient?: boolean;
 }
 
 export interface FacilityDef {
@@ -98,6 +137,12 @@ export interface FacilityDef {
 	placement?: PlacementRules;
 	/** Tech node that must be researched before this can be built (in addition to `unlockTier`). Absent = no research needed. */
 	tech?: string;
+	bio?: BioSpec;
+	/**
+	 * Growth: never buildable by the player; the sim sprouts it on contaminated empty slab. It works without
+	 * conduits (free, unreliable), can be demolished, and counts as a `grown` facility in the view.
+	 */
+	growth?: boolean;
 }
 
 export interface BotDef {
@@ -232,6 +277,44 @@ export interface Balance {
 		/** Cash grant (+) or fine (−) per grade A..E, as a share of the quarter's revenue. */
 		cashShareByGrade: number[];
 	};
+	/** Contamination field, mutations, growths (M3). Contamination is 0..1 per cell. */
+	bio: {
+		/** Share of the difference exchanged with each open neighbour per tick (slab-separated floors use `slabFactor`). */
+		diffusion: number;
+		slabFactor: number;
+		/** Fraction lost per tick everywhere. */
+		decay: number;
+		/** Share of normal diffusion that crosses a quarantine cell (0 = sealed). */
+		quarantineLeak: number;
+		/** Rack failure hazard ×(1 + k × contamination at the rack). */
+		hazardPerContamination: number;
+		/** Bot speed ×(1 − k × contamination at the bot), floored at 0.3. */
+		botSlowPerContamination: number;
+		/** A bot mutates after this many ticks (cumulative) on cells at or above `mutationThreshold`. */
+		mutationThreshold: number;
+		mutationExposureTicks: number;
+		/** Empty slab cells at or above this contamination may sprout a growth. */
+		growthThreshold: number;
+		/** Chance per qualifying cell per day (rolled hourly with the right share). */
+		growthChancePerDay: number;
+		/** Contaminated share (cells ≥ 0.5 among built cells) beyond which resisting gets much harder. */
+		irreversibleShare: number;
+		/** Sterilizer effectiveness multiplier once irreversible. */
+		irreversibleCleanFactor: number;
+		/** $ per nutrient unit supplied. */
+		nutrientPrice: number;
+	};
+	/** Ascension: the path is chosen at `minTier` (Clearance), once, and never changes. */
+	ascension: { minTier: number };
+	/** Path endings (biotech in M3). Each must hold continuously for `days` days. */
+	endings: {
+		/** Embrace: corruption ≥ minCorruption and organoid PFLOPS ≥ pflops. */
+		livingTower: { minCorruption: number; pflops: number; days: number };
+		/** Resist: corruption ≤ maxCorruption and organoid PFLOPS ≥ pflops. */
+		cleanTower: { maxCorruption: number; pflops: number; days: number };
+		/** Secret: corruption reaches this (any path, at Clearance ≥ ascension.minTier). */
+		absorbed: { corruption: number };
+	};
 	events: {
 		/** Mean ticks between new memos (seeded jitter ±50%). */
 		intervalTicks: number;
@@ -258,6 +341,8 @@ export interface ClientTemplate {
 	payMultiplier: number;
 	/** Requires all allocated racks to be liquid-cooled. */
 	needsLiquid?: boolean;
+	/** Requires organoid (`cooling: "bio"`) racks; pays the bio premium via payMultiplier. */
+	needsBio?: boolean;
 }
 
 /** A contract as generated; the sim assigns the id. */
@@ -276,6 +361,8 @@ export interface ContractSpec {
 	/** Penalty if a training job misses its deadline. */
 	penalty: number;
 	needsLiquid: boolean;
+	/** Only organoid (`cooling: "bio"`) racks may serve it. Absent = false. */
+	needsBio?: boolean;
 	/**
 	 * Dataset size. While running, Σ storageTB of running jobs must be ≤ Σ storageTB of
 	 * powered storage racks, else the newest jobs stall. 0 for inference.
@@ -365,6 +452,10 @@ export interface EventDef {
 	minDay?: number;
 	/** Min days before the same event may recur. */
 	cooldownDays: number;
+	/** Only when `view.corruption` ≥ this (horror escalation). */
+	minCorruption?: number;
+	/** Only after this ascension path was chosen. */
+	path?: AscensionPath;
 	/**
 	 * Scripted: issued exactly once, at 09:00 on this game day, regardless of weight, cooldown and timing (still subject to
 	 * minTier/maxTier). Never picked randomly.
@@ -378,7 +469,29 @@ export interface EventDef {
 
 // ─── Research (tech tree) ─────────────────────────────────────────────
 
-export type TechBranch = "compute" | "cooling" | "power" | "logistics" | "administration";
+export type TechBranch = "compute" | "cooling" | "power" | "logistics" | "administration" | "wetware";
+
+export type AscensionPath = "biotech" | "greentech" | "synthetic";
+
+/** Ending ids (see `Balance.endings`). */
+export type EndingId = "livingTower" | "cleanTower" | "absorbed";
+
+/** Text of an ending, shown on the game-over sheet. */
+export interface EndingDef {
+	id: EndingId;
+	title: string;
+	/** Ministry prose, paragraphs separated by "\n\n". */
+	body: string;
+}
+
+/** An ascension path as offered at Clearance `balance.ascension.minTier`. */
+export interface PathDef {
+	id: AscensionPath;
+	name: string;
+	description: string;
+	/** False = shown as "coming soon" and cannot be chosen. */
+	available: boolean;
+}
 
 /** Permanent multipliers granted by researched tech; they stack multiplicatively. */
 export type PerkKind =
@@ -410,6 +523,8 @@ export interface TechNode {
 	requires: string[];
 	/** Perks and features. Facility/bot unlocks are declared on the facility/bot (`tech`). */
 	effects: TechEffect[];
+	/** Only researchable after this ascension path was chosen. */
+	path?: AscensionPath;
 }
 
 export interface ContentDB {
@@ -422,5 +537,7 @@ export interface ContentDB {
 	scenarios: Record<string, Scenario>;
 	events: EventDef[];
 	tech: TechNode[];
+	paths: PathDef[];
+	endings: EndingDef[];
 	generateContract: ContractGenerator;
 }

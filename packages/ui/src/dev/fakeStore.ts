@@ -88,6 +88,8 @@ export function createFakeContent(): ContentDB {
 			techbot: { id: "techbot", name: "TechBot", cost: 15_000, speed: 0.5, batteryTicks: 600, repairTicks: 30, color: "#8fffdd" },
 			drone: { id: "drone", name: "Rotor Drone", cost: 30_000, speed: 0.8, batteryTicks: 400, repairTicks: 30, color: "#ffd34d", tech: "log_drone", flying: true, carry: 2 },
 		},
+		paths: [],
+		endings: [],
 		clients: [],
 		structure: { slabPerTile: 1_200, basementSlabPerTile: 3_000, powerConduitPerTile: 150, coolantConduitPerTile: 400, liftPerFloor: 6_000, liftBase: 20_000, sparePart: 800 },
 		lift: { speed: 0.1, capacity: 2, dwellTicks: 2, facilityKw: 3 },
@@ -106,6 +108,9 @@ export function createFakeContent(): ContentDB {
 			clerk: { feeShare: 0.05 },
 			loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
 			tax: { profitShare: 0 },
+			bio: { diffusion: 0.05, slabFactor: 0.3, decay: 0.0005, quarantineLeak: 0.05, hazardPerContamination: 2, botSlowPerContamination: 0.5, mutationThreshold: 0.5, mutationExposureTicks: 720, growthThreshold: 0.7, growthChancePerDay: 0.05, irreversibleShare: 0.4, irreversibleCleanFactor: 0.25, nutrientPrice: 2 },
+			ascension: { minTier: 5 },
+			endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
 			audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
 		scenarios: {},
@@ -137,8 +142,8 @@ function buildView(content: ContentDB): SimView {
 		facilities: [],
 		lifts: [{ id: 1, x: 2, floorMin: -1, floorMax: 4, carFloor: 2.4, dir: 1, doorsOpen: false, riders: 1 }],
 		bots: [
-			{ id: 1, defId: "techbot", x: 14.3, floor: 2, state: "toTarget", battery: 0.72, carrying: true, workOrderId: 3 },
-			{ id: 2, defId: "techbot", x: 5, floor: 0, state: "charging", battery: 0.31, carrying: false, workOrderId: null },
+			{ id: 1, defId: "techbot", x: 14.3, floor: 2, state: "toTarget", battery: 0.72, carrying: true, workOrderId: 3, trait: null },
+			{ id: 2, defId: "techbot", x: 5, floor: 0, state: "charging", battery: 0.31, carrying: false, workOrderId: null, trait: null },
 		],
 		powerNets: [{ id: 1, supplyKw: 1500, demandKw: 812, satisfaction: 1, storedKwh: 96, storageCapacityKwh: 120, gridImportKw: 812 }],
 		coolantNets: [{ id: 1, capacityKw: 300, loadKw: 212, supplyTempC: 30 }],
@@ -173,6 +178,16 @@ function buildView(content: ContentDB): SimView {
 			{ quarter: 1, fromDay: 0, toDay: 6, revenue: 310_000, costs: 1_420_000, uptime: 0.981, pue: 1.52, jobsCompleted: 3, jobsFailed: 1, penalties: 25_000, grade: "D", standingDelta: -3, cashDelta: -20_000, remark: "The Ministry notes that construction is not, strictly speaking, a revenue stream." },
 		],
 		stats: { revenue: 2_120_000, pflopHours: 8_450, jobsCompleted: 21, jobsFailed: 2, peakPflops: 61.2, facilitiesBuilt: 47, componentFailures: 6, repairs: 5, memosAnswered: 3, researchPointsEarned: 42 },
+		nutrient: new Uint8Array(n),
+		nutrientNetOf: new Int32Array(n).fill(-1),
+		contamination: new Float32Array(n),
+		nutrientNets: [],
+		corruption: 0,
+		contaminatedShare: 0,
+		irreversible: false,
+		path: null,
+		organoidPflops: 0,
+		endingProgress: null,
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
@@ -182,7 +197,7 @@ function buildView(content: ContentDB): SimView {
 	let id = 1;
 	const put = (defId: string, floor: number, x: number, extra: Partial<FacilityView> = {}): void => {
 		const d = content.facilities[defId];
-		v.facilities.push({ id: id++, defId, floor, x, width: d.width, enabled: true, status: "ok", tempC: 24, clock: 1, health: 1, powerKw: d.rack?.powerKw ?? d.facilityKw, heatKw: d.rack?.powerKw ?? 0, jobId: null, powerNet: 1, coolantNet: null, ...extra });
+		v.facilities.push({ id: id++, defId, floor, x, width: d.width, enabled: true, status: "ok", tempC: 24, clock: 1, health: 1, powerKw: d.rack?.powerKw ?? d.facilityKw, heatKw: d.rack?.powerKw ?? 0, jobId: null, powerNet: 1, coolantNet: null, nutrientNet: null, grown: false, contamination: 0, ...extra });
 	};
 	put("grid_tie", 0, 6);
 	put("genset", 0, 9, { running: false, powerKw: 0 });
@@ -439,7 +454,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (!r.ok) return r;
 					const d = content.facilities[cmd.defId];
 					const id = Math.max(0, ...view.facilities.map((f) => f.id)) + 1;
-					newView({ cash: view.cash - d.cost, facilities: [...view.facilities, { id, defId: d.id, floor: cmd.floor, x: cmd.x, width: d.width, enabled: true, status: d.rack ? "idle" : "ok", tempC: 24, clock: 1, health: 1, powerKw: 0, heatKw: 0, jobId: null, powerNet: 1, coolantNet: null }] });
+					newView({ cash: view.cash - d.cost, facilities: [...view.facilities, { id, defId: d.id, floor: cmd.floor, x: cmd.x, width: d.width, enabled: true, status: d.rack ? "idle" : "ok", tempC: 24, clock: 1, health: 1, powerKw: 0, heatKw: 0, jobId: null, powerNet: 1, coolantNet: null, nutrientNet: null, grown: false, contamination: 0 }] });
 					pushEvents([{ type: "built", what: "facility", floor: cmd.floor, x: cmd.x }]);
 					return ok;
 				}

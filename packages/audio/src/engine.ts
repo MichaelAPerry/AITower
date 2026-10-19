@@ -3,7 +3,7 @@
  * no audio files. Every method is a no-op when no AudioContext exists (Node,
  * tests) or before `resume()` has been called from a user gesture.
  */
-import type { AudioEngine } from "@aitower/shared";
+import type { AudioEngine, HorrorIntensity } from "@aitower/shared";
 import type { SimEvent, SimView } from "@aitower/sim";
 import { humParams, maxRackTemp } from "./hum";
 import { clamp01, createMixer, type Mixer, shouldDuck } from "./mixer";
@@ -246,6 +246,9 @@ export function createAudio(): AudioEngine {
 			mixer?.setMaster(masterLevel());
 		},
 
+		setHorrorIntensity(_i: HorrorIntensity) {
+			// M3 placeholder (M3-T5 drives the corruption layers from it).
+		},
 		setMusicVolume(v: number) {
 			musicVolume = clamp01(v, musicVolume);
 			mixer?.setMusic(musicVolume);

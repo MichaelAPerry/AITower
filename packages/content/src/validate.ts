@@ -14,8 +14,13 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	cdu: "cooling",
 	depot: "logistics",
 	charger: "logistics",
+	// M3 placeholders (M3-T2 decides categories and required specs for the biotech kinds).
+	nutrient: "bio",
+	sterilizer: "bio",
+	quarantine: "bio",
+	bioreactor: "bio",
 };
-const SPEC_FOR_KIND: Record<FacilityKind, "rack" | "power" | "cooling" | "logistics"> = KIND_CATEGORY;
+const SPEC_FOR_KIND: Record<FacilityKind, "rack" | "power" | "cooling" | "logistics" | "bio"> = KIND_CATEGORY;
 const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion"];

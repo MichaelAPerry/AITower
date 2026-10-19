@@ -108,6 +108,9 @@ export const balance: Balance = {
 	loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
 	tax: { profitShare: 0 },
 	audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
+	bio: { diffusion: 0.05, slabFactor: 0.3, decay: 0.0005, quarantineLeak: 0.05, hazardPerContamination: 2, botSlowPerContamination: 0.5, mutationThreshold: 0.5, mutationExposureTicks: 720, growthThreshold: 0.7, growthChancePerDay: 0.05, irreversibleShare: 0.4, irreversibleCleanFactor: 0.25, nutrientPrice: 2 },
+	ascension: { minTier: 5 },
+	endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
 };
 
 /** Deterministic, tiny contract generator (rng only). */
@@ -199,6 +202,8 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 		bots: JSON.parse(JSON.stringify(bots)) as Record<string, BotDef>,
 		clients: [],
 		tech: JSON.parse(JSON.stringify(tech)) as TechNode[],
+		paths: [],
+		endings: [],
 		structure: {
 			slabPerTile: 2_000,
 			basementSlabPerTile: 5_000,

@@ -69,6 +69,7 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			audio?.setMuted(s.muted);
 			audio?.setVolume(s.masterVolume);
 			audio?.setMusicVolume(s.musicVolume);
+			audio?.setHorrorIntensity(s.horrorIntensity);
 		} catch (err) {
 			console.warn("audio settings failed:", err);
 		}

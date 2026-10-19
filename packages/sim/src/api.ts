@@ -9,16 +9,16 @@
  * Time: 1 tick = 1 game-minute, 1440 ticks per day. Day 0 starts at 06:00
  * (tick 0 ⇒ minuteOfDay 360).
  */
-import type { ContentDB, ContractSpec, JobKind } from "@aitower/content";
+import type { AscensionPath, ContentDB, ContractSpec, EndingId, JobKind } from "@aitower/content";
 
-export type { JobKind };
+export type { AscensionPath, EndingId, JobKind };
 
 export const TICKS_PER_DAY = 1440;
 export const START_MINUTE_OF_DAY = 360;
 
 // ─── Commands ──────────────────────────────────────────────────────────────
 
-export type ConduitLayer = "power" | "coolant";
+export type ConduitLayer = "power" | "coolant" | "nutrient";
 
 export type SimCommand =
 	/** Build floor slab on `floor` from x0..x1 inclusive. Above ground needs slab below; skips cells already built. */
@@ -50,7 +50,9 @@ export type SimCommand =
 	/** Borrow from the Ministry Credit Office (up to the tier's limit). */
 	| { type: "takeLoan"; amount: number }
 	/** Repay principal (up to what is owed and what cash allows). */
-	| { type: "repayLoan"; amount: number };
+	| { type: "repayLoan"; amount: number }
+	/** Commit to an ascension path (tier ≥ balance.ascension.minTier, path available, not chosen before). Irreversible. */
+	| { type: "choosePath"; path: AscensionPath };
 
 /**
  * The clerk accepts, once per tick at most, the oldest offer that can start (same check as acceptContract) and matches
@@ -114,13 +116,20 @@ export type SimEvent =
 	/** `auto` = timed out and resolved with the default choice. */
 	| { type: "memoResolved"; memoId: number; eventId: string; choiceId: string; auto: boolean }
 	| { type: "standingChanged"; standing: number; delta: number }
-	| { type: "gameOver"; kind: GameOverKind }
+	/** `ending` is set for path endings (kind "victory", or "absorbed" for the secret one). */
+	| { type: "gameOver"; kind: GameOverKind; ending?: EndingId }
 	| { type: "researched"; techId: string }
 	| { type: "clerkAccepted"; contractId: number; jobId: number }
 	| { type: "loanTaken"; amount: number }
 	| { type: "loanRepaid"; amount: number }
 	/** A quarterly audit was filed; the report is `view.reports.at(-1)`. */
-	| { type: "quarterReport"; quarter: number; grade: AuditGrade };
+	| { type: "quarterReport"; quarter: number; grade: AuditGrade }
+	| { type: "pathChosen"; path: AscensionPath }
+	/** The sim grew a facility (a growth) on contaminated slab. */
+	| { type: "growthSprouted"; facilityId: number }
+	| { type: "botMutated"; botId: number; trait: BotTrait }
+	/** The contaminated share crossed `balance.bio.irreversibleShare` (emitted once). */
+	| { type: "contaminationIrreversible" };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -131,6 +140,8 @@ export type FacilityStatus =
 	| "unpowered" // not on a power net, or net satisfaction 0
 	| "brownout" // net satisfaction < 1
 	| "noCoolant" // needsCoolant but no coolant net / net over capacity
+	| "noNutrient" // needsNutrient but no nutrient net / net short
+	| "tooCold" // organoid rack below its band (throttled or dying from cold)
 	| "throttled"
 	| "tripped"
 	| "failed"; // awaiting repair
@@ -157,6 +168,11 @@ export interface FacilityView {
 	jobId: number | null;
 	powerNet: number | null;
 	coolantNet: number | null;
+	nutrientNet: number | null;
+	/** Grown by the sim (a growth), not built by the player. */
+	grown: boolean;
+	/** Contamination at its cells (max), 0..1. */
+	contamination: number;
 	/** genset: running? ups: charge 0..1. depot: parts stored. */
 	running?: boolean;
 	charge?: number;
@@ -190,7 +206,12 @@ export interface BotView {
 	battery: number;
 	carrying: boolean;
 	workOrderId: number | null;
+	/** Mutation from contamination exposure, or null. */
+	trait: BotTrait | null;
 }
+
+/** fleshed: repairs faster but contaminates where it works. tendriled: carries more parts but never rides lifts. */
+export type BotTrait = "fleshed" | "tendriled";
 
 export interface PowerNetView {
 	id: number;
@@ -201,6 +222,15 @@ export interface PowerNetView {
 	storedKwh: number;
 	storageCapacityKwh: number;
 	gridImportKw: number;
+}
+
+export interface NutrientNetView {
+	id: number;
+	/** Units per tick. */
+	supply: number;
+	demand: number;
+	/** 0..1 */
+	satisfaction: number;
 }
 
 export interface CoolantNetView {
@@ -267,7 +297,8 @@ export interface MetricSample {
 	maxRackC: number;
 }
 
-export type GameOverKind = "bankrupt" | "shutdown" | "victory";
+/** `absorbed`: the secret ending (the Ministry absorbed you); final like bankrupt/shutdown. */
+export type GameOverKind = "bankrupt" | "shutdown" | "victory" | "absorbed";
 
 export type AuditGrade = "A" | "B" | "C" | "D" | "E";
 
@@ -347,12 +378,18 @@ export interface SimView {
 	/** Power/coolant net id per cell (-1 none) — for overlays. */
 	powerNetOf: Int32Array;
 	coolantNetOf: Int32Array;
+	/** 1 where nutrient conduit exists. */
+	nutrient: Uint8Array;
+	nutrientNetOf: Int32Array;
+	/** Contamination 0..1 per cell. */
+	contamination: Float32Array;
 	ambientC: number;
 	facilities: FacilityView[];
 	lifts: LiftView[];
 	bots: BotView[];
 	powerNets: PowerNetView[];
 	coolantNets: CoolantNetView[];
+	nutrientNets: NutrientNetView[];
 	offers: ContractView[];
 	jobs: JobView[];
 	workOrders: WorkOrderView[];
@@ -378,6 +415,21 @@ export interface SimView {
 	modifiers: ModifierView[];
 	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
 	standing: number;
+	/**
+	 * Body-horror scalar 0..1 (drives render, audio and memos). Grows with the contaminated share, wetware share of
+	 * compute and growths; never decreases by more than a little per day (the building remembers).
+	 */
+	corruption: number;
+	/** Share of built cells with contamination ≥ 0.5. */
+	contaminatedShare: number;
+	/** The contaminated share crossed `balance.bio.irreversibleShare` at some point. */
+	irreversible: boolean;
+	/** Chosen ascension path, or null. */
+	path: AscensionPath | null;
+	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
+	organoidPflops: number;
+	/** Days the leading ending's condition has held (for the UI's progress line), or 0. */
+	endingProgress: { ending: EndingId; days: number; needed: number } | null;
 	/** Unspent research points. */
 	researchPoints: number;
 	/** Researched tech ids, in research order. */
@@ -391,7 +443,7 @@ export interface SimView {
 	 * Set once when the game ends. "victory" = reached the top tier (play may continue in sandbox: the sim keeps running).
 	 * "bankrupt" / "shutdown" are final; the sim keeps stepping but the UI should offer load / new game.
 	 */
-	gameOver: { kind: GameOverKind; tick: number } | null;
+	gameOver: { kind: GameOverKind; tick: number; ending?: EndingId } | null;
 }
 
 // ─── Snapshot & façade ───────────────────────────────────────────────────

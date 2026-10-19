@@ -46,6 +46,11 @@ const CATEGORY: Record<Kind, FacilityDef["category"]> = {
 	ups: "power",
 	depot: "logistics",
 	charger: "logistics",
+	// M3 placeholders (M3-T3 adds biotech kinds to the scene).
+	nutrient: "bio",
+	sterilizer: "bio",
+	quarantine: "bio",
+	bioreactor: "bio",
 };
 
 export const varietyId = (row: VarietyRow, tier: number, width: number): string => `var_${row.kind}${row.flavour ? `_${row.flavour}` : ""}_t${tier}_w${width}`;
@@ -159,6 +164,9 @@ export function createVarietyScene(): VarietyScene {
 			running: d.kind === "genset" ? true : undefined,
 			charge: d.kind === "ups" ? 0.6 : undefined,
 			stored: d.kind === "depot" ? 5 : undefined,
+			nutrientNet: null,
+			grown: false,
+			contamination: 0,
 			...extra,
 		});
 	};
@@ -206,12 +214,12 @@ export function createVarietyScene(): VarietyScene {
 	for (let k = 0; k < 3; k++) place(varietyId(VARIETY_ROWS[1], 2, 2), LEAK, LEFT + 2 + k * 6, "noCoolant", { tempC: 90 });
 
 	const bots: BotView[] = [
-		{ id: 1, defId: "var_rover", x: LEFT + 3, floor: 0, state: "toTarget", battery: 0.8, carrying: true, workOrderId: 1 },
-		{ id: 2, defId: "var_lifter", x: LEFT + 8, floor: 0, state: "toDepot", battery: 0.7, carrying: true, workOrderId: 2 },
-		{ id: 3, defId: "var_lifter", x: LEFT + 12, floor: 0, state: "idle", battery: 0.4, carrying: false, workOrderId: null },
-		{ id: 4, defId: "var_drone", x: LEFT + 16, floor: 0, state: "flying", battery: 0.9, carrying: true, workOrderId: 3 },
-		{ id: 5, defId: "var_drone", x: LEFT + 20, floor: 0, state: "idle", battery: 0.6, carrying: false, workOrderId: null },
-		{ id: 6, defId: "var_drone", x: LEFT + 24, floor: 0, state: "repairing", battery: 0.5, carrying: false, workOrderId: 4 },
+		{ id: 1, defId: "var_rover", x: LEFT + 3, floor: 0, state: "toTarget", battery: 0.8, carrying: true, workOrderId: 1, trait: null },
+		{ id: 2, defId: "var_lifter", x: LEFT + 8, floor: 0, state: "toDepot", battery: 0.7, carrying: true, workOrderId: 2, trait: null },
+		{ id: 3, defId: "var_lifter", x: LEFT + 12, floor: 0, state: "idle", battery: 0.4, carrying: false, workOrderId: null, trait: null },
+		{ id: 4, defId: "var_drone", x: LEFT + 16, floor: 0, state: "flying", battery: 0.9, carrying: true, workOrderId: 3, trait: null },
+		{ id: 5, defId: "var_drone", x: LEFT + 20, floor: 0, state: "idle", battery: 0.6, carrying: false, workOrderId: null, trait: null },
+		{ id: 6, defId: "var_drone", x: LEFT + 24, floor: 0, state: "repairing", battery: 0.5, carrying: false, workOrderId: 4, trait: null },
 	];
 
 	const powerNets: PowerNetView[] = [

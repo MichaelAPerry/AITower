@@ -52,6 +52,8 @@ export const ledCue = (status: FacilityStatus, enabled: boolean, colorBlind = fa
 		case "brownout":
 			return cue(L.amber, "activity", "warn");
 		case "noCoolant":
+		case "noNutrient": // M3 placeholder (M3-T3 may refine)
+		case "tooCold":
 			return cue(L.amber, "blink", "warn");
 		case "tripped":
 		case "failed":
@@ -98,6 +100,8 @@ export const crtGlyph = (status: FacilityStatus): CrtGlyph | null => {
 		case "throttled":
 		case "brownout":
 		case "noCoolant":
+		case "noNutrient":
+		case "tooCold":
 			return "throttled";
 		case "tripped":
 		case "failed":

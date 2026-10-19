@@ -129,6 +129,9 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 			jobId: status === "ok" || status === "throttled" ? 1 : null,
 			powerNet: power[idx(x, floor)] ? powerNetOf[idx(x, floor)] : null,
 			coolantNet: coolant[idx(x, floor)] ? 0 : null,
+			nutrientNet: null,
+			grown: false,
+			contamination: 0,
 			...extra,
 		};
 	};
@@ -170,9 +173,9 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 
 	const lifts: LiftView[] = [{ id: 1, x: 24, floorMin: -1, floorMax: 3, carFloor: 0, dir: 0, doorsOpen: true, riders: 0 }];
 	const bots: BotView[] = [
-		{ id: 1, defId: "rover", x: 27, floor: 0, state: "toTarget", battery: 0.8, carrying: true, workOrderId: 1 },
-		{ id: 2, defId: "rover", x: 16, floor: 2, state: "toDepot", battery: 0.35, carrying: false, workOrderId: null },
-		{ id: 3, defId: "rover", x: 21, floor: 1, state: "repairing", battery: 0.6, carrying: false, workOrderId: 2 },
+		{ id: 1, defId: "rover", x: 27, floor: 0, state: "toTarget", battery: 0.8, carrying: true, workOrderId: 1, trait: null },
+		{ id: 2, defId: "rover", x: 16, floor: 2, state: "toDepot", battery: 0.35, carrying: false, workOrderId: null, trait: null },
+		{ id: 3, defId: "rover", x: 21, floor: 1, state: "repairing", battery: 0.6, carrying: false, workOrderId: 2, trait: null },
 	];
 
 	const powerNets: PowerNetView[] = [
@@ -225,6 +228,16 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		loan: { principal: 0, max: 0, dailyRate: 0 },
 		reports: [],
 		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
+		nutrient: new Uint8Array(n),
+		nutrientNetOf: new Int32Array(n).fill(-1),
+		contamination: new Float32Array(n),
+		nutrientNets: [],
+		corruption: 0,
+		contaminatedShare: 0,
+		irreversible: false,
+		path: null,
+		organoidPflops: 0,
+		endingProgress: null,
 		gameOver: null,
 	};
 

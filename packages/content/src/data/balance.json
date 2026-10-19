@@ -115,6 +115,39 @@
    -0.06
   ]
  },
+ "bio": {
+  "diffusion": 0.05,
+  "slabFactor": 0.3,
+  "decay": 0.0005,
+  "quarantineLeak": 0.05,
+  "hazardPerContamination": 2,
+  "botSlowPerContamination": 0.5,
+  "mutationThreshold": 0.5,
+  "mutationExposureTicks": 720,
+  "growthThreshold": 0.7,
+  "growthChancePerDay": 0.05,
+  "irreversibleShare": 0.4,
+  "irreversibleCleanFactor": 0.25,
+  "nutrientPrice": 2
+ },
+ "ascension": {
+  "minTier": 5
+ },
+ "endings": {
+  "livingTower": {
+   "minCorruption": 0.8,
+   "pflops": 2000,
+   "days": 3
+  },
+  "cleanTower": {
+   "maxCorruption": 0.1,
+   "pflops": 2000,
+   "days": 7
+  },
+  "absorbed": {
+   "corruption": 1
+  }
+ },
  "events": {
   "intervalTicks": 720,
   "maxOpen": 3,

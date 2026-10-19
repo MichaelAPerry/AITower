@@ -1,0 +1,20 @@
+[
+ {
+  "id": "biotech",
+  "name": "Biotech",
+  "description": "M3 placeholder.",
+  "available": true
+ },
+ {
+  "id": "greentech",
+  "name": "Greentech",
+  "description": "Coming soon.",
+  "available": false
+ },
+ {
+  "id": "synthetic",
+  "name": "Synthetic Mind",
+  "description": "Coming soon.",
+  "available": false
+ }
+]
