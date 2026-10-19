@@ -11,6 +11,7 @@ import facilities from "./data/facilities.json";
 import lift from "./data/lift.json";
 import scenarios from "./data/scenarios.json";
 import structure from "./data/structure.json";
+import tech from "./data/tech.json";
 import type { ContentDB } from "./schema";
 import { validateContent } from "./validate";
 
@@ -23,7 +24,7 @@ export { validateContent } from "./validate";
  */
 export function loadContent(): ContentDB {
 	// JSON imports widen string unions to `string`; validateContent checks the real shapes.
-	const raw = structuredClone({ facilities, bots, clients, structure, lift, balance, scenarios, events }) as unknown as Omit<
+	const raw = structuredClone({ facilities, bots, clients, structure, lift, balance, scenarios, events, tech }) as unknown as Omit<
 		ContentDB,
 		"generateContract"
 	>;

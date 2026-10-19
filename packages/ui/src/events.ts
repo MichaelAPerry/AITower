@@ -25,6 +25,10 @@ const commandName: Record<SimCommand["type"], string> = {
 	buyParts: "Buy parts",
 	buyBot: "Buy bot",
 	resolveMemo: "Answer memo",
+	research: "Research",
+	setClerk: "Clerk orders",
+	takeLoan: "Take loan",
+	repayLoan: "Repay loan",
 };
 
 /** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
@@ -127,6 +131,17 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 				severity: ev.kind === "victory" ? "good" : "error",
 				toast: false,
 			};
+		// M2b placeholders (M2b-T3 words these properly).
+		case "researched":
+			return { text: `Research filed: ${content.tech.find((t) => t.id === ev.techId)?.name ?? ev.techId}`, severity: "good", toast: true };
+		case "clerkAccepted":
+			return { text: `The clerk accepted ${job(ev.jobId)}`, severity: "info", toast: false };
+		case "loanTaken":
+			return { text: `Loan drawn: ${fmtMoney(ev.amount)}`, severity: "info", toast: false };
+		case "loanRepaid":
+			return { text: `Loan repaid: ${fmtMoney(ev.amount)}`, severity: "good", toast: false };
+		case "quarterReport":
+			return { text: `Quarter ${ev.quarter} audit filed: grade ${ev.grade}`, severity: ev.grade <= "B" ? "good" : ev.grade === "C" ? "info" : "warn", toast: true };
 	}
 }
 

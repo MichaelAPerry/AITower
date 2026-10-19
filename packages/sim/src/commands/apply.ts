@@ -74,6 +74,11 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 		case "resolveMemo":
 			plan = planResolveMemo(ctx, cmd.memoId, cmd.choiceId);
 			break;
+		case "research":
+		case "setClerk":
+		case "takeLoan":
+		case "repayLoan":
+			return reject("not available yet"); // M2b-T1 placeholder
 		default:
 			return reject("unknown command type");
 	}

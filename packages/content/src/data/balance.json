@@ -79,6 +79,42 @@
   "jobFailed": -4,
   "jobCompleted": 1
  },
+ "research": {
+  "pointsPerPflopHour": 0.01,
+  "pointsPerJob": 5
+ },
+ "clerk": {
+  "feeShare": 0.05
+ },
+ "loans": {
+  "maxByTier": [
+   2000000,
+   6000000,
+   15000000,
+   40000000
+  ],
+  "dailyRate": 0.004
+ },
+ "tax": {
+  "profitShare": 0
+ },
+ "audit": {
+  "periodDays": 7,
+  "standingByGrade": [
+   4,
+   2,
+   0,
+   -3,
+   -6
+  ],
+  "cashShareByGrade": [
+   0.05,
+   0.02,
+   0,
+   -0.02,
+   -0.05
+  ]
+ },
  "events": {
   "intervalTicks": 720,
   "maxOpen": 3,

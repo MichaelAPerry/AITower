@@ -61,6 +61,11 @@ export const balance: Balance = {
 	tiers: { pflops: [0, 60, 300, 1000], uptime: [0, 0.95, 0.98, 0.995], reward: [0, 500_000, 2_000_000, 5_000_000] },
 	standing: { start: 50, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 },
 	events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
+	research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
+	clerk: { feeShare: 0.05 },
+	loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
+	tax: { profitShare: 0 },
+	audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 };
 
 /** Deterministic, tiny contract generator (rng only). */
@@ -151,6 +156,7 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 		facilities: JSON.parse(JSON.stringify(facilities)) as Record<string, FacilityDef>,
 		bots: { rover: { id: "rover", name: "Rover", cost: 50_000, speed: 0.25, batteryTicks: 600, repairTicks: 30, color: "#00aaaa" } },
 		clients: [],
+		tech: [],
 		structure: {
 			slabPerTile: 2_000,
 			basementSlabPerTile: 5_000,

@@ -165,6 +165,13 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
 		standing: state.standing,
+		// M2b placeholders (M2b-T1 implements).
+		researchPoints: 0,
+		techResearched: [],
+		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
+		loan: { principal: 0, max: 0, dailyRate: 0 },
+		reports: [],
+		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
 		gameOver: state.gameOver ? { ...state.gameOver } : null,
 	};
 }

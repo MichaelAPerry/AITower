@@ -82,9 +82,15 @@ export function createFakeContent(): ContentDB {
 			tiers: { pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
 			standing: { start: 50, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 },
 			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
+			research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
+			clerk: { feeShare: 0.05 },
+			loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
+			tax: { profitShare: 0 },
+			audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
 		scenarios: {},
 		events: FAKE_EVENTS,
+		tech: [],
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
@@ -139,6 +145,12 @@ function buildView(content: ContentDB): SimView {
 		memoHistory: [],
 		modifiers: [],
 		standing: 50,
+		researchPoints: 0,
+		techResearched: [],
+		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
+		loan: { principal: 0, max: 0, dailyRate: 0 },
+		reports: [],
+		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
@@ -178,6 +190,9 @@ function buildView(content: ContentDB): SimView {
 		revenue: d < 2 ? 0 : 80_000 + d * 9_000 + ((d * 7919) % 30_000),
 		energy: 18_000 + d * 1_400,
 		upkeep: 6_200 + d * 300,
+		taxes: 0,
+		interest: 0,
+		fees: 0,
 		construction: d === 0 ? 900_000 : d % 4 === 1 ? 160_000 : (d * 3301) % 20_000,
 		penalties: d === 9 ? 25_000 : 0,
 	}));

@@ -11,6 +11,8 @@
  */
 import type { ContentDB, ContractSpec, JobKind } from "@aitower/content";
 
+export type { JobKind };
+
 export const TICKS_PER_DAY = 1440;
 export const START_MINUTE_OF_DAY = 360;
 
@@ -40,7 +42,41 @@ export type SimCommand =
 	/** Spawn a bot at the first charger with space. */
 	| { type: "buyBot"; defId: string }
 	/** Answer an open Ministry memo with one of its choice ids. */
-	| { type: "resolveMemo"; memoId: number; choiceId: string };
+	| { type: "resolveMemo"; memoId: number; choiceId: string }
+	/** Spend research points on a tech node (prerequisites researched, tier ≥ minTier, enough RP). */
+	| { type: "research"; techId: string }
+	/** Set the Contracts Clerk's standing order (needs the `contractsClerk` feature researched). */
+	| { type: "setClerk"; policy: ClerkPolicy }
+	/** Borrow from the Ministry Credit Office (up to the tier's limit). */
+	| { type: "takeLoan"; amount: number }
+	/** Repay principal (up to what is owed and what cash allows). */
+	| { type: "repayLoan"; amount: number };
+
+/**
+ * The clerk accepts, once per tick at most, the oldest offer that can start (same check as acceptContract) and matches
+ * every rule. Its fee (`balance.clerk.feeShare`) is withheld from that job's earnings.
+ */
+export interface ClerkPolicy {
+	enabled: boolean;
+	/** Job kinds it may accept. */
+	kinds: JobKind[];
+	/** Minimum pay in $ per PFLOP-hour (see `payPerPflopHour`). 0 = any. */
+	minPayPerPflopHour: number;
+	/** Never accept an offer whose missed-deadline penalty exceeds this ($). 0 = no limit. */
+	maxPenalty: number;
+	/** May accept offers that need liquid-cooled racks. */
+	allowLiquid: boolean;
+}
+
+/** Pay rate of an offer in $ per PFLOP-hour: training/finetune payout ÷ work; inference payout ÷ (PFLOPS × hours). */
+export function payPerPflopHour(spec: ContractSpec): number {
+	if (spec.kind === "inference") {
+		const pf = spec.sustainedPflops ?? spec.work;
+		const hours = spec.durationTicks / 60;
+		return pf > 0 && hours > 0 ? spec.payout / (pf * hours) : 0;
+	}
+	return spec.work > 0 ? spec.payout / spec.work : 0;
+}
 
 export interface CellRef {
 	x: number;
@@ -78,7 +114,13 @@ export type SimEvent =
 	/** `auto` = timed out and resolved with the default choice. */
 	| { type: "memoResolved"; memoId: number; eventId: string; choiceId: string; auto: boolean }
 	| { type: "standingChanged"; standing: number; delta: number }
-	| { type: "gameOver"; kind: GameOverKind };
+	| { type: "gameOver"; kind: GameOverKind }
+	| { type: "researched"; techId: string }
+	| { type: "clerkAccepted"; contractId: number; jobId: number }
+	| { type: "loanTaken"; amount: number }
+	| { type: "loanRepaid"; amount: number }
+	/** A quarterly audit was filed; the report is `view.reports.at(-1)`. */
+	| { type: "quarterReport"; quarter: number; grade: AuditGrade };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -133,7 +175,8 @@ export interface LiftView {
 	riders: number;
 }
 
-export type BotState = "idle" | "toDepot" | "toTarget" | "repairing" | "toCharger" | "charging" | "waitingLift" | "riding";
+/** `flying`: a flying bot moving between floors (its `floor` is fractional meanwhile). */
+export type BotState = "idle" | "toDepot" | "toTarget" | "repairing" | "toCharger" | "charging" | "waitingLift" | "riding" | "flying";
 
 export interface BotView {
 	id: number;
@@ -206,6 +249,12 @@ export interface LedgerDay {
 	upkeep: number;
 	construction: number;
 	penalties: number;
+	/** Ministry levy on the day's profit (charged at midnight, so it lands on the day it is charged for). */
+	taxes: number;
+	/** Loan interest. */
+	interest: number;
+	/** Contracts Clerk fees withheld from earnings. */
+	fees: number;
 }
 
 export interface MetricSample {
@@ -219,6 +268,46 @@ export interface MetricSample {
 }
 
 export type GameOverKind = "bankrupt" | "shutdown" | "victory";
+
+export type AuditGrade = "A" | "B" | "C" | "D" | "E";
+
+/** Quarterly Ministry audit (every `balance.audit.periodDays` days, filed at midnight). */
+export interface QuarterReport {
+	quarter: number;
+	/** Days covered, inclusive. */
+	fromDay: number;
+	toDay: number;
+	revenue: number;
+	/** energy + upkeep + construction + penalties + taxes + interest + fees. */
+	costs: number;
+	/** Mean of the daily uptimes. */
+	uptime: number;
+	/** Mean of the daily PUE samples. */
+	pue: number;
+	jobsCompleted: number;
+	jobsFailed: number;
+	penalties: number;
+	grade: AuditGrade;
+	standingDelta: number;
+	/** Grant (+) or fine (−) applied. */
+	cashDelta: number;
+	/** One dry Ministry sentence explaining the grade. */
+	remark: string;
+}
+
+/** Totals since the start of the game. */
+export interface LifetimeStats {
+	revenue: number;
+	pflopHours: number;
+	jobsCompleted: number;
+	jobsFailed: number;
+	peakPflops: number;
+	facilitiesBuilt: number;
+	componentFailures: number;
+	repairs: number;
+	memosAnswered: number;
+	researchPointsEarned: number;
+}
 
 export interface MemoView {
 	id: number;
@@ -289,6 +378,15 @@ export interface SimView {
 	modifiers: ModifierView[];
 	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
 	standing: number;
+	/** Unspent research points. */
+	researchPoints: number;
+	/** Researched tech ids, in research order. */
+	techResearched: string[];
+	clerk: { unlocked: boolean; policy: ClerkPolicy; acceptedTotal: number };
+	loan: { principal: number; max: number; dailyRate: number };
+	/** Filed quarterly audits, oldest first (last 8). */
+	reports: QuarterReport[];
+	stats: LifetimeStats;
 	/**
 	 * Set once when the game ends. "victory" = reached the top tier (play may continue in sandbox: the sim keeps running).
 	 * "bankrupt" / "shutdown" are final; the sim keeps stepping but the UI should offer load / new game.

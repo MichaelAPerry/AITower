@@ -11,6 +11,9 @@ export const emptyLedgerDay = (day: number): LedgerDay => ({
 	upkeep: 0,
 	construction: 0,
 	penalties: 0,
+	taxes: 0,
+	interest: 0,
+	fees: 0,
 });
 
 export function earn(state: SimState, amount: number): void {

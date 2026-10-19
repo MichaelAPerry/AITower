@@ -219,6 +219,12 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		memoHistory: [],
 		modifiers: [],
 		standing: 50,
+		researchPoints: 0,
+		techResearched: [],
+		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
+		loan: { principal: 0, max: 0, dailyRate: 0 },
+		reports: [],
+		stats: { revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 },
 		gameOver: null,
 	};
 

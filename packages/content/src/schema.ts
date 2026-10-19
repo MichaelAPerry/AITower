@@ -96,6 +96,8 @@ export interface FacilityDef {
 	cooling?: CoolingSpec;
 	logistics?: LogisticsSpec;
 	placement?: PlacementRules;
+	/** Tech node that must be researched before this can be built (in addition to `unlockTier`). Absent = no research needed. */
+	tech?: string;
 }
 
 export interface BotDef {
@@ -109,6 +111,12 @@ export interface BotDef {
 	/** Ticks to swap a failed component. */
 	repairTicks: number;
 	color: string;
+	/** Tech node that must be researched before this bot can be bought. */
+	tech?: string;
+	/** Flies straight between floors (no lift needed); drawn as a drone. */
+	flying?: boolean;
+	/** Spare parts carried per depot trip (default 1); repairs queued work orders in turn. */
+	carry?: number;
 }
 
 export interface StructureCosts {
@@ -194,6 +202,35 @@ export interface Balance {
 		/** Change on a missed training deadline / completed job. */
 		jobFailed: number;
 		jobCompleted: number;
+	};
+	/** Research points (RP): earned from delivered compute, spent on tech nodes. */
+	research: {
+		/** RP per PFLOP-hour of delivered compute (all job kinds). */
+		pointsPerPflopHour: number;
+		/** RP bonus per completed job. */
+		pointsPerJob: number;
+	};
+	/** Contracts Clerk (auto-accept), unlocked by a tech node with the `contractsClerk` feature. */
+	clerk: {
+		/** Share of each clerk-accepted job's earnings kept by the clerk (0..1). */
+		feeShare: number;
+	};
+	/** Ministry Credit Office. */
+	loans: {
+		/** Max outstanding principal by clearance: index = tier − 1 (same indexing as `tiers`). */
+		maxByTier: number[];
+		/** Interest charged at midnight on the outstanding principal (e.g. 0.004 = 0.4 %/day). */
+		dailyRate: number;
+	};
+	/** Ministry levy: share of a day's positive profit (revenue − costs) charged at midnight. */
+	tax: { profitShare: number };
+	/** Quarterly audit: every `periodDays` the Ministry grades the facility (see `QuarterReport` in sim/api). */
+	audit: {
+		periodDays: number;
+		/** Standing change per grade A..E. */
+		standingByGrade: number[];
+		/** Cash grant (+) or fine (−) per grade A..E, as a share of the quarter's revenue. */
+		cashShareByGrade: number[];
 	};
 	events: {
 		/** Mean ticks between new memos (seeded jitter ±50%). */
@@ -328,10 +365,51 @@ export interface EventDef {
 	minDay?: number;
 	/** Min days before the same event may recur. */
 	cooldownDays: number;
+	/**
+	 * Scripted: issued exactly once, at 09:00 on this game day, regardless of weight, cooldown and timing (still subject to
+	 * minTier/maxTier). Never picked randomly.
+	 */
+	scriptedDay?: number;
 	/** Auto-resolve with `defaultChoice` after this many ticks unanswered. */
 	timeoutTicks: number;
 	defaultChoice: string;
 	choices: EventChoice[];
+}
+
+// ─── Research (tech tree) ─────────────────────────────────────────────
+
+export type TechBranch = "compute" | "cooling" | "power" | "logistics" | "administration";
+
+/** Permanent multipliers granted by researched tech; they stack multiplicatively. */
+export type PerkKind =
+	| "failureRate" // rack failure hazard
+	| "energyPrice" // grid energy price
+	| "payout" // payout of new offers
+	| "coolingCapacity" // crah, chiller and cdu capacity
+	| "repairSpeed" // divides bot repair ticks
+	| "upkeep" // facility upkeep
+	| "researchRate" // RP earned
+	| "botSpeed"; // bot walk/fly speed
+
+/** Gameplay features switched on by tech. */
+export type FeatureId = "contractsClerk";
+
+export type TechEffect = { type: "perk"; kind: PerkKind; factor: number } | { type: "feature"; feature: FeatureId };
+
+export interface TechNode {
+	id: string;
+	name: string;
+	/** One or two sentences in Ministry voice that also state the real effect. */
+	description: string;
+	branch: TechBranch;
+	/** Clearance (tier) required before it can be researched. */
+	minTier: number;
+	/** Research points. */
+	cost: number;
+	/** Tech ids that must be researched first. */
+	requires: string[];
+	/** Perks and features. Facility/bot unlocks are declared on the facility/bot (`tech`). */
+	effects: TechEffect[];
 }
 
 export interface ContentDB {
@@ -343,5 +421,6 @@ export interface ContentDB {
 	balance: Balance;
 	scenarios: Record<string, Scenario>;
 	events: EventDef[];
+	tech: TechNode[];
 	generateContract: ContractGenerator;
 }

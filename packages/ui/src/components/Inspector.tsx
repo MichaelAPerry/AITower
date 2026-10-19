@@ -17,6 +17,7 @@ const botStateLabel: Record<BotState, string> = {
 	charging: "charging",
 	waitingLift: "waiting lift",
 	riding: "riding lift",
+	flying: "flying",
 };
 
 /** Round temperature dial (ok / throttle / trip bands) with a CRT readout. */
