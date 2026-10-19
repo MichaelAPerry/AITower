@@ -1,0 +1,374 @@
+<title>AItower Calm HUD</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Special+Elite&family=Silkscreen&display=swap">
+<style>
+/* Layout: one "screen" mockup (world ~85%, thin top strip, dock, edge drawers), then before/after notes. Single dark look, the game's own palette. */
+:root {
+	--ink: #0d0b08;
+	--housing: #2a241b;
+	--housing-lo: #1a160f;
+	--paper: #e8dfc6;
+	--putty: #c9bc9c;
+	--beige: #a8987a;
+	--brass: #c8a248;
+	--copper: #c06a3b;
+	--verdigris: #4f9a85;
+	--amber: #ffb000;
+	--green: #33ff66;
+	--red: #ff3b2f;
+	--brick: #2f2a22;
+	--sky: #3a2c22;
+	--f-crt: "VT323", ui-monospace, monospace;
+	--f-type: "Special Elite", "Courier New", ui-monospace, monospace;
+	--f-stamp: "Silkscreen", ui-monospace, monospace;
+	color-scheme: dark;
+}
+html, body { background: var(--ink); color: var(--paper); }
+body { font: 15px/1.5 var(--f-type); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 24px 48px; }
+.wrap { max-width: 1240px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2 { font-family: var(--f-stamp); font-weight: 400; letter-spacing: .06em; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(20px, 3vw, 28px); color: var(--amber); }
+h2 { font-size: 15px; color: var(--brass); text-transform: uppercase; }
+p { margin: 0; max-width: 68ch; color: var(--putty); }
+.lede { display: grid; gap: 8px; }
+.switch { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { font: 12px var(--f-stamp); letter-spacing: .08em; text-transform: uppercase; background: var(--housing); color: var(--putty); border: 1px solid var(--brass-dk, #7d6227); padding: 8px 12px; cursor: pointer; border-radius: 3px; }
+.btn[aria-pressed="true"], .btn.on { background: var(--amber); color: var(--ink); border-color: var(--amber); }
+.btn:focus-visible, .tab:focus-visible, .dockbtn:focus-visible, .stamp:focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+/* ── The screen ── */
+.scroller { overflow-x: auto; border: 1px solid #4a3f2e; border-radius: 6px; }
+.screen { position: relative; width: 1200px; height: 700px; background: var(--sky); overflow: hidden; font-size: 14px; }
+.before-img { width: 1200px; height: 700px; object-fit: cover; object-position: left top; display: block; }
+
+.top { position: absolute; inset: 0 0 auto 0; height: 52px; display: flex; align-items: center; gap: 14px; padding: 0 14px; background: linear-gradient(var(--housing), var(--housing-lo)); border-bottom: 2px solid var(--ink); z-index: 5; }
+.plate { font: 15px var(--f-stamp); color: var(--ink); background: var(--brass); padding: 3px 8px; border-radius: 2px; }
+.crt { font-family: var(--f-crt); color: var(--amber); background: #120e08; border: 1px solid #000; padding: 2px 10px; border-radius: 3px; text-shadow: 0 0 6px #ffb00066; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.crt small { display: block; font: 9px var(--f-stamp); color: var(--beige); text-shadow: none; letter-spacing: .1em; }
+.crt b { font-weight: 400; font-size: 24px; }
+.crt.big b { font-size: 30px; color: var(--green); text-shadow: 0 0 8px #33ff6680; }
+.speed { display: flex; gap: 2px; }
+.speed button { font: 13px var(--f-crt); width: 30px; height: 26px; background: #3a3124; color: var(--beige); border: 1px solid #000; cursor: pointer; }
+.speed button.on { background: var(--amber); color: var(--ink); }
+.clear { flex: 1; min-width: 0; display: grid; gap: 3px; }
+.clear .lbl { font: 10px var(--f-stamp); color: var(--beige); letter-spacing: .1em; display: flex; justify-content: space-between; }
+.bar { height: 12px; background: #120e08; border: 1px solid #000; border-radius: 2px; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 72%; background: repeating-linear-gradient(90deg, var(--amber) 0 7px, #b87f00 7px 9px); }
+.inbox { position: relative; font: 11px var(--f-stamp); color: var(--ink); background: var(--paper); padding: 6px 10px; border-radius: 2px; transform: rotate(-2deg); cursor: pointer; border: 0; }
+.inbox span { position: absolute; top: -8px; right: -8px; background: var(--red); color: var(--paper); border-radius: 50%; width: 18px; height: 18px; display: grid; place-items: center; font-size: 10px; }
+.menu { font: 11px var(--f-stamp); color: var(--beige); background: none; border: 1px solid #4a3f2e; padding: 6px 8px; cursor: pointer; }
+
+/* World */
+.world { position: absolute; inset: 52px 0 0 0; }
+canvas { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.float { position: absolute; font: 22px var(--f-crt); color: var(--green); text-shadow: 0 0 6px #33ff6699, 0 1px 0 #000; pointer-events: none; animation: rise 2.2s ease-out forwards; }
+.float.neg { color: var(--red); text-shadow: 0 0 6px #ff3b2f99, 0 1px 0 #000; }
+@keyframes rise { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-46px); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .float { animation: fade 2.2s forwards; } @keyframes fade { to { opacity: 0; } } }
+.pin { position: absolute; font: 10px var(--f-stamp); color: var(--ink); background: var(--amber); padding: 2px 5px; border-radius: 2px; box-shadow: 0 2px 0 #000; }
+.pin::after { content: ""; position: absolute; left: 8px; bottom: -6px; border: 3px solid transparent; border-top-color: var(--amber); }
+
+/* Ticker: the only text feed */
+.ticker { position: absolute; left: 230px; right: 60px; bottom: 10px; height: 30px; display: flex; align-items: center; gap: 10px; padding: 0 10px; background: #120e08e6; border: 1px solid #000; border-radius: 3px; font: 18px var(--f-crt); color: var(--amber); white-space: nowrap; overflow: hidden; }
+.ticker .n { font: 10px var(--f-stamp); background: var(--housing); color: var(--putty); padding: 2px 6px; border-radius: 2px; }
+.ticker .ok { color: var(--green); } .ticker .bad { color: var(--red); }
+
+/* Goal chip (CURRENT ORDERS, one line) */
+.goal { position: absolute; left: 50%; top: 12px; transform: translateX(-50%); display: flex; align-items: center; gap: 10px; background: var(--paper); color: var(--ink); padding: 6px 12px; border-radius: 2px; box-shadow: 0 3px 0 #000; font-size: 15px; }
+.goal .k { font: 10px var(--f-stamp); background: var(--ink); color: var(--paper); padding: 2px 5px; }
+
+/* Memo slip: headline + stamps with effects as icons */
+.slip { position: absolute; right: 64px; top: 64px; width: 300px; background: var(--paper); color: var(--ink); padding: 12px 14px; border-radius: 2px; box-shadow: 0 4px 0 #000; transform: rotate(.8deg); display: grid; gap: 8px; }
+.slip .from { font: 10px var(--f-stamp); color: var(--copper); letter-spacing: .08em; display: flex; justify-content: space-between; }
+.slip h3 { margin: 0; font: 18px/1.2 var(--f-type); }
+.stamps { display: grid; gap: 6px; }
+.stamp { display: flex; justify-content: space-between; align-items: center; gap: 8px; font: 12px var(--f-stamp); background: none; border: 2px solid var(--verdigris); color: #2d6b5a; padding: 5px 8px; cursor: pointer; text-transform: uppercase; }
+.stamp em { font: 15px var(--f-crt); font-style: normal; color: var(--ink); text-transform: none; }
+.stamp:hover { background: #4f9a8522; }
+.slip .more { font: 11px var(--f-type); color: #6b5e45; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; text-decoration: underline dotted; }
+.slip .body { font-size: 13px; color: #3b3326; }
+
+/* Build dock */
+.dock { position: absolute; left: 10px; bottom: 10px; width: 210px; display: grid; gap: 6px; }
+.dockbtn { display: grid; grid-template-columns: 34px 1fr auto; align-items: center; gap: 8px; text-align: left; background: #2a241bf0; border: 1px solid #000; color: var(--paper); padding: 5px 8px; border-radius: 3px; cursor: pointer; font: 14px var(--f-type); }
+.dockbtn .ic { width: 34px; height: 26px; border-radius: 2px; background: var(--housing-lo); display: grid; place-items: center; font: 16px var(--f-crt); color: var(--amber); }
+.dockbtn .c { font: 16px var(--f-crt); color: var(--beige); }
+.dockbtn.can { box-shadow: 0 0 0 1px var(--amber), 0 0 12px #ffb00055; }
+.dockbtn.can .c { color: var(--green); }
+.dockhead { font: 10px var(--f-stamp); color: var(--beige); letter-spacing: .1em; display: flex; justify-content: space-between; }
+
+/* Edge drawers */
+.tabs { position: absolute; right: 0; top: 64px; display: grid; gap: 6px; z-index: 4; }
+.tab { writing-mode: vertical-rl; font: 11px var(--f-stamp); letter-spacing: .12em; background: var(--housing); color: var(--putty); border: 1px solid #000; border-right: 0; padding: 12px 7px; cursor: pointer; border-radius: 3px 0 0 3px; }
+.tab.on { background: var(--amber); color: var(--ink); }
+.tab kbd { font: 10px var(--f-crt); writing-mode: horizontal-tb; display: block; margin-top: 6px; color: inherit; opacity: .7; }
+.drawer { position: absolute; right: 36px; top: 64px; bottom: 50px; width: 420px; background: #1d1810f5; border: 1px solid #000; border-radius: 4px; box-shadow: -6px 0 20px #0009; padding: 14px; display: grid; align-content: start; gap: 12px; z-index: 6; overflow: auto; }
+.drawer[hidden] { display: none; }
+.drawer h4 { margin: 0; font: 12px var(--f-stamp); letter-spacing: .1em; color: var(--brass); display: flex; justify-content: space-between; }
+.row { display: grid; grid-template-columns: 1fr auto auto auto; gap: 10px; align-items: center; padding: 6px 8px; background: #2a241b; border-radius: 2px; font-size: 13px; }
+.row .num { font: 18px var(--f-crt); color: var(--amber); font-variant-numeric: tabular-nums; }
+.row .why { grid-column: 1 / -1; font-size: 12px; color: var(--copper); }
+.chip { font: 10px var(--f-stamp); padding: 2px 6px; border-radius: 2px; background: var(--verdigris); color: var(--ink); }
+.chip.off { background: #4a3f2e; color: var(--beige); }
+.chip.no { background: var(--red); color: var(--paper); }
+.clerk { display: flex; justify-content: space-between; align-items: center; background: #33ff6614; border: 1px solid #33ff6655; padding: 6px 10px; border-radius: 2px; font: 18px var(--f-crt); color: var(--green); }
+.gauges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.gauges .crt { text-align: center; padding: 8px; }
+
+/* Notes */
+.notes { display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.card { background: var(--housing-lo); border: 1px solid #3a3124; border-radius: 4px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+td, th { text-align: left; padding: 5px 6px; border-bottom: 1px solid #3a3124; vertical-align: top; }
+th { font: 10px var(--f-stamp); color: var(--beige); letter-spacing: .08em; font-weight: 400; }
+td:first-child { color: var(--beige); }
+ul { margin: 0; padding-left: 18px; color: var(--putty); display: grid; gap: 6px; }
+.tablewrap { overflow-x: auto; }
+</style>
+
+<div class="wrap">
+	<header class="lede">
+		<h1>AItower: Calm HUD</h1>
+		<p>Proposed redesign: the building is the UI. The world gets about 85% of the screen. The HUD keeps only what a clicker needs at a glance (money, money per hour, the next goal, speed, inbox). Everything else waits in drawers on hotkeys. Events show in the world instead of in text.</p>
+		<p>Click around the mockup: the speed buttons, the drawers on the right edge (C, R, F, I), the memo stamps and the build dock. Cash floats up from racks as jobs pay.</p>
+		<div class="switch" role="group" aria-label="Compare">
+			<button class="btn" id="showAfter" aria-pressed="true">After (proposed)</button>
+			<button class="btn" id="showBefore" aria-pressed="false">Before (today, day 15)</button>
+		</div>
+	</header>
+
+	<div class="scroller">
+		<div class="screen" id="after">
+			<div class="top">
+				<span class="plate">AITOWER</span>
+				<div class="crt"><small>DAY 15</small><b>02:23</b></div>
+				<div class="speed" role="group" aria-label="Speed">
+					<button data-s="0" title="Pause">■</button><button data-s="1">1×</button><button data-s="3">3×</button><button data-s="10" class="on">10×</button><button data-s="30">30×</button>
+				</div>
+				<div class="crt"><small>TREASURY</small><b id="cash">$424k</b></div>
+				<div class="crt big"><small>PER HOUR</small><b>+$21.4k</b></div>
+				<div class="clear">
+					<div class="lbl"><span>CLEARANCE 3</span><span>290 / 400 PF · uptime ok</span></div>
+					<div class="bar" title="290 of 400 PFLOPS installed for Clearance 3"><i></i></div>
+				</div>
+				<button class="inbox" title="Ministry inbox: 1 memo waiting">INBOX<span>1</span></button>
+				<button class="menu">MENU</button>
+			</div>
+
+			<div class="world">
+				<canvas id="cv" width="600" height="324" aria-label="The tower, side view"></canvas>
+				<div class="goal"><span class="k">NEXT</span>Research ready: <b>Central Stores</b> · 1000 / 3015 RP <span class="k">R</span></div>
+				<span class="pin" data-f="1" data-i="5">REPAIRING</span>
+				<span class="pin" data-f="3" data-i="4" style="background: var(--red); color: var(--paper)">NO PARTS</span>
+
+				<div class="slip" id="slip">
+					<div class="from"><span>OPERATIONS · URGENT</span><span>auto-files 5h 47m</span></div>
+					<h3>Ransom note from an unknown benefactor</h3>
+					<div class="stamps">
+						<button class="stamp" data-out="Paid. Standing −4.">Pay <em>−$160k · ★−4</em></button>
+						<button class="stamp" data-out="Ignored. Two racks failed.">Ignore <em>2 racks fail</em></button>
+						<button class="stamp" data-out="Perimeter hardened. Standing +3.">Harden <em>−$200k · ★+3</em></button>
+					</div>
+					<button class="more" id="more">read memo</button>
+					<p class="body" id="body" hidden>A message arrived demanding payment in exchange for not having done something. It is unclear whether it has been done. The Ministry will remain uninvolved and will assess the damage afterwards.</p>
+				</div>
+
+				<div class="dock" id="dock">
+					<div class="dockhead"><span>BUILD</span><span>B</span></div>
+					<button class="dockbtn can"><span class="ic">▤</span>Mk.I Cabinet<span class="c">$400k</span></button>
+					<button class="dockbtn"><span class="ic">▥</span>Mk.II Liquid<span class="c">$1.4M</span></button>
+					<button class="dockbtn can"><span class="ic">✱</span>Air handler<span class="c">$120k</span></button>
+					<button class="dockbtn"><span class="ic">…</span>More (slab, pipes, lifts)<span class="c">▸</span></button>
+				</div>
+
+				<div class="ticker" aria-live="polite"><span class="n">3</span><span class="ok">✓ Ipanema finetune +$63.6k</span><span>·</span><span>⚙ 2 cabinets repairing</span><span>·</span><span class="bad">✕ Ledgerline missed deadline −$86.7k</span></div>
+
+				<div class="tabs" role="tablist" aria-label="Drawers">
+					<button class="tab" data-d="contracts" role="tab">CONTRACTS<kbd>C</kbd></button>
+					<button class="tab" data-d="research" role="tab">RESEARCH<kbd>R</kbd></button>
+					<button class="tab" data-d="finance" role="tab">FINANCE<kbd>F</kbd></button>
+					<button class="tab" data-d="instruments" role="tab">GAUGES<kbd>I</kbd></button>
+				</div>
+
+				<section class="drawer" id="d-contracts" hidden>
+					<h4><span>CONTRACTS</span><span>1 offer</span></h4>
+					<div class="clerk"><span>CLERK ON · 17 booked · fee 6%</span><button class="btn">Edit</button></div>
+					<div class="row"><span>Ipanema Genomics · training</span><span class="num">$1.67M</span><span class="num">$137/PF·h</span><span class="chip no">CAN'T START</span><span class="why">Too slow: 154 h on your idle racks, deadline 63 h</span></div>
+					<div class="row"><span>Kestrel Quant · inference</span><span class="num">$412k</span><span class="num">$145/PF·h</span><span class="chip">FITS</span></div>
+					<h4><span>RUNNING</span><span>2 jobs</span></h4>
+					<div class="row"><span>Northwind · training</span><span class="num">58%</span><span class="num">80 PF</span><span class="chip">ON TIME</span></div>
+					<div class="row"><span>Lumen · inference</span><span class="num">31%</span><span class="num">41 PF</span><span class="chip">SLA OK</span></div>
+				</section>
+				<section class="drawer" id="d-research" hidden>
+					<h4><span>RESEARCH</span><span>3,015 RP</span></h4>
+					<div class="row"><span>Central Stores Warehousing</span><span class="num">1000</span><span class="chip">READY</span><span></span></div>
+					<div class="row"><span>Rear-Door Exchanger Patent</span><span class="num">1100</span><span class="chip">READY</span><span></span></div>
+					<div class="row"><span>Hot-Aisle Containment</span><span class="num">3200</span><span class="chip off">CLEARANCE 3</span><span></span></div>
+					<p>The full tree stays one keypress away. The drawer lists only what you can buy now.</p>
+				</section>
+				<section class="drawer" id="d-finance" hidden>
+					<h4><span>TODAY</span><span>day 15</span></h4>
+					<div class="row"><span>Income</span><span class="num">+$505k</span><span></span><span></span></div>
+					<div class="row"><span>Costs</span><span class="num">−$456k</span><span></span><span></span><span class="why">energy $119k · upkeep $25k · penalties $287k · clerk $26k</span></div>
+					<h4><span>CREDIT OFFICE</span><span>0.5%/day</span></h4>
+					<div class="row"><span>Owed</span><span class="num">$0</span><span class="num">limit $6M</span><button class="btn">Borrow</button></div>
+				</section>
+				<section class="drawer" id="d-instruments" hidden>
+					<h4><span>GAUGES</span><span>for when you want them</span></h4>
+					<div class="gauges">
+						<div class="crt"><small>PUE</small><b>1.32</b></div>
+						<div class="crt"><small>IT LOAD</small><b>472</b><small>of 638 kW</small></div>
+						<div class="crt"><small>UPTIME</small><b>97.1%</b></div>
+						<div class="crt"><small>STANDING</small><b>84</b></div>
+						<div class="crt"><small>OUTSIDE</small><b>14°C</b></div>
+						<div class="crt"><small>GRID</small><b>$4.31</b><small>per kWh</small></div>
+					</div>
+					<p>Overlays (heat, power, coolant) and active modifiers live here too.</p>
+				</section>
+			</div>
+		</div>
+		<div class="screen" id="before" hidden><img class="before-img" alt="Today's HUD at day 15: four telex slips, a large memo, the clerk form, the contract table and a full top bar cover most of the world." src=""></div>
+	</div>
+
+	<div class="notes">
+		<section class="card">
+			<h2>Where everything went</h2>
+			<div class="tablewrap"><table>
+				<thead><tr><th>Today</th><th>Proposed</th></tr></thead>
+				<tbody>
+					<tr><td>4 telex slips</td><td>One ticker line with a count. Failures the robots already handle show as a pin on the rack, not as a message.</td></tr>
+					<tr><td>Half-screen memo with paragraphs</td><td>Headline plus stamps with costs in numbers and icons. The prose is behind "read memo". Only urgent memos pop up; the rest wait in the inbox.</td></tr>
+					<tr><td>CURRENT ORDERS (2 sentences)</td><td>One "NEXT" chip with the key to press.</td></tr>
+					<tr><td>12 instruments in the top bar</td><td>Day, speed, treasury, per hour, clearance bar, inbox. PUE, load, uptime, standing, weather and grid price move to the Gauges drawer (I).</td></tr>
+					<tr><td>Bottom panel open by default</td><td>Closed. Contracts open as a drawer (C), and the clerk is one line.</td></tr>
+					<tr><td>Modifier chips</td><td>Gauges drawer. A modifier that matters right now also shows in the NEXT chip.</td></tr>
+					<tr><td>Full build palette</td><td>A dock with the 3 most useful builds, glowing when affordable. "More" opens the full palette.</td></tr>
+				</tbody>
+			</table></div>
+		</section>
+		<section class="card">
+			<h2>Show, don't tell</h2>
+			<ul>
+				<li>Cash floats up from the rack that earned it. Penalties float red.</li>
+				<li>Broken racks spark and get a pin. The robot walking over is the "repair queued" message.</li>
+				<li>"Per hour" is the clicker number: the one figure that should always go up.</li>
+				<li>Anything affordable glows: research, build items, upgrades.</li>
+				<li>Every number has a colour state (green ok, amber watch, red act), so you rarely need to read it.</li>
+			</ul>
+		</section>
+		<section class="card">
+			<h2>Paths without new prose</h2>
+			<ul>
+				<li>Each Ascension path reskins the building: façade, windows, sky and roof (Biotech flesh and wet glass, Greentech algae and solar, Synthetic glass and cold light).</li>
+				<li>The machines change silhouette, not just colour.</li>
+				<li>The path's music layer and ambient motion carry the mood. Memos stay short.</li>
+			</ul>
+		</section>
+	</div>
+</div>
+
+<script>
+(() => {
+	const $ = (s, r = document) => r.querySelector(s);
+	const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+	const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+	// Before / after
+	const show = (after) => {
+		$("#after").hidden = !after; $("#before").hidden = after;
+		$("#showAfter").setAttribute("aria-pressed", String(after));
+		$("#showBefore").setAttribute("aria-pressed", String(!after));
+	};
+	$("#showAfter").onclick = () => show(true);
+	$("#showBefore").onclick = () => show(false);
+
+	// Speed
+	let speed = 10;
+	$$(".speed button").forEach((b) => b.onclick = () => { $$(".speed button").forEach((x) => x.classList.toggle("on", x === b)); speed = Number(b.dataset.s); });
+
+	// Drawers
+	$$(".tab").forEach((t) => t.onclick = () => {
+		const id = `d-${t.dataset.d}`; const open = $(`#${id}`).hidden;
+		$$(".drawer").forEach((d) => d.hidden = true); $$(".tab").forEach((x) => x.classList.remove("on"));
+		if (open) { $(`#${id}`).hidden = false; t.classList.add("on"); }
+	});
+	addEventListener("keydown", (e) => {
+		const map = { c: "contracts", r: "research", f: "finance", i: "instruments" };
+		const k = map[e.key.toLowerCase()]; if (!k || e.target.tagName === "INPUT") return;
+		$(`.tab[data-d="${k}"]`).click();
+	});
+
+	// Memo
+	$("#more").onclick = () => { const b = $("#body"); b.hidden = !b.hidden; $("#more").textContent = b.hidden ? "read memo" : "hide memo"; };
+	$$(".stamp").forEach((s) => s.onclick = () => {
+		const slip = $("#slip"); slip.innerHTML = `<div class="from"><span>FILED</span><span>inbox</span></div><h3>${s.dataset.out}</h3>`;
+		setTimeout(() => { slip.style.transition = "opacity .6s"; slip.style.opacity = "0"; }, 1600);
+		const inb = $(".inbox span"); inb.textContent = "0"; inb.style.background = "var(--verdigris)";
+	});
+
+	// World: a small side-cut tower drawn on canvas.
+	const cv = $("#cv"), g = cv.getContext("2d");
+	const W = cv.width, H = cv.height;
+	const floors = [{ y: 70, n: 14 }, { y: 130, n: 14 }, { y: 190, n: 10 }, { y: 250, n: 6 }];
+	const racks = [];
+	floors.forEach((f, fi) => { for (let i = 0; i < f.n; i++) racks.push({ x: 120 + i * 24, y: f.y, fi, broken: (fi === 1 && i === 5) || (fi === 3 && i === 4) }); });
+	let t = 0;
+	function draw() {
+		g.fillStyle = "#3a2c22"; g.fillRect(0, 0, W, H);
+		// skyline
+		g.fillStyle = "#241b14"; for (let i = 0; i < 12; i++) g.fillRect(i * 52, 30 + ((i * 37) % 40), 40, H);
+		g.fillStyle = "#c8a24855"; for (let i = 0; i < 60; i++) g.fillRect((i * 97) % W, 40 + ((i * 53) % 90), 2, 2);
+		// tower
+		g.fillStyle = "#2f2a22"; g.fillRect(100, 40, 400, 284);
+		floors.forEach((f) => {
+			g.fillStyle = "#4a4334"; g.fillRect(100, f.y + 30, 400, 4);
+			g.fillStyle = "#b87333"; g.fillRect(100, f.y + 34, 400, 2);
+		});
+		// lift
+		g.fillStyle = "#1a160f"; g.fillRect(440, 40, 18, 284);
+		g.fillStyle = "#c8a248"; g.fillRect(442, 60 + ((Math.sin(t / 60) + 1) * 90), 14, 16);
+		racks.forEach((r, i) => {
+			g.fillStyle = "#c9bc9c"; g.fillRect(r.x, r.y, 20, 30);
+			g.fillStyle = "#1a160f"; g.fillRect(r.x + 3, r.y + 3, 14, 9);
+			const blink = reduce ? 1 : (Math.sin(t / 8 + i) > -0.6 ? 1 : 0.4);
+			g.fillStyle = r.broken ? (blink > 0.5 ? "#ff3b2f" : "#5a1410") : `rgba(51,255,102,${0.55 + 0.45 * blink})`;
+			g.fillRect(r.x + 5, r.y + 5, 10, 5);
+			if (r.broken && !reduce && t % 20 < 6) { g.fillStyle = "#ffb000"; g.fillRect(r.x + 8 + (t % 7), r.y - 4, 2, 2); }
+		});
+		// robot walking to the broken rack on floor 2
+		const bx = 300 - ((t / 2) % 160);
+		g.fillStyle = "#8a8f8c"; g.fillRect(bx, 152, 10, 8); g.fillStyle = "#ffb000"; g.fillRect(bx + 2, 150, 6, 2);
+		t++; if (!reduce) requestAnimationFrame(draw);
+	}
+	draw();
+
+	// Pins sit above their rack (canvas coordinates scaled to the world box).
+	const placePins = () => {
+		const sx = world.clientWidth / W, sy = world.clientHeight / H;
+		$$(".pin").forEach((p) => {
+			const r = racks.find((q) => q.fi === Number(p.dataset.f) && q.x === 120 + Number(p.dataset.i) * 24);
+			if (!r) return;
+			p.style.left = `${(r.x - 2) * sx}px`;
+			p.style.top = `${(r.y - 12) * sy}px`;
+		});
+	};
+
+	// Cash floaters from earning racks
+	const world = $(".world");
+	const earn = () => {
+		if (speed === 0 || $("#after").hidden) return;
+		const r = racks[Math.floor(Math.random() * racks.length)]; if (r.broken) return;
+		const el = document.createElement("span");
+		const neg = Math.random() < 0.08;
+		el.className = `float${neg ? " neg" : ""}`;
+		el.textContent = neg ? "−$12k" : `+$${(2 + Math.random() * 9).toFixed(1)}k`;
+		const sx = world.clientWidth / W, sy = world.clientHeight / H;
+		el.style.left = `${r.x * sx}px`; el.style.top = `${(r.y - 6) * sy}px`;
+		world.appendChild(el); setTimeout(() => el.remove(), 2300);
+	};
+	setInterval(earn, 700);
+	placePins();
+	$("#showAfter").addEventListener("click", placePins);
+})();
+</script>
