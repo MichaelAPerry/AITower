@@ -7,14 +7,14 @@ const money = (a: number): string => `${a >= 0 ? "+" : "-"}$${Math.abs(a) / 1000
 describe("events.json", () => {
 	const db = loadContent();
 
-	it("has the specified category mix, none horror yet", () => {
+	it("has the specified category mix (the 37 M2 memos plus the M3 seeds, biotech and horror memos)", () => {
 		const by = (c: string): number => db.events.filter((e) => e.category === c).length;
-		expect(db.events).toHaveLength(37);
-		expect(by("ministry")).toBe(16);
+		expect(db.events).toHaveLength(62);
+		expect(by("ministry")).toBe(16 + 1 + 5);
 		expect(by("environmental")).toBe(8);
-		expect(by("operational")).toBe(9);
+		expect(by("operational")).toBe(9 + 3 + 3);
 		expect(by("client")).toBe(4);
-		expect(by("horror")).toBe(0);
+		expect(by("horror")).toBe(13);
 	});
 
 	it("validates (unique ids, defaults, effects, durations, weights)", () => {
@@ -138,7 +138,7 @@ describe("economy retune", () => {
 	const db = loadContent();
 
 	it("tier rewards are about 5x the M1 values", () => {
-		expect(db.balance.tiers.reward).toEqual([0, 1_250_000, 3_750_000, 10_000_000]);
+		expect(db.balance.tiers.reward).toEqual([0, 1_250_000, 3_750_000, 10_000_000, 25_000_000]);
 	});
 
 	it("DLC racks deliver about 1.6x the air PFLOPS per dollar once their cooling plant is counted", () => {

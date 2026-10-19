@@ -16,6 +16,8 @@ export const CONTRACT_TUNING = {
 	minRefPflops: 20,
 	/** The sim's scheduler gives a training/finetune job at most this many racks. */
 	maxRacksPerTrainingJob: 8,
+	/** Organoid-only (`needsBio`) offers are sized against at most this many of the best bio racks. */
+	bioRefRacks: 4,
 	training: { days: [0.5, 3], slack: [1.4, 2.0] },
 	finetune: { hours: [2, 8], capacityShare: [0.3, 0.8], slack: [1.5, 2.5] },
 	inference: { share: [0.2, 0.6], days: [0.5, 2] },
@@ -55,13 +57,25 @@ function bestRackPflops(db: ContentDB, tier: number): number {
 	return best > 0 ? best : CONTRACT_TUNING.minRefPflops;
 }
 
+/** Best organoid (`cooling: "bio"`) rack PFLOPS unlocked at this tier, 0 if none; growths are not buildable and are skipped. */
+function bestBioPflops(db: ContentDB, tier: number): number {
+	let best = 0;
+	for (const def of Object.values(db.facilities)) {
+		if (def.rack?.cooling === "bio" && !def.growth && def.unlockTier <= tier && def.rack.pflops > best) best = def.rack.pflops;
+	}
+	return best;
+}
+
 export const generateContract: ContractGenerator = (rng, ctx: ContractGenContext, db: ContentDB): ContractSpec => {
 	const T = CONTRACT_TUNING;
 	const client = pickClient(rng, ctx.tier, db.clients);
 	const kind = client.kinds[Math.min(client.kinds.length - 1, Math.floor(rng() * client.kinds.length))];
-	const ref = Math.max(T.minRefPflops, ctx.capacityPflops);
+	const needsBio = client.needsBio === true;
+	// Organoid-only jobs run on bio racks alone, so size them against a few bio racks, not the whole facility.
+	const bioBest = needsBio ? bestBioPflops(db, ctx.tier) : 0;
+	const ref = needsBio && bioBest > 0 ? Math.min(Math.max(T.minRefPflops, ctx.capacityPflops), T.bioRefRacks * bioBest) : Math.max(T.minRefPflops, ctx.capacityPflops);
 	// Training/finetune jobs only get up to N racks, so don't size them beyond that.
-	const trainRef = Math.min(ref, T.maxRacksPerTrainingJob * bestRackPflops(db, ctx.tier));
+	const trainRef = Math.min(ref, T.maxRacksPerTrainingJob * (needsBio && bioBest > 0 ? bioBest : bestRackPflops(db, ctx.tier)));
 	const mult = client.payMultiplier;
 	const storageMax = Math.min(T.storageTB.max, T.storageTB.base + T.storageTB.perTier * Math.max(1, ctx.tier));
 
@@ -112,6 +126,7 @@ export const generateContract: ContractGenerator = (rng, ctx: ContractGenContext
 		storageTB,
 		checkpointTicks,
 	};
+	if (needsBio) spec.needsBio = true;
 	if (sustainedPflops !== undefined) spec.sustainedPflops = sustainedPflops;
 	return spec;
 };

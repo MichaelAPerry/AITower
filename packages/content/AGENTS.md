@@ -34,3 +34,9 @@ Game data, validation and the contract generator. Depends on nothing.
 
 ## Test
 `npx vitest run packages/content` · `npm run typecheck` · `npm run check:boundaries`
+
+## M3 (Biotech path)
+- Clearance 5 (3,000 PF, uptime 0.992, reward $25M, loan cap $100M); `ascension.minTier` 5. `paths.json` (biotech available, greentech/synthetic "coming soon"), `endings.json` (3), `balance.bio` / `balance.endings` tuned (see `biotech.test.ts` for the contamination model checks).
+- 8 biotech facilities + 3 growths (`growth: true`, free, no tech), all other wetware facilities gated by a `wetware`-branch tech (`wetware_annex` T3, five T4 nodes, T5 `path: "biotech"` nodes). Organoid racks: `cooling: "bio"`, category `"bio"`, `rack.bio` required, liquidFraction 0, `needsNutrient`. Bioreactors need both `power` and `bio` specs. Nutrient is never pre-placed in scenarios.
+- 4 `needsBio` clients (generator sizes them against <= 4 of the best bio racks and sets `needsBio` on the spec); events: 4 T1-T2 seeds, 8 biotech memos, 13 `horror` memos (`minCorruption` 0.1..0.9, required for horror).
+- Tech tree totals: trunk 60-90 days, wetware branch 30-50 more.

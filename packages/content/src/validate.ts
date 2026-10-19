@@ -2,7 +2,7 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { BuildCategory, ContentDB, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechNode } from "./schema";
+import type { AscensionPath, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechNode } from "./schema";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -14,18 +14,35 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	cdu: "cooling",
 	depot: "logistics",
 	charger: "logistics",
-	// M3 placeholders (M3-T2 decides categories and required specs for the biotech kinds).
 	nutrient: "bio",
 	sterilizer: "bio",
 	quarantine: "bio",
 	bioreactor: "bio",
 };
-const SPEC_FOR_KIND: Record<FacilityKind, "rack" | "power" | "cooling" | "logistics" | "bio"> = KIND_CATEGORY;
+type SpecName = "rack" | "power" | "cooling" | "logistics" | "bio";
+/** Specs a kind requires. `bio` is also allowed (optional) on growth racks; bioreactors need both `power` and `bio`. */
+const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
+	rack: ["rack"],
+	grid_tie: ["power"],
+	genset: ["power"],
+	ups: ["power"],
+	crah: ["cooling"],
+	chiller: ["cooling"],
+	cdu: ["cooling"],
+	depot: ["logistics"],
+	charger: ["logistics"],
+	nutrient: ["bio"],
+	sterilizer: ["bio"],
+	quarantine: [],
+	bioreactor: ["power", "bio"],
+};
+const PATHS: AscensionPath[] = ["biotech", "greentech", "synthetic"];
+const ENDINGS = ["livingTower", "cleanTower", "absorbed"];
 const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
-const COOLING_MODES = ["air", "dlc", "immersion"];
+const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
-const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration"];
+const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
 const FEATURES = ["contractsClerk"];
 /** Letter grades A..E used by `balance.audit`. */
@@ -56,6 +73,37 @@ export function facilityNeedsPower(def: FacilityDef): boolean {
 	return def.facilityKw > 0 || def.kind === "rack" || KIND_CATEGORY[def.kind] === "power";
 }
 
+function validateOrganoid(p: Problems, w: string, o: OrganoidSpec | undefined, plant: boolean): void {
+	if (!o) {
+		p.push(`${w}: cooling "bio" racks require an organoid spec`);
+		return;
+	}
+	num(p, `${w}.targetC`, o.targetC, { min: 1, max: 60 });
+	num(p, `${w}.toleranceC`, o.toleranceC, { gt: 0, max: 20 });
+	num(p, `${w}.nutrientUse`, o.nutrientUse, plant ? { gt: 0 } : { min: 0 });
+	num(p, `${w}.contamination`, o.contamination, plant ? { gt: 0, max: 1 } : { min: 0, max: 1 });
+}
+
+function validateBio(p: Problems, w: string, d: FacilityDef): void {
+	const b = d.bio;
+	if (!b) return;
+	for (const k of ["nutrientCapacity", "nutrientUse", "cleanRate", "radius", "contamination"] as const) {
+		if (b[k] !== undefined) num(p, `${w}.${k}`, b[k], { min: 0 });
+	}
+	if (b.cullsGrowths !== undefined && typeof b.cullsGrowths !== "boolean") p.push(`${w}.cullsGrowths: expected a boolean`);
+	if (d.kind === "nutrient") num(p, `${w}.nutrientCapacity`, b.nutrientCapacity, { gt: 0 });
+	if (d.kind === "sterilizer") {
+		num(p, `${w}.cleanRate`, b.cleanRate, { gt: 0 });
+		num(p, `${w}.radius`, b.radius, { gt: 0 });
+	}
+	if (d.kind === "bioreactor") {
+		num(p, `${w}.nutrientUse`, b.nutrientUse, { gt: 0 });
+		num(p, `${w}.contamination`, b.contamination, { gt: 0 });
+	}
+	if (b.cullsGrowths && d.kind !== "sterilizer") p.push(`${w}.cullsGrowths: only a sterilizer can cull`);
+	if (d.growth) num(p, `${w}.contamination`, b.contamination, { gt: 0 });
+}
+
 function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: number): void {
 	const w = `facilities.${key}`;
 	if (d.id !== key) p.push(`${w}: id "${d.id}" does not match key`);
@@ -65,7 +113,9 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		p.push(`${w}.kind: unknown kind "${d.kind}"`);
 		return;
 	}
-	if (d.category !== KIND_CATEGORY[d.kind]) p.push(`${w}.category: "${d.category}" should be "${KIND_CATEGORY[d.kind]}" for kind ${d.kind}`);
+	// Organoid (bio-cooled) racks live in the Wetware tab.
+	const wantCategory = d.kind === "rack" && d.rack?.cooling === "bio" ? "bio" : KIND_CATEGORY[d.kind];
+	if (d.category !== wantCategory) p.push(`${w}.category: "${d.category}" should be "${wantCategory}" for kind ${d.kind}`);
 	num(p, `${w}.width`, d.width, { min: 1, int: true });
 	// The renderer draws these bodies at a fixed native width; narrower defs would overflow their tiles.
 	const minWidth = MIN_WIDTH_BY_KIND[d.kind];
@@ -77,12 +127,23 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	if (typeof d.color !== "string" || !HEX.test(d.color)) p.push(`${w}.color: expected #rrggbb`);
 	if (typeof d.accent !== "string" || !HEX.test(d.accent)) p.push(`${w}.accent: expected #rrggbb`);
 
-	const spec = SPEC_FOR_KIND[d.kind];
-	for (const s of ["rack", "power", "cooling", "logistics"] as const) {
-		if (s === spec && !d[s]) p.push(`${w}: kind ${d.kind} requires a "${s}" spec`);
-		if (s !== spec && d[s]) p.push(`${w}: unexpected "${s}" spec for kind ${d.kind}`);
+	const specs = SPECS_FOR_KIND[d.kind];
+	for (const s of ["rack", "power", "cooling", "logistics", "bio"] as const) {
+		if (specs.includes(s) && !d[s]) p.push(`${w}: kind ${d.kind} requires a "${s}" spec`);
+		if (!specs.includes(s) && d[s] && !(s === "bio" && d.growth && d.kind === "rack")) p.push(`${w}: unexpected "${s}" spec for kind ${d.kind}`);
 	}
-
+	if (d.growth !== undefined && typeof d.growth !== "boolean") p.push(`${w}.growth: expected a boolean`);
+	if (d.growth) {
+		if (d.tech !== undefined) p.push(`${w}.tech: growths are never researched`);
+		if (d.cost !== 0) p.push(`${w}.cost: growths are free (cost 0)`);
+		if (d.upkeepPerDay !== 0) p.push(`${w}.upkeepPerDay: growths have no upkeep`);
+		if (d.kind !== "rack") p.push(`${w}.kind: a growth must be a rack`);
+	}
+	if (d.bio) validateBio(p, `${w}.bio`, d);
+	if (d.placement?.needsNutrient && d.category !== "bio") p.push(`${w}.placement.needsNutrient: only wetware facilities use nutrient`);
+	if (d.category === "bio" && !d.growth && ["nutrient", "bioreactor", "rack"].includes(d.kind) && !d.placement?.needsNutrient) {
+		p.push(`${w}.placement.needsNutrient: a ${d.kind} must sit on a nutrient pipe`);
+	}
 	if (d.rack) {
 		const r = d.rack;
 		if (!COOLING_MODES.includes(r.cooling)) p.push(`${w}.rack.cooling: unknown mode "${r.cooling}"`);
@@ -93,7 +154,11 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		num(p, `${w}.rack.failurePerDay`, r.failurePerDay, { min: 0 });
 		if (r.pflops <= 0 && r.storageTB <= 0) p.push(`${w}.rack: must provide pflops or storageTB`);
 		if (r.cooling === "air" && r.liquidFraction !== 0) p.push(`${w}.rack.liquidFraction: air racks must be 0`);
-		if (r.cooling !== "air") {
+		if (r.cooling === "bio") {
+			if (r.liquidFraction !== 0) p.push(`${w}.rack.liquidFraction: organoid racks must be 0`);
+			validateOrganoid(p, `${w}.rack.bio`, r.bio, !d.growth);
+		} else if (r.bio) p.push(`${w}.rack.bio: only cooling "bio" racks have an organoid spec`);
+		if (r.cooling !== "air" && r.cooling !== "bio") {
 			if (!(r.liquidFraction > 0)) p.push(`${w}.rack.liquidFraction: liquid-cooled racks need > 0`);
 			if (!d.placement?.needsCoolant) p.push(`${w}.placement.needsCoolant: liquid-cooled racks must require coolant`);
 		}
@@ -296,6 +361,8 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 			if (conduit.power[c]) hasPower = true;
 			if (conduit.coolant[c]) hasCoolant = true;
 		}
+		if (pl?.needsNutrient) p.push(`${fw}: scenarios have no nutrient conduits, so a ${def.kind} cannot be pre-placed`);
+		if (def.growth) p.push(`${fw}: growths cannot be pre-placed`);
 		if (facilityNeedsPower(def) && !hasPower) p.push(`${fw}: needs a power conduit under one of its cells`);
 		if (pl?.needsCoolant && !hasCoolant) p.push(`${fw}: needs a coolant conduit under one of its cells`);
 	});
@@ -381,6 +448,9 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 	}
 	if (e.minDay !== undefined) num(p, `${w}.minDay`, e.minDay, { min: 0, int: true });
 	num(p, `${w}.cooldownDays`, e.cooldownDays, { min: 0, int: true });
+	if (e.minCorruption !== undefined) num(p, `${w}.minCorruption`, e.minCorruption, { min: 0, max: 1 });
+	else if (e.category === "horror") p.push(`${w}.minCorruption: horror memos must be corruption-gated`);
+	if (e.path !== undefined && !PATHS.includes(e.path)) p.push(`${w}.path: unknown path "${e.path}"`);
 	if (e.scriptedDay !== undefined) num(p, `${w}.scriptedDay`, e.scriptedDay, { min: 0, int: true });
 	num(p, `${w}.timeoutTicks`, e.timeoutTicks, { gt: 0, int: true });
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
@@ -463,6 +533,73 @@ function validateResearchBalance(p: Problems, db: ContentDB): void {
 	}
 }
 
+function validateBioBalance(p: Problems, db: ContentDB): void {
+	const b = db.balance;
+	if (!b) return;
+	const tierCount = b.tiers?.pflops?.length ?? 0;
+	if (!b.bio) p.push("balance.bio: missing");
+	else {
+		const o = b.bio;
+		for (const k of ["diffusion", "slabFactor", "decay", "quarantineLeak", "mutationThreshold", "growthThreshold", "growthChancePerDay", "irreversibleShare", "irreversibleCleanFactor"] as const) {
+			num(p, `balance.bio.${k}`, o[k], { min: 0, max: 1 });
+		}
+		// Explicit diffusion over up to 4 horizontal neighbours + 2 vertical stays stable only below this.
+		if (isNum(o.diffusion) && isNum(o.slabFactor) && 4 * o.diffusion + 2 * o.diffusion * o.slabFactor > 1) p.push("balance.bio: diffusion is too high to be stable");
+		num(p, "balance.bio.hazardPerContamination", o.hazardPerContamination, { min: 0 });
+		num(p, "balance.bio.botSlowPerContamination", o.botSlowPerContamination, { min: 0, max: 1 });
+		num(p, "balance.bio.mutationExposureTicks", o.mutationExposureTicks, { min: 1, int: true });
+		num(p, "balance.bio.nutrientPrice", o.nutrientPrice, { min: 0 });
+		if (isNum(o.growthThreshold) && isNum(o.mutationThreshold) && o.growthThreshold < o.mutationThreshold) p.push("balance.bio: growthThreshold must be ≥ mutationThreshold");
+	}
+	if (!b.ascension) p.push("balance.ascension: missing");
+	else num(p, "balance.ascension.minTier", b.ascension.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
+	const e = b.endings;
+	if (!e?.livingTower || !e.cleanTower || !e.absorbed) {
+		p.push("balance.endings: livingTower, cleanTower and absorbed are required");
+		return;
+	}
+	num(p, "balance.endings.livingTower.minCorruption", e.livingTower.minCorruption, { gt: 0, max: 1 });
+	num(p, "balance.endings.livingTower.pflops", e.livingTower.pflops, { gt: 0 });
+	num(p, "balance.endings.livingTower.days", e.livingTower.days, { min: 1, int: true });
+	num(p, "balance.endings.cleanTower.maxCorruption", e.cleanTower.maxCorruption, { min: 0, max: 1 });
+	num(p, "balance.endings.cleanTower.pflops", e.cleanTower.pflops, { gt: 0 });
+	num(p, "balance.endings.cleanTower.days", e.cleanTower.days, { min: 1, int: true });
+	num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
+	if (e.cleanTower.maxCorruption >= e.livingTower.minCorruption) p.push("balance.endings: cleanTower.maxCorruption must be below livingTower.minCorruption");
+	if (e.absorbed.corruption <= e.livingTower.minCorruption) p.push("balance.endings: absorbed.corruption must be above livingTower.minCorruption");
+}
+
+function validatePathsAndEndings(p: Problems, db: ContentDB): void {
+	if (!Array.isArray(db.paths)) p.push("paths: expected an array");
+	else {
+		const seen = new Set<string>();
+		db.paths.forEach((d, i) => {
+			const w = `paths[${i}] (${d?.id})`;
+			if (!PATHS.includes(d.id)) p.push(`${w}.id: unknown path`);
+			if (seen.has(d.id)) p.push(`${w}: duplicate id`);
+			seen.add(d.id);
+			str(p, `${w}.name`, d.name);
+			str(p, `${w}.description`, d.description);
+			if (typeof d.available !== "boolean") p.push(`${w}.available: expected a boolean`);
+		});
+		for (const id of PATHS) if (!seen.has(id)) p.push(`paths: missing "${id}"`);
+		if (!db.paths.some((d) => d.available)) p.push("paths: at least one path must be available");
+	}
+	if (!Array.isArray(db.endings)) p.push("endings: expected an array");
+	else {
+		const seen = new Set<string>();
+		db.endings.forEach((d, i) => {
+			const w = `endings[${i}] (${d?.id})`;
+			if (!ENDINGS.includes(d.id)) p.push(`${w}.id: unknown ending`);
+			if (seen.has(d.id)) p.push(`${w}: duplicate id`);
+			seen.add(d.id);
+			str(p, `${w}.title`, d.title);
+			str(p, `${w}.body`, d.body);
+		});
+		for (const id of ENDINGS) if (!seen.has(id)) p.push(`endings: missing "${id}"`);
+	}
+}
+
 function validateTech(p: Problems, db: ContentDB): void {
 	if (!Array.isArray(db.tech)) {
 		p.push("tech: expected an array");
@@ -496,6 +633,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 				} else p.push(`${ew}.type: unknown effect type ${JSON.stringify(t)}`);
 			});
 		if (!Array.isArray(n.requires)) p.push(`${w}.requires: expected an array`);
+		if (n.path !== undefined && !PATHS.includes(n.path)) p.push(`${w}.path: unknown path "${n.path}"`);
 	});
 	for (const n of byId.values()) {
 		if (!Array.isArray(n.requires)) continue;
@@ -524,6 +662,10 @@ function validateTech(p: Problems, db: ContentDB): void {
 
 	for (const [key, d] of Object.entries(db.facilities ?? {})) {
 		if (d.tech !== undefined && !byId.has(d.tech)) p.push(`facilities.${key}.tech: unknown tech "${d.tech}"`);
+		if (d.category === "bio" && !d.growth && d.tech !== undefined && byId.has(d.tech) && byId.get(d.tech)?.branch !== "wetware") {
+			p.push(`facilities.${key}.tech: wetware facilities must be gated by a "wetware" tech node`);
+		}
+		if (d.category === "bio" && !d.growth && d.tech === undefined) p.push(`facilities.${key}.tech: wetware facilities must be gated behind wetware tech`);
 	}
 	for (const [key, b] of Object.entries(db.bots ?? {})) {
 		if (b.tech !== undefined && !byId.has(b.tech)) p.push(`bots.${key}.tech: unknown tech "${b.tech}"`);
@@ -531,7 +673,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 }
 
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
-const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2 };
+const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 3, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2 };
 
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
@@ -570,6 +712,8 @@ export function validateContent(db: ContentDB): string[] {
 		num(p, `${w}.weight`, c.weight, { gt: 0 });
 		num(p, `${w}.minTier`, c.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
 		num(p, `${w}.payMultiplier`, c.payMultiplier, { gt: 0 });
+		if (c.needsBio !== undefined && typeof c.needsBio !== "boolean") p.push(`${w}.needsBio: expected a boolean`);
+		if (c.needsBio && c.needsLiquid) p.push(`${w}: needsBio and needsLiquid are mutually exclusive`);
 		if (!Array.isArray(c.kinds) || c.kinds.length === 0) p.push(`${w}.kinds: at least one job kind required`);
 		else
 			c.kinds.forEach((k) => {
@@ -607,6 +751,8 @@ export function validateContent(db: ContentDB): string[] {
 	validateEvents(p, db);
 	validateResearchBalance(p, db);
 	validateTech(p, db);
+	validateBioBalance(p, db);
+	validatePathsAndEndings(p, db);
 
 	const scenarios = db.scenarios ?? {};
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");
