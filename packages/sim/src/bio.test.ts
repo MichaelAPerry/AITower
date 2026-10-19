@@ -11,6 +11,7 @@ import { balance, exec, facilityOf, makeContent, newSim, rowCells, run } from ".
 import { count, giveRp, NO_OFFERS, pushOffer, QUIET_EVENTS, training } from "./test/m2b";
 import { addBot, addFacility } from "./world/entities";
 import { failRack } from "./reliability/reliabilityStep";
+import { organoidBand } from "./thermal/rackThermal";
 
 const BIO = balance.bio;
 const PATHS = [
@@ -146,45 +147,90 @@ describe("organoid racks", () => {
 		const a = Math.abs(tempC - 37);
 		return a <= 1 ? 1 : a >= 2 ? 0.6 : 1 - 0.4 * (a - 1);
 	};
-	const at = (sim: SimImpl, id: number, t: number) => {
-		setAir(sim, t);
-		const ev = sim.step();
-		return { v: fview(sim, id), ev };
+	/** The band rule itself, on a tissue temperature (the incubator's regulation is tested separately below). */
+	const band = (t: number) => {
+		const { sim, id } = bandRack();
+		const f = sim.state.facilities.find((x) => x.id === id);
+		if (!f) throw new Error("no rack");
+		f.tempC = t;
+		const events: SimEvent[] = [];
+		organoidBand({ state: sim.state, content: sim.content, events }, f, { targetC: 37, toleranceC: 1 });
+		return { f, events, sim };
 	};
 
 	it("full clock in the band, linear to minClock at ±2× tolerance, flat beyond, tooCold vs throttled", () => {
-		const { sim, id } = bandRack();
-		const check = (t: number, status: string, lo: number, hi: number) => {
-			const { v } = at(sim, id, t);
-			expect(v.status).toBe(status);
-			expect(v.clock).toBeCloseTo(clockAt(v.tempC), 3);
-			expect(v.clock).toBeGreaterThanOrEqual(lo);
-			expect(v.clock).toBeLessThanOrEqual(hi);
+		const check = (t: number, state: "ok" | "hot" | "cold", lo: number, hi: number) => {
+			const { f } = band(t);
+			expect(f.tooCold).toBe(state === "cold");
+			expect(f.throttled).toBe(state === "hot");
+			expect(f.thermalClock).toBeCloseTo(clockAt(t), 3);
+			expect(f.thermalClock).toBeGreaterThanOrEqual(lo);
+			expect(f.thermalClock).toBeLessThanOrEqual(hi);
 		};
-		check(37, "idle", 1, 1);
-		check(37.9, "idle", 1, 1);
-		check(38.5, "throttled", 0.7, 0.95); // a bit above the band: partly slowed
-		check(35.5, "tooCold", 0.7, 0.85);
-		check(34.9, "tooCold", 0.6, 0.6); // beyond 2× tolerance: flat at minClock
-		check(34.5, "tooCold", 0.6, 0.6);
-		check(39.6, "throttled", 0.6, 0.6);
-		check(37, "idle", 1, 1);
+		check(37, "ok", 1, 1);
+		check(37.9, "ok", 1, 1);
+		check(38.5, "hot", 0.7, 0.95); // a bit above the band: partly slowed
+		check(35.5, "cold", 0.7, 0.85);
+		check(34.9, "cold", 0.6, 0.6); // beyond 2× tolerance: flat at minClock
+		check(34.5, "cold", 0.6, 0.6);
+		check(39.6, "hot", 0.6, 0.6);
 	});
 
 	it("beyond ±3× the tissue fails (work order, repairable), too hot and too cold", () => {
 		for (const t of [33.4, 40.6]) {
+			const { f, events, sim } = band(t);
+			expect(events).toContainEqual({ type: "componentFailed", facilityId: f.id });
+			expect(f.failed).toBe(true);
+			expect(sim.state.workOrders.map((w) => w.facilityId)).toEqual([f.id]);
+		}
+		expect(band(34.2).f.failed).toBe(false); // 2.8×: still alive
+	});
+
+	it("a new incubator warms up without dying, but a power cut in a cool room kills the tissue", () => {
+		const sim = lab({}, undefined, true);
+		const id = place(sim, "organoid_rack", 10);
+		const f = sim.state.facilities.find((x) => x.id === id);
+		if (!f) throw new Error("no rack");
+		f.tempC = 15; // fresh from the crate, at room temperature
+		let fails = 0;
+		for (let i = 0; i < 60; i++) {
+			setAir(sim, 15);
+			fails += count(sim.step(), "componentFailed");
+		}
+		expect(fails).toBe(0);
+		expect(f.tempC).toBeGreaterThan(36);
+		f.enabled = false; // the plug is pulled
+		for (let i = 0; i < 60 && !f.failed; i++) {
+			setAir(sim, 15);
+			sim.step();
+		}
+		f.enabled = true;
+		setAir(sim, 15);
+		sim.step();
+		expect(f.failed).toBe(true);
+	});
+
+	it("a powered incubator holds 37 °C across ordinary room temperatures; unpowered, the tissue follows the air", () => {
+		for (const air of [13, 25, 42.5]) {
 			const { sim, id } = bandRack();
-			setAir(sim, t);
-			const ev = sim.step();
-			expect(ev).toContainEqual({ type: "componentFailed", facilityId: id });
-			expect(sim.view().workOrders.map((w) => w.facilityId)).toEqual([id]);
-			expect(fview(sim, id).status).toBe("failed");
-			expect(count(ev, "rackTripped")).toBe(0);
+			for (let i = 0; i < 80; i++) {
+				setAir(sim, air);
+				sim.step();
+			}
+			const v = fview(sim, id);
+			expect(v.tempC).toBeCloseTo(37, 1);
+			expect(v.status).not.toBe("tooCold");
+			expect(v.status).not.toBe("failed");
 		}
 		const { sim, id } = bandRack();
-		setAir(sim, 34.2);
-		sim.step();
-		expect(fview(sim, id).status).not.toBe("failed"); // 2.8×: still alive
+		const f = sim.state.facilities.find((x) => x.id === id);
+		if (!f) throw new Error("no rack");
+		f.enabled = false;
+		for (let i = 0; i < 80; i++) {
+			setAir(sim, 22);
+			sim.step();
+		}
+		expect(fview(sim, id).tempC).toBeLessThan(25); // no regulation without power: the tissue cools with the room
 	});
 
 	it("needsBio contracts only use organoid racks; organoid racks also serve ordinary jobs; liquid jobs exclude them", () => {

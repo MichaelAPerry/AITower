@@ -103,3 +103,8 @@ export const CORRUPTION_GROWTHS_SATURATION = 20;
 /** Corruption moves toward its target by at most this much per day up / down. */
 export const CORRUPTION_RISE_PER_DAY = 0.1;
 export const CORRUPTION_FALL_PER_DAY = 0.02;
+
+/** Organoid incubators hold their tissue at targetC while powered, heating up to this many °C above the room air (from a cooled room's ~12 °C)… */
+export const INCUBATOR_LIFT_C = 25;
+/** …or cooling up to this many °C below it. Beyond that range the tissue drifts with the air. */
+export const INCUBATOR_COOL_C = 6;
