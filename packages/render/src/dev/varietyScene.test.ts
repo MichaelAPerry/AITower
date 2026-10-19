@@ -227,6 +227,7 @@ describe("wetware art (M3)", () => {
 	});
 
 	it("every wetware body stays inside its tiles at widths 1..6, plain or not, at every stage", () => {
+		const bad: string[] = [];
 		const base = wet.map((d) => d.def).filter((d, i, a) => a.findIndex((q) => q.kind === d.kind && q.rack?.cooling === d.rack?.cooling && artSpec(q).variant === artSpec(d).variant && q.bio?.cullsGrowths === d.bio?.cullsGrowths) === i);
 		for (const d0 of base) {
 			for (const width of [1, 2, 3, 4, 5, 6]) {
@@ -237,19 +238,18 @@ describe("wetware art (M3)", () => {
 						const eff = skinEffects({ path: "biotech", stage }, def.kind);
 						const r = recorder();
 						drawBody(r.g, def, 0, TOP, { plain, skin: { effects: eff, alpha: 1, seed: 3 } });
-						expect(r.rects.length, def.id).toBeGreaterThan(10);
+						const id = `${def.id} w${width} s${stage}${plain ? " plain" : ""}`;
+						if (r.rects.length <= 10) bad.push(`${id}: only ${r.rects.length} rects`);
+						// Collected, not asserted per rect: thousands of expect() calls made this test time out on CI.
 						for (const q of r.rects) {
-							const id = `${def.id} w${width} s${stage}`;
-							expect(Number.isFinite(q.x + q.y + q.w + q.h), id).toBe(true);
-							expect(q.x, id).toBeGreaterThanOrEqual(0);
-							expect(q.x + q.w, id).toBeLessThanOrEqual(width * TILE);
-							expect(q.y, id).toBeGreaterThanOrEqual(TOP + 1);
-							expect(q.y + q.h, id).toBeLessThanOrEqual(TOP + FAC_BOTTOM);
+							const inside = Number.isFinite(q.x + q.y + q.w + q.h) && q.x >= 0 && q.x + q.w <= width * TILE && q.y >= TOP + 1 && q.y + q.h <= TOP + FAC_BOTTOM;
+							if (!inside) bad.push(`${id}: rect ${q.x},${q.y} ${q.w}×${q.h}`);
 						}
 					}
 				}
 			}
 		}
+		expect(bad).toEqual([]);
 	});
 
 	it("growths are tissue whatever their kind; plain growths drop the veins; widths 1..4 stay inside", () => {
