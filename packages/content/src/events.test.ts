@@ -7,12 +7,12 @@ const money = (a: number): string => `${a >= 0 ? "+" : "-"}$${Math.abs(a) / 1000
 describe("events.json", () => {
 	const db = loadContent();
 
-	it("has about 30 events in the specified category mix, none horror yet", () => {
+	it("has the specified category mix, none horror yet", () => {
 		const by = (c: string): number => db.events.filter((e) => e.category === c).length;
-		expect(db.events).toHaveLength(30);
-		expect(by("ministry")).toBe(12);
-		expect(by("environmental")).toBe(7);
-		expect(by("operational")).toBe(7);
+		expect(db.events).toHaveLength(37);
+		expect(by("ministry")).toBe(16);
+		expect(by("environmental")).toBe(8);
+		expect(by("operational")).toBe(9);
 		expect(by("client")).toBe(4);
 		expect(by("horror")).toBe(0);
 	});
@@ -24,6 +24,34 @@ describe("events.json", () => {
 	it("covers the required scenarios", () => {
 		const ids = db.events.map((e) => e.id).join(" ");
 		for (const re of [/heatwave/, /cold_snap/, /brownout/, /blackout/, /flood/, /shortage/, /recall/, /firmware/, /ransom/, /theft/, /fibre/, /audit/, /inspection/, /rebrand/, /census/, /subsidy/, /27b6/, /misplaced/]) expect(ids).toMatch(re);
+	});
+
+	it("has exactly one scripted first emergency: a day-2 heat event whose choices trade cash against risk", () => {
+		const scripted = db.events.filter((e) => e.scriptedDay !== undefined);
+		expect(scripted.map((e) => e.id)).toEqual(["first_heat_alarm"]);
+		const e = scripted[0];
+		expect(e.scriptedDay).toBe(2);
+		expect(e.category).toBe("operational");
+		expect(e.minTier).toBe(1);
+		const spike = (c: (typeof e.choices)[number]): number => c.effects.reduce((m, f) => (f.type === "ambient" ? Math.max(m, f.deltaC) : m), 0);
+		const cash = (c: (typeof e.choices)[number]): number => c.effects.reduce((s, f) => (f.type === "cash" ? s + f.amount : s), 0);
+		expect(e.choices.every((c) => spike(c) > 0 && c.effects.some((f) => f.type === "ambient" && f.durationTicks <= 720))).toBe(true);
+		// The default (do nothing) is free and the hottest; paying cash buys a smaller spike.
+		const ride = e.choices.find((c) => c.id === e.defaultChoice);
+		const paid = e.choices.filter((c) => cash(c) < 0);
+		expect(ride && cash(ride)).toBe(0);
+		expect(paid.length).toBeGreaterThan(0);
+		for (const c of paid) expect(spike(c)).toBeLessThan(spike(ride as never));
+	});
+
+	it("the memos added for tiers 2-4 touch loans, the levy, audits and research", () => {
+		const text = db.events.filter((e) => e.minTier >= 2).map((e) => `${e.title} ${e.body}`).join(" ").toLowerCase();
+		for (const w of ["loan", "levy", "audit", "research"]) expect(text, w).toContain(w);
+	});
+
+	it("scriptedDay events are never picked randomly: they carry a positive weight but are unique per day", () => {
+		const days = db.events.filter((e) => e.scriptedDay !== undefined).map((e) => e.scriptedDay);
+		expect(new Set(days).size).toBe(days.length);
 	});
 
 	it("every memo has 2-3 choices, a default among them and unique ids/labels/hints", () => {

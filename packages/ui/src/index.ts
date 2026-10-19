@@ -10,3 +10,6 @@ export { escapeStep, type EscapeStep } from "./menu/escape";
 export { HEAT_RAMP_COLORBLIND, HEAT_RAMP_TEMPS, heatRamp, hudScale, settingsToCssVars, settingsToClasses } from "./settings";
 export { pushNotice, onNotice, type Notice, type Severity } from "./notices";
 export * from "./format";
+export { nodeState, effectText, unlocksFor, techGate, cheapestAvailable, type TechState } from "./research/tech";
+export { clerkVerdict, type ClerkVerdict } from "./clerk/clerk";
+export { ledgerNet, loanInfo, takePresets, repayPresets } from "./finance/finance";

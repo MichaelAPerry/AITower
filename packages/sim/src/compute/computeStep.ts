@@ -8,6 +8,8 @@ import { EPS, FINISHED_JOB_RETENTION_TICKS, TICKS_PER_HOUR, TRAINING_PROGRESS_PA
 import { findById } from "../core/grid";
 import type { Job, SimState } from "../core/state";
 import { earn, spend } from "../economy/ledger";
+import { recordJobOutcome } from "../economy/stats";
+import { earnResearch, perk } from "../research/research";
 import { powerFactor } from "../power/powerSolve";
 import { getDef } from "../world/defs";
 import { allocateRacks, applyStorageLimit, isActive, releaseBadRacks, releaseJobRacks, sustainedPflops } from "./allocation";
@@ -32,6 +34,20 @@ function finish(state: SimState, job: Job, status: "completed" | "failed"): void
 	job.pflops = 0;
 }
 
+/** Pay a job: revenue stays gross; a clerk-accepted job's fee is withheld (cash and `fees`, not revenue). */
+function earnJob(ctx: TickCtx, job: Job, amount: number): void {
+	const { state, content } = ctx;
+	earn(state, amount);
+	if (job.clerk && amount > 0) spend(state, "fees", amount * content.balance.clerk.feeShare);
+}
+
+/** A job completed: bonus RP, lifetime and audit counters. */
+function jobCompleted(ctx: TickCtx, job: Job): void {
+	finish(ctx.state, job, "completed");
+	earnResearch(ctx.state, ctx.content.balance.research.pointsPerJob);
+	recordJobOutcome(ctx.state, "completed");
+}
+
 function deliveredBy(state: SimState, job: Job): number {
 	let p = 0;
 	for (const id of job.rackIds) p += findById(state.facilities, id)?.pflops ?? 0;
@@ -43,18 +59,25 @@ export function computeStep(ctx: TickCtx): void {
 	releaseBadRacks(state, events);
 	const runnable = applyStorageLimit(state, content);
 	state.metrics.pflops = updateRackClocks(ctx);
+	if (state.metrics.pflops > state.stats.peakPflops) state.stats.peakPflops = state.metrics.pflops;
+	const rpPerPflopHour = content.balance.research.pointsPerPflopHour * perk(state, content, "researchRate");
 	allocateRacks(state, content, runnable);
 
 	for (const job of state.jobs) {
 		if (!isActive(job)) continue;
 		const delivered = deliveredBy(state, job);
 		job.pflops = delivered;
+		if (delivered > 0) {
+			const pflopHours = delivered / TICKS_PER_HOUR;
+			state.stats.pflopHours += pflopHours;
+			earnResearch(state, pflopHours * rpPerPflopHour);
+		}
 		const rate = job.spec.payout / Math.max(1, job.spec.durationTicks);
 
 		if (job.spec.kind === "inference") {
 			job.progress++;
 			if (delivered + EPS >= sustainedPflops(job)) {
-				earn(state, rate);
+				earnJob(ctx, job, rate);
 				job.earned += rate;
 			} else if (job.earned > 0) {
 				// SLA breach: the service was running and fell short (failures, brownout). A job that has not started
@@ -62,7 +85,7 @@ export function computeStep(ctx: TickCtx): void {
 				spend(state, "penalties", content.balance.economy.slaPenaltyFactor * rate);
 			}
 			if (job.progress >= job.total) {
-				finish(state, job, "completed");
+				jobCompleted(ctx, job);
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.earned });
 				continue;
 			}
@@ -76,22 +99,23 @@ export function computeStep(ctx: TickCtx): void {
 					// Milestone billing: checkpointed (rollback-safe) work is paid as it lands, so a long run shows income.
 					const due = job.spec.payout * TRAINING_PROGRESS_PAY_SHARE * Math.min(1, job.lastCheckpoint / job.total) - job.earned;
 					if (due > 0) {
-						earn(state, due);
+						earnJob(ctx, job, due);
 						job.earned += due;
 					}
 				}
 			}
 			if (job.progress + EPS >= job.total) {
 				job.progress = job.total;
-				earn(state, job.spec.payout - job.earned); // the balance not already paid at checkpoints
+				earnJob(ctx, job, job.spec.payout - job.earned); // the balance not already paid at checkpoints
 				job.earned = job.spec.payout;
-				finish(state, job, "completed");
+				jobCompleted(ctx, job);
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.spec.payout });
 				continue;
 			}
 			if (state.tick >= job.deadline) {
 				spend(state, "penalties", job.spec.penalty);
 				finish(state, job, "failed");
+				recordJobOutcome(state, "failed");
 				events.push({ type: "jobFailed", jobId: job.id, penalty: job.spec.penalty });
 				continue;
 			}

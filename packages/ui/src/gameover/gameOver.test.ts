@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
+import { fmtMoney } from "../format";
 import { gameOverToShow, isFinal, keepDismissed, lifetimeStats, OVER_COPY, overKey } from "./gameOver";
 
 describe("game-over notices", () => {
@@ -38,15 +39,25 @@ describe("game-over notices", () => {
 		expect(OVER_COPY.victory.heading).toBe("COMMENDATION");
 	});
 
-	it("lists the lifetime stats and only mentions contracts when some were completed", () => {
+	it("lists where the run ended, then the sim's lifetime stats", () => {
 		const store = createFakeStore(createFakeContent());
 		const v = store.get().view;
-		const rows = lifetimeStats({ ...v, day: 42, jobs: [] });
+		const rows = lifetimeStats({ ...v, day: 42 });
 		expect(rows.find((r) => r.label === "Days in service")?.value).toBe("42");
+		expect(rows.find((r) => r.label === "Lifetime revenue")?.value).toBe(fmtMoney(v.stats.revenue));
+		expect(rows.find((r) => r.label === "Jobs completed")?.value).toBe(String(v.stats.jobsCompleted));
+		expect(rows.find((r) => r.label === "Peak compute")?.value).toMatch(/PF$/);
+		expect(rows.length).toBe(4 + 10);
+	});
+
+	it("falls back to the view's own numbers when the view has no stats", () => {
+		const v = createFakeStore(createFakeContent()).get().view;
+		const old = { ...v, stats: undefined, jobs: [] } as unknown as typeof v;
+		const rows = lifetimeStats(old);
 		expect(rows.some((r) => r.label === "Contracts completed")).toBe(false);
+		expect(rows.find((r) => r.label === "Peak compute")?.value).toMatch(/PF$/);
 		const job = { ...v.jobs[0], status: "completed" as const };
-		expect(lifetimeStats({ ...v, jobs: [job, job] }).find((r) => r.label === "Contracts completed")?.value).toBe("2");
-		expect(lifetimeStats(v).find((r) => r.label === "Peak compute")?.value).toMatch(/PF$/);
+		expect(lifetimeStats({ ...old, jobs: [job, job] }).find((r) => r.label === "Contracts completed")?.value).toBe("2");
 	});
 
 	it("the fake store ends the game like the sim: once, and standing 0 means shutdown", () => {

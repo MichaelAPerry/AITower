@@ -1891,5 +1891,438 @@
     ]
    }
   ]
+ },
+ {
+  "id": "first_heat_alarm",
+  "category": "operational",
+  "title": "Thermal Advisory No. 1: The Afternoon Is Unusually Afternoon",
+  "body": "A hot front is due over the lot this afternoon, and the Ministry's thermometer has already agreed with it. The Mk.I cabinets will be at full load when it peaks, and the boiler-room thermometer has begun to sweat.\n\nA second air handler would have helped. This is a good moment to find that out.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "scriptedDay": 2,
+  "timeoutTicks": 360,
+  "defaultChoice": "ride",
+  "choices": [
+   {
+    "id": "ride",
+    "label": "RIDE IT OUT",
+    "hint": "ambient +12°C for 6h",
+    "outcome": "You did nothing. The racks ran hot, the clocks sagged, and the afternoon passed with dignity intact.",
+    "effects": [
+     {
+      "type": "ambient",
+      "deltaC": 12,
+      "durationTicks": 360
+     }
+    ]
+   },
+   {
+    "id": "coolers",
+    "label": "RENT PORTABLE COOLERS",
+    "hint": "-$60k now · ambient +5°C for 6h",
+    "outcome": "Six rented coolers arrived on a flatbed and were plugged into the nearest wall, which was important.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "ambient",
+      "deltaC": 5,
+      "durationTicks": 360
+     }
+    ]
+   },
+   {
+    "id": "appeal",
+    "label": "PLEAD WITH THE MET OFFICE",
+    "hint": "standing +1 · ambient +9°C for 6h · energy price x1.15 for 6h",
+    "outcome": "The Met Office promised to look into it. It looked. The front stayed, but the Ministry noted your civic spirit.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "ambient",
+      "deltaC": 9,
+      "durationTicks": 360
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.15,
+      "durationTicks": 360
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "credit_office_review",
+  "category": "ministry",
+  "title": "Credit Office: Annual Review of Your Obligations",
+  "body": "The Ministry Credit Office has reviewed your loan book, and finds that you have borrowed money. It would like to discuss this, at its convenience, which is now.\n\nBorrowing is encouraged, repaying is encouraged, and the interest is merely a form of encouragement.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 6,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "roll",
+  "choices": [
+   {
+    "id": "roll",
+    "label": "ROLL OVER THE CALENDAR",
+    "hint": "+$80k now · energy price x1.1 for 2d",
+    "outcome": "The loan officer stamped 'REVIEWED' on a page and began a new page. You were given a pen.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 80000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.1,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "prepay",
+    "label": "PREPAY THE CLERK'S FEES",
+    "hint": "-$110k now · standing +3",
+    "outcome": "The Credit Office accepted payment and then admitted it had no idea what for.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -110000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "DECLINE POLITELY",
+    "hint": "standing -1",
+    "outcome": "The reviewer wrote 'RELUCTANT' on the file. It will not be mentioned again, in writing.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "levy_amnesty",
+  "category": "ministry",
+  "title": "Levy Amnesty Window Now Open (Brief)",
+  "body": "The Ministry announces a brief amnesty for facilities that have not paid the profit levy they have not yet been billed for. The window closes when the Ministry remembers it.\n\nThe levy is a share of each day's profit, charged at midnight. Amnesty is not a share of anything.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 8,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "lobby",
+  "choices": [
+   {
+    "id": "early",
+    "label": "PAY EARLY",
+    "hint": "-$150k now · standing +3",
+    "outcome": "The Ministry stamped the early payment in green and then misfiled it. The goodwill filed itself.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "contest",
+    "label": "CONTEST THE ASSESSMENT",
+    "hint": "-$40k now · standing -2",
+    "outcome": "A contest was lodged. The Ministry replied that it would reply, in due course.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "lobby",
+    "label": "LOBBY THE LEVY OFFICE",
+    "hint": "-$90k now · payout x1.05 for 2d",
+    "outcome": "A lunch was had. The levy officer was moved to tears, and to a better desk.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "payout",
+      "factor": 1.05,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "audit_preparation",
+  "category": "ministry",
+  "title": "Notice: Quarterly Audit Preparation Window",
+  "body": "The Bureau of Verification will grade the facility at the end of the quarter, from A to E, on throughput, uptime and the neatness of the cable runs. A grants, E fines.\n\nPreparation is optional. So are consequences.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 9,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "consult",
+  "choices": [
+   {
+    "id": "consult",
+    "label": "HIRE A CONSULTANT",
+    "hint": "-$180k now · standing +3 · rack failure rate x0.9 for 3d",
+    "outcome": "A consultant arrived, rearranged the clipboards and left a very detailed invoice.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -180000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.9,
+      "durationTicks": 4320
+     }
+    ]
+   },
+   {
+    "id": "polish",
+    "label": "POLISH THE BRASS",
+    "hint": "-$50k now · standing +1",
+    "outcome": "Every plate was polished until it shone. The graders will notice the plates.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "selfcert",
+    "label": "SELF-CERTIFY",
+    "hint": "standing -2",
+    "outcome": "You certified yourself. The Bureau noted that you have excellent standards, and then lowered them.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "research_grant",
+  "category": "ministry",
+  "title": "Ministry of Science: Grant Offer (Terms Attached)",
+  "body": "The Ministry of Science offers a grant to facilities with an active research programme. The terms are attached; the grant, regrettably, is not.\n\nAcceptance includes a Ministry observer, who will sit in on your research and take notes in a language of his own.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 7,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "ACCEPT THE GRANT",
+    "hint": "+$250k now · payout x0.9 for 2d",
+    "outcome": "The grant arrived with its observer. He sat in the corner and made your research his own.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 250000
+     },
+     {
+      "type": "payout",
+      "factor": 0.9,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "split",
+    "label": "SPLIT THE RESULTS",
+    "hint": "+$100k now · standing -1",
+    "outcome": "You gave the Ministry half the results. The observer wrote 'ADEQUATE' and left.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 100000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "DECLINE AND PUBLISH",
+    "hint": "standing +2",
+    "outcome": "You declined and printed the findings in the Ministry Gazette. The Minister sent a note.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "capacitor_plague",
+  "category": "operational",
+  "title": "Engineering Bulletin: The Great Capacitor Plague",
+  "body": "A batch of electrolytic capacitors in the power-supply units of three major vendors has begun to bulge, weep and, in one case, sing.\n\nThe Ministry assures you that capacitors are a type of battery and that batteries are a national treasure.",
+  "weight": 5,
+  "minTier": 3,
+  "minDay": 10,
+  "cooldownDays": 12,
+  "timeoutTicks": 1080,
+  "defaultChoice": "replace",
+  "choices": [
+   {
+    "id": "replace",
+    "label": "REPLACE THE LOT",
+    "hint": "-$200k now · -2 spare parts",
+    "outcome": "A tidy swap-out. The old capacitors were mounted in the lobby as a warning.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -200000
+     },
+     {
+      "type": "spareParts",
+      "count": -2
+     }
+    ]
+   },
+   {
+    "id": "wait",
+    "label": "WAIT AND SEE",
+    "hint": "1 rack fails",
+    "outcome": "You waited. One rack saw and decided to go first.",
+    "effects": [
+     {
+      "type": "failRacks",
+      "count": 1
+     }
+    ]
+   },
+   {
+    "id": "insure",
+    "label": "CLAIM ON THE WARRANTY",
+    "hint": "+$90k now · 1 rack fails · standing -2",
+    "outcome": "The vendor paid out, with a smile that looked like a bill.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 90000
+     },
+     {
+      "type": "failRacks",
+      "count": 1
+     },
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "substation_works",
+  "category": "environmental",
+  "title": "Utility Notice: Substation Works (Scheduled, Allegedly)",
+  "body": "The municipal utility is performing urgent maintenance on the main substation. It will take six hours and, we are told, no more than seven.\n\nGrid import will be limited during the work. The utility apologises in advance and in arrears.",
+  "weight": 5,
+  "minTier": 3,
+  "minDay": 11,
+  "cooldownDays": 10,
+  "timeoutTicks": 720,
+  "defaultChoice": "endure",
+  "choices": [
+   {
+    "id": "endure",
+    "label": "ENDURE THE CAP",
+    "hint": "grid import x0.7 for 6h",
+    "outcome": "You lived within the cap. The generators were quietly given the evening off.",
+    "effects": [
+     {
+      "type": "gridCap",
+      "factor": 0.7,
+      "durationTicks": 360
+     }
+    ]
+   },
+   {
+    "id": "generator",
+    "label": "FUEL UP THE GENERATORS",
+    "hint": "-$70k now · grid import x0.85 for 6h",
+    "outcome": "Fuel was bought and generators warmed. The utility called it 'a gesture'.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -70000
+     },
+     {
+      "type": "gridCap",
+      "factor": 0.85,
+      "durationTicks": 360
+     }
+    ]
+   },
+   {
+    "id": "protest",
+    "label": "FILE A PROTEST",
+    "hint": "standing +1 · grid import x0.6 for 6h",
+    "outcome": "A strongly worded protest was filed. The utility was moved, but only to a different desk.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "gridCap",
+      "factor": 0.6,
+      "durationTicks": 360
+     }
+    ]
+   }
+  ]
  }
 ]

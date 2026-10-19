@@ -1,23 +1,40 @@
 import type { GameStore, Selection, Tool } from "@aitower/shared";
 import type { MenuController } from "./menuController";
 
-export type EscapeStep = "closeMenu" | "cancelTool" | "clearSelection" | "openMenu";
+export type EscapeStep = "closeMenu" | "closeResearch" | "closeAudit" | "cancelTool" | "clearSelection" | "openMenu";
 
-/** Esc order: close the menu, else cancel the armed tool, else clear the selection, else open the menu. */
-export function escapeStep(ctx: { menuOpen: boolean; tool: Tool; selection: Selection }): EscapeStep {
+/** A sheet that Esc can close (the research sheet, the audit sheet). */
+export interface Closable {
+	isOpen(): boolean;
+	close(): void;
+}
+
+/**
+ * Esc order: close the menu, else the research sheet, else the audit sheet, else cancel the armed tool, else clear the
+ * selection, else open the menu.
+ */
+export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; auditOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
 	if (ctx.menuOpen) return "closeMenu";
+	if (ctx.researchOpen) return "closeResearch";
+	if (ctx.auditOpen) return "closeAudit";
 	if (ctx.tool.kind !== "select") return "cancelTool";
 	if (ctx.selection) return "clearSelection";
 	return "openMenu";
 }
 
 /** Run one Esc press against the store and the menu controller. Returns the step taken. */
-export function applyEscape(store: GameStore, menu: MenuController): EscapeStep {
+export function applyEscape(store: GameStore, menu: MenuController, sheets: { research?: Closable; audit?: Closable } = {}): EscapeStep {
 	const s = store.get();
-	const step = escapeStep({ menuOpen: menu.isOpen(), tool: s.tool, selection: s.selection });
+	const step = escapeStep({ menuOpen: menu.isOpen(), researchOpen: sheets.research?.isOpen(), auditOpen: sheets.audit?.isOpen(), tool: s.tool, selection: s.selection });
 	switch (step) {
 		case "closeMenu":
 			menu.close();
+			break;
+		case "closeResearch":
+			sheets.research?.close();
+			break;
+		case "closeAudit":
+			sheets.audit?.close();
 			break;
 		case "cancelTool":
 			store.setGhost(null);

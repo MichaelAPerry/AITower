@@ -18,7 +18,8 @@
     "sim": "tsx tools/sim-cli/src/main.ts",
     "lint": "biome lint .",
     "budget": "node scripts/bundle-budget.mjs",
-    "e2e": "node e2e/smoke.mjs"
+    "e2e": "node e2e/smoke.mjs",
+    "build:single": "node scripts/build-single.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

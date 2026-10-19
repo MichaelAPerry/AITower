@@ -161,6 +161,16 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("menu opened and closed");
 
+		stage("5b. open the Department of Research with R and close it with Esc");
+		await page.keyboard.press("r");
+		await page.locator(".ui-research").waitFor();
+		const cards = await page.locator(".ui-tech").count();
+		assert(cards >= 30, `expected the full tech tree, found ${cards} cards`);
+		await page.keyboard.press("Escape");
+		await page.locator(".ui-research").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		log(`${cards} research cards`);
+
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
 		const saved = await game(() => window.aitower.store.saveTo("slot1", "e2e"));

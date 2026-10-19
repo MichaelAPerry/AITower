@@ -5,12 +5,14 @@
 import type { TickCtx } from "../core/context";
 import { COOLANT_MAX_OVERLOAD_FRACTION, COOLANT_OVERLOAD_C_PER_FRACTION, EPS } from "../core/constants";
 import type { CoolantNet } from "../core/state";
+import { perk } from "../research/research";
 import { powerFactor } from "../power/powerSolve";
 import { getDef, isLiquidRack } from "../world/defs";
 
 export function coolingSolve(ctx: TickCtx): void {
 	const { state, content } = ctx;
 	const supplyC = content.balance.thermal.coolantSupplyC;
+	const coolingPerk = perk(state, content, "coolingCapacity");
 	const n = state.coolantNetCount;
 	const chillerCap = new Float64Array(n);
 	const cduCap = new Float64Array(n);
@@ -19,7 +21,7 @@ export function coolingSolve(ctx: TickCtx): void {
 	for (const f of state.facilities) {
 		if (f.coolantNet < 0 || !f.enabled) continue;
 		const d = getDef(content, f.defId);
-		const cap = (d.cooling?.capacityKw ?? 0) * powerFactor(f.sat);
+		const cap = (d.cooling?.capacityKw ?? 0) * coolingPerk * powerFactor(f.sat);
 		if (d.kind === "chiller") chillerCap[f.coolantNet] += cap;
 		else if (d.kind === "cdu") cduCap[f.coolantNet] += cap;
 	}
@@ -53,7 +55,7 @@ export function coolingSolve(ctx: TickCtx): void {
 			}
 			const removed = Math.min(load[net], capacity(net));
 			const total = d.kind === "chiller" ? chillerCap[net] : cduCap[net];
-			const own = (d.cooling?.capacityKw ?? 0) * powerFactor(f.sat);
+			const own = (d.cooling?.capacityKw ?? 0) * coolingPerk * powerFactor(f.sat);
 			f.heatKw = total > EPS ? (removed * own) / total : 0;
 		} else if (isLiquidRack(d)) {
 			f.coolantC = f.noCoolant ? supplyC : nets[f.coolantNet].supplyTempC;

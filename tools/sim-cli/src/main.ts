@@ -28,7 +28,7 @@ function main(argv: string[]): number {
 	const t0 = process.hrtime.bigint();
 	const { rows, hash } = runHeadless(content, scenario, days, seed);
 	const ms = Number(process.hrtime.bigint() - t0) / 1e6;
-	console.log(`scenario=${scenario} days=${days} seed=${seed}  (policy: accept fitting offers, restock parts when empty, memos: best cash choice)\n`);
+	console.log(`scenario=${scenario} days=${days} seed=${seed}  (policy: accept fitting offers, restock parts when empty, memos: best cash choice, research: clerk first then cheapest, clerk on, never borrows)\n`);
 	console.log(formatTable(rows));
 	console.log(`\nfinal hash: ${hash}   (${ms.toFixed(0)} ms)`);
 	return 0;

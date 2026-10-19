@@ -4,7 +4,7 @@
  */
 import type { CellRef, CommandResult, ConduitLayer, SimCommand, SimEvent, SimView } from "@aitower/sim";
 
-export type OverlayMode = "normal" | "heat" | "power" | "coolant";
+export type OverlayMode = "normal" | "heat" | "power" | "coolant" | "nutrient" | "contamination";
 
 export type Speed = 0 | 1 | 3 | 10 | 30;
 
@@ -156,6 +156,8 @@ export interface AudioEngine {
 	setVolume(v: number): void;
 	/** Music level relative to master (0..1). 0 stops the music engine's scheduling. */
 	setMusicVolume(v: number): void;
+	/** Body-horror intensity for the corruption layers (off = clean tape, no organic sounds). */
+	setHorrorIntensity(i: HorrorIntensity): void;
 	destroy(): void;
 }
 

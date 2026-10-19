@@ -1,0 +1,227 @@
+/* ── Finance tab: ledger columns, Credit Office, audits, service record; the quarterly audit sheet ── */
+.aitower-hud .ui-finance {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.aitower-hud .ui-finance-nav {
+	display: flex;
+	gap: 3px;
+	border-bottom: 2px solid var(--paper);
+}
+.aitower-hud .ui-subtab {
+	padding: 7px 10px 6px;
+}
+.aitower-hud .ui-subtab-note {
+	font: 15px/1 var(--f-crt);
+	letter-spacing: 0;
+	color: var(--red);
+}
+.aitower-hud .ui-subtab.is-on .ui-subtab-note {
+	color: var(--red);
+}
+/* Ten ledger columns need a little less air than seven did. */
+.aitower-hud .ui-ledger td {
+	padding: 4px 7px 3px;
+	font-size: 18px;
+}
+.aitower-hud .ui-ledger th {
+	padding: 6px 7px 4px;
+	font-size: 15px;
+}
+
+.aitower-hud .ui-credit-figs,
+.aitower-hud .ui-record-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 6px 18px;
+	margin: 8px 0 6px;
+}
+.aitower-hud .ui-credit-figs > div,
+.aitower-hud .ui-record-grid > div {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+	border-bottom: 1px dotted var(--paper-ink);
+	padding-bottom: 2px;
+}
+.aitower-hud .ui-credit-figs dt,
+.aitower-hud .ui-record-grid dt {
+	font: 8px/1.3 var(--f-stamp);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-credit-figs dd,
+.aitower-hud .ui-record-grid dd {
+	margin: 0;
+	font: 19px/1 var(--f-crt);
+	text-align: right;
+}
+.aitower-hud .ui-credit-acts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px 22px;
+	margin: 6px 0 4px;
+}
+.aitower-hud .ui-credit-group {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: wrap;
+}
+.aitower-hud .ui-credit-label {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.1em;
+	color: var(--ink);
+	min-width: 46px;
+}
+.aitower-hud .ui-credit-btn {
+	display: inline-flex;
+	gap: 6px;
+	align-items: baseline;
+}
+.aitower-hud .ui-credit-amt {
+	font: 15px/1 var(--f-crt);
+	letter-spacing: 0;
+	color: var(--amber);
+}
+.aitower-hud .ui-credit-note {
+	margin: 4px 0 2px;
+	font: 14px/1.3 var(--f-type);
+	color: var(--paper-ink);
+}
+
+.aitower-hud .ui-audits .ui-audits-remark {
+	max-width: 320px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 14px;
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-audit-mini {
+	font-size: 15px;
+	padding: 1px 7px 0;
+	transform: rotate(-4deg);
+}
+
+/* The sheet. Sits above the game but below the research sheet, the menu and the game-over notice. */
+.aitower-hud .ui-audit-backdrop {
+	position: absolute;
+	inset: 0;
+	z-index: 48;
+	pointer-events: auto;
+	display: grid;
+	place-items: center;
+	padding: 20px;
+	overflow: auto;
+	background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ink) 35%, transparent), color-mix(in srgb, var(--ink) 80%, transparent));
+	animation: ui-menu-in 0.2s ease-out both;
+}
+.aitower-hud .ui-audit {
+	position: relative;
+	width: min(560px, 100%);
+	padding: 18px 28px 16px 36px;
+	color: var(--ink);
+	font: 16px/1.35 var(--f-type);
+	background:
+		repeating-linear-gradient(180deg, transparent 0 23px, color-mix(in srgb, var(--beige) 35%, transparent) 23px 24px),
+		linear-gradient(90deg, transparent 0 20px, color-mix(in srgb, var(--red) 40%, var(--paper)) 20px 21px, transparent 21px),
+		var(--paper);
+	border: 1px solid var(--brass-dk);
+	box-shadow: 0 0 0 4px var(--housing), 0 16px 36px var(--shade-hard);
+}
+.aitower-hud .ui-audit-head {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 6px 12px;
+	font: 8px/1.2 var(--f-stamp);
+	letter-spacing: 0.08em;
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-audit-title {
+	margin: 10px 0 8px;
+	font: 30px/1.1 var(--f-type);
+	letter-spacing: 0.06em;
+	text-decoration: underline;
+	text-decoration-color: var(--brass-dk);
+}
+.aitower-hud .ui-audit-main {
+	display: flex;
+	gap: 18px;
+	align-items: stretch;
+	flex-wrap: wrap;
+}
+.aitower-hud .ui-audit-figs {
+	flex: 1 1 250px;
+	margin: 0;
+	display: grid;
+	gap: 2px;
+}
+.aitower-hud .ui-audit-figs > div {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 10px;
+	border-bottom: 1px dotted var(--paper-ink);
+}
+.aitower-hud .ui-audit-figs dt {
+	font: 15px/1.3 var(--f-type);
+	color: var(--paper-ink);
+}
+.aitower-hud .ui-audit-figs dd {
+	margin: 0;
+	font: 20px/1.1 var(--f-crt);
+}
+.aitower-hud .ui-audit .is-bad {
+	color: var(--red);
+}
+.aitower-hud .ui-audit .is-good {
+	color: var(--green-dim);
+}
+.aitower-hud .ui-audit-grade {
+	flex: 0 0 120px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+}
+.aitower-hud .ui-audit-gradelabel {
+	font: 8px/1 var(--f-stamp);
+	letter-spacing: 0.12em;
+	color: var(--brass-dk);
+}
+.aitower-hud .ui-audit-stamp {
+	font-size: 72px;
+	line-height: 1;
+	padding: 6px 22px 2px;
+	border-width: 5px;
+	outline-width: 2px;
+	outline-offset: 4px;
+	letter-spacing: 0;
+}
+.aitower-hud .ui-audit-outcome {
+	display: flex;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin: 12px 0 4px;
+	padding: 6px 8px;
+	font: 17px/1.2 var(--f-type);
+	background: color-mix(in srgb, var(--amber) 9%, var(--paper));
+	border: 1px dashed var(--brass-dk);
+}
+.aitower-hud .ui-audit-remark {
+	margin: 8px 0 4px;
+	padding: 0 0 0 10px;
+	border-left: 3px solid var(--brass-dk);
+	font: italic 16px/1.35 var(--f-type);
+}
+.aitower-hud .ui-audit-acts {
+	display: flex;
+	justify-content: flex-end;
+	margin-top: 10px;
+}

@@ -5,6 +5,12 @@ coolant and service lifts, keep repair bots swapping failed GPUs, and sell compu
 2D side-cut pixel art · TypeScript · PixiJS · React.
 
 ## Play
+- **In the browser:** https://michaelaperry.github.io/AITower/
+- **Offline, one file:** download [**AItower.html**](https://michaelaperry.github.io/AITower/AItower.html)
+  (right-click → *Save link as…*) and double-click it. Everything (code, art, fonts, music) is inside that one file:
+  no install and no server. Saves live in that browser. Build it yourself with `npm run build:single`.
+
+**From source:**
 ```sh
 npm install
 npm run dev          # open the printed URL

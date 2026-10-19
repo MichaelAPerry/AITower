@@ -5,7 +5,7 @@
  * Collects per-day metrics. Pure (no I/O).
  */
 import type { ContentDB } from "@aitower/content";
-import { type ContractView, createSim, type SimView, TICKS_PER_DAY } from "@aitower/sim";
+import { type ClerkPolicy, type ContractView, createSim, type Sim, type SimView, TICKS_PER_DAY } from "@aitower/sim";
 
 /** Accept only work that the currently idle, healthy racks can finish comfortably. */
 export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB): boolean {
@@ -45,6 +45,32 @@ export function bestMemoChoice(content: ContentDB, eventId: string): string | nu
 	return best?.id ?? null;
 }
 
+/** Permissive clerk standing order: any kind, any pay, any penalty, liquid included. */
+export const PERMISSIVE_CLERK: ClerkPolicy = { enabled: true, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true };
+
+/** The next tech to research: the clerk node first, then the cheapest researchable node (prerequisites met, clearance reached). */
+export function nextTech(content: ContentDB, v: SimView): string | null {
+	const done = new Set(v.techResearched);
+	const open = content.tech.filter((t) => !done.has(t.id) && t.minTier <= v.tier && t.requires.every((r) => done.has(r)));
+	const clerk = open.find((t) => t.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk"));
+	if (clerk) return clerk.id;
+	if (!v.clerk.unlocked && content.tech.some((t) => t.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk"))) {
+		// Work toward the clerk: a missing prerequisite chain comes first (cheapest open node on the way is enough).
+		const need = open.filter((t) => content.tech.some((c) => c.effects.some((e) => e.type === "feature") && c.requires.includes(t.id)));
+		if (need.length > 0) return need.sort((a, b) => a.cost - b.cost)[0].id;
+	}
+	return open.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id))[0]?.id ?? null;
+}
+
+/** Spend RP when the next node is affordable; switch the clerk on once it exists. */
+export function managePolicy(sim: Sim, content: ContentDB): void {
+	const v = sim.view();
+	const id = nextTech(content, v);
+	const node = id ? content.tech.find((t) => t.id === id) : undefined;
+	if (node && v.researchPoints >= node.cost) sim.submit({ type: "research", techId: node.id });
+	if (v.clerk.unlocked && !v.clerk.policy.enabled) sim.submit({ type: "setClerk", policy: PERMISSIVE_CLERK });
+}
+
 export interface DayRow {
 	day: number;
 	cash: number;
@@ -59,6 +85,12 @@ export interface DayRow {
 	failures: number;
 	tier: number;
 	standing: number;
+	/** Unspent research points at the end of the day. */
+	rp: number;
+	/** Techs researched so far. */
+	techs: number;
+	/** Ministry levy charged on the day. */
+	taxes: number;
 	/** Memos issued so far. */
 	memos: number;
 	gameOver: string | null;
@@ -95,6 +127,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			}
 			const v = sim.view();
 			if (v.spareParts === 0 && v.workOrders.length > 0 && t % 60 === 0) sim.submit({ type: "buyParts", count: 2 });
+			if (t % 60 === 30) managePolicy(sim, content);
 			pflopsSum += v.pflops;
 			for (const f of v.facilities) if (rackIds.has(f.defId) && f.tempC > maxRackC) maxRackC = f.tempC;
 		}
@@ -114,6 +147,9 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			failures,
 			tier: v.tier,
 			standing: v.standing,
+			rp: v.researchPoints,
+			techs: v.techResearched.length,
+			taxes: closed.taxes,
 			memos,
 			gameOver: v.gameOver?.kind ?? null,
 		});
@@ -124,7 +160,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 const money = (n: number): string => `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
 export function formatTable(rows: DayRow[]): string {
-	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "memos", "over"];
+	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "RP", "techs", "taxes", "memos", "over"];
 	const body = rows.map((r) => [
 		String(r.day),
 		money(r.cash),
@@ -138,6 +174,9 @@ export function formatTable(rows: DayRow[]): string {
 		String(r.failures),
 		String(r.tier),
 		r.standing.toFixed(0),
+		r.rp.toFixed(1),
+		String(r.techs),
+		money(r.taxes),
 		String(r.memos),
 		r.gameOver ?? "-",
 	]);

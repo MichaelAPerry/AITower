@@ -2,7 +2,7 @@ import type { LedgerDay } from "../api";
 import { LEDGER_DAYS } from "../core/constants";
 import type { SimState } from "../core/state";
 
-export type CostField = "energy" | "upkeep" | "construction" | "penalties";
+export type CostField = "energy" | "upkeep" | "construction" | "penalties" | "taxes" | "interest" | "fees";
 
 export const emptyLedgerDay = (day: number): LedgerDay => ({
 	day,
@@ -11,11 +11,15 @@ export const emptyLedgerDay = (day: number): LedgerDay => ({
 	upkeep: 0,
 	construction: 0,
 	penalties: 0,
+	taxes: 0,
+	interest: 0,
+	fees: 0,
 });
 
 export function earn(state: SimState, amount: number): void {
 	state.cash += amount;
 	state.today.revenue += amount;
+	state.stats.revenue += amount;
 }
 
 /** Negative amounts are refunds. */
@@ -30,3 +34,9 @@ export function rollLedger(state: SimState, day: number): void {
 	if (state.ledger.length > LEDGER_DAYS) state.ledger.splice(0, state.ledger.length - LEDGER_DAYS);
 	state.today = emptyLedgerDay(day);
 }
+
+/** Everything the day cost: energy + upkeep + construction + penalties + taxes + interest + fees. */
+export const dayCosts = (d: LedgerDay): number => d.energy + d.upkeep + d.construction + d.penalties + d.taxes + d.interest + d.fees;
+
+/** Profit before the levy: revenue minus every cost except the levy itself. */
+export const profitBeforeLevy = (d: LedgerDay): number => d.revenue - (d.energy + d.upkeep + d.construction + d.penalties + d.interest + d.fees);

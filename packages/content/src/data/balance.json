@@ -27,16 +27,16 @@
   0.9,
   0.7
  ],
- "ambientMeanC": 18,
- "ambientSwingC": 7,
+ "ambientMeanC": 22,
+ "ambientSwingC": 8,
  "thermal": {
   "airCellHeatCapacity": 3000,
   "airConductance": 6,
   "slabConductance": 1,
-  "envelopeConductance": 0.05,
+  "envelopeConductance": 0.4,
   "buoyancy": 1.5,
   "rackEase": 0.1,
-  "rackDeltaC": 40,
+  "rackDeltaC": 48,
   "okC": 80,
   "throttleC": 90,
   "tripC": 95,
@@ -78,6 +78,75 @@
   "dailyBad": -3,
   "jobFailed": -4,
   "jobCompleted": 1
+ },
+ "research": {
+  "pointsPerPflopHour": 0.1,
+  "pointsPerJob": 8
+ },
+ "clerk": {
+  "feeShare": 0.06
+ },
+ "loans": {
+  "maxByTier": [
+   2000000,
+   6000000,
+   15000000,
+   40000000
+  ],
+  "dailyRate": 0.005
+ },
+ "tax": {
+  "profitShare": 0.12
+ },
+ "audit": {
+  "periodDays": 7,
+  "standingByGrade": [
+   4,
+   2,
+   0,
+   -3,
+   -6
+  ],
+  "cashShareByGrade": [
+   0.04,
+   0.015,
+   0,
+   -0.025,
+   -0.06
+  ]
+ },
+ "bio": {
+  "diffusion": 0.05,
+  "slabFactor": 0.3,
+  "decay": 0.0005,
+  "quarantineLeak": 0.05,
+  "hazardPerContamination": 2,
+  "botSlowPerContamination": 0.5,
+  "mutationThreshold": 0.5,
+  "mutationExposureTicks": 720,
+  "growthThreshold": 0.7,
+  "growthChancePerDay": 0.05,
+  "irreversibleShare": 0.4,
+  "irreversibleCleanFactor": 0.25,
+  "nutrientPrice": 2
+ },
+ "ascension": {
+  "minTier": 5
+ },
+ "endings": {
+  "livingTower": {
+   "minCorruption": 0.8,
+   "pflops": 2000,
+   "days": 3
+  },
+  "cleanTower": {
+   "maxCorruption": 0.1,
+   "pflops": 2000,
+   "days": 7
+  },
+  "absorbed": {
+   "corruption": 1
+  }
  },
  "events": {
   "intervalTicks": 720,

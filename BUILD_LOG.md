@@ -115,3 +115,31 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 - **Clearance hint:** once unlocked, liquid cabinets are offered alongside air ones, and idle cabinets are counted.
 - **Second money trap closed.** A training job could be accepted onto the one rack left idle and was then certain to miss its deadline (penalty). Acceptance now requires the racks the job would get to finish it within 90% of the deadline. Otherwise the offer shows "too slow for the deadline: your idle racks (X PF) need about N h, the deadline allows M h".
 - **Verified in the real build:** a save with F1 liquid racks on a pipe that reaches nothing shows the alert and the dossier reason. Laying the joining pipe cools the racks and clears the alert. Auto-player over 15 days on 3 seeds: cash $3.0M → $5.2–5.6M.
+
+## M2b: research, Contracts Clerk, credit and audits, T2–T4 trunk, failure feedback
+- **Owner ask:** "automate accepting contracts, but keep a challenge". The **Contracts Clerk** is the first research node (180 RP, about 0.75 of a full starter day), so early accepting is manual. The clerk follows a standing order (job kinds, minimum $/PF·h, maximum penalty, liquid allowed) and keeps 6 % of what its jobs earn.
+- **The challenge moves to decisions the clerk can't make:**
+  - research choices: 36 nodes in 5 branches, tiers 1–4, about 83 days for the whole tree
+  - the Credit Office (loans at 0.5 %/day) and the 12 % levy on daily profit
+  - quarterly audits, graded A–E, with standing and a grant or fine
+  - early heat pressure: on a hot afternoon four racks and one CRAH sit close to throttling
+  - a scripted day-2 heat alarm
+  - memo trade-offs between cash and standing
+- **Agents (Sonnet ×4):**
+  - **sim** (`tasks/m2b/T1-sim.md`): RP, perks, gating, clerk, loans and levy, audits, lifetime stats, scripted events, flying and carrying bots, snapshot v4 with a v3 migration.
+  - **content** (`T2`): the tech tree, 20 facilities including 8 rack types (immersion among them), drone and lifter, 10 clients, 7 events, balance values.
+  - **ui** (`T3`): the Department of Research (R), the clerk's standing-order form, the Finance tab (ledger, Credit Office, audits, lifetime record), the audit sheet, and gating in the palette.
+  - **render** (`T4`): visuals for trips, fire, blackouts, brownouts and leaks; off-screen alert arrows; drone and lifter art; immersion tanks and tiered detailing.
+- **Orchestrator:**
+  - The contracts first, with placeholders, so every agent started green.
+  - Content validation of minimum art widths (raised by agent-render).
+  - The bot rows in the stores panel wrap instead of overflowing.
+  - e2e now opens the research sheet.
+- **Balance check (auto-player, 30 days):** profitable ($3.1M → $7.5–7.9M), all audits graded A. Standing drifts down only because the auto-player always picks the most cash in memos (memos −105 against jobs +44, daily +26, audits +20). Picking for standing instead gives 100 standing and half the cash. That trade-off is the challenge.
+- **Real-build check (Chromium, 15 points):**
+  - R opens the research sheet and pauses the clock; filing the clerk spends the RP; Esc resumes.
+  - The clerk switches on and accepts 11 contracts in 7 days.
+  - A loan is drawn.
+  - The first audit (grade A) shows its sheet, and Esc closes it.
+  - The scripted heat alarm arrives on day 2, and lifetime stats fill in.
+  - No page errors.

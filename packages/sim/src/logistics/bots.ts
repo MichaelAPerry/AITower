@@ -26,6 +26,7 @@ import {
 } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Bot, Facility, Lift, SimState, WorkOrder } from "../core/state";
+import { perk } from "../research/research";
 import { serviceTile } from "../world/defs";
 import { beginSearch, ensureNav, type Hop, routeTo, type RouteResult, WALK_DIRECT } from "./routing";
 
@@ -37,13 +38,35 @@ export const backoffTicks = (failures: number): number =>
 
 const liftPowered = (lift: Lift): boolean => lift.powerNet >= 0 && lift.sat >= MIN_POWERED_SATISFACTION;
 
-/** Search from the bot's position; follow with `routeTo`. */
-function search(ctx: TickCtx, bot: Bot, def: BotDef): void {
-	ensureNav(ctx.scratch.nav, ctx.state, ctx.content);
-	beginSearch(ctx.scratch.nav, ctx.state, ctx.content, def.speed, bot.floor, bot.x);
+/** Walk / fly speed with the `botSpeed` tech perk. */
+const speedOf = (ctx: TickCtx, def: BotDef): number => def.speed * perk(ctx.state, ctx.content, "botSpeed");
+
+/** Parts currently held (a bot poked into `carrying` without a count holds one). */
+const heldParts = (bot: Bot): number => (bot.carrying ? Math.max(1, bot.parts) : 0);
+
+function setParts(bot: Bot, n: number): void {
+	bot.parts = Math.max(0, n);
+	bot.carrying = bot.parts > 0;
 }
 
-const route = (ctx: TickCtx, floor: number, x: number): RouteResult | null => routeTo(ctx.scratch.nav, ctx.state, floor, x);
+/** Spare parts per depot trip (`BotDef.carry`, default 1). */
+const carryOf = (def: BotDef): number => Math.max(1, Math.floor(def.carry ?? 1));
+
+/** Search from the bot's position; follow with `route`. Flying bots need no search: they fly straight. */
+function search(ctx: TickCtx, bot: Bot, def: BotDef): void {
+	if (def.flying) return;
+	ensureNav(ctx.scratch.nav, ctx.state, ctx.content);
+	beginSearch(ctx.scratch.nav, ctx.state, ctx.content, speedOf(ctx, def), bot.floor, bot.x);
+}
+
+/** Route from the last `search` (or, for a flying bot, the straight flight from where it is) to a position. */
+function route(ctx: TickCtx, bot: Bot, def: BotDef, floor: number, x: number): RouteResult | null {
+	if (def.flying) {
+		const sp = Math.max(speedOf(ctx, def), 1e-6);
+		return { lift: WALK_DIRECT, exit: floor, cost: Math.max(Math.abs(x - bot.x), Math.abs(floor - bot.floor)) / sp };
+	}
+	return routeTo(ctx.scratch.nav, ctx.state, floor, x);
+}
 
 function takeHop(state: SimState, bot: Bot, hop: Hop): void {
 	bot.liftId = hop.lift;
@@ -63,7 +86,7 @@ function aimAt(state: SimState, bot: Bot, f: Facility, hop: Hop): void {
 /** Point the bot at a facility; false if unreachable. */
 function setGoal(ctx: TickCtx, bot: Bot, def: BotDef, f: Facility): boolean {
 	search(ctx, bot, def);
-	const r = route(ctx, f.floor, serviceTile(f));
+	const r = route(ctx, bot, def, f.floor, serviceTile(f));
 	if (!r) return false;
 	aimAt(ctx.state, bot, f, r);
 	return true;
@@ -72,18 +95,18 @@ function setGoal(ctx: TickCtx, bot: Bot, def: BotDef, f: Facility): boolean {
 /** Re-plan the path to the current goal from where the bot stands; false if the goal is now unreachable. */
 function replan(ctx: TickCtx, bot: Bot, def: BotDef): boolean {
 	search(ctx, bot, def);
-	const r = route(ctx, bot.goalFloor, bot.goalX);
+	const r = route(ctx, bot, def, bot.goalFloor, bot.goalX);
 	if (!r) return false;
 	takeHop(ctx.state, bot, r);
 	return true;
 }
 
 /** Best reachable depot (preferring ones with stock) from the last search. */
-function chooseDepot(ctx: TickCtx): { depot: Facility; route: RouteResult } | null {
+function chooseDepot(ctx: TickCtx, bot: Bot, def: BotDef): { depot: Facility; route: RouteResult } | null {
 	let best: { depot: Facility; route: RouteResult } | null = null;
 	let bestKey = Number.POSITIVE_INFINITY;
 	for (const f of ctx.scratch.nav.depots) {
-		const r = route(ctx, f.floor, serviceTile(f));
+		const r = route(ctx, bot, def, f.floor, serviceTile(f));
 		if (!r) continue;
 		const key = (f.stored > 0 ? 0 : 1e9) + r.cost;
 		if (key < bestKey) {
@@ -94,9 +117,27 @@ function chooseDepot(ctx: TickCtx): { depot: Facility; route: RouteResult } | nu
 	return best;
 }
 
+/** Flying bot: a straight line to the goal, at most `speed` tiles and `speed` floors per tick (floor is fractional in flight). */
+function fly(ctx: TickCtx, bot: Bot, def: BotDef): Travel {
+	bot.leg = "walk";
+	bot.liftId = WALK_DIRECT;
+	const dx = bot.goalX - bot.x;
+	const df = bot.goalFloor - bot.floor;
+	const t = Math.max(Math.abs(dx), Math.abs(df)) / Math.max(speedOf(ctx, def), 1e-6);
+	if (t <= 1) {
+		bot.x = bot.goalX;
+		bot.floor = bot.goalFloor;
+		return "arrived";
+	}
+	bot.x += dx / t;
+	bot.floor += df / t;
+	return "moving";
+}
+
 /** Move one tick toward the goal. */
 function travel(ctx: TickCtx, bot: Bot, def: BotDef): Travel {
 	const state = ctx.state;
+	if (def.flying) return fly(ctx, bot, def);
 	if (bot.leg === "ride") return "moving";
 	if (bot.leg === "waitLift") {
 		if (findById(state.lifts, bot.liftId)) return "moving";
@@ -114,8 +155,9 @@ function travel(ctx: TickCtx, bot: Bot, def: BotDef): Travel {
 		tx = lift.x;
 	} else if (bot.liftId >= 0) bot.liftId = WALK_DIRECT;
 	const dx = tx - bot.x;
-	if (Math.abs(dx) <= def.speed) bot.x = tx;
-	else bot.x += Math.sign(dx) * def.speed;
+	const speed = speedOf(ctx, def);
+	if (Math.abs(dx) <= speed) bot.x = tx;
+	else bot.x += Math.sign(dx) * speed;
 	if (bot.x !== tx) return "moving";
 	if (bot.floor !== bot.goalFloor) {
 		bot.leg = "waitLift";
@@ -185,16 +227,22 @@ function giveUp(ctx: TickCtx, bot: Bot, def: BotDef): void {
 	goHome(ctx, bot, def);
 }
 
-/** Claim the oldest available work order; false when none could be taken. */
-function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef): boolean {
+/** A work order nobody holds and that is not backing off after a failed attempt. */
+const claimable = (state: SimState, wo: WorkOrder): boolean => wo.botId < 0 && !(wo.retryAt > state.tick && wo.retryRev === state.topologyRev);
+
+/**
+ * Claim the oldest available work order (by id, so assignment is deterministic); false when none could be taken.
+ * `chain`: a carrying bot that just finished a repair looks for its next order (no charge threshold, no self back-off).
+ */
+function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef, chain = false): boolean {
 	const { state } = ctx;
-	if (bot.homeId >= 0 && bot.battery < BOT_RESUME_BATTERY) return false;
+	if (!chain && bot.homeId >= 0 && bot.battery < BOT_RESUME_BATTERY) return false;
 	const speaksForAll = atHome(state, bot) !== undefined || bot.homeId < 0;
 	let searched = false;
 	let plans = 0;
 	let sawUnreachable = false;
 	for (const wo of state.workOrders) {
-		if (wo.botId >= 0 || (wo.retryAt > state.tick && wo.retryRev === state.topologyRev)) continue;
+		if (!claimable(state, wo)) continue;
 		const rack = findById(state.facilities, wo.facilityId);
 		if (!rack) continue;
 		if (plans++ >= BOT_MAX_CLAIM_PLANS_PER_TICK) break;
@@ -202,7 +250,7 @@ function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef): boolean {
 			search(ctx, bot, def);
 			searched = true;
 		}
-		const toRack = route(ctx, rack.floor, serviceTile(rack));
+		const toRack = route(ctx, bot, def, rack.floor, serviceTile(rack));
 		if (!toRack) {
 			// A bot parked at its charger speaks for every bot: back the order off (so nobody rescans it every
 			// tick). A stranded bot just skips it and throttles itself below.
@@ -214,7 +262,7 @@ function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef): boolean {
 			aimAt(state, bot, rack, toRack);
 			bot.task = "target";
 		} else {
-			const pick = chooseDepot(ctx);
+			const pick = chooseDepot(ctx, bot, def);
 			if (!pick) {
 				backOff(state, bot); // no reachable depot: wait at the charger and retry later
 				return false;
@@ -227,7 +275,7 @@ function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef): boolean {
 		bot.fails = 0;
 		return true;
 	}
-	if (sawUnreachable) backOff(state, bot);
+	if (sawUnreachable && !chain) backOff(state, bot);
 	return false;
 }
 
@@ -278,7 +326,7 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 			const there = bot.leg === "walk" && bot.x === bot.goalX && bot.floor === bot.goalFloor;
 			if (!isDepot || (depot?.stored === 0 && there && (state.tick + bot.id) % BOT_DEPOT_RECHECK_TICKS === 0)) {
 				search(ctx, bot, def);
-				const alt = chooseDepot(ctx);
+				const alt = chooseDepot(ctx, bot, def);
 				if (alt && alt.depot !== depot && (alt.depot.stored > 0 || !isDepot)) {
 					aimAt(state, bot, alt.depot, alt.route);
 					depot = alt.depot;
@@ -292,12 +340,16 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 			const t = travel(ctx, bot, def);
 			if (t === "blocked") {
 				search(ctx, bot, def);
-				const alt = chooseDepot(ctx);
+				const alt = chooseDepot(ctx, bot, def);
 				if (alt && alt.depot !== depot) aimAt(state, bot, alt.depot, alt.route);
 				else giveUp(ctx, bot, def);
 			} else if (t === "arrived" && depot.stored > 0) {
-				depot.stored--;
-				bot.carrying = true;
+				// Take up to `carry` parts, but no more than the queued orders it could use (its own plus unclaimed ones).
+				let orders = 1;
+				for (const o of state.workOrders) if (o.id !== bot.workOrderId && claimable(state, o) && findById(state.facilities, o.facilityId)) orders++;
+				const take = Math.min(carryOf(def), orders, depot.stored);
+				depot.stored -= take;
+				setParts(bot, take);
 				const wo = findById(state.workOrders, bot.workOrderId);
 				const rack = wo ? findById(state.facilities, wo.facilityId) : undefined;
 				if (rack && setGoal(ctx, bot, def, rack)) bot.task = "target";
@@ -309,7 +361,7 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 			const t = travel(ctx, bot, def);
 			if (t === "arrived") {
 				bot.task = "repair";
-				bot.timer = def.repairTicks;
+				bot.timer = def.repairTicks / perk(state, content, "repairSpeed");
 			} else if (t === "blocked") giveUp(ctx, bot, def);
 			break;
 		}
@@ -321,11 +373,14 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 				if (rack) {
 					rack.failed = false;
 					rack.health = 1;
+					state.stats.repairs++;
 					events.push({ type: "repaired", facilityId: rack.id, botId: bot.id });
 				}
 				state.workOrders = state.workOrders.filter((w) => w.id !== bot.workOrderId);
 				bot.workOrderId = -1;
-				bot.carrying = false;
+				setParts(bot, heldParts(bot) - 1);
+				// A bot with parts left goes on to the next unclaimed order before heading home.
+				if (bot.carrying && bot.battery >= BOT_LOW_BATTERY && tryClaim(ctx, bot, def, true)) break;
 				goHome(ctx, bot, def);
 			}
 			break;

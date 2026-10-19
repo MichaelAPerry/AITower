@@ -4,9 +4,10 @@ import type { SimEvent } from "../api";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import { stockParts } from "../commands/operations";
 import type { TickCtx } from "../core/context";
+import { SCRIPTED_MINUTE_OF_DAY } from "../core/constants";
 import { nextRandom } from "../core/rng";
 import type { Memo, SimState } from "../core/state";
-import { dayOf } from "../core/time";
+import { dayOf, minuteOfDay } from "../core/time";
 import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
@@ -28,6 +29,7 @@ function eligible(state: SimState, content: ContentDB): EventDef[] {
 	const day = dayOf(state.tick);
 	const open = new Set(state.memos.map((m) => m.eventId));
 	return content.events.filter((e) => {
+		if (e.scriptedDay !== undefined) return false; // scripted events are never picked randomly
 		if (open.has(e.id)) return false;
 		if (state.tier < e.minTier) return false;
 		if (e.maxTier !== undefined && state.tier > e.maxTier) return false;
@@ -35,6 +37,26 @@ function eligible(state: SimState, content: ContentDB): EventDef[] {
 		const last = Object.hasOwn(state.lastIssuedDay, e.id) ? state.lastIssuedDay[e.id] : undefined;
 		return last === undefined || day - last >= e.cooldownDays;
 	});
+}
+
+function openMemo(state: SimState, e: EventDef, events: SimEvent[]): void {
+	const memo: Memo = { id: state.nextId.memo++, eventId: e.id, issuedAt: state.tick, expiresAt: state.tick + e.timeoutTicks };
+	state.memos.push(memo);
+	state.lastIssuedDay[e.id] = dayOf(state.tick);
+	events.push({ type: "memoIssued", memoId: memo.id, eventId: e.id });
+}
+
+/** Scripted events (`scriptedDay`) are issued once, at 09:00 on their day: no weight, cooldown, timing or `maxOpen`; tier limits apply. */
+function issueScripted(ctx: TickCtx): void {
+	const { state, content, events } = ctx;
+	if (minuteOfDay(state.tick) !== SCRIPTED_MINUTE_OF_DAY) return;
+	const day = dayOf(state.tick);
+	for (const e of content.events) {
+		if (e.scriptedDay !== day || state.scriptedIssued.includes(e.id)) continue;
+		if (state.tier < e.minTier || (e.maxTier !== undefined && state.tier > e.maxTier)) continue;
+		state.scriptedIssued.push(e.id);
+		openMemo(state, e, events);
+	}
 }
 
 function issueMemo(ctx: TickCtx): void {
@@ -52,13 +74,10 @@ function issueMemo(ctx: TickCtx): void {
 		}
 		r -= e.weight;
 	}
-	const memo: Memo = { id: state.nextId.memo++, eventId: pick.id, issuedAt: state.tick, expiresAt: state.tick + pick.timeoutTicks };
-	state.memos.push(memo);
-	state.lastIssuedDay[pick.id] = dayOf(state.tick);
-	events.push({ type: "memoIssued", memoId: memo.id, eventId: pick.id });
+	openMemo(state, pick, events);
 }
 
-/** Tick stage 9b: expire modifiers, time out memos, roll for a new memo. */
+/** Tick stage 9b: expire modifiers, time out memos, issue scripted events, roll for a new memo. */
 export function memoStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	expireModifiers(state);
@@ -69,6 +88,7 @@ export function memoStep(ctx: TickCtx): void {
 		if (def && choice) resolveNow(state, content, memo, def, choice, true, events);
 		else state.memos = state.memos.filter((m) => m.id !== memo.id); // unknown event (stale save): drop silently
 	}
+	issueScripted(ctx);
 	const eb = content.balance.events;
 	if (state.tick < state.nextMemoTick || state.tick < eb.graceTicks) return;
 	state.nextMemoTick = state.tick + nextMemoDelay(state, content);
@@ -126,6 +146,7 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 
 function resolveNow(state: SimState, content: ContentDB, memo: Memo, def: EventDef, choice: EventChoice, auto: boolean, events: SimEvent[]): void {
 	state.memos = state.memos.filter((m) => m.id !== memo.id);
+	if (!auto) state.stats.memosAnswered++;
 	for (const e of choice.effects) applyEffect(state, content, e, events);
 	state.memoHistory.push({ memoId: memo.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick, auto });
 	if (state.memoHistory.length > MEMO_HISTORY_LENGTH) state.memoHistory.splice(0, state.memoHistory.length - MEMO_HISTORY_LENGTH);

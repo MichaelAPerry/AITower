@@ -8,6 +8,7 @@ import { CRAH_TARGET_C, MAX_LINK_COUPLING, SECONDS_PER_TICK } from "../core/cons
 import { cellIdx, floorCount } from "../core/grid";
 import { powerFactor } from "../power/powerSolve";
 import { getDef } from "../world/defs";
+import { perk } from "../research/research";
 
 const coupling = (kKw: number, perKj: number): number => Math.min(MAX_LINK_COUPLING, kKw * perKj);
 
@@ -73,12 +74,13 @@ export function airFieldStep(ctx: TickCtx): void {
 	}
 
 	// CRAH sinks, in id order; each sees the result of the previous one.
+	const coolingPerk = perk(state, content, "coolingCapacity");
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind !== "crah") continue;
 		f.heatKw = 0;
 		if (!f.enabled) continue;
-		const capKw = (d.cooling?.capacityKw ?? 0) * powerFactor(f.sat);
+		const capKw = (d.cooling?.capacityKw ?? 0) * coolingPerk * powerFactor(f.sat);
 		if (capKw <= 0) continue;
 		const r = d.cooling?.radius ?? 0;
 		const x0 = Math.max(0, f.x - r);

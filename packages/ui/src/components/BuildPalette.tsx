@@ -4,6 +4,7 @@ import type { Tool } from "@aitower/shared";
 import { type MouseEvent, useState } from "react";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
+import { techGate } from "../research/tech";
 import { hudScale } from "../settings";
 import { toolKey } from "../tools/controller";
 import { FormLabel, Icon, Stamp, Swatch } from "./common";
@@ -120,7 +121,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 		.filter((d) => d.category === tab)
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost);
 
-	const bot = Object.values(content.bots)[0];
+	const bots = Object.values(content.bots);
 	const buy = (cmd: SimCommand): void => {
 		const r = store.dispatch(cmd);
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `buy:${r.reason}` });
@@ -178,6 +179,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 				{tab !== "structure" &&
 					defs.map((d) => {
 						const locked = d.unlockTier > view.tier;
+						const gate = techGate(d.tech, view, content);
 						const poor = view.cash < d.cost;
 						const t: Tool = { kind: "place", defId: d.id };
 						return (
@@ -185,10 +187,11 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 								key={d.id}
 								type="button"
 								data-tut={`card-${d.id}`}
-								aria-disabled={locked || poor}
-								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
+								aria-disabled={locked || poor || !!gate}
+								title={gate ?? undefined}
+								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : gate ? "is-tech-locked" : poor ? "is-poor" : ""}`}
 								onClick={() => {
-									if (!locked && !poor) pick(t);
+									if (!locked && !poor && !gate) pick(t);
 								}}
 								onMouseLeave={() => setHover(null)}
 								onMouseEnter={(e) =>
@@ -196,7 +199,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 										title: d.name,
 										body: d.description,
 										specs: defSpecs(d),
-										warn: locked ? `Unlocks at Tier ${d.unlockTier}` : poor ? `Need ${fmtMoney(d.cost - view.cash)} more` : undefined,
+										warn: locked ? `Unlocks at Tier ${d.unlockTier}` : gate ? `${gate} (R)` : poor ? `Need ${fmtMoney(d.cost - view.cash)} more` : undefined,
 									})
 								}
 							>
@@ -211,7 +214,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 										)}
 									</span>
 									<span className="ui-item-foot">
-										<span className="ui-item-sub">{defHeadline(d)}</span>
+										<span className={`ui-item-sub ${gate ? "is-tech" : ""}`}>{gate ?? defHeadline(d)}</span>
 										<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
 									</span>
 								</span>
@@ -239,19 +242,35 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 						+5 · {fmtMoney(st.sparePart * 5)}
 					</button>
 				</div>
-				<div className="ui-supply">
-					<span className="ui-k">Bots</span>
-					<span className="ui-v ui-crt crt-amber">{view.bots.length}</span>
-					<button
-						type="button"
-						className="ui-btn ui-mini"
-						disabled={!bot || view.cash < bot.cost}
-						onClick={() => bot && buy({ type: "buyBot", defId: bot.id })}
-						title={bot ? `Buy a ${bot.name} for ${fmtMoney(bot.cost)}` : "No bot types available"}
-					>
-						+1 · {bot ? fmtMoney(bot.cost) : "—"}
-					</button>
-				</div>
+				{bots.map((bot) => {
+					const gate = techGate(bot.tech, view, content);
+					const many = bots.length > 1;
+					return (
+						<div key={bot.id} className="ui-supply">
+							<span className="ui-k">{many ? bot.name : "Bots"}</span>
+							<span className="ui-v ui-crt crt-amber">{many ? view.bots.filter((b) => b.defId === bot.id).length : view.bots.length}</span>
+							<button
+								type="button"
+								className="ui-btn ui-mini"
+								disabled={!!gate || view.cash < bot.cost}
+								onClick={() => buy({ type: "buyBot", defId: bot.id })}
+								title={gate ?? `Buy a ${bot.name} for ${fmtMoney(bot.cost)}${bot.flying ? " (flies between floors, no lift needed)" : ""}`}
+							>
+								{gate ? "Research" : `+1 · ${fmtMoney(bot.cost)}`}
+							</button>
+							{gate && <span className="ui-supply-gate">{gate}</span>}
+						</div>
+					);
+				})}
+				{bots.length === 0 && (
+					<div className="ui-supply">
+						<span className="ui-k">Bots</span>
+						<span className="ui-v ui-crt crt-amber">{view.bots.length}</span>
+						<button type="button" className="ui-btn ui-mini" disabled title="No bot types available">
+							+1 · —
+						</button>
+					</div>
+				)}
 			</div>
 			{hover && (
 				<div className="ui-tooltip ui-panel" style={{ top: tooltipTop(hover.top, window.innerHeight, hudScale(state.settings)) }}>

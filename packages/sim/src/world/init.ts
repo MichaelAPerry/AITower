@@ -10,7 +10,10 @@ import { cellCount, cellIdx, inBounds } from "../core/grid";
 import { createRng } from "../core/rng";
 import type { SimState } from "../core/state";
 import { ambientAt, dayOf } from "../core/time";
+import { emptyAudit } from "../economy/audit";
+import { defaultClerkPolicy } from "../economy/clerk";
 import { emptyLedgerDay } from "../economy/ledger";
+import { emptyStats } from "../economy/stats";
 import { attachToNets } from "../networks/rebuild";
 import { labelLayer } from "../networks/unionFind";
 import { addBot, addLift, findChargerWithSpace } from "./entities";
@@ -80,6 +83,15 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		lastIssuedDay: {},
 		standing: content.balance.standing.start,
 		gameOver: null,
+		researchPoints: 0,
+		techResearched: [],
+		clerkPolicy: defaultClerkPolicy(),
+		clerkAccepted: 0,
+		loanPrincipal: 0,
+		reports: [],
+		audit: emptyAudit(),
+		stats: emptyStats(),
+		scriptedIssued: [],
 		pending: [],
 	};
 

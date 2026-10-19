@@ -2,17 +2,20 @@
  * Read-only SimView. Grid typed arrays are the live state arrays (reused, don't mutate);
  * entity arrays are rebuilt small each call.
  */
-import type { ContentDB } from "@aitower/content";
+import type { BotDef, ContentDB } from "@aitower/content";
 import type { BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
+import { loanMax } from "../economy/credit";
 import { eventDef } from "../ministry/memos";
 import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 import { facilityStatus } from "./status";
+import { clerkUnlocked, perk } from "../research/research";
 
-function botState(b: Bot): BotState {
+function botState(b: Bot, def: BotDef | undefined): BotState {
+	if (def?.flying && b.leg === "walk" && b.floor !== b.goalFloor && (b.task === "depot" || b.task === "target" || b.task === "charger")) return "flying";
 	if (b.leg === "ride") return "riding";
 	if (b.leg === "waitLift") return "waitingLift";
 	switch (b.task) {
@@ -51,6 +54,26 @@ function memoViews(state: SimState, content: ContentDB): MemoView[] {
 	return out;
 }
 
+/** M3 placeholders, cached per grid size so view() stays allocation-free. M3-T1 replaces these. */
+const m3Cache = new Map<number, { nutrient: Uint8Array; nutrientNetOf: Int32Array; contamination: Float32Array }>();
+function m3Placeholder(cells: number) {
+	let c = m3Cache.get(cells);
+	if (!c) {
+		c = { nutrient: new Uint8Array(cells), nutrientNetOf: new Int32Array(cells).fill(-1), contamination: new Float32Array(cells) };
+		m3Cache.set(cells, c);
+	}
+	return {
+		...c,
+		nutrientNets: [],
+		corruption: 0,
+		contaminatedShare: 0,
+		irreversible: false,
+		path: null,
+		organoidPflops: 0,
+		endingProgress: null,
+	};
+}
+
 export function buildView(state: SimState, content: ContentDB): SimView {
 	const m = state.metrics;
 	const facilities: FacilityView[] = state.facilities.map((f) => {
@@ -71,6 +94,10 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			jobId: f.jobId >= 0 ? f.jobId : null,
 			powerNet: f.powerNet >= 0 ? f.powerNet : null,
 			coolantNet: f.coolantNet >= 0 ? f.coolantNet : null,
+			// M3 placeholders (M3-T1 implements).
+			nutrientNet: null,
+			grown: false,
+			contamination: 0,
 		};
 		if (d.kind === "genset") v.running = f.gensetMode === GensetMode.Running;
 		if (d.kind === "ups") v.charge = (d.power?.storageKwh ?? 0) > 0 ? f.storedKwh / (d.power?.storageKwh ?? 1) : 0;
@@ -82,10 +109,11 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		defId: b.defId,
 		x: b.x,
 		floor: b.floor,
-		state: botState(b),
+		state: botState(b, content.bots[b.defId]),
 		battery: b.battery,
 		carrying: b.carrying,
 		workOrderId: b.workOrderId >= 0 ? b.workOrderId : null,
+		trait: null, // M3 placeholder
 	}));
 	const jobs: JobView[] = state.jobs.map((j) => ({
 		id: j.id,
@@ -116,6 +144,8 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		airTemp: state.airTemp,
 		powerNetOf: state.powerNetOf,
 		coolantNetOf: state.coolantNetOf,
+		// M3 placeholders (M3-T1 implements).
+		...m3Placeholder(state.coolant.length),
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({
@@ -150,7 +180,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		cash: state.cash,
 		spareParts,
 		tier: state.tier,
-		energyPrice: energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice"),
+		energyPrice: energyPriceAt(content.balance, state.tick) * modFactor(state, "energyPrice") * perk(state, content, "energyPrice"),
 		pue: m.pue,
 		uptime: m.uptime,
 		itKw: m.itKw,
@@ -165,6 +195,12 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
 		standing: state.standing,
+		researchPoints: state.researchPoints,
+		techResearched: state.techResearched.slice(),
+		clerk: { unlocked: clerkUnlocked(state, content), policy: { ...state.clerkPolicy, kinds: state.clerkPolicy.kinds.slice() }, acceptedTotal: state.clerkAccepted },
+		loan: { principal: state.loanPrincipal, max: loanMax(state, content), dailyRate: content.balance.loans.dailyRate },
+		reports: state.reports.map((r) => ({ ...r })),
+		stats: { ...state.stats },
 		gameOver: state.gameOver ? { ...state.gameOver } : null,
 	};
 }

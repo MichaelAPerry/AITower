@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadContent } from "@aitower/content";
 import { createSim, simFromSnapshot, TICKS_PER_DAY } from "@aitower/sim";
 import { makeContent } from "../../../packages/sim/src/test/fixture";
-import { bestMemoChoice, formatTable, runHeadless } from "./run";
+import { bestMemoChoice, formatTable, nextTech, PERMISSIVE_CLERK, runHeadless } from "./run";
 
 describe("sim-cli runHeadless", () => {
 	it("produces one row per day and a deterministic hash", () => {
@@ -78,5 +78,36 @@ describe("sim-cli memo policy", () => {
 			expect(r.standing).toBeLessThanOrEqual(100);
 		}
 		expect(formatTable(a.rows)).toContain("standing");
+	});
+});
+
+describe("sim-cli research policy", () => {
+	it("nextTech: the clerk first, then the cheapest open node; locked nodes are skipped", () => {
+		const c = makeContent();
+		const sim = createSim(c, "starter", 1);
+		const v = sim.view();
+		expect(nextTech(c, v)).toBe("t_clerk");
+		const done = { ...v, techResearched: ["t_clerk"], clerk: { ...v.clerk, unlocked: true } };
+		// Open nodes now: perks and gating nodes (cost 1 first); t_tier2 needs Clearance 2.
+		const next = nextTech(c, done);
+		expect(next).not.toBe("t_tier2");
+		expect(c.tech.find((t) => t.id === next)?.cost).toBe(1);
+		const all = { ...done, techResearched: c.tech.map((t) => t.id) };
+		expect(nextTech(c, all)).toBeNull();
+	});
+
+	it("the auto-player researches, switches the clerk on, never borrows, and reports RP / techs / taxes", () => {
+		const c = makeContent();
+		c.balance.research.pointsPerJob = 50;
+		const { rows } = runHeadless(c, "starter", 6, 2);
+		expect(rows.at(-1)?.techs).toBeGreaterThan(1);
+		const sim = createSim(c, "starter", 2);
+		expect(PERMISSIVE_CLERK.enabled).toBe(true);
+		expect(sim.view().loan.principal).toBe(0);
+		const table = formatTable(rows);
+		expect(table).toContain("RP");
+		expect(table).toContain("techs");
+		expect(table).toContain("taxes");
+		expect(table.split("\n")[0].split(/\s+/)).toContain("taxes");
 	});
 });

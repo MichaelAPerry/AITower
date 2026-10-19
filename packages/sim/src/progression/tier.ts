@@ -1,12 +1,16 @@
 /**
  * Tick stage 10: tier rating, evaluated on the last tick of each day. Tier n needs installed
  * PFLOPS ≥ tiers.pflops[n-1] and rolling uptime ≥ tiers.uptime[n-1]; each new tier pays its reward.
- * Tiers never decrease.
+ * Tiers never decrease. Midnight order: daily standing, tier rating (its reward is revenue), loan interest, the levy on the day's profit, then
+ * the day is recorded for the quarterly audit (filed when the day is the last of a period, graded against the clearance held
+ * during the day, i.e. before a tier-up at this midnight).
  */
 import { installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
 import { isLastTickOfDay } from "../core/time";
 import { dailyStanding, setGameOver } from "../ministry/standing";
+import { closeAuditDay } from "../economy/audit";
+import { midnightCredit } from "../economy/credit";
 import { earn } from "../economy/ledger";
 
 export function progressionStep(ctx: TickCtx): void {
@@ -25,4 +29,6 @@ export function progressionStep(ctx: TickCtx): void {
 		events.push({ type: "tierUp", tier: n, reward });
 	}
 	if (state.tier > before && state.tier >= tiers.pflops.length) setGameOver(state, "victory", events);
+	midnightCredit(ctx); // interest, then the levy on everything the day earned (tier reward included)
+	closeAuditDay(ctx, before); // record the closed day; file the quarterly audit when one is due
 }

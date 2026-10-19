@@ -47,6 +47,13 @@ if (q.get("mod") === "1") {
 	store.addModifier({ label: "Brownout", kind: "gridCap", value: 0.5, endsAt: t + 300 });
 	store.addModifier({ label: "Subsidy", kind: "payout", value: 1.25, endsAt: t + 2000 });
 }
+// M2b: ?clerk=1 (clerk hired) | ?clerk=on (and switched on), ?rp=N research points, ?research=1 opens the sheet,
+// ?audit=A..E files a quarterly audit after load, ?fin=credit|audits|record opens that Finance section (with ?tab=finance).
+if (q.get("clerk")) {
+	store.unlockClerk();
+	if (q.get("clerk") === "on") store.dispatch({ type: "setClerk", policy: { ...store.get().view.clerk.policy, enabled: true, kinds: ["training", "inference"], allowLiquid: false, minPayPerPflopHour: 100 } });
+}
+if (num("rp") !== null) store.addResearchPoints((num("rp") as number) - store.get().view.researchPoints);
 if (q.get("over")) store.triggerGameOver(q.get("over") as "bankrupt");
 // Induction: ?tut=<step id> jumps to that step, ?tut=none closes it (default: step 1, as on a first visit).
 try {
@@ -89,3 +96,14 @@ if (menuSection) {
 		}, 120);
 	}, 300);
 }
+
+const press = (key: string): boolean => window.dispatchEvent(new KeyboardEvent("keydown", { key }));
+if (q.get("research") === "1") setTimeout(() => press("r"), 300);
+if (q.get("audit")) setTimeout(() => store.fileQuarterReport(q.get("audit") as "A"), 700);
+const fin = q.get("fin");
+if (fin)
+	setTimeout(() => {
+		document.querySelectorAll<HTMLButtonElement>(".ui-subtab").forEach((b) => {
+			if (b.textContent?.toLowerCase().startsWith(fin)) b.click();
+		});
+	}, 150);

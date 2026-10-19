@@ -1,6 +1,8 @@
 import type { ContentDB } from "@aitower/content";
-import type { CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { AuditGrade, CellRef, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPct } from "./format";
+import { gradeTone } from "./finance/finance";
+import { effectText, unlocksFor } from "./research/tech";
 import type { Severity } from "./notices";
 
 export interface Described {
@@ -25,6 +27,16 @@ const commandName: Record<SimCommand["type"], string> = {
 	buyParts: "Buy parts",
 	buyBot: "Buy bot",
 	resolveMemo: "Answer memo",
+	research: "Research",
+	setClerk: "Clerk orders",
+	takeLoan: "Take loan",
+	repayLoan: "Repay loan",
+	choosePath: "Choose path",
+};
+
+const gradeSeverity = (g: AuditGrade): Severity => {
+	const t = gradeTone(g);
+	return t === "green" ? "good" : t === "amber" ? "info" : "warn";
 };
 
 /** Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). */
@@ -127,6 +139,34 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB): 
 				severity: ev.kind === "victory" ? "good" : "error",
 				toast: false,
 			};
+		case "researched": {
+			const node = content.tech?.find((t) => t.id === ev.techId);
+			const gives = [...(node?.effects.map((e) => effectText(e, content)) ?? []), ...(unlocksFor(ev.techId, content).length ? [`new in the build menu: ${unlocksFor(ev.techId, content).join(", ")}`] : [])];
+			return { text: `Research filed: ${node?.name ?? ev.techId}${gives.length ? `. ${gives.join("; ")}` : ""}`, severity: "good", toast: true };
+		}
+		case "clerkAccepted": {
+			const fee = content.balance?.clerk?.feeShare;
+			return { text: `The Contracts Clerk accepted ${job(ev.jobId)}${fee ? ` (fee ${Math.round(fee * 1000) / 10} % of its earnings)` : ""}`, severity: "info", toast: false };
+		}
+		case "loanTaken": {
+			const rate = view.loan?.dailyRate;
+			return { text: `Credit Office: loan of ${fmtMoney(ev.amount)} approved${rate ? `; interest accrues at ${Math.round(rate * 10000) / 100} % a day` : ""}`, severity: "info", toast: false };
+		}
+		case "loanRepaid":
+			return { text: `Credit Office: ${fmtMoney(ev.amount)} repaid. The Ministry thanks you for your promptness`, severity: "good", toast: false };
+		// M3 placeholders (M3-T4 words these properly).
+		case "pathChosen":
+			return { text: `Ascension path filed: ${ev.path}`, severity: "info", toast: true };
+		case "growthSprouted":
+			return { text: `An asset has been registered at ${fac(ev.facilityId).name}`, severity: "info", toast: false, cell: fac(ev.facilityId).cell };
+		case "botMutated":
+			return { text: `Automaton #${ev.botId} has been reclassified (${ev.trait})`, severity: "info", toast: false };
+		case "contaminationIrreversible":
+			return { text: "The building has been recertified as an organism", severity: "warn", toast: true };
+		case "quarterReport": {
+			const r = view.reports?.find((r) => r.quarter === ev.quarter);
+			return { text: `Quarterly audit ${ev.quarter} filed: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
+		}
 	}
 }
 

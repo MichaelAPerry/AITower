@@ -1,5 +1,6 @@
 import type { ContentDB } from "@aitower/content";
 import type { GameStore } from "@aitower/shared";
+import type { QuarterReport } from "@aitower/sim";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BottomPanel } from "./components/BottomPanel";
 import { BuildPalette } from "./components/BuildPalette";
@@ -9,6 +10,9 @@ import { Inspector } from "./components/Inspector";
 import { OverlaySwitcher } from "./components/OverlaySwitcher";
 import { Toasts } from "./components/Toasts";
 import { TopBar } from "./components/TopBar";
+import { AuditSheet } from "./finance/AuditSheet";
+import { auditToShow, createLogCursor } from "./finance/auditTrigger";
+import { ResearchSheet } from "./research/ResearchSheet";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { MemoDrawer, MemoPop, ModifierChips } from "./memo/MemoDesk";
@@ -24,6 +28,10 @@ import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
+// After ui.css, so these can refine its base rules.
+import "./clerk/clerk.css";
+import "./finance/finance.css";
+import "./research/research.css";
 
 export interface HudProps {
 	store: GameStore;
@@ -35,10 +43,18 @@ export interface HudProps {
 /** The whole HUD, absolutely positioned over the world canvas; empty areas let pointer events through. */
 export function Hud({ store, content, title }: HudProps) {
 	const state = useGameState(store);
-	const [ui, setUiState] = useState<UiState>({ bottomTab: "contracts", bottomOpen: true, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, stamped: [], aside: [] });
+	const [ui, setUiState] = useState<UiState>({ bottomTab: "contracts", bottomOpen: true, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
+	// The research sheet pauses like the menu (and restores the speed on close).
+	const [researchOpen, setResearchOpen] = useState(false);
+	const research = useMemo(() => createMenuController(store, setResearchOpen), [store]);
+	// The quarterly audit sheet does not pause. `auditRef` lets the Esc handler (a stable object) see the current report.
+	const [audit, setAudit] = useState<QuarterReport | null>(null);
+	const auditRef = useRef<QuarterReport | null>(null);
+	auditRef.current = audit;
+	const auditSheet = useMemo(() => ({ isOpen: () => auditRef.current !== null, close: () => setAudit(null) }), []);
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
@@ -57,11 +73,13 @@ export function Hud({ store, content, title }: HudProps) {
 	}, [menuOpen]);
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
+	useEffect(() => () => research.close(), [research]);
 	useHudKeyboard(
 		store,
 		useCallback(() => setUiState((u) => ({ ...u, bottomOpen: !u.bottomOpen })), []),
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current, []),
+		{ research, audit: auditSheet },
 	);
 
 	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
@@ -74,7 +92,10 @@ export function Hud({ store, content, title }: HudProps) {
 	const overId = over ? overKey(over) : null;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: pause once when a game-over appears
 	useEffect(() => {
-		if (overId) store.setSpeed(0);
+		if (overId) {
+			research.close(); // restores its remembered speed first, so the pause below is the last word
+			store.setSpeed(0);
+		}
 	}, [overId]);
 	// A load or import replaced the game: leave the title or the game-over notice and run at 1×.
 	const onReplaced = (): void => {
@@ -98,13 +119,21 @@ export function Hud({ store, content, title }: HudProps) {
 	const [noticeDismissed, setNoticeDismissed] = useState(false);
 	const showNotice = settings.showDesktopNotice && !noticeDismissed && isSmallScreen(viewport.width, viewport.height);
 
+	// A filed quarterly audit pops its sheet once (entries already in the log when the HUD mounts, or from before a load, do not).
+	const cursor = useRef(createLogCursor());
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scan the log only when it changes; the view is read at that moment
+	useEffect(() => {
+		const r = auditToShow(cursor.current, state.log, state.view.reports);
+		if (r) setAudit(r);
+	}, [state.log]);
+
 	const alertsOpen = ui.bottomOpen && ui.bottomTab === "alerts";
 	const tick = state.view.tick;
 	useEffect(() => {
 		if (alertsOpen) setUi({ alertsSeenTick: tick });
 	}, [alertsOpen, tick, setUi]);
 
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save") };
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAudit: setAudit };
 	return (
 		<div
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
@@ -126,6 +155,8 @@ export function Hud({ store, content, title }: HudProps) {
 				<Inspector {...props} />
 			</div>
 			<BottomPanel {...props} />
+			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
+			{researchOpen && !titleOpen && <ResearchSheet store={store} content={content} view={state.view} onClose={research.close} />}
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
 			{titleOpen && <TitleScreen store={store} state={state} menuOpen={menuOpen} openMenu={openMenuAt} onStart={() => setTitleOpen(false)} />}
 			{over && (

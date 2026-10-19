@@ -74,8 +74,42 @@ describe("current orders", () => {
 		expect(o.detail).toMatch(/or 1 Mk\.II Liquid \(\$1\.40M each\) on a coolant loop with a chiller and a CDU/);
 		expect(o.detail).toMatch(/1 cabinet is idle/);
 	});
+	it("red treasury with loan headroom mentions the Credit Office and the amount", () => {
+		const o = currentObjective(view({ cash: -5, loan: { principal: 500_000, max: 2_000_000, dailyRate: 0.004 } }), content, yes);
+		expect(o.tone).toBe("alert");
+		expect(o.detail).toMatch(/Credit Office/);
+		expect(o.detail).toMatch(/\$1\.50M/);
+	});
+	it("red treasury with the credit line used up (or no loan data) does not mention it", () => {
+		expect(currentObjective(view({ cash: -5, loan: { principal: 2_000_000, max: 2_000_000, dailyRate: 0.004 } }), content, yes).detail).not.toMatch(/Credit Office/);
+		expect(currentObjective(view({ cash: -5 }), content, yes).detail).not.toMatch(/Credit Office/);
+	});
+	it("an affordable research node names itself and the R key, once racks are busy", () => {
+		const c = { ...content, tech: [{ id: "x", name: "Form 9", cost: 20, branch: "compute", minTier: 1, requires: [], effects: [{ type: "perk", kind: "failureRate", factor: 0.9 }] }, { id: "y", name: "Costly", cost: 90, branch: "power", minTier: 1, requires: [], effects: [] }] } as unknown as ContentDB;
+		const o = currentObjective(view({ jobs: running, researchPoints: 25, techResearched: [] }), c, yes);
+		expect(o.title).toBe("File a research request (R)");
+		expect(o.detail).toMatch(/Form 9/);
+		expect(o.detail).toMatch(/−10 % failure rate/);
+		expect(o.detail).not.toMatch(/Costly/);
+	});
+	it("research is not suggested when nothing is affordable, and a fitting offer still comes first", () => {
+		const c = { ...content, tech: [{ id: "x", name: "Form 9", cost: 20, branch: "compute", minTier: 1, requires: [], effects: [] }] } as unknown as ContentDB;
+		expect(currentObjective(view({ jobs: running, researchPoints: 5 }), c, yes).title).toBe("Next: Clearance 2");
+		expect(currentObjective(view({ jobs: running, researchPoints: 50, offers: [{ id: 5, clientName: "X" }] }), c, yes).title).toBe("Accept another contract");
+	});
+	it("a clerk that is unlocked but off is flagged; on, or locked, it is not", () => {
+		const clerk = (unlocked: boolean, enabled: boolean) => ({ unlocked, policy: { enabled }, acceptedTotal: 0 });
+		expect(currentObjective(view({ jobs: running, clerk: clerk(true, false) }), content, yes).title).toBe("Switch on your Contracts Clerk");
+		expect(currentObjective(view({ jobs: running, clerk: clerk(true, true) }), content, yes).title).toBe("Next: Clearance 2");
+		expect(currentObjective(view({ jobs: running, clerk: clerk(false, false) }), content, yes).title).toBe("Next: Clearance 2");
+	});
 	it("installed PFLOPS ignores failed and disabled racks", () => {
 		expect(installedPflops(view({ facilities: [rack(1), rack(2, "failed"), rack(3, "ok", false)] }), content)).toBe(20);
+	});
+	it("money line includes taxes, interest and fees", () => {
+		const m = moneyToday(view({ ledger: [{ day: 0, revenue: 80_000, energy: 10_000, upkeep: 2_000, construction: 0, penalties: 0, taxes: 6_000, interest: 1_500, fees: 800 }] }));
+		expect(m.costs).toBe(20_300);
+		expect(m.breakdown).toBe("energy $10k · upkeep $2k · taxes $6k · interest $1.5k · fees $800");
 	});
 	it("money line sums costs and lists only non-zero parts", () => {
 		const m = moneyToday(view());

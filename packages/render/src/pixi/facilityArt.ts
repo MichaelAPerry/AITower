@@ -9,6 +9,7 @@ import type { FacilityDef } from "@aitower/content";
 import type { RenderOptions } from "@aitower/shared";
 import type { FacilityView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
+import { type ArtTier, type RackVariant, annexTiles, artSpec, bodyWidth, cabinetDetail, rackVariant, trimDetail } from "../art";
 import { alertColor, hex } from "../color";
 import { FAC_BOTTOM, FAC_TOP, PIPE_H, PIPE_RETURN_Y, PIPE_SUPPLY_Y, TILE, TUBE_Y } from "../constants";
 import { BRASS, COPPER, CRATE, GLASS, type Mat, PAPER, SCREEN, STEEL, T, VERDI, dk, lt, mat, mix } from "../palette";
@@ -37,14 +38,7 @@ const H = FAC_BOTTOM - FAC_TOP;
 const HOUSING = mat(T.housing);
 const TAPE = mix(T.housing, T.copper, 0.35);
 
-/** Rack variant from its def. */
-export type RackVariant = "air" | "dlc" | "storage";
-export const rackVariant = (def: FacilityDef): RackVariant =>
-	(def.rack?.pflops ?? 0) === 0 && (def.rack?.storageTB ?? 0) > 0
-		? "storage"
-		: def.rack?.cooling === "dlc" || def.rack?.cooling === "immersion"
-			? "dlc"
-			: "air";
+export { rackVariant, type RackVariant };
 
 // ─── Shared parts ──────────────────────────────────────────────────────
 
@@ -108,10 +102,55 @@ function kick(g: Graphics, x: number, y: number, w: number): void {
 
 // ─── Static bodies ─────────────────────────────────────────────────────
 
+/** Static body plus the brass trim its `unlockTier` earns (racks carry theirs per cabinet). */
 export function drawBody(g: Graphics, def: FacilityDef, x: number, top: number): void {
+	baseBody(g, def, x, top);
+	if (def.kind === "rack") return;
+	const extra = annexTiles(def);
+	if (extra > 0) annexBay(g, x + bodyWidth(def) * TILE, top + FAC_TOP, extra * TILE, hex(def.color), hex(def.accent));
+	tierTrim(g, x, top + FAC_TOP, def.width * TILE, artSpec(def).tier);
+}
+
+/** Enamel bay that fills tiles beyond a body's native width: louvres, a dial and a kick plate. */
+function annexBay(g: Graphics, x: number, y: number, W: number, c: number, a: number): void {
+	const m = mat(c);
+	enamel(g, x, y + 4, W - 1, H - 4, m);
+	px(g, x + 2, y + 7, W - 5, 1, mix(a, c, 0.5));
+	louvres(g, x + 2, y + 10, W - 5, 10, m);
+	dialFace(g, x + Math.floor((W - 6) / 2), y + 21, 5);
+	kick(g, x + 1, y + H - 4, W - 3);
+}
+
+/** Edge trim for non-rack facilities: brass rail, plinth, pilasters and finials, only on edge rows/columns the bodies leave free. */
+function tierTrim(g: Graphics, x: number, y: number, W: number, tier: ArtTier): void {
+	const d = trimDetail(tier, W / TILE);
+	if (d.topRail) {
+		px(g, x + 2, y, W - 4, 1, BRASS.mid);
+		for (let k = x + 3; k < x + W - 3; k += 3) px(g, k, y, 1, 1, BRASS.hi);
+	}
+	if (d.plinth) {
+		px(g, x + 1, y + H - 1, W - 2, 1, BRASS.lo);
+		for (let k = x + 3; k < x + W - 3; k += 4) px(g, k, y + H - 1, 1, 1, BRASS.mid);
+	}
+	if (d.pilasters) {
+		for (const px0 of [x, x + W - 1]) {
+			px(g, px0, y + 2, 1, H - 5, BRASS.mid);
+			for (let k = y + 4; k < y + H - 4; k += 4) px(g, px0, k, 1, 1, BRASS.hi);
+		}
+	}
+	if (d.finials) {
+		for (const fx of [x + 1, x + W - 4]) {
+			px(g, fx, y, 3, 3, BRASS.line);
+			px(g, fx + 1, y + 1, 1, 1, BRASS.hi);
+			px(g, fx, y, 3, 1, BRASS.mid);
+		}
+	}
+}
+
+function baseBody(g: Graphics, def: FacilityDef, x: number, top: number): void {
 	const c = hex(def.color);
 	const a = hex(def.accent);
-	const W = def.width * TILE;
+	const W = bodyWidth(def) * TILE;
 	const y = top + FAC_TOP;
 	switch (def.kind) {
 		case "rack":
@@ -153,11 +192,14 @@ const CRT_H = 5;
 const LAMP_Y = 14;
 
 function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: number, c: number, a: number): void {
-	const v = rackVariant(def);
+	const spec = artSpec(def);
+	const v = spec.variant ?? "air";
 	const m = mat(c);
+	const liquid = v === "dlc" || v === "immersion";
 	for (let i = 0; i < def.width; i++) {
 		const cx = x + i * TILE + 1;
-		if (v === "dlc") {
+		const det = cabinetDetail(spec.tier, i, def.width);
+		if (liquid) {
 			// Ceiling drops: supply into the left cabinet's manifold, return out of the right one.
 			if (i === 0) vpipe(g, cx + 11, top + PIPE_SUPPLY_Y + PIPE_H, y + 1, COPPER);
 			if (i === def.width - 1) vpipe(g, cx + 11, top + PIPE_RETURN_Y + PIPE_H, y + 1, VERDI);
@@ -181,8 +223,9 @@ function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: numb
 		} else {
 			// Lamp sockets.
 			for (const lx of [3, 6, 9]) px(g, cx + lx, y + LAMP_Y + 2, 2, 1, m.lo);
-			// Punch-card intake grille (air) or a narrower panel beside the manifold (DLC).
-			louvres(g, cx + 2, y + 17, v === "dlc" ? 8 : 9, 8, m);
+			// Punch-card intake grille (air), a narrower panel beside the manifold (DLC) or a glass immersion tank.
+			if (v === "immersion") immersionTank(g, cx + TANK_X, y + TANK_Y, hex(def.accent), i);
+			else louvres(g, cx + 2, y + 17, v === "dlc" ? 8 : 9, 8, m);
 			// Punch-card slot (card drawn live).
 			px(g, cx + 3, y + 26, 7, 1, T.ink);
 			px(g, cx + 3, y + 27, 7, 1, m.hi);
@@ -199,17 +242,106 @@ function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: numb
 				const pm = i === 0 ? COPPER : VERDI;
 				vpipe(g, cx + 11, y + 1, y + 26, pm);
 				valveWheel(g, cx + 10, y + 13, i);
-				valveWheel(g, cx + 10, y + 19, i + 1);
+				if (v === "dlc") valveWheel(g, cx + 10, y + 19, i + 1);
 				px(g, cx + 10, y + 25, 5, 2, pm.dk);
 			}
 		}
 		kick(g, cx + 1, y + H - 4, CAB_W - 2);
+		cabinetTrim(g, v, det, cx, y);
 	}
 	// Pneumatic receiver where the job tube meets the cabinet top.
 	const rx = x + 6;
 	px(g, rx, top + TUBE_Y - 1, 4, 4, BRASS.line);
 	px(g, rx + 1, top + TUBE_Y - 1, 2, 4, BRASS.mid);
 	px(g, rx + 1, top + TUBE_Y - 1, 1, 1, BRASS.hi);
+}
+
+// Immersion tank (local to a cabinet): glass box with a brass lid, dielectric fluid, submerged blades.
+const TANK_X = 2;
+const TANK_Y = 16;
+const TANK_W = 8;
+const TANK_H = 10;
+/** Dielectric fluid: the glass tint pulled toward the def's accent. */
+const fluidColor = (accent: number): number => lt(mix(GLASS, accent, 0.55), 0.1);
+
+function immersionTank(g: Graphics, x: number, y: number, accent: number, i: number): void {
+	const fluid = fluidColor(accent);
+	px(g, x, y, TANK_W, TANK_H, BRASS.line);
+	px(g, x + 1, y + 1, TANK_W - 2, TANK_H - 2, GLASS);
+	px(g, x + 1, y + 3, TANK_W - 2, TANK_H - 4, fluid);
+	px(g, x + 1, y + 3, TANK_W - 2, 1, lt(fluid, 0.35)); // meniscus
+	// Submerged server blades with a status pip each.
+	for (const bx of [x + 3, x + 5]) {
+		px(g, bx, y + 4, 1, TANK_H - 5, dk(T.housing, 0.2));
+		px(g, bx, y + 4, 1, 1, (bx + i) % 2 ? T.green : T.amber);
+	}
+	px(g, x + 1, y + 2, 1, TANK_H - 4, lt(GLASS, 0.3), 0.8); // glint
+	// Brass lid with bolts, and a foot.
+	px(g, x, y, TANK_W, 1, BRASS.mid);
+	px(g, x, y, 1, 1, BRASS.hi);
+	px(g, x + TANK_W - 1, y, 1, 1, BRASS.hi);
+	px(g, x, y + TANK_H - 1, TANK_W, 1, BRASS.lo);
+}
+
+/** Bubbles rising in an immersion tank; `rise` 0..1 per bubble (held at fixed phases when `moving` is false). */
+function tankBubbles(g: Graphics, cx: number, y: number, accent: number, id: number, n: number, t: number, moving: boolean): void {
+	const col = lt(fluidColor(accent), 0.75);
+	const cols = [3, 5, 7];
+	for (let k = 0; k < n; k++) {
+		const ph = moving ? (t * 0.7 + hash(id, k)) % 1 : hash(id, k);
+		const by = y + TANK_Y + TANK_H - 3 - Math.round(ph * (TANK_H - 6));
+		px(g, cx + TANK_X + cols[k % 3], by, 1, 1, col, moving ? 0.9 * (1 - ph * 0.5) : 0.75);
+	}
+}
+
+/** Gauge / hopper / crest / pilaster extras that a rack cabinet earns from its `unlockTier`. */
+function cabinetTrim(g: Graphics, v: RackVariant, d: ReturnType<typeof cabinetDetail>, cx: number, y: number): void {
+	const liquid = v === "dlc" || v === "immersion";
+	if (d.cornice) {
+		px(g, cx + 2, y + 1, CAB_W - 4, 1, BRASS.mid);
+		for (let k = cx + 3; k < cx + CAB_W - 3; k += 2) px(g, k, y + 1, 1, 1, BRASS.hi);
+	}
+	if (d.pilasters) {
+		px(g, cx + 1, y + 6, 1, 20, BRASS.mid);
+		if (!liquid) px(g, cx + CAB_W - 2, y + 6, 1, 20, BRASS.mid);
+		for (let k = y + 8; k < y + 25; k += 4) {
+			px(g, cx + 1, k, 1, 1, BRASS.hi);
+			if (!liquid) px(g, cx + CAB_W - 2, k, 1, 1, BRASS.hi);
+		}
+	}
+	if (d.gauge) {
+		if (liquid) {
+			// Brass collars on the manifold.
+			for (const cy of [y + 5, y + 21]) {
+				px(g, cx + 10, cy, 5, 2, BRASS.mid);
+				px(g, cx + 10, cy, 5, 1, BRASS.hi);
+			}
+		} else {
+			// 3×3 pressure gauge in the side column (air) or beside the CRT (storage).
+			const gy = v === "storage" ? y + 7 : y + 13;
+			px(g, cx + 11, gy, 3, 3, BRASS.mid);
+			px(g, cx + 12, gy + 1, 1, 1, PAPER.hi);
+			px(g, cx + 11, gy, 1, 1, BRASS.hi);
+			px(g, cx + 13, gy, 1, 1, T.red);
+		}
+	}
+	if (d.hopper) {
+		// Punch-card hopper on the cabinet top: brass cheeks around a stack of cards with punched holes.
+		px(g, cx + 9, y - 1, 5, 1, BRASS.lo);
+		px(g, cx + 9, y - 3, 1, 2, BRASS.mid);
+		px(g, cx + 13, y - 3, 1, 2, BRASS.mid);
+		px(g, cx + 10, y - 2, 3, 1, PAPER.lo);
+		px(g, cx + 10, y - 3, 3, 1, PAPER.hi);
+		px(g, cx + 11, y - 3, 1, 1, dk(T.paper, 0.5));
+	}
+	if (d.crest) {
+		// Brass Ministry crest above the cabinet.
+		px(g, cx + 6, y - 4, 3, 1, BRASS.hi);
+		px(g, cx + 5, y - 3, 5, 2, BRASS.mid);
+		px(g, cx + 6, y - 1, 3, 1, BRASS.lo);
+		px(g, cx + 7, y - 3, 1, 1, T.ink);
+		px(g, cx + 7, y - 2, 1, 1, T.red);
+	}
 }
 
 function crahBody(g: Graphics, x: number, y: number, W: number, c: number, a: number): void {
@@ -675,6 +807,11 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 			[3, 6, 9].forEach((lx, l) => {
 				lamp(g, cx + lx, y + LAMP_Y, cue.color, lampOn(l));
 			});
+			if (v === "immersion") {
+				// Bubbling fluid: more bubbles under load, none when dark; held at fixed positions under reduced motion.
+				const n = !f.enabled || cue.mode === "off" ? 0 : active ? 5 : 2;
+				tankBubbles(g, cx, y, hex(def.accent), f.id * 8 + i, n, t, !calm && active);
+			}
 			// Punch card feeding through the slot.
 			const feed = active && !calm && f.jobId !== null ? Math.floor(t * 1.5 + i) % 3 : 0;
 			const kx = cx + 4 + ((f.id + i) % 3);

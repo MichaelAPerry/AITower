@@ -8,7 +8,10 @@ import { HISTORY_INTERVAL_TICKS, HISTORY_LENGTH, MIN_POWERED_SATISFACTION, TICKS
 import { offersStep } from "../compute/offers";
 import { setGameOver } from "../ministry/standing";
 import { getDef } from "../world/defs";
+import { sampleAudit } from "./audit";
+import { clerkStep } from "./clerk";
 import { spend } from "./ledger";
+import { perk } from "../research/research";
 
 function sum(a: Float64Array): number {
 	let s = 0;
@@ -31,7 +34,7 @@ export function economyStep(ctx: TickCtx): void {
 			if (!f.failed && !f.tripped && !f.noCoolant && f.sat >= MIN_POWERED_SATISFACTION) running++;
 		}
 	}
-	spend(state, "upkeep", upkeep / TICKS_PER_DAY);
+	spend(state, "upkeep", (upkeep / TICKS_PER_DAY) * perk(state, content, "upkeep"));
 	spend(state, "energy", m.energyCost);
 
 	const slot = state.tick % TICKS_PER_DAY;
@@ -43,6 +46,7 @@ export function economyStep(ctx: TickCtx): void {
 	m.pue = it > 0 ? sum(m.ringTotalKwh) / it : 1;
 	const should = sum(m.ringShouldRun);
 	m.uptime = should > 0 ? sum(m.ringRunning) / should : 1;
+	sampleAudit(state);
 
 	if (state.cash < 0) {
 		state.negativeCashTicks++;
@@ -57,6 +61,7 @@ export function economyStep(ctx: TickCtx): void {
 	}
 
 	offersStep(ctx);
+	clerkStep(ctx);
 
 	if (state.tick % HISTORY_INTERVAL_TICKS === 0) {
 		state.history.push({

@@ -11,5 +11,15 @@
 	{ "id": "paperlantern", "name": "Paper Lantern Studios", "sector": "media", "weight": 1, "kinds": ["finetune", "training"], "minTier": 2, "payMultiplier": 1.0 },
 	{ "id": "stratos_weather", "name": "Stratos Ensemble Weather Service", "sector": "climate", "weight": 2, "kinds": ["inference", "training"], "minTier": 3, "payMultiplier": 1.2 },
 	{ "id": "valdoria_sovereign", "name": "Valdorian Sovereign AI Programme", "sector": "gov", "weight": 2, "kinds": ["training"], "minTier": 3, "payMultiplier": 1.4, "needsLiquid": true },
-	{ "id": "meridian_agi", "name": "Meridian Superintelligence Project", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.6, "needsLiquid": true }
+	{ "id": "meridian_agi", "name": "Meridian Superintelligence Project", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.6, "needsLiquid": true },
+	{ "id": "ipanema_genomics", "name": "Ipanema Genomics Cooperative", "sector": "biotech", "weight": 2, "kinds": ["training", "finetune"], "minTier": 2, "payMultiplier": 1.2 },
+	{ "id": "banco_meridional", "name": "Banco Meridional Clearing House", "sector": "finance", "weight": 2, "kinds": ["inference"], "minTier": 2, "payMultiplier": 1.25 },
+	{ "id": "census_cybernetics", "name": "Bureau of Census Cybernetics", "sector": "gov", "weight": 1, "kinds": ["inference", "finetune"], "minTier": 2, "payMultiplier": 1.0 },
+	{ "id": "tupi_telemetry", "name": "Tupi Satellite Telemetry Office", "sector": "climate", "weight": 2, "kinds": ["inference", "training"], "minTier": 3, "payMultiplier": 1.15 },
+	{ "id": "carioca_render", "name": "Carioca Cinematic Rendering Guild", "sector": "media", "weight": 2, "kinds": ["finetune", "inference"], "minTier": 3, "payMultiplier": 1.05 },
+	{ "id": "amazonas_twin", "name": "Amazonas Rainforest Digital Twin", "sector": "climate", "weight": 2, "kinds": ["training"], "minTier": 3, "payMultiplier": 1.35, "needsLiquid": true },
+	{ "id": "ouro_preto_proteome", "name": "Ouro Preto Proteome Works", "sector": "biotech", "weight": 2, "kinds": ["training", "inference"], "minTier": 3, "payMultiplier": 1.4, "needsLiquid": true },
+	{ "id": "santos_arbitrage", "name": "Santos Exchange Arbitrage Syndicate", "sector": "finance", "weight": 2, "kinds": ["inference"], "minTier": 3, "payMultiplier": 1.5 },
+	{ "id": "strategic_cognition", "name": "Ministry of Strategic Cognition", "sector": "gov", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 1.6, "needsLiquid": true },
+	{ "id": "paulista_foundation", "name": "Paulista Foundation Models Consortium", "sector": "frontier", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 1.7, "needsLiquid": true }
 ]
