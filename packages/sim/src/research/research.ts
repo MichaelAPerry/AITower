@@ -63,6 +63,7 @@ export function planResearch(ctx: PlanCtx, techId: string): Plan {
 	for (const req of node.requires) {
 		if (!isResearched(state, req)) return reject(`missing prerequisite: ${techNode(content, req)?.name ?? req}`);
 	}
+	if (node.path !== undefined && state.path !== node.path) return reject(`requires the ${node.path} path`);
 	if (state.tier < node.minTier) return reject(`requires Clearance ${node.minTier}`);
 	if (state.researchPoints < node.cost) return reject(`needs ${rp(node.cost)} RP, have ${rp(state.researchPoints)}`);
 	return accept(0, (events) => {

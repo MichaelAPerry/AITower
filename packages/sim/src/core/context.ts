@@ -1,5 +1,6 @@
 import type { ContentDB } from "@aitower/content";
 import type { SimEvent } from "../api";
+import type { BioIndex } from "../bio/index";
 import { createNav, type Nav } from "../logistics/routing";
 import type { Facility, SimState } from "./state";
 
@@ -8,6 +9,8 @@ export interface PowerBucket {
 	loads: Facility[];
 	liftKw: number;
 	grids: Facility[];
+	/** Bioreactors: free power while their nutrient net feeds them. */
+	reactors: Facility[];
 	gensets: Facility[];
 	upses: Facility[];
 }
@@ -22,6 +25,8 @@ export interface Scratch {
 	nav: Nav;
 	/** Power-solve buffers (cleared every tick, never reallocated unless the net count grows). */
 	power: { buckets: PowerBucket[]; gensetOut: number[] };
+	/** Biotech facility lists (rebuilt when `topologyRev` changes) and the quarantine mask. */
+	bio: BioIndex;
 }
 
 export function createScratch(cells: number): Scratch {
@@ -32,6 +37,7 @@ export function createScratch(cells: number): Scratch {
 		label: new Int32Array(cells),
 		nav: createNav(cells),
 		power: { buckets: [], gensetOut: [] },
+		bio: { rev: -1, plants: [], consumers: [], emitters: [], sterilizers: [], quarantines: [], reactors: [], growthDefs: [], mask: new Uint8Array(cells) },
 	};
 }
 

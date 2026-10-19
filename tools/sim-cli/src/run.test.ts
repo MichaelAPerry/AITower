@@ -78,6 +78,8 @@ describe("sim-cli memo policy", () => {
 			expect(r.standing).toBeLessThanOrEqual(100);
 		}
 		expect(formatTable(a.rows)).toContain("standing");
+		expect(formatTable(a.rows)).toContain("corruption");
+		for (const r of a.rows) expect(r.corruption).toBe(0);
 	});
 });
 

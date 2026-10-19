@@ -8,7 +8,8 @@
 import { installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
 import { isLastTickOfDay } from "../core/time";
-import { dailyStanding, setGameOver } from "../ministry/standing";
+import { endingsStep } from "../bio/path";
+import { dailyStanding } from "../ministry/standing";
 import { closeAuditDay } from "../economy/audit";
 import { midnightCredit } from "../economy/credit";
 import { earn } from "../economy/ledger";
@@ -28,7 +29,7 @@ export function progressionStep(ctx: TickCtx): void {
 		earn(state, reward);
 		events.push({ type: "tierUp", tier: n, reward });
 	}
-	if (state.tier > before && state.tier >= tiers.pflops.length) setGameOver(state, "victory", events);
+	endingsStep(ctx); // reaching the top tier is no longer a win: the path endings decide
 	midnightCredit(ctx); // interest, then the levy on everything the day earned (tier reward included)
 	closeAuditDay(ctx, before); // record the closed day; file the quarterly audit when one is due
 }

@@ -17,7 +17,8 @@ export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB
 		if (!spec) continue;
 		storageTB += spec.storageTB;
 		if (f.jobId !== null || f.status === "failed" || f.status === "tripped" || !f.enabled) continue;
-		if (offer.needsLiquid && spec.cooling === "air") continue;
+		if (offer.needsLiquid && (spec.cooling === "air" || spec.cooling === "bio")) continue;
+		if (offer.needsBio && spec.cooling !== "bio") continue;
 		freePflops += spec.pflops;
 	}
 	if (offer.storageTB > storageTB) return false;
@@ -85,6 +86,8 @@ export interface DayRow {
 	failures: number;
 	tier: number;
 	standing: number;
+	/** Body-horror scalar 0..1 at the end of the day. */
+	corruption: number;
 	/** Unspent research points at the end of the day. */
 	rp: number;
 	/** Techs researched so far. */
@@ -147,6 +150,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			failures,
 			tier: v.tier,
 			standing: v.standing,
+			corruption: v.corruption,
 			rp: v.researchPoints,
 			techs: v.techResearched.length,
 			taxes: closed.taxes,
@@ -160,7 +164,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 const money = (n: number): string => `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
 export function formatTable(rows: DayRow[]): string {
-	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "RP", "techs", "taxes", "memos", "over"];
+	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "corruption", "RP", "techs", "taxes", "memos", "over"];
 	const body = rows.map((r) => [
 		String(r.day),
 		money(r.cash),
@@ -174,6 +178,7 @@ export function formatTable(rows: DayRow[]): string {
 		String(r.failures),
 		String(r.tier),
 		r.standing.toFixed(0),
+		r.corruption.toFixed(2),
 		r.rp.toFixed(1),
 		String(r.techs),
 		money(r.taxes),

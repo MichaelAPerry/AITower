@@ -12,6 +12,8 @@
  * the topology changes, and one shortest-path search per claim attempt serves every candidate.
  */
 import type { BotDef } from "@aitower/content";
+import { addContamination } from "../bio/contamination";
+import { contaminationAt } from "../bio/index";
 import type { TickCtx } from "../core/context";
 import {
 	BOT_DEPOT_RECHECK_TICKS,
@@ -21,8 +23,12 @@ import {
 	BOT_RETRY_BACKOFF_BASE_TICKS,
 	BOT_RETRY_BACKOFF_MAX_TICKS,
 	BOT_CHARGE_RATE_MULTIPLIER,
+	BOT_MIN_CONTAMINATION_SPEED,
 	BOT_STUCK_TICKS,
+	FLESHED_REPAIR_CONTAMINATION,
+	FLESHED_REPAIR_FACTOR,
 	MIN_POWERED_SATISFACTION,
+	TENDRILED_EXTRA_CARRY,
 } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Bot, Facility, Lift, SimState, WorkOrder } from "../core/state";
@@ -39,7 +45,10 @@ export const backoffTicks = (failures: number): number =>
 const liftPowered = (lift: Lift): boolean => lift.powerNet >= 0 && lift.sat >= MIN_POWERED_SATISFACTION;
 
 /** Walk / fly speed with the `botSpeed` tech perk. */
-const speedOf = (ctx: TickCtx, def: BotDef): number => def.speed * perk(ctx.state, ctx.content, "botSpeed");
+const speedOf = (ctx: TickCtx, def: BotDef, bot: Bot): number =>
+	def.speed *
+	perk(ctx.state, ctx.content, "botSpeed") *
+	Math.max(BOT_MIN_CONTAMINATION_SPEED, 1 - ctx.content.balance.bio.botSlowPerContamination * contaminationAt(ctx.state, bot.x, bot.floor));
 
 /** Parts currently held (a bot poked into `carrying` without a count holds one). */
 const heldParts = (bot: Bot): number => (bot.carrying ? Math.max(1, bot.parts) : 0);
@@ -50,19 +59,21 @@ function setParts(bot: Bot, n: number): void {
 }
 
 /** Spare parts per depot trip (`BotDef.carry`, default 1). */
-const carryOf = (def: BotDef): number => Math.max(1, Math.floor(def.carry ?? 1));
+const carryOf = (def: BotDef, bot: Bot): number => Math.max(1, Math.floor(def.carry ?? 1)) + (bot.trait === "tendriled" ? TENDRILED_EXTRA_CARRY : 0);
 
 /** Search from the bot's position; follow with `route`. Flying bots need no search: they fly straight. */
 function search(ctx: TickCtx, bot: Bot, def: BotDef): void {
 	if (def.flying) return;
 	ensureNav(ctx.scratch.nav, ctx.state, ctx.content);
-	beginSearch(ctx.scratch.nav, ctx.state, ctx.content, speedOf(ctx, def), bot.floor, bot.x);
+	beginSearch(ctx.scratch.nav, ctx.state, ctx.content, speedOf(ctx, def, bot), bot.floor, bot.x);
 }
 
 /** Route from the last `search` (or, for a flying bot, the straight flight from where it is) to a position. */
 function route(ctx: TickCtx, bot: Bot, def: BotDef, floor: number, x: number): RouteResult | null {
+	// A tendriled bot never rides lifts (nor flies between floors): only its own floor is reachable.
+	if (bot.trait === "tendriled" && floor !== bot.floor) return null;
 	if (def.flying) {
-		const sp = Math.max(speedOf(ctx, def), 1e-6);
+		const sp = Math.max(speedOf(ctx, def, bot), 1e-6);
 		return { lift: WALK_DIRECT, exit: floor, cost: Math.max(Math.abs(x - bot.x), Math.abs(floor - bot.floor)) / sp };
 	}
 	return routeTo(ctx.scratch.nav, ctx.state, floor, x);
@@ -123,7 +134,7 @@ function fly(ctx: TickCtx, bot: Bot, def: BotDef): Travel {
 	bot.liftId = WALK_DIRECT;
 	const dx = bot.goalX - bot.x;
 	const df = bot.goalFloor - bot.floor;
-	const t = Math.max(Math.abs(dx), Math.abs(df)) / Math.max(speedOf(ctx, def), 1e-6);
+	const t = Math.max(Math.abs(dx), Math.abs(df)) / Math.max(speedOf(ctx, def, bot), 1e-6);
 	if (t <= 1) {
 		bot.x = bot.goalX;
 		bot.floor = bot.goalFloor;
@@ -155,7 +166,7 @@ function travel(ctx: TickCtx, bot: Bot, def: BotDef): Travel {
 		tx = lift.x;
 	} else if (bot.liftId >= 0) bot.liftId = WALK_DIRECT;
 	const dx = tx - bot.x;
-	const speed = speedOf(ctx, def);
+	const speed = speedOf(ctx, def, bot);
 	if (Math.abs(dx) <= speed) bot.x = tx;
 	else bot.x += Math.sign(dx) * speed;
 	if (bot.x !== tx) return "moving";
@@ -347,7 +358,7 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 				// Take up to `carry` parts, but no more than the queued orders it could use (its own plus unclaimed ones).
 				let orders = 1;
 				for (const o of state.workOrders) if (o.id !== bot.workOrderId && claimable(state, o) && findById(state.facilities, o.facilityId)) orders++;
-				const take = Math.min(carryOf(def), orders, depot.stored);
+				const take = Math.min(carryOf(def, bot), orders, depot.stored);
 				depot.stored -= take;
 				setParts(bot, take);
 				const wo = findById(state.workOrders, bot.workOrderId);
@@ -361,7 +372,7 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 			const t = travel(ctx, bot, def);
 			if (t === "arrived") {
 				bot.task = "repair";
-				bot.timer = def.repairTicks / perk(state, content, "repairSpeed");
+				bot.timer = (def.repairTicks / perk(state, content, "repairSpeed")) * (bot.trait === "fleshed" ? FLESHED_REPAIR_FACTOR : 1);
 			} else if (t === "blocked") giveUp(ctx, bot, def);
 			break;
 		}
@@ -375,6 +386,9 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 					rack.health = 1;
 					state.stats.repairs++;
 					events.push({ type: "repaired", facilityId: rack.id, botId: bot.id });
+					if (bot.trait === "fleshed" && Math.round(bot.floor) >= state.floorMin && Math.round(bot.floor) <= state.floorMax) {
+						addContamination(state, Math.min(state.width - 1, Math.max(0, Math.round(bot.x))), Math.round(bot.floor), FLESHED_REPAIR_CONTAMINATION);
+					}
 				}
 				state.workOrders = state.workOrders.filter((w) => w.id !== bot.workOrderId);
 				bot.workOrderId = -1;
@@ -427,6 +441,13 @@ function stepBot(ctx: TickCtx, bot: Bot): void {
 		bot.stuck = progressed ? 0 : bot.stuck + 1;
 		if (bot.stuck >= BOT_STUCK_TICKS) giveUp(ctx, bot, def);
 	} else bot.stuck = 0;
+
+	// Mutation: cumulative time on contaminated cells.
+	const bioCfg = content.balance.bio;
+	if (bot.trait === null && contaminationAt(state, bot.x, bot.floor) >= bioCfg.mutationThreshold && ++bot.exposure >= bioCfg.mutationExposureTicks) {
+		bot.trait = (bot.id + state.seed) % 2 === 0 ? "fleshed" : "tendriled";
+		events.push({ type: "botMutated", botId: bot.id, trait: bot.trait });
+	}
 
 	const active = bot.task !== "none" && bot.task !== "charge";
 	if (active) bot.battery = Math.max(0, bot.battery - 1 / def.batteryTicks);

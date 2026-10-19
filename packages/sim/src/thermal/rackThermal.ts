@@ -6,7 +6,8 @@
 import type { TickCtx } from "../core/context";
 import { cellIdx } from "../core/grid";
 import type { Facility } from "../core/state";
-import { getDef } from "../world/defs";
+import { failRack } from "../reliability/reliabilityStep";
+import { getDef, organoidSpec } from "../world/defs";
 
 function meanAir(ctx: TickCtx, f: Facility): number {
 	const s = ctx.state;
@@ -26,7 +27,16 @@ export function rackThermalStep(ctx: TickCtx): void {
 			f.tempC = air;
 			continue;
 		}
-		const lf = d.rack.liquidFraction;
+		if (d.growth) {
+			// Growths ignore temperature: always at full clock, never throttled.
+			f.tempC = air;
+			f.thermalClock = 1;
+			f.throttled = false;
+			f.tooCold = false;
+			continue;
+		}
+		const bio = organoidSpec(d);
+		const lf = bio ? 0 : d.rack.liquidFraction;
 		const inlet = f.noCoolant || lf <= 0 ? air : (1 - lf) * air + lf * f.coolantC;
 		const load = d.rack.powerKw > 0 ? f.powerKw / d.rack.powerKw : 0;
 		const extra = f.noCoolant ? th.rackDeltaC * lf * load : 0;
@@ -34,6 +44,10 @@ export function rackThermalStep(ctx: TickCtx): void {
 		f.tempC += (target - f.tempC) * th.rackEase;
 		if (f.tempC > maxRackC) maxRackC = f.tempC;
 
+		if (bio) {
+			organoidBand(ctx, f, bio);
+			continue;
+		}
 		// Throttle band.
 		const span = th.throttleC - th.okC;
 		const over = f.tempC - th.okC;
@@ -61,4 +75,23 @@ export function rackThermalStep(ctx: TickCtx): void {
 		}
 	}
 	state.metrics.maxRackC = Number.isFinite(maxRackC) ? maxRackC : state.ambientC;
+}
+
+/**
+ * Organoid tissue band: full clock within targetC ± toleranceC, linear down to `minClock` at ±2× tolerance (flat beyond),
+ * and beyond ±3× the tissue fails like a component (work order). Too cold sets `tooCold`, too hot `throttled`.
+ */
+function organoidBand(ctx: TickCtx, f: Facility, bio: { targetC: number; toleranceC: number }): void {
+	const { state, content, events } = ctx;
+	const minClock = content.balance.thermal.minClock;
+	const dev = f.tempC - bio.targetC;
+	const a = Math.abs(dev) / Math.max(bio.toleranceC, 1e-6);
+	f.thermalClock = a <= 1 ? 1 : a >= 2 ? minClock : 1 - (1 - minClock) * (a - 1);
+	const out = a > 1;
+	const cold = out && dev < 0;
+	const hot = out && dev > 0;
+	if (out && !f.throttled && !f.tooCold && !f.failed) events.push({ type: "rackThrottled", facilityId: f.id });
+	f.throttled = hot;
+	f.tooCold = cold;
+	if (a > 3 && !f.failed) failRack(state, f, events);
 }

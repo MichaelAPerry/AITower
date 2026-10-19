@@ -4,7 +4,7 @@ import type { SimEvent } from "../api";
 import { ACCEPT_DEADLINE_MARGIN, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR, TRAINING_MAX_RACKS } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Facility, Job, SimState } from "../core/state";
-import { getDef, isComputeRack, isStorageRack } from "../world/defs";
+import { getDef, isBioRack, isComputeRack, isStorageRack } from "../world/defs";
 
 export const isActive = (job: Job): boolean => job.status === "queued" || job.status === "running" || job.status === "stalled";
 
@@ -73,7 +73,14 @@ export function applyStorageLimit(state: SimState, content: ContentDB): Set<numb
 
 function isFreeRack(content: ContentDB, f: Facility): boolean {
 	const d = getDef(content, f.defId);
-	return isComputeRack(d) && f.jobId < 0 && !rackDown(f) && !f.noCoolant && f.sat >= MIN_POWERED_SATISFACTION;
+	return isComputeRack(d) && f.jobId < 0 && !rackDown(f) && !f.noCoolant && !f.noNutrient && f.sat >= MIN_POWERED_SATISFACTION;
+}
+
+/** Can this rack serve a job? Liquid contracts need liquid-cooled racks (not air, not organoid); bio contracts need organoid racks. */
+export function rackSuits(spec: { needsLiquid: boolean; needsBio?: boolean }, d: ReturnType<typeof getDef>): boolean {
+	if (spec.needsLiquid && (d.rack?.cooling === "air" || d.rack?.cooling === "bio")) return false;
+	if (spec.needsBio && !isBioRack(d)) return false;
+	return true;
 }
 
 /** Auto-scheduler: oldest job first; inference until sustainedPflops is met, training up to 8 racks. */
@@ -90,7 +97,6 @@ export function allocateRacks(state: SimState, content: ContentDB, runnable: Set
 	if (free.length === 0) return;
 	for (const job of state.jobs) {
 		if (!isActive(job) || !runnable.has(job.id)) continue;
-		const needLiquid = job.spec.needsLiquid;
 		const inference = job.spec.kind === "inference";
 		let have = 0;
 		if (inference) for (const id of job.rackIds) have += pflopsOf(state, content, id);
@@ -99,7 +105,7 @@ export function allocateRacks(state: SimState, content: ContentDB, runnable: Set
 			if (r.jobId >= 0) continue;
 			if (inference ? have >= sustainedPflops(job) : job.rackIds.length >= TRAINING_MAX_RACKS) break;
 			const d = getDef(content, r.defId);
-			if (needLiquid && d.rack?.cooling === "air") continue;
+			if (!rackSuits(job.spec, d)) continue;
 			r.jobId = job.id;
 			job.rackIds.push(r.id);
 			have += d.rack?.pflops ?? 0;
@@ -130,14 +136,14 @@ export function installedPflops(state: SimState, content: ContentDB): number {
 export function acceptCheck(state: SimState, content: ContentDB, spec: ContractSpec): { ok: true } | { ok: false; reason: string } {
 	const free = state.facilities.filter((f) => isFreeRack(content, f));
 	const claimed = new Set<number>();
-	const claim = (needLiquid: boolean, enough: (have: number, count: number) => boolean, have0: number, count0: number) => {
+	const claim = (spec: { needsLiquid: boolean; needsBio?: boolean }, enough: (have: number, count: number) => boolean, have0: number, count0: number) => {
 		let have = have0;
 		let count = count0;
 		for (const r of free) {
 			if (enough(have, count)) break;
 			if (claimed.has(r.id)) continue;
 			const d = getDef(content, r.defId);
-			if (needLiquid && d.rack?.cooling === "air") continue;
+			if (!rackSuits(spec, d)) continue;
 			claimed.add(r.id);
 			have += d.rack?.pflops ?? 0;
 			count++;
@@ -150,8 +156,8 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 			let have = 0;
 			for (const id of job.rackIds) have += pflopsOf(state, content, id);
 			const need = sustainedPflops(job);
-			claim(job.spec.needsLiquid, (h) => h >= need, have, 0);
-		} else claim(job.spec.needsLiquid, (_h, n) => n >= TRAINING_MAX_RACKS, 0, job.rackIds.length);
+			claim(job.spec, (h) => h >= need, have, 0);
+		} else claim(job.spec, (_h, n) => n >= TRAINING_MAX_RACKS, 0, job.rackIds.length);
 	}
 
 	let idlePflops = 0;
@@ -161,17 +167,18 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 	let anyCompatible = false;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
-		if (isComputeRack(d) && !(spec.needsLiquid && d.rack?.cooling === "air")) anyCompatible = true;
+		if (isComputeRack(d) && rackSuits(spec, d)) anyCompatible = true;
 	}
 	for (const r of free) {
 		if (claimed.has(r.id)) continue;
 		const d = getDef(content, r.defId);
-		if (spec.needsLiquid && d.rack?.cooling === "air") continue;
+		if (!rackSuits(spec, d)) continue;
 		idlePflops += d.rack?.pflops ?? 0;
 		if (idleRacks < TRAINING_MAX_RACKS) trainPflops += d.rack?.pflops ?? 0;
 		idleRacks++;
 	}
 	const pf = (n: number) => `${Math.round(n * 10) / 10} PF`;
+	if (spec.needsBio && !anyCompatible) return { ok: false, reason: "needs organoid racks (none installed)" };
 	if (spec.needsLiquid && !anyCompatible) return { ok: false, reason: "needs liquid-cooled racks (none installed)" };
 	if (spec.kind === "inference") {
 		const need = spec.sustainedPflops ?? spec.work;
@@ -181,7 +188,7 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 		let offline = 0;
 		for (const f of state.facilities) {
 			const d = getDef(content, f.defId);
-			if (!isComputeRack(d) || (spec.needsLiquid && d.rack?.cooling === "air")) continue;
+			if (!isComputeRack(d) || !rackSuits(spec, d)) continue;
 			if (f.jobId >= 0 || claimed.has(f.id)) busy++;
 			else if (!isFreeRack(content, f)) offline++;
 		}

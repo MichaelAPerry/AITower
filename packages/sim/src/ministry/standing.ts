@@ -1,12 +1,12 @@
 /** Standing (0..100) and the one-shot game-over flag. */
-import type { GameOverKind, SimEvent } from "../api";
+import type { EndingId, GameOverKind, SimEvent } from "../api";
 import type { TickCtx } from "../core/context";
 import type { SimState } from "../core/state";
 
-export function setGameOver(state: SimState, kind: GameOverKind, events: SimEvent[]): void {
+export function setGameOver(state: SimState, kind: GameOverKind, events: SimEvent[], ending?: EndingId): void {
 	if (state.gameOver) return;
-	state.gameOver = { kind, tick: state.tick };
-	events.push({ type: "gameOver", kind });
+	state.gameOver = ending ? { kind, tick: state.tick, ending } : { kind, tick: state.tick };
+	events.push(ending ? { type: "gameOver", kind, ending } : { type: "gameOver", kind });
 }
 
 /** Clamp to 0..100, emit `standingChanged` with the applied delta (nothing if unchanged); reaching 0 ends the game. */

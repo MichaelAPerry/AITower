@@ -75,6 +75,16 @@ export function closeAuditDay(ctx: TickCtx, tier: number): void {
 	const a = state.audit;
 	const day = dayOf(state.tick);
 	const t = state.today;
+	if (state.irreversible) {
+		// The Ministry quietly stops sending inspectors: nothing is recorded or filed any more.
+		a.days = [];
+		a.samples = 0;
+		a.uptimeSum = 0;
+		a.pueSum = 0;
+		a.jobsCompleted = 0;
+		a.jobsFailed = 0;
+		return;
+	}
 	a.days.push({
 		day,
 		uptime: a.samples > 0 ? a.uptimeSum / a.samples : state.metrics.uptime,

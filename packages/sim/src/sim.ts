@@ -14,6 +14,10 @@ import { ambientAt } from "./core/time";
 import { memoStep } from "./ministry/memos";
 import { ambientOffset } from "./ministry/modifiers";
 import { jobStanding } from "./ministry/standing";
+import { contaminationStep } from "./bio/contamination";
+import { corruptionStep } from "./bio/corruption";
+import { growthStep } from "./bio/growth";
+import { nutrientSolve } from "./bio/nutrient";
 import { coolingSolve } from "./cooling/coolingSolve";
 import { economyStep } from "./economy/economyStep";
 import { spend } from "./economy/ledger";
@@ -121,6 +125,7 @@ export class SimImpl implements Sim {
 		applyCommands(ctx); //  1
 		rebuildNetworks(ctx); //  2 (dirty only)
 		powerSolve(ctx); //  3
+		nutrientSolve(ctx); //  3b nutrient nets
 		coolingSolve(ctx); //  4
 		airFieldStep(ctx); //  5a
 		rackThermalStep(ctx); //  5b
@@ -128,6 +133,9 @@ export class SimImpl implements Sim {
 		reliabilityStep(ctx); //  7
 		stepLifts(ctx); //  8a
 		stepBots(ctx); //  8b
+		contaminationStep(ctx); //  8c contamination field
+		growthStep(ctx); //  8d growth cull + sprouting
+		corruptionStep(ctx); //  8e
 		economyStep(ctx); //  9 (incl. contract offers)
 		memoStep(ctx); //  9b modifiers expire, memos time out / are issued
 		jobStanding(ctx); //  9c standing from this tick's job outcomes

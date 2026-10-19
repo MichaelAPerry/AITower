@@ -91,7 +91,7 @@ export const GROWTH_RECOVER_TICKS = 180;
 /** Culling rooms clear growths once a day at this minute of day (03:00). */
 export const CULL_MINUTE_OF_DAY = 3 * 60;
 /** Contamination below this is flushed to zero (so the field can go quiet). */
-export const CONTAMINATION_FLOOR = 1e-6;
+export const CONTAMINATION_FLOOR = 1e-9;
 /** A cell counts as contaminated at or above this level. */
 export const CONTAMINATED_CELL = 0.5;
 /** Corruption target weights: contaminated share (relative to the irreversible share), organoid share of compute, growths. */

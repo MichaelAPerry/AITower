@@ -31,7 +31,7 @@ export function economyStep(ctx: TickCtx): void {
 		upkeep += d.upkeepPerDay;
 		if (d.kind === "rack" && f.enabled) {
 			shouldRun++;
-			if (!f.failed && !f.tripped && !f.noCoolant && f.sat >= MIN_POWERED_SATISFACTION) running++;
+			if (!f.failed && !f.tripped && !f.noCoolant && !f.noNutrient && f.sat >= MIN_POWERED_SATISFACTION) running++;
 		}
 	}
 	spend(state, "upkeep", (upkeep / TICKS_PER_DAY) * perk(state, content, "upkeep"));
