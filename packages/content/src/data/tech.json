@@ -1,1 +1,552 @@
-[]
+[
+ {
+  "id": "contracts_clerk",
+  "name": "Contracts Clerk",
+  "description": "A desk, a stamp and a clerk who never sleeps. Switches on the Contracts Clerk: it accepts fitting offers for you and keeps 6% of what those jobs earn.",
+  "branch": "administration",
+  "minTier": 1,
+  "cost": 180,
+  "requires": [],
+  "effects": [
+   {
+    "type": "feature",
+    "feature": "contractsClerk"
+   }
+  ]
+ },
+ {
+  "id": "reading_room",
+  "name": "Reading Room Library Card",
+  "description": "The Ministry library lends out its journals, with a fine for returning them late. Research points earned +10%.",
+  "branch": "administration",
+  "minTier": 1,
+  "cost": 330,
+  "requires": [
+   "contracts_clerk"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "researchRate",
+    "factor": 1.1
+   }
+  ]
+ },
+ {
+  "id": "vendor_stamp",
+  "name": "Preferred Vendor Stamp",
+  "description": "Your invoices go to the top of the pile, in a pink folder. Contract payouts +5%.",
+  "branch": "administration",
+  "minTier": 2,
+  "cost": 1000,
+  "requires": [
+   "reading_room"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.05
+   }
+  ]
+ },
+ {
+  "id": "ledger_audit",
+  "name": "Double-Entry Ledger Reform",
+  "description": "Every cruzeiro is now counted twice, which saves money somehow. Facility upkeep -8%.",
+  "branch": "administration",
+  "minTier": 2,
+  "cost": 1200,
+  "requires": [
+   "contracts_clerk"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "upkeep",
+    "factor": 0.92
+   }
+  ]
+ },
+ {
+  "id": "ministry_liaison",
+  "name": "Ministry Liaison Desk",
+  "description": "A brass nameplate and a standing lunch reservation at the Ministry. Contract payouts +4%.",
+  "branch": "administration",
+  "minTier": 3,
+  "cost": 3400,
+  "requires": [
+   "vendor_stamp"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.04
+   }
+  ]
+ },
+ {
+  "id": "procurement_committee",
+  "name": "Procurement Committee",
+  "description": "Three clerks, one stamp, and a joint discount on everything. Facility upkeep -7%.",
+  "branch": "administration",
+  "minTier": 3,
+  "cost": 3600,
+  "requires": [
+   "ledger_audit"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "upkeep",
+    "factor": 0.93
+   }
+  ]
+ },
+ {
+  "id": "grand_concordat",
+  "name": "Grand Ministry Concordat",
+  "description": "The Minister himself signs. The pen is on a chain. Contract payouts +6%. Research points earned +5%.",
+  "branch": "administration",
+  "minTier": 4,
+  "cost": 19000,
+  "requires": [
+   "ministry_liaison",
+   "procurement_committee"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.06
+   },
+   {
+    "type": "perk",
+    "kind": "researchRate",
+    "factor": 1.05
+   }
+  ]
+ },
+ {
+  "id": "batch_cards",
+  "name": "Batch Scheduler Cards",
+  "description": "A better deck of punch cards for the job queue. Contract payouts +3%.",
+  "branch": "compute",
+  "minTier": 1,
+  "cost": 450,
+  "requires": [],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.03
+   }
+  ]
+ },
+ {
+  "id": "rear_door_drawings",
+  "name": "Rear-Door Cabinet Drawings",
+  "description": "Blueprints for a hinged heat exchanger on the cabinet door. Unlocks the Mk.III Rear-Door Air Cabinet: 32 PFLOPS at 55 kW.",
+  "branch": "compute",
+  "minTier": 2,
+  "cost": 1000,
+  "requires": [
+   "batch_cards"
+  ],
+  "effects": []
+ },
+ {
+  "id": "tape_silo",
+  "name": "Tape Silo Engineering",
+  "description": "A gantry arm, ten thousand reels and a very long queue. Unlocks the Tape Silo Array: 8,000 TB at 30 kW.",
+  "branch": "compute",
+  "minTier": 2,
+  "cost": 900,
+  "requires": [
+   "batch_cards"
+  ],
+  "effects": []
+ },
+ {
+  "id": "hot_aisle",
+  "name": "Hot-Aisle Containment Cabinets",
+  "description": "Ducted exhaust and curtains of fireproof canvas. Unlocks the Mk.IV Hot-Aisle Air Cabinet: 52 PFLOPS at 70 kW.",
+  "branch": "compute",
+  "minTier": 3,
+  "cost": 3200,
+  "requires": [
+   "rear_door_drawings"
+  ],
+  "effects": []
+ },
+ {
+  "id": "cold_plate_gen3",
+  "name": "Cold-Plate Generation III",
+  "description": "Copper plates milled to the thousandth of an inch, 160 kW per cabinet. Unlocks the Mk.III Cold-Plate Compute Cabinet: 230 PFLOPS at 160 kW.",
+  "branch": "compute",
+  "minTier": 3,
+  "cost": 4200,
+  "requires": [
+   "rear_door_drawings",
+   "chilled_loop"
+  ],
+  "effects": []
+ },
+ {
+  "id": "inference_foundry",
+  "name": "Inference Accelerator Foundry",
+  "description": "Fixed-function cards cast in a Ministry-approved foundry. Unlocks the Inference Accelerator Cabinet: 54 PFLOPS at 36 kW.",
+  "branch": "compute",
+  "minTier": 3,
+  "cost": 3800,
+  "requires": [
+   "hot_aisle"
+  ],
+  "effects": []
+ },
+ {
+  "id": "manifold_blade",
+  "name": "Manifold Blade Architecture",
+  "description": "Rack-scale blades that slide into brass manifolds like cartridges. Unlocks the Mk.IV Manifold Blade Cabinet: 420 PFLOPS at 240 kW.",
+  "branch": "compute",
+  "minTier": 4,
+  "cost": 22000,
+  "requires": [
+   "cold_plate_gen3"
+  ],
+  "effects": []
+ },
+ {
+  "id": "desk_fan_standard",
+  "name": "Desk Fan Standardisation",
+  "description": "One model of zip-tie, one model of fan. The Ministry approves. CRAH, chiller and CDU capacity +5%.",
+  "branch": "cooling",
+  "minTier": 1,
+  "cost": 360,
+  "requires": [],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "coolingCapacity",
+    "factor": 1.05
+   }
+  ]
+ },
+ {
+  "id": "rear_door_exchanger",
+  "name": "Rear-Door Exchanger Patent",
+  "description": "A chilled-water coil on a hinge, licensed from a small workshop. Unlocks the Rear-Door Air Handler.",
+  "branch": "cooling",
+  "minTier": 2,
+  "cost": 1100,
+  "requires": [
+   "desk_fan_standard"
+  ],
+  "effects": []
+ },
+ {
+  "id": "chilled_loop",
+  "name": "Chilled-Water Loop Theory",
+  "description": "Pumps, valves and a chalkboard full of Greek letters. CRAH, chiller and CDU capacity +5%.",
+  "branch": "cooling",
+  "minTier": 2,
+  "cost": 1300,
+  "requires": [
+   "desk_fan_standard"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "coolingCapacity",
+    "factor": 1.05
+   }
+  ]
+ },
+ {
+  "id": "high_capacity_air",
+  "name": "High-Capacity Air Handling",
+  "description": "A fan wall the size of a cinema screen. Unlocks the High-Capacity Air Handler.",
+  "branch": "cooling",
+  "minTier": 3,
+  "cost": 3300,
+  "requires": [
+   "rear_door_exchanger"
+  ],
+  "effects": []
+ },
+ {
+  "id": "tower_hydraulics",
+  "name": "Cooling Tower Hydraulics",
+  "description": "A tower, a basin, and the permission to steam. Unlocks the Cooling-Tower Chiller. Unlocks the Industrial Coolant Manifold.",
+  "branch": "cooling",
+  "minTier": 3,
+  "cost": 3800,
+  "requires": [
+   "chilled_loop"
+  ],
+  "effects": []
+ },
+ {
+  "id": "dielectric_handbook",
+  "name": "Dielectric Fluid Handbook",
+  "description": "How to pour, drain and not drink the oil. Unlocks the Mk.I Dielectric Bath Cabinet: 300 PFLOPS at 180 kW.",
+  "branch": "cooling",
+  "minTier": 3,
+  "cost": 4200,
+  "requires": [
+   "tower_hydraulics",
+   "cold_plate_gen3"
+  ],
+  "effects": []
+ },
+ {
+  "id": "adiabatic_cooling",
+  "name": "Adiabatic Free Cooling",
+  "description": "Evaporate the loop in the open air and let the sky have the heat. CRAH, chiller and CDU capacity +5%. Unlocks the Adiabatic Free-Cooling Chiller.",
+  "branch": "cooling",
+  "minTier": 4,
+  "cost": 19000,
+  "requires": [
+   "tower_hydraulics"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "coolingCapacity",
+    "factor": 1.05
+   }
+  ]
+ },
+ {
+  "id": "two_phase_immersion",
+  "name": "Two-Phase Immersion Doctrine",
+  "description": "Boiling fluid and a condenser coil. Do not look into the vat. Rack failure rate -5%. Unlocks the Mk.II Two-Phase Immersion Vat: 560 PFLOPS at 300 kW.",
+  "branch": "cooling",
+  "minTier": 4,
+  "cost": 21000,
+  "requires": [
+   "dielectric_handbook",
+   "adiabatic_cooling"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "failureRate",
+    "factor": 0.95
+   }
+  ]
+ },
+ {
+  "id": "surge_memo",
+  "name": "Surge Protector Memorandum",
+  "description": "Fuses, in writing, on every circuit. Rack failure rate -5%.",
+  "branch": "power",
+  "minTier": 1,
+  "cost": 300,
+  "requires": [],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "failureRate",
+    "factor": 0.95
+   }
+  ]
+ },
+ {
+  "id": "offpeak_petition",
+  "name": "Off-Peak Tariff Petition",
+  "description": "Thirty-two signatures and a plea to the Utility Board. Grid energy price -5%.",
+  "branch": "power",
+  "minTier": 1,
+  "cost": 420,
+  "requires": [],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "energyPrice",
+    "factor": 0.95
+   }
+  ]
+ },
+ {
+  "id": "substation_licence",
+  "name": "High-Voltage Substation Licence",
+  "description": "A licence to import more electricity than strictly sensible. Unlocks the Substation Intake Hall.",
+  "branch": "power",
+  "minTier": 2,
+  "cost": 1100,
+  "requires": [
+   "offpeak_petition"
+  ],
+  "effects": []
+ },
+ {
+  "id": "flywheel_patent",
+  "name": "Flywheel Rotor Patent",
+  "description": "A brass rotor that stores a minute of the city in a second. Unlocks the Flywheel Rotor Bank.",
+  "branch": "power",
+  "minTier": 2,
+  "cost": 1200,
+  "requires": [
+   "surge_memo"
+  ],
+  "effects": []
+ },
+ {
+  "id": "gas_concession",
+  "name": "Gas Turbine Concession",
+  "description": "A pipeline tap and a turbine that sings. Grid energy price -3%. Unlocks the Gas Turbine Set No. 2.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3600,
+  "requires": [
+   "substation_licence"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "energyPrice",
+    "factor": 0.97
+   }
+  ]
+ },
+ {
+  "id": "accumulator_charter",
+  "name": "Accumulator Hall Charter",
+  "description": "Permission to keep a thousand jars of acid in one room. Unlocks the Accumulator Hall.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3300,
+  "requires": [
+   "flywheel_patent"
+  ],
+  "effects": []
+ },
+ {
+  "id": "feeder_treaty",
+  "name": "Transmission Feeder Treaty",
+  "description": "A private line to the national grid, ratified in three languages. Grid energy price -5%. Unlocks the Transmission Feeder Annex.",
+  "branch": "power",
+  "minTier": 4,
+  "cost": 20000,
+  "requires": [
+   "gas_concession",
+   "accumulator_charter"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "energyPrice",
+    "factor": 0.95
+   }
+  ]
+ },
+ {
+  "id": "pit_crew",
+  "name": "Pit Crew Handbook",
+  "description": "How to swap a GPU tray in under a minute, with a stopwatch. Bot repairs 15% faster.",
+  "branch": "logistics",
+  "minTier": 1,
+  "cost": 340,
+  "requires": [],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "repairSpeed",
+    "factor": 1.15
+   }
+  ]
+ },
+ {
+  "id": "brass_gearing",
+  "name": "Brass Gearing for Automatons",
+  "description": "Faster gears and a louder whirr. Bot speed +10%.",
+  "branch": "logistics",
+  "minTier": 1,
+  "cost": 390,
+  "requires": [
+   "pit_crew"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "botSpeed",
+    "factor": 1.1
+   }
+  ]
+ },
+ {
+  "id": "logistics_drone",
+  "name": "Aerial Surveyor Drones",
+  "description": "Clockwork rotors that skip the lift entirely. Unlocks the Surveyor Drone (flies between floors, 0.5 tiles per tick).",
+  "branch": "logistics",
+  "minTier": 2,
+  "cost": 1100,
+  "requires": [
+   "brass_gearing"
+  ],
+  "effects": []
+ },
+ {
+  "id": "central_stores",
+  "name": "Central Stores Warehousing",
+  "description": "Shelves, ledgers and a very patient storekeeper. Unlocks the Central Stores Warehouse.",
+  "branch": "logistics",
+  "minTier": 2,
+  "cost": 1000,
+  "requires": [
+   "pit_crew"
+  ],
+  "effects": []
+ },
+ {
+  "id": "fast_charge",
+  "name": "Pantograph Fast Charging",
+  "description": "Twenty-five kilowatts in a pantograph arm. Unlocks the Pantograph Fast-Charge Bay.",
+  "branch": "logistics",
+  "minTier": 3,
+  "cost": 3000,
+  "requires": [
+   "logistics_drone"
+  ],
+  "effects": []
+ },
+ {
+  "id": "logistics_lifter",
+  "name": "Heavy Lifter Chassis",
+  "description": "A broad-shouldered automaton with room for three spare parts. Unlocks the Heavy Lifter Automaton (carries 3 spare parts per trip).",
+  "branch": "logistics",
+  "minTier": 3,
+  "cost": 3500,
+  "requires": [
+   "brass_gearing",
+   "central_stores"
+  ],
+  "effects": []
+ },
+ {
+  "id": "maintenance_corps",
+  "name": "Autonomous Maintenance Corps",
+  "description": "A drilled and uniformed corps of mechanical staff. Bot repairs 10% faster. Bot speed +5%.",
+  "branch": "logistics",
+  "minTier": 4,
+  "cost": 18000,
+  "requires": [
+   "fast_charge",
+   "logistics_lifter"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "repairSpeed",
+    "factor": 1.1
+   },
+   {
+    "type": "perk",
+    "kind": "botSpeed",
+    "factor": 1.05
+   }
+  ]
+ }
+]

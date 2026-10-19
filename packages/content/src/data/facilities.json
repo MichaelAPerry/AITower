@@ -245,5 +245,486 @@
   "placement": {
    "needsPower": true
   }
+ },
+ "rack_air_gpu2": {
+  "id": "rack_air_gpu2",
+  "name": "Mk.III Rear-Door Air Cabinet",
+  "description": "Eight-GPU trays behind a hinged water-cooled rear door that scrubs the exhaust before it reaches the aisle. 55 kW and 32 PFLOPS per cabinet, but it needs an air handler that can keep up.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 600000,
+  "upkeepPerDay": 1800,
+  "unlockTier": 2,
+  "facilityKw": 0,
+  "color": "#bfb08c",
+  "accent": "#33ff66",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 55,
+   "liquidFraction": 0,
+   "pflops": 32,
+   "storageTB": 0,
+   "failurePerDay": 0.22
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "rear_door_drawings"
+ },
+ "rack_air_gpu3": {
+  "id": "rack_air_gpu3",
+  "name": "Mk.IV Hot-Aisle Air Cabinet",
+  "description": "A sealed hot-aisle cabinet with ducted exhaust and tuned fan curves, squeezing 52 PFLOPS out of 70 kW of air-cooled silicon. The practical ceiling of air; the Ministry stamps it 'Adequate'.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 880000,
+  "upkeepPerDay": 2600,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#b4a582",
+  "accent": "#7dff8f",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 70,
+   "liquidFraction": 0,
+   "pflops": 52,
+   "storageTB": 0,
+   "failurePerDay": 0.24
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "hot_aisle"
+ },
+ "rack_dlc_gpu2": {
+  "id": "rack_dlc_gpu2",
+  "name": "Mk.III Cold-Plate Compute Cabinet",
+  "description": "A 160 kW cabinet with cold plates on every die and 82% of its heat carried off by the brass manifold: 230 PFLOPS per cabinet. Needs a coolant loop with a CDU and chiller sized for 131 kW per rack.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 2150000,
+  "upkeepPerDay": 6000,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#9c8c70",
+  "accent": "#d4733f",
+  "rack": {
+   "cooling": "dlc",
+   "powerKw": 160,
+   "liquidFraction": 0.82,
+   "pflops": 230,
+   "storageTB": 0,
+   "failurePerDay": 0.26
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "cold_plate_gen3"
+ },
+ "rack_dlc_gpu3": {
+  "id": "rack_dlc_gpu3",
+  "name": "Mk.IV Manifold Blade Cabinet",
+  "description": "Rack-scale blades on blind-mate manifolds, 85% liquid-cooled: 240 kW and 420 PFLOPS per cabinet, the best ratio the Ministry has ever signed off. Needs a 204 kW share of coolant capacity.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 4000000,
+  "upkeepPerDay": 11000,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#8f8068",
+  "accent": "#e8844a",
+  "rack": {
+   "cooling": "dlc",
+   "powerKw": 240,
+   "liquidFraction": 0.85,
+   "pflops": 420,
+   "storageTB": 0,
+   "failurePerDay": 0.28
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "manifold_blade"
+ },
+ "rack_imm_gpu": {
+  "id": "rack_imm_gpu",
+  "name": "Mk.I Dielectric Bath Cabinet",
+  "description": "Servers submerged in a tank of mineral-oil dielectric, 95% of the 180 kW leaving through the heat exchanger: 300 PFLOPS per tank and a calm 0.15 failures a day. Messy to service, silent to run.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 3,
+  "cost": 3100000,
+  "upkeepPerDay": 7500,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#6f7473",
+  "accent": "#ffb000",
+  "rack": {
+   "cooling": "immersion",
+   "powerKw": 180,
+   "liquidFraction": 0.95,
+   "pflops": 300,
+   "storageTB": 0,
+   "failurePerDay": 0.15
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "dielectric_handbook"
+ },
+ "rack_imm_gpu2": {
+  "id": "rack_imm_gpu2",
+  "name": "Mk.II Two-Phase Immersion Vat",
+  "description": "A boiling-fluid vat in a riveted steel tank. 300 kW and 560 PFLOPS per vat, 95% of the heat taken by the condenser coil. The vat bubbles; the Ministry insists this is intended.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 3,
+  "cost": 4800000,
+  "upkeepPerDay": 12000,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#5f6563",
+  "accent": "#ffd84a",
+  "rack": {
+   "cooling": "immersion",
+   "powerKw": 300,
+   "liquidFraction": 0.95,
+   "pflops": 560,
+   "storageTB": 0,
+   "failurePerDay": 0.18
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "two_phase_immersion"
+ },
+ "rack_infer": {
+  "id": "rack_infer",
+  "name": "Inference Accelerator Cabinet",
+  "description": "Fixed-function inference cards on punched-card firmware: 54 PFLOPS from only 36 kW, so 1.5 PFLOPS per kW, three times the Mk.I. Air-cooled and thrifty with the electricity bill, though it costs $1.3M.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 1300000,
+  "upkeepPerDay": 3500,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#c4b78f",
+  "accent": "#ff5e8a",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 36,
+   "liquidFraction": 0,
+   "pflops": 54,
+   "storageTB": 0,
+   "failurePerDay": 0.18
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "inference_foundry"
+ },
+ "rack_storage2": {
+  "id": "rack_storage2",
+  "name": "Tape Silo Array",
+  "description": "A robotic tape library: 8,000 TB behind glass, retrieved by a gantry arm with opinions. Draws 30 kW and gives training jobs four times the storage of the Archive Cabinet.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 3,
+  "cost": 520000,
+  "upkeepPerDay": 1600,
+  "unlockTier": 2,
+  "facilityKw": 0,
+  "color": "#555a3c",
+  "accent": "#ffb000",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 30,
+   "liquidFraction": 0,
+   "pflops": 0,
+   "storageTB": 8000,
+   "failurePerDay": 0.1
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "tape_silo"
+ },
+ "grid_tie_2": {
+  "id": "grid_tie_2",
+  "name": "Substation Intake Hall",
+  "description": "A tiled hall of oil-filled transformers on a dedicated 11 kV feeder. Imports up to 3.5 MW at the going rate, with a canteen for the linesmen.",
+  "kind": "grid_tie",
+  "category": "power",
+  "width": 5,
+  "cost": 520000,
+  "upkeepPerDay": 2200,
+  "unlockTier": 2,
+  "facilityKw": 20,
+  "color": "#555a3c",
+  "accent": "#e8dfc6",
+  "power": {
+   "capacityKw": 3500
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "substation_licence"
+ },
+ "grid_tie_3": {
+  "id": "grid_tie_3",
+  "name": "Transmission Feeder Annex",
+  "description": "A private 132 kV feeder with its own switchyard and a lightning-rod collection. Imports up to 9 MW; the Ministry has asked that you not tell the neighbours.",
+  "kind": "grid_tie",
+  "category": "power",
+  "width": 8,
+  "cost": 1500000,
+  "upkeepPerDay": 5500,
+  "unlockTier": 4,
+  "facilityKw": 45,
+  "color": "#4a4f35",
+  "accent": "#f0e8cc",
+  "power": {
+   "capacityKw": 9000
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "feeder_treaty"
+ },
+ "genset_gas": {
+  "id": "genset_gas",
+  "name": "Gas Turbine Set No. 2",
+  "description": "A 3 MW turbine on a pipeline tap, spun up in about 6 minutes and burning fuel at $18 per kWh (the diesel No. 4 costs $25). Rated for outages, not for vanity.",
+  "kind": "genset",
+  "category": "power",
+  "width": 6,
+  "cost": 1600000,
+  "upkeepPerDay": 3000,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#34503a",
+  "accent": "#ffb000",
+  "power": {
+   "capacityKw": 3000,
+   "startDelayTicks": 6,
+   "costPerKwh": 18
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "gas_concession"
+ },
+ "ups_flywheel": {
+  "id": "ups_flywheel",
+  "name": "Flywheel Rotor Bank",
+  "description": "A hall of vacuum-sealed brass rotors spinning at ten thousand revolutions. Dumps 2 MW instantly but stores only 60 kWh, so it bridges the 10 minutes until a generator wakes up. 97% efficient.",
+  "kind": "ups",
+  "category": "power",
+  "width": 3,
+  "cost": 650000,
+  "upkeepPerDay": 700,
+  "unlockTier": 2,
+  "facilityKw": 5,
+  "color": "#403b30",
+  "accent": "#c8a248",
+  "power": {
+   "capacityKw": 2000,
+   "storageKwh": 60,
+   "efficiency": 0.97
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "flywheel_patent"
+ },
+ "ups_bank_big": {
+  "id": "ups_bank_big",
+  "name": "Accumulator Hall",
+  "description": "Row upon row of lead-acid jars in a ventilated hall: 2,400 kWh at up to 2 MW, 92% round-trip efficient. Rides through long outages and the evening price peak.",
+  "kind": "ups",
+  "category": "power",
+  "width": 5,
+  "cost": 1400000,
+  "upkeepPerDay": 1400,
+  "unlockTier": 3,
+  "facilityKw": 12,
+  "color": "#45402f",
+  "accent": "#33ff66",
+  "power": {
+   "capacityKw": 2000,
+   "storageKwh": 2400,
+   "efficiency": 0.92
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "accumulator_charter"
+ },
+ "crah_rear_door": {
+  "id": "crah_rear_door",
+  "name": "Rear-Door Air Handler",
+  "description": "A slim air handler on a chilled-water coil, mounted at the end of the row: 320 kW of heat removal within 5 tiles. Short reach, strong lungs.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 2,
+  "cost": 210000,
+  "upkeepPerDay": 700,
+  "unlockTier": 2,
+  "facilityKw": 36,
+  "color": "#a99a7c",
+  "accent": "#4f9a85",
+  "cooling": {
+   "capacityKw": 320,
+   "radius": 5
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "rear_door_exchanger"
+ },
+ "crah_hc": {
+  "id": "crah_hc",
+  "name": "High-Capacity Air Handler",
+  "description": "A roof-sized air handler with a five-blade fan wall: 700 kW of heat removal within 12 tiles. It hums in the key of B-flat.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 4,
+  "cost": 480000,
+  "upkeepPerDay": 1200,
+  "unlockTier": 3,
+  "facilityKw": 75,
+  "color": "#9a8b6e",
+  "accent": "#58b59b",
+  "cooling": {
+   "capacityKw": 700,
+   "radius": 12
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "high_capacity_air"
+ },
+ "chiller_tower": {
+  "id": "chiller_tower",
+  "name": "Cooling-Tower Chiller",
+  "description": "A cooling tower on top of a steel chiller set: 2,400 kW of coolant heat rejected at COP 7.0 (1 kW of electricity per 7 kW of heat). The plume is visible from the Ministry.",
+  "kind": "chiller",
+  "category": "cooling",
+  "width": 6,
+  "cost": 3500000,
+  "upkeepPerDay": 5500,
+  "unlockTier": 3,
+  "facilityKw": 22,
+  "color": "#6a706f",
+  "accent": "#c06a3b",
+  "cooling": {
+   "capacityKw": 2400,
+   "cop": 7.0
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "tower_hydraulics"
+ },
+ "cdu_big": {
+  "id": "cdu_big",
+  "name": "Industrial Coolant Manifold",
+  "description": "A wall of valve wheels and plate exchangers sized for a whole row: 1,600 kW of liquid-cabinet heat on its loop.",
+  "kind": "cdu",
+  "category": "cooling",
+  "width": 3,
+  "cost": 1300000,
+  "upkeepPerDay": 1800,
+  "unlockTier": 3,
+  "facilityKw": 14,
+  "color": "#7a6025",
+  "accent": "#c8a248",
+  "cooling": {
+   "capacityKw": 1600
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "tower_hydraulics"
+ },
+ "chiller_free": {
+  "id": "chiller_free",
+  "name": "Adiabatic Free-Cooling Chiller",
+  "description": "Louvred halls that spray and evaporate to chill the loop without much compressor: 5,000 kW at COP 11. Steam rises. The Ministry takes credit.",
+  "kind": "chiller",
+  "category": "cooling",
+  "width": 8,
+  "cost": 7200000,
+  "upkeepPerDay": 11000,
+  "unlockTier": 4,
+  "facilityKw": 40,
+  "color": "#5f6968",
+  "accent": "#d8eadf",
+  "cooling": {
+   "capacityKw": 5000,
+   "cop": 11.0
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "adiabatic_cooling"
+ },
+ "depot_big": {
+  "id": "depot_big",
+  "name": "Central Stores Warehouse",
+  "description": "A hangar of numbered pigeonholes holding 60 spare parts, enough for a bad week. Requisitions on Form 27B/6, countersigned.",
+  "kind": "depot",
+  "category": "logistics",
+  "width": 5,
+  "cost": 190000,
+  "upkeepPerDay": 500,
+  "unlockTier": 2,
+  "facilityKw": 1.2,
+  "color": "#66706d",
+  "accent": "#c8a248",
+  "logistics": {
+   "capacity": 60
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "central_stores"
+ },
+ "charger_fast": {
+  "id": "charger_fast",
+  "name": "Pantograph Fast-Charge Bay",
+  "description": "A four-bay dock with a 25 kW pantograph per berth and a bell that rings when an automaton is full. Bots return to work sooner.",
+  "kind": "charger",
+  "category": "logistics",
+  "width": 2,
+  "cost": 160000,
+  "upkeepPerDay": 400,
+  "unlockTier": 3,
+  "facilityKw": 1,
+  "color": "#463f31",
+  "accent": "#e0b84a",
+  "logistics": {
+   "capacity": 4,
+   "chargeKw": 25
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "fast_charge"
  }
 }

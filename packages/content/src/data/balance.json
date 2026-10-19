@@ -27,16 +27,16 @@
   0.9,
   0.7
  ],
- "ambientMeanC": 18,
- "ambientSwingC": 7,
+ "ambientMeanC": 22,
+ "ambientSwingC": 8,
  "thermal": {
   "airCellHeatCapacity": 3000,
   "airConductance": 6,
   "slabConductance": 1,
-  "envelopeConductance": 0.05,
+  "envelopeConductance": 0.4,
   "buoyancy": 1.5,
   "rackEase": 0.1,
-  "rackDeltaC": 40,
+  "rackDeltaC": 48,
   "okC": 80,
   "throttleC": 90,
   "tripC": 95,
@@ -80,11 +80,11 @@
   "jobCompleted": 1
  },
  "research": {
-  "pointsPerPflopHour": 0.01,
-  "pointsPerJob": 5
+  "pointsPerPflopHour": 0.1,
+  "pointsPerJob": 8
  },
  "clerk": {
-  "feeShare": 0.05
+  "feeShare": 0.06
  },
  "loans": {
   "maxByTier": [
@@ -93,10 +93,10 @@
    15000000,
    40000000
   ],
-  "dailyRate": 0.004
+  "dailyRate": 0.005
  },
  "tax": {
-  "profitShare": 0
+  "profitShare": 0.12
  },
  "audit": {
   "periodDays": 7,
@@ -108,11 +108,11 @@
    -6
   ],
   "cashShareByGrade": [
-   0.05,
-   0.02,
+   0.04,
+   0.015,
    0,
-   -0.02,
-   -0.05
+   -0.025,
+   -0.06
   ]
  },
  "events": {

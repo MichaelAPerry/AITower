@@ -7,5 +7,27 @@
   "batteryTicks": 600,
   "repairTicks": 30,
   "color": "#8a8f8c"
+ },
+ "drone": {
+  "id": "drone",
+  "name": "Surveyor Drone",
+  "cost": 90000,
+  "speed": 0.5,
+  "batteryTicks": 240,
+  "repairTicks": 40,
+  "color": "#c4ae72",
+  "tech": "logistics_drone",
+  "flying": true
+ },
+ "lifter": {
+  "id": "lifter",
+  "name": "Heavy Lifter Automaton",
+  "cost": 130000,
+  "speed": 0.18,
+  "batteryTicks": 900,
+  "repairTicks": 24,
+  "color": "#6d7a58",
+  "tech": "logistics_lifter",
+  "carry": 3
  }
 }

@@ -2,7 +2,7 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { BuildCategory, ContentDB, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario } from "./schema";
+import type { BuildCategory, ContentDB, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechNode } from "./schema";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -20,6 +20,11 @@ const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
+const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration"];
+const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
+const FEATURES = ["contractsClerk"];
+/** Letter grades A..E used by `balance.audit`. */
+const GRADES = 5;
 
 type Problems = string[];
 
@@ -368,6 +373,7 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 	}
 	if (e.minDay !== undefined) num(p, `${w}.minDay`, e.minDay, { min: 0, int: true });
 	num(p, `${w}.cooldownDays`, e.cooldownDays, { min: 0, int: true });
+	if (e.scriptedDay !== undefined) num(p, `${w}.scriptedDay`, e.scriptedDay, { min: 0, int: true });
 	num(p, `${w}.timeoutTicks`, e.timeoutTicks, { gt: 0, int: true });
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
 		p.push(`${w}.choices: at least one choice required`);
@@ -404,6 +410,118 @@ function validateEvents(p: Problems, db: ContentDB): void {
 	});
 }
 
+function validateResearchBalance(p: Problems, db: ContentDB): void {
+	const b = db.balance;
+	if (!b) return;
+	if (!b.research) p.push("balance.research: missing");
+	else {
+		num(p, "balance.research.pointsPerPflopHour", b.research.pointsPerPflopHour, { gt: 0 });
+		num(p, "balance.research.pointsPerJob", b.research.pointsPerJob, { min: 0 });
+	}
+	if (!b.clerk) p.push("balance.clerk: missing");
+	else num(p, "balance.clerk.feeShare", b.clerk.feeShare, { min: 0, max: 1 });
+	const tierCount = b.tiers?.pflops?.length ?? 0;
+	if (!b.loans) p.push("balance.loans: missing");
+	else {
+		const m = b.loans.maxByTier;
+		if (!Array.isArray(m) || m.length !== tierCount) {
+			p.push(`balance.loans.maxByTier: expected ${tierCount} entries (one per tier), got ${Array.isArray(m) ? m.length : "none"}`);
+		} else {
+			m.forEach((v, i) => {
+				num(p, `balance.loans.maxByTier[${i}]`, v, { min: 0 });
+				if (i > 0 && isNum(v) && isNum(m[i - 1]) && v < m[i - 1]) p.push(`balance.loans.maxByTier: must be non-decreasing at ${i}`);
+			});
+		}
+		num(p, "balance.loans.dailyRate", b.loans.dailyRate, { min: 0, max: 1 });
+	}
+	if (!b.tax) p.push("balance.tax: missing");
+	else num(p, "balance.tax.profitShare", b.tax.profitShare, { min: 0, max: 1 });
+	if (!b.audit) p.push("balance.audit: missing");
+	else {
+		num(p, "balance.audit.periodDays", b.audit.periodDays, { min: 1, int: true });
+		const grades = (key: "standingByGrade" | "cashShareByGrade", lo: number, hi: number): void => {
+			const a = b.audit[key];
+			if (!Array.isArray(a) || a.length !== GRADES) {
+				p.push(`balance.audit.${key}: expected ${GRADES} entries (grades A..E), got ${Array.isArray(a) ? a.length : "none"}`);
+				return;
+			}
+			a.forEach((v, i) => {
+				num(p, `balance.audit.${key}[${i}]`, v, { min: lo, max: hi });
+				if (i > 0 && isNum(v) && isNum(a[i - 1]) && v > a[i - 1]) p.push(`balance.audit.${key}: a worse grade must not pay more (index ${i})`);
+			});
+		};
+		grades("standingByGrade", -100, 100);
+		grades("cashShareByGrade", -1, 1);
+	}
+}
+
+function validateTech(p: Problems, db: ContentDB): void {
+	if (!Array.isArray(db.tech)) {
+		p.push("tech: expected an array");
+		return;
+	}
+	const tierCount = db.balance?.tiers?.pflops?.length ?? 1;
+	const byId = new Map<string, TechNode>();
+	db.tech.forEach((n, i) => {
+		const w = `tech[${i}] (${n?.id})`;
+		str(p, `${w}.id`, n.id);
+		if (typeof n.id === "string" && !ID_RE.test(n.id)) p.push(`${w}.id: use lowercase letters, digits and underscores`);
+		if (byId.has(n.id)) p.push(`${w}: duplicate id`);
+		byId.set(n.id, n);
+		str(p, `${w}.name`, n.name);
+		str(p, `${w}.description`, n.description);
+		if (!TECH_BRANCHES.includes(n.branch)) p.push(`${w}.branch: unknown "${n.branch}"`);
+		num(p, `${w}.minTier`, n.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
+		num(p, `${w}.cost`, n.cost, { gt: 0 });
+		if (!Array.isArray(n.effects)) p.push(`${w}.effects: expected an array`);
+		else
+			n.effects.forEach((e, k) => {
+				const ew = `${w}.effects[${k}]`;
+				const t = (e as { type?: unknown } | null)?.type;
+				if (t === "perk") {
+					const pe = e as { kind: string; factor: number };
+					if (!PERK_KINDS.includes(pe.kind)) p.push(`${ew}.kind: unknown perk "${pe.kind}"`);
+					num(p, `${ew}.factor`, pe.factor, { gt: 0, max: 2 });
+				} else if (t === "feature") {
+					const fe = e as { feature: string };
+					if (!FEATURES.includes(fe.feature)) p.push(`${ew}.feature: unknown feature "${fe.feature}"`);
+				} else p.push(`${ew}.type: unknown effect type ${JSON.stringify(t)}`);
+			});
+		if (!Array.isArray(n.requires)) p.push(`${w}.requires: expected an array`);
+	});
+	for (const n of byId.values()) {
+		if (!Array.isArray(n.requires)) continue;
+		const w = `tech ${n.id}`;
+		const seen = new Set<string>();
+		for (const r of n.requires) {
+			if (seen.has(r)) p.push(`${w}.requires: "${r}" listed twice`);
+			seen.add(r);
+			if (r === n.id) p.push(`${w}.requires: requires itself`);
+			else if (!byId.has(r)) p.push(`${w}.requires: unknown tech "${r}"`);
+		}
+	}
+	// Cycles (depth-first, 0 = unvisited, 1 = on the stack, 2 = done); each cycle is reported once.
+	const state = new Map<string, number>();
+	const visit = (id: string, path: string[]): void => {
+		state.set(id, 1);
+		for (const r of byId.get(id)?.requires ?? []) {
+			if (!byId.has(r) || r === id) continue;
+			const s = state.get(r) ?? 0;
+			if (s === 1) p.push(`tech: dependency cycle ${[...path.slice(path.indexOf(r)), id, r].join(" -> ")}`);
+			else if (s === 0) visit(r, [...path, id]);
+		}
+		state.set(id, 2);
+	};
+	for (const id of byId.keys()) if (!state.get(id)) visit(id, []);
+
+	for (const [key, d] of Object.entries(db.facilities ?? {})) {
+		if (d.tech !== undefined && !byId.has(d.tech)) p.push(`facilities.${key}.tech: unknown tech "${d.tech}"`);
+	}
+	for (const [key, b] of Object.entries(db.bots ?? {})) {
+		if (b.tech !== undefined && !byId.has(b.tech)) p.push(`bots.${key}.tech: unknown tech "${b.tech}"`);
+	}
+}
+
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
 	const tierCount = db.balance?.tiers?.pflops?.length ?? 1;
@@ -423,6 +541,9 @@ export function validateContent(db: ContentDB): string[] {
 		num(p, `${w}.batteryTicks`, b.batteryTicks, { gt: 0, int: true });
 		num(p, `${w}.repairTicks`, b.repairTicks, { gt: 0, int: true });
 		if (typeof b.color !== "string" || !HEX.test(b.color)) p.push(`${w}.color: expected #rrggbb`);
+		if (b.carry !== undefined) num(p, `${w}.carry`, b.carry, { min: 1, int: true });
+		if (b.flying !== undefined && typeof b.flying !== "boolean") p.push(`${w}.flying: expected a boolean`);
+		if (b.tech !== undefined && typeof b.tech !== "string") p.push(`${w}.tech: expected a tech node id`);
 	}
 
 	const clients = db.clients ?? [];
@@ -473,6 +594,8 @@ export function validateContent(db: ContentDB): string[] {
 
 	validateBalance(p, db);
 	validateEvents(p, db);
+	validateResearchBalance(p, db);
+	validateTech(p, db);
 
 	const scenarios = db.scenarios ?? {};
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");
