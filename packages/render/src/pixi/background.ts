@@ -8,136 +8,12 @@
 import type { RenderOptions } from "@aitower/shared";
 import { Container, Graphics, GraphicsContext, Texture, TilingSprite } from "pixi.js";
 import { droughtSky, lerpColor, skyColors } from "../color";
-import { SIGN_ALT, SIGN_WORD } from "../horror";
 import { T, dk, lt, mix } from "../palette";
 import { px } from "./draw";
-
-const CITY_SPAN = 1024; // world px per silhouette tile
+import { type CityCtx, buildCity } from "./skylineArt";
+import { CITY_SPAN, type SkyStyle, rand, styleKey } from "./skyline";
 const SKY_REF = 520; // world px over which the gradient runs (above the horizon)
 const BAND = 6; // world px per sky band
-
-function rand(seed: number): () => number {
-	let s = seed >>> 0;
-	return () => {
-		s = (Math.imul(s, 1664525) + 1013904223) >>> 0;
-		return s / 4294967296;
-	};
-}
-
-/** 5×7 block glyphs for the sign. */
-const GLYPHS: Record<string, string[]> = {
-	M: ["10001", "11011", "10101", "10101", "10001", "10001", "10001"],
-	I: ["11111", "00100", "00100", "00100", "00100", "00100", "11111"],
-	N: ["10001", "11001", "10101", "10011", "10001", "10001", "10001"],
-	S: ["01111", "10000", "10000", "01110", "00001", "00001", "11110"],
-	T: ["11111", "00100", "00100", "00100", "00100", "00100", "00100"],
-	R: ["11110", "10001", "10001", "11110", "10100", "10010", "10001"],
-	Y: ["10001", "10001", "01010", "00100", "00100", "00100", "00100"],
-	H: ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
-	U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
-	G: ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
-	A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
-	O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
-	W: ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
-	E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
-};
-
-interface CityCtx {
-	body: GraphicsContext;
-	/** Recesses / shadow sides, tinted darker than the body. */
-	shade: GraphicsContext;
-	/** Window lights, visible at night. */
-	lights: GraphicsContext;
-	/** Sign letters. */
-	sign: GraphicsContext;
-	/** The same sign showing the alternate word (stage 4 flicker). */
-	alt: GraphicsContext;
-	/** Aircraft lamp positions (tile-local world px). */
-	lamps: { x: number; y: number; phase: number }[];
-	/** Searchlight origins (tile-local). */
-	beams: { x: number; y: number; phase: number }[];
-}
-
-function buildCity(seed: number, minH: number, maxH: number, withSign: boolean): CityCtx {
-	const body = new GraphicsContext();
-	const shade = new GraphicsContext();
-	const lights = new GraphicsContext();
-	const sign = new GraphicsContext();
-	const alt = new GraphicsContext();
-	const lamps: CityCtx["lamps"] = [];
-	const beams: CityCtx["beams"] = [];
-	const r = rand(seed);
-	const W = 0xffffff;
-	let x = 0;
-	let i = 0;
-	const signAt = withSign ? 3 : -1;
-	while (x < CITY_SPAN - 20) {
-		const isSign = i === signAt;
-		const w = isSign ? 116 : 22 + Math.floor(r() * 46);
-		const h = isSign ? maxH - 10 : minH + Math.floor(r() * (maxH - minH));
-		const kind = r();
-		// Main slab.
-		body.rect(x, -h, w, h).fill({ color: W });
-		// Shadow side.
-		shade.rect(x + w - 3, -h, 3, h).fill({ color: W });
-		if (kind < 0.35) {
-			// Cantilevered upper block overhanging both sides.
-			const ch = 14 + Math.floor(r() * 18);
-			body.rect(x - 4, -h - ch, w + 8, ch).fill({ color: W });
-			shade.rect(x - 4, -h - 2, w + 8, 2).fill({ color: W });
-			shade.rect(x + w + 1, -h - ch, 3, ch).fill({ color: W });
-		} else if (kind < 0.6) {
-			// Setback + stair core.
-			body.rect(x + 6, -h - 12, w - 12, 12).fill({ color: W });
-			body.rect(x + 2, -h - 20, 7, 20).fill({ color: W });
-		}
-		// Horizontal strip windows (recessed) every 6 px.
-		for (let wy = -h + 6; wy < -6; wy += 6) {
-			shade.rect(x + 2, wy, w - 5, 2).fill({ color: W });
-			for (let wx = x + 3; wx < x + w - 4; wx += 3) if (r() < 0.28) lights.rect(wx, wy, 2, 2).fill({ color: W });
-		}
-		// Antenna mast with an aircraft lamp.
-		if (!isSign && r() < 0.45) {
-			const ah = 10 + Math.floor(r() * 18);
-			const ax = x + Math.floor(w / 2);
-			const ay = kind < 0.35 ? -h - 32 : -h - 20;
-			body.rect(ax, ay - ah, 1, ah).fill({ color: W });
-			body.rect(ax - 2, ay - Math.floor(ah / 2), 5, 1).fill({ color: W });
-			lamps.push({ x: ax, y: ay - ah - 1, phase: r() * 6 });
-		}
-		if (!isSign && r() < 0.18) beams.push({ x: x + Math.floor(w / 2), y: -h - 2, phase: r() * 6 });
-		if (isSign) {
-			// Scaffold + letters on the roof.
-			const text = SIGN_WORD;
-			const S = 2; // giant: 2× block glyphs
-			const sw = text.length * 6 * S + 2;
-			const sx = x + Math.floor((w - sw) / 2);
-			const sy = -h - 7 * S - 10;
-			// Lattice scaffold holding the letters.
-			for (let k = sx; k < sx + sw; k += 8) body.rect(k, sy + 7 * S, 1, 10).fill({ color: W });
-			body.rect(sx, sy + 7 * S + 2, sw, 1).fill({ color: W });
-			body.rect(sx, sy + 7 * S + 7, sw, 1).fill({ color: W });
-			for (let k = sx; k < sx + sw - 8; k += 8) for (let d = 0; d < 5; d++) body.rect(k + d + 1, sy + 7 * S + 2 + d, 1, 1).fill({ color: W });
-			const letters = (ctx: GraphicsContext, word: string): void => {
-				// Centre a shorter word inside the same eight slots.
-				let lx = sx + 2 + Math.floor((text.length - word.length) / 2) * 6 * S;
-				for (const ch of word) {
-					const gl = GLYPHS[ch];
-					for (let gy = 0; gy < 7; gy++) for (let gx = 0; gx < 5; gx++) if (gl[gy][gx] === "1") ctx.rect(lx + gx * S, sy + gy * S, S, S).fill({ color: W });
-					lx += 6 * S;
-				}
-			};
-			letters(sign, text);
-			letters(alt, SIGN_ALT);
-			lamps.push({ x: sx - 1, y: sy - 2, phase: 0 });
-			lamps.push({ x: sx + sw, y: sy - 2, phase: 3 });
-			beams.push({ x: x + 6, y: -h - 1, phase: 1.2 });
-		}
-		x += w + 2 + Math.floor(r() * 8);
-		i++;
-	}
-	return { body, shade, lights, sign, alt, lamps, beams };
-}
 
 const CLOUD_SPAN = 2048;
 
@@ -168,10 +44,21 @@ function buildClouds(seed: number): GraphicsContext {
 	return ctx;
 }
 
+interface Look {
+	deco: number;
+	decoAlpha: number;
+	accent: number;
+	accentAlpha: number;
+}
+
 interface Layer {
 	ctx: CityCtx;
 	parallax: number;
-	tiles: { body: Graphics; shade: Graphics; lights: Graphics; sign: Graphics; alt: Graphics }[];
+	tiles: { body: Graphics; shade: Graphics; lights: Graphics; deco: Graphics; accent: Graphics; sign: Graphics; alt: Graphics }[];
+	minH: number;
+	maxH: number;
+	seed: number;
+	sign: boolean;
 	root: Container;
 }
 
@@ -205,18 +92,41 @@ export class Background {
 	private cloudTiles: Graphics[] = [];
 	private far: Layer;
 	private near: Layer;
+	private style: SkyStyle = { tier: 1, path: null, stage: 0 };
+	private styleKey = styleKey(this.style);
 	private starList: { x: number; y: number; phase: number }[];
 
 	constructor() {
-		this.far = this.makeLayer(buildCity(97, 40, 120, false), 0.25);
-		this.near = this.makeLayer(buildCity(1337, 30, 150, true), 0.5);
+		this.far = this.makeLayer(97, 40, 120, false, 0.25);
+		this.near = this.makeLayer(1337, 30, 150, true, 0.5);
 		this.root.addChild(this.sky, this.dithers, this.stars, this.clouds, this.beams, this.far.root, this.haze, this.near.root, this.lampsG);
 		const r = rand(42);
 		this.starList = Array.from({ length: 40 }, () => ({ x: r(), y: r(), phase: r() * 6.28 }));
 	}
 
-	private makeLayer(ctx: CityCtx, parallax: number): Layer {
-		return { ctx, parallax, tiles: [], root: new Container() };
+	private makeLayer(seed: number, minH: number, maxH: number, sign: boolean, parallax: number): Layer {
+		return { ctx: buildCity(seed, minH, maxH, sign, this.style, !sign), parallax, tiles: [], root: new Container(), seed, minH, maxH, sign };
+	}
+
+	/** Rebuild the skyline when the Level or the path stage changed (a no-op otherwise). */
+	setStyle(tier: number, path: SkyStyle["path"], stage: SkyStyle["stage"]): void {
+		const next = { tier, path, stage };
+		if (styleKey(next) === this.styleKey) return;
+		this.style = next;
+		this.styleKey = styleKey(next);
+		for (const l of [this.far, this.near]) {
+			for (const t of l.tiles) {
+				l.root.removeChild(t.body, t.shade, t.lights, t.deco, t.accent, t.sign, t.alt);
+				for (const g of Object.values(t)) g.destroy();
+			}
+			l.tiles = [];
+			this.destroyCtx(l.ctx);
+			l.ctx = buildCity(l.seed, l.minH, l.maxH, l.sign, next, !l.sign);
+		}
+	}
+
+	private destroyCtx(c: CityCtx): void {
+		for (const g of [c.body, c.shade, c.lights, c.deco, c.accent, c.sign, c.alt]) g.destroy();
 	}
 
 	/**
@@ -303,10 +213,16 @@ export class Background {
 		}
 
 		// Layers.
-		this.placeLayer(this.far, vw, z, hz, originX, sky.cityFar, dk(sky.cityFar, 0.25), sky.night * 0.5, mix(sky.cityFar, sky.horizon, 0.3), sky.night, false);
+		const pk = this.style.path;
+		const pc = pk === "biotech" ? T.flesh : pk === "greentech" ? T.green : T.brass;
+		const ac = pk === "biotech" ? lt(T.blood, 0.35) : pk === "greentech" ? lt(T.green, 0.6) : lt(T.brass, 0.25);
+		const dAlpha = pk === "synthetic" ? 0.3 : 0.92;
+		const aAlpha = pk === "synthetic" ? 0.4 + 0.6 * sky.night : pk === "biotech" ? 0.6 + 0.4 * sky.night : 0.95;
+		const look = (city: number, far: boolean): Look => ({ deco: mix(city, pc, far ? 0.4 : 0.55), decoAlpha: dAlpha * (far ? 0.75 : 1), accent: far ? mix(ac, city, 0.4) : ac, accentAlpha: aAlpha });
+		this.placeLayer(this.far, vw, z, hz, originX, sky.cityFar, dk(sky.cityFar, 0.25), sky.night * 0.5, mix(sky.cityFar, sky.horizon, 0.3), sky.night, false, look(sky.cityFar, true));
 		const signLit = sky.night > 0.25;
 		const signCol = signAlt ? mix(T.flesh, T.paper, 0.2) : signLit ? (!calm && Math.floor(t * 1.7) % 9 === 0 ? dk(T.brass, 0.4) : T.brass) : mix(sky.city, T.paper, 0.35);
-		this.placeLayer(this.near, vw, z, hz, originX, sky.city, dk(sky.city, 0.3), sky.night * 0.85, signCol, sky.night, signAlt);
+		this.placeLayer(this.near, vw, z, hz, originX, sky.city, dk(sky.city, 0.3), sky.night * 0.85, signCol, sky.night, signAlt, look(sky.city, false));
 
 		// Searchlights sweeping from the near skyline.
 		const b = this.beams;
@@ -373,6 +289,7 @@ export class Background {
 		signColor: number,
 		night: number,
 		signAlt: boolean,
+		look: Look,
 	): void {
 		const tileW = CITY_SPAN * z;
 		const need = Math.ceil(vw / tileW) + 2;
@@ -381,10 +298,12 @@ export class Background {
 				body: new Graphics(layer.ctx.body),
 				shade: new Graphics(layer.ctx.shade),
 				lights: new Graphics(layer.ctx.lights),
+				deco: new Graphics(layer.ctx.deco),
+				accent: new Graphics(layer.ctx.accent),
 				sign: new Graphics(layer.ctx.sign),
 				alt: new Graphics(layer.ctx.alt),
 			};
-			layer.root.addChild(t.body, t.shade, t.lights, t.sign, t.alt);
+			layer.root.addChild(t.body, t.shade, t.lights, t.deco, t.accent, t.sign, t.alt);
 			layer.tiles.push(t);
 		}
 		const start = this.layerStart(layer, originX, z);
@@ -392,7 +311,7 @@ export class Background {
 			const tl = layer.tiles[i];
 			const vis = i < need;
 			const x = start + i * tileW;
-			for (const gfx of [tl.body, tl.shade, tl.lights, tl.sign, tl.alt]) {
+			for (const gfx of [tl.body, tl.shade, tl.lights, tl.deco, tl.accent, tl.sign, tl.alt]) {
 				gfx.visible = vis;
 				gfx.position.set(x, hz);
 				gfx.scale.set(z);
@@ -402,6 +321,10 @@ export class Background {
 			tl.lights.visible = vis && lightAlpha > 0.08;
 			tl.lights.tint = mix(T.brass, T.paper, 0.4);
 			tl.lights.alpha = lightAlpha;
+			tl.deco.tint = look.deco;
+			tl.deco.alpha = look.decoAlpha;
+			tl.accent.tint = look.accent;
+			tl.accent.alpha = look.accentAlpha;
 			tl.sign.tint = signColor;
 			tl.sign.alpha = night > 0.25 ? 1 : 0.9;
 			tl.alt.tint = signColor;
@@ -415,11 +338,7 @@ export class Background {
 	destroyShared(): void {
 		this.cloudCtx.destroy();
 		for (const l of [this.far, this.near]) {
-			l.ctx.body.destroy();
-			l.ctx.shade.destroy();
-			l.ctx.lights.destroy();
-			l.ctx.sign.destroy();
-			l.ctx.alt.destroy();
+			this.destroyCtx(l.ctx);
 		}
 		this.checker.destroy(true);
 	}

@@ -40,6 +40,16 @@ export function agoText(ms: number, now: number): string {
 /** The Continue line: "DAY 11 · $1.10M · TIER 2 · 3 h ago". */
 export const continueSummary = (info: SaveSlotInfo, now: number): string => `DAY ${info.day} · ${fmtMoney(info.cash)} · TIER ${info.tier} · ${agoText(info.savedAt, now)}`;
 
+/** What lives behind the menu: the player's saved tower when an autosave exists (the game boots from it), else the starter demo tower. */
+export type Backdrop = { kind: "save"; day: number; tier: number } | { kind: "demo" };
+
+export function titleBackdrop(saves: readonly SaveSlotInfo[] | null): Backdrop {
+	const auto = saves?.find((s) => s.id === "auto");
+	return auto ? { kind: "save", day: auto.day, tier: auto.tier } : { kind: "demo" };
+}
+
+export const backdropCaption = (b: Backdrop): string => (b.kind === "save" ? `YOUR TOWER · DAY ${b.day} · LEVEL ${b.tier}` : "DEMO TOWER");
+
 export interface StartHooks {
 	/** Reopen the induction from step 1. */
 	restartInduction(): void;
