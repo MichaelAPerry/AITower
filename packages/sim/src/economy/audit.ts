@@ -123,7 +123,7 @@ export function closeAuditDay(ctx: TickCtx, tier: number): void {
 	const gi = GRADES.indexOf(grade);
 
 	const standingBefore = state.standing;
-	changeStanding(state, cfg.standingByGrade[gi] ?? 0, events);
+	changeStanding(state, cfg.standingByGrade[gi] ?? 0, events, "audit", `Quarterly audit: grade ${grade}`);
 	const cashDelta = (cfg.cashShareByGrade[gi] ?? 0) * revenue + 0; // + 0 turns -0 into 0
 	if (cashDelta > 0) earn(state, cashDelta);
 	else if (cashDelta < 0) spend(state, "penalties", -cashDelta);

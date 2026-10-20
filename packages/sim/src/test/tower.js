@@ -1,0 +1,43 @@
+import { makeContent, scenario } from "./fixture";
+export const TOWER_FLOORS = 60;
+export const TOWER_WIDTH = 64;
+export function towerScenario() {
+    const facilities = [];
+    for (let k = 0; k < 7; k++)
+        facilities.push({ defId: "grid_tie", floor: 0, x: k * 4 });
+    for (let k = 0; k < 15; k++)
+        facilities.push({ defId: "bot_charger", floor: 0, x: 28 + k * 2 });
+    for (const floor of [0, 30, TOWER_FLOORS - 1])
+        facilities.push({ defId: "parts_depot", floor, x: 58 });
+    for (let floor = 1; floor < TOWER_FLOORS; floor++) {
+        for (let k = 0; k < 17; k++)
+            facilities.push({ defId: "rack_air_gpu", floor, x: 2 + k * 2 });
+        facilities.push({ defId: "crah_unit", floor, x: 38 }, { defId: "crah_unit", floor, x: 40 });
+    }
+    const floors = Array.from({ length: TOWER_FLOORS }, (_, i) => i);
+    return scenario("tower", {
+        width: TOWER_WIDTH,
+        floorMin: 0,
+        floorMax: TOWER_FLOORS - 1,
+        slabs: floors.map((f) => [f, 0, TOWER_WIDTH - 1]),
+        conduits: floors.map((f) => ["power", f, 0, TOWER_WIDTH - 1]),
+        facilities,
+        lifts: [
+            { x: 61, floorMin: 0, floorMax: 30 },
+            { x: 62, floorMin: 0, floorMax: 30 },
+            { x: 63, floorMin: 30, floorMax: TOWER_FLOORS - 1 },
+            { x: 44, floorMin: 30, floorMax: TOWER_FLOORS - 1 },
+        ],
+        bots: Array.from({ length: 30 }, () => ({ defId: "rover", floor: 0, x: 30 })),
+        spareParts: 20,
+    });
+}
+/** Fixture content with the tower scenario; racks fail every few days so bots and work orders stay busy. */
+export function towerContent() {
+    const content = makeContent([towerScenario()]);
+    content.facilities.rack_air_gpu.rack = { ...content.facilities.rack_air_gpu.rack, failurePerDay: 0.3 };
+    content.lift = { ...content.lift, capacity: 6 };
+    // 7 ties × 8 MW: the net never browns out (a browned-out net freezes the lifts, which is a different test).
+    content.facilities.grid_tie.power = { ...content.facilities.grid_tie.power, capacityKw: 8000 };
+    return content;
+}

@@ -222,6 +222,8 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		memoHistory: [],
 		modifiers: [],
 		standing: 50,
+		standingLog: [],
+		uptimeTarget: 0.95,
 		researchPoints: 0,
 		techResearched: [],
 		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },

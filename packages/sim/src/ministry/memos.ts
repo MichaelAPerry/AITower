@@ -121,14 +121,14 @@ function removeParts(state: SimState, content: ContentDB, count: number): void {
 	}
 }
 
-function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events: SimEvent[]): void {
+function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events: SimEvent[], memoTitle: string): void {
 	switch (e.type) {
 		case "cash":
 			if (e.amount >= 0) earn(state, e.amount);
 			else spend(state, "penalties", -e.amount);
 			break;
 		case "standing":
-			changeStanding(state, e.amount, events);
+			changeStanding(state, e.amount, events, "memo", `Memo: ${memoTitle}`);
 			break;
 		case "ambient":
 			state.modifiers.push({ kind: "ambient", value: e.deltaC, endsAt: state.tick + e.durationTicks, label: modifierLabel("ambient", e.deltaC) });
@@ -155,7 +155,7 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 function resolveNow(state: SimState, content: ContentDB, memo: Memo, def: EventDef, choice: EventChoice, auto: boolean, events: SimEvent[]): void {
 	state.memos = state.memos.filter((m) => m.id !== memo.id);
 	if (!auto) state.stats.memosAnswered++;
-	for (const e of choice.effects) applyEffect(state, content, e, events);
+	for (const e of choice.effects) applyEffect(state, content, e, events, def.title);
 	state.memoHistory.push({ memoId: memo.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick, auto });
 	if (state.memoHistory.length > MEMO_HISTORY_LENGTH) state.memoHistory.splice(0, state.memoHistory.length - MEMO_HISTORY_LENGTH);
 	events.push({ type: "memoResolved", memoId: memo.id, eventId: def.id, choiceId: choice.id, auto });

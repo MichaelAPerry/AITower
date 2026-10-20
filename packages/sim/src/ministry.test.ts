@@ -538,7 +538,7 @@ const noOffers = (extra: Partial<Balance> = {}) => contentWith([ev("fx")], { ...
 
 describe("standing", () => {
 	it("starts at balance.standing.start", () => {
-		expect(newSim(contentWith([], { ...QUIET, standing: { start: 77, dailyGood: 1, dailyBad: -3, jobFailed: -4, jobCompleted: 1 } }), "empty").view().standing).toBe(77);
+		expect(newSim(contentWith([], { ...QUIET, standing: { start: 77, dailyGood: 1, dailyBad: -3, dailyNearMiss: -3, dailyMissSpan: 0.05, jobFailed: -4, jobCompleted: 1 } }), "empty").view().standing).toBe(77);
 	});
 
 	it("a day that meets the current tier's uptime target adds dailyGood, a missed one adds dailyBad", () => {

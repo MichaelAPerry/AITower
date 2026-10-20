@@ -259,7 +259,12 @@ export interface Balance {
 		start: number;
 		/** Change per completed day with uptime ≥ the current tier's uptime target (+) or below it (−). */
 		dailyGood: number;
+		/** Daily change when the uptime target is missed by `dailyMissSpan` or more. */
 		dailyBad: number;
+		/** Daily change for a near miss (shortfall → 0); in between it scales linearly. */
+		dailyNearMiss: number;
+		/** Uptime shortfall (0..1) at which the daily change reaches `dailyBad`. */
+		dailyMissSpan: number;
 		/** Change on a missed training deadline / completed job. */
 		jobFailed: number;
 		jobCompleted: number;

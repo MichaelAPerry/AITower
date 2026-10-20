@@ -333,6 +333,18 @@ export type GameOverKind = "bankrupt" | "shutdown" | "victory" | "absorbed";
 export type AuditGrade = "A" | "B" | "C" | "D" | "E";
 
 /** Quarterly Ministry audit (every `balance.audit.periodDays` days, filed at midnight). */
+/** What moved reputation: a Ministry memo, a finished/failed job, the daily uptime check, or the quarterly audit. */
+export type StandingCause = "memo" | "job" | "daily-uptime" | "audit";
+
+export interface StandingLogEntry {
+	tick: number;
+	/** Applied change (after clamping to 0..100). */
+	delta: number;
+	cause: StandingCause;
+	/** Plain-language detail, e.g. "Uptime 91.2% vs target 95%". */
+	detail: string;
+}
+
 export interface QuarterReport {
 	quarter: number;
 	/** Days covered, inclusive. */
@@ -445,6 +457,10 @@ export interface SimView {
 	modifiers: ModifierView[];
 	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
 	standing: number;
+	/** Why reputation moved: the last 20 changes (oldest first), each with its cause. */
+	standingLog: StandingLogEntry[];
+	/** Rolling 24 h uptime the current tier asks for; a day below it costs reputation (more the further below). */
+	uptimeTarget: number;
 	/**
 	 * Body-horror scalar 0..1 (drives render, audio and memos). Grows with the contaminated share, wetware share of
 	 * compute and growths; never decreases by more than a little per day (the building remembers).

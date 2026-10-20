@@ -1,0 +1,120 @@
+/**
+ * Constants that the task spec fixes literally but `Balance` (a frozen contract) has no field for.
+ * Every other number comes from `ContentDB.balance`. Candidates to move into `balance` later.
+ */
+/** Real seconds of game time per tick (1 tick = 1 game-minute). Converts kW ↔ kJ per tick. */
+export const SECONDS_PER_TICK = 60;
+/** Ticks per game hour; converts kW per tick into kWh. */
+export const TICKS_PER_HOUR = 60;
+/** With no open offer, the next one arrives at most this many ticks later (6 game hours), whatever the interval roll said. */
+export const GUARANTEED_OFFER_TICKS = 360;
+/** Idle racks (no job) draw this share of their rated power. */
+export const IDLE_RACK_POWER_FRACTION = 0.15;
+/** Below this power satisfaction, loads on the net switch off ("unpowered"). */
+export const MIN_POWERED_SATISFACTION = 0.5;
+/** A running genset stops after this many consecutive ticks in which the grid alone covers demand. */
+export const GENSET_STOP_SURPLUS_TICKS = 60;
+/** Chiller COP derates linearly by this fraction per °C ambient above the reference. */
+export const CHILLER_COP_DERATE_PER_C = 0.02;
+export const CHILLER_COP_REF_AMBIENT_C = 20;
+/** COP never derates below this share of nominal (keeps power finite in heatwaves). */
+export const CHILLER_MIN_COP_FRACTION = 0.1;
+/** Coolant supply temp rises this many °C per 1.0 (=100 %) of load over capacity (+10 °C per 10 %). */
+export const COOLANT_OVERLOAD_C_PER_FRACTION = 100;
+/** Overload fraction is capped here so temperatures stay finite. */
+export const COOLANT_MAX_OVERLOAD_FRACTION = 1;
+/** CRAHs pull air toward this temperature and never below it. */
+export const CRAH_TARGET_C = 20;
+/** Ambient sinusoid peaks at 15:00. */
+export const AMBIENT_PEAK_MINUTE = 15 * 60;
+/** Explicit thermal step: each link's k·dt/C is clamped to this (4 links per cell ⇒ Σ ≤ 0.8, stable). */
+export const MAX_LINK_COUPLING = 0.2;
+/** Training/finetune jobs take free racks up to this many. */
+export const TRAINING_MAX_RACKS = 8;
+/** Bots head to the charger below this battery level. */
+export const BOT_LOW_BATTERY = 0.2;
+/** Charging bots accept new work once above this level. */
+export const BOT_RESUME_BATTERY = 0.5;
+/** Charging is this many times faster than draining. */
+export const BOT_CHARGE_RATE_MULTIPLIER = 5;
+/** A bot that makes no progress toward its goal for this many ticks gives up: the order is released and retried later. */
+export const BOT_STUCK_TICKS = 360;
+/** Backoff before a released / unreachable work order (or a stranded bot) is retried: base × 2^(failures-1), capped. */
+export const BOT_RETRY_BACKOFF_BASE_TICKS = 30;
+export const BOT_RETRY_BACKOFF_MAX_TICKS = 720;
+/** A bot waiting at an empty depot looks for a better-stocked one this often (ticks, staggered by bot id). */
+export const BOT_DEPOT_RECHECK_TICKS = 10;
+/** An idle bot plans routes for at most this many work orders per tick (the rest wait for the next tick). */
+export const BOT_MAX_CLAIM_PLANS_PER_TICK = 6;
+/** Demolition refunds this share of the build cost. */
+export const DEMOLISH_REFUND = 0.5;
+/** One history sample every N ticks, keeping the last N samples. */
+export const HISTORY_INTERVAL_TICKS = 10;
+export const HISTORY_LENGTH = 1440;
+/** Completed days kept in the ledger (today is extra). */
+export const LEDGER_DAYS = 30;
+/** Completed / failed jobs stay visible this long before being pruned. */
+export const FINISHED_JOB_RETENTION_TICKS = 1440;
+/** Numerical tolerance for float comparisons. */
+export const EPS = 1e-9;
+/** Share of a training/finetune payout billed progressively at checkpoints; the rest is paid on completion. */
+export const TRAINING_PROGRESS_PAY_SHARE = 0.8;
+/** A training/finetune offer is accepted only if its idle racks would finish it within this share of the deadline (headroom for throttling and rollbacks). */
+export const ACCEPT_DEADLINE_MARGIN = 0.9;
+/** Scripted events are issued at 09:00 (minute of day) on their `scriptedDay`. */
+export const SCRIPTED_MINUTE_OF_DAY = 9 * 60;
+// ── Biotech (M3) ──
+/** Fleshed bots repair in this share of the normal ticks. */
+export const FLESHED_REPAIR_FACTOR = 0.6;
+/** Contamination a fleshed bot leaves at the tile where it finishes a repair. */
+export const FLESHED_REPAIR_CONTAMINATION = 0.2;
+/** A tendriled bot carries this many extra parts per depot trip. */
+export const TENDRILED_EXTRA_CARRY = 2;
+/** Bot speed never drops below this share of normal in contamination. */
+export const BOT_MIN_CONTAMINATION_SPEED = 0.3;
+/** A growth that failed comes back by itself after this many ticks (3 game hours). */
+export const GROWTH_RECOVER_TICKS = 180;
+/** Culling rooms clear growths once a day at this minute of day (03:00). */
+export const CULL_MINUTE_OF_DAY = 3 * 60;
+/** Contamination below this is flushed to zero (so the field can go quiet). */
+export const CONTAMINATION_FLOOR = 1e-9;
+/** A cell counts as contaminated at or above this level. */
+export const CONTAMINATED_CELL = 0.5;
+/** Corruption target weights: contaminated share (relative to the irreversible share), organoid share of compute, growths. */
+export const CORRUPTION_W_SHARE = 0.5;
+export const CORRUPTION_W_ORGANOID = 0.3;
+export const CORRUPTION_W_GROWTHS = 0.2;
+/** This many growths saturate the growth term of the corruption target. */
+export const CORRUPTION_GROWTHS_SATURATION = 20;
+/** Corruption moves toward its target by at most this much per day up / down. */
+export const CORRUPTION_RISE_PER_DAY = 0.1;
+export const CORRUPTION_FALL_PER_DAY = 0.02;
+/** Organoid incubators hold their tissue at targetC while powered, heating up to this many °C above the room air (from a cooled room's ~12 °C)… */
+export const INCUBATOR_LIFT_C = 25;
+/** …or cooling up to this many °C below it. Beyond that range the tissue drifts with the air. */
+export const INCUBATOR_COOL_C = 6;
+// ── Greentech / Synthetic / automation (M4) ──
+/** Daylight runs from 06:00 to 20:00 as a sine peaking at 13:00. */
+export const DAYLIGHT_START_MINUTE = 6 * 60;
+export const DAYLIGHT_END_MINUTE = 20 * 60;
+/** Wind strength is drawn hourly in this range. */
+export const WIND_MIN = 0.2;
+export const WIND_MAX = 1;
+/** greenScore = GREEN_W_ENERGY × green share of energy + GREEN_W_HEAT × min(1, exported heat ÷ IT energy). */
+export const GREEN_W_ENERGY = 0.7;
+export const GREEN_W_HEAT = 0.3;
+/** The greenScore moves toward its 24 h target by this share per tick (about a one-hour time constant). */
+export const GREEN_SMOOTHING = 1 / 60;
+/** Racks from this clearance count as top-tier for the Synthetic refinement score. */
+export const TOP_TIER_RACK = 4;
+/** Heat exporters pull air down to this temperature, never below. */
+export const HEAT_EXPORT_FLOOR_C = 20;
+/** The Foreman builds racks when less than this share of installed compute is idle. */
+export const FOREMAN_IDLE_SHARE = 0.2;
+/** …nor while any rack runs within this many °C of `okC` (cooling comes first). */
+export const FOREMAN_HEAT_MARGIN_C = 5;
+/** The Foreman builds no racks while Ministry standing is below this. */
+export const FOREMAN_MIN_STANDING = 40;
+/** Automation caps on policy numbers. */
+export const AUTOMATION_MAX_PARTS_KEEP = 1000;
+export const AUTOMATION_MAX_BOTS = 1000;
