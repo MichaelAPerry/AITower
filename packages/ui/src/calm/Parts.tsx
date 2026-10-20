@@ -1,23 +1,17 @@
-import type { Tool } from "@aitower/shared";
 import { isSerious, AlertsLog, ContractsDrawer, ResearchDrawer, Telemetry } from "./Panels";
 import { FinanceTab } from "../finance/FinanceTab";
 import { OverlaySwitcher } from "../components/OverlaySwitcher";
 import type { PanelProps } from "../components/context";
-import { fmtMoney, fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
+import { fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
 import { ModifierChips } from "../memo/MemoDesk";
-import { pushNotice } from "../notices";
 import { currentObjective, endingLine, isProblem } from "../objective/objective";
-import { toolKey } from "../tools/controller";
-import { BuildPalette, defSpecs } from "../components/BuildPalette";
-import { SpecCard, type SpecHover, anchorOf, softHide } from "../components/SpecCard";
-import { facilityEntryId } from "../encyclopedia/entries";
+import { BuildPalette } from "../components/BuildPalette";
 import { EncyclopediaDrawer } from "../encyclopedia/EncyclopediaDrawer";
 import { AffinityBars } from "../components/AffinityBars";
 import { leadingPath } from "../ascension/ascension";
-import { hudScale } from "../settings";
-import { DRAWER_TABS, type DockPick, dockPicks, feedLines, isRoutine, nextDrawer } from "./calm";
-import { Icon, Swatch } from "../components/common";
+import { DRAWER_TABS, feedLines, isRoutine, nextDrawer } from "./calm";
+import { Icon } from "../components/common";
 
 /** NEXT: one line from the current objective, with the key to press. The detail is its tooltip. */
 export function NextChip({ store, content, state, ui, setUi, openAscension }: PanelProps) {
@@ -65,62 +59,6 @@ export function Ticker({ content, state, ui, setUi }: PanelProps) {
 				</span>
 			))}
 		</button>
-	);
-}
-
-/** Bottom-left dock: the 3 most useful builds for now (glowing when affordable) and More, which opens the full palette. */
-export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
-	const { view, tool } = state;
-	const picks = dockPicks(view, content);
-	const hover = ui.dockHover ?? null;
-	const setHover = (h: SpecHover | null): void => setUi({ dockHover: h });
-	const soft = softHide(() => setHover(null));
-	const cost = (p: DockPick): number => (p.kind === "parts" ? content.structure.sparePart * 5 : content.facilities[p.defId].cost);
-	const run = (p: DockPick): void => {
-		if (cost(p) > view.cash) {
-			pushNotice({ text: `Need ${fmtMoney(cost(p) - view.cash)} more`, severity: "warn", key: "dock-poor" });
-			return;
-		}
-		if (p.kind === "parts") {
-			const r = store.dispatch({ type: "buyParts", count: 5 });
-			if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `buy:${r.reason}` });
-			return;
-		}
-		const t: Tool = { kind: "place", defId: p.defId };
-		store.setGhost(null);
-		store.setTool(toolKey(tool) === toolKey(t) ? { kind: "select" } : t);
-	};
-	return (
-		<section className="ui-dock" aria-label="Build dock" data-help="build">
-			<div className="ui-dockhead">
-				<span className="ui-label">BUILD</span>
-				<span className="ui-label">B</span>
-			</div>
-			{picks.map((p) => {
-				const key = p.kind === "parts" ? "parts" : p.defId;
-				const def = p.kind === "place" ? content.facilities[p.defId] : null;
-				const can = cost(p) <= view.cash;
-				const on = p.kind === "place" && toolKey(tool) === toolKey({ kind: "place", defId: p.defId });
-				return (
-					<button key={key} type="button" data-tut={`dock-${key}`} className={`ui-dockbtn ${can ? "can" : ""} ${on ? "is-on" : ""}`} onClick={() => run(p)}
-						onMouseLeave={soft.hide}
-						onMouseEnter={(e) => {
-							soft.keep();
-							setHover({ anchor: { ...anchorOf(e.currentTarget), right: e.currentTarget.getBoundingClientRect().right + 80 * hudScale(state.settings) }, ...(def ? { entry: facilityEntryId(def.id), title: def.name, body: def.description, specs: defSpecs(def) } : { title: "Spare parts ×5", body: "Replacement parts for maintenance bots. Each repair uses one.", specs: [["Cost", fmtMoney(cost(p))]] }) });
-						}}>
-						<span className="ui-dock-ic">{def ? <Swatch color={def.color} accent={def.accent} size={22} /> : <Icon name="bolt" size={14} />}</span>
-						<span className="ui-dock-name">{def ? def.name : "Spare parts ×5"}</span>
-						<span className="ui-dock-cost">{fmtMoney(cost(p))}</span>
-					</button>
-				);
-			})}
-			<button type="button" data-tut="dock-more" className={`ui-dockbtn ${ui.paletteOpen ? "is-on" : ""}`} aria-expanded={ui.paletteOpen} onClick={() => setUi({ paletteOpen: !ui.paletteOpen })} title="All builds: structure, racks, power, cooling, logistics, wetware (B)">
-				<span className="ui-dock-ic">…</span>
-				<span className="ui-dock-name">More</span>
-				<span className="ui-dock-cost">▸</span>
-			</button>
-			{hover && <SpecCard hover={hover} scale={hudScale(state.settings)} onEnter={soft.keep} onLeave={soft.hide} onMore={(entry) => { setHover(null); setUi({ drawer: "encyclopedia", encyId: entry }); }} />}
-		</section>
 	);
 }
 
@@ -203,7 +141,7 @@ export function Drawer(props: PanelProps) {
 	);
 }
 
-/** The full palette as a popover above the dock. */
+/** The build catalog beside the category bar, and the Inspector that goes with it. */
 export function PalettePopover(props: PanelProps) {
 	return props.ui.paletteOpen ? <BuildPalette {...props} /> : null;
 }

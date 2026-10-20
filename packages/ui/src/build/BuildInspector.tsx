@@ -1,0 +1,77 @@
+import { fmtMoney } from "../format";
+import { Icon } from "../components/common";
+import type { PanelProps } from "../components/context";
+import { findItem, itemForTool } from "./catalog";
+import { CATEGORY_LABEL, type Stat } from "./plain";
+
+function StatRow({ s }: { s: Stat }) {
+	return (
+		<div className="bld-stat">
+			<span className="bld-stat-ic" aria-hidden="true">
+				{s.icon === "$" ? "$" : <Icon name={s.icon} size={12} />}
+			</span>
+			<span className="bld-stat-text">
+				<span className="bld-stat-label">{s.label}</span>
+				<span className="bld-stat-sub">{s.sub}</span>
+			</span>
+			<span className={`bld-stat-val ${s.tone ? `is-${s.tone}` : ""}`}>{s.value}</span>
+		</div>
+	);
+}
+
+/**
+ * The persistent Inspector beside the catalog. Hovering a card previews it; the picked item shows when nothing is hovered
+ * and stays while the player places it. Replaces the old floating spec card.
+ */
+export function BuildInspector({ store, content, state, ui, setUi }: PanelProps) {
+	const { view, tool } = state;
+	const picked = itemForTool(tool, content);
+	const hovered = findItem(ui.buildHover, content);
+	const item = hovered ?? picked;
+	if (!item) {
+		return (
+			<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector">
+				<div className="bld-kicker">Inspector</div>
+				<h2 className="bld-h">Pick something to build</h2>
+				<p className="bld-blurb">Point at any card to see what it does and what it costs. Click it to pick it, then click the tower to put it down.</p>
+			</aside>
+		);
+	}
+	const isPicked = !!picked && picked.key === item.key;
+	const missing = item.def ? item.cost - view.cash : 0;
+	const openEntry = (): void => setUi({ drawer: "encyclopedia", encyId: item.entry, paletteOpen: false, buildHover: null });
+	return (
+		<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
+			<div className="bld-kicker">
+				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
+			</div>
+			<h2 className="bld-h">{item.name}</h2>
+			<p className="bld-blurb">{item.blurb}</p>
+			<div className="bld-stats">
+				{item.stats.map((s) => (
+					<StatRow key={`${s.label}${s.sub}`} s={s} />
+				))}
+			</div>
+			{missing > 0 && <p className="bld-warn">You need {fmtMoney(missing)} more cash to build this.</p>}
+			{item.entry && (
+				<div className="bld-links">
+					<button type="button" className="bld-q" onClick={openEntry}>
+						? What is {item.name.toLowerCase().startsWith("a") ? "an" : "a"} {item.name}
+					</button>
+				</div>
+			)}
+			<div className="bld-act">
+				{isPicked ? (
+					<>
+						<p className="bld-placing">{tool.kind === "demolish" ? "Click or drag over the tower to remove things." : "Now click the tower to put it down. Keep clicking to place more."}</p>
+						<button type="button" className="ui-btn bld-btn" onClick={() => { store.setGhost(null); store.setTool({ kind: "select" }); }}>
+							Put tool down · Esc
+						</button>
+					</>
+				) : (
+					<p className="bld-placing">Click the card to pick it.</p>
+				)}
+			</div>
+		</aside>
+	);
+}

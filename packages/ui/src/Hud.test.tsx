@@ -18,7 +18,7 @@ describe("Hud (server render smoke test)", () => {
 		expect(html).toContain("ui-strip");
 		expect(html).toContain("$1.28M");
 		expect(html).toContain("PER HOUR");
-		expect(html).toContain("ui-dock");
+		expect(html).toContain("bld-bar");
 		expect(html).toContain("ui-ticker");
 		expect(html).not.toContain("ui-bottom"); // no bottom panel, no open drawer, no palette
 		expect(html).not.toContain("ui-edge");

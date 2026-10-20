@@ -14,6 +14,10 @@ describe("escapeStep (pure)", () => {
 		expect(escapeStep({ menuOpen: true, tool: place, selection: sel })).toBe("closeMenu");
 		expect(escapeStep({ menuOpen: true, tool: select, selection: null })).toBe("closeMenu");
 	});
+	it("drops the armed tool before it closes a drawer or the build catalog", () => {
+		expect(escapeStep({ menuOpen: false, drawerOpen: true, tool: place, selection: null })).toBe("cancelTool");
+		expect(escapeStep({ menuOpen: false, drawerOpen: true, tool: select, selection: null })).toBe("closeDrawer");
+	});
 	it("then cancels an armed tool, then clears the selection, then opens the menu", () => {
 		expect(escapeStep({ menuOpen: false, tool: place, selection: sel })).toBe("cancelTool");
 		expect(escapeStep({ menuOpen: false, tool: { kind: "demolish" }, selection: null })).toBe("cancelTool");

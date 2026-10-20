@@ -62,7 +62,7 @@ export function createToolController(store: GameStore, content: ContentDB, opts:
 					cells: footprint(cell, def.width),
 					valid: r.ok,
 					defId: tool.defId,
-					label: r.ok ? `${def.name} · ${fmtMoney(def.cost)}` : r.reason,
+					label: r.ok ? `${def.name} · ${fmtMoney(def.cost)}` : sentence(r.reason),
 				};
 			}
 			case "slab": {

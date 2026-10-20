@@ -11,10 +11,10 @@ import { BOT_H, botBox } from "./bots";
 import { box, px } from "./draw";
 import { drawBody } from "./facilityArt";
 import { WORLD_FONT } from "./labels";
-import { BRASS, HEAT_RAMP, T, dk, lt, mix } from "../palette";
+import { BRASS, T, dk, lt, mix } from "../palette";
 
-/** Cyanotype ground (the cold end of the STYLE.md heat ramp) and its chalk lines. */
-const CYAN = HEAT_RAMP[0];
+/** Legal-placement ground: HUD green (--good), so green = fits and red = does not. Chalk lines on top. */
+const CYAN = 0x2fbf6b;
 const CYAN_LINE = mix(T.paper, CYAN, 0.12);
 const CYAN_TINT = mix(CYAN, T.paper, 0.55);
 const STAMP = T.red;
@@ -82,7 +82,7 @@ export class GhostLayer {
 			maxY = Math.max(maxY, y + FLOOR_H);
 			if (gh.valid) {
 				// Blueprint: cyanotype wash, chalk grid, dashed outline.
-				px(g, x, y, TILE, FLOOR_H, CYAN, 0.55);
+				px(g, x, y, TILE, FLOOR_H, CYAN, 0.45);
 				for (let k = 4; k < FLOOR_H; k += 8) px(g, x, y + k, TILE, 1, CYAN_LINE, 0.18);
 				px(g, x + 8, y, 1, FLOOR_H, CYAN_LINE, 0.18);
 				for (let k = 0; k < TILE; k += 4) {

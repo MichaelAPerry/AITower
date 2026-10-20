@@ -256,73 +256,6 @@
 	color: var(--bad);
 }
 
-/* Build dock */
-.aitower-hud .ui-dock {
-	position: absolute;
-	left: var(--gap);
-	bottom: var(--gap);
-	width: var(--dock-w);
-	display: grid;
-	gap: 6px;
-	z-index: 4;
-}
-.aitower-hud .ui-dockhead {
-	display: flex;
-	justify-content: space-between;
-}
-.aitower-hud .ui-dockbtn {
-	display: grid;
-	grid-template-columns: 30px 1fr auto;
-	align-items: center;
-	gap: var(--gap);
-	padding: 5px var(--gap);
-	text-align: left;
-	background: var(--panel);
-	border: 1px solid var(--panel-edge);
-	border-radius: var(--radius-sm);
-	color: var(--text);
-	cursor: pointer;
-}
-.aitower-hud .ui-dockbtn.can {
-	border-color: var(--accent);
-	box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 35%, transparent);
-}
-.aitower-hud .ui-dockbtn.is-on {
-	background: color-mix(in srgb, var(--accent) 22%, var(--panel));
-}
-.aitower-hud .ui-dock-ic {
-	display: grid;
-	place-items: center;
-	color: var(--accent);
-	font: var(--fs-num) / 1 var(--f-num);
-}
-.aitower-hud .ui-dock-name {
-	font: 500 var(--fs-body) / 1.1 var(--f-body);
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-}
-.aitower-hud .ui-dock-cost {
-	font: var(--fs-body) / 1 var(--f-num);
-	color: var(--text-dim);
-}
-.aitower-hud .ui-dockbtn.can .ui-dock-cost {
-	color: var(--money);
-}
-
-/* The full palette becomes a popover above the dock */
-.aitower-hud .ui-center > .ui-palette {
-	position: absolute;
-	left: var(--gap);
-	bottom: calc(var(--gap) * 25);
-	width: calc(var(--dock-w) + var(--gap) * 10);
-	max-height: calc(100% - var(--gap) * 28);
-	z-index: 6;
-}
-.aitower-hud .ui-tabs-6 {
-	grid-template-columns: repeat(6, auto);
-}
-
 /* Drawers */
 .aitower-hud .ui-dtabs {
 	position: absolute;
@@ -618,13 +551,3 @@
 	pointer-events: none;
 }
 
-.aitower-hud .ui-speccard .ui-more-link {
-	margin-top: 6px;
-	padding: 0;
-	background: none;
-	border: 0;
-	color: var(--accent);
-	font: inherit;
-	text-decoration: underline;
-	cursor: pointer;
-}

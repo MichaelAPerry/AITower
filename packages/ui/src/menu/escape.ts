@@ -10,16 +10,16 @@ export interface Closable {
 }
 
 /**
- * Esc order: close the menu, else the research sheet, else the ascension sheet, else the audit sheet, else the open drawer or palette, else cancel the
- * armed tool, else clear the selection, else open the menu.
+ * Esc order: close the menu, else the research sheet, else the ascension sheet, else the audit sheet, else cancel the armed tool (before any panel closes), else the open
+ * drawer or build catalog, else clear the selection, else open the menu.
  */
 export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; ascensionOpen?: boolean; auditOpen?: boolean; drawerOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
 	if (ctx.menuOpen) return "closeMenu";
 	if (ctx.researchOpen) return "closeResearch";
 	if (ctx.ascensionOpen) return "closeAscension";
 	if (ctx.auditOpen) return "closeAudit";
-	if (ctx.drawerOpen) return "closeDrawer";
 	if (ctx.tool.kind !== "select") return "cancelTool";
+	if (ctx.drawerOpen) return "closeDrawer";
 	if (ctx.selection) return "clearSelection";
 	return "openMenu";
 }

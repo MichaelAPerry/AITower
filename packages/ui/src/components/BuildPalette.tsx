@@ -1,54 +1,16 @@
 import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
 import type { SimCommand, SimView } from "@aitower/sim";
-import type { Tool } from "@aitower/shared";
-import { type MouseEvent, useRef, useState } from "react";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
 import { techGate } from "../research/tech";
-import { hudScale } from "../settings";
-import { conduitUnitCost, toolKey } from "../tools/controller";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
-import { SpecCard, type SpecHover, type SpecInfo, anchorOf, softHide } from "./SpecCard";
-import { facilityEntryId } from "../encyclopedia/entries";
+import { findItem, structure } from "../build/catalog";
+import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary } from "../build/plain";
+import { toolKey } from "../tools/controller";
 import type { PanelProps } from "./context";
 
-export type Tab = "structure" | BuildCategory;
-const TABS: { id: Tab; label: string }[] = [
-	{ id: "structure", label: "Build" },
-	{ id: "rack", label: "Racks" },
-	{ id: "power", label: "Power" },
-	{ id: "cooling", label: "Cool" },
-	{ id: "logistics", label: "Logis" },
-	{ id: "bio", label: "Wetware" },
-];
-
-/** One-line headline numbers for a facility card. */
-export function defHeadline(def: FacilityDef): string {
-	const parts: string[] = [];
-	if (def.rack) {
-		parts.push(fmtPower(def.rack.powerKw));
-		if (def.rack.pflops) parts.push(fmtPflops(def.rack.pflops));
-		if (def.rack.storageTB) parts.push(`${def.rack.storageTB} TB`);
-		parts.push(def.rack.cooling.toUpperCase());
-		if (def.rack.bio) parts.push(bandText(def.rack.bio));
-	} else if (def.power) {
-		parts.push(`${fmtPower(def.power.capacityKw)} out`);
-		if (def.power.storageKwh) parts.push(`${def.power.storageKwh} kWh`);
-	} else if (def.cooling) {
-		parts.push(`${fmtPower(def.cooling.capacityKw)} heat`);
-		if (def.cooling.radius) parts.push(`r${def.cooling.radius}`);
-		if (def.cooling.cop) parts.push(`COP ${def.cooling.cop}`);
-	} else if (def.logistics) {
-		parts.push(`cap ${def.logistics.capacity}`);
-	}
-	if (def.bio && !def.rack) {
-		if (def.bio.nutrientCapacity) parts.push(`${def.bio.nutrientCapacity} nutrient/tick`);
-		if (def.bio.radius) parts.push(`r${def.bio.radius}`);
-	}
-	if (def.facilityKw) parts.push(`+${fmtPower(def.facilityKw)} aux`);
-	return parts.join(" · ");
-}
+export type { Tab };
 
 export function defSpecs(def: FacilityDef): [string, string][] {
 	const s: [string, string][] = [
@@ -114,182 +76,127 @@ export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategor
 		.map((x) => x.d);
 }
 
-export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
+
+/** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
+function Card({ item, picked, poor, onPick, onHover }: { item: CatalogItem; picked: boolean; poor: boolean; onPick: () => void; onHover: (key: string | null) => void }) {
+	const d = item.def;
+	return (
+		<button
+			key={item.key}
+			type="button"
+			data-tut={`card-${d ? d.id : item.key}`}
+			aria-pressed={picked}
+			className={`bld-card ${picked ? "is-on" : ""} ${poor ? "is-poor" : ""} ${item.danger ? "is-danger" : ""}`}
+			onClick={onPick}
+			onMouseEnter={() => onHover(item.key)}
+			onMouseLeave={() => onHover(null)}
+			onFocus={() => onHover(item.key)}
+			onBlur={() => onHover(null)}
+		>
+			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
+			<span className="bld-name">{item.name}</span>
+			<span className={`bld-cost ${poor ? "is-short" : ""}`}>{item.costText}</span>
+		</button>
+	);
+}
+
+/**
+ * The build catalog: a grid of item cards for the category chosen on the build bar. Hovering a card fills the Inspector
+ * (BuildInspector); clicking it arms the tool and the card stays selected. `recommended` is a hook for a "Recommended" row
+ * at the top (def ids from a suggestion helper); it renders nothing when empty.
+ */
+export function BuildPalette({ store, content, state, ui, setUi, recommended }: PanelProps & { recommended?: readonly string[] }) {
 	const tab = ui.paletteTab as Tab;
-	const [hover, setHover] = useState<SpecHover | null>(null);
-	const root = useRef<HTMLElement>(null);
 	const { view, tool } = state;
 	const active = toolKey(tool);
-	const st = content.structure;
 
-	const pick = (t: Tool): void => {
-		setHover(null);
+	const hover = (key: string | null): void => {
+		if ((ui.buildHover ?? null) !== key) setUi({ buildHover: key });
+	};
+	const pick = (item: CatalogItem): void => {
 		store.setGhost(null);
-		store.setTool(active === toolKey(t) ? { kind: "select" } : t);
+		store.setTool(active === toolKey(item.tool) ? { kind: "select" } : item.tool);
 	};
-	const soft = softHide(() => setHover(null));
-	const hoverAt = (e: MouseEvent<HTMLElement>, h: SpecInfo): void => {
-		soft.keep();
-		setHover({ ...h, anchor: anchorOf(e.currentTarget, root.current) });
-	};
+	// Called as a plain function (no hooks), so tests can walk the returned element tree.
+	const card = (item: CatalogItem) => Card({ item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, onPick: () => pick(item), onHover: hover });
 
-	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "leaf" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
-		{ tool: { kind: "slab" }, icon: "slab", name: "Floor slab", cost: `${fmtMoney(st.slabPerTile)}/tile`, hint: `basement ${fmtMoney(st.basementSlabPerTile)}/tile`, body: "Drag horizontally along one floor. Floors above ground need slab underneath." },
-		{ tool: { kind: "conduit", layer: "power" }, icon: "bolt", name: "Power conduit", cost: `${fmtMoney(st.powerConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Busway linking power sources, UPS and loads into one net. Vertical runs become risers." },
-		{ tool: { kind: "conduit", layer: "coolant" }, icon: "drop", name: "Coolant conduit", cost: `${fmtMoney(st.coolantConduitPerTile)}/tile`, hint: "drag an L-shaped run", body: "Liquid loop piping between chillers, CDUs and liquid-cooled racks." },
-		{ tool: { kind: "conduit", layer: "nutrient" }, icon: "leaf", name: "Nutrient conduit", cost: `${fmtMoney(conduitUnitCost(content, "nutrient"))}/tile`, hint: "drag an L-shaped run", body: "Feed line from a nutrient plant to organoid racks and bioreactors. Vertical runs join floors." },
-		{ tool: { kind: "lift" }, icon: "lift", name: "Service lift", cost: `${fmtMoney(st.liftBase)}+${fmtMoney(st.liftPerFloor)}/fl`, hint: "drag vertically", body: "Lets bots change floors. Every floor in the span needs slab at that column." },
-		{ tool: { kind: "demolish" }, icon: "demolish", name: "Demolish", cost: "50% refund", hint: "click or drag", body: "Removes the top-most thing in a cell: facility ▸ lift ▸ conduit ▸ slab." },
-	];
+	let cards: CatalogItem[] = [];
+	let lockedLines: string[] = [];
+	if (tab === "structure") cards = structure(content);
+	else if (tab !== "supplies") {
+		const defs = Object.values(content.facilities)
+			.filter((d) => d.category === tab && !d.growth)
+			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
+		cards = defs.filter((d) => !lockReason(d, view, content)).map((d) => findItem(d.id, content) as CatalogItem);
+		lockedLines = lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
+	}
+	const rec = (recommended ?? []).map((id) => findItem(id, content)).filter((i): i is CatalogItem => !!i?.def && !lockReason(i.def, view, content));
 
-	const defs = tab === "structure" ? [] : paletteDefs(content, view, tab);
-
-	const bots = Object.values(content.bots);
 	const buy = (cmd: SimCommand): void => {
 		const r = store.dispatch(cmd);
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `buy:${r.reason}` });
 	};
+	const bots = Object.values(content.bots);
+	const st = content.structure;
 
 	return (
-		<aside ref={root} className="ui-palette ui-panel" onMouseLeave={soft.hide}>
-			<div className="ui-panel-title">
-				<span className="ui-panel-name">Build</span>
-				<button
-					type="button"
-					className={`ui-btn ui-icon-btn ui-select-btn ${tool.kind === "select" ? "is-on" : ""}`}
-					onClick={() => pick({ kind: "select" })}
-					title="Select / inspect (Esc)"
-					aria-label="Select"
-				>
-					<Icon name="pointer" size={13} />
+		<aside className="bld-catalog ui-panel" data-help="catalog" aria-label={`${CATEGORY_LABEL[tab]} catalog`}>
+			<div className="bld-head">
+				<span className="bld-title">{CATEGORY_LABEL[tab]}</span>
+				{tool.kind !== "select" && (
+					<button type="button" className="ui-btn bld-drop" onClick={() => { store.setGhost(null); store.setTool({ kind: "select" }); }} title="Put the tool down (Esc)">
+						Put tool down
+					</button>
+				)}
+				<button type="button" className="ui-btn ui-icon-btn" aria-label="Close catalog" title="Close (B)" onClick={() => setUi({ paletteOpen: false, buildHover: null })}>
+					<Icon name="close" size={11} />
 				</button>
 			</div>
-			<div className="ui-tabs ui-tabs-6" role="tablist">
-				{TABS.map((t) => (
-					<button key={t.id} type="button" role="tab" data-tut={`tab-${t.id}`} aria-selected={tab === t.id} className={`ui-tab ${tab === t.id ? "is-on" : ""}`} onClick={() => {
-							setUi({ paletteTab: t.id });
-							setHover(null);
-						}}>
-						{t.label}
-					</button>
-				))}
-			</div>
-			<div className="ui-palette-list">
-				{tab === "structure" &&
-					structure.map((s) => (
-						<button
-							key={s.name}
-							type="button"
-							data-tut={`card-${s.icon}${s.tool.kind === "conduit" ? `-${s.tool.layer}` : ""}`}
-							className={`ui-item ui-card ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
-							onClick={() => pick(s.tool)}
-							onMouseLeave={soft.hide}
-							onMouseEnter={(e) => hoverAt(e, { title: s.name, body: s.body, specs: [["Cost", s.cost], ["How", s.hint]] })}
-						>
-							<span className={`ui-item-icon ic-${s.icon}`}>
-								<Icon name={s.icon} size={15} />
-							</span>
-							<span className="ui-item-main">
-								<span className="ui-item-name">{s.name}</span>
-								<span className="ui-item-foot">
-									<span className="ui-item-sub">{s.hint}</span>
-									<span className="ui-item-cost">{s.cost}</span>
-								</span>
-							</span>
-						</button>
-					))}
-				{tab !== "structure" && defs.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
-				{tab !== "structure" &&
-					defs.map((d) => {
-						const lock = lockText(d, view, content);
-						const locked = lock !== null;
-						const poor = view.cash < d.cost;
-						const t: Tool = { kind: "place", defId: d.id };
-						return (
-							<button
-								key={d.id}
-								type="button"
-								data-tut={`card-${d.id}`}
-								aria-disabled={locked || poor}
-								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
-								onClick={() => {
-									if (!locked && !poor) pick(t);
-								}}
-								onMouseLeave={soft.hide}
-								onMouseEnter={(e) =>
-									hoverAt(e, {
-										entry: facilityEntryId(d.id),
-										title: d.name,
-										body: d.description,
-										specs: defSpecs(d),
-										warn: lock ? lock : poor ? `Need ${fmtMoney(d.cost - view.cash)} more` : undefined,
-									})
-								}
-							>
-								<Swatch color={d.color} accent={d.accent} />
-								<span className="ui-item-main">
-									<span className="ui-item-name">
-										{d.name}
-									</span>
-									<span className="ui-item-foot">
-										<span className={`ui-item-sub ${locked ? "is-lock" : ""}`}>
-											{locked && <Icon name="lock" size={10} />} {lock ?? defHeadline(d)}
-										</span>
-										<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
-									</span>
-								</span>
-							</button>
-						);
-					})}
-			</div>
-			<div className="ui-supplies">
-				<span className="ui-dymo ui-supplies-title">SUPPLIES</span>
-				<div className="ui-supply">
-					<span className="ui-k">Spare parts</span>
-					<span className="ui-v ui-crt crt-amber">{view.spareParts}</span>
-					<button
-						type="button"
-						className="ui-btn ui-mini"
-						disabled={view.cash < st.sparePart * 5}
-						onClick={() => buy({ type: "buyParts", count: 5 })}
-						title={`Buy 5 spare parts for ${fmtMoney(st.sparePart * 5)}`}
-					>
-						+5 · {fmtMoney(st.sparePart * 5)}
-					</button>
-				</div>
-				{bots.map((bot) => {
-					const gate = techGate(bot.tech, view, content);
-					const many = bots.length > 1;
-					return (
-						<div key={bot.id} className="ui-supply">
-							<span className="ui-k">{many ? bot.name : "Bots"}</span>
-							<span className="ui-v ui-crt crt-amber">{many ? view.bots.filter((b) => b.defId === bot.id).length : view.bots.length}</span>
-							<button
-								type="button"
-								className="ui-btn ui-mini"
-								disabled={!!gate || view.cash < bot.cost}
-								onClick={() => buy({ type: "buyBot", defId: bot.id })}
-								title={gate ?? `Buy a ${bot.name} for ${fmtMoney(bot.cost)}${bot.flying ? " (flies between floors, no lift needed)" : ""}`}
-							>
-								{gate ? "Research" : `+1 · ${fmtMoney(bot.cost)}`}
-							</button>
-							{gate && <span className="ui-supply-gate">{gate}</span>}
+			<div className="bld-scroll">
+				{rec.length > 0 && (
+					<section className="bld-rec" aria-label="Recommended">
+						<h4 className="bld-sub">Recommended</h4>
+						<div className="bld-grid">{rec.map(card)}</div>
+					</section>
+				)}
+				{tab !== "supplies" && <div className="bld-grid">{cards.map(card)}</div>}
+				{tab !== "supplies" && cards.length === 0 && lockedLines.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
+				{lockedLines.length > 0 && (
+					<div className="bld-locked" data-tut="locked-row">
+						<Icon name="lock" size={11} />
+						<div>
+							{lockedLines.map((l) => (
+								<p key={l}>{l}</p>
+							))}
 						</div>
-					);
-				})}
-				{bots.length === 0 && (
-					<div className="ui-supply">
-						<span className="ui-k">Bots</span>
-						<span className="ui-v ui-crt crt-amber">{view.bots.length}</span>
-						<button type="button" className="ui-btn ui-mini" disabled title="No bot types available">
-							+1 · —
-						</button>
+					</div>
+				)}
+				{tab === "supplies" && (
+					<div className="bld-supplies">
+						<div className="bld-supply">
+							<span className="bld-supply-name">Spare parts <b>{view.spareParts}</b></span>
+							<span className="bld-supply-sub">Repair bots use one part per fix.</span>
+							<button type="button" className="ui-btn" disabled={view.cash < st.sparePart * 5} onClick={() => buy({ type: "buyParts", count: 5 })}>
+								Buy 5 · {fmtMoney(st.sparePart * 5)}
+							</button>
+						</div>
+						{bots.map((bot) => {
+							const gate = techGate(bot.tech, view, content);
+							const n = view.bots.filter((b) => b.defId === bot.id).length;
+							return (
+								<div key={bot.id} className="bld-supply">
+									<span className="bld-supply-name">{bot.name} <b>{n}</b></span>
+									<span className="bld-supply-sub">{gate ? gate : bot.flying ? "Flies between floors, no lift needed." : "Walks to broken racks and fixes them."}</span>
+									<button type="button" className="ui-btn" disabled={!!gate || view.cash < bot.cost} onClick={() => buy({ type: "buyBot", defId: bot.id })}>
+										{gate ? "Research first" : `Buy 1 · ${fmtMoney(bot.cost)}`}
+									</button>
+								</div>
+							);
+						})}
 					</div>
 				)}
 			</div>
-			{hover && tool.kind === "select" && (
-				<SpecCard hover={hover} scale={hudScale(state.settings)} onEnter={soft.keep} onLeave={soft.hide} onMore={(entry) => { setHover(null); setUi({ paletteOpen: false, drawer: "encyclopedia", encyId: entry }); }} />
-			)}
 		</aside>
 	);
 }
+

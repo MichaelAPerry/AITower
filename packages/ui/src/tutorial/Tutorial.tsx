@@ -213,12 +213,6 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 		[step?.id],
 	);
 
-	// Build step: once the card is picked the palette gets out of the way of the blueprint spot.
-	const armed = step?.id === "build" && state.tool.kind === "place" && ui.paletteOpen;
-	useEffect(() => {
-		if (armed) setUi({ paletteOpen: false });
-	}, [armed, setUi]);
-
 	const satisfied = !hintId && !!step?.done && !!baseline.current && step.done(state, baseline.current, ctx);
 	useEffect(() => {
 		if (satisfied && completedAt === null) setCompletedAt(Date.now());

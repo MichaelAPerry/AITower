@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 import { AscensionForm } from "./ascension/AscensionForm";
 import { ascensionDue, filePath, pathPending, pathRows, pathToConfirm } from "./ascension/ascension";
 import { bandText, bioWords, memoStain, organoidBand, showGrowthGauge, tissueState, traitInfo } from "./bio/bio";
-import { BuildDock, NextChip, Ticker } from "./calm/Parts";
+import { NextChip, Ticker } from "./calm/Parts";
+import { BuildBar } from "./build/BuildBar";
+import { BuildInspector } from "./build/BuildInspector";
 import { BuildPalette } from "./components/BuildPalette";
 import { MODES, overlayLabel } from "./components/OverlaySwitcher";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
@@ -298,13 +300,14 @@ describe("Wetware tab, nutrient tool and overlays", () => {
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "bio", paletteOpen: true } })} />);
 		expect(html).toContain("Wetware");
 		expect(html).toContain("Nutrient Plant");
-		expect(html).toContain("37 °C ±1");
+		const insp = renderToString(<BuildInspector {...panelProps(store, content, { ui: { paletteTab: "bio", paletteOpen: true, buildHover: "organoid_incubator" } })} />);
+		expect(insp).toContain("37 °C ±1");
 		expect(html).not.toContain("Growth Mass"); // growths are never buildable
 	});
 	it("lists the nutrient conduit next to power and coolant, with its cost", () => {
 		const { content, store } = setup();
-		const html = renderToString(<BuildPalette {...panelProps(store, content)} />);
-		expect(html).toContain("Nutrient conduit");
+		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "structure" } })} />);
+		expect(html).toContain("Nutrient pipe");
 		expect(html).toContain(`$${content.structure.coolantConduitPerTile}/tile`);
 	});
 	it("the nutrient conduit tool drags an L-path and dispatches buildConduit on the nutrient layer", () => {
@@ -336,23 +339,28 @@ describe("Wetware tab, nutrient tool and overlays", () => {
 });
 
 describe("Calm HUD interactions", () => {
-	it("the dock arms a build, disarms on a second press, and buys parts", () => {
+	it("a catalog card arms a build, a second click puts it down, and hovering only previews", () => {
 		const { content, store } = setup();
 		store.setSettings(DEFAULT_SETTINGS);
-		const tree = () => BuildDock(panelProps(store, content));
-		const first = findAll(tree(), (e) => !!e.props.className?.toString().includes("ui-dockbtn") && typeof e.props.onClick === "function")[0];
-		click(first);
-		expect(store.get().tool.kind).toBe("place");
-		const again = findAll(tree(), (e) => !!e.props.className?.toString().includes("ui-dockbtn") && typeof e.props.onClick === "function")[0];
-		click(again);
+		const patches: unknown[] = [];
+		const tree = () => BuildPalette(panelProps(store, content, { ui: { paletteTab: "rack", paletteOpen: true }, setUi: (p) => patches.push(p) }));
+		const cardOf = (t: ReturnType<typeof tree>) => findAll(t, (e) => String(e.props["data-tut"]).startsWith("card-rack_air_gpu"))[0];
+		click(cardOf(tree()));
+		expect(store.get().tool).toEqual({ kind: "place", defId: "rack_air_gpu" });
+		click(cardOf(tree()));
+		expect(store.get().tool.kind).toBe("select");
+		(cardOf(tree()).props.onMouseEnter as () => void)();
+		expect(patches).toContainEqual({ buildHover: "rack_air_gpu" });
 		expect(store.get().tool.kind).toBe("select");
 	});
-	it("More toggles the palette popover through the ui state", () => {
-		const { content, store } = setup();
+	it("a category button opens its catalog in one click; the active one closes it", () => {
 		const patches: unknown[] = [];
-		const tree = BuildDock(panelProps(store, content, { setUi: (p) => patches.push(p) }));
-		click(findButton(tree, /More/));
-		expect(patches).toEqual([{ paletteOpen: true }]);
+		const tree = BuildBar({ ui: { paletteOpen: false, paletteTab: "rack" } as never, setUi: (p) => patches.push(p) });
+		click(findButton(tree, /Cooling/));
+		expect(patches).toEqual([{ paletteOpen: true, paletteTab: "cooling", drawer: null, buildHover: null }]);
+		const open = BuildBar({ ui: { paletteOpen: true, paletteTab: "cooling" } as never, setUi: (p) => patches.push(p) });
+		click(findButton(open, /Cooling/));
+		expect(patches.at(-1)).toEqual({ paletteOpen: false, buildHover: null });
 	});
 	it("the ticker opens the alert log and counts unseen serious events only", () => {
 		const { content, store } = setup();
@@ -382,7 +390,7 @@ describe("Calm HUD interactions", () => {
 });
 
 describe("drawer and palette keys", () => {
-	it("C F I B call the drawer and palette togglers; Esc closes the open drawer before cancelling the tool", () => {
+	it("C F I B call the drawer and palette togglers; Esc puts the tool down before it closes the open drawer", () => {
 		const { store } = setup();
 		const menu = createMenuController(store);
 		const calls: string[] = [];
@@ -393,10 +401,10 @@ describe("drawer and palette keys", () => {
 		expect(calls).toEqual(["contracts", "finance", "gauges", "palette"]);
 		store.setTool({ kind: "slab" });
 		runKey(store, "Escape", env as never);
-		expect(open).toBe(false);
-		expect(store.get().tool.kind).toBe("slab"); // the tool stays armed until the next Esc
+		expect(store.get().tool.kind).toBe("select"); // the tool goes first …
+		expect(open).toBe(true);
 		runKey(store, "Escape", env as never);
-		expect(store.get().tool.kind).toBe("select");
-		expect(escapeStep({ menuOpen: false, drawerOpen: true, tool: { kind: "slab" }, selection: null })).toBe("closeDrawer");
+		expect(open).toBe(false); // … then the panel
+		expect(escapeStep({ menuOpen: false, drawerOpen: true, tool: { kind: "slab" }, selection: null })).toBe("cancelTool");
 	});
 });
