@@ -4,7 +4,7 @@ import { buildEntries, type Entry, lockFor, SECTIONS, type Section, searchEntrie
 import "./encyclopedia.css";
 
 /** Encyclopedia drawer (K): search, section tabs, and entries that open in place. */
-export function EncyclopediaDrawer({ content, state, ui, setUi }: PanelProps) {
+export function EncyclopediaDrawer({ content, state, ui, setUi, openResearch }: PanelProps) {
 	const entries = useMemo(() => buildEntries(content), [content]);
 	const [query, setQuery] = useState("");
 	const [section, setSection] = useState<Section>("basics");
@@ -43,6 +43,11 @@ export function EncyclopediaDrawer({ content, state, ui, setUi }: PanelProps) {
 					<div className="ui-ency-body">
 						{lock && <p className="ui-ency-locktext">{lock}</p>}
 						{!hidden && e.lines.map((l) => <p key={l}>{l}</p>)}
+						{e.ref?.kind === "tech" && (
+							<button type="button" className="ui-btn ui-mini" onClick={() => e.ref && openResearch(e.ref.id)}>
+								Open in Research
+							</button>
+						)}
 						{!hidden && e.needs.length > 0 && <p className="ui-ency-needs">Needs: {e.needs.join(" / ")}</p>}
 						{!hidden && e.stats.length > 0 && (
 							<dl className="ui-ency-stats">

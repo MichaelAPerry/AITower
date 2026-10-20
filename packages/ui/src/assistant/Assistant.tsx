@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { findItem } from "../build/catalog";
 import type { PanelProps } from "../components/context";
 import { pushNotice } from "../notices";
+import { cheapestAvailable } from "../research/tech";
 import { acted, dismiss, initialPace, type PaceState, pace } from "./pace";
 import { type AssistantAction, type Suggestion, tipFor } from "./suggest";
 import "./assistant.css";
@@ -58,7 +59,7 @@ export function runAction(a: AssistantAction, p: Pick<PanelProps, "store" | "con
 			setUi({ inboxOpen: true });
 			return;
 		case "research":
-			p.openResearch();
+			p.openResearch(cheapestAvailable(store.get().view, content)?.id);
 			return;
 		case "ascension":
 			p.openAscension();

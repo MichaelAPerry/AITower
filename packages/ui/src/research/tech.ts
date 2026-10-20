@@ -34,6 +34,7 @@ export function nodeState(node: TechNode, view: SimView, content: ContentDB): Te
 	const needs: string[] = [];
 	if (view.tier < node.minTier) needs.push(`Level ${node.minTier}`);
 	for (const r of node.requires) if (!done.has(r)) needs.push(techName(content, r));
+	if (node.path !== undefined && view.path !== node.path) needs.push(`the ${node.path} path`);
 	if (needs.length) return { kind: "locked", reason: `Requires ${needs.join(" and ")}` };
 	const rp = view.researchPoints ?? 0;
 	if (rp + 1e-9 < node.cost) return { kind: "poor", short: Math.ceil(node.cost - rp - 1e-9) };

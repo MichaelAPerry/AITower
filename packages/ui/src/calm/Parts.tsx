@@ -1,4 +1,5 @@
-import { isSerious, AlertsLog, ResearchDrawer } from "./Panels";
+import { isSerious, AlertsLog } from "./Panels";
+import { ResearchPanel } from "../research/ResearchPanel";
 import { ContractsDrawer } from "../contracts/ContractsPanel";
 import { InsightsPanel } from "../insights/InsightsPanel";
 import type { PanelProps } from "../components/context";
@@ -73,7 +74,7 @@ export function DrawerTabs({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
 }
 
 /** Panels built on the shared shell (list + Inspector) get the wide frame. */
-export const WIDE: ReadonlySet<DrawerId> = new Set<DrawerId>(["contracts", "insights"]);
+export const WIDE: ReadonlySet<DrawerId> = new Set<DrawerId>(["contracts", "insights", "research"]);
 
 /** The open drawer, if any. */
 export function Drawer(props: PanelProps) {
@@ -86,7 +87,7 @@ export function Drawer(props: PanelProps) {
 				<Icon name="close" size={11} />
 			</button>
 			{d === "contracts" && <ContractsDrawer {...props} />}
-			{d === "research" && <ResearchDrawer {...props} />}
+			{d === "research" && <ResearchPanel {...props} />}
 			{d === "automation" && <AutomationDrawer {...props} />}
 			{d === "insights" && <InsightsPanel {...props} />}
 			{d === "encyclopedia" && <EncyclopediaDrawer {...props} />}

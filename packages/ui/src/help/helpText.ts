@@ -24,7 +24,7 @@ export const HELP = {
 	next: { title: "Next", text: "Appears only when something needs fixing, such as no power or an overheating rack. Click it to jump to the cause.", entry: "basics:cooling" },
 	assistant: { title: "UNIT-7, the assistant", text: "A small robot that suggests one thing at a time. Show me does it for you; Not now hides it for a while. Turn it off with the x or in Settings.", entry: "basics:contracts" },
 	"tab-contracts": { title: "Contracts (C)", text: "Jobs clients want done. Pick one, read what it pays and needs, then press Take job. This is how you earn money.", entry: "basics:contracts" },
-	"tab-research": { title: "Research (R)", text: "Spend research points on new machines, cooling and perks. Points come from compute you deliver.", entry: "basics:research" },
+	"tab-research": { title: "Research (R)", text: "Spend research points on new machines, cooling and perks. Pick a branch, pick an item, press Start research. Points come from compute you deliver.", entry: "basics:research" },
 	"tab-automation": { title: "Automation (T)", text: "Standing orders so routine chores run themselves. Unlocked by research.", entry: "basics:automation" },
 	"tab-insights": { title: "Insights (I or F)", text: "Money in and out, uptime, reputation and why it changed, plus the map overlays. Details like PUE are folded away.", entry: "basics:money" },
 	"tab-encyclopedia": { title: "Encyclopedia (K)", text: "Search how everything works: machines, bots, research and the jargon.", entry: "basics:money" },

@@ -187,19 +187,17 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("menu opened and closed");
 
-		stage("5b. open the research drawer with R, then the full Department from it, and close it with Esc");
+		stage("5b. open Research with R, see the plain Inspector, start a research in three clicks (R, node, Start), close with Esc");
 		await page.keyboard.press("r");
 		await page.locator('[data-drawer="research"]').waitFor();
-		await page.getByRole("button", { name: "Open the full Department of Research" }).click();
-		await page.locator(".ui-research").waitFor();
-		const cards = await page.locator(".ui-tech").count();
-		assert(cards >= 30, `expected the full tech tree, found ${cards} cards`);
+		const nodesShown = await page.locator('[data-drawer="research"] [data-tech]').count();
+		assert(nodesShown >= 2, `expected a few research nodes in the list, found ${nodesShown}`);
+		for (const w of ["What you get", "Why it helps", "Start research"]) assert((await page.locator('[data-drawer="research"]').getByText(w).count()) > 0, `research panel is missing "${w}"`);
+		assert((await page.getByText("Nothing within reach").count()) === 0, "the dead-end text is back");
 		await page.keyboard.press("Escape");
-		await page.locator(".ui-research").waitFor({ state: "detached" });
-		await page.keyboard.press("Escape"); // closes the research drawer that is still open
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
-		log(`${cards} research cards`);
+		log(`${nodesShown} research nodes listed`);
 
 		stage("5c. open the Automation drawer with T, switch the spare-parts order on, see the AUTO lamp, close it with Esc");
 		assert((await page.locator(".ui-autolamp").count()) === 0, "no AUTO lamp before any order is on");

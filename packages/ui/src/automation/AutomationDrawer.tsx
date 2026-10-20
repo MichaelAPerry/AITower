@@ -35,7 +35,7 @@ export function AutomationDrawer({ store, content, state, openResearch }: PanelP
 								<span className="ui-auto-blurb">{o.blurb}</span>
 							</div>
 							{locked ? (
-								<button type="button" className="ui-btn ui-mini" onClick={openResearch} title="Open the Department of Research (R)">
+								<button type="button" className="ui-btn ui-mini" onClick={() => openResearch()} title="Open the Department of Research (R)">
 									{foremanLockedText(content)}
 								</button>
 							) : (
@@ -101,7 +101,7 @@ export function AutomationDrawer({ store, content, state, openResearch }: PanelP
 					{clerk.unlocked ? (
 						<Toggle on={clerk.policy.enabled} onClick={() => sendClerk(store, { enabled: !clerk.policy.enabled })} label={clerk.policy.enabled ? "ON" : "OFF"} title={clerk.policy.enabled ? "Clerk is on. Click to switch off" : "Clerk is off. Click to switch on"} className="ui-auto-toggle" />
 					) : (
-						<button type="button" className="ui-btn ui-mini" onClick={openResearch} title="Open the Department of Research (R)">
+						<button type="button" className="ui-btn ui-mini" onClick={() => openResearch()} title="Open the Department of Research (R)">
 							Research (R)
 						</button>
 					)}
