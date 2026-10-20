@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { ContractSpec } from "@aitower/content";
-import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
+import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand, StandingLogEntry } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -343,6 +343,8 @@ export interface SimState {
 	lastIssuedDay: Record<string, number>;
 	/** 0..100; 0 ends the game ("shutdown"). */
 	standing: number;
+	/** Last 20 reputation changes with their causes, oldest first. */
+	standingLog: StandingLogEntry[];
 	gameOver: { kind: GameOverKind; tick: number; ending?: EndingId } | null;
 	// ── Research, clerk, credit, audits (snapshot v4) ──
 	/** Unspent research points (float). */

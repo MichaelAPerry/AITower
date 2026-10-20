@@ -194,6 +194,8 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
 		standing: state.standing,
+		standingLog: state.standingLog.map((e) => ({ ...e })),
+		uptimeTarget: content.balance.tiers.uptime[state.tier - 1] ?? 0,
 		researchPoints: state.researchPoints,
 		techResearched: state.techResearched.slice(),
 		clerk: { unlocked: clerkUnlocked(state, content), policy: { ...state.clerkPolicy, kinds: state.clerkPolicy.kinds.slice() }, acceptedTotal: state.clerkAccepted },

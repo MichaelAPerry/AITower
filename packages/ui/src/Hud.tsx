@@ -6,7 +6,9 @@ import type { PanelProps, UiState } from "./components/context";
 import { DesktopNotice } from "./components/DesktopNotice";
 import { Inspector } from "./components/Inspector";
 import { Toasts } from "./components/Toasts";
-import { BuildDock, Drawer, DrawerTabs, NextChip, PalettePopover, Ticker } from "./calm/Parts";
+import { BuildBar } from "./build/BuildBar";
+import { BuildInspector } from "./build/BuildInspector";
+import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
 import { nextDrawer } from "./calm/calm";
 import { AscensionSheet } from "./ascension/AscensionSheet";
@@ -24,6 +26,8 @@ import { showTitleAtBoot } from "./title/titleState";
 import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
+import { Assistant } from "./assistant/Assistant";
+import { recommendedIds, suggestions } from "./assistant/suggest";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
@@ -40,6 +44,7 @@ import "./research/research.css";
 import "./bio/bio.css";
 import "./calm/calm.css";
 import "./calm/theme.css";
+import "./build/build.css";
 import "./help/help.css";
 
 export interface HudProps {
@@ -52,7 +57,7 @@ export interface HudProps {
 /** The whole HUD, absolutely positioned over the world canvas; empty areas let pointer events through. */
 export function Hud({ store, content, title }: HudProps) {
 	const state = useGameState(store);
-	const [ui, setUiState] = useState<UiState>({ drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
+	const [ui, setUiState] = useState<UiState>({ drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "rack", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
@@ -70,7 +75,7 @@ export function Hud({ store, content, title }: HudProps) {
 	// Esc closes the open drawer or the palette popover (the key handler is a stable object, so it reads the state through a ref).
 	const uiRef = useRef(ui);
 	uiRef.current = ui;
-	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen || !!uiRef.current.help, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false, help: false })) }), []);
+	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen || !!uiRef.current.help, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false, buildHover: null, help: false })) }), []);
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
@@ -106,7 +111,7 @@ export function Hud({ store, content, title }: HudProps) {
 		store,
 		{
 			toggleDrawer: useCallback((id) => setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false })), []),
-			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null })), []),
+			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null, buildHover: null })), []),
 			toggleHelp: useCallback(() => setUiState((u) => ({ ...u, help: !u.help })), []),
 		},
 		menu,
@@ -172,6 +177,10 @@ export function Hud({ store, content, title }: HudProps) {
 		if (ascensionStale) ascension.close();
 	}, [ascensionStale, ascension]);
 
+	// UNIT-7: candidates come from the pure helper; the same list feeds the catalog's Recommended row.
+	const assistantOn = settings.assistant !== false;
+	const candidates = useMemo(() => (assistantOn ? suggestions(state.view, content) : []), [assistantOn, state.view, content]);
+	const recommended = useMemo(() => recommendedIds(candidates), [candidates]);
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
@@ -188,12 +197,13 @@ export function Hud({ store, content, title }: HudProps) {
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
 				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
-				<PalettePopover {...props} />
-				<BuildDock {...props} />
+				<PalettePopover {...props} recommended={recommended} />
+				<BuildBar ui={ui} setUi={setUi} />
 				<Ticker {...props} />
 				<div className="ui-right">
-					<Inspector {...props} />
+					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
+				{assistantOn && !titleOpen && !crawl && !over && <Assistant {...props} candidates={candidates} />}
 				<DrawerTabs ui={ui} setUi={setUi} />
 				<Drawer {...props} />
 			</div>

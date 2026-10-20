@@ -136,6 +136,7 @@ function finiteDeep(v: unknown, path: string, depth = 0): void {
 }
 
 export function validateState(content: ContentDB, raw: RawState): SimState {
+	if (!Array.isArray(raw.standingLog)) raw.standingLog = []; // saves written before the reputation log
 	const s = fields(raw, {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
@@ -407,6 +408,10 @@ function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {
 		fields(h, { memoId: "int", eventId: "str", title: "str", choiceId: "str", outcome: "str", tick: "num", auto: "bool" }, `memoHistory[${i}]`);
 	});
 	if ((s.memoHistory as unknown[]).length > 20) fail("memoHistory is too long");
+	array(s, "standingLog").forEach((h, i) => {
+		fields(h, { tick: "num", delta: "num", cause: "str", detail: "str" }, `standingLog[${i}]`);
+	});
+	if ((s.standingLog as unknown[]).length > 20) fail("standingLog is too long");
 	array(s, "modifiers").forEach((m, i) => {
 		const o = fields(m, { kind: "str", value: "num", endsAt: "num", label: "str" }, `modifiers[${i}]`);
 		if (!MODIFIER_KINDS.includes(o.kind as string)) fail(`modifiers[${i}].kind is invalid`);

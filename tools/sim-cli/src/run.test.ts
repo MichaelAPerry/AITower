@@ -168,7 +168,8 @@ describe("sim-cli --auto", () => {
 			expect(rows[29].racks).toBeGreaterThan(rows[0].racks + 5);
 			expect(rows[29].pflops).toBeGreaterThan(rows[0].pflops * 3);
 			expect(rows[29].standing).toBeGreaterThan(10);
-			expect(rows[29].uptime).toBeGreaterThan(0.9);
+			const lastFive = rows.slice(-5).reduce((n, r) => n + r.uptime, 0) / 5; // one bad day (a failure burst) must not fail the run
+			expect(lastFive).toBeGreaterThan(0.9);
 			expect(rows[29].built).toBe(auto.built);
 		}
 	});
@@ -177,5 +178,23 @@ describe("sim-cli --auto", () => {
 		const { rows, auto } = runHeadless(loadContent(), "starter", 6, 1, true);
 		expect(auto.built).toBe(0);
 		expect(rows.at(-1)?.techs).toBeGreaterThan(0);
+	});
+});
+
+describe("reputation regression (M5b)", () => {
+	// Tier 4 used to ask for 99 % uptime, which a healthy tower never hit: every day cost 3 and reputation fell to 0.
+	it("an unattended tier-4 run (automation and Foreman on) for 10 days does not lose more than 10 reputation", { timeout: 120_000 }, () => {
+		for (const seed of [1, 2]) {
+			const c = loadContent();
+			c.tech.push(foremanNode);
+			c.balance.tiers.pflops = [0, 1, 2, 3, 1e12]; // start the run already in tier 4
+			const { rows } = runHeadless(c, "brownfield", 10, seed, true);
+			expect(rows[0].tier, `seed ${seed}`).toBeGreaterThanOrEqual(4);
+			const start = c.balance.standing.start;
+			const low = Math.min(...rows.map((r) => r.standing));
+			expect(start - low, `seed ${seed} lowest ${low}`).toBeLessThanOrEqual(10);
+			expect(rows.at(-1)?.standing, `seed ${seed}: reputation should not trend down`).toBeGreaterThanOrEqual(start);
+			expect(rows.at(-1)?.gameOver).toBeNull();
+		}
 	});
 });

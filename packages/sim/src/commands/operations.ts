@@ -1,4 +1,5 @@
 /** Non-construction commands: setEnabled, contracts, jobs, parts, bots. */
+import { CLERK_COMPUTE_MARGIN, CLERK_DEADLINE_MARGIN } from "../core/constants";
 import { findById } from "../core/grid";
 import type { Job } from "../core/state";
 import { spend } from "../economy/ledger";
@@ -23,7 +24,7 @@ export function planAcceptContract(ctx: PlanCtx, contractId: number, byClerk = f
 	const s = ctx.state;
 	const offer = findById(s.offers, contractId);
 	if (!offer) return reject("no such offer");
-	const fits = acceptCheck(s, ctx.content, offer.spec);
+	const fits = byClerk ? acceptCheck(s, ctx.content, offer.spec, { deadline: CLERK_DEADLINE_MARGIN, compute: CLERK_COMPUTE_MARGIN }) : acceptCheck(s, ctx.content, offer.spec);
 	if (!fits.ok) return reject(fits.reason);
 	return accept(0, (events) => {
 		s.offers = s.offers.filter((o) => o.id !== contractId);

@@ -551,11 +551,11 @@ describe("scenarios", () => {
 		const c = content([custom, plain]);
 		const sb = newSim(c, "custom");
 		const ev: SimEvent[] = [];
-		changeStanding(sb.state, -1000, ev);
+		changeStanding(sb.state, -1000, ev, "memo", "test");
 		expect(sb.state.standing).toBe(0);
 		expect(sb.state.gameOver).toBeNull();
 		const normal = newSim(c, "plain");
-		changeStanding(normal.state, -1000, ev);
+		changeStanding(normal.state, -1000, ev, "memo", "test");
 		expect(normal.state.gameOver?.kind).toBe("shutdown");
 	});
 

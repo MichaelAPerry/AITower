@@ -46,10 +46,10 @@ describe("planTags", () => {
 		const w = planTags([fac(1, 0, { width: 4 }), fac(2, 4, { status: "unpowered", defId: "crac", width: 4 })], name);
 		expect(w.map((x) => x.text).sort()).toEqual(["GPU rack", "NO POWER"]);
 	});
-	it("quiet words ride on the name instead of adding a tag", () => {
-		const t = planTags([fac(1, 0, { status: "idle" }), fac(2, 2, { status: "idle" })], name);
-		expect(t).toEqual([{ text: "GPU rack · IDLE", tone: "name", cx: 2, floor: 0 }]);
-		expect(planTags([fac(1, 0, { status: "idle" }), fac(2, 2)], name)[0].text).toBe("GPU rack");
+	it("quiet words (IDLE, OFF) never appear in the world, not even on the name", () => {
+		const t = planTags([fac(1, 0, { status: "idle" }), fac(2, 2, { status: "idle" }), fac(3, 4, { status: "disabled" })], name);
+		expect(t.map((x) => x.text)).toEqual(["GPU rack"]);
+		expect(t.every((x) => x.tone === "name")).toBe(true);
 	});
 	it("skips unknown types and does not depend on input order", () => {
 		expect(planTags([fac(1, 0, { defId: "mystery" })], name)).toEqual([]);

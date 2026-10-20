@@ -69,15 +69,15 @@ describe("coach-mark steps", () => {
 		expect(step("income").targets(state({ speed: 0 }), ui())).toEqual(['[data-tut="speed-1"]']);
 	});
 
-	it("build walks menu, tab, card, then the blueprint; the ghost shows only once the tool is armed", () => {
+	it("build is two clicks then the blueprint; the ghost shows only once the tool is armed", () => {
 		const s = step("build");
 		const st = state({});
 		const armed = ui({ paletteOpen: true, paletteTab: "rack", tool: { kind: "place", defId: "rack_air_gpu" } });
-		expect(s.targets(st, ui())).toEqual(['[data-tut="dock-more"]']);
-		expect(s.targets(st, ui({ paletteOpen: true, paletteTab: "structure" }))).toEqual(['[data-tut="tab-rack"]']);
+		expect(s.targets(st, ui())).toEqual(['[data-tut="cat-rack"]']);
+		expect(s.targets(st, ui({ paletteOpen: true, paletteTab: "structure" }))).toEqual(['[data-tut="cat-rack"]']);
 		expect(s.targets(st, ui({ paletteOpen: true, paletteTab: "rack" }))).toEqual(['[data-tut="card-rack_air_gpu"]']);
 		expect(s.targets(st, armed)).toEqual([]);
-		expect([ui(), ui({ paletteOpen: true, paletteTab: "structure" }), ui({ paletteOpen: true, paletteTab: "rack" }), armed].map(buildPhase)).toEqual([0, 1, 2, 3]);
+		expect([ui(), ui({ paletteOpen: true, paletteTab: "rack" }), armed].map(buildPhase)).toEqual([0, 1, 2]);
 		expect(s.ghost?.(st, ui({ paletteTab: "rack" }))).toBeNull();
 		expect(s.ghost?.(st, armed)).toMatchObject({ valid: true, defId: "rack_air_gpu" });
 		const b = baselineOf(state({ racks: 4 }), ctx);

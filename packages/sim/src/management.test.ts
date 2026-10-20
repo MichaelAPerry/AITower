@@ -376,3 +376,39 @@ describe("lifetime stats", () => {
 		expect(s.researchPointsEarned).toBeGreaterThan(5);
 	});
 });
+
+describe("Contracts Clerk safety margin", () => {
+	const clerkSim = () => {
+		const sim = newSim(farmContent(), "farm");
+		sim.step();
+		grant(sim, "t_clerk");
+		exec(sim, cmdSetClerk({}));
+		return sim;
+	};
+	// farm: 4 air racks × 20 PF; a 10 h deadline allows 9 h for the player but only 7 h for the clerk.
+	const tight = (work: number) => training({ work, durationTicks: 600, payout: 1e6, penalty: 1e5 });
+
+	it("the player may take a job that needs 8 of its 10 hours, the clerk may not", () => {
+		const sim = clerkSim();
+		const id = pushOffer(sim, tight(640)); // 640 PF-h ÷ 80 PF = 8 h
+		expect(count(sim.step(), "clerkAccepted")).toBe(0);
+		expect(sim.state.offers.map((o) => o.id)).toEqual([id]);
+		expect(exec(sim, { type: "acceptContract", contractId: id }).some((e) => e.type === "jobStarted")).toBe(true);
+	});
+
+	it("the clerk takes a job that needs 6 of its 10 hours", () => {
+		const sim = clerkSim();
+		pushOffer(sim, tight(480));
+		expect(count(sim.step(), "clerkAccepted")).toBe(1);
+	});
+
+	it("inference needs a margin of idle PFLOPS: 80 PF idle serves 75 PF for the player but the clerk wants 1.6x", () => {
+		const sim = clerkSim();
+		const id = pushOffer(sim, inference({ sustainedPflops: 75, work: 75 }));
+		expect(count(sim.step(), "clerkAccepted")).toBe(0);
+		expect(exec(sim, { type: "acceptContract", contractId: id }).some((e) => e.type === "jobStarted")).toBe(true);
+		const ok = clerkSim();
+		pushOffer(ok, inference({ sustainedPflops: 45, work: 45 })); // 45 x 1.6 = 72 <= 80
+		expect(count(ok.step(), "clerkAccepted")).toBe(1);
+	});
+});

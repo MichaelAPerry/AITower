@@ -73,6 +73,13 @@ export const EPS = 1e-9;
 export const TRAINING_PROGRESS_PAY_SHARE = 0.8;
 /** A training/finetune offer is accepted only if its idle racks would finish it within this share of the deadline (headroom for throttling and rollbacks). */
 export const ACCEPT_DEADLINE_MARGIN = 0.9;
+/** The Contracts Clerk is stricter than the player's own accept: a training job must fit in this share of its deadline (nobody is watching it)... */
+export const CLERK_DEADLINE_MARGIN = 0.7;
+/** ...and an inference job needs this multiple of its sustained PFLOPS idle */
+export const CLERK_COMPUTE_MARGIN = 1.6;
+
+/** The Foreman also keeps this many days of running costs (energy + upkeep + fees, from the last closed day) in the bank: a fixed reserve is under a day's burn once the tower is big. */
+export const FOREMAN_RUNWAY_DAYS = 3;
 
 /** Scripted events are issued at 09:00 (minute of day) on their `scriptedDay`. */
 export const SCRIPTED_MINUTE_OF_DAY = 9 * 60;

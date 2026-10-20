@@ -133,7 +133,12 @@ export function installedPflops(state: SimState, content: ContentDB): number {
  * (a running training job keeps absorbing free racks up to its cap), then checks what is left, plus free storage.
  * Pure: never changes state. Used to refuse contracts that would only sit in a queue accruing penalties.
  */
-export function acceptCheck(state: SimState, content: ContentDB, spec: ContractSpec): { ok: true } | { ok: false; reason: string } {
+export function acceptCheck(
+	state: SimState,
+	content: ContentDB,
+	spec: ContractSpec,
+	margin: { deadline: number; compute: number } = { deadline: ACCEPT_DEADLINE_MARGIN, compute: 1 },
+): { ok: true } | { ok: false; reason: string } {
 	const free = state.facilities.filter((f) => isFreeRack(content, f));
 	const claimed = new Set<number>();
 	const claim = (spec: { needsLiquid: boolean; needsBio?: boolean }, enough: (have: number, count: number) => boolean, have0: number, count0: number) => {
@@ -181,8 +186,8 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 	if (spec.needsBio && !anyCompatible) return { ok: false, reason: "needs organoid racks (none installed)" };
 	if (spec.needsLiquid && !anyCompatible) return { ok: false, reason: "needs liquid-cooled racks (none installed)" };
 	if (spec.kind === "inference") {
-		const need = spec.sustainedPflops ?? spec.work;
-		if (idlePflops + 1e-9 < need) return { ok: false, reason: `not enough idle compute: needs ${pf(need)}, ${pf(idlePflops)} idle` };
+		const need = (spec.sustainedPflops ?? spec.work) * margin.compute;
+		if (idlePflops + 1e-9 < need) return { ok: false, reason: `not enough idle compute: needs ${pf(need)}${margin.compute > 1 ? " with a safety margin" : ""}, ${pf(idlePflops)} idle` };
 	} else if (idleRacks === 0) {
 		let busy = 0;
 		let offline = 0;
@@ -197,7 +202,7 @@ export function acceptCheck(state: SimState, content: ContentDB, spec: ContractS
 	} else {
 		// Would it finish in time on the racks it gets now? Otherwise it is a guaranteed missed-deadline penalty.
 		const needHours = trainPflops > 0 ? spec.work / trainPflops : Number.POSITIVE_INFINITY;
-		const haveHours = (spec.durationTicks * ACCEPT_DEADLINE_MARGIN) / TICKS_PER_HOUR;
+		const haveHours = (spec.durationTicks * margin.deadline) / TICKS_PER_HOUR;
 		if (needHours > haveHours) {
 			const h = (n: number) => `${Math.ceil(n)} h`;
 			return { ok: false, reason: `too slow for the deadline: your idle racks (${pf(trainPflops)}) need about ${h(needHours)}, the deadline allows ${h(spec.durationTicks / TICKS_PER_HOUR)}` };

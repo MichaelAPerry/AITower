@@ -28,7 +28,7 @@ export interface TutorialUi {
 	paletteTab: string;
 	/** The open edge drawer ("contracts", "gauges", ...) or null. */
 	drawer: string | null;
-	/** The full build palette popover is open. */
+	/** The build catalog is open. */
 	paletteOpen: boolean;
 	tool: Tool;
 }
@@ -77,8 +77,8 @@ const RACK_SPOT: CellRef[] = [
 ];
 const placing = (ui: TutorialUi, defId: string): boolean => ui.tool.kind === "place" && ui.tool.defId === defId;
 
-/** Which of the build steps' four moves the player is on (0 menu, 1 tab, 2 card, 3 blueprint). */
-export const buildPhase = (ui: TutorialUi): number => (placing(ui, "rack_air_gpu") ? 3 : !ui.paletteOpen ? 0 : ui.paletteTab !== "rack" ? 1 : 2);
+/** Which of the build step's three moves the player is on (0 Racks category, 1 card, 2 blueprint). */
+export const buildPhase = (ui: TutorialUi): number => (placing(ui, "rack_air_gpu") ? 2 : ui.paletteOpen && ui.paletteTab === "rack" ? 1 : 0);
 
 export const TUTORIAL_STEPS: TutorialStep[] = [
 	{
@@ -110,8 +110,8 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 	},
 	{
 		id: "build",
-		text: (_s, ui) => ["Open the build menu to add a rack.", "Pick the RACKS tab.", "Choose the air-cooled rack.", "Click the blue spot to place it."][buildPhase(ui)],
-		targets: (_s, ui) => [[t("dock-more")], [t("tab-rack")], [t("card-rack_air_gpu")], []][buildPhase(ui)],
+		text: (_s, ui) => ["Click Racks to add a rack.", "Choose the air-cooled rack.", "Click the green spot to place it."][buildPhase(ui)],
+		targets: (_s, ui) => [[t("cat-rack")], [t("card-rack_air_gpu")], []][buildPhase(ui)],
 		sides: ["right", "above"],
 		ghost: (_s, ui) => (placing(ui, "rack_air_gpu") ? { cells: RACK_SPOT, valid: true, defId: "rack_air_gpu", label: "CLICK HERE" } : null),
 		clock: "pause",

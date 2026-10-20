@@ -231,21 +231,23 @@ describe("Research key, pause and Esc", () => {
 });
 
 describe("Top bar and build palette", () => {
-	it("items whose tech is not researched show 'Locked: <name>' and cannot be armed", () => {
+	it("items whose tech is not researched fold into one locked row and get no card", () => {
 		const { content, store } = setup();
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
-		expect(html).toContain("Locked: Heat Exchange Theory"); // chiller
-		expect(html).toMatch(/aria-disabled="true"[^>]*data-tut="card-chiller"|data-tut="card-chiller"[^>]*aria-disabled="true"/);
-		expect(html).toContain("is-locked");
+		expect(html).toContain('Research &quot;Heat Exchange Theory&quot; to unlock'); // chiller
+		expect(html).toContain("Chiller");
+		expect(html).not.toContain('data-tut="card-chiller"');
+		expect(html.match(/bld-locked/g)?.length).toBe(1);
 		store.dispatch({ type: "research", techId: "cool_exchange" });
 		const after = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
+		expect(after).toContain('data-tut="card-chiller"');
 		expect(after).not.toContain("Heat Exchange Theory");
 	});
 	it("a bot that needs research is disabled with the reason", () => {
 		const { content, store } = setup();
-		const html = renderToString(<BuildPalette {...panelProps(store, content)} />);
+		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "supplies" } })} />);
 		expect(html).toContain("Requires research: Rotary Aviation Licence");
-		expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Research<\/button>/);
+		expect(html).toMatch(/<button[^>]*disabled=""[^>]*>Research first<\/button>/);
 		expect(html).toContain("Rotor Drone");
 	});
 });

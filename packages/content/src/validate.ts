@@ -502,7 +502,8 @@ function validateEvents(p: Problems, db: ContentDB): void {
 	const b = db.balance;
 	if (b?.standing) {
 		num(p, "balance.standing.start", b.standing.start, { min: 1, max: 100 });
-		for (const k of ["dailyGood", "dailyBad", "jobFailed", "jobCompleted"] as const) num(p, `balance.standing.${k}`, b.standing[k]);
+		for (const k of ["dailyGood", "dailyBad", "dailyNearMiss", "jobFailed", "jobCompleted"] as const) num(p, `balance.standing.${k}`, b.standing[k]);
+		num(p, "balance.standing.dailyMissSpan", b.standing.dailyMissSpan, { min: 0.001, max: 1 });
 	} else p.push("balance.standing: missing");
 	if (b?.events) {
 		num(p, "balance.events.intervalTicks", b.events.intervalTicks, { min: 1, int: true });

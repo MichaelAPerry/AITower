@@ -166,7 +166,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 				if (e.type === "contractOffered") {
 					const v = sim.view();
 					const offer = v.offers.find((o) => o.id === e.contractId);
-					if (offer && shouldAccept(offer, v, content, auto ? AUTO_ACCEPT_MARGIN : 0.75)) sim.submit({ type: "acceptContract", contractId: e.contractId });
+					if (offer && !(auto && v.clerk.policy.enabled) && shouldAccept(offer, v, content, auto ? AUTO_ACCEPT_MARGIN : 0.75)) sim.submit({ type: "acceptContract", contractId: e.contractId });
 				}
 				else if (e.type === "componentFailed") failures++;
 				else if (e.type === "autoBuilt") totals.built++;

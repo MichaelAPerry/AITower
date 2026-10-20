@@ -10,7 +10,7 @@ export type FinanceTab = "ledger" | "credit" | "audits" | "record";
 export interface UiState {
 	/** The edge drawer that is open (one at a time), or null. */
 	drawer: DrawerId | null;
-	/** The full build palette popover (the dock's "More") is open. */
+	/** The build catalog (opened from the category bar) is open. */
 	paletteOpen: boolean;
 	/** The clerk's standing-order form is expanded in the Contracts drawer. */
 	clerkEdit?: boolean;
@@ -22,8 +22,8 @@ export interface UiState {
 	alertsSeenTick: number;
 	/** Build palette tab (lifted so the induction can point at the right one). */
 	paletteTab: string;
-	/** Spec card of the hovered build-dock button. */
-	dockHover?: import("./SpecCard").SpecHover | null;
+	/** Catalog item key under the pointer (the build Inspector previews it); null/absent = show the picked item. */
+	buildHover?: string | null;
 	/** Compute Authority inbox drawer is open. */
 	inboxOpen: boolean;
 	/** Memos the player has stamped; the sim files them at the next tick, so they are hidden meanwhile. */

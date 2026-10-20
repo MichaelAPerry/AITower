@@ -112,6 +112,7 @@ async function run(url) {
 		const coach = page.locator(".ui-coach");
 		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
 		await coach.waitFor();
+		assert((await page.locator(".ast-bubble").count()) === 0, "the assistant must stay quiet while the coach marks run");
 		// The sim posts an offer at tick 0 and the Contracts drawer opens itself: no waiting, no hunting for the tab.
 		await coachAt("Accept this contract");
 		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
@@ -122,7 +123,7 @@ async function run(url) {
 		await coachAt("Press play");
 		await page.locator('[data-tut="speed-1"]').click();
 		await coachAt("PER HOUR"); // step 3: it turns green on its own once income is positive
-		await coachAt("build menu"); // step 4 follows by itself
+		await coachAt("Click Racks"); // step 4 follows by itself, and points at the always-visible category bar
 		await page.getByRole("button", { name: "Skip tutorial" }).click();
 		await coach.waitFor({ state: "detached" });
 		await page.waitForSelector('[data-goal="earn-first"]');
@@ -134,6 +135,25 @@ async function run(url) {
 		assert((await page.locator(".ui-goals").count()) === 1, "Goals card missing");
 		assert((await page.locator(".ui-next-btn").count()) === 0, "NEXT is for problems only; none expected here");
 		log(`job running at ${running.pflops} PF`);
+
+		stage("3b. build catalog: Racks category, hover fills the Inspector, click picks, Esc drops the tool before the catalog closes");
+		assert((await page.locator(".bld-bar .bld-cat").count()) >= 6, "category bar must always be visible");
+		await page.locator('[data-tut="cat-rack"]').click();
+		await page.locator(".bld-catalog").waitFor();
+		const card = page.locator('[data-tut="card-rack_air_gpu"]');
+		await card.hover();
+		assert(((await page.locator(".bld-insp .bld-h").textContent()) ?? "").length > 3, "hovering a card must fill the Inspector");
+		assert((await page.locator(".ui-tooltip").count()) === 0, "no floating tooltip on cards");
+		await card.click();
+		assert((await game(() => window.aitower.store.get().tool.kind)) === "place", "one click on the card arms the tool");
+		await page.mouse.move(5, 400); // off the card: the Inspector keeps showing the picked item
+		assert(/Picked/.test((await page.locator(".bld-insp .bld-kicker").textContent()) ?? ""), "picked item stays in the Inspector while placing");
+		await page.keyboard.press("Escape");
+		assert((await game(() => window.aitower.store.get().tool.kind)) === "select", "first Esc drops the tool");
+		assert((await page.locator(".bld-catalog").count()) === 1, "first Esc leaves the catalog open");
+		await page.keyboard.press("Escape");
+		await page.locator(".bld-catalog").waitFor({ state: "detached" });
+		log("catalog opened in one click, tool dropped before the panel closed");
 
 		stage("4. place a rack through window.aitower.store.dispatch");
 		const before = await racks();
@@ -216,6 +236,19 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		log("help mode, More... link, Encyclopedia search");
+
+		stage("5e. assistant: UNIT-7 is docked, a click gives a tip, the x turns it off (and Settings turns it back on)");
+		await page.locator(".ast-bot").waitFor();
+		await page.locator(".ast-bot").click({ force: true });
+		await page.locator(".ast-bubble").waitFor();
+		// With nothing to suggest the click gives a tip (Thanks); if a real suggestion is up, it answers that instead (Not now).
+		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now)$/ }).click();
+		await page.locator(".ast-off").click({ force: true });
+		await page.locator(".ast").waitFor({ state: "detached" });
+		assert((await game(() => window.aitower.store.get().settings.assistant)) === false, "turning the assistant off must persist in settings");
+		await game(() => window.aitower.store.setSettings({ assistant: true }));
+		await page.locator(".ast-bot").waitFor();
+		log("robot docked, tip, off and on");
 
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
