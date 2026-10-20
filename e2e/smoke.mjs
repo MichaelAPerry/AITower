@@ -113,10 +113,10 @@ async function run(url) {
 		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
 		await coach.waitFor();
 		assert((await page.locator(".ast-bubble").count()) === 0, "the assistant must stay quiet while the coach marks run");
-		// The sim posts an offer at tick 0 and the Contracts drawer opens itself: no waiting, no hunting for the tab.
-		await coachAt("Accept this contract");
+		// The sim posts an offer at tick 0 and the tutorial opens the Contracts panel itself: no waiting, no hunting for the tab.
+		await coachAt("Take job");
 		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
-		const acceptBtn = page.locator('[data-tut="accept"]');
+		const acceptBtn = page.locator('[data-tut="take"]');
 		await acceptBtn.waitFor({ timeout: 5_000 });
 		assert(await acceptBtn.isEnabled(), "the highlighted offer must fit the idle racks");
 		await acceptBtn.click({ force: true }); // hover tilts the button, which Playwright reads as "unstable"
@@ -187,19 +187,17 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("menu opened and closed");
 
-		stage("5b. open the research drawer with R, then the full Department from it, and close it with Esc");
+		stage("5b. open Research with R, see the plain Inspector, start a research in three clicks (R, node, Start), close with Esc");
 		await page.keyboard.press("r");
 		await page.locator('[data-drawer="research"]').waitFor();
-		await page.getByRole("button", { name: "Open the full Department of Research" }).click();
-		await page.locator(".ui-research").waitFor();
-		const cards = await page.locator(".ui-tech").count();
-		assert(cards >= 30, `expected the full tech tree, found ${cards} cards`);
+		const nodesShown = await page.locator('[data-drawer="research"] [data-tech]').count();
+		assert(nodesShown >= 2, `expected a few research nodes in the list, found ${nodesShown}`);
+		for (const w of ["What you get", "Why it helps", "Start research"]) assert((await page.locator('[data-drawer="research"]').getByText(w).count()) > 0, `research panel is missing "${w}"`);
+		assert((await page.getByText("Nothing within reach").count()) === 0, "the dead-end text is back");
 		await page.keyboard.press("Escape");
-		await page.locator(".ui-research").waitFor({ state: "detached" });
-		await page.keyboard.press("Escape"); // closes the research drawer that is still open
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
-		log(`${cards} research cards`);
+		log(`${nodesShown} research nodes listed`);
 
 		stage("5c. open the Automation drawer with T, switch the spare-parts order on, see the AUTO lamp, close it with Esc");
 		assert((await page.locator(".ui-autolamp").count()) === 0, "no AUTO lamp before any order is on");
@@ -214,35 +212,52 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("parts order on, AUTO lamp lit");
 
-		stage("5d. help mode: ? shows a tooltip with More..., which opens the Encyclopedia on an entry; K and search work");
+		stage("5c2. Contracts and Insights: C shows the job board and Inspector, F opens Insights (one panel at a time), the reputation list is there, Esc closes");
+		await page.keyboard.press("c");
+		await page.locator('[data-drawer="contracts"] .pnl-insp').waitFor();
+		await page.keyboard.press("f");
+		await page.locator('[data-drawer="insights"]').waitFor();
+		assert((await page.locator("[data-drawer]").count()) === 1, "only one panel may be open at a time");
+		await page.locator("summary", { hasText: "Why did it change?" }).waitFor();
+		await page.keyboard.press("i"); // I toggles the same panel closed
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		log("Contracts (C), Insights (F and I), one panel at a time");
+
+		stage("5d. help mode: ? shows a tooltip with More..., which opens the Primer on a chapter; K, a chapter and search work");
 		await page.keyboard.press("?");
 		await page.waitForSelector(".aitower-hud.is-help");
 		assert((await page.locator("[data-help]").count()) >= 10, "help regions missing");
 		await page.locator('[data-help="treasury"]').hover();
 		await page.locator(".ui-helpcard").waitFor();
 		await page.getByRole("button", { name: "More…" }).click();
-		await page.locator('[data-drawer="encyclopedia"]').waitFor();
-		await page.locator('[data-entry="basics:money"].is-open').waitFor();
+		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.locator('[data-chapter-view="ch:money"] svg').waitFor();
 		await page.keyboard.press("Escape"); // closes the drawer and leaves help mode in one go
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await page.waitForFunction(() => !document.querySelector(".aitower-hud.is-help"));
 		await page.keyboard.press("k");
-		await page.locator('[data-drawer="encyclopedia"]').waitFor();
-		await page.getByRole("searchbox", { name: "Search the Encyclopedia" }).fill("pue");
+		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.locator('[data-chapter="ch:heat"]').click();
+		await page.locator('[data-chapter-view="ch:heat"] svg').waitFor();
+		await page.getByRole("searchbox", { name: "Search the Primer" }).fill("chiller");
+		await page.locator('[data-entry="fac:chiller"]').waitFor();
+		await page.getByRole("searchbox").fill("uptime");
+		await page.locator('[data-chapter="ch:uptime"]').waitFor();
+		await page.getByRole("searchbox").fill("pue");
 		await page.locator('[data-entry="glossary:pue"]').waitFor();
 		await page.getByRole("searchbox").fill("");
 		await page.evaluate(() => document.activeElement?.blur());
 		await page.keyboard.press("Escape");
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
-		log("help mode, More... link, Encyclopedia search");
+		log("help mode, More... link, Primer search");
 
 		stage("5e. assistant: UNIT-7 is docked, a click gives a tip, the x turns it off (and Settings turns it back on)");
 		await page.locator(".ast-bot").waitFor();
 		await page.locator(".ast-bot").click({ force: true });
 		await page.locator(".ast-bubble").waitFor();
-		// With nothing to suggest the click gives a tip (Thanks); if a real suggestion is up, it answers that instead (Not now).
-		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now)$/ }).click();
+		// With nothing to suggest the click gives a tip (Thanks); a real suggestion (Not now) or the one-time Primer tip (Later) is answered instead.
+		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now|Later)$/ }).click();
 		await page.locator(".ast-off").click({ force: true });
 		await page.locator(".ast").waitFor({ state: "detached" });
 		assert((await game(() => window.aitower.store.get().settings.assistant)) === false, "turning the assistant off must persist in settings");

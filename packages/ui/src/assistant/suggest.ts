@@ -76,11 +76,11 @@ function reputation(view: SimView): Suggestion | null {
 	const base = { id: "reputation", urgent: false, recommend: [] as string[] };
 	switch (last.cause) {
 		case "daily-uptime":
-			return { ...base, text: `${lead}: ${detail}. The Gauges drawer shows where racks are down.`, cta: "Show me", action: { kind: "drawer", drawer: "gauges" } };
+			return { ...base, text: `${lead}: ${detail}. Insights shows where racks are down.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
 		case "job":
-			return { ...base, text: `${lead}: ${detail}. The Contracts drawer shows what is late.`, cta: "Show me", action: { kind: "drawer", drawer: "contracts" } };
+			return { ...base, text: `${lead}: ${detail}. The Contracts panel shows what is late.`, cta: "Show me", action: { kind: "drawer", drawer: "contracts" } };
 		case "audit":
-			return { ...base, text: `${lead}: ${detail}. The Finance drawer has the audit.`, cta: "Show me", action: { kind: "drawer", drawer: "finance" } };
+			return { ...base, text: `${lead}: ${detail}. Insights has the audit under Money.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
 		default:
 			return { ...base, text: `${lead}: ${detail}. It came from a memo; the inbox has the story.`, cta: "Show me", action: { kind: "inbox" } };
 	}
@@ -230,7 +230,7 @@ export function suggestions(view: SimView, content: ContentDB): Suggestion[] {
 	} else {
 		const c = clearanceProgress(view, content);
 		if (c.next !== null && c.frac >= 1 && !c.uptimeOk) {
-			out.push({ id: "level", text: `Compute is enough for Level ${c.next}. Hold uptime at ${Math.round(c.uptimeNeed * 100)}% or better and it comes at midnight.`, cta: "Show me", action: { kind: "drawer", drawer: "gauges" }, urgent: false, recommend: [] });
+			out.push({ id: "level", text: `Compute is enough for Level ${c.next}. Hold uptime at ${Math.round(c.uptimeNeed * 100)}% or better and it comes at midnight.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" }, urgent: false, recommend: [] });
 		} else if (c.next !== null && c.frac >= 0.6 && c.frac < 1 && cheapRack) {
 			out.push({
 				id: "level",
@@ -255,7 +255,7 @@ export function recommendedIds(list: readonly Suggestion[], max = 3): string[] {
 /** Short general tips for when the robot is clicked and has nothing urgent. Picked by `tipFor`. */
 export const TIPS = [
 	"Racks earn only while a contract runs on them. Idle racks are the cheapest money to fix.",
-	"Heat slows racks down long before it breaks them. The Gauges drawer has a heat map.",
+	"Heat slows racks down long before it breaks them. Insights has a heat map.",
 	"Pausing is free. Plan your build with the clock stopped, then press play.",
 	"Spare parts are cheap; broken racks are not. Keep a few in the cage.",
 	"Reputation moves slowly. Late jobs and low uptime cost it; finished jobs earn it back.",

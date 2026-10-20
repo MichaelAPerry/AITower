@@ -90,7 +90,7 @@ export function HelpLayer({ ui, setUi, scale }: Pick<PanelProps, "ui" | "setUi">
 				<button
 					type="button"
 					onClick={() => {
-						setUi({ drawer: "encyclopedia", encyId: tip.item.entry, paletteOpen: false });
+						setUi({ drawer: "primer", encyId: tip.item.entry, paletteOpen: false });
 						setTip(null);
 					}}
 				>

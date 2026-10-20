@@ -53,10 +53,11 @@ describe("Clearance bar", () => {
 
 describe("drawers", () => {
 	it("keys C R F I open their drawers; the same key closes it", () => {
-		expect(["c", "R", "f", "I", "x"].map(drawerForKey)).toEqual(["contracts", "research", "finance", "gauges", null]);
-		expect(nextDrawer(null, "finance")).toBe("finance");
-		expect(nextDrawer("finance", "finance")).toBeNull();
-		expect(nextDrawer("finance", "gauges")).toBe("gauges");
+		// F (was Finance) and I (was Gauges) both open Insights.
+		expect(["c", "R", "f", "I", "x"].map(drawerForKey)).toEqual(["contracts", "research", "insights", "insights", null]);
+		expect(nextDrawer(null, "insights")).toBe("insights");
+		expect(nextDrawer("insights", "insights")).toBeNull();
+		expect(nextDrawer("insights", "contracts")).toBe("contracts");
 	});
 });
 

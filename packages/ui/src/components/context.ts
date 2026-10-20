@@ -1,4 +1,4 @@
-import type { ContentDB } from "@aitower/content";
+import type { ContentDB, TechBranch } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
 import type { PathFiled } from "../ascension/ascension";
@@ -16,6 +16,13 @@ export interface UiState {
 	clerkEdit?: boolean;
 	/** Memo whose prose is expanded on the slip ("read memo"). */
 	readMemo?: number | null;
+	/** The card picked in the Contracts panel (the Inspector shows it). Null/absent = the best offer that fits. */
+	contractSel?: { kind: "offer" | "job"; id: number } | null;
+	/** Research panel: the node picked and the branch tab shown (null/absent = the best one to start). */
+	researchSel?: string | null;
+	researchTab?: TechBranch | null;
+	/** Section of the Insights panel. */
+	insightsTab?: "overview" | "money";
 	/** Job highlighted in the Contracts drawer (set by the inspector's job link). */
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */
@@ -49,8 +56,8 @@ export interface PanelProps {
 	setUi: (patch: Partial<UiState>) => void;
 	/** Open the system menu (pauses the game). */
 	openMenu: () => void;
-	/** Open the Department of Research sheet (pauses the game). */
-	openResearch: () => void;
+	/** Open the Research panel, optionally on one node (the game keeps running). */
+	openResearch: (techId?: string) => void;
 	/** Open FORM A-5, the Ascension sheet (pauses the game). */
 	openAscension: () => void;
 	/** Show a filed quarterly audit on the audit sheet. */

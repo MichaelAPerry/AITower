@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Toggle } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { pushNotice } from "../notices";
+import { clerkNode } from "../research/tech";
 import { clerkLockedText, feePercent, JOB_KINDS, parseAmount, toggleKind } from "./clerk";
 
 const KIND_TITLE: Record<JobKind, string> = {
@@ -53,7 +54,7 @@ export function ClerkPanel({ store, content, state, openResearch }: PanelProps) 
 		return (
 			<div className="ui-clerk-slip" data-tut="clerk-locked">
 				<span className="ui-clerk-slip-text">{clerkLockedText(content)}</span>
-				<button type="button" className="ui-btn ui-mini" onClick={openResearch} title="Open the Department of Research (R)">
+				<button type="button" className="ui-btn ui-mini" onClick={() => openResearch(clerkNode(content)?.id)} title="Open Research (R) on the Contract Automation">
 					Research (R)
 				</button>
 			</div>

@@ -28,7 +28,7 @@ export interface SystemMenuProps {
 	fromTitle?: boolean;
 	/** The running game was replaced by a load or import (the title screen leaves on this). */
 	onReplaced?: () => void;
-	/** Close the menu and open the Encyclopedia drawer. */
+	/** Close the menu and open the Primer drawer. */
 	onEncyclopedia?: () => void;
 }
 
@@ -115,9 +115,9 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 									menu.close();
 									onEncyclopedia();
 								}}
-								title="How everything works (K)"
+								title="Datacenter Primer (K)"
 							>
-								Encyclopedia
+								Primer
 							</button>
 						)}
 						{!fromTitle && (

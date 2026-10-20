@@ -398,7 +398,7 @@ describe("drawer and palette keys", () => {
 		const drawer = { isOpen: () => open, close: () => (open = false) };
 		const env = { menu, drawer, toggleDrawer: (id: string) => calls.push(id), togglePalette: () => calls.push("palette"), lastSpeed: { current: 1 as const } };
 		for (const k of ["c", "F", "i", "b"]) expect(runKey(store, k, env as never)).toBe(true);
-		expect(calls).toEqual(["contracts", "finance", "gauges", "palette"]);
+		expect(calls).toEqual(["contracts", "insights", "insights", "palette"]);
 		store.setTool({ kind: "slab" });
 		runKey(store, "Escape", env as never);
 		expect(store.get().tool.kind).toBe("select"); // the tool goes first …

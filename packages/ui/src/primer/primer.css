@@ -1,0 +1,192 @@
+/* Datacenter Primer: chapter list + reading pane on the shared panel shell. */
+.aitower-hud .pr-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	text-align: left;
+	padding: 9px 10px;
+	font: 14px/1.25 var(--f-body);
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+}
+.aitower-hud .pr-row:hover {
+	border-color: var(--accent);
+}
+.aitower-hud .pr-row.is-sel {
+	border-color: var(--accent);
+	background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+	color: var(--accent);
+}
+.aitower-hud .pr-row.is-locked .pr-row-t {
+	color: var(--text-dim);
+}
+.aitower-hud .pr-lock {
+	font: 11px/1 var(--f-body);
+	color: var(--text-dim);
+	border: 1px solid var(--panel-edge);
+	border-radius: 99px;
+	padding: 3px 7px;
+}
+.aitower-hud .pr-dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	background: var(--accent);
+	flex: none;
+	box-shadow: 0 0 6px var(--accent);
+}
+.aitower-hud .pr-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+}
+.aitower-hud .pr-tabs .pnl-tab {
+	padding: 5px 10px;
+	font-size: 12px;
+}
+.aitower-hud .pr-chap {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+.aitower-hud .pr-kicker {
+	font: 600 10px/1 var(--f-display);
+	letter-spacing: 0.12em;
+	color: var(--text-dim);
+}
+.aitower-hud .pr-h {
+	margin: 0;
+	font: 600 22px/1.15 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .pr-sub {
+	margin: 6px 0 2px;
+	font: 600 11px/1 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.aitower-hud .pr-p {
+	margin: 0;
+	font: 15px/1.55 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .pr-dim {
+	color: var(--text-dim);
+}
+.aitower-hud .pr-lockline {
+	font-weight: 600;
+	color: var(--warn);
+}
+.aitower-hud .pr-svg {
+	width: 100%;
+	height: auto;
+	margin: 6px 0 4px;
+	background: color-mix(in srgb, var(--bg) 80%, #000);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+}
+.aitower-hud .pr-svg .pr-t {
+	font: 12px var(--f-body);
+	fill: var(--text);
+}
+.aitower-hud .pr-svg .pr-t.is-dim {
+	fill: var(--text-dim);
+}
+.aitower-hud .pr-svg .pr-t.is-hot,
+.aitower-hud .pr-svg .pr-t.is-bad {
+	fill: var(--bad);
+}
+.aitower-hud .pr-svg .pr-t.is-cool,
+.aitower-hud .pr-svg .pr-t.is-on {
+	fill: var(--accent);
+}
+.aitower-hud .pr-svg .pr-t.is-warn {
+	fill: var(--warn);
+}
+.aitower-hud .pr-svg .pr-t.is-good {
+	fill: var(--good);
+}
+.aitower-hud .pr-svg .pr-box {
+	fill: color-mix(in srgb, var(--panel) 90%, #fff 4%);
+	stroke: var(--panel-edge);
+	stroke-width: 1.5;
+}
+.aitower-hud .pr-svg .pr-box.is-acc {
+	stroke: var(--accent);
+}
+.aitower-hud .pr-svg .pr-box.is-bad {
+	stroke: var(--bad);
+}
+.aitower-hud .pr-svg .pr-ln {
+	fill: none;
+	stroke: var(--text-dim);
+	stroke-width: 3;
+	stroke-linecap: round;
+}
+.aitower-hud .pr-svg .pr-ln.is-flow,
+.aitower-hud .pr-svg .pr-ln.is-cool {
+	stroke: var(--accent);
+}
+.aitower-hud .pr-svg .pr-ln.is-hot {
+	stroke: var(--bad);
+}
+.aitower-hud .pr-svg .pr-ln.is-warn {
+	stroke: var(--warn);
+}
+.aitower-hud .pr-svg .pr-ln.is-good {
+	stroke: var(--good);
+}
+.aitower-hud .pr-svg .pr-hotdot {
+	fill: var(--bad);
+}
+.aitower-hud .pr-svg .pr-cooldot {
+	fill: var(--accent);
+}
+.aitower-hud .pr-svg .pr-fill {
+	fill: color-mix(in srgb, var(--accent) 35%, transparent);
+	stroke: var(--accent);
+}
+.aitower-hud .pr-act {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+}
+.aitower-hud .pr-try {
+	flex: 1 1 auto;
+}
+
+/* "New chapter" note: calm, top centre, never steals focus */
+.aitower-hud .pr-new {
+	position: absolute;
+	top: 56px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 11;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	max-width: min(560px, 90%);
+	padding: 8px 8px 8px 14px;
+	font: 14px/1.3 var(--f-body);
+	color: var(--text);
+	background: color-mix(in srgb, var(--panel) 96%, #000);
+	border: 1px solid var(--accent);
+	border-radius: 99px;
+	pointer-events: auto;
+}
+.aitower-hud .pr-new b {
+	color: var(--accent);
+}
+
+.aitower-hud.has-drawer .pr-new {
+	top: auto;
+	bottom: 56px;
+	left: 30%;
+}

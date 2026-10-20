@@ -1,16 +1,14 @@
-import { isSerious, AlertsLog, ContractsDrawer, ResearchDrawer, Telemetry } from "./Panels";
-import { FinanceTab } from "../finance/FinanceTab";
-import { OverlaySwitcher } from "../components/OverlaySwitcher";
+import { isSerious, AlertsLog } from "./Panels";
+import { ResearchPanel } from "../research/ResearchPanel";
+import { ContractsDrawer } from "../contracts/ContractsPanel";
+import { InsightsPanel } from "../insights/InsightsPanel";
 import type { PanelProps } from "../components/context";
-import { fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
-import { ModifierChips } from "../memo/MemoDesk";
 import { currentObjective, endingLine, isProblem } from "../objective/objective";
 import { BuildPalette } from "../components/BuildPalette";
-import { EncyclopediaDrawer } from "../encyclopedia/EncyclopediaDrawer";
-import { AffinityBars } from "../components/AffinityBars";
-import { leadingPath } from "../ascension/ascension";
-import { DRAWER_TABS, feedLines, isRoutine, nextDrawer } from "./calm";
+import { PrimerDrawer } from "../primer/PrimerDrawer";
+import { useUnreadPrimer } from "../primer/PrimerPrompt";
+import { DRAWER_TABS, type DrawerId, feedLines, isRoutine, nextDrawer } from "./calm";
 import { Icon } from "../components/common";
 
 /** NEXT: one line from the current objective, with the key to press. The detail is its tooltip. */
@@ -63,12 +61,14 @@ export function Ticker({ content, state, ui, setUi }: PanelProps) {
 }
 
 /** The edge tabs: one drawer at a time, each on a hotkey. */
-export function DrawerTabs({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
+export function DrawerTabs({ ui, setUi, content, state }: Pick<PanelProps, "ui" | "setUi" | "content" | "state">) {
+	const unreadPrimer = useUnreadPrimer(content, state.view);
 	return (
 		<div className="ui-dtabs" role="tablist" aria-label="Drawers">
 			{DRAWER_TABS.map((d) => (
 				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} data-help={`tab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} aria-label={`${d.label} (${d.key})`}>
 					<span className="ui-dtab-name">{d.label}</span>
+					{d.id === "primer" && unreadPrimer && <span className="pr-dot" role="img" aria-label="New chapter" />}
 					<kbd>{d.key}</kbd>
 				</button>
 			))}
@@ -76,49 +76,8 @@ export function DrawerTabs({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
 	);
 }
 
-function GaugesDrawer(props: PanelProps) {
-	const { state } = props;
-	const { view } = state;
-	const stat = (label: string, value: string, tone = "") => (
-		<div key={label} className={`ui-chip ui-gstat ${tone}`}>
-			<span className="ui-label">{label}</span>
-			<span className="ui-big">{value}</span>
-		</div>
-	);
-	const supply = view.powerNets.reduce((s, n) => s + n.supplyKw, 0);
-	return (
-		<>
-			<h4 className="ui-dh">
-				<span>GAUGES</span>
-			</h4>
-			<div className="ui-gstats">
-				{stat("PUE", fmtPue(view.pue))}
-				{stat("IT LOAD", fmtPower(view.itKw), supply > 0 && view.totalKw > supply ? "is-bad" : "")}
-				{stat("UPTIME", fmtPct(view.uptime, 1), view.uptime < 0.99 ? "is-warn" : "")}
-				{stat("OUTSIDE", fmtTemp(view.ambientC, 0))}
-				{stat("GRID $/kWh", view.energyPrice.toFixed(3))}
-				{stat("COMPUTE", `${Math.round(view.pflops)} PF`)}
-			</div>
-			<h4 className="ui-dh">
-				<span>OVERLAYS</span>
-			</h4>
-			<OverlaySwitcher {...props} embedded />
-			<h4 className="ui-dh">
-				<span>PATH AFFINITY</span>
-			</h4>
-			<AffinityBars affinity={view.affinity} content={props.content} leading={view.path ?? leadingPath(view.affinity)} />
-			{view.modifiers.length > 0 && (
-				<>
-					<h4 className="ui-dh">
-						<span>MODIFIERS</span>
-					</h4>
-					<ModifierChips modifiers={view.modifiers} tick={view.tick} />
-				</>
-			)}
-			<Telemetry {...props} />
-		</>
-	);
-}
+/** Panels built on the shared shell (list + Inspector) get the wide frame. */
+export const WIDE: ReadonlySet<DrawerId> = new Set<DrawerId>(["contracts", "insights", "research", "primer"]);
 
 /** The open drawer, if any. */
 export function Drawer(props: PanelProps) {
@@ -126,16 +85,15 @@ export function Drawer(props: PanelProps) {
 	if (!d) return null;
 	const title = d === "log" ? "ALERT LOG" : DRAWER_TABS.find((t) => t.id === d)?.label.toUpperCase();
 	return (
-		<section className={`ui-edge ui-glass is-${d}`} aria-label={title} data-drawer={d}>
+		<section className={`ui-edge ui-glass is-${d} ${WIDE.has(d) ? "is-wide" : ""}`} aria-label={title} data-drawer={d}>
 			<button type="button" className="ui-btn ui-icon-btn ui-drawer-x" aria-label="Close drawer" title="Close (Esc)" onClick={() => props.setUi({ drawer: null })}>
 				<Icon name="close" size={11} />
 			</button>
 			{d === "contracts" && <ContractsDrawer {...props} />}
-			{d === "research" && <ResearchDrawer {...props} />}
+			{d === "research" && <ResearchPanel {...props} />}
 			{d === "automation" && <AutomationDrawer {...props} />}
-			{d === "finance" && <FinanceTab {...props} />}
-			{d === "gauges" && <GaugesDrawer {...props} />}
-			{d === "encyclopedia" && <EncyclopediaDrawer {...props} />}
+			{d === "insights" && <InsightsPanel {...props} />}
+			{d === "primer" && <PrimerDrawer {...props} />}
 			{d === "log" && <AlertsLog {...props} />}
 		</section>
 	);

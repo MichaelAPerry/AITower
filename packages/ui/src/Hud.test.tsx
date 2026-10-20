@@ -65,7 +65,7 @@ describe("Hud (server render smoke test)", () => {
 		const content = createFakeContent();
 		const std = createFakeStore(content);
 		std.setOverlay("heat");
-		const gauges = (st: typeof std) => renderToString(<Drawer {...panelProps(st, content, { ui: { drawer: "gauges" } })} />);
+		const gauges = (st: typeof std) => renderToString(<Drawer {...panelProps(st, content, { ui: { drawer: "insights" } })} />);
 		expect(gauges(std)).toContain("var(--heat-18)");
 		const cb = createFakeStore(content);
 		cb.setOverlay("heat");
@@ -134,7 +134,7 @@ describe("SystemMenu (server render)", () => {
 		expect(html).toMatch(/ui-inbox-count has[^>]*>1</);
 		expect(html).toContain("tone-red"); // standing 18 is below 25
 		expect(html).not.toContain("ui-memo-drawer");
-		expect(renderToString(<Drawer {...panelProps(store, content, { ui: { drawer: "gauges" } })} />)).toContain("HEATWAVE +8 °C · 14h");
+		expect(renderToString(<Drawer {...panelProps(store, content, { ui: { drawer: "insights" } })} />)).toContain("HEATWAVE +8 °C · 14h");
 	});
 	it("a memo that is not urgent only raises the inbox count (no slip)", () => {
 		const content = createFakeContent();

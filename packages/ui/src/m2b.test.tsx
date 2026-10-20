@@ -3,7 +3,7 @@ import type { QuarterReport, SimCommand } from "@aitower/sim";
 import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ClerkPanel } from "./clerk/ClerkPanel";
-import { ContractsDrawer } from "./calm/Panels";
+import { ContractsDrawer } from "./contracts/ContractsPanel";
 import { BuildPalette } from "./components/BuildPalette";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { click, findAll, findButton, panelProps, textOf } from "./dev/walk";
@@ -14,7 +14,7 @@ import { Hud } from "./Hud";
 import { runKey } from "./keyboard";
 import { applyEscape, escapeStep } from "./menu/escape";
 import { createMenuController } from "./menu/menuController";
-import { ResearchSheet, TechCard } from "./research/ResearchSheet";
+import { ResearchPanel } from "./research/ResearchPanel";
 
 /** Server-rendered HTML without React's text-node separators, so assertions read like the page. */
 const renderToString = (el: Parameters<typeof render>[0]): string => render(el).replace(/<!-- -->/g, "");
@@ -99,40 +99,34 @@ describe("Contract Automation panel", () => {
 	});
 });
 
-describe("Research sheet", () => {
-	it("renders the department, five branch columns, cards with plain effects, unlocks and states", () => {
+describe("Research panel", () => {
+	const panel = (store: ReturnType<typeof setup>["store"], content: ReturnType<typeof setup>["content"], ui = {}) => renderToString(<ResearchPanel {...panelProps(store, content, { ui })} />);
+	it("shows the points, branch tabs, what is ready and what comes next, in plain words", () => {
 		const { content, store } = setup();
-		store.dispatch({ type: "research", techId: "cmp_burnin" });
-		const html = renderToString(<ResearchSheet store={store} content={content} view={store.get().view} onClose={() => {}} />);
-		expect(html).toContain("DEPARTMENT OF RESEARCH");
-		for (const b of ["Compute", "Cooling", "Power", "Logistics", "Administration"]) expect(html).toContain(`>${b}</h3>`);
-		expect(html).toContain("−10 % failure rate"); // plain-English perk
-		expect(html).toContain("Contract Automation: accepts offers for you");
-		expect(html).toContain("<b>Unlocks:</b> Chiller"); // scanned from facilities
-		expect(html).toContain("<b>Unlocks:</b> Rotor Drone"); // and from bots
-		expect(html).toContain("Researched");
-		expect(html).toContain("Requires Level 3 and Silicon Binning"); // locked, with the reason
-		expect(html).toContain("GAME PAUSED");
-		expect(html).toMatch(/aria-modal="true"/);
+		const html = panel(store, content);
+		expect(html).toContain("Research");
+		for (const b of ["Compute", "Cooling", "Power", "Logistics", "Admin"]) expect(html).toContain(b);
+		expect(html).toContain("Available now");
+		expect(html).toContain("Start research");
+		expect(html).toContain("What you get");
+		expect(html).toContain("Why it helps");
+		expect(html).toContain("42 RP");
 	});
-	it("a card's state: available has a RESEARCH button, too expensive shows the shortfall", () => {
-		const { content, store } = setup();
-		const v = store.get().view; // 42 RP
-		const node = (id: string) => content.tech.find((t) => t.id === id) as (typeof content.tech)[number];
-		expect(renderToString(<TechCard node={node("cmp_burnin")} view={v} content={content} store={store} />)).toContain("is-available");
-		const poor = renderToString(<TechCard node={node("pow_tariff")} view={{ ...v, researchPoints: 10 }} content={content} store={store} />);
-		expect(poor).toContain("is-poor");
-		expect(poor).toContain("Need 25 more RP");
-		expect(poor).not.toContain("ui-stampbtn");
-	});
-	it("RESEARCH dispatches {type:'research'} and spends the points", () => {
+	it("Start research on the picked node dispatches {type:'research'} and spends the points", () => {
 		const { content, store, sent } = setup();
-		const node = content.tech.find((t) => t.id === "cmp_burnin") as (typeof content.tech)[number];
-		const card = TechCard({ node, view: store.get().view, content, store });
-		click(findButton(card, /Research/));
+		const tree = ResearchPanel(panelProps(store, content, { ui: { researchSel: "cmp_burnin", researchTab: "compute" } }));
+		const split = findAll(tree, (el) => "inspector" in el.props)[0];
+		click(findButton(split.props.inspector as never, /Start research/));
 		expect(sent).toEqual([{ type: "research", techId: "cmp_burnin" }]);
 		expect(store.get().view.techResearched).toEqual(["cmp_burnin"]);
 		expect(store.get().view.researchPoints).toBe(22);
+	});
+	it("too expensive: the button is off and says how many points are missing", () => {
+		const { content, store } = setup();
+		const html = panel(store, content, { researchSel: "cmp_binning", researchTab: "compute" });
+		expect(html).toContain("disabled");
+		expect(html).toContain("You need first");
+		expect(html).toContain("Burn-in Protocol");
 	});
 	it("researching the clerk node unlocks the clerk", () => {
 		const { store } = setup();
@@ -383,11 +377,11 @@ describe("event wording", () => {
 });
 
 describe("Hud", () => {
-	it("renders the research tab and no sheet until opened", () => {
+	it("renders the research tab and no research panel until opened", () => {
 		const { content, store } = setup();
 		const html = renderToString(<Hud store={store} content={content} />);
 		expect(html).toContain('data-tut="dtab-research"');
-		expect(html).not.toContain("ui-research-backdrop");
+		expect(html).not.toContain("data-drawer=\"research\"");
 		expect(html).not.toContain("ui-audit-backdrop");
 	});
 	it("shows the clerk slip in the Contracts tab while the clerk is locked and a few contracts are done", () => {

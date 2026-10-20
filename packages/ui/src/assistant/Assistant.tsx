@@ -1,7 +1,9 @@
+import { loadProgress, shouldNudge, tutorialDone, update as primerUpdate } from "../primer/progress";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { findItem } from "../build/catalog";
 import type { PanelProps } from "../components/context";
 import { pushNotice } from "../notices";
+import { cheapestAvailable } from "../research/tech";
 import { acted, dismiss, initialPace, type PaceState, pace } from "./pace";
 import { type AssistantAction, type Suggestion, tipFor } from "./suggest";
 import "./assistant.css";
@@ -58,7 +60,7 @@ export function runAction(a: AssistantAction, p: Pick<PanelProps, "store" | "con
 			setUi({ inboxOpen: true });
 			return;
 		case "research":
-			p.openResearch();
+			p.openResearch(cheapestAvailable(store.get().view, content)?.id);
 			return;
 		case "ascension":
 			p.openAscension();
@@ -92,12 +94,20 @@ export function Assistant(props: AssistantProps) {
 		return () => clearInterval(iv);
 	}, []);
 
+	// One time, after the coach marks: point at the Primer.
+	const [nudge, setNudge] = useState(false);
+	useEffect(() => {
+		if (nudge || quiet || !shouldNudge(tutorialDone(), loadProgress())) return;
+		setNudge(true);
+		primerUpdate({ nudged: true });
+	}, [nudge, quiet]);
+
 	const decided = useMemo(() => pace(ps, candidates, tick, quiet), [ps, candidates, tick, quiet]);
 	useEffect(() => {
 		if (decided.state !== ps) setPs(decided.state);
 	}, [decided.state, ps]);
 	const current = decided.current;
-	const shown = current && !tip ? current : null;
+	const shown = current && !tip && !nudge ? current : null;
 
 	const answer = useCallback(
 		(fn: typeof dismiss, id: string) => {
@@ -113,12 +123,28 @@ export function Assistant(props: AssistantProps) {
 
 	return (
 		<aside className="ast" data-help="assistant" aria-label="Assistant UNIT-7">
-			{(shown || tip) && (
+			{(shown || tip || nudge) && (
 				<div className="ast-bubble ui-panel" role="status" aria-live="polite">
 					<span className="ast-name">UNIT-7</span>
-					<p className="ast-text">{shown ? shown.text : tip?.text}</p>
+					<p className="ast-text">{nudge ? "New to datacenters? The Primer explains power, heat and money in plain words, one short page each. Press K any time." : shown ? shown.text : tip?.text}</p>
 					<div className="ast-btns">
-						{shown ? (
+						{nudge ? (
+							<>
+								<button
+									type="button"
+									className="ui-btn is-on ast-go"
+									onClick={() => {
+										props.setUi({ drawer: "primer", encyId: "ch:what", paletteOpen: false, buildHover: null });
+										setNudge(false);
+									}}
+								>
+									Open the Primer
+								</button>
+								<button type="button" className="ui-btn" onClick={() => setNudge(false)}>
+									Later
+								</button>
+							</>
+						) : shown ? (
 							<>
 								<button
 									type="button"
@@ -155,7 +181,7 @@ export function Assistant(props: AssistantProps) {
 					title="UNIT-7"
 					onClick={() => setTip((t) => (t || shown ? null : { text: tipFor(tick), n: 0 }))}
 				>
-					<Robot mood={shown || tip ? "talk" : "idle"} />
+					<Robot mood={shown || tip || nudge ? "talk" : "idle"} />
 				</button>
 				<button type="button" className="ast-off" aria-label="Turn off assistant" title="Turn off assistant" onClick={turnOff}>
 					×

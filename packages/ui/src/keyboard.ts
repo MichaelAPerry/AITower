@@ -21,7 +21,7 @@ const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "
 /**
  * Pure key → action map. WASD and arrows are deliberately unused (the renderer pans the camera with them).
  * Overlay keys: N normal, H heat, P power, O coolant, U nutrient, G contamination ("growth").
- * Drawers: C contracts, R research, T automation, F finance, I gauges, K encyclopedia (one open at a time). ? or F1: help mode. B opens the full build palette.
+ * Drawers: C contracts, R research, T automation, F finance, I gauges, K primer (one open at a time). ? or F1: help mode. B opens the full build palette.
  * Speed keys follow the button order: 1 = pause, 2 = 1×, 3 = 3×, 4 = 10×, 5 = 30×.
  */
 export function keyAction(key: string): KeyAction | null {

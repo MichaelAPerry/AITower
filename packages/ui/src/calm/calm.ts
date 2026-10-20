@@ -12,18 +12,20 @@ import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
 
-export type DrawerId = "contracts" | "research" | "automation" | "finance" | "gauges" | "encyclopedia" | "log";
+export type DrawerId = "contracts" | "research" | "automation" | "insights" | "primer" | "log";
 /** Drawers that have an edge tab and a hotkey (the log opens from the ticker). */
 export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: string }[] = [
 	{ id: "contracts", label: "Contracts", key: "C" },
 	{ id: "research", label: "Research", key: "R" },
 	// A is not free: the renderer pans the camera with WASD. T (as in "autoTomation") is.
 	{ id: "automation", label: "Automation", key: "T" },
-	{ id: "finance", label: "Finance", key: "F" },
-	{ id: "gauges", label: "Gauges", key: "I" },
-	{ id: "encyclopedia", label: "Encyclopedia", key: "K" },
+	// Finance and Gauges are one panel now: both F and I open it.
+	{ id: "insights", label: "Insights", key: "I" },
+	{ id: "primer", label: "Primer", key: "K" },
 ];
-export const drawerForKey = (key: string): DrawerId | null => DRAWER_TABS.find((d) => d.key === key.toUpperCase())?.id ?? null;
+/** Extra keys that open a drawer (F was Finance, which lives in Insights now). */
+const KEY_ALIAS: Record<string, DrawerId> = { F: "insights" };
+export const drawerForKey = (key: string): DrawerId | null => DRAWER_TABS.find((d) => d.key === key.toUpperCase())?.id ?? KEY_ALIAS[key.toUpperCase()] ?? null;
 /** One drawer at a time: pressing the key of the open one closes it. */
 export const nextDrawer = (cur: DrawerId | null, pressed: DrawerId): DrawerId | null => (cur === pressed ? null : pressed);
 
@@ -41,10 +43,10 @@ export const operatingNet = (d: LedgerDay): number => d.revenue - (d.energy + d.
  * at its own average rate: today's rate (total over the minutes elapsed today) for the part of the window that falls in
  * today, and yesterday's rate (total over 24 h) for the rest. Null when there is no ledger yet.
  */
-export function perHour(view: Pick<SimView, "tick" | "day" | "ledger">): number | null {
+export function perHour(view: Pick<SimView, "tick" | "day" | "ledger">, net: (d: LedgerDay) => number = operatingNet): number | null {
 	const rate = (day: number, minutes: number): number | null => {
 		const d = view.ledger.find((x) => x.day === day);
-		return d && minutes > 0 ? (operatingNet(d) / minutes) * HOUR : null;
+		return d && minutes > 0 ? (net(d) / minutes) * HOUR : null;
 	};
 	const today = Math.max(0, view.tick - view.day * 1440);
 	const inToday = Math.min(RATE_WINDOW, today);

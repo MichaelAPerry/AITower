@@ -8,14 +8,13 @@ import { Inspector } from "./components/Inspector";
 import { Toasts } from "./components/Toasts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
-import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker } from "./calm/Parts";
+import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker, WIDE } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
 import { nextDrawer } from "./calm/calm";
 import { AscensionSheet } from "./ascension/AscensionSheet";
 import { ascensionDue } from "./ascension/ascension";
 import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
-import { ResearchSheet } from "./research/ResearchSheet";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { MemoDrawer, MemoPop } from "./memo/MemoDesk";
@@ -27,6 +26,7 @@ import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
 import { Assistant } from "./assistant/Assistant";
+import { PrimerPrompt } from "./primer/PrimerPrompt";
 import { recommendedIds, suggestions } from "./assistant/suggest";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -45,6 +45,7 @@ import "./bio/bio.css";
 import "./calm/calm.css";
 import "./calm/theme.css";
 import "./build/build.css";
+import "./panel/panel.css";
 import "./help/help.css";
 
 export interface HudProps {
@@ -61,9 +62,6 @@ export function Hud({ store, content, title }: HudProps) {
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
-	// The research sheet pauses like the menu (and restores the speed on close).
-	const [researchOpen, setResearchOpen] = useState(false);
-	const research = useMemo(() => createMenuController(store, setResearchOpen), [store]);
 	// FORM A-5 (ascension) pauses the same way: the choice is irreversible, so nothing may happen while it is read.
 	const [ascensionOpen, setAscensionOpen] = useState(false);
 	const ascension = useMemo(() => createMenuController(store, setAscensionOpen), [store]);
@@ -105,7 +103,6 @@ export function Hud({ store, content, title }: HudProps) {
 	}, [menuOpen]);
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
-	useEffect(() => () => research.close(), [research]);
 	useEffect(() => () => ascension.close(), [ascension]);
 	useHudKeyboard(
 		store,
@@ -116,7 +113,7 @@ export function Hud({ store, content, title }: HudProps) {
 		},
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current || crawlRef.current !== null, []),
-		{ research, ascension, audit: auditSheet, drawer: drawerCloser },
+		{ ascension, audit: auditSheet, drawer: drawerCloser },
 	);
 
 	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
@@ -130,7 +127,6 @@ export function Hud({ store, content, title }: HudProps) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: pause once when a game-over appears
 	useEffect(() => {
 		if (overId) {
-			research.close(); // restores its remembered speed first, so the pause below is the last word
 			ascension.close();
 			store.setSpeed(0);
 		}
@@ -181,10 +177,17 @@ export function Hud({ store, content, title }: HudProps) {
 	const assistantOn = settings.assistant !== false;
 	const candidates = useMemo(() => (assistantOn ? suggestions(state.view, content) : []), [assistantOn, state.view, content]);
 	const recommended = useMemo(() => recommendedIds(candidates), [candidates]);
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
+	const openResearch = useCallback(
+		(techId?: string) => {
+			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
+			setUiState((u) => ({ ...u, drawer: "research", paletteOpen: false, buildHover: null, ...(node ? { researchSel: node.id, researchTab: node.branch } : {}) }));
+		},
+		[content],
+	);
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<TopStrip {...props} />
@@ -204,11 +207,11 @@ export function Hud({ store, content, title }: HudProps) {
 					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
 				{assistantOn && !titleOpen && !crawl && !over && <Assistant {...props} candidates={candidates} />}
-				<DrawerTabs ui={ui} setUi={setUi} />
+				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} />
+				{!titleOpen && !crawl && !over && <PrimerPrompt content={content} state={state} setUi={setUi} />}
 				<Drawer {...props} />
 			</div>
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
-			{researchOpen && !titleOpen && <ResearchSheet store={store} content={content} view={state.view} onClose={research.close} />}
 			{ascensionOpen && !titleOpen && !over && (
 				<AscensionSheet
 					store={store}
@@ -255,7 +258,7 @@ export function Hud({ store, content, title }: HudProps) {
 					}}
 				/>
 			)}
-			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "encyclopedia", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
+			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "primer", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 	);
 }

@@ -64,7 +64,7 @@ describe("suggestions", () => {
 		const log = [{ tick: 2900, delta: -3, cause: "daily-uptime", detail: "Uptime 91.2% vs target 95%" }];
 		const s = suggestions(view({ standingLog: log }), content).find((x) => x.id === "reputation");
 		expect(s?.text).toMatch(/Uptime 91\.2%/);
-		expect(s?.action).toMatchObject({ drawer: "gauges" });
+		expect(s?.action).toMatchObject({ drawer: "insights" });
 		// old losses and gains are ignored
 		expect(ids(view({ standingLog: [{ tick: 10, delta: -3, cause: "job", detail: "x" }] }))).not.toContain("reputation");
 		expect(ids(view({ standingLog: [{ tick: 2900, delta: 2, cause: "job", detail: "x" }] }))).not.toContain("reputation");

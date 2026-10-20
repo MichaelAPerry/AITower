@@ -81,6 +81,9 @@ function basics(c: ContentDB): Entry[] {
 function glossary(): Entry[] {
 	const G = (term: string, ...lines: string[]): Entry => mk({ id: `glossary:${term.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, section: "glossary", title: term, lines });
 	return [
+		G("Rack", "A tall cabinet of computers. It needs power, cooling and a bot to repair it. Racks earn money by running jobs."),
+		G("Reputation", "Your trust score, from 0 to 100. Good days raise it, failed jobs and missed uptime lower it. At 0 you are shut down."),
+		G("Overlay", "A colour view over the floor, such as Heat or Power, that shows what is hot or short of power."),
 		G("PF", "Petaflop: a quadrillion calculations per second. The game's unit of compute, shown like \"80 PF compute\"."),
 		G("PFLOPS", "Petaflops per second of computing power. Same unit as PF; this is what contracts are measured in."),
 		G("kW", "Kilowatt: 1,000 watts of power. A rack might draw tens of kW."),

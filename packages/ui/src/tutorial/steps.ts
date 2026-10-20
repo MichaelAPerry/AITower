@@ -83,9 +83,9 @@ export const buildPhase = (ui: TutorialUi): number => (placing(ui, "rack_air_gpu
 export const TUTORIAL_STEPS: TutorialStep[] = [
 	{
 		id: "accept",
-		text: (s, ui) => (ui.drawer !== "contracts" ? "Open Contracts to see who wants to rent your racks." : s.view.offers.length > 0 ? "Accept this contract to start earning." : "Waiting for an offer to arrive."),
-		targets: (s, ui) => (ui.drawer !== "contracts" ? [t("dtab-contracts")] : s.view.offers.length > 0 ? [t("accept")] : [".ui-drawer"]),
-		sides: ["below"],
+		text: (s, ui) => (ui.drawer !== "contracts" ? "Open Contracts to see who wants to rent your racks." : s.view.offers.length > 0 ? "Press Take job to start earning." : "Waiting for a job to arrive."),
+		targets: (s, ui) => (ui.drawer !== "contracts" ? [t("dtab-contracts")] : s.view.offers.length > 0 ? [t("take")] : ['[data-drawer="contracts"]']),
+		sides: ["left", "above"],
 		clock: "free",
 		onEnter: (_store, setUi) => setUi({ drawer: "contracts" }),
 		done: (s, b) => maxJobId(s) > b.maxJobId,

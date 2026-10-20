@@ -39,7 +39,7 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 	}
 	const isPicked = !!picked && picked.key === item.key;
 	const missing = item.def ? item.cost - view.cash : 0;
-	const openEntry = (): void => setUi({ drawer: "encyclopedia", encyId: item.entry, paletteOpen: false, buildHover: null });
+	const openEntry = (): void => setUi({ drawer: "primer", encyId: item.entry, paletteOpen: false, buildHover: null });
 	return (
 		<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
 			<div className="bld-kicker">
