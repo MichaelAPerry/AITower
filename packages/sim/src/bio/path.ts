@@ -1,5 +1,5 @@
 /** Ascension: the `choosePath` command and the daily ending checks. */
-import type { AscensionPath, EndingId } from "@aitower/content";
+import type { AscensionPath, Balance, EndingId } from "@aitower/content";
 import { accept, type Plan, type PlanCtx, reject } from "../commands/plan";
 import type { TickCtx } from "../core/context";
 import type { SimState } from "../core/state";
@@ -28,12 +28,25 @@ export function endingsStep(ctx: TickCtx): void {
 	const biotech = state.path === "biotech";
 	state.endingDays.livingTower = biotech && c >= e.livingTower.minCorruption && org >= e.livingTower.pflops ? state.endingDays.livingTower + 1 : 0;
 	state.endingDays.cleanTower = biotech && c <= e.cleanTower.maxCorruption && org >= e.cleanTower.pflops ? state.endingDays.cleanTower + 1 : 0;
+	// Greentech and Synthetic endings (their balance entries are optional: an absent one never counts).
+	const pf = state.metrics.pflops;
+	const g = e.greenExemplar;
+	state.endingDays.greenExemplar = g && state.path === "greentech" && state.greenScore >= g.minScore && pf >= g.pflops ? state.endingDays.greenExemplar + 1 : 0;
+	const mm = e.millionMinds;
+	state.endingDays.millionMinds = mm && state.path === "synthetic" && state.refinement >= mm.minScore && pf >= mm.pflops ? state.endingDays.millionMinds + 1 : 0;
 	if (state.endingDays.livingTower >= e.livingTower.days) setGameOver(state, "victory", events, "livingTower");
 	else if (state.endingDays.cleanTower >= e.cleanTower.days) setGameOver(state, "victory", events, "cleanTower");
+	else if (g && state.endingDays.greenExemplar >= g.days) setGameOver(state, "victory", events, "greenExemplar");
+	else if (mm && state.endingDays.millionMinds >= mm.days) setGameOver(state, "victory", events, "millionMinds");
 }
 
-/** The ending whose condition is closest (most of its days held; ties by corruption distance), for the UI. */
-export function leadingEnding(state: SimState, e: { livingTower: { minCorruption: number; days: number }; cleanTower: { maxCorruption: number; days: number } }): { ending: EndingId; days: number; needed: number } | null {
+/**
+ * The path's ending whose condition is closest (most of its days held; biotech ties by corruption distance), for the UI.
+ * Greentech has one ending (greenExemplar), Synthetic one (millionMinds); null when the path is unset or its ending is absent.
+ */
+export function leadingEnding(state: SimState, e: Balance["endings"]): { ending: EndingId; days: number; needed: number } | null {
+	if (state.path === "greentech") return e.greenExemplar ? { ending: "greenExemplar", days: state.endingDays.greenExemplar, needed: e.greenExemplar.days } : null;
+	if (state.path === "synthetic") return e.millionMinds ? { ending: "millionMinds", days: state.endingDays.millionMinds, needed: e.millionMinds.days } : null;
 	if (state.path !== "biotech") return null;
 	const l = { ending: "livingTower" as const, days: state.endingDays.livingTower, needed: e.livingTower.days };
 	const k = { ending: "cleanTower" as const, days: state.endingDays.cleanTower, needed: e.cleanTower.days };

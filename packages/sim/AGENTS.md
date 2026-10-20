@@ -25,6 +25,8 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 | `economy/clerk.ts`, `credit.ts`, `audit.ts`, `stats.ts` | Contracts Clerk (`planSetClerk`, `clerkStep`), loans + midnight interest/levy, quarterly audit + grading, lifetime stats helpers |
 | `ministry/*` | `memos.ts` (seeded issue cadence/eligibility, `resolveMemo` plan, effects, timeout auto-resolve), `modifiers.ts` (timed modifiers: `modFactor`, `ambientOffset`, labels, expiry), `standing.ts` (standing 0..100, one-shot `gameOver`) |
 | `bio/*` | M3: `index.ts` (facility index cache keyed by `topologyRev`, rack load, contamination lookups), `nutrient.ts` (stage 3b), `contamination.ts` (field, stage 8c), `growth.ts` (hourly sprouting, daily cull), `corruption.ts`, `path.ts` (`choosePath`, daily endings, `leadingEnding`) |
+| `automation/*` | M4: `policy.ts` (defaults, `shapeAutomation`, `planSetAutomation`), `automationStep.ts` (stage 9d: research, parts, bots), `foreman.ts`, `run.ts` (`runCommand` = plan ▸ pay ▸ apply, `buildable`) |
+| `green/weather.ts` | M4: `daylight`, hourly wind and daily drought rolls (`weatherStep`, stage 2b), `renewableFactors` |
 | `view/*` | `SimView` builder and facility status precedence |
 | `snapshot/*` | Typed-array-aware JSON codec; canonical FNV-1a hash; `load.ts` (decode ▸ migrate ▸ validate), `migrate.ts` (`SNAPSHOT_VERSION`, `migrations`), `validate.ts`, `clone.ts` (deep copy for the projection) |
 | `test/fixture.ts` | Self-contained `ContentDB` + helpers for tests |
@@ -34,6 +36,7 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 0. ambient for this tick
 1. `applyCommands` — re-validate queued commands, charge cost, apply (`commandRejected` on failure)
 2. `rebuildNetworks` — only when `netsDirty`
+2b. `weatherStep` — wind redrawn each game-hour, drought rolled at the start of each game-day (own `weather` RNG stream)
 3. `powerSolve` — demand (uses last tick's thermal clock / chiller heat / charger use) → genset control → satisfaction → draws → dispatch grid ▸ genset ▸ UPS → UPS charging → energy cost
 3b. `nutrientSolve` — nutrient nets (supply, demand, satisfaction, billing as upkeep)
 4. `coolingSolve` — loop capacity/load/supply temp, `noCoolant`, chiller heat for next tick's power
@@ -44,6 +47,7 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 8c. `contaminationStep` (diffuse ▸ decay ▸ emit ▸ sterilize ▸ clamp; share, `irreversible`), 8d. `growthStep` (03:00 cull, hourly sprout), 8e. `corruptionStep`
 9. `economyStep` — upkeep, energy bill, rolling 24 h PUE/uptime, bankruptcy, offers (expire/generate), history
 9b. `memoStep` — expire modifiers, auto-resolve timed-out memos, roll for a new memo (own `events` RNG stream); 9c. `jobStanding` — one standing change from this tick's `jobCompleted`/`jobFailed`
+9d. `automationStep` — once per game-hour (`minuteOfDay % 60 == 0`): research ▸ parts ▸ bots ▸ Foreman
 10. `progressionStep` — on the last tick of each day: daily standing (uptime vs the *current* tier's target), then tier-up (no victory any more), then `endingsStep` (absorbed ▸ livingTower / cleanTower day counters)
 11. `advanceTime` — tick++, ledger roll + `newDay` at day change
 
@@ -71,6 +75,16 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 - **Growths** (`def.growth`, `f.grown`): own `growth` RNG stream (draw per qualifying cell on each hour, +1 for the def pick, none without growth defs); need no power/nutrient/coolant, no upkeep, no refund; failure (reliability roll) = `failed` + `recoverAt` (+180 ticks), no work order, `rackRecovered` on return; culling rooms remove them at 03:00 (`demolished` events).
 - **Corruption / endings / path**: see `bio/corruption.ts`, `bio/path.ts`. `gameOver.ending`; `absorbed` is a game over kind. Path gates: `TechNode.path` (`planResearch`), `EventDef.path` / `minCorruption` (pool and scripted).
 - Tests: `bio.test.ts`; fixture has small biotech defs (`nutrient_plant`, `sterile_bay`, `culling_room`, `quarantine_lock`, `bioreactor`, `organoid_rack`, `growth_mass`, `needy_depot`).
+
+## Automation, Greentech, Synthetic, scenarios (M4, snapshot v6, `migrateV5`)
+- **Policy** `state.automation` (`setAutomation` replaces it whole; enabling the Foreman needs a researched `foreman` feature node, `foremanUnlocked`). Orders run through `runCommand` = the same `plan*` + payment as a player's command. Research: first affordable node by `branches` order (non-empty list also restricts) ▸ cost ▸ id, one per hour. Parts: `min(partsBatch, depot room)` when stock < keep. Bots: priciest unlocked type when `bots < min(maxBots, ceil(racks / racksPerBot))`, one per hour.
+- **Foreman** (`automation/foreman.ts`): ≤ `foremanPerHour` placements per hour, cash − cost ≥ `reserve`, footprint fully on slab **and** power conduit, never builds slab/conduit. Order per placement: power (grid tie / genset, largest capacity first, on a net with satisfaction < 1, footprint inside that net) ▸ cooling (largest CRAH within reach of the hottest rack above `okC`; racks in reach are then covered) ▸ racks (DLC when a coolant net with spare capacity ≥ its liquid heat is reachable, else best air rack; wanted when installed compute is < 20 % idle, or offers exist and none passes `acceptCheck` ignoring storage — at most one rack per run for the offer reason). Spot = floor nearest the racks (floor 0 when none), leftmost cell run that `place` accepts. Nets are rebuilt after each placement.
+- **Green power**: solar/wind are free sources dispatched first (`PowerBucket.greens`), counted in `metrics.totalKw`/`greenKw` (so PUE includes them); `needsPower` is true for them (they attach to a power net). Daylight sine 06:00-20:00, wind 0.2..1 hourly, drought = `tick < droughtUntil` × `droughtFactor`.
+- **heat_export** acts in `airFieldStep` after the CRAHs (pulls cells in reach down to 20 °C at most, `exportKw` × power satisfaction, `earn`s `heatPrice` per kWh, `f.heatKw` = heat removed). **carbon** pays at day end (`progressionStep`) when enabled and powered.
+- **Scores** (`economyStep`): `greenScore` smoothed 1/60 per tick toward 0.7 × solar+wind share of 24 h energy + 0.3 × min(1, 24 h exported heat ÷ IT energy); `refinement` = uptime × share of delivered PFLOPS on racks with `unlockTier ≥ 4`. `pathScore` in the view picks by path. Endings `greenExemplar` / `millionMinds` in `endingsStep` (skipped when absent from balance); `leadingEnding` covers all three paths.
+- **Scenarios**: `startingCash`, `startTier` (clamped to the tier table), `sandbox` (`state.sandbox`, re-derived from the scenario on every load): no bankruptcy and no shutdown (standing still moves).
+- **`earned`**: training checkpoint/completion payments at once; inference revenue accumulates in `job.unreported` and is flushed hourly, at completion and on `cancelJob`.
+- Tests: `automation.test.ts`, `green.test.ts` (weather, exporters, scores, endings, scenarios, earned, v5 ▸ v6, determinism), perf test with every order on. The fixture has `solar_array`, `wind_turbine`, `heat_exchanger`, `carbon_facade`, `rack_top` (tier 4) and the `t_foreman` node.
 
 ## Invariants
 - Everything that affects the future is in `SimState`; scratch buffers are overwritten every tick.
@@ -102,4 +116,4 @@ Deterministic, headless simulation core. Public surface = `src/api.ts` (frozen c
 offers, logistics (`logistics.test.ts` single lift, `bots.test.ts` multi-lift/timeouts/topology changes, `routing.test.ts`), economy/progression,
 determinism (3 days, hash every 100 ticks; snapshot round-trip), `commands.test.ts` (queue-aware validation), `fuzz.test.ts` (seeded, 2,000
 malformed + valid commands, incl. `resolveMemo` against expiring memos), `snapshot.test.ts` (validation, migrations; v2 → v3 is tested in `ministry.test.ts`, v3 → v4 in `m2bSave.test.ts`), `research.test.ts`, `management.test.ts` (clerk, loans, levy, audits, stats), `m2bBots.test.ts`, `scripted.test.ts`, `m2bSave.test.ts`, `ministry.test.ts` (memos, effects, standing, game over, determinism, v3 validation), perf (48×13 / 60 racks / 4 bots: 1440 ticks < 1.5 s; 60×64 tower,
-~1,000 racks, 30 bots: best-window mean `step()` < 2 ms). Headless run with real content: `npm run sim -- starter 10`.
+~1,000 racks, 30 bots: best-window mean `step()` < 2 ms). Headless run with real content: `npm run sim -- starter 10` (`--auto` turns every standing order on and researches the Foreman first; real content has no Foreman node until T2).

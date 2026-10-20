@@ -36,5 +36,7 @@ export function loadSnapshot(content: ContentDB, snap: SimSnapshot): SimState {
 			return n.ok ? [n.cmd] : [];
 		});
 	if (migrated.scenarioId !== snap.scenarioId) throw new InvalidSaveError("state belongs to a different scenario");
-	return validateState(content, migrated);
+	const state = validateState(content, migrated);
+	state.sandbox = content.scenarios[state.scenarioId]?.sandbox === true; // follows the scenario, not the save
+	return state;
 }

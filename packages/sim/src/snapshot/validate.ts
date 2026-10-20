@@ -10,6 +10,7 @@ import type { ContentDB } from "@aitower/content";
 import { TICKS_PER_DAY } from "../api";
 import type { BotLeg, BotTask, SimState } from "../core/state";
 import type { Bot, Facility, Job, Lift, WorkOrder } from "../core/state";
+import { automationProblem, shapeAutomation } from "../automation/policy";
 import { InvalidSaveError, type RawState } from "./migrate";
 
 type Kind = "int" | "num" | "bool" | "str" | "trait";
@@ -68,7 +69,7 @@ const BOT: Record<keyof Bot, Kind> = {
 const WORK_ORDER: Record<keyof WorkOrder, Kind> = { id: "int", facilityId: "int", botId: "int", createdAt: "num", attempts: "num", retryAt: "num", retryRev: "num" };
 const JOB: Record<Exclude<keyof Job, "spec" | "rackIds">, Kind> = {
 	id: "int", contractId: "int", status: "str", acceptedAt: "num", deadline: "num", progress: "num", total: "num",
-	lastCheckpoint: "num", sinceCheckpoint: "num", pflops: "num", earned: "num", clerk: "bool", finishedAt: "num",
+	lastCheckpoint: "num", sinceCheckpoint: "num", pflops: "num", earned: "num", clerk: "bool", finishedAt: "num", unreported: "num",
 };
 const SPEC: Record<string, Kind> = {
 	clientId: "str", clientName: "str", kind: "str", work: "num", durationTicks: "num", payout: "num", penalty: "num",
@@ -85,7 +86,7 @@ const LEDGER_DAY: Record<string, Kind> = {
 };
 const SAMPLE: Record<string, Kind> = { tick: "num", pue: "num", itKw: "num", totalKw: "num", pflops: "num", cash: "num", maxRackC: "num" };
 const METRIC_NUMS: Record<string, Kind> = {
-	itKw: "num", totalKw: "num", gridKw: "num", gensetKw: "num", pflops: "num", organoidPflops: "num", energyCost: "num", pue: "num", uptime: "num", maxRackC: "num",
+	itKw: "num", totalKw: "num", gridKw: "num", gensetKw: "num", pflops: "num", organoidPflops: "num", energyCost: "num", pue: "num", uptime: "num", maxRackC: "num", greenKw: "num", heatExportKw: "num",
 };
 
 const TASKS: readonly BotTask[] = ["none", "depot", "target", "repair", "charger", "charge"];
@@ -295,11 +296,12 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 		fields(d, SAMPLE, `history[${i}]`);
 	});
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
-	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
-	fields(s.rng, { contracts: "num", reliability: "num", events: "num", growth: "num" }, "rng");
+	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning", "ringGreenKwh", "ringHeatKwh"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
+	fields(s.rng, { contracts: "num", reliability: "num", events: "num", growth: "num", weather: "num" }, "rng");
 	validateMinistry(content, s, nextId.memo);
 	validateManagement(content, s);
 	validateBiotech(s);
+	validateGreen(s);
 	array(s, "pending");
 
 	// Catch-all: any non-finite number anywhere (including float arrays) is corruption.
@@ -356,7 +358,7 @@ function validateManagement(content: ContentDB, s: Obj): void {
 
 const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];
 const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory", "absorbed"];
-const ENDINGS = ["livingTower", "cleanTower", "absorbed"];
+const ENDINGS = ["livingTower", "cleanTower", "absorbed", "greenExemplar", "millionMinds"];
 const PATHS = ["biotech", "greentech", "synthetic"];
 
 /** Contamination share, corruption, path, ending counters (snapshot v5). */
@@ -366,8 +368,26 @@ function validateBiotech(s: Obj): void {
 	if (share < 0 || share > 1) fail("contaminatedShare is outside 0..1");
 	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
 	if (s.path !== null && !PATHS.includes(s.path as string)) fail("path is invalid");
-	const d = fields(s.endingDays, { livingTower: "int", cleanTower: "int" }, "endingDays");
-	if ((d.livingTower as number) < 0 || (d.cleanTower as number) < 0) fail("endingDays must not be negative");
+	const d = fields(s.endingDays, { livingTower: "int", cleanTower: "int", greenExemplar: "int", millionMinds: "int" }, "endingDays");
+	for (const k of Object.keys(d)) if ((d[k] as number) < 0) fail("endingDays must not be negative");
+}
+
+/** Automation, weather, scores, sandbox flag (snapshot v6). */
+function validateGreen(s: Obj): void {
+	const wind = s.wind;
+	if (typeof wind !== "number" || !(wind >= 0 && wind <= 1)) fail("wind is outside 0..1");
+	if (typeof s.droughtUntil !== "number" || !(s.droughtUntil >= 0)) fail("droughtUntil must be a non-negative number");
+	for (const k of ["greenScore", "refinement"]) {
+		const v = s[k];
+		if (typeof v !== "number" || !(v >= 0 && v <= 1)) fail(`${k} is outside 0..1`);
+	}
+	if (typeof s.sandbox !== "boolean") fail("sandbox must be a boolean");
+	const shaped = shapeAutomation(s.automation);
+	if (!shaped.ok) fail(`automation: ${shaped.reason}`);
+	else {
+		const problem = automationProblem(shaped.policy);
+		if (problem) fail(`automation: ${problem}`);
+	}
 }
 
 function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {

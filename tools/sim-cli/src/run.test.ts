@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { loadContent } from "@aitower/content";
 import { createSim, simFromSnapshot, TICKS_PER_DAY } from "@aitower/sim";
 import { makeContent } from "../../../packages/sim/src/test/fixture";
-import { bestMemoChoice, formatTable, nextTech, PERMISSIVE_CLERK, runHeadless } from "./run";
+import { allAutomation, AUTO_RESERVE, bestMemoChoice, formatTable, nextTech, PERMISSIVE_CLERK, runHeadless } from "./run";
 
 describe("sim-cli runHeadless", () => {
 	it("produces one row per day and a deterministic hash", () => {
@@ -111,5 +111,68 @@ describe("sim-cli research policy", () => {
 		expect(table).toContain("techs");
 		expect(table).toContain("taxes");
 		expect(table.split("\n")[0].split(/\s+/)).toContain("taxes");
+	});
+});
+
+const foremanNode = { id: "foreman", name: "Foreman", description: "Builds for you.", branch: "administration" as const, minTier: 1, cost: 30, requires: [], effects: [{ type: "feature" as const, feature: "foreman" as const }] };
+
+describe("sim-cli --auto", () => {
+	it("nextTech: with auto the Foreman's node follows the clerk's; without it the Foreman is ignored", () => {
+		const c = makeContent();
+		const v = createSim(c, "starter", 1).view();
+		expect(nextTech(c, v, true)).toBe("t_clerk");
+		const done = { ...v, techResearched: ["t_clerk"], clerk: { ...v.clerk, unlocked: true } };
+		expect(nextTech(c, done, true)).toBe("t_foreman");
+		expect(nextTech(c, done, false)).not.toBe("t_foreman");
+		const both = { ...done, techResearched: ["t_clerk", "t_foreman"], automation: { ...done.automation, foremanUnlocked: true } };
+		expect(nextTech(c, both, true)).not.toBe("t_foreman");
+	});
+
+	it("allAutomation switches every order on and keeps the documented limits", () => {
+		const a = allAutomation(true);
+		expect([a.research.enabled, a.parts.enabled, a.bots.enabled, a.foreman.enabled]).toEqual([true, true, true, true]);
+		expect(a.foreman.reserve).toBe(AUTO_RESERVE);
+		expect(allAutomation(false).foreman.enabled).toBe(false);
+	});
+
+	it("is deterministic, researches the Foreman, and lets the standing orders build (fixture content)", { timeout: 60_000 }, () => {
+		const make = () => {
+			const c = makeContent();
+			c.balance.research.pointsPerJob = 200;
+			return c;
+		};
+		const a = runHeadless(make(), "starter", 6, 4, true);
+		const b = runHeadless(make(), "starter", 6, 4, true);
+		expect(a.hash).toBe(b.hash);
+		expect(a.auto).toEqual(b.auto);
+		expect(a.auto.parts + a.auto.bots + a.auto.built).toBeGreaterThan(0);
+		expect(formatTable(a.rows, true).split("\n")[0]).toContain("built");
+		expect(formatTable(a.rows)).not.toContain("built");
+		const manual = runHeadless(make(), "starter", 6, 4, false);
+		expect(manual.auto).toEqual({ built: 0, parts: 0, bots: 0 });
+		expect(manual.hash).not.toBe(a.hash);
+	});
+
+	it("real content with a Foreman node: a 30-day starter run grows and stays solvent", { timeout: 120_000 }, () => {
+		const c = loadContent();
+		c.tech.push(foremanNode);
+		const { rows, auto } = runHeadless(c, "starter", 30, 1, true);
+		expect(rows).toHaveLength(30);
+		for (const r of rows) {
+			expect(Number.isFinite(r.cash)).toBe(true);
+			expect(r.cash).toBeGreaterThan(0);
+			expect(r.gameOver).toBeNull();
+		}
+		expect(auto.built).toBeGreaterThan(5);
+		expect(rows[29].racks).toBeGreaterThan(rows[0].racks + 5);
+		expect(rows[29].pflops).toBeGreaterThan(rows[0].pflops * 3);
+		expect(rows[29].tier).toBeGreaterThanOrEqual(2);
+		expect(rows[29].built).toBe(auto.built);
+	});
+
+	it("real content as shipped (no Foreman node yet): --auto still runs; parts and research are automated, nothing is built", { timeout: 60_000 }, () => {
+		const { rows, auto } = runHeadless(loadContent(), "starter", 6, 1, true);
+		expect(auto.built).toBe(0);
+		expect(rows.at(-1)?.techs).toBeGreaterThan(0);
 	});
 });

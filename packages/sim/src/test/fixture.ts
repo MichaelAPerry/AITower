@@ -47,6 +47,12 @@ export const facilities: Record<string, FacilityDef> = Object.fromEntries(
 			bio: { contamination: 0.005 },
 		}),
 		fac({ id: "needy_depot", kind: "depot", category: "logistics", width: 1, cost: 1, facilityKw: 0, logistics: { capacity: 1 }, placement: { needsNutrient: true } }),
+		// ── Greentech / Synthetic (M4) ──
+		fac({ id: "solar_array", kind: "solar", category: "power", width: 4, cost: 200_000, facilityKw: 0, power: { capacityKw: 400, costPerKwh: 0 } }),
+		fac({ id: "wind_turbine", kind: "wind", category: "power", width: 2, cost: 250_000, facilityKw: 0, power: { capacityKw: 300, costPerKwh: 0 } }),
+		fac({ id: "heat_exchanger", kind: "heat_export", category: "cooling", width: 2, cost: 150_000, facilityKw: 0, green: { exportKw: 100, radius: 6 } }),
+		fac({ id: "carbon_facade", kind: "carbon", category: "bio", width: 2, cost: 100_000, facilityKw: 5, green: { creditsPerDay: 10 } }),
+		fac({ id: "rack_top", kind: "rack", category: "rack", width: 2, cost: 2_000_000, facilityKw: 0, unlockTier: 4, rack: { cooling: "air", powerKw: 40, liquidFraction: 0, pflops: 100, storageTB: 0, failurePerDay: 0 } }),
 		fac({ id: "tier2_thing", kind: "depot", category: "logistics", width: 1, cost: 1, facilityKw: 0, unlockTier: 2, logistics: { capacity: 1 } }),
 	].map((d) => [d.id, d]),
 );
@@ -81,6 +87,7 @@ export const tech: TechNode[] = [
 	node("t_bots", { name: "Gated Bots", cost: 15, branch: "logistics" }),
 	node("t_chain", { name: "Chained Node", cost: 5, requires: ["t_clerk"] }),
 	node("t_tier2", { name: "Clearance Node", cost: 5, minTier: 2 }),
+	node("t_foreman", { name: "Foreman", cost: 10, effects: [{ type: "feature", feature: "foreman" }] }),
 	perkNode("p_fail", "failureRate", 0.5),
 	perkNode("p_energy", "energyPrice", 0.5),
 	perkNode("p_payout", "payout", 2),

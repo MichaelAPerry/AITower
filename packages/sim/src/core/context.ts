@@ -11,6 +11,8 @@ export interface PowerBucket {
 	grids: Facility[];
 	/** Bioreactors: free power while their nutrient net feeds them. */
 	reactors: Facility[];
+	/** Solar and wind. */
+	greens: Facility[];
 	gensets: Facility[];
 	upses: Facility[];
 }

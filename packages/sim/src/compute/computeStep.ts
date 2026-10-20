@@ -6,6 +6,7 @@
 import type { TickCtx } from "../core/context";
 import { EPS, FINISHED_JOB_RETENTION_TICKS, TICKS_PER_HOUR, TRAINING_PROGRESS_PAY_SHARE } from "../core/constants";
 import { findById } from "../core/grid";
+import { minuteOfDay } from "../core/time";
 import type { Job, SimState } from "../core/state";
 import { earn, spend } from "../economy/ledger";
 import { recordJobOutcome } from "../economy/stats";
@@ -42,6 +43,17 @@ function earnJob(ctx: TickCtx, job: Job, amount: number): void {
 	const { state, content } = ctx;
 	earn(state, amount);
 	if (job.clerk && amount > 0) spend(state, "fees", amount * content.balance.clerk.feeShare);
+	// `earned` events: training checkpoints and the completion balance at once; inference streams are summed per game-hour.
+	if (amount > 0) {
+		if (job.spec.kind === "inference") job.unreported += amount;
+		else ctx.events.push({ type: "earned", jobId: job.id, amount });
+	}
+}
+
+/** Emit and clear a job's pending inference revenue. */
+export function flushEarned(events: TickCtx["events"], job: Job): void {
+	if (job.unreported > 0) events.push({ type: "earned", jobId: job.id, amount: job.unreported });
+	job.unreported = 0;
 }
 
 /** A job completed: bonus RP, lifetime and audit counters. */
@@ -88,6 +100,7 @@ export function computeStep(ctx: TickCtx): void {
 				spend(state, "penalties", content.balance.economy.slaPenaltyFactor * rate);
 			}
 			if (job.progress >= job.total) {
+				flushEarned(events, job);
 				jobCompleted(ctx, job);
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.earned });
 				continue;
@@ -125,6 +138,9 @@ export function computeStep(ctx: TickCtx): void {
 		}
 		job.status = !runnable.has(job.id) ? "stalled" : delivered > 0 ? "running" : job.rackIds.length > 0 ? "stalled" : "queued";
 	}
+
+	// Once per game-hour: inference revenue, summed per job.
+	if (minuteOfDay(state.tick) % TICKS_PER_HOUR === 0) for (const job of state.jobs) if (isActive(job)) flushEarned(events, job);
 
 	// Prune long-finished jobs.
 	state.jobs = state.jobs.filter((j) => isActive(j) || state.tick - j.finishedAt < FINISHED_JOB_RETENTION_TICKS);

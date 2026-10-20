@@ -4,8 +4,9 @@
  * Rack air heat is added, then CRAHs pull cells within their radius toward 20 °C (never below).
  */
 import type { TickCtx } from "../core/context";
-import { CRAH_TARGET_C, MAX_LINK_COUPLING, SECONDS_PER_TICK } from "../core/constants";
+import { CRAH_TARGET_C, HEAT_EXPORT_FLOOR_C, MAX_LINK_COUPLING, SECONDS_PER_TICK, TICKS_PER_HOUR } from "../core/constants";
 import { cellIdx, floorCount } from "../core/grid";
+import { earn } from "../economy/ledger";
 import { powerFactor } from "../power/powerSolve";
 import { getDef } from "../world/defs";
 import { perk } from "../research/research";
@@ -98,6 +99,35 @@ export function airFieldStep(ctx: TickCtx): void {
 		}
 		f.heatKw = wantKw * scale;
 	}
+
+	// District-heat exporters (after the CRAHs): remove up to `green.exportKw` (× power satisfaction) from the warm cells in
+	// reach, never below HEAT_EXPORT_FLOOR_C, and sell the heat at `green.heatPrice` per kWh.
+	let exportedKw = 0;
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (d.kind !== "heat_export") continue;
+		f.heatKw = 0;
+		const capKw = (d.green?.exportKw ?? 0) * powerFactor(f.sat);
+		if (!f.enabled || capKw <= 0) continue;
+		const r = d.green?.radius ?? 0;
+		const x0 = Math.max(0, f.x - r);
+		const x1 = Math.min(w - 1, f.x + f.width - 1 + r);
+		let wantKw = 0;
+		for (let x = x0; x <= x1; x++) {
+			const i = cellIdx(state, x, f.floor);
+			if (slab[i] && next[i] > HEAT_EXPORT_FLOOR_C) wantKw += (next[i] - HEAT_EXPORT_FLOOR_C) / perKj;
+		}
+		if (wantKw <= 0) continue;
+		const scale = Math.min(1, capKw / wantKw);
+		for (let x = x0; x <= x1; x++) {
+			const i = cellIdx(state, x, f.floor);
+			if (slab[i] && next[i] > HEAT_EXPORT_FLOOR_C) next[i] -= (next[i] - HEAT_EXPORT_FLOOR_C) * scale;
+		}
+		f.heatKw = wantKw * scale;
+		exportedKw += f.heatKw;
+		earn(state, (f.heatKw / TICKS_PER_HOUR) * content.balance.green.heatPrice);
+	}
+	state.metrics.heatExportKw = exportedKw;
 
 	for (let i = 0; i < n; i++) state.airTemp[i] = next[i];
 }

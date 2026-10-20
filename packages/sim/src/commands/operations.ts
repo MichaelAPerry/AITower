@@ -5,6 +5,7 @@ import { spend } from "../economy/ledger";
 import { getDef } from "../world/defs";
 import { addBot, chargerSpot, findChargerWithSpace } from "../world/entities";
 import { acceptCheck, releaseJobRacks } from "../compute/allocation";
+import { flushEarned } from "../compute/computeStep";
 import { recordJobOutcome } from "../economy/stats";
 import { techGate } from "../research/research";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
@@ -44,6 +45,7 @@ export function planAcceptContract(ctx: PlanCtx, contractId: number, byClerk = f
 			earned: 0,
 			clerk: byClerk,
 			finishedAt: -1,
+			unreported: 0,
 		};
 		s.jobs.push(job);
 		events.push({ type: "jobStarted", jobId: job.id });
@@ -66,6 +68,7 @@ export function planCancelJob(ctx: PlanCtx, jobId: number): Plan {
 	return accept(0, (events) => {
 		const penalty = job.spec.kind === "inference" ? 0 : job.spec.penalty;
 		spend(s, "penalties", penalty);
+		flushEarned(events, job);
 		releaseJobRacks(s, job);
 		job.status = "failed";
 		job.finishedAt = s.tick;

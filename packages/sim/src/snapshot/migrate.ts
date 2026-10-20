@@ -13,10 +13,13 @@
  *    `taxes` / `interest` / `fees` ledger fields on every stored day.
  *  - v4 → v5 (M3-T1): nutrient layer, contamination field, growths, mutations (`bot.trait`), corruption, ascension `path`,
  *    `endingDays`, the `growth` RNG stream, `gameOver.ending`.
+ *  - v5 → v6 (M4-T1): automation policy, weather (`wind`, `droughtUntil`, the `weather` RNG stream), `greenScore`, `refinement`,
+ *    `sandbox`, the greentech / synthetic `endingDays`, the green-energy and exported-heat rings, `job.unreported`.
  */
+import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 5;
+export const SNAPSHOT_VERSION = 6;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -144,8 +147,32 @@ function migrateV4(state: RawState): RawState {
 	return state;
 }
 
+/** Defaults for a pre-M4 save: every automation off, calm weather, no scores, the new rings empty. */
+function migrateV5(state: RawState): RawState {
+	if (!isObj(state.automation)) state.automation = defaultAutomation();
+	if (typeof state.wind !== "number") state.wind = 0.6;
+	if (typeof state.droughtUntil !== "number") state.droughtUntil = 0;
+	if (typeof state.greenScore !== "number") state.greenScore = 0;
+	if (typeof state.refinement !== "number") state.refinement = 0;
+	if (typeof state.sandbox !== "boolean") state.sandbox = false;
+	if (isObj(state.endingDays)) {
+		if (typeof state.endingDays.greenExemplar !== "number") state.endingDays.greenExemplar = 0;
+		if (typeof state.endingDays.millionMinds !== "number") state.endingDays.millionMinds = 0;
+	}
+	if (isObj(state.rng) && typeof state.rng.weather !== "number") state.rng.weather = mixSeed(typeof state.seed === "number" ? state.seed : 0, 5);
+	if (isObj(state.metrics)) {
+		const m = state.metrics;
+		if (!(m.ringGreenKwh instanceof Float64Array)) m.ringGreenKwh = new Float64Array(1440);
+		if (!(m.ringHeatKwh instanceof Float64Array)) m.ringHeatKwh = new Float64Array(1440);
+		if (typeof m.greenKw !== "number") m.greenKw = 0;
+		if (typeof m.heatExportKw !== "number") m.heatExportKw = 0;
+	}
+	if (Array.isArray(state.jobs)) for (const j of state.jobs) if (isObj(j) && typeof j.unreported !== "number") j.unreported = 0;
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

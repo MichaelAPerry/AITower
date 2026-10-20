@@ -13,6 +13,18 @@ import { dailyStanding } from "../ministry/standing";
 import { closeAuditDay } from "../economy/audit";
 import { midnightCredit } from "../economy/credit";
 import { earn } from "../economy/ledger";
+import { MIN_POWERED_SATISFACTION } from "../core/constants";
+import { getDef } from "../world/defs";
+
+/** Midnight: every enabled, powered carbon facility earns `creditsPerDay` × `creditPrice`. */
+function carbonCredits(ctx: TickCtx): void {
+	const { state, content } = ctx;
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (d.kind !== "carbon" || !f.enabled || f.sat < MIN_POWERED_SATISFACTION) continue;
+		earn(state, (d.green?.creditsPerDay ?? 0) * content.balance.green.creditPrice);
+	}
+}
 
 export function progressionStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
@@ -29,6 +41,7 @@ export function progressionStep(ctx: TickCtx): void {
 		earn(state, reward);
 		events.push({ type: "tierUp", tier: n, reward });
 	}
+	carbonCredits(ctx); // carbon credits are revenue of the day, so the levy and the audit see them
 	endingsStep(ctx); // reaching the top tier is no longer a win: the path endings decide
 	midnightCredit(ctx); // interest, then the levy on everything the day earned (tier reward included)
 	closeAuditDay(ctx, before); // record the closed day; file the quarterly audit when one is due

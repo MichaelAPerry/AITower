@@ -18,6 +18,8 @@ export function needsPower(d: FacilityDef): boolean {
 		case "genset":
 		case "ups":
 		case "chiller":
+		case "solar":
+		case "wind":
 			return true;
 		case "charger":
 			return (d.logistics?.chargeKw ?? 0) > 0;

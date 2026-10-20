@@ -5,6 +5,7 @@ import { planSetClerk } from "../economy/clerk";
 import { planRepayLoan, planTakeLoan } from "../economy/credit";
 import { spend } from "../economy/ledger";
 import { planChoosePath } from "../bio/path";
+import { planSetAutomation } from "../automation/policy";
 import { planResearch } from "../research/research";
 import { planDemolish } from "./demolish";
 import {
@@ -92,6 +93,9 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "choosePath":
 			plan = planChoosePath(ctx, cmd.path);
+			break;
+		case "setAutomation":
+			plan = planSetAutomation(ctx, cmd.policy);
 			break;
 		default:
 			return reject("unknown command type");

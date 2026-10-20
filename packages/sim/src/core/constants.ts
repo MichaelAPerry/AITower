@@ -108,3 +108,25 @@ export const CORRUPTION_FALL_PER_DAY = 0.02;
 export const INCUBATOR_LIFT_C = 25;
 /** …or cooling up to this many °C below it. Beyond that range the tissue drifts with the air. */
 export const INCUBATOR_COOL_C = 6;
+
+// ── Greentech / Synthetic / automation (M4) ──
+/** Daylight runs from 06:00 to 20:00 as a sine peaking at 13:00. */
+export const DAYLIGHT_START_MINUTE = 6 * 60;
+export const DAYLIGHT_END_MINUTE = 20 * 60;
+/** Wind strength is drawn hourly in this range. */
+export const WIND_MIN = 0.2;
+export const WIND_MAX = 1;
+/** greenScore = GREEN_W_ENERGY × green share of energy + GREEN_W_HEAT × min(1, exported heat ÷ IT energy). */
+export const GREEN_W_ENERGY = 0.7;
+export const GREEN_W_HEAT = 0.3;
+/** The greenScore moves toward its 24 h target by this share per tick (about a one-hour time constant). */
+export const GREEN_SMOOTHING = 1 / 60;
+/** Racks from this clearance count as top-tier for the Synthetic refinement score. */
+export const TOP_TIER_RACK = 4;
+/** Heat exporters pull air down to this temperature, never below. */
+export const HEAT_EXPORT_FLOOR_C = 20;
+/** The Foreman builds racks when less than this share of installed compute is idle. */
+export const FOREMAN_IDLE_SHARE = 0.2;
+/** Automation caps on policy numbers. */
+export const AUTOMATION_MAX_PARTS_KEEP = 1000;
+export const AUTOMATION_MAX_BOTS = 1000;
