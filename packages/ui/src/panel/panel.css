@@ -1,0 +1,414 @@
+/* Shared panel shell (list + Inspector + one primary button), Contracts and Insights. Borrows the Build catalog's look. */
+
+/* Shell panels are wider so the list and the Inspector sit side by side. The variable also moves things that dodge the drawer. */
+.aitower-hud.has-wide {
+	--drawer-w: min(640px, calc(100vw - var(--dtab-w) - var(--gap) * 4));
+}
+.aitower-hud .ui-edge.is-wide {
+	gap: 10px;
+}
+.aitower-hud .pnl-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 8px;
+	padding-right: calc(var(--gap) * 4);
+}
+.aitower-hud .pnl-title {
+	margin: 4px 0 0;
+	font: 600 22px/1.1 var(--f-display);
+	letter-spacing: 0.03em;
+	color: var(--text);
+}
+.aitower-hud .pnl-note {
+	font: 12px/1.3 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .pnl-tabs {
+	display: flex;
+	gap: 6px;
+	flex-wrap: wrap;
+}
+.aitower-hud .pnl-tab {
+	font: 600 13px/1 var(--f-body);
+	color: var(--text);
+	background: none;
+	border: 1px solid var(--panel-edge);
+	border-radius: 99px;
+	padding: 7px 14px;
+	cursor: pointer;
+}
+.aitower-hud .pnl-tab.is-on {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: var(--bg);
+}
+
+/* List | Inspector */
+.aitower-hud .pnl-split {
+	display: grid;
+	grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+	gap: 12px;
+	align-items: start;
+	min-height: 0;
+}
+.aitower-hud .pnl-list {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+}
+.aitower-hud .pnl-insp {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	padding: 14px;
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	background: color-mix(in srgb, var(--panel) 96%, #000);
+	position: sticky;
+	top: 0;
+	min-width: 0;
+}
+.aitower-hud .pnl-lh {
+	display: flex;
+	justify-content: space-between;
+	margin: 6px 0 0;
+	font: 600 11px/1 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.aitower-hud .pnl-count {
+	color: var(--text-dim);
+}
+.aitower-hud .pnl-empty {
+	margin: 0;
+	padding: 10px;
+	font: 14px/1.4 var(--f-body);
+	color: var(--text-dim);
+	border: 1px dashed var(--panel-edge);
+	border-radius: var(--radius-sm);
+}
+
+/* Cards */
+.aitower-hud .pnl-card {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 5px;
+	text-align: left;
+	padding: 10px 12px;
+	font: 14px/1.25 var(--f-body);
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	cursor: pointer;
+}
+.aitower-hud .pnl-card:hover {
+	border-color: var(--accent);
+}
+.aitower-hud .pnl-card.is-sel {
+	border-color: var(--accent);
+	box-shadow: inset 0 0 0 1px var(--accent);
+	background: color-mix(in srgb, var(--accent) 10%, var(--panel));
+}
+.aitower-hud .pnl-card.is-blocked:not(.is-sel) {
+	opacity: 0.8;
+}
+.aitower-hud .pnl-card-top {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	gap: 8px;
+}
+.aitower-hud .pnl-card-name {
+	font-weight: 600;
+	min-width: 0;
+}
+.aitower-hud .pnl-card-pay {
+	font: 600 14px/1 var(--f-num);
+	color: var(--money);
+	white-space: nowrap;
+}
+.aitower-hud .pnl-card-sub {
+	font-size: 12px;
+	color: var(--text-dim);
+}
+.aitower-hud .pnl-fit {
+	font: 600 12px/1.2 var(--f-body);
+}
+.aitower-hud .pnl-fit.is-ok {
+	color: var(--good);
+}
+.aitower-hud .pnl-fit.is-no {
+	color: var(--warn);
+}
+.aitower-hud .pnl-chip {
+	font: 600 11px/1 var(--f-body);
+	padding: 3px 8px;
+	border-radius: 99px;
+	white-space: nowrap;
+	background: var(--wall);
+}
+.aitower-hud .pnl-chip.tone-good {
+	color: var(--good);
+}
+.aitower-hud .pnl-chip.tone-warn {
+	color: var(--warn);
+}
+.aitower-hud .pnl-chip.tone-bad {
+	color: var(--bad);
+}
+
+/* Inspector bits */
+.aitower-hud .pnl-insp .bld-stats {
+	margin-top: 2px;
+}
+.aitower-hud .pnl-insp .bld-stat-label {
+	font-weight: 600;
+}
+.aitower-hud .pnl-small {
+	margin: 0;
+	font: 12px/1.35 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .pnl-status {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 8px 10px;
+	border-radius: var(--radius-sm);
+	font: 13px/1.35 var(--f-body);
+	background: var(--wall);
+}
+.aitower-hud .pnl-status b {
+	font-size: 15px;
+}
+.aitower-hud .pnl-status.tone-good b {
+	color: var(--good);
+}
+.aitower-hud .pnl-status.tone-warn b {
+	color: var(--warn);
+}
+.aitower-hud .pnl-status.tone-bad b {
+	color: var(--bad);
+}
+.aitower-hud .pnl-prog {
+	display: grid;
+	gap: 4px;
+	font: 12px/1 var(--f-num);
+	color: var(--text-dim);
+}
+.aitower-hud .pnl-act {
+	display: grid;
+	gap: 6px;
+	margin-top: 4px;
+}
+.aitower-hud .pnl-primary {
+	width: 100%;
+	font: 700 15px/1.2 var(--f-body);
+	padding: 12px 14px;
+	border-radius: var(--radius);
+	background: var(--good);
+	border-color: var(--good);
+	color: var(--bg);
+	cursor: pointer;
+}
+.aitower-hud .pnl-primary:disabled {
+	background: var(--wall);
+	border-color: var(--panel-edge);
+	color: var(--text-dim);
+	cursor: not-allowed;
+}
+.aitower-hud .pnl-primary:not(:disabled):hover {
+	filter: brightness(1.1);
+}
+.aitower-hud .pnl-secondary {
+	width: 100%;
+	padding: 9px 12px;
+	font: 600 13px/1.2 var(--f-body);
+}
+.aitower-hud .pnl-why {
+	margin: 0;
+	font: 12px/1.35 var(--f-body);
+	color: var(--warn);
+}
+.aitower-hud .pnl-link {
+	align-self: center;
+	background: none;
+	border: 0;
+	color: var(--text-dim);
+	font: 12px/1 var(--f-body);
+	text-decoration: underline;
+	cursor: pointer;
+	padding: 4px;
+}
+.aitower-hud .pnl-link:hover {
+	color: var(--text);
+}
+
+/* Narrow screens: the Inspector goes above the list */
+@media (max-width: 1100px) {
+	.aitower-hud .pnl-split {
+		grid-template-columns: minmax(0, 1fr);
+	}
+	.aitower-hud .pnl-insp {
+		order: -1;
+		position: static;
+	}
+}
+
+/* Insights */
+.aitower-hud .ins {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.aitower-hud .ins-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 12px 14px;
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+}
+.aitower-hud .ins-h {
+	margin: 0;
+	font: 600 11px/1 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.aitower-hud .ins-h2 {
+	margin: 10px 0 4px;
+	font: 600 12px/1 var(--f-display);
+	color: var(--accent);
+}
+.aitower-hud .ins-big {
+	margin: 0;
+	font: 600 19px/1.2 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .ins-big.tone-good {
+	color: var(--good);
+}
+.aitower-hud .ins-big.tone-warn {
+	color: var(--warn);
+}
+.aitower-hud .ins-big.tone-bad {
+	color: var(--bad);
+}
+.aitower-hud .ins-of {
+	font: 400 13px/1 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ins-p {
+	margin: 0;
+	font: 13px/1.4 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ins-p.tone-good {
+	color: var(--good);
+}
+.aitower-hud .ins-p.tone-warn {
+	color: var(--warn);
+}
+.aitower-hud .ins-two {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+.aitower-hud .ins-two > div {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	padding: 8px 10px;
+	background: var(--wall);
+	border-radius: var(--radius-sm);
+}
+.aitower-hud .ins-k {
+	font: 12px/1 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ins-v {
+	font: 600 18px/1.1 var(--f-num);
+}
+.aitower-hud .ins-v.is-money {
+	color: var(--money);
+}
+.aitower-hud .ins-fold > summary {
+	cursor: pointer;
+	font: 600 13px/1.2 var(--f-body);
+	color: var(--accent);
+	padding: 4px 0;
+}
+.aitower-hud .ins-details {
+	padding: 10px 14px;
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+}
+.aitower-hud .ins-why {
+	list-style: none;
+	margin: 6px 0 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+}
+.aitower-hud .ins-why li {
+	display: grid;
+	grid-template-columns: 44px minmax(0, 1fr);
+	gap: 8px;
+	padding: 7px 0;
+	border-top: 1px solid var(--panel-edge);
+	font: 13px/1.35 var(--f-body);
+}
+.aitower-hud .ins-why b {
+	font: 600 14px/1.3 var(--f-num);
+}
+.aitower-hud .is-down {
+	color: var(--bad);
+}
+.aitower-hud .is-up {
+	color: var(--good);
+}
+.aitower-hud .ins-why-t {
+	display: flex;
+	flex-direction: column;
+}
+.aitower-hud .ins-when {
+	font-size: 11px;
+	color: var(--text-dim);
+}
+.aitower-hud .ins-dl {
+	margin: 6px 0 0;
+}
+.aitower-hud .ins-dl dt {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 10px;
+	font: 600 13px/1.2 var(--f-body);
+}
+.aitower-hud .ins-dl dt b {
+	font-family: var(--f-num);
+}
+.aitower-hud .ins-dl dd {
+	margin: 2px 0 0;
+	font: 12px/1.4 var(--f-body);
+	color: var(--text-dim);
+}
+
+/* The one primary button stays in view while the Inspector scrolls. */
+.aitower-hud .pnl-insp .pnl-act:last-child,
+.aitower-hud .pnl-insp .pnl-act {
+	position: sticky;
+	bottom: -14px;
+	padding: 8px 0 2px;
+	background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--panel) 96%, #000) 30%);
+}
+/* The PER HOUR hint is a first-minutes helper; it would sit on top of a wide panel. */
+.aitower-hud.has-wide .ui-perhour .ui-hint {
+	display: none;
+}

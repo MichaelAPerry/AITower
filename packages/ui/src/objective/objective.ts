@@ -118,7 +118,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			tone: "action",
 			title: active.length === 0 ? "Accept a contract" : "Accept another contract",
 			key: "C",
-			detail: `Contracts drawer (C): press ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
+			detail: `Contracts (C): pick an offer marked “Fits your idle racks” and press Take job, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
 		};
 	}
 	if (active.length === 0) {
@@ -138,7 +138,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			tone: "action",
 			title: "Switch on Contract Automation",
 			key: "C",
-			detail: "Contracts drawer (C): turn Contract Automation ON and it accepts matching offers for you (it takes a fee from each job).",
+			detail: "Contracts (C): turn Contract Automation ON and it accepts matching offers for you (it takes a fee from each job).",
 		};
 	}
 	const tech = cheapestAvailable(view, content);

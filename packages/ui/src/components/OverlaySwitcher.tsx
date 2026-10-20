@@ -107,6 +107,9 @@ function Legend({ mode, colorBlind, horror }: { mode: OverlayMode; colorBlind: b
 	return null;
 }
 
+/** Nutrient and Growth only matter once there is wetware: keep them off a first-timer's chips until then (their keys still work). */
+const showMode = (id: OverlayMode, state: PanelProps["state"]): boolean => (id !== "nutrient" && id !== "contamination") || state.overlay === id || state.view.nutrientNets.length > 0;
+
 export function OverlaySwitcher({ store, state, embedded = false }: PanelProps & { embedded?: boolean }) {
 	const [collapsed, setCollapsed] = useState(readCollapsed);
 	const toggle = (): void => {
@@ -137,7 +140,7 @@ export function OverlaySwitcher({ store, state, embedded = false }: PanelProps &
 			)}
 			{(embedded || !collapsed) && (
 				<div className="ui-seg" role="radiogroup" aria-label="Overlay">
-					{MODES.map((m) => (
+					{MODES.filter((m) => showMode(m.id, state)).map((m) => (
 						// biome-ignore lint/a11y/useSemanticElements: styled button group acts as a radio group; native radio inputs would change the markup and CSS
 						<button
 							key={m.id}

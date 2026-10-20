@@ -3,7 +3,7 @@ import type { QuarterReport, SimCommand } from "@aitower/sim";
 import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { ClerkPanel } from "./clerk/ClerkPanel";
-import { ContractsDrawer } from "./calm/Panels";
+import { ContractsDrawer } from "./contracts/ContractsPanel";
 import { BuildPalette } from "./components/BuildPalette";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { click, findAll, findButton, panelProps, textOf } from "./dev/walk";

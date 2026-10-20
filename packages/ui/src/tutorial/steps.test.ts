@@ -50,10 +50,10 @@ describe("coach-mark steps", () => {
 		expect(TUTORIAL_STEPS.filter((s) => s.clock === "pause").map((s) => s.id)).toEqual(["build"]);
 	});
 
-	it("accept points at the tab, then the ACCEPT stamp, and counts only new jobs", () => {
+	it("accept points at the tab, then Take job, and counts only new jobs", () => {
 		const s = step("accept");
 		expect(s.targets(state({ offers: 1 }), ui())).toEqual(['[data-tut="dtab-contracts"]']);
-		expect(s.targets(state({ offers: 1 }), ui({ drawer: "contracts" }))).toEqual(['[data-tut="accept"]']);
+		expect(s.targets(state({ offers: 1 }), ui({ drawer: "contracts" }))).toEqual(['[data-tut="take"]']);
 		const b = baselineOf(state({ jobs: [0, 1] }), ctx);
 		expect(s.done?.(state({ jobs: [0, 1] }), b, ctx)).toBe(false);
 		expect(s.done?.(state({ jobs: [0, 1, 2] }), b, ctx)).toBe(true);

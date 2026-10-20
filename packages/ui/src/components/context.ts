@@ -16,6 +16,10 @@ export interface UiState {
 	clerkEdit?: boolean;
 	/** Memo whose prose is expanded on the slip ("read memo"). */
 	readMemo?: number | null;
+	/** The card picked in the Contracts panel (the Inspector shows it). Null/absent = the best offer that fits. */
+	contractSel?: { kind: "offer" | "job"; id: number } | null;
+	/** Section of the Insights panel. */
+	insightsTab?: "overview" | "money";
 	/** Job highlighted in the Contracts drawer (set by the inspector's job link). */
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */

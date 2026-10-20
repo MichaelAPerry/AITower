@@ -8,7 +8,7 @@ import { Inspector } from "./components/Inspector";
 import { Toasts } from "./components/Toasts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
-import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker } from "./calm/Parts";
+import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker, WIDE } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
 import { nextDrawer } from "./calm/calm";
 import { AscensionSheet } from "./ascension/AscensionSheet";
@@ -45,6 +45,7 @@ import "./bio/bio.css";
 import "./calm/calm.css";
 import "./calm/theme.css";
 import "./build/build.css";
+import "./panel/panel.css";
 import "./help/help.css";
 
 export interface HudProps {
@@ -184,7 +185,7 @@ export function Hud({ store, content, title }: HudProps) {
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<TopStrip {...props} />
