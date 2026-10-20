@@ -37,7 +37,7 @@ export function ContractsDrawer(props: PanelProps) {
 			{clerk && (
 				<div className="ui-clerkline">
 					<span>
-						CLERK {clerk.policy.enabled ? "ON" : "OFF"} · {clerk.acceptedTotal} booked
+						CONTRACT AUTOMATION {clerk.policy.enabled ? "ON" : "OFF"} · {clerk.acceptedTotal} booked
 					</span>
 					<button type="button" className="ui-btn ui-mini" aria-expanded={!!ui.clerkEdit} onClick={() => setUi({ clerkEdit: !ui.clerkEdit })}>
 						{ui.clerkEdit ? "Done" : "Edit"}

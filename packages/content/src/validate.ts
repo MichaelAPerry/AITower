@@ -440,6 +440,10 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 			if (c === 0) p.push(`${w}.count: must not be 0`);
 			break;
 		}
+		case "affinity":
+			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path "${(e as { path: unknown }).path}"`);
+			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: 0 });
+			break;
 		default:
 			p.push(`${w}.type: unknown effect type ${JSON.stringify(t)}`);
 	}

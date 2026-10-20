@@ -108,7 +108,7 @@ async function run(url) {
 		const start = await game(() => ({ day: window.aitower.store.get().view.day, tick: window.aitower.store.get().view.tick }));
 		log(`HUD up, day ${start.day}`);
 
-		stage("2. follow the induction: read the welcome, accept the highlighted contract, watch it start");
+		stage("2. follow the tutorial: read the welcome, accept the highlighted contract, watch it start");
 		const memo = async () => (await page.locator(".ui-tutorial .tut-count").textContent())?.replace(/\s+/g, "") ?? "";
 		const at = (n) => page.waitForFunction((k) => document.querySelector(".ui-tutorial .tut-count")?.textContent?.replace(/\s+/g, "").startsWith(`${k}/`), n, { timeout: 60_000 });
 		await page.locator(".ui-tutorial").waitFor();
@@ -116,16 +116,16 @@ async function run(url) {
 		assert((await game(() => window.aitower.store.get().speed)) === 0, "the clock must be stopped while reading the welcome memo");
 		await page.getByRole("button", { name: "Continue" }).click();
 		await at(2);
-		// The induction runs the clock until an offer is posted, then stops it and highlights the ACCEPT stamp.
+		// The tutorial runs the clock until an offer is posted, then stops it and highlights the ACCEPT button.
 		await page.locator('[data-tut="dtab-contracts"]').click();
-		const stamp = page.locator('[data-tut="accept"]');
-		await stamp.waitFor({ timeout: 60_000 });
-		assert(await stamp.isEnabled(), "the highlighted offer must fit the idle racks");
-		await stamp.click({ force: true }); // hover tilts the stamp, which Playwright reads as "unstable"
+		const acceptBtn = page.locator('[data-tut="accept"]');
+		await acceptBtn.waitFor({ timeout: 60_000 });
+		assert(await acceptBtn.isEnabled(), "the highlighted offer must fit the idle racks");
+		await acceptBtn.click({ force: true }); // hover tilts the button, which Playwright reads as "unstable"
 		await at(4); // step 3 (compute) ticks itself off once the racks start; step 4 is the NEXT-chip memo
-		await page.getByRole("button", { name: "Skip induction" }).click();
+		await page.getByRole("button", { name: "Skip tutorial" }).click();
 		await page.locator(".ui-tutorial").waitFor({ state: "detached" });
-		log("welcome read, contract accepted through the induction, induction skipped at step 4");
+		log("welcome read, contract accepted through the tutorial, tutorial skipped at step 4");
 
 		stage("3. the accepted contract is running and the NEXT chip is shown");
 		const running = await game(() => ({ jobs: window.aitower.store.get().view.jobs.length, pflops: window.aitower.store.get().view.pflops }));
@@ -154,7 +154,7 @@ async function run(url) {
 		stage("5. open the Esc menu");
 		await game(() => window.aitower.store.setSelection(null));
 		if ((await page.locator("[data-drawer]").count()) > 0) {
-			await page.keyboard.press("Escape"); // the Contracts drawer from the induction is still open; Esc closes it first
+			await page.keyboard.press("Escape"); // the Contracts drawer from the tutorial is still open; Esc closes it first
 			await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		}
 		await page.keyboard.press("Escape");

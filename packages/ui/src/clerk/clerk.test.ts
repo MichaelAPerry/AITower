@@ -55,8 +55,8 @@ describe("clerk copy and edits", () => {
 	});
 	it("locked slip names the node and its cost, with a fallback when content has no node", () => {
 		const c = { tech: [{ id: "t", name: "Form 9 Delegation", cost: 40, effects: [{ type: "feature", feature: "contractsClerk" }] }] } as unknown as ContentDB;
-		expect(clerkLockedText(c)).toBe("Hire a Contracts Clerk: research Form 9 Delegation (40 RP)");
-		expect(clerkLockedText({ tech: [] } as unknown as ContentDB)).toMatch(/^Hire a Contracts Clerk: research/);
+		expect(clerkLockedText(c)).toBe("Hire a Contract Automation: research Form 9 Delegation (40 RP)");
+		expect(clerkLockedText({ tech: [] } as unknown as ContentDB)).toMatch(/^Hire a Contract Automation: research/);
 	});
 	it("toggleKind never empties the list and keeps canonical order", () => {
 		expect(toggleKind(["training", "finetune"], "finetune")).toEqual(["training"]);

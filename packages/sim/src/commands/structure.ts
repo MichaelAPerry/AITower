@@ -2,7 +2,8 @@
 import type { CellRef, ConduitLayer } from "../api";
 import { cellIdx, inBounds } from "../core/grid";
 import { techGate } from "../research/research";
-import { addLift } from "../world/entities";
+import type { Lift } from "../core/state";
+import { addLift, extendLift } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
 
 export const slabCost = (ctx: PlanCtx, floor: number): number =>
@@ -90,8 +91,11 @@ export function planConduit(ctx: PlanCtx, layer: ConduitLayer, cells: CellRef[])
 
 export function planLift(ctx: PlanCtx, x: number, floorMin: number, floorMax: number): Plan {
 	const s = ctx.state;
-	if (!inBounds(s, x, floorMin) || !inBounds(s, x, floorMax) || floorMax <= floorMin)
-		return reject("lift must span at least two floors inside the lot");
+	if (!inBounds(s, x, floorMin) || !inBounds(s, x, floorMax) || floorMax < floorMin) return reject("lift must stay inside the lot");
+	// A drag that overlaps or touches an existing lift in this column extends that lift (only the new floors are paid for).
+	const host = s.lifts.find((l) => l.x === x && l.floorMin <= floorMax + 1 && l.floorMax >= floorMin - 1);
+	if (host) return planLiftExtend(ctx, host, Math.min(host.floorMin, floorMin), Math.max(host.floorMax, floorMax));
+	if (floorMax === floorMin) return reject("lift must span at least two floors inside the lot");
 	for (let fl = floorMin; fl <= floorMax; fl++) {
 		const i = cellIdx(s, x, fl);
 		if (!s.slab[i]) return reject(`no slab at floor ${fl}`);
@@ -101,5 +105,22 @@ export function planLift(ctx: PlanCtx, x: number, floorMin: number, floorMax: nu
 	return accept(liftCost(ctx, floorMax - floorMin + 1), (events) => {
 		addLift(s, x, floorMin, floorMax);
 		events.push({ type: "built", what: "lift", floor: floorMin, x });
+	});
+}
+
+function planLiftExtend(ctx: PlanCtx, lift: Lift, floorMin: number, floorMax: number): Plan {
+	const s = ctx.state;
+	if (floorMin === lift.floorMin && floorMax === lift.floorMax) return reject("already built");
+	for (let fl = floorMin; fl <= floorMax; fl++) {
+		if (fl >= lift.floorMin && fl <= lift.floorMax) continue;
+		const i = cellIdx(s, lift.x, fl);
+		if (!s.slab[i]) return reject(`no slab at floor ${fl}`);
+		if (s.facilityAt[i] >= 0) return reject(`facility in the way at floor ${fl}`);
+		if (s.liftAt[i] >= 0) return reject(`another lift at floor ${fl}`);
+	}
+	const added = floorMax - floorMin - (lift.floorMax - lift.floorMin);
+	return accept(ctx.content.structure.liftPerFloor * added, (events) => {
+		extendLift(s, lift, floorMin, floorMax);
+		events.push({ type: "built", what: "lift", floor: floorMin, x: lift.x });
 	});
 }

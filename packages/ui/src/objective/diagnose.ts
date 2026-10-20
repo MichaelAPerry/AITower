@@ -7,6 +7,32 @@ import type { FacilityView, SimView } from "@aitower/sim";
 import { bandText, organoidBand } from "../bio/bio";
 import { fmtPower, fmtTemp } from "../format";
 
+/**
+ * Floors with facilities that bots cannot get to: the floors of the bots and chargers, widened through any chain of lifts
+ * (mirrors the sim's reachableFloors, from the view). Empty when a flying bot exists or nothing anchors the reach.
+ */
+export function unreachedFloors(view: SimView, content: ContentDB): number[] {
+	if ((view.bots ?? []).some((b) => content.bots?.[b.defId]?.flying)) return [];
+	const bots = view.bots ?? [];
+	const reach = new Set<number>(bots.map((b) => Math.round(b.floor)));
+	for (const f of view.facilities) if (kindOf(content, f) === "charger") reach.add(f.floor);
+	if (reach.size === 0) return [];
+	for (let grew = true; grew; ) {
+		grew = false;
+		for (const l of view.lifts ?? []) {
+			let serves = false;
+			for (let f = l.floorMin; f <= l.floorMax && !serves; f++) serves = reach.has(f);
+			if (!serves) continue;
+			for (let f = l.floorMin; f <= l.floorMax; f++)
+				if (!reach.has(f)) {
+					reach.add(f);
+					grew = true;
+				}
+		}
+	}
+	return [...new Set(view.facilities.filter((f) => !reach.has(f.floor)).map((f) => f.floor))].sort((a, b) => a - b);
+}
+
 const kindOf = (content: ContentDB, f: FacilityView): string | undefined => content.facilities[f.defId]?.kind;
 
 /** What is wrong with the coolant loop `net` (null = no pipe at all), or null if it has working chillers and CDUs. */
@@ -19,7 +45,7 @@ export function coolantLoopProblem(view: SimView, content: ContentDB, net: numbe
 	const pipe = "A liquid loop needs a chiller and a CDU on the same coolant pipe (a vertical pipe run joins floors).";
 	if (chillers.length === 0 && cdus.length === 0) return `Its coolant pipe reaches no chiller or CDU. ${pipe}`;
 	if (chillers.length === 0) return `Its coolant loop has a CDU but no chiller. ${pipe}`;
-	if (cdus.length === 0) return `Its coolant loop has a chiller but no CDU (Coolant Distribution Manifold). ${pipe}`;
+	if (cdus.length === 0) return `Its coolant loop has a chiller but no CDU (Coolant Distribution Unit). ${pipe}`;
 	if (!chillers.some(working)) return "The chiller on its loop is off or has no power: lay a power conduit under it.";
 	if (!cdus.some(working)) return "The CDU on its loop is off or has no power: lay a power conduit under it.";
 	return null;
@@ -45,11 +71,11 @@ export function rackProblem(view: SimView, content: ContentDB, f: FacilityView):
 	if (!def?.rack) return null;
 	switch (f.status) {
 		case "disabled":
-			return "Switched off. Flip MAINS in its dossier to turn it on.";
+			return "Switched off. Flip MAINS in its details to turn it on.";
 		case "failed":
 			return view.spareParts > 0
-				? "Broken. A maintenance automaton is bringing a spare part to repair it."
-				: "Broken, and the parts cage is empty. Buy spare parts so an automaton can repair it.";
+				? "Broken. A maintenance bot is bringing a spare part to repair it."
+				: "Broken, and the spare-parts stock is empty. Buy spare parts so a bot can repair it.";
 		case "tripped":
 			return def.rack.liquidFraction > 0
 				? "Overheated and tripped; it restarts once it cools. Give its coolant loop more capacity (another chiller or CDU), and an air handler for the rest of its heat."

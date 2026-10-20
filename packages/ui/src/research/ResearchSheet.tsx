@@ -56,10 +56,10 @@ export function TechCard({ node, view, content, store }: { node: TechNode; view:
 			<footer className="ui-tech-foot">
 				{st.kind === "researched" && (
 					<Stamp tone="green" className="ui-tech-filed">
-						Filed
+						Researched
 					</Stamp>
 				)}
-				{st.kind === "available" && <StampBtn tone="green" rest="Research" hot="Filed" onClick={file} title={`File a research request: spend ${node.cost} RP on ${node.name}`} />}
+				{st.kind === "available" && <StampBtn tone="green" rest="Research" hot="Started" onClick={file} title={`Start research: spend ${node.cost} RP on ${node.name}`} />}
 				{st.kind === "poor" && (
 					<span className="ui-tech-state is-poor" title={`${node.name} costs ${node.cost} RP; you are ${st.short} short`}>
 						Need {st.short} more RP
@@ -111,7 +111,7 @@ export function ResearchSheet({ store, content, view, onClose }: { store: GameSt
 			<section className="ui-research" role="dialog" aria-modal="true" aria-labelledby="research-title">
 				<header className="ui-research-head">
 					<div className="ui-research-titles">
-						<span className="ui-research-form">FORM RD-1 · REQUEST FOR RESEARCH</span>
+						<span className="ui-research-form">RESEARCH QUEUE</span>
 						<h2 id="research-title">DEPARTMENT OF RESEARCH</h2>
 					</div>
 					<div className="ui-research-rp ui-crt crt-amber" title="Unspent research points. Delivering compute and finishing jobs earns them.">
@@ -124,7 +124,7 @@ export function ResearchSheet({ store, content, view, onClose }: { store: GameSt
 					</button>
 				</header>
 				{empty ? (
-					<p className="ui-empty ui-pad">The Department has no requests on file yet.</p>
+					<p className="ui-empty ui-pad">No research started yet.</p>
 				) : (
 					<div className="ui-research-cols">
 						{BRANCHES.map((b) => (

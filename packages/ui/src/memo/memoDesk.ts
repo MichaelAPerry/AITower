@@ -1,4 +1,4 @@
-/** Pure parts of the Ministry memo desk: countdowns, the default stamp, standing tone, modifier chips, history rows. */
+/** Pure parts of the Authority memo desk: countdowns, the default stamp, standing tone, modifier chips, history rows. */
 import type { ContentDB } from "@aitower/content";
 import type { MemoView, ModifierView, SimView } from "@aitower/sim";
 import { fmtDuration } from "../format";
@@ -10,10 +10,10 @@ export const memoTicksLeft = (m: Pick<MemoView, "expiresAt">, tick: number): num
 export const URGENT_TICKS = 120;
 export const memoUrgent = (m: Pick<MemoView, "expiresAt">, tick: number): boolean => memoTicksLeft(m, tick) < URGENT_TICKS;
 
-/** "AUTO-FILED IN 11h 20m", or "BEING FILED" at zero. */
+/** "AUTO-RESOLVES IN 11h 20m", or "BEING FILED" at zero. */
 export const memoCountdown = (m: Pick<MemoView, "expiresAt">, tick: number): string => {
 	const left = memoTicksLeft(m, tick);
-	return left <= 0 ? "BEING FILED NOW" : `AUTO-FILED IN ${fmtDuration(left)}`;
+	return left <= 0 ? "RESOLVING NOW" : `AUTO-RESOLVES IN ${fmtDuration(left)}`;
 };
 
 /** Label of the choice that is used if the memo is not answered. */

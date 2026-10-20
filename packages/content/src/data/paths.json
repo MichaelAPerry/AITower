@@ -3,18 +3,18 @@
   "id": "biotech",
   "name": "Biotech",
   "available": true,
-  "description": "Cultured tissue computes at about three times the PFLOPS per kilowatt of any cabinet the Ministry has ever stamped. Feed the Annex, hold the jars at 37 °C and the numbers climb quickly, along with the contamination, the mutations and the unregistered assets. Embrace the flesh for the Living Tower, or hold the line with bleach and quarantine locks for the Clean Tower. The Ministry assures you that the tissue is entirely under control, and has stopped answering when asked by whom."
+  "description": "Cultured tissue computes at about three times the PFLOPS per kW of any cabinet in the catalogue. Feed the annex, hold the tanks at 37 °C and output climbs quickly, along with contamination, mutations and unregistered assets. Embrace it for the Living Tower, or hold the line with sterile bays and quarantine locks for the Clean Tower. The Compute Authority describes the tissue as fully under control, and has stopped saying by whom."
  },
  {
   "id": "greentech",
   "name": "Greentech",
   "available": true,
-  "description": "Sun, wind and waste heat, accounted for to the last kilowatt-hour. Skin the tower in photovoltaic panels, raise masts on the upper floors, pipe the racks' exhaust to the municipal baths and grow algae on the façade for carbon credits. Your Green Score rises with the share of power that comes from the weather and the heat you sell, and falls through a Dunkelflaute, when the sky is dark and the air is still, so keep a generator warm. The Department of Weather assures you the building is flourishing, and has noticed that the ferns are doing better than anyone expected."
+  "description": "Sun, wind and waste heat, accounted for to the last kilowatt-hour. Fit panels, raise masts on the upper floors, sell exhaust heat to the district network and grow algae on the facade for carbon credits. Your Green Score rises with the share of power from the weather and the heat you sell, and falls through a Dunkelflaute, when the sky is dark and the air is still, so keep a generator warm. The ferns in the lobby are doing better than expected."
  },
  {
   "id": "synthetic",
   "name": "Synthetic Mind",
   "available": true,
-  "description": "Hosted minds, continuity audits and a lattice that remembers you. Cool Mind Lattice cabinets on a cryo loop, keep every process alive through a brownout behind Continuity Monitors and a Backup Vault, and raise your Refinement: uptime multiplied by the share of compute on top-tier racks. The minds are courteous, productive and file their own forms. The Ethics Office has confirmed that it is permitted to exist, and has asked that you stop asking who signed that."
+  "description": "Hosted minds, continuity audits and a lattice with persistent memory. Cool Mind Lattice racks on a cryo loop, keep every process alive through a brownout behind Continuity Monitors and a Backup Vault, and raise your Refinement: uptime multiplied by the share of compute on top-tier racks. The minds are courteous, productive and file their own paperwork. Ethics review has confirmed they are permitted to exist, and has asked that you stop asking who approved that."
  }
 ]

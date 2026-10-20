@@ -2,7 +2,7 @@
 import type { AuditGrade, LedgerDay, LifetimeStats, QuarterReport, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPct, fmtPflops } from "../format";
 
-/** Everything that leaves the Treasury in a day, including the Ministry levy, loan interest and clerk fees. */
+/** Everything that leaves the Treasury in a day, including the Authority levy, loan interest and clerk fees. */
 export const ledgerCosts = (d: LedgerDay): number => d.energy + d.upkeep + d.construction + d.penalties + (d.taxes ?? 0) + (d.interest ?? 0) + (d.fees ?? 0);
 
 /** Revenue less all costs: the Finance tab's Net column and the NET TODAY gauge. */
@@ -94,9 +94,9 @@ export function reportRows(r: QuarterReport): ReportRow[] {
 	];
 }
 
-/** Sheet headline numbers: Ministry standing and cash change. */
+/** Sheet headline numbers: Authority standing and cash change. */
 export function auditOutcome(r: QuarterReport): { standing: string; cash: string } {
-	return { standing: `Ministry standing ${signed(Math.round(r.standingDelta))}`, cash: cashDeltaText(r.cashDelta) };
+	return { standing: `Authority standing ${signed(Math.round(r.standingDelta))}`, cash: cashDeltaText(r.cashDelta) };
 }
 
 // ─── Lifetime stats ──────────────────────────────────────────────────

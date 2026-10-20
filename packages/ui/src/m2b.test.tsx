@@ -33,12 +33,12 @@ function setup(opts: { clerk?: boolean; speed?: Speed } = {}) {
 	return { content, store, sent };
 }
 
-describe("Contracts Clerk panel", () => {
+describe("Contract Automation panel", () => {
 	it("locked: shows the hire slip naming the node and its cost, with a button that opens research", () => {
 		const { content, store } = setup();
 		let opened = 0;
 		const tree = ClerkPanel(panelProps(store, content, { openResearch: () => opened++ }));
-		expect(textOf(tree)).toContain("Hire a Contracts Clerk: research Form 9: Delegation of Signature (30 RP)");
+		expect(textOf(tree)).toContain("Hire a Contract Automation: research Form 9: Delegation of Signature (30 RP)");
 		click(findButton(tree, /Research/));
 		expect(opened).toBe(1);
 		expect(store.get().view.clerk.unlocked).toBe(false);
@@ -107,10 +107,10 @@ describe("Research sheet", () => {
 		expect(html).toContain("DEPARTMENT OF RESEARCH");
 		for (const b of ["Compute", "Cooling", "Power", "Logistics", "Administration"]) expect(html).toContain(`>${b}</h3>`);
 		expect(html).toContain("−10 % failure rate"); // plain-English perk
-		expect(html).toContain("Contracts Clerk: accepts offers for you");
+		expect(html).toContain("Contract Automation: accepts offers for you");
 		expect(html).toContain("<b>Unlocks:</b> Chiller"); // scanned from facilities
 		expect(html).toContain("<b>Unlocks:</b> Rotor Drone"); // and from bots
-		expect(html).toContain("Filed"); // researched stamp
+		expect(html).toContain("Researched");
 		expect(html).toContain("Requires Clearance 3 and Silicon Binning"); // locked, with the reason
 		expect(html).toContain("GAME PAUSED");
 		expect(html).toMatch(/aria-modal="true"/);
@@ -231,12 +231,12 @@ describe("Research key, pause and Esc", () => {
 });
 
 describe("Top bar and build palette", () => {
-	it("items whose tech is not researched show 'Requires research: <name>' and cannot be armed", () => {
+	it("items whose tech is not researched show 'Locked: <name>' and cannot be armed", () => {
 		const { content, store } = setup();
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
-		expect(html).toContain("Requires research: Heat Exchange Theory"); // chiller
+		expect(html).toContain("Locked: Heat Exchange Theory"); // chiller
 		expect(html).toMatch(/aria-disabled="true"[^>]*data-tut="card-chiller"|data-tut="card-chiller"[^>]*aria-disabled="true"/);
-		expect(html).toContain("is-tech-locked");
+		expect(html).toContain("is-locked");
 		store.dispatch({ type: "research", techId: "cool_exchange" });
 		const after = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
 		expect(after).not.toContain("Heat Exchange Theory");
@@ -263,12 +263,12 @@ describe("Finance tab", () => {
 		const { content, store } = setup();
 		const seen: unknown[] = [];
 		const tree = FinanceTab(panelProps(store, content, { setUi: (p) => seen.push(p) }));
-		click(findButton(tree, /Credit Office/));
+		click(findButton(tree, /Credit Facility/));
 		click(findButton(tree, /Audits/));
 		click(findButton(tree, /Record/));
 		expect(seen).toEqual([{ financeTab: "credit" }, { financeTab: "audits" }, { financeTab: "record" }]);
 	});
-	it("Credit Office shows principal, limit, daily rate and interest per day", () => {
+	it("Credit Facility shows principal, limit, daily rate and interest per day", () => {
 		const { content, store } = setup();
 		const text = textOf(CreditSection(panelProps(store, content)));
 		expect(text).toContain("Owed $400k");
@@ -341,7 +341,7 @@ describe("Quarterly audit sheet", () => {
 		expect(html).toContain("QUARTER 2");
 		expect(html).toMatch(/ui-audit-stamp[^>]*>D</);
 		expect(html).toContain("stamp-red");
-		expect(html).toContain("Ministry standing −3");
+		expect(html).toContain("Authority standing −3");
 		expect(html).toContain("Fine −$29k");
 		expect(html).toContain("regrettable"); // the remark (React escapes its quotes)
 		expect(html).toContain("Uptime");
@@ -363,17 +363,17 @@ describe("event wording", () => {
 		const { content, store } = setup();
 		const d = describeEvent({ type: "researched", techId: "cool_exchange" }, store.get().view, content);
 		expect(d).toMatchObject({ severity: "good", toast: true });
-		expect(d.text).toBe("Research filed: Heat Exchange Theory. +10 % cooling capacity; new in the build menu: Chiller");
+		expect(d.text).toBe("Research complete: Heat Exchange Theory. +10 % cooling capacity; new in the build menu: Chiller");
 	});
 	it("the clerk, loans and the audit read as plain sentences", () => {
 		const { content, store } = setup();
 		const v = store.get().view;
-		expect(describeEvent({ type: "clerkAccepted", contractId: 1, jobId: 7 }, v, content).text).toBe("The Contracts Clerk accepted Northwind AI training (fee 5 % of its earnings)");
-		expect(describeEvent({ type: "loanTaken", amount: 500_000 }, v, content).text).toBe("Credit Office: loan of $500k approved; interest accrues at 0.4 % a day");
-		expect(describeEvent({ type: "loanRepaid", amount: 250_000 }, v, content).text).toContain("Credit Office: $250k repaid");
+		expect(describeEvent({ type: "clerkAccepted", contractId: 1, jobId: 7 }, v, content).text).toBe("The Contract Automation accepted Northwind AI training (fee 5 % of its earnings)");
+		expect(describeEvent({ type: "loanTaken", amount: 500_000 }, v, content).text).toBe("Credit Facility: loan of $500k approved; interest accrues at 0.4 % a day");
+		expect(describeEvent({ type: "loanRepaid", amount: 250_000 }, v, content).text).toContain("Credit Facility: $250k repaid");
 		const r = store.fileQuarterReport("B");
 		const q = describeEvent({ type: "quarterReport", quarter: r.quarter, grade: "B" }, store.get().view, content);
-		expect(q.text).toBe(`Quarterly audit ${r.quarter} filed: grade B. ${r.remark}`);
+		expect(q.text).toBe(`Quarterly audit ${r.quarter}: grade B. ${r.remark}`);
 		expect(q.severity).toBe("good");
 		expect(describeEvent({ type: "quarterReport", quarter: 9, grade: "C" }, v, content).severity).toBe("info");
 		expect(describeEvent({ type: "quarterReport", quarter: 9, grade: "E" }, v, content).severity).toBe("warn");
@@ -390,6 +390,6 @@ describe("Hud", () => {
 	});
 	it("shows the clerk slip in the Contracts tab while the clerk is locked", () => {
 		const { content, store } = setup();
-		expect(renderToString(<ContractsDrawer {...panelProps(store, content)} />)).toContain("Hire a Contracts Clerk: research");
+		expect(renderToString(<ContractsDrawer {...panelProps(store, content)} />)).toContain("Hire a Contract Automation: research");
 	});
 });

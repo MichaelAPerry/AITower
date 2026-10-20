@@ -1,12 +1,12 @@
-/** The opening crawl: a few cards of Ministry prose before a new game, in the manner of an old film's title sequence. */
+/** The opening crawl: a few cards of Compute Authority prose before a new game, in the manner of an old film's title sequence. */
 
 export const CRAWL_LINES: readonly string[] = [
-	"Somewhere in the late twentieth century, which has not quite ended,",
-	"the Ministry of Computation ruled that thought could be licensed.",
-	"You have been granted a plot of ground, a grid connection and a quantity of hope.",
-	"The racks will run hot. The forms will multiply.",
-	"The Ministry asks only that you keep the lights on, and do not ask what the lights are for.",
-	"This building is now your responsibility. Please file accordingly.",
+	"Year 14 of the compute build-out.",
+	"The Compute Authority now licenses every large training run.",
+	"You have been allocated a plot, a 1.5 MW grid intake and a quarterly target.",
+	"The racks will run hot. The reporting requirements will multiply.",
+	"The Compute Authority asks only that you keep the lights on and do not ask what the workloads are for.",
+	"This facility is now your responsibility.",
 ];
 
 /** Seconds between one line appearing and the next. */

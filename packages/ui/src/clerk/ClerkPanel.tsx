@@ -45,7 +45,7 @@ export function AmountField({ label, value, onValue, title, prefix }: { label: s
 	);
 }
 
-/** The Contracts Clerk: a hire-me slip until researched, then a compact standing-order form. */
+/** The Contract Automation: a hire-me slip until researched, then a compact standing-order form. */
 export function ClerkPanel({ store, content, state, openResearch }: PanelProps) {
 	const clerk = state.view.clerk;
 	if (!clerk) return null;
@@ -67,9 +67,9 @@ export function ClerkPanel({ store, content, state, openResearch }: PanelProps) 
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `clerk:${r.reason}` });
 	};
 	return (
-		<section className={`ui-clerk ${p.enabled ? "is-on" : "is-off"}`} aria-label="Contracts Clerk standing order">
+		<section className={`ui-clerk ${p.enabled ? "is-on" : "is-off"}`} aria-label="Contract Automation standing order">
 			<div className="ui-clerk-head">
-				<span className="ui-clerk-title">FORM AT-9 · STANDING ORDER TO THE CONTRACTS CLERK</span>
+				<span className="ui-clerk-title">CONTRACT AUTOMATION · STANDING ORDER</span>
 				<span className="ui-clerk-stats" title="The clerk keeps this share of the earnings of every job it books">
 					Fee {feePercent(content)} % · accepted so far: <b>{clerk.acceptedTotal}</b>
 				</span>

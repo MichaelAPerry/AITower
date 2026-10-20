@@ -1,7 +1,8 @@
 import type { ContentDB } from "@aitower/content";
 import type { MemoView, ModifierView, SimView } from "@aitower/sim";
 import { memoStain } from "../bio/bio";
-import { choiceChips, effectsOf, isUrgentMemo } from "../calm/calm";
+import { PATH_COLOR } from "../ascension/ascension";
+import { chipParts, effectsOf, isUrgentMemo } from "../calm/calm";
 import type { GameState, GameStore } from "@aitower/shared";
 import { useEffect } from "react";
 import { Icon, Lamp, Stamp } from "../components/common";
@@ -13,13 +14,36 @@ import "./memo.css";
 
 type SetUi = (patch: Partial<UiState>) => void;
 
-const CATEGORY: Record<string, string> = { ministry: "MINISTRY", environmental: "WEATHER BUREAU", operational: "OPERATIONS", client: "CLIENT LIAISON", horror: "CLASSIFIED" };
+/** The consequence of a choice: plain chips, with affinity effects as path-coloured pills. */
+function choiceChipsNode(effects: Parameters<typeof chipParts>[0]) {
+	const parts = chipParts(effects);
+	if (parts.length === 0) return <em>no effect</em>;
+	return (
+		<em>
+			{parts.map((c, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: static list
+				<span key={i}>
+					{i > 0 && " · "}
+					{c.path ? (
+						<span className="ui-pathchip" data-path={c.path} style={{ color: PATH_COLOR[c.path] }}>
+							{c.text}
+						</span>
+					) : (
+						c.text
+					)}
+				</span>
+			))}
+		</em>
+	);
+}
+
+const CATEGORY: Record<string, string> = { ministry: "COMPUTE AUTHORITY", environmental: "WEATHER SERVICE", operational: "OPERATIONS", client: "CLIENT LIAISON", horror: "CLASSIFIED" };
 
 /** Stamp a memo. The memo is hidden at once; the store applies the answer immediately (or on the next tick while running). */
 function answer(store: GameStore, ui: UiState, setUi: SetUi, memo: MemoView, choiceId: string): void {
 	const r = store.dispatch({ type: "resolveMemo", memoId: memo.id, choiceId });
 	if (!r.ok) {
-		pushNotice({ text: `Memo not filed: ${r.reason}`, severity: "warn", key: `memo:${memo.id}` });
+		pushNotice({ text: `Memo not answered: ${r.reason}`, severity: "warn", key: `memo:${memo.id}` });
 		return;
 	}
 	setUi({ stamped: [...ui.stamped, memo.id] });
@@ -32,7 +56,7 @@ export function MemoCard({ memo, tick, onAnswer, onAside }: { memo: MemoView; ti
 		<article className={`memo-card ${urgent ? "is-urgent" : ""}`} data-memo={memo.id} aria-labelledby={`${id}-t`}>
 			<header className="memo-head">
 				<span className="memo-from">
-					FROM: {CATEGORY[memo.category] ?? "MINISTRY"} · NO. {String(memo.id).padStart(4, "0")}
+					FROM: {CATEGORY[memo.category] ?? "COMPUTE AUTHORITY"} · NO. {String(memo.id).padStart(4, "0")}
 				</span>
 				{urgent && <Stamp tone="red" className="memo-urgent">Urgent</Stamp>}
 			</header>
@@ -50,7 +74,7 @@ export function MemoCard({ memo, tick, onAnswer, onAside }: { memo: MemoView; ti
 				</span>
 				<span className="memo-left">{memoCountdown(memo, tick)}</span>
 				<span className="memo-default">
-					Unanswered memos are filed as: <b>{defaultChoiceLabel(memo)}</b>
+					Unanswered memos resolve as: <b>{defaultChoiceLabel(memo)}</b>
 				</span>
 			</div>
 			<div className="memo-choices">
@@ -89,15 +113,15 @@ export function MemoSlip({ memo, content, tick, open, onRead, onAnswer, onAside 
 	return (
 		<article className="memo-slip" data-memo={memo.id} aria-label={memo.title}>
 			<header className="memo-slip-from">
-				<span>{CATEGORY[memo.category] ?? "MINISTRY"} · URGENT</span>
-				<span title="The memo is filed under its default stamp when the time runs out">{memoCountdown(memo, tick)}</span>
+				<span>{CATEGORY[memo.category] ?? "COMPUTE AUTHORITY"} · URGENT</span>
+				<span title="The memo resolves to its default choice when the time runs out">{memoCountdown(memo, tick)}</span>
 			</header>
 			<h3 className="memo-slip-title">{memo.title}</h3>
 			<div className="memo-slip-stamps">
 				{memo.choices.map((c) => (
 					<button key={c.id} type="button" className={`memo-slip-stamp ${c.id === memo.defaultChoice ? "is-default" : ""}`} title={c.hint} onClick={() => onAnswer(c.id)}>
 						<span>{c.label}</span>
-						<em>{choiceChips(effectsOf(content, memo, c.id))}</em>
+						{choiceChipsNode(effectsOf(content, memo, c.id))}
 					</button>
 				))}
 			</div>
@@ -132,7 +156,7 @@ export function MemoPop({ store, content, state, ui, setUi }: { store: GameStore
 	if (!memo) return null;
 	const stain = memoStain(state.view.corruption ?? 0, state.settings.horrorIntensity);
 	return (
-		<div className={`ui-memo-pop ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-label="Incoming Ministry memo" key={memo.id}>
+		<div className={`ui-memo-pop ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-label="Incoming Authority memo" key={memo.id}>
 			<MemoSlip
 				memo={memo}
 				content={content}
@@ -152,21 +176,21 @@ export function MemoDrawer({ store, content, state, ui, setUi }: { store: GameSt
 	const open = openMemos(view.memos, ui.stamped);
 	const history = historyRows(view, content);
 	return (
-		<aside className="ui-memo-drawer ui-panel" aria-label="Ministry inbox">
+		<aside className="ui-memo-drawer ui-panel" aria-label="Compute Authority inbox">
 			<div className="ui-panel-title">
-				<span className="memo-drawer-title">MINISTRY INBOX</span>
+				<span className="memo-drawer-title">AUTHORITY INBOX</span>
 				<button type="button" className="ui-btn ui-icon-btn" onClick={() => setUi({ inboxOpen: false })} aria-label="Close inbox" title="Close the inbox">
 					<Icon name="close" size={12} />
 				</button>
 			</div>
 			<div className="memo-drawer-scroll">
 				<h4 className="memo-sect">IN TRAY ({open.length})</h4>
-				{open.length === 0 && <p className="memo-empty">The tray is empty. The Ministry will write when it has something to say.</p>}
+				{open.length === 0 && <p className="memo-empty">No open memos.</p>}
 				{open.map((m) => (
 					<MemoCard key={m.id} memo={m} tick={view.tick} onAnswer={(c) => answer(store, ui, setUi, m, c)} />
 				))}
-				<h4 className="memo-sect">FILED ({history.length})</h4>
-				{history.length === 0 && <p className="memo-empty">Nothing has been filed yet.</p>}
+				<h4 className="memo-sect">RESOLVED ({history.length})</h4>
+				{history.length === 0 && <p className="memo-empty">Nothing resolved yet.</p>}
 				<ul className="memo-history">
 					{history.map((h) => (
 						<li key={h.memoId} className="memo-hist">
@@ -188,7 +212,7 @@ export function MemoDrawer({ store, content, state, ui, setUi }: { store: GameSt
 export function InboxButton({ state, ui, setUi }: { state: GameState; ui: UiState; setUi: SetUi }) {
 	const n = openMemos(state.view.memos, ui.stamped).length;
 	return (
-		<button type="button" className={`ui-btn ui-inbox ${ui.inboxOpen ? "is-on" : ""}`} data-tut="inbox" onClick={() => setUi({ inboxOpen: !ui.inboxOpen })} aria-expanded={ui.inboxOpen} title={n ? `${n} Ministry memo${n === 1 ? "" : "s"} waiting` : "Ministry inbox: no memos waiting"}>
+		<button type="button" className={`ui-btn ui-inbox ${ui.inboxOpen ? "is-on" : ""}`} data-tut="inbox" onClick={() => setUi({ inboxOpen: !ui.inboxOpen })} aria-expanded={ui.inboxOpen} title={n ? `${n} Authority memo${n === 1 ? "" : "s"} waiting` : "Compute Authority inbox: no memos waiting"}>
 			<Lamp on={n > 0} tone="red" blink={n > 0} plain />
 			<span className="ui-inbox-label ui-hide-narrow">INBOX</span>
 			<span className={`ui-inbox-count ${n ? "has" : ""}`}>{n}</span>
@@ -196,13 +220,13 @@ export function InboxButton({ state, ui, setUi }: { state: GameState; ui: UiStat
 	);
 }
 
-/** Ministry standing as a horizontal needle meter, 0–100, with a red zone below 25. */
+/** Authority standing as a horizontal needle meter, 0–100, with a red zone below 25. */
 export function StandingMeter({ standing }: { standing: number }) {
 	const v = clampStanding(standing);
 	const tone = standingTone(v);
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: a custom needle meter; a native <meter> cannot be styled into this gauge
-		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Ministry standing" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Ministry standing ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Ministry shuts you down.`}>
+		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Authority standing" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Authority standing ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Compute Authority shuts you down.`}>
 			<span className="ui-dymo">STANDING</span>
 			<span className="ui-standing-row">
 				<span className="ui-standing-scale" aria-hidden="true">

@@ -224,12 +224,25 @@ function conduitGhost(store: GameStore, view: SimView, content: ContentDB, layer
 	return { cells, valid: true, label: `${conduitName(layer)} ×${cells.length} · ${fmtMoney(n * per)}` };
 }
 
+/**
+ * What a lift drag costs: a new shaft pays the base fee plus the per-floor price; a drag that overlaps or touches an
+ * existing shaft in the column extends it and pays per-floor for the added floors only (no base fee).
+ */
+export function liftDragCost(view: { lifts: readonly { x: number; floorMin: number; floorMax: number }[] }, st: ContentDB["structure"], x: number, floorMin: number, floorMax: number): { cost: number; extends: boolean; added: number } {
+	const host = view.lifts.find((l) => l.x === x && l.floorMin <= floorMax + 1 && l.floorMax >= floorMin - 1);
+	if (!host) return { cost: st.liftBase + st.liftPerFloor * (floorMax - floorMin + 1), extends: false, added: floorMax - floorMin + 1 };
+	const added = Math.max(host.floorMax, floorMax) - Math.min(host.floorMin, floorMin) - (host.floorMax - host.floorMin);
+	return { cost: st.liftPerFloor * added, extends: true, added };
+}
+
 function liftGhost(store: GameStore, content: ContentDB, span: ReturnType<typeof liftSpan>, dragging: boolean): Ghost {
 	const st = content.structure;
 	const { x, floorMin, floorMax, cells } = span;
+	const view = store.get().view;
 	if (!dragging) {
 		// A lift spans two or more floors: this column is a valid start if the cell can pair with the floor above or below.
 		const f = floorMin;
+		if (view.lifts.some((l) => l.x === x && f >= l.floorMin && f <= l.floorMax)) return { cells, valid: true, label: `Drag up/down to extend this lift · ${fmtMoney(st.liftPerFloor)}/floor` };
 		const up = store.canBuild({ type: "buildLift", x, floorMin: f, floorMax: f + 1 });
 		if (up.ok) return { cells, valid: true, label: "Drag up/down to size the shaft" };
 		const down = store.canBuild({ type: "buildLift", x, floorMin: f - 1, floorMax: f });
@@ -238,5 +251,6 @@ function liftGhost(store: GameStore, content: ContentDB, span: ReturnType<typeof
 	}
 	const r = store.canBuild({ type: "buildLift", x, floorMin, floorMax });
 	if (!r.ok) return { cells, valid: false, label: sentence(r.reason) };
-	return { cells, valid: true, label: `Lift ${cells.length} floors · ${fmtMoney(st.liftBase + st.liftPerFloor * cells.length)}` };
+	const c = liftDragCost(view, st, x, floorMin, floorMax);
+	return { cells, valid: true, label: c.extends ? `Extend lift +${c.added} floor${c.added === 1 ? "" : "s"} · ${fmtMoney(c.cost)}` : `Lift ${cells.length} floors · ${fmtMoney(c.cost)}` };
 }

@@ -111,6 +111,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		automation: defaultAutomation(),
 		wind: 0.6,
 		droughtUntil: 0,
+		affinity: { biotech: 0, greentech: 0, synthetic: 0 },
 		greenScore: 0,
 		refinement: 0,
 		sandbox: sc.sandbox === true,

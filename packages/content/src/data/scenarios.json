@@ -33,7 +33,7 @@
 	"brownfield": {
 		"id": "brownfield",
 		"name": "Brownfield Tower",
-		"description": "An old half-built tower, bought at auction with the debts attached. Six floors of slab, six air cabinets sharing one tired air handler, three empty storeys above them and $350k in an account the bank describes as \"optimistic\". Starts at Clearance 2.",
+		"description": "A half-built tower bought at auction with the debts attached. Six floors of slab, six air cabinets sharing one underpowered air handler, three empty storeys above them and $350k in the account. Starts at Clearance 2.",
 		"width": 56,
 		"floorMin": -2,
 		"floorMax": 12,
@@ -79,7 +79,7 @@
 	"sandbox": {
 		"id": "sandbox",
 		"name": "Sandbox Annex",
-		"description": "A fully funded test lot with no bankruptcy and no shutdown; the Ministry still files its audits, out of habit. $500M and Clearance 5, for trying anything once. Research is still required.",
+		"description": "A fully funded test lot with no bankruptcy and no shutdown; audits are still filed, for the record. $500M and Clearance 5, for trying anything once. Research is still required.",
 		"width": 64,
 		"floorMin": -2,
 		"floorMax": 16,

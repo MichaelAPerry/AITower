@@ -11,9 +11,9 @@ describe("memo desk logic", () => {
 		const m = store.get().view.memos[0];
 		const t = m.issuedAt;
 		expect(memoTicksLeft(m, t)).toBe(840);
-		expect(memoCountdown(m, t)).toBe("AUTO-FILED IN 14h");
-		expect(memoCountdown(m, t + 800)).toBe("AUTO-FILED IN 40m");
-		expect(memoCountdown(m, t + 840)).toBe("BEING FILED NOW");
+		expect(memoCountdown(m, t)).toBe("AUTO-RESOLVES IN 14h");
+		expect(memoCountdown(m, t + 800)).toBe("AUTO-RESOLVES IN 40m");
+		expect(memoCountdown(m, t + 840)).toBe("RESOLVING NOW");
 		expect(memoTicksLeft(m, t + 9999)).toBe(0);
 		expect(defaultChoiceLabel(m)).toBe("FILE IN TRIPLICATE");
 		expect(memoFraction(m, t + 420)).toBeCloseTo(0.5);

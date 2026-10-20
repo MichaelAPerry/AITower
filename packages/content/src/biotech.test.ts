@@ -110,29 +110,25 @@ describe("biotech content (bundled)", () => {
 		}
 	});
 
-	it("has at least 10 horror memos escalating from 0.1 to 0.9 corruption, none before Clearance 3", () => {
+	it("has at least 3 corruption-gated horror memos escalating from 0.1 to 0.9 corruption, none before Clearance 3", () => {
 		// The greentech and synthetic horror memos are gated by path (they have no corruption score); see m4.test.ts.
 		const h = db.events.filter((e) => e.category === "horror" && e.path !== "greentech" && e.path !== "synthetic");
-		expect(h.length).toBeGreaterThanOrEqual(10);
+		expect(h.length).toBeGreaterThanOrEqual(3);
 		const cs = h.map((e) => e.minCorruption as number);
 		expect(Math.min(...cs)).toBe(0.1);
 		expect(Math.max(...cs)).toBe(0.9);
 		expect(cs.every((c) => c >= 0 && c <= 1)).toBe(true);
 		expect(h.every((e) => e.minTier >= 3)).toBe(true);
-		expect(h.some((e) => e.path === "biotech")).toBe(true);
 		for (const e of h) expect(e.body + e.title, e.id).not.toMatch(/\b(blood|gore|corpse|scream|eyes?|faces?)\b/i);
 	});
 
-	it("has 8 biotech memos from tier 3 and 4 T1-T2 seed memos", () => {
-		const ids = ["nutrient_spoilage", "contamination_audit", "incubator_drift", "cell_line_certificate", "wetware_grant", "asset_registration", "mutation_report", "biosafety_visit"];
-		for (const id of ids) {
-			const e = db.events.find((x) => x.id === id);
-			expect(e?.minTier, id).toBeGreaterThanOrEqual(3);
-			expect(["ministry", "operational"], id).toContain(e?.category);
-		}
-		const seeds = ["form_9b_brochure", "damp_patch", "smell_report", "lamp_phasing"].map((id) => db.events.find((x) => x.id === id));
-		expect(seeds.every((e) => e && e.maxTier === 2 && e.minTier <= 2)).toBe(true);
-		expect(seeds[0]?.title).toContain("Form 9-B");
+	it("has a biotech memo from tier 3 and a T1-T2 wetware pilot seed memo", () => {
+		const e = db.events.find((x) => x.id === "nutrient_spoilage");
+		expect(e?.minTier).toBeGreaterThanOrEqual(3);
+		expect(e?.choices.some((c) => c.effects.some((f) => f.type === "affinity" && f.path === "biotech"))).toBe(true);
+		const seed = db.events.find((x) => x.id === "form_9b_brochure");
+		expect(seed && seed.maxTier === 2 && seed.minTier <= 2).toBe(true);
+		expect(seed?.title).toContain("Wetware");
 	});
 
 	it("balance: one unattended incubator contaminates noticeably within days; one Sterile Bay holds two incubators clean", () => {

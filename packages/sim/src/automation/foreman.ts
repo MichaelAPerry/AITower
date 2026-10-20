@@ -10,13 +10,14 @@
  * orders outnumber the bots, the rolling uptime is under the current tier's target, standing is under FOREMAN_MIN_STANDING, the last closed day lost money, a rack runs above `okC` (cooling on) or a
  * power net is short (power on).
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
+ * Reach: only on floors a bot can get to (see `reachableFloors`); with none reachable nothing is placed.
  */
-import type { FacilityDef } from "@aitower/content";
+import type { ContentDB, FacilityDef } from "@aitower/content";
 import { acceptCheck, installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
 import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING } from "../core/constants";
 import { cellIdx } from "../core/grid";
-import type { Facility } from "../core/state";
+import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
 import { dayCosts } from "../economy/ledger";
 import { findChargerWithSpace } from "../world/entities";
@@ -38,6 +39,35 @@ interface Run {
 	racksPlaced: number;
 	/** PFLOPS placed this run (idle until jobs take them). */
 	addedPflops: number;
+	/** Floors bots can reach (computed on first use; the Foreman builds no lifts, so it holds for the run). */
+	reach?: Set<number>;
+}
+
+/**
+ * Floors a bot can work on: every floor if a flying bot exists; otherwise the floors of the bots and chargers (a bot lives
+ * at its charger), widened through any chain of lifts (a lift serving a reachable floor makes all its floors reachable).
+ */
+export function reachableFloors(state: SimState, content: ContentDB): Set<number> {
+	const out = new Set<number>();
+	if (state.bots.some((b) => content.bots[b.defId]?.flying)) {
+		for (let f = state.floorMin; f <= state.floorMax; f++) out.add(f);
+		return out;
+	}
+	for (const b of state.bots) out.add(Math.round(b.floor));
+	for (const f of state.facilities) if (getDef(content, f.defId).kind === "charger") out.add(f.floor);
+	for (let grew = true; grew; ) {
+		grew = false;
+		for (const l of state.lifts) {
+			let serves = false;
+			for (let f = l.floorMin; f <= l.floorMax && !serves; f++) serves = out.has(f);
+			if (!serves) continue;
+			for (let f = l.floorMin; f <= l.floorMax; f++) if (!out.has(f)) {
+				out.add(f);
+				grew = true;
+			}
+		}
+	}
+	return out;
 }
 
 const affordable = (r: Run, d: FacilityDef): boolean => r.ctx.state.cash - d.cost >= r.reserve;
@@ -59,7 +89,9 @@ function findSpot(r: Run, d: FacilityDef, floors: number[], spotOk: (floor: numb
 	const { state } = r.ctx;
 	const rackFloors = [...new Set(realRacks(r).map((k) => k.floor))];
 	const near = (floor: number): number => (rackFloors.length === 0 ? Math.abs(floor) : Math.min(...rackFloors.map((k) => Math.abs(k - floor))));
-	const order = floors.slice().sort((a, b) => near(a) - near(b) || a - b);
+	if (!r.reach) r.reach = reachableFloors(state, r.ctx.content);
+	const reach = r.reach;
+	const order = floors.filter((f) => reach.has(f)).sort((a, b) => near(a) - near(b) || a - b);
 	for (const floor of order) {
 		for (let x = 0; x + d.width <= state.width; x++) {
 			let ok = true;

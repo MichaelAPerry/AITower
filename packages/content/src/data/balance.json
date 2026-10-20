@@ -174,7 +174,7 @@
   "foremanPerHour": 1
  },
  "events": {
-  "intervalTicks": 720,
+  "intervalTicks": 3600,
   "maxOpen": 3,
   "graceTicks": 1440
  }

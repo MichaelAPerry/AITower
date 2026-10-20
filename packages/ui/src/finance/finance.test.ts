@@ -74,7 +74,7 @@ describe("quarterly report", () => {
 		expect(cashDeltaText(50_000)).toBe("Grant +$50k");
 		expect(cashDeltaText(-20_000)).toBe("Fine −$20k");
 		expect(cashDeltaText(0)).toBe("No grant or fine");
-		expect(auditOutcome(r)).toEqual({ standing: "Ministry standing −3", cash: "Fine −$20k" });
+		expect(auditOutcome(r)).toEqual({ standing: "Authority standing −3", cash: "Fine −$20k" });
 	});
 });
 

@@ -3,7 +3,7 @@ import type { CellPointerEvent, GameState, GameStore, Ghost, Selection, Tool } f
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
 import type { Notice } from "../notices";
-import { createToolController } from "./controller";
+import { createToolController, liftDragCost } from "./controller";
 import { lPath, liftSpan, slabSpan } from "./geometry";
 import { pickAt } from "./pick";
 
@@ -248,10 +248,10 @@ describe("ghost validity comes from store.canBuild", () => {
 		d.ev("move", 2, 3);
 		expect(d.lastGhost()).toMatchObject({ valid: false, label: "Lift already at floor 2" });
 	});
-	it("lift (fake store rules): existing shaft column is red, a free slabbed column is green", () => {
+	it("lift (fake store rules): a column on an existing shaft offers to extend it, a free slabbed column is green", () => {
 		const h = harness({ kind: "lift" });
 		h.ev("move", 2, 1);
-		expect(h.lastGhost()?.valid).toBe(false);
+		expect(h.lastGhost()).toMatchObject({ valid: true, label: expect.stringContaining("extend this lift") });
 		h.ev("move", 30, 1);
 		expect(h.lastGhost()?.valid).toBe(true);
 	});
@@ -260,5 +260,18 @@ describe("ghost validity comes from store.canBuild", () => {
 		h.ev("move", 20, 1);
 		expect(h.asked).toHaveLength(0);
 		expect(h.lastGhost()).toMatchObject({ valid: true });
+	});
+});
+
+describe("liftDragCost", () => {
+	const st = { liftBase: 100_000, liftPerFloor: 20_000 } as never;
+	const view = { lifts: [{ x: 2, floorMin: 1, floorMax: 3 }] };
+	it("charges base plus per floor for a new shaft", () => {
+		expect(liftDragCost(view, st, 9, 1, 4)).toEqual({ cost: 180_000, extends: false, added: 4 });
+	});
+	it("charges per added floor only when the drag extends a shaft (overlap or touching)", () => {
+		expect(liftDragCost(view, st, 2, 2, 6)).toEqual({ cost: 60_000, extends: true, added: 3 });
+		expect(liftDragCost(view, st, 2, 4, 5)).toEqual({ cost: 40_000, extends: true, added: 2 });
+		expect(liftDragCost(view, st, 2, 0, 1)).toEqual({ cost: 20_000, extends: true, added: 1 });
 	});
 });

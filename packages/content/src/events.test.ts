@@ -7,15 +7,39 @@ const money = (a: number): string => `${a >= 0 ? "+" : "-"}$${Math.abs(a) / 1000
 describe("events.json", () => {
 	const db = loadContent();
 
-	it("has the specified category mix (the 37 M2 memos plus the M3 seeds, biotech and horror memos)", () => {
+	it("has about two dozen memos with 7 horror memos, every memo having exactly two choices", () => {
 		const by = (c: string): number => db.events.filter((e) => e.category === c).length;
-		// Plus the M4 memos: 6 greentech (1 environmental, 3 ministry, 2 operational) and 8 path horror memos.
-		expect(db.events).toHaveLength(62 + 6 + 8);
-		expect(by("ministry")).toBe(16 + 1 + 5 + 3);
-		expect(by("environmental")).toBe(8 + 1);
-		expect(by("operational")).toBe(9 + 3 + 3 + 2);
-		expect(by("client")).toBe(4);
-		expect(by("horror")).toBe(13 + 8);
+		expect(db.events).toHaveLength(24);
+		expect(by("horror")).toBe(7);
+		expect(by("ministry")).toBe(7);
+		for (const c of ["environmental", "operational", "client"]) expect(by(c), c).toBeGreaterThan(0);
+		for (const e of db.events) expect(e.choices, e.id).toHaveLength(2);
+	});
+
+	it("most choices carry an affinity effect, spread over all three paths", () => {
+		const all = db.events.flatMap((e) => e.choices);
+		const aff = all.filter((c) => c.effects.some((f) => f.type === "affinity"));
+		expect(aff.length).toBeGreaterThan(all.length * 0.45);
+		for (const p of ["biotech", "greentech", "synthetic"]) expect(aff.some((c) => c.effects.some((f) => f.type === "affinity" && f.path === p && f.amount >= 2 && f.amount <= 6)), p).toBe(true);
+		for (const c of aff) for (const f of c.effects) if (f.type === "affinity") expect(f.amount).toBeLessThanOrEqual(6);
+	});
+
+	it("uses the Compute Authority voice (no Ministry, steam, brass or punch cards)", () => {
+		const text = [
+			...db.events.flatMap((e) => [e.title, e.body, ...e.choices.flatMap((c) => [c.label, c.hint, c.outcome])]),
+			...db.tech.flatMap((t) => [t.name, t.description]),
+			...Object.values(db.facilities).flatMap((f) => [f.name, f.description ?? ""]),
+			...Object.values(db.bots).map((b) => b.name),
+			...db.clients.map((c) => c.name),
+			...db.paths.map((p) => p.description),
+			...db.endings.flatMap((e) => [e.title, e.body]),
+		].join("\n");
+		expect(text).not.toMatch(/ministry|steam|brass|punch|triplicate|riveted|zip-tied|superintendent/i);
+	});
+
+	it("spaces memos about 2-3 game days apart", () => {
+		expect(db.balance.events.intervalTicks).toBeGreaterThanOrEqual(2 * 1440);
+		expect(db.balance.events.intervalTicks).toBeLessThanOrEqual(3 * 1440 + 720);
 	});
 
 	it("validates (unique ids, defaults, effects, durations, weights)", () => {
@@ -24,7 +48,7 @@ describe("events.json", () => {
 
 	it("covers the required scenarios", () => {
 		const ids = db.events.map((e) => e.id).join(" ");
-		for (const re of [/heatwave/, /cold_snap/, /brownout/, /blackout/, /flood/, /shortage/, /recall/, /firmware/, /ransom/, /theft/, /fibre/, /audit/, /inspection/, /rebrand/, /census/, /subsidy/, /27b6/, /misplaced/]) expect(ids).toMatch(re);
+		for (const re of [/heatwave/, /brownout/, /price_spike/, /recall/, /ransom/, /audit/, /subsidy/, /levy/]) expect(ids).toMatch(re);
 	});
 
 	it("has exactly one scripted first emergency: a day-2 heat event whose choices trade cash against risk", () => {
@@ -47,7 +71,7 @@ describe("events.json", () => {
 
 	it("the memos added for tiers 2-4 touch loans, the levy, audits and research", () => {
 		const text = db.events.filter((e) => e.minTier >= 2).map((e) => `${e.title} ${e.body}`).join(" ").toLowerCase();
-		for (const w of ["loan", "levy", "audit", "research"]) expect(text, w).toContain(w);
+		for (const w of ["levy", "audit", "research"]) expect(text, w).toContain(w);
 	});
 
 	it("scriptedDay events are never picked randomly: they carry a positive weight but are unique per day", () => {
@@ -88,6 +112,8 @@ describe("events.json", () => {
 						case "spareParts":
 							expect(c.hint, w).toContain(`${fx.count >= 0 ? "+" : "-"}${Math.abs(fx.count)} spare parts`);
 							break;
+						case "affinity":
+							break; // the hint names the lean in words; no fixed format
 						case "gridCap":
 							expect(c.hint, w).toMatch(fx.factor === 0 ? /grid offline/ : new RegExp(`x${fx.factor}\\b`));
 							break;
@@ -179,6 +205,9 @@ describe("validateContent: events", () => {
 		expect(broken((db) => fx(db).push({ type: "teleport" } as never))).toMatch(/unknown effect type/);
 		expect(broken((db) => fx(db).push({ type: "cash", amount: Number.NaN }))).toMatch(/amount/);
 		expect(broken((db) => fx(db).push({ type: "standing", amount: 500 }))).toMatch(/amount/);
+		expect(broken((db) => fx(db).push({ type: "affinity", path: "nope" as never, amount: 3 }))).toMatch(/unknown path/);
+		expect(broken((db) => fx(db).push({ type: "affinity", path: "biotech", amount: -1 }))).toMatch(/amount/);
+		expect(broken((db) => fx(db).push({ type: "affinity", path: "biotech", amount: 3 }))).toBe("");
 		expect(broken((db) => fx(db).push({ type: "failRacks", count: 0 }))).toMatch(/count/);
 		expect(broken((db) => fx(db).push({ type: "failRacks", count: 1.5 }))).toMatch(/count/);
 		expect(broken((db) => fx(db).push({ type: "spareParts", count: 0 }))).toMatch(/count/);

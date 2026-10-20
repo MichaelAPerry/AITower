@@ -319,9 +319,6 @@
 	max-height: calc(100% - var(--gap) * 28);
 	z-index: 6;
 }
-.aitower-hud .ui-tooltip {
-	left: calc(var(--dock-w) + var(--gap) * 12);
-}
 .aitower-hud .ui-tabs-6 {
 	grid-template-columns: repeat(6, auto);
 }

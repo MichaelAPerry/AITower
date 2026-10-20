@@ -85,7 +85,7 @@ describe("SystemMenu (server render)", () => {
 		const html = renderToString(<SystemMenu store={store} state={store.get()} menu={menu} />);
 		expect(html).toContain('role="dialog"');
 		expect(html).toContain('aria-modal="true"');
-		for (const t of ["Resume", "Save game", "Load game", "Settings", "Controls", "New game", "Restart induction", "GAME PAUSED"]) expect(html).toContain(t);
+		for (const t of ["Resume", "Save game", "Load game", "Settings", "Controls", "New game", "Restart tutorial", "GAME PAUSED"]) expect(html).toContain(t);
 	});
 	it("shows the settings drawer with every Settings field", () => {
 		const content = createFakeContent();
@@ -128,7 +128,7 @@ describe("SystemMenu (server render)", () => {
 		expect(html).toContain("BUY CREDITS");
 		expect(html).toContain("−$12k"); // the stamp shows its effect as a number
 		expect(html).toContain("no effect");
-		expect(html).toContain("AUTO-FILED IN 10h");
+		expect(html).toContain("AUTO-RESOLVES IN 10h");
 		expect(html).toContain("read memo");
 		expect(html).not.toContain("Weather Bureau advises"); // the prose is behind "read memo"
 		expect(html).toMatch(/ui-inbox-count has[^>]*>1</);
@@ -164,7 +164,7 @@ describe("SystemMenu (server render)", () => {
 		expect(clean).not.toContain("ui-over-memo");
 	});
 
-	it("uses Ministry wording for memo, standing and game-over events", () => {
+	it("uses Compute Authority wording for memo, standing and game-over events", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
 		const id = store.issueMemo("audit");
@@ -173,9 +173,9 @@ describe("SystemMenu (server render)", () => {
 		const v = store.get().view;
 		const resolved = describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: false }, v, content);
 		expect(resolved).toMatchObject({ toast: true });
-		expect(resolved.text).toBe("Memo stamped COMPLY. The Inspector counted 4,112 cables and left.");
-		expect(describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: true }, v, content).text).toContain("unanswered and filed as COMPLY");
-		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Ministry standing falls by 8 to 42", severity: "warn", toast: true });
+		expect(resolved.text).toBe("Memo answered: COMPLY. The Inspector counted 4,112 cables and left.");
+		expect(describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: true }, v, content).text).toContain("unanswered, resolved as COMPLY");
+		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Authority standing falls by 8 to 42", severity: "warn", toast: true });
 		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
 		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");
 		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");

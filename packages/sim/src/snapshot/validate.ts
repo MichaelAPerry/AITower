@@ -381,6 +381,8 @@ function validateGreen(s: Obj): void {
 		const v = s[k];
 		if (typeof v !== "number" || !(v >= 0 && v <= 1)) fail(`${k} is outside 0..1`);
 	}
+	const aff = fields(s.affinity, { biotech: "num", greentech: "num", synthetic: "num" }, "affinity");
+	for (const k of Object.keys(aff)) if (!((aff[k] as number) >= 0)) fail("affinity must not be negative");
 	if (typeof s.sandbox !== "boolean") fail("sandbox must be a boolean");
 	const shaped = shapeAutomation(s.automation);
 	if (!shaped.ok) fail(`automation: ${shaped.reason}`);

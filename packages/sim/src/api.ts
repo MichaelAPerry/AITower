@@ -27,7 +27,10 @@ export type SimCommand =
 	| { type: "place"; defId: string; floor: number; x: number }
 	/** Lay conduit on the given cells (any shape; vertical runs are risers). Cells need slab or an adjacent conduit. */
 	| { type: "buildConduit"; layer: ConduitLayer; cells: CellRef[] }
-	/** Build a lift shaft at column x spanning floorMin..floorMax (all floors need slab at x). */
+	/**
+	 * Build a lift shaft at column x spanning floorMin..floorMax (all floors need slab at x). If the span overlaps or touches
+	 * an existing lift in that column, that lift is extended instead (one floor is enough; only new floors are paid for).
+	 */
 	| { type: "buildLift"; x: number; floorMin: number; floorMax: number }
 	/**
 	 * Demolish whatever is top-most at the cell: facility ▸ lift ▸ conduit (layer
@@ -460,6 +463,12 @@ export interface SimView {
 	pathScore: number;
 	/** Greentech score 0..1: share of energy from solar/wind/bioreactor-free green sources blended with heat exported. */
 	greenScore: number;
+	/**
+	 * How strongly the tower leans to each path, as shares summing to 1 (all 0 before any lean). Points come from what is
+	 * built (path-flavoured facilities), researched (path-branch nodes) and chosen in memos (`affinity` effects). At
+	 * Clearance `ascension.minTier` the UI pre-selects the leading path for the player to confirm.
+	 */
+	affinity: { biotech: number; greentech: number; synthetic: number };
 	/** Synthetic score 0..1: uptime × share of compute on top-tier racks. */
 	refinement: number;
 	/** A Dunkelflaute (calm, dark spell) is in force. */

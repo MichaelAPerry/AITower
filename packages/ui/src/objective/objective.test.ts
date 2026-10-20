@@ -74,20 +74,20 @@ describe("current orders", () => {
 		expect(o.detail).toMatch(/or 1 Mk\.II Liquid \(\$1\.40M each\) on a coolant loop with a chiller and a CDU/);
 		expect(o.detail).toMatch(/1 cabinet is idle/);
 	});
-	it("red treasury with loan headroom mentions the Credit Office and the amount", () => {
+	it("red treasury with loan headroom mentions the Credit Facility and the amount", () => {
 		const o = currentObjective(view({ cash: -5, loan: { principal: 500_000, max: 2_000_000, dailyRate: 0.004 } }), content, yes);
 		expect(o.tone).toBe("alert");
-		expect(o.detail).toMatch(/Credit Office/);
+		expect(o.detail).toMatch(/Credit Facility/);
 		expect(o.detail).toMatch(/\$1\.50M/);
 	});
 	it("red treasury with the credit line used up (or no loan data) does not mention it", () => {
-		expect(currentObjective(view({ cash: -5, loan: { principal: 2_000_000, max: 2_000_000, dailyRate: 0.004 } }), content, yes).detail).not.toMatch(/Credit Office/);
-		expect(currentObjective(view({ cash: -5 }), content, yes).detail).not.toMatch(/Credit Office/);
+		expect(currentObjective(view({ cash: -5, loan: { principal: 2_000_000, max: 2_000_000, dailyRate: 0.004 } }), content, yes).detail).not.toMatch(/Credit Facility/);
+		expect(currentObjective(view({ cash: -5 }), content, yes).detail).not.toMatch(/Credit Facility/);
 	});
 	it("an affordable research node names itself and the R key, once racks are busy", () => {
 		const c = { ...content, tech: [{ id: "x", name: "Form 9", cost: 20, branch: "compute", minTier: 1, requires: [], effects: [{ type: "perk", kind: "failureRate", factor: 0.9 }] }, { id: "y", name: "Costly", cost: 90, branch: "power", minTier: 1, requires: [], effects: [] }] } as unknown as ContentDB;
 		const o = currentObjective(view({ jobs: running, researchPoints: 25, techResearched: [] }), c, yes);
-		expect(o.title).toBe("File a research request");
+		expect(o.title).toBe("Start a research project");
 		expect(o.key).toBe("R");
 		expect(o.detail).toMatch(/Form 9/);
 		expect(o.detail).toMatch(/−10 % failure rate/);
@@ -100,7 +100,7 @@ describe("current orders", () => {
 	});
 	it("a clerk that is unlocked but off is flagged; on, or locked, it is not", () => {
 		const clerk = (unlocked: boolean, enabled: boolean) => ({ unlocked, policy: { enabled }, acceptedTotal: 0 });
-		expect(currentObjective(view({ jobs: running, clerk: clerk(true, false) }), content, yes).title).toBe("Switch on your Contracts Clerk");
+		expect(currentObjective(view({ jobs: running, clerk: clerk(true, false) }), content, yes).title).toBe("Switch on Contract Automation");
 		expect(currentObjective(view({ jobs: running, clerk: clerk(true, true) }), content, yes).title).toBe("Next: Clearance 2");
 		expect(currentObjective(view({ jobs: running, clerk: clerk(false, false) }), content, yes).title).toBe("Next: Clearance 2");
 	});
@@ -117,5 +117,18 @@ describe("current orders", () => {
 		expect(m).toMatchObject({ income: 50_000, costs: 15_000 });
 		expect(m.breakdown).toMatch(/energy/);
 		expect(m.breakdown).not.toMatch(/penalties/);
+	});
+});
+
+describe("lift access hint", () => {
+	const c = { ...content, bots: { maint: { id: "maint" } }, facilities: { ...content.facilities } } as unknown as ContentDB;
+	const base = { bots: [{ defId: "maint", floor: 1 }], lifts: [{ x: 3, floorMin: 1, floorMax: 2 }], facilities: [{ ...rack(1), floor: 1 }, { ...rack(2), floor: 7 }] };
+	it("names a floor with facilities but no lift reach", () => {
+		const o = currentObjective(view(base), c, yes);
+		expect(o.title).toBe("F7 has no lift access: extend a lift");
+	});
+	it("is quiet once a lift reaches it", () => {
+		const o = currentObjective(view({ ...base, lifts: [{ x: 3, floorMin: 1, floorMax: 7 }] }), c, yes);
+		expect(o.title).not.toContain("lift access");
 	});
 });

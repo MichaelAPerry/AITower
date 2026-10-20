@@ -1,5 +1,5 @@
 /**
- * The Ministry Induction: a guided first session on the starter facility.
+ * The Compute Authority Induction: a guided first session on the starter facility.
  * Pure data + predicates over GameState so the flow is unit-testable without React.
  *
  * Clock policy (owner feedback: "the game kept running behind the memo"):
@@ -41,7 +41,7 @@ export interface TutorialStep {
 	id: string;
 	/** Memo heading, typewritten. */
 	title: string;
-	/** Memo body. Short paragraphs; plain words first, Ministry flavour second. */
+	/** Memo body. Short paragraphs; plain words first, Compute Authority flavour second. */
 	body: string[];
 	/** The one-line task shown with a checkbox: says exactly what to click and where. Absent = an informational memo. */
 	task?: string;
@@ -87,9 +87,9 @@ const placing = (ui: TutorialUi, defId: string): boolean => ui.tool.kind === "pl
 export const TUTORIAL_STEPS: TutorialStep[] = [
 	{
 		id: "welcome",
-		title: "Welcome, Superintendent",
+		title: "Welcome, Operator",
 		body: [
-			"You run an AI datacenter for the Ministry of Computation. Labs pay to rent your racks; power and upkeep cost money every minute.",
+			"You operate an AI datacenter under the Compute Authority. Labs pay to rent your racks; power and upkeep cost money every minute.",
 			"Your job: keep the racks busy. The clock is stopped while you read.",
 		],
 		clock: "pause",
@@ -98,7 +98,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		id: "contract",
 		title: "Take a contract",
 		body: ["Money comes from contracts. Accept one your idle racks can start: those offers say “Fits your idle racks”."],
-		task: "Press the green ACCEPT stamp on the highlighted offer",
+		task: "Press the green ACCEPT button on the highlighted offer",
 		how: ["Open CONTRACTS on the right edge (key C)", "Press ACCEPT on the highlighted offer"],
 		phase: (_s, ui) => (ui.drawer === "contracts" ? 1 : 0),
 		targets: (s, ui) => (ui.drawer !== "contracts" ? [t("dtab-contracts")] : s.view.offers.length > 0 ? [t("accept")] : [".ui-drawer"]),
@@ -140,7 +140,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		title: "Add a cabinet",
 		body: ["More racks, more contracts. The marked spot on F1 already has floor, power and cooling. Press Esc afterwards."],
 		task: "Build one more compute cabinet on F1",
-		how: ["Press MORE in the build dock (bottom left)", "Click the RACKS tab", "Click the first card: Mk.I Air-Cooled Compute Cabinet", "Click the blue blueprint on F1"],
+		how: ["Press MORE in the build dock (bottom left)", "Click the RACKS tab", "Click the first card (the air-cooled rack)", "Click the blue blueprint on F1"],
 		phase: (_s, ui) => (placing(ui, "rack_air_gpu") ? 3 : !ui.paletteOpen ? 0 : ui.paletteTab !== "rack" ? 1 : 2),
 		targets: (_s, ui) => (placing(ui, "rack_air_gpu") ? [] : !ui.paletteOpen ? [t("dock-more")] : ui.paletteTab !== "rack" ? [t("tab-rack")] : [t("card-rack_air_gpu")]),
 		ghost: (_s, ui) => (placing(ui, "rack_air_gpu") ? { cells: RACK_SPOT, valid: true, defId: "rack_air_gpu", label: "CLICK HERE" } : null),
@@ -162,17 +162,17 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 	},
 	{
 		id: "memos",
-		title: "Ministry memos",
-		body: ["Memos arrive in the INBOX (top strip). Urgent ones pop up with their stamps; the figure on each stamp is its real cost. Unanswered memos are filed under the default stamp."],
+		title: "Authority memos",
+		body: ["Memos arrive in the INBOX (top strip). Urgent ones pop up; the figure on each choice is its real cost. Unanswered memos resolve to the default choice."],
 		targets: () => [t("inbox"), t("standing")],
 		clock: "pause",
 	},
 	{
 		id: "finale",
-		title: "Induction complete",
+		title: "Tutorial complete",
 		body: [
 			"Goal: Clearance 2 (120 PFLOPS installed) unlocks liquid cooling. The CLEARANCE bar in the top strip shows your progress; NEXT says what to do.",
-			"Esc opens saves, settings and controls. Closing this memo starts the clock at 1×.",
+			"Esc opens saves, settings and controls. Closing this starts the clock at 1×.",
 		],
 		targets: () => [t("clearance")],
 		clock: "pause",
@@ -180,15 +180,15 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 ];
 
 /**
- * Shown once, the first time a Ministry memo is open while the induction is running. Not part of the numbered
+ * Shown once, the first time a Authority memo is open while the induction is running. Not part of the numbered
  * steps: it interrupts the current step, and the clock is stopped while it is on screen.
  */
 export const MEMO_EXPLAINER: TutorialStep = {
 	id: "memo-explainer",
-	title: "A memo from the Ministry",
+	title: "A memo from the Compute Authority",
 	body: [
-		"A memo just arrived. Urgent ones pop up at the top right; the rest wait in the INBOX. Each stamp shows what it costs.",
-		"Ignored memos are filed under their default stamp when the countdown ends.",
+		"A memo just arrived. Urgent ones pop up at the top right; the rest wait in the INBOX. Each choice shows what it costs.",
+		"Ignored memos resolve to the default choice when the countdown ends.",
 	],
 	targets: () => [t("inbox")],
 	corner: "br",

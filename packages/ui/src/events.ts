@@ -30,7 +30,7 @@ const commandName: Record<SimCommand["type"], string> = {
 	buyBot: "Buy bot",
 	resolveMemo: "Answer memo",
 	research: "Research",
-	setClerk: "Clerk orders",
+	setClerk: "Contract Automation orders",
 	takeLoan: "Take loan",
 	repayLoan: "Repay loan",
 	choosePath: "Choose path",
@@ -44,7 +44,7 @@ const gradeSeverity = (g: AuditGrade): Severity => {
 
 /**
  * Turn a SimEvent into human words. Unknown ids degrade gracefully ("#12"). `horror` is `settings.horrorIntensity`:
- * "off" gives plain wording for the biotech events; otherwise the Ministry's euphemism (it never admits anything).
+ * "off" gives plain wording for the biotech events; otherwise the Compute Authority's euphemism (it never admits anything).
  */
 export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, horror: HorrorIntensity = "full"): Described {
 	const plain = horror === "off";
@@ -125,18 +125,18 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			return { text: "WARNING: Treasury below zero for a full day (insolvency notice)", severity: "error", toast: true };
 		case "memoIssued": {
 			const m = view.memos.find((m) => m.eventId === ev.eventId);
-			return { text: m ? `Memo received from the Ministry: ${m.title}` : "A memo has arrived from the Ministry", severity: "info", toast: false };
+			return { text: m ? `Memo received: ${m.title}` : "A memo has arrived", severity: "info", toast: false };
 		}
 		case "memoResolved": {
 			const h = view.memoHistory.find((h) => h.memoId === ev.memoId);
 			const label = h ? content.events.find((e) => e.id === h.eventId)?.choices.find((c) => c.id === h.choiceId)?.label : undefined;
 			const stamp = label ?? ev.choiceId.toUpperCase();
-			const head = ev.auto ? `Memo unanswered and filed as ${stamp}` : `Memo stamped ${stamp}`;
+			const head = ev.auto ? `Memo unanswered, resolved as ${stamp}` : `Memo answered: ${stamp}`;
 			return { text: h ? `${head}. ${h.outcome}` : `${head}.`, severity: "info", toast: true };
 		}
 		case "standingChanged":
 			return {
-				text: `Ministry standing ${ev.delta >= 0 ? "rises" : "falls"} by ${Math.abs(ev.delta)} to ${ev.standing}`,
+				text: `Authority standing ${ev.delta >= 0 ? "rises" : "falls"} by ${Math.abs(ev.delta)} to ${ev.standing}`,
 				severity: ev.delta < 0 ? "warn" : "good",
 				toast: ev.delta <= -5 || ev.standing < 25,
 			};
@@ -149,21 +149,21 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		case "researched": {
 			const node = content.tech?.find((t) => t.id === ev.techId);
 			const gives = [...(node?.effects.map((e) => effectText(e, content)) ?? []), ...(unlocksFor(ev.techId, content).length ? [`new in the build menu: ${unlocksFor(ev.techId, content).join(", ")}`] : [])];
-			return { text: `Research filed: ${node?.name ?? ev.techId}${gives.length ? `. ${gives.join("; ")}` : ""}`, severity: "good", toast: true };
+			return { text: `Research complete: ${node?.name ?? ev.techId}${gives.length ? `. ${gives.join("; ")}` : ""}`, severity: "good", toast: true };
 		}
 		case "clerkAccepted": {
 			const fee = content.balance?.clerk?.feeShare;
-			return { text: `The Contracts Clerk accepted ${job(ev.jobId)}${fee ? ` (fee ${Math.round(fee * 1000) / 10} % of its earnings)` : ""}`, severity: "info", toast: false };
+			return { text: `The Contract Automation accepted ${job(ev.jobId)}${fee ? ` (fee ${Math.round(fee * 1000) / 10} % of its earnings)` : ""}`, severity: "info", toast: false };
 		}
 		case "loanTaken": {
 			const rate = view.loan?.dailyRate;
-			return { text: `Credit Office: loan of ${fmtMoney(ev.amount)} approved${rate ? `; interest accrues at ${Math.round(rate * 10000) / 100} % a day` : ""}`, severity: "info", toast: false };
+			return { text: `Credit Facility: loan of ${fmtMoney(ev.amount)} approved${rate ? `; interest accrues at ${Math.round(rate * 10000) / 100} % a day` : ""}`, severity: "info", toast: false };
 		}
 		case "loanRepaid":
-			return { text: `Credit Office: ${fmtMoney(ev.amount)} repaid. The Ministry thanks you for your promptness`, severity: "good", toast: false };
+			return { text: `Credit Facility: ${fmtMoney(ev.amount)} repaid. Repayment recorded`, severity: "good", toast: false };
 		case "pathChosen": {
 			const name = content.paths?.find((p) => p.id === ev.path)?.name ?? ev.path;
-			return { text: plain ? `Ascension path chosen: ${name}` : `FORM A-5 filed. The Ministry notes the tower's election of the ${name} programme, and congratulates it`, severity: "good", toast: true };
+			return { text: plain ? `Ascension path chosen: ${name}` : `Ascension path committed: ${name}`, severity: "good", toast: true };
 		}
 		case "growthSprouted": {
 			const f = fac(ev.facilityId);
@@ -171,7 +171,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "botMutated": {
 			const trait = traitName(ev.trait, horror);
-			return { text: plain ? `Automaton #${ev.botId} has mutated (${trait})` : `Automaton #${ev.botId} has been reclassified (${trait}). No action is required`, severity: plain ? "warn" : "info", toast: false };
+			return { text: plain ? `Bot #${ev.botId} has mutated (${trait})` : `Bot #${ev.botId} has been reclassified (${trait})`, severity: plain ? "warn" : "info", toast: false };
 		}
 		case "earned":
 			return { text: `${job(ev.jobId)} paid ${fmtMoney(ev.amount)}`, severity: "good", toast: false };
@@ -189,25 +189,25 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			const k = content.balance?.bio?.irreversibleCleanFactor;
 			const strength = k === undefined ? "" : ` Sterile bays now work at ${Math.round(k * 100)} % of rated effect.`;
 			return {
-				text: plain ? `Contamination can no longer be reversed.${strength}` : `Sanitation Bureau: the premises have been recertified as established.${strength}`,
+				text: plain ? `Contamination can no longer be reversed.${strength}` : `Compute Authority: the premises have been recertified.${strength}`,
 				severity: "warn",
 				toast: true,
 			};
 		}
 		case "quarterReport": {
 			const r = view.reports?.find((r) => r.quarter === ev.quarter);
-			return { text: `Quarterly audit ${ev.quarter} filed: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
+			return { text: `Quarterly audit ${ev.quarter}: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
 		}
 	}
 }
 
 function gameOverText(kind: GameOverKind, ending: EndingId | undefined, content: ContentDB, plain: boolean): string {
-	if (kind === "absorbed") return plain ? "The Ministry has taken over the facility: game over" : "NOTICE OF INCORPORATION: the facility has been reclassified as a Ministry asset";
+	if (kind === "absorbed") return plain ? "The Compute Authority has taken over the facility: game over" : "NOTICE: the facility has been reclassified as a Compute Authority asset";
 	if (kind === "victory") {
 		const title = ending ? content.endings?.find((e) => e.id === ending)?.title : undefined;
-		return title ? `COMMENDATION issued by the Ministry: ${title}` : "COMMENDATION issued by the Ministry";
+		return title ? `COMMENDATION from the Compute Authority: ${title}` : "COMMENDATION from the Compute Authority";
 	}
-	return kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, Ministry standing is zero" : "NOTICE OF TERMINATION: foreclosed for insolvency";
+	return kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, Authority standing is zero" : "NOTICE: foreclosed for insolvency";
 }
 
 /** Events too chatty for the alert feed. */

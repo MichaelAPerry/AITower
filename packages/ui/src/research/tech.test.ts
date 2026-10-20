@@ -55,8 +55,8 @@ describe("effect text", () => {
 		expect(fmtFactor(1.1)).toBe("+10 %");
 	});
 	it("the clerk feature mentions the fee when the balance is known", () => {
-		expect(effectText({ type: "feature", feature: "contractsClerk" }, content)).toBe("Contracts Clerk: accepts offers for you (keeps 5 % of each job it books)");
-		expect(effectText({ type: "feature", feature: "contractsClerk" })).toBe("Contracts Clerk: accepts offers for you");
+		expect(effectText({ type: "feature", feature: "contractsClerk" }, content)).toBe("Contract Automation: accepts offers for you (keeps 5 % of each job it books)");
+		expect(effectText({ type: "feature", feature: "contractsClerk" })).toBe("Contract Automation: accepts offers for you");
 	});
 });
 

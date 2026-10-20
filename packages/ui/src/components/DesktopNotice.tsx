@@ -6,14 +6,14 @@ export function DesktopNotice({ store, onDismiss }: { store: GameStore; onDismis
 	return (
 		<section className="ui-desknotice" role="note" aria-label="Best on desktop">
 			<header className="tut-head">
-				<span className="ui-dymo">INTERDEPT. MEMO</span>
+				<span className="ui-dymo">NOTICE</span>
 				<Stamp tone="red" className="ui-desknotice-stamp">
 					Notice
 				</Stamp>
 			</header>
 			<h3 className="tut-title">Best viewed on a desktop</h3>
 			<p className="tut-body">
-				This control room is built for a large screen and a mouse. On a window this small the panels crowd the tower. It still runs, but a desktop browser is recommended.
+				This console is built for a large screen and a mouse. On a window this small the panels crowd the tower. It still runs, but a desktop browser is recommended.
 			</p>
 			<label className="ui-desknotice-check">
 				<input

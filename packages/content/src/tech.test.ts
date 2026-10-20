@@ -25,9 +25,9 @@ describe("tech tree (bundled)", () => {
 		for (let t = 1; t <= db.balance.tiers.pflops.length; t++) expect(db.tech.some((n) => n.minTier === t), `tier ${t}`).toBe(true);
 	});
 
-	it("starts with the cheap tier-1 administration node 'Contracts Clerk' that switches on the clerk", () => {
+	it("starts with the cheap tier-1 administration node 'Contract Automation' that switches on the clerk", () => {
 		const n = byId.get("contracts_clerk") as TechNode;
-		expect(n.name).toBe("Contracts Clerk");
+		expect(n.name).toBe("Contract Automation");
 		expect(n.branch).toBe("administration");
 		expect(n.minTier).toBe(1);
 		expect(n.requires).toEqual([]);

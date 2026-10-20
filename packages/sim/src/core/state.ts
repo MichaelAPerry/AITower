@@ -378,6 +378,8 @@ export interface SimState {
 	wind: number;
 	/** A Dunkelflaute is in force while `tick < droughtUntil`. */
 	droughtUntil: number;
+	/** Raw path-affinity points (memos, research, running facilities); the view reports shares. */
+	affinity: { biotech: number; greentech: number; synthetic: number };
 	/** Smoothed greentech score 0..1. */
 	greenScore: number;
 	/** Synthetic score 0..1: uptime × share of delivered compute on top-tier racks. */

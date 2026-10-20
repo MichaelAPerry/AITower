@@ -1,13 +1,13 @@
-/* ── Title screen: the Ministry front office ── */
+/* ── Title screen ── */
 .aitower-hud .ui-title {
 	position: absolute;
 	inset: 0;
 	z-index: 50;
 	pointer-events: auto;
-	display: grid;
-	place-items: center;
+	display: flex;
 	padding: 20px;
-	overflow: hidden;
+	overflow-x: hidden;
+	overflow-y: auto;
 	background:
 		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 20%, transparent) 2px 3px),
 		linear-gradient(180deg, color-mix(in srgb, var(--ink) 92%, var(--smog)) 0%, color-mix(in srgb, var(--smog) 38%, var(--ink)) 62%, color-mix(in srgb, var(--sodium) 22%, var(--ink)) 100%);
@@ -39,12 +39,12 @@
 .aitower-hud .ui-title-cabinet {
 	position: relative;
 	z-index: 1;
+	flex: none;
+	margin: auto;
 	width: min(560px, 100%);
 	padding: 26px 30px 20px;
 	display: grid;
 	gap: 18px;
-	max-height: 100%;
-	overflow-y: auto;
 }
 .aitower-hud .ui-title-plate {
 	display: grid;
@@ -224,4 +224,16 @@
 }
 .aitower-hud .ui-title-card-desc {
 	font: 14px/1.3 var(--f-type);
+}
+
+/* Cards wrap their text instead of running past the panel */
+.aitower-hud .ui-title-card,
+.aitower-hud .ui-title-card-desc,
+.aitower-hud .ui-title-card-head {
+	min-width: 0;
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+.aitower-hud .ui-title-sub {
+	font-size: 10px;
 }

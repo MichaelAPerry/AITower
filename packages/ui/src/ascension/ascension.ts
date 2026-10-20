@@ -1,5 +1,5 @@
 /**
- * FORM A-5: ASCENSION. Pure logic for the sheet that commits the tower to a path at Clearance `balance.ascension.minTier`.
+ * ASCENSION. Pure logic for the sheet that commits the tower to a path at Clearance `balance.ascension.minTier`.
  * The choice is irreversible, so the sheet asks once more before dispatching `choosePath`.
  */
 import type { AscensionPath, ContentDB } from "@aitower/content";
@@ -41,7 +41,7 @@ export function pathToConfirm(content: ContentDB, id: AscensionPath): AscensionP
 	return (content.paths ?? []).some((p) => p.id === id && p.available) ? id : null;
 }
 
-export const confirmQuestion = (name: string): string => `File FORM A-5 for ${name}? This cannot be undone.`;
+export const confirmQuestion = (name: string): string => `Commit to ${name}? This cannot be undone.`;
 
 /** Dispatch the irreversible choice. Returns the filing marker on success; a refusal is shown as a notice. */
 export function filePath(store: GameStore, content: ContentDB, id: AscensionPath): PathFiled | null {
@@ -53,3 +53,22 @@ export function filePath(store: GameStore, content: ContentDB, id: AscensionPath
 	}
 	return { path: id, tick: store.get().view.tick };
 }
+
+/** Path order and colours (one hue per path; used by the bars, the memo chips and the sheet). */
+export const PATH_ORDER: readonly AscensionPath[] = ["biotech", "greentech", "synthetic"];
+export const PATH_COLOR: Record<AscensionPath, string> = { biotech: "#d9669c", greentech: "#4ee08a", synthetic: "#9b8cff" };
+
+/** The path with the largest affinity share; null when all are zero or the top two tie. */
+export function leadingPath(affinity: Record<AscensionPath, number>): AscensionPath | null {
+	const sorted = [...PATH_ORDER].sort((a, b) => affinity[b] - affinity[a]);
+	return affinity[sorted[0]] > 0 && affinity[sorted[0]] > affinity[sorted[1]] ? sorted[0] : null;
+}
+
+/** The path the sheet opens with selected: the leading one if it can be chosen. */
+export function preselectedPath(content: ContentDB, affinity: Record<AscensionPath, number>): AscensionPath | null {
+	const lead = leadingPath(affinity);
+	return lead ? pathToConfirm(content, lead) : null;
+}
+
+/** "Biotech 62%" style label for a share. */
+export const sharePct = (share: number): string => `${Math.round(share * 100)}%`;
