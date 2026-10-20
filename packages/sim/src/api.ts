@@ -27,7 +27,10 @@ export type SimCommand =
 	| { type: "place"; defId: string; floor: number; x: number }
 	/** Lay conduit on the given cells (any shape; vertical runs are risers). Cells need slab or an adjacent conduit. */
 	| { type: "buildConduit"; layer: ConduitLayer; cells: CellRef[] }
-	/** Build a lift shaft at column x spanning floorMin..floorMax (all floors need slab at x). */
+	/**
+	 * Build a lift shaft at column x spanning floorMin..floorMax (all floors need slab at x). If the span overlaps or touches
+	 * an existing lift in that column, that lift is extended instead (one floor is enough; only new floors are paid for).
+	 */
 	| { type: "buildLift"; x: number; floorMin: number; floorMax: number }
 	/**
 	 * Demolish whatever is top-most at the cell: facility ▸ lift ▸ conduit (layer

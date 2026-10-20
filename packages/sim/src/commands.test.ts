@@ -250,3 +250,53 @@ describe("flush (apply queued commands while paused)", () => {
 		expect(a.hash()).toBe(b.hash());
 	});
 });
+
+describe("lift extension", () => {
+	/** Slab on floors 0..4 over x 0..20, a lift at x=10 spanning 0..1. */
+	const setup = () => {
+		const sim = newSim(makeContent());
+		for (let f = 0; f <= 4; f++) exec(sim, { type: "buildSlab", floor: f, x0: 0, x1: 20 });
+		exec(sim, { type: "buildLift", x: 10, floorMin: 0, floorMax: 1 });
+		return sim;
+	};
+
+	it("a drag touching the top extends the same lift, charging only the new floors", () => {
+		const sim = setup();
+		const id = sim.state.lifts[0].id;
+		const cash0 = sim.state.cash;
+		exec(sim, { type: "buildLift", x: 10, floorMin: 2, floorMax: 4 });
+		expect(sim.state.lifts).toHaveLength(1);
+		expect(sim.state.lifts[0]).toMatchObject({ id, floorMin: 0, floorMax: 4 });
+		expect(cash0 - sim.state.cash).toBe(3 * sim.content.structure.liftPerFloor);
+		const v = sim.view();
+		expect(v.lifts[0]).toMatchObject({ floorMin: 0, floorMax: 4 });
+	});
+
+	it("one floor is enough when extending; overlapping drags work; a lift with nothing new is refused", () => {
+		const sim = setup();
+		exec(sim, { type: "buildLift", x: 10, floorMin: 2, floorMax: 2 });
+		expect(sim.state.lifts[0]).toMatchObject({ floorMin: 0, floorMax: 2 });
+		exec(sim, { type: "buildLift", x: 10, floorMin: 1, floorMax: 3 });
+		expect(sim.state.lifts[0]).toMatchObject({ floorMin: 0, floorMax: 3 });
+		const r = sim.submit({ type: "buildLift", x: 10, floorMin: 0, floorMax: 3 });
+		expect(r).toEqual({ ok: false, reason: "already built" });
+		// A new single-floor lift elsewhere is still refused.
+		expect(sim.submit({ type: "buildLift", x: 15, floorMin: 2, floorMax: 2 }).ok).toBe(false);
+	});
+
+	it("needs slab on the new floors and stops at facilities in the way", () => {
+		const sim = newSim(makeContent());
+		for (let f = 0; f <= 2; f++) exec(sim, { type: "buildSlab", floor: f, x0: 0, x1: 20 });
+		exec(sim, { type: "buildLift", x: 10, floorMin: 0, floorMax: 1 });
+		const r = sim.submit({ type: "buildLift", x: 10, floorMin: 2, floorMax: 3 });
+		expect(r).toEqual({ ok: false, reason: "no slab at floor 3" });
+	});
+
+	it("bots can ride the extended shaft to the new floors (routing sees the change)", () => {
+		const sim = setup();
+		const before = sim.state.topologyRev;
+		exec(sim, { type: "buildLift", x: 10, floorMin: 2, floorMax: 4 });
+		expect(sim.state.topologyRev).toBeGreaterThan(before);
+		for (let f = 0; f <= 4; f++) expect(sim.state.liftAt[(f - sim.state.floorMin) * sim.state.width + 10]).toBe(sim.state.lifts[0].id);
+	});
+});

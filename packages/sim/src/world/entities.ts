@@ -101,6 +101,15 @@ export function addLift(state: SimState, x: number, floorMin: number, floorMax: 
 	return lift;
 }
 
+/** Grow a lift's shaft to [floorMin, floorMax] (a superset of its current span). Riders and the car are unaffected. */
+export function extendLift(state: SimState, lift: Lift, floorMin: number, floorMax: number): void {
+	lift.floorMin = floorMin;
+	lift.floorMax = floorMax;
+	for (let fl = floorMin; fl <= floorMax; fl++) state.liftAt[cellIdx(state, lift.x, fl)] = lift.id;
+	state.netsDirty = true;
+	state.topologyRev++;
+}
+
 export function removeLift(state: SimState, lift: Lift): void {
 	for (let fl = lift.floorMin; fl <= lift.floorMax; fl++) state.liftAt[cellIdx(state, lift.x, fl)] = -1;
 	removeById(state.lifts, lift.id);
