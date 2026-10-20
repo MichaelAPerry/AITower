@@ -7,7 +7,9 @@ import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY,
 import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
 import { Interpolator, effectiveAlpha, hashArrays } from "../interp";
 import { type HorrorStages, type LiveFx, SIGN_WORD, easeToward, horrorStages, signWord } from "../horror";
-import { pathSkin, skinEffects } from "../skin";
+import { type SkinStage, pathSkin, skinEffects } from "../skin";
+import { GreenDecals } from "./greenDecals";
+import { Juice } from "./juice";
 import { HorrorLayer } from "./horror";
 import { Arrows } from "./arrows";
 import { Background } from "./background";
@@ -111,6 +113,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const effects = new Effects(content);
 	const feedback = new Feedback(content);
 	const horror = new HorrorLayer();
+	const decals = new GreenDecals();
+	const juice = new Juice(content);
 	const arrows = new Arrows(content);
 	const overlays = new Overlays(content);
 	const ghost = new GhostLayer(content);
@@ -120,6 +124,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		structure.shell,
 		conduits,
 		horror.root,
+		decals.g,
 		structure.plates,
 		lifts.shafts,
 		lifts.cars,
@@ -131,6 +136,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		pneumatics.g,
 		bots.g,
 		effects.g,
+		juice.root,
 		feedback.g,
 		overlays.root,
 		ghost.root,
@@ -160,6 +166,11 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	let stages: HorrorStages = horrorStages(0, 0, pres.options.horrorIntensity);
 	let skinKey = "0f";
 	let skinScore = 0;
+	// Greentech / synthetic skin (separate from the biotech horror stages): path, stage and the fungus's horror alpha.
+	let ppath: "greentech" | "synthetic" | null = null;
+	let pstage: SkinStage = 0;
+	let phorror = 1;
+	let droughtAmt = 0;
 	const live: LiveFx = { stages, score: 0, stage: 0, cursor: null, paused: false };
 	const cursor = { x: 0, y: 0 };
 	let cursorSeen = false;
@@ -179,7 +190,11 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		const stage = off || skin.path !== "biotech" ? 0 : skin.stage;
 		stages = horrorStages(stage, skin.score, pres.options.horrorIntensity);
 		skinScore = skin.score;
-		skinKey = `${stage}${pres.options.horrorIntensity[0]}`;
+		ppath = skin.path === "greentech" || skin.path === "synthetic" ? skin.path : null;
+		pstage = ppath ? skin.stage : 0;
+		phorror = pres.options.horrorIntensity === "off" ? 0 : pres.options.horrorIntensity === "mild" ? 0.5 : 1;
+		skinKey = `${stage}${pres.options.horrorIntensity[0]}${ppath ? `${ppath[0]}${pstage}` : ""}`;
+		live.pskin = ppath && pstage > 0 ? { path: ppath, stage: pstage, horror: phorror } : undefined;
 		live.stages = stages;
 		live.stage = stage;
 		live.score = skinScore;
@@ -261,6 +276,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			drawCoolant(conduits, view);
 			drawNutrient(conduits, view);
 		}
+		const dkey = ppath === "greentech" && pstage > 0 ? `${pstage}:${keys.grid}:${sh}:${ch}` : "";
+		if (decals.needsRebuild(dkey)) decals.rebuild(view, dkey ? pstage : 0, dkey);
 		if (horror.needsRebuild(sh ^ Math.imul(ch, 31), stages)) horror.rebuild(view, sh ^ Math.imul(ch, 31), stages);
 		const lk = liftKey(view.lifts);
 		if (gridChanged || lk !== keys.lift) {
@@ -274,8 +291,12 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			for (const f of view.facilities) {
 				const def = content.facilities[f.defId];
 				if (!def) continue;
-				const eff = skinEffects({ path: stages.stage > 0 ? "biotech" : null, stage: stages.stage }, f.grown || def.growth ? "growth" : def.kind);
-				drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor), { grown: f.grown, plain, skin: { effects: eff, alpha: stages.alpha, seed: f.id } });
+				const cls = f.grown || def.growth ? "growth" : def.kind;
+				const skin =
+					ppath && pstage > 0
+						? { effects: skinEffects({ path: ppath, stage: pstage }, cls), alpha: 1, seed: f.id, path: ppath, horror: phorror }
+						: { effects: skinEffects({ path: stages.stage > 0 ? "biotech" : null, stage: stages.stage }, cls), alpha: stages.alpha, seed: f.id };
+				drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor), { grown: f.grown, plain, skin });
 			}
 		}
 		feedback.onTick(view);
@@ -284,8 +305,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	};
 
 	const renderer: Renderer = {
-		pushEvents(_events: SimEvent[]) {
-			// M4 placeholder (M4-T4 draws "+$" floaters and build puffs from these).
+		pushEvents(events: SimEvent[]) {
+			juice.push(events, lastView);
 		},
 		setOptions(o: RenderOptions) {
 			// Cheap when nothing changed: only changed keys invalidate anything.
@@ -319,7 +340,13 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			world.scale.set(cam.zoom);
 			const opt = pres.options;
 			const paused = now - lastTickAt > SETTLE_MS;
-			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt, signWord(stages, t, opt.reducedMotion) !== SIGN_WORD);
+			// A drought dims and flattens the sky (eased; instant under reduced motion).
+			const dTarget = view.drought ? 1 : 0;
+			droughtAmt = opt.reducedMotion || Math.abs(droughtAmt - dTarget) < 0.002 ? dTarget : easeToward(droughtAmt, dTarget, dt, 1.2);
+			live.minute = view.minuteOfDay;
+			live.tick = view.tick;
+			live.drought = view.drought;
+			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt, signWord(stages, t, opt.reducedMotion) !== SIGN_WORD, droughtAmt);
 			// Eyes follow the cursor slowly: ease a world-space point toward the pointer.
 			if (pointer && stages.eyes) {
 				const wx = (pointer.sx - o.x) / cam.zoom;
@@ -360,6 +387,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			horror.updateBreath(view, stages, t, opt);
 			horror.update({ x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, stages, t, opt);
 			effects.update(view, bots.torches, dt, t, opt);
+			juice.update(dt, opt.reducedMotion);
 			feedback.update(view, { x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, dt, t, opt);
 
 			overlays.root.visible = overlay !== "normal";

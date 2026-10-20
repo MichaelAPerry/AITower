@@ -1,7 +1,7 @@
 /**
  * Staged path reskins (M3-T3b). Every ascension path re-skins every device at 25 / 50 / 75 / 100 % of its path score:
- * Biotech turns fleshy (score = `view.corruption`, applied even before the path is chosen), Greentech grows fungus, plants
- * and fish and Synthetic Mind grows more refined (both M4: placeholders that plug into this same table).
+ * Biotech turns fleshy (score = `view.corruption`, applied even before the path is chosen), Greentech grows moss, fungus, plants
+ * and fish and Synthetic Mind grows more refined (score = `view.pathScore`).
  * Pure: `pathSkin` picks path and stage, `skinEffects` says what a device kind shows at a stage.
  */
 import type { AscensionPath, FacilityKind } from "@aitower/content";
@@ -28,17 +28,14 @@ export interface PathSkin {
 }
 
 /** What `pathSkin` reads of a `SimView`. */
-export type SkinInput = { path: AscensionPath | null; corruption: number };
+export type SkinInput = { path: AscensionPath | null; corruption: number; pathScore?: number };
 
-/**
- * M4 hook: score of a non-biotech path. Greentech and Synthetic Mind have no score in the view yet, so they stay at
- * stage 0 (the plain synthetic look) until M4 supplies one.
- */
-export const pathScore = (path: AscensionPath, v: SkinInput): number => (path === "biotech" ? clamp01(v.corruption) : 0);
+/** Score of a path: biotech reads `corruption`; greentech and Synthetic Mind read `view.pathScore` (greenScore / refinement). */
+export const pathScore = (path: AscensionPath, v: SkinInput): number => (path === "biotech" ? clamp01(v.corruption) : clamp01(v.pathScore ?? 0));
 
 /**
  * The active skin. Biotech wins when chosen, and also applies before any path is chosen once corruption has started
- * (the Wetware tier seeds it). Another chosen path shows its own (M4) score and never the biotech skin.
+ * (the Wetware tier seeds it). Another chosen path shows its own score and never the biotech skin.
  */
 export const pathSkin = (v: SkinInput): PathSkin => {
 	const path: SkinPath | null = v.path ?? (clamp01(v.corruption) > 0 ? "biotech" : null);
@@ -47,8 +44,29 @@ export const pathSkin = (v: SkinInput): PathSkin => {
 	return { path, stage: stageOf(score), score };
 };
 
-/** Effects a device can show. */
-export type SkinEffect = "damp" | "pulse" | "veins" | "flesh" | "bile" | "breathe" | "eyes" | "tissue";
+/**
+ * Effects a device can show. Biotech: damp .. tissue. Greentech: moss, fungus (the quiet horror: spores and gills), vines,
+ * plants, tank (a fish tank), garden. Synthetic Mind: lines, glass, panels, light.
+ */
+export type SkinEffect =
+	| "damp"
+	| "pulse"
+	| "veins"
+	| "flesh"
+	| "bile"
+	| "breathe"
+	| "eyes"
+	| "tissue"
+	| "moss"
+	| "fungus"
+	| "vines"
+	| "plants"
+	| "tank"
+	| "garden"
+	| "lines"
+	| "glass"
+	| "panels"
+	| "light";
 
 /** Effects each biotech stage adds (cumulative): 25 % damp + pulse, 50 % veins + flesh + bile, 75 % breathe + eyes, 100 % tissue. */
 export const BIOTECH_STAGES: readonly (readonly SkinEffect[])[] = [["damp", "pulse"], ["veins", "flesh", "bile"], ["breathe", "eyes"], ["tissue"]];
@@ -71,7 +89,7 @@ const RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	// The clean devices hold out: sterile bays and quarantine locks only give way at the very end.
 	sterilizer: ["damp", "tissue"],
 	quarantine: ["damp", "tissue"],
-	// M4 placeholders (M4-T4 gives greentech devices their own responses).
+	// Green kinds: biotech barely touches them (tissue and damp only).
 	solar: ["damp", "tissue"],
 	wind: ["damp", "tissue"],
 	heat_export: ["damp", "veins", "tissue"],
@@ -80,12 +98,68 @@ const RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	growth: ["pulse", "veins", "breathe", "eyes"],
 };
 
-/** Per-path table: for each device class, the effects it shows at each stage (index 0 = stage 1). Greentech and synthetic are M4 placeholders ("same"). */
-export const skinTable = (path: SkinPath, kind: DeviceClass): readonly (readonly SkinEffect[])[] => {
-	if (path !== "biotech") return [[], [], [], []];
-	const ok = RESPONDS[kind] ?? [];
-	return BIOTECH_STAGES.map((s) => s.filter((e) => ok.includes(e)));
+/** Greentech stages: 25 % moss on edges, 50 % fungus shelves and vines on conduits, 75 % plants out of devices and fish tanks in coolant loops, 100 % a living green tower. */
+export const GREEN_STAGES: readonly (readonly SkinEffect[])[] = [["moss"], ["fungus", "vines"], ["plants", "tank"], ["garden"]];
+
+/** Synthetic Mind stages: finer light lines, brighter glass, monolithic panels, then light-only geometry. */
+export const SYNTH_STAGES: readonly (readonly SkinEffect[])[] = [["lines"], ["glass"], ["panels"], ["light"]];
+
+const ALL_SYNTH: readonly SkinEffect[] = ["lines", "glass", "panels", "light"];
+
+/** Which greentech effects a device class responds to ("stays the same" at stages that add nothing it responds to). */
+const GREEN_RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
+	rack: ["moss", "fungus", "plants", "garden"],
+	crah: ["moss", "fungus", "vines", "plants", "garden"],
+	chiller: ["moss", "vines", "tank", "garden"],
+	cdu: ["moss", "vines", "tank", "garden"],
+	grid_tie: ["moss", "vines"],
+	genset: ["moss", "garden"],
+	ups: ["moss", "vines"],
+	depot: ["moss", "fungus", "plants", "garden"],
+	charger: ["moss", "plants"],
+	nutrient: ["moss", "fungus", "plants", "garden"],
+	bioreactor: ["moss", "fungus", "garden"],
+	// The clean devices hold out.
+	sterilizer: ["moss"],
+	quarantine: ["moss"],
+	// Green devices are already half there: they take the living tower, not the first stages.
+	solar: ["moss", "plants", "garden"],
+	wind: ["moss", "vines"],
+	heat_export: ["moss", "vines", "plants", "garden"],
+	carbon: ["fungus", "tank", "garden"],
+	growth: [],
 };
+
+/** Which synthetic effects a device class responds to. */
+const SYNTH_RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
+	rack: ALL_SYNTH,
+	crah: ["lines", "glass", "light"],
+	chiller: ["lines", "glass", "light"],
+	cdu: ["lines", "glass", "light"],
+	grid_tie: ["lines", "panels", "light"],
+	genset: ["lines", "panels", "light"],
+	ups: ["lines", "glass", "panels", "light"],
+	depot: ["lines", "glass", "light"],
+	charger: ["lines", "glass", "light"],
+	nutrient: ["lines", "glass", "light"],
+	bioreactor: ["lines", "glass", "light"],
+	sterilizer: ALL_SYNTH,
+	quarantine: ALL_SYNTH,
+	solar: ["lines", "glass", "light"],
+	wind: ["lines", "light"],
+	heat_export: ["lines", "glass", "light"],
+	carbon: ["lines", "glass", "light"],
+	growth: [],
+};
+
+/** Per-path table: for each device class, the effects it shows at each stage (index 0 = stage 1). */
+export const skinTable = (path: SkinPath, kind: DeviceClass): readonly (readonly SkinEffect[])[] => {
+	const [stages, responds]: [readonly (readonly SkinEffect[])[], Record<DeviceClass, readonly SkinEffect[]>] =
+		path === "biotech" ? [BIOTECH_STAGES, RESPONDS] : path === "greentech" ? [GREEN_STAGES, GREEN_RESPONDS] : [SYNTH_STAGES, SYNTH_RESPONDS];
+	const ok = responds[kind] ?? [];
+	return stages.map((s) => s.filter((e) => ok.includes(e)));
+};
+
 
 /** Effects shown by a device kind at `skin` (cumulative up to the stage; empty at stage 0 or without a path). */
 export const skinEffects = (skin: Pick<PathSkin, "path" | "stage">, kind: DeviceClass): ReadonlySet<SkinEffect> => {

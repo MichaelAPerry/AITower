@@ -51,7 +51,7 @@ const body = (def: FacilityDef): Rect[] => {
 describe("variety scene", () => {
 	it("covers every facility kind, every rack cooling flavour, tiers 1-4 and several widths", () => {
 		const kinds = new Set(defs.map((d) => d.def.kind));
-		expect([...kinds].sort()).toEqual(["bioreactor", "charger", "cdu", "chiller", "crah", "depot", "genset", "grid_tie", "nutrient", "quarantine", "rack", "sterilizer", "ups"].sort());
+		expect([...kinds].sort()).toEqual(["bioreactor", "carbon", "charger", "cdu", "chiller", "crah", "depot", "genset", "grid_tie", "heat_export", "nutrient", "quarantine", "rack", "solar", "sterilizer", "ups", "wind"].sort());
 		const flavours = new Set(defs.filter((d) => d.def.kind === "rack").map((d) => artSpec(d.def).variant));
 		expect([...flavours].sort()).toEqual(["air", "dlc", "dna", "immersion", "neural", "organoid", "storage"]);
 		expect(defs.some((d) => bodyArt(d.def) === "culling_room")).toBe(true);

@@ -40,6 +40,9 @@ export const T = {
 	blood: 0x6a2c22,
 } as const;
 
+/** `--money` (docs/STYLE_SYNTHETIC.md): cash and per-hour figures, the "+$" floaters. */
+export const MONEY = 0x7cf0b0;
+
 /** STYLE.md heat ramp stops (overlay): ≤18 → 24 → 30 → 36 → 42 → ≥50 °C. */
 export const HEAT_RAMP = [0x1b3a5c, 0x3f7f6a, 0xffb000, 0xff8a3d, 0xff3b2f, 0xfff2c4] as const;
 

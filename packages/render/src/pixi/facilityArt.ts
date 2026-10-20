@@ -12,7 +12,8 @@ import type { Graphics } from "pixi.js";
 import { type ArtTier, type RackVariant, annexTiles, artSpec, artTier, bodyArt, bodyWidth, cabinetDetail, rackVariant, stripHeight, trimDetail } from "../art";
 import { alertColor, hex, skinAccent, skinColor } from "../color";
 import { type LiveFx, NO_FX, breathFrame, crtMotif, isPlain, lampFactor } from "../horror";
-import { type SkinEffect, skinEffects } from "../skin";
+import { RotorPhases } from "../green";
+import { type SkinEffect, type SkinPath, skinEffects } from "../skin";
 import { FAC_BOTTOM, FAC_TOP, PIPE_H, PIPE_RETURN_Y, PIPE_SUPPLY_Y, TILE, TUBE_Y } from "../constants";
 import { BRASS, COPPER, CRATE, GLASS, type Mat, NUTRIENT, PAPER, STEEL, T, VERDI, dk, lt, mat, mix } from "../palette";
 import { CRT_GLYPHS, FROST, LED, badgeFor, crtGlyph, flicker, isActive, ledCue } from "../status";
@@ -35,10 +36,24 @@ import {
 	rivet,
 	valveWheel,
 } from "./draw";
+import { greenKindBody, greenKindLive, greenSkin, pathLive, synthSkin, windOmega } from "./greenArt";
 import type { TextPool } from "./labels";
 
 const H = FAC_BOTTOM - FAC_TOP;
 const HOUSING = mat(T.housing);
+const ROTORS = new RotorPhases();
+const EFFECT_CACHE = new Map<string, ReadonlySet<SkinEffect>>();
+
+/** `skinEffects` memoised per (path, stage, kind): the per-frame live pass must not build a Set per facility. */
+const cachedEffects = (path: SkinPath, stage: 0 | 1 | 2 | 3 | 4, kind: Parameters<typeof skinEffects>[1]): ReadonlySet<SkinEffect> => {
+	const key = `${path}${stage}${kind}`;
+	let e = EFFECT_CACHE.get(key);
+	if (!e) {
+		e = skinEffects({ path, stage }, kind);
+		EFFECT_CACHE.set(key, e);
+	}
+	return e;
+};
 
 export { rackVariant, type RackVariant };
 
@@ -106,7 +121,8 @@ function kick(g: Graphics, x: number, y: number, w: number): void {
 export interface BodyOpts {
 	grown?: boolean;
 	plain?: boolean;
-	skin?: { effects: ReadonlySet<SkinEffect>; alpha: number; seed: number };
+	/** Stage overlays. `path` defaults to biotech; `horror` (0 off, 0.5 mild, 1 full) tones the greentech fungus. */
+	skin?: { effects: ReadonlySet<SkinEffect>; alpha: number; seed: number; path?: SkinPath; horror?: number };
 }
 
 /** Static body plus the light trim its `unlockTier` earns (racks carry theirs per cabinet) and the stage overlays. */
@@ -124,7 +140,13 @@ export function drawBody(g: Graphics, def: FacilityDef, x: number, top: number, 
 		if (extra > 0) annexBay(g, x + bodyWidth(def) * TILE, y, extra * TILE, skinColor(hex(def.color)), skinAccent(hex(def.accent)));
 		tierTrim(g, x, y, def.width * TILE, artSpec(def).tier);
 	}
-	if (opts.skin && opts.skin.effects.size > 0) skinBody(g, x, y, def.width * TILE, opts.skin, def.kind === "chiller" || def.kind === "cdu" || def.kind === "ups");
+	if (opts.skin && opts.skin.effects.size > 0) {
+		const W = def.width * TILE;
+		const path = opts.skin.path ?? "biotech";
+		if (path === "greentech") greenSkin(g, x, y, W, { ...opts.skin, horror: opts.skin.horror ?? 1 });
+		else if (path === "synthetic") synthSkin(g, x, y, W, { ...opts.skin, horror: 1 });
+		else skinBody(g, x, y, W, opts.skin, def.kind === "chiller" || def.kind === "cdu" || def.kind === "ups");
+	}
 }
 
 /** Enamel bay that fills tiles beyond a body's native width: louvres, a dial and a kick plate. */
@@ -212,6 +234,12 @@ function baseBody(g: Graphics, def: FacilityDef, art: ReturnType<typeof bodyArt>
 			return;
 		case "charger":
 			chargerBody(g, x, y, W, c, a);
+			return;
+		case "solar":
+		case "wind":
+		case "heat_export":
+		case "carbon":
+			greenKindBody(g, art, x, y, W, c);
 			return;
 	}
 }
@@ -632,6 +660,27 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 	const eff = skinEffects({ path: lf.stage > 0 ? "biotech" : null, stage: lf.stage }, art === "growth" ? "growth" : def.kind);
 	const sel: string = art === "growth" ? "growth" : def.kind;
 	switch (sel) {
+		case "solar":
+		case "wind":
+		case "heat_export":
+		case "carbon": {
+			const usable = active && f.status !== "tripped";
+			const omega = sel === "wind" && !calm ? windOmega(lf.tick ?? 0, lf.drought === true, usable) : 0;
+			greenKindLive(g, x, y, W, {
+				kind: sel,
+				id: f.id,
+				usable,
+				heatKw: f.heatKw,
+				exportKw: def.green?.exportKw ?? 0,
+				minute: lf.minute ?? 720,
+				tick: lf.tick ?? 0,
+				drought: lf.drought === true,
+				calm,
+				t,
+				phase: sel === "wind" ? ROTORS.at(f.id, t, omega) : 0,
+			});
+			break;
+		}
 		case "growth":
 			bioLive(g, "growth", f.id, x, y, W, t, active, calm, lf, eff.has("eyes") && lf.stages.eyes);
 			break;
@@ -777,6 +826,7 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 	if (!f.enabled || f.status === "unpowered" || f.status === "disabled") px(g, x + 1, y, W - 2, H, T.ink, 0.45);
 	if (f.status === "tooCold") frost(g, x, y, W, f.id);
 	stageLive(g, x, y, W, f.id, t, calm, lf, eff, art === "growth");
+	if (lf.pskin && lf.pskin.stage > 0) pathLive(g, x, y, W, f.id, t, calm, cachedEffects(lf.pskin.path, lf.pskin.stage, art === "growth" ? "growth" : def.kind), lf.pskin.horror);
 	drawBadge(g, f, x + W / 2, top + 1, t, calm);
 }
 

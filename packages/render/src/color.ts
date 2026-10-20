@@ -155,6 +155,25 @@ export const skyColors = (minuteOfDay: number): SkyColors => {
 	return { top: k[1], horizon: k[2], night: k[3], city: k[4], cityFar: k[5], haze: k[6] };
 };
 
+/**
+ * Dunkelflaute sky: dimmer and flat. At `amount` 1 the gradient collapses to one dim grey-teal (top pulled to the horizon
+ * colour, both darkened toward the smog), the haze thickens toward it and the skyline loses contrast; `night` is untouched.
+ */
+export const droughtSky = (s: SkyColors, amount: number): SkyColors => {
+	const a = clamp01(amount);
+	if (a <= 0) return s;
+	const flat = lerpColor(lerpColor(s.top, s.horizon, 0.8), T.smog, 0.35);
+	const dim = (c: number): number => lerpColor(c, flat, 0.55 * a);
+	return {
+		top: lerpColor(s.top, flat, a),
+		horizon: lerpColor(s.horizon, flat, 0.85 * a),
+		night: s.night,
+		city: dim(s.city),
+		cityFar: dim(s.cityFar),
+		haze: lerpColor(s.haze, flat, 0.5 * a),
+	};
+};
+
 // ─── Synthetic skin for content colours ─────────────────────────────────
 
 /**

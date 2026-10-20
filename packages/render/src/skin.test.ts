@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { BIOTECH_STAGES, STAGE_AT, changesAt, pathSkin, skinEffects, skinTable, stageOf } from "./skin";
+import { BIOTECH_STAGES, GREEN_STAGES, STAGE_AT, SYNTH_STAGES, changesAt, pathSkin, skinEffects, skinTable, stageOf } from "./skin";
 
 describe("stageOf", () => {
 	it("steps at 25 / 50 / 75 / 100 % of the score", () => {
@@ -24,9 +24,12 @@ describe("pathSkin", () => {
 		expect(pathSkin({ path: "biotech", corruption: 1 })).toEqual({ path: "biotech", stage: 4, score: 1 });
 		expect(pathSkin({ path: "biotech", corruption: 0.8 }).stage).toBe(3);
 	});
-	it("greentech and synthetic mind are M4 placeholders: their own path, stage 0, never the biotech skin", () => {
+	it("greentech and synthetic mind read view.pathScore, never the corruption or the biotech skin", () => {
 		expect(pathSkin({ path: "greentech", corruption: 0.9 })).toEqual({ path: "greentech", stage: 0, score: 0 });
 		expect(pathSkin({ path: "synthetic", corruption: 0.9 })).toMatchObject({ path: "synthetic", stage: 0 });
+		expect(pathSkin({ path: "greentech", corruption: 0.9, pathScore: 0.5 })).toEqual({ path: "greentech", stage: 2, score: 0.5 });
+		expect(pathSkin({ path: "synthetic", corruption: 0, pathScore: 1 })).toEqual({ path: "synthetic", stage: 4, score: 1 });
+		expect(pathSkin({ path: "greentech", corruption: 0, pathScore: 9 }).score).toBe(1);
 	});
 	it("clamps the score", () => {
 		expect(pathSkin({ path: "biotech", corruption: 7 }).score).toBe(1);
@@ -63,8 +66,34 @@ describe("skin table", () => {
 		expect(all.has("tissue")).toBe(false);
 		expect(all.has("pulse")).toBe(true);
 	});
-	it("M4 paths plug into the same table as 'same at every stage' placeholders", () => {
-		for (const path of ["greentech", "synthetic"] as const) expect(skinTable(path, "rack")).toEqual([[], [], [], []]);
-		expect(skinEffects({ path: "greentech", stage: 4 }, "rack").size).toBe(0);
+	it("greentech stages add: 25 moss, 50 fungus + vines, 75 plants + tanks, 100 garden", () => {
+		expect(GREEN_STAGES).toEqual([["moss"], ["fungus", "vines"], ["plants", "tank"], ["garden"]]);
+		expect([...skinEffects({ path: "greentech", stage: 1 }, "rack")]).toEqual(["moss"]);
+		expect([...skinEffects({ path: "greentech", stage: 2 }, "crah")].sort()).toEqual(["fungus", "moss", "vines"]);
+		// Racks grow plants but no fish tank; the chiller gets a tank and no fungus.
+		expect(skinEffects({ path: "greentech", stage: 3 }, "rack").has("tank")).toBe(false);
+		expect(skinEffects({ path: "greentech", stage: 3 }, "chiller").has("tank")).toBe(true);
+		expect(skinEffects({ path: "greentech", stage: 4 }, "chiller").has("fungus")).toBe(false);
+	});
+	it("clean devices hold out of greentech; growths take no green; green kinds change at some stages only", () => {
+		for (const kind of ["sterilizer", "quarantine"] as const) expect([1, 2, 3, 4].map((s) => changesAt("greentech", kind, s as 1 | 2 | 3 | 4))).toEqual([true, false, false, false]);
+		expect(skinEffects({ path: "greentech", stage: 4 }, "growth").size).toBe(0);
+		expect([1, 2, 3, 4].map((s) => changesAt("greentech", "wind", s as 1 | 2 | 3 | 4))).toEqual([true, true, false, false]);
+		expect([1, 2, 3, 4].every((s) => changesAt("greentech", "heat_export", s as 1 | 2 | 3 | 4))).toBe(true);
+	});
+	it("synthetic stages add: 25 lines, 50 glass, 75 panels, 100 light-only", () => {
+		expect(SYNTH_STAGES).toEqual([["lines"], ["glass"], ["panels"], ["light"]]);
+		expect([...skinEffects({ path: "synthetic", stage: 4 }, "rack")].sort()).toEqual(["glass", "light", "lines", "panels"]);
+		expect(skinEffects({ path: "synthetic", stage: 4 }, "wind").has("glass")).toBe(false);
+		expect(skinEffects({ path: "synthetic", stage: 4 }, "growth").size).toBe(0);
+	});
+	it("every path has four stage rows for every kind, and no path leaks another path's effects", () => {
+		const bio = new Set(["damp", "pulse", "veins", "flesh", "bile", "breathe", "eyes", "tissue"]);
+		for (const path of ["biotech", "greentech", "synthetic"] as const)
+			for (const kind of ["rack", "crah", "chiller", "cdu", "grid_tie", "genset", "ups", "depot", "charger", "nutrient", "sterilizer", "quarantine", "bioreactor", "solar", "wind", "heat_export", "carbon", "growth"] as const) {
+				const t = skinTable(path, kind);
+				expect(t.length).toBe(4);
+				if (path !== "biotech") expect(t.flat().some((e) => bio.has(e))).toBe(false);
+			}
 	});
 });
