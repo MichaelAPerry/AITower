@@ -2,7 +2,7 @@
  * Pure helpers for the Biotech / body-horror layer of the HUD: wording per `horrorIntensity`, the organoid temperature
  * band, bot traits, the corruption gauge and the memo stain.
  *
- * The Ministry never acknowledges the horror: growths are "assets", a mutated bot is "reclassified", contamination is an
+ * The Compute Authority never acknowledges the horror: growths are "assets", a mutated bot is "reclassified", contamination is an
  * "asset growth index". `horrorIntensity: "off"` keeps every mechanic and switches to plain wording.
  */
 import type { ContentDB, OrganoidSpec } from "@aitower/content";
@@ -23,7 +23,7 @@ export interface BioWords {
 	overlayLegend: string;
 }
 
-/** Wording for the current intensity: Ministry euphemism (full, mild) or plain words (off). */
+/** Wording for the current intensity: Compute Authority euphemism (full, mild) or plain words (off). */
 export function bioWords(h: HorrorIntensity): BioWords {
 	if (h === "off") return { gauge: "CONTAMINATION", contamination: "Contamination", overlayButton: "Contam.", grown: "Growth", overlayLegend: "Contamination per cell" };
 	return { gauge: "ASSET GROWTH INDEX", contamination: "Growth index", overlayButton: "Growth", grown: "Unregistered asset", overlayLegend: "Asset growth index per cell" };
@@ -116,7 +116,7 @@ export function growthTitle(view: Pick<SimView, "corruption" | "contaminatedShar
 	const pct = fmtPct(view.corruption ?? 0, 0);
 	return h === "off"
 		? `Corruption ${pct}. It rises with contamination and with organoid racks.`
-		: `Asset Growth Index ${pct}. The Ministry regards any figure as satisfactory.`;
+		: `Asset Growth Index ${pct}. The Compute Authority classes any figure as within tolerance.`;
 }
 
 export type Stain = "none" | "faint" | "heavy";

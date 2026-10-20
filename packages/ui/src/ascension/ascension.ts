@@ -1,5 +1,5 @@
 /**
- * FORM A-5: ASCENSION. Pure logic for the sheet that commits the tower to a path at Clearance `balance.ascension.minTier`.
+ * ASCENSION. Pure logic for the sheet that commits the tower to a path at Clearance `balance.ascension.minTier`.
  * The choice is irreversible, so the sheet asks once more before dispatching `choosePath`.
  */
 import type { AscensionPath, ContentDB } from "@aitower/content";
@@ -41,7 +41,7 @@ export function pathToConfirm(content: ContentDB, id: AscensionPath): AscensionP
 	return (content.paths ?? []).some((p) => p.id === id && p.available) ? id : null;
 }
 
-export const confirmQuestion = (name: string): string => `File FORM A-5 for ${name}? This cannot be undone.`;
+export const confirmQuestion = (name: string): string => `Commit to ${name}? This cannot be undone.`;
 
 /** Dispatch the irreversible choice. Returns the filing marker on success; a refusal is shown as a notice. */
 export function filePath(store: GameStore, content: ContentDB, id: AscensionPath): PathFiled | null {

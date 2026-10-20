@@ -32,7 +32,7 @@ interface SlotPaneProps extends PaneProps {
 const errText = (e: unknown): string => (e instanceof Error ? e.message : String(e));
 
 function SlotsLoading() {
-	return <div className="ui-slot-empty">Fetching the file index…</div>;
+	return <div className="ui-slot-empty">Reading saves…</div>;
 }
 
 export function SavePane({ store, state, flash, saves, reload }: SlotPaneProps) {
@@ -48,7 +48,7 @@ export function SavePane({ store, state, flash, saves, reload }: SlotPaneProps) 
 		flash(null);
 		try {
 			const r = await store.saveTo(id, cleanSlotName(names[id] ?? "") ?? fallbackName);
-			flash(r.ok ? { tone: "good", text: `Filed under ${id === "auto" ? "AUTOSAVE" : id.replace("slot", "SLOT ")}.` } : { tone: "error", text: r.reason });
+			flash(r.ok ? { tone: "good", text: `Saved to ${id === "auto" ? "AUTOSAVE" : id.replace("slot", "SLOT ")}.` } : { tone: "error", text: r.reason });
 			if (r.ok) setNames((n) => ({ ...n, [id]: "" }));
 		} catch (e) {
 			flash({ tone: "error", text: errText(e) });
@@ -90,7 +90,7 @@ export function SavePane({ store, state, flash, saves, reload }: SlotPaneProps) 
 					</div>
 					<div className="ui-slot-act">
 						{row.manual ? (
-							<StampBtn rest="Save" hot="Filed" disabled={busy} onClick={() => (row.empty ? void doSave(row.id, undefined) : setArmed(row.id))} />
+							<StampBtn rest="Save" hot="Saved" disabled={busy} onClick={() => (row.empty ? void doSave(row.id, undefined) : setArmed(row.id))} />
 						) : (
 							<span className="ui-slot-ro">READ-ONLY</span>
 						)}
@@ -105,7 +105,7 @@ export function SavePane({ store, state, flash, saves, reload }: SlotPaneProps) 
 					)}
 				</div>
 			))}
-			<p className="ui-pane-note">The autosave is written by the Ministry at the start of each day and cannot be overwritten by hand.</p>
+			<p className="ui-pane-note">The autosave is written at the start of each day and cannot be overwritten by hand.</p>
 		</div>
 	);
 }
@@ -172,7 +172,7 @@ export function LoadPane({ store, state, menu, flash, onReplaced, saves, reload 
 				</div>
 			))}
 			<div className="ui-filebox">
-				<span className="ui-filebox-title">Paper file</span>
+				<span className="ui-filebox-title">File</span>
 				<div className="ui-filebox-acts">
 					<input ref={file} type="file" accept=".json,application/json" hidden onChange={(e) => {
 							const input = e.currentTarget;
@@ -211,10 +211,10 @@ export function SettingsPane({ store, state }: PaneProps) {
 	const set = store.setSettings;
 	return (
 		<div className="ui-settings">
-			<SettingRow label="Master volume" hint="Everything the Ministry plays through the loudspeakers.">
+			<SettingRow label="Master volume" hint="All game audio.">
 				<Slider label="Master volume" value={s.masterVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.masterVolume * 100)}%`} onChange={(v) => set({ masterVolume: v })} />
 			</SettingRow>
-			<SettingRow label="Music volume" hint="The Ministry's background music, on top of the master volume.">
+			<SettingRow label="Music volume" hint="Background music, on top of the master volume.">
 				<Slider label="Music volume" value={s.musicVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.musicVolume * 100)}%`} onChange={(v) => set({ musicVolume: v })} />
 			</SettingRow>
 			<SettingRow label="Mute" hint="Silence all audio (key M).">
@@ -288,7 +288,7 @@ export function NewGamePane({ store, menu, onReplaced }: PaneProps) {
 					onYes={() => {
 						store.newGame();
 						onReplaced?.();
-						pushNotice({ text: "A fresh datacenter has been requisitioned.", severity: "info", key: "newgame" });
+						pushNotice({ text: "New datacenter started.", severity: "info", key: "newgame" });
 						menu.close();
 					}}
 					onNo={() => setArmed(false)}

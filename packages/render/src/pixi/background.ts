@@ -2,7 +2,7 @@
  * Screen-space sky and skyline. Smoggy dithered gradient (dirty teal day,
  * sodium dusk, brown-black night), sweeping searchlights at night, two parallax
  * layers of brutalist towers with lit strip windows, blinking aircraft lamps,
- * and a giant "MINISTRY" sign. Silhouettes are shared `GraphicsContext`s tinted
+ * and a giant "AITOWER" sign. Silhouettes are shared `GraphicsContext`s tinted
  * per time of day; everything is drawn in whole zoom-pixels.
  */
 import type { RenderOptions } from "@aitower/shared";
@@ -36,6 +36,10 @@ const GLYPHS: Record<string, string[]> = {
 	H: ["10001", "10001", "10001", "11111", "10001", "10001", "10001"],
 	U: ["10001", "10001", "10001", "10001", "10001", "10001", "01110"],
 	G: ["01110", "10001", "10000", "10111", "10001", "10001", "01110"],
+	A: ["01110", "10001", "10001", "11111", "10001", "10001", "10001"],
+	O: ["01110", "10001", "10001", "10001", "10001", "10001", "01110"],
+	W: ["10001", "10001", "10001", "10101", "10101", "11011", "10001"],
+	E: ["11111", "10000", "10000", "11110", "10000", "10000", "11111"],
 };
 
 interface CityCtx {

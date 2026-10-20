@@ -48,7 +48,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	// A sandbox lot has no bankruptcy, so a negative balance is no warning there.
 	if (view.cash < 0 && !view.sandbox) {
 		const room = view.loan ? view.loan.max - view.loan.principal : 0;
-		const credit = room > 0 ? ` Or borrow up to ${fmtMoney(room)} from the Ministry Credit Office (Finance tab): it is interest, not income.` : "";
+		const credit = room > 0 ? ` Or borrow up to ${fmtMoney(room)} from the Credit Facility (Finance tab): it is interest, not income.` : "";
 		return {
 			tone: "alert",
 			title: "The Treasury is in the red",
@@ -58,15 +58,15 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 
 	const urgent = view.memos.find((m) => m.expiresAt - view.tick <= 120);
 	if (urgent) {
-		return { tone: "alert", title: "A Ministry memo is about to auto-file", detail: `Answer “${urgent.title}” in the memo inbox (top bar), or it is filed as its default choice.` };
+		return { tone: "alert", title: "An Authority memo is about to auto-resolve", detail: `Answer “${urgent.title}” in the memo inbox (top bar), or it resolves to its default choice.` };
 	}
 
 	const broken = view.facilities.filter((f) => f.status === "failed").length;
 	if (broken > 0 && view.spareParts === 0) {
 		return {
 			tone: "alert",
-			title: `${broken} rack${broken === 1 ? " is" : "s are"} broken and the parts cage is empty`,
-			detail: "Buy spare parts (the build dock, bottom left) so the maintenance automaton can repair them.",
+			title: `${broken} rack${broken === 1 ? " is" : "s are"} broken and the spare-parts stock is empty`,
+			detail: "Buy spare parts (the build dock, bottom left) so a maintenance bot can repair them.",
 		};
 	}
 
@@ -98,8 +98,8 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	if (ascensionDue(view, content) && !pathPending(filed, view)) {
 		return {
 			tone: "action",
-			title: "FORM A-5: choose your Ascension path",
-			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the form below to read the options.`,
+			title: "Choose your Ascension path",
+			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the review below to read the options.`,
 			action: "ascension",
 		};
 	}
@@ -118,7 +118,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			tone: "action",
 			title: active.length === 0 ? "Accept a contract" : "Accept another contract",
 			key: "C",
-			detail: `Contracts drawer (C): stamp ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
+			detail: `Contracts drawer (C): press ACCEPT on an offer marked “Fits your idle racks”, e.g. ${fitting.clientName}. ${active.length === 0 ? "Your racks earn nothing while idle." : "Some racks are idle and earning nothing."}`,
 		};
 	}
 	if (active.length === 0) {
@@ -136,9 +136,9 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	if (view.clerk?.unlocked && !view.clerk.policy.enabled) {
 		return {
 			tone: "action",
-			title: "Switch on your Contracts Clerk",
+			title: "Switch on Contract Automation",
 			key: "C",
-			detail: "Contracts drawer (C): flip the clerk's standing order to ON and it will accept matching offers for you (it keeps a fee from each job).",
+			detail: "Contracts drawer (C): turn Contract Automation ON and it accepts matching offers for you (it takes a fee from each job).",
 		};
 	}
 	const tech = cheapestAvailable(view, content);
@@ -146,7 +146,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		const fx = tech.effects.map((e) => effectText(e, content)).join(", ");
 		return {
 			tone: "action",
-			title: "File a research request",
+			title: "Start a research project",
 			key: "R",
 			detail: `Department of Research: ${tech.name} costs ${tech.cost} RP and you have ${fmtRp(view.researchPoints)}.${fx ? ` It gives ${fx}.` : ""}`,
 		};
@@ -186,7 +186,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			detail: `Compute is enough (${have} PFLOPS). Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; clearance is reviewed at midnight.`,
 		};
 	}
-	return { tone: "progress", title: "Top clearance reached", detail: "Keep the Treasury growing and the Ministry's standing high." };
+	return { tone: "progress", title: "Top clearance reached", detail: "Keep the Treasury growing and the Compute Authority's standing high." };
 }
 
 /** "Living Tower: 2 of 3 days" for the ending the tower is closest to; null when none (the secret ending is never announced). */

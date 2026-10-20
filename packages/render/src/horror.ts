@@ -31,7 +31,7 @@ export interface HorrorStages {
 	eyes: boolean;
 	/** Stage 4 (100 %): devices are tissue and the slabs creep. */
 	tissue: boolean;
-	/** Stage 4: the MINISTRY sign flickers to another word. */
+	/** Stage 4: the AITOWER sign flickers to another word. */
 	sign: boolean;
 	/** 0..1 growth of the veined stage above its threshold (drives coverage and tint). */
 	amount: number;
@@ -134,8 +134,8 @@ export const lampFactor = (s: HorrorStages, id: number, lamp: number, t: number,
 /** Wainscot breathing frame (0/1): two frames at 0.2 Hz (2.5 s each); frame 0 held under reduced motion. */
 export const breathFrame = (t: number, reducedMotion: boolean): 0 | 1 => (reducedMotion ? 0 : Math.floor(t / 2.5) % 2 === 0 ? 0 : 1);
 
-/** Sky sign text: "MINISTRY", or a flicker to "HUNGRY" at the tissue stage (stage 4, never under reduced motion). */
-export const SIGN_WORD = "MINISTRY";
+/** Sky sign text: "AITOWER", or a flicker to "HUNGRY" at the tissue stage (stage 4, never under reduced motion). */
+export const SIGN_WORD = "AITOWER";
 export const SIGN_ALT = "HUNGRY";
 export const signWord = (s: HorrorStages, t: number, reducedMotion: boolean): string => {
 	if (!s.sign || s.alpha <= 0 || reducedMotion) return SIGN_WORD;

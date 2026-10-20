@@ -26,7 +26,7 @@ export interface SlotRow {
 	manual: boolean;
 	empty: boolean;
 	name: string;
-	/** "DAY 12 · $1.28M · TIER 2", or "Nothing filed here yet". */
+	/** "DAY 12 · $1.28M · TIER 2", or "Empty slot". */
 	summary: string;
 	/** "12:04", or "—" when empty. */
 	when: string;
@@ -45,7 +45,7 @@ export function slotRows(saves: readonly SaveSlotInfo[], now: number = Date.now(
 			manual: id !== "auto",
 			empty: !info,
 			name: info ? info.name : "",
-			summary: info ? `DAY ${info.day} · ${fmtMoney(info.cash)} · TIER ${info.tier}` : "Nothing filed here yet",
+			summary: info ? `DAY ${info.day} · ${fmtMoney(info.cash)} · TIER ${info.tier}` : "Empty slot",
 			when: info ? fmtSavedAt(info.savedAt, now) : "—",
 			info,
 		};

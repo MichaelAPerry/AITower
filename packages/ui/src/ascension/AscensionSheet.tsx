@@ -15,9 +15,9 @@ export function AscensionForm({ rows, tier, affinity, content, pending, onPick, 
 	return (
 		<section className="ui-asc" role="dialog" aria-modal="true" aria-labelledby="asc-title">
 			<header className="ui-asc-head">
-				<span className="ui-asc-form">FORM A-5 · CLEARANCE REVIEW BOARD</span>
-				<h2 id="asc-title">FORM A-5: ASCENSION</h2>
-				<button type="button" className="ui-btn ui-asc-close" onClick={onClose} title="Close the form without filing it (Esc)">
+				<span className="ui-asc-form">CLEARANCE REVIEW</span>
+				<h2 id="asc-title">ASCENSION</h2>
+				<button type="button" className="ui-btn ui-asc-close" onClick={onClose} title="Close without choosing (Esc)">
 					Close
 				</button>
 			</header>
@@ -32,7 +32,7 @@ export function AscensionForm({ rows, tier, affinity, content, pending, onPick, 
 						<h3 className="ui-asc-name">{r.name}</h3>
 						<p className="ui-asc-desc">{r.description}</p>
 						{r.available ? (
-							<StampBtn tone="green" rest="Choose" hot="File it" onClick={() => onPick(r.id)} disabled={r.id === pending} title={`Elect ${r.name} (you will be asked to confirm)`} />
+							<StampBtn tone="green" rest="Choose" hot="Confirm" onClick={() => onPick(r.id)} disabled={r.id === pending} title={`Elect ${r.name} (you will be asked to confirm)`} />
 						) : (
 							<Stamp tone="ink" className="ui-asc-soon">
 								Coming soon
@@ -41,7 +41,7 @@ export function AscensionForm({ rows, tier, affinity, content, pending, onPick, 
 					</li>
 				))}
 			</ul>
-			{picked && <ConfirmBar question={confirmQuestion(picked.name)} yes="File it" onYes={onConfirm} onNo={onCancel} />}
+			{picked && <ConfirmBar question={confirmQuestion(picked.name)} yes="Confirm" onYes={onConfirm} onNo={onCancel} />}
 		</section>
 	);
 }

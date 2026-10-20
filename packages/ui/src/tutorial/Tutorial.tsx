@@ -177,7 +177,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		if (!area || !me || !current) return;
 		const avoid: Rect[] = [];
 		for (const el of document.querySelectorAll(`.aitower-hud [${HL}]`)) avoid.push(toRect(el.getBoundingClientRect()));
-		// Never sit on a Ministry memo or on CURRENT ORDERS (the induction points at it in step 3).
+		// Never sit on a Authority memo or on CURRENT ORDERS (the induction points at it in step 3).
 		for (const el of document.querySelectorAll(".aitower-hud .ui-memo-pop, .aitower-hud .ui-memo-drawer, .aitower-hud .ui-next")) avoid.push(toRect(el.getBoundingClientRect()));
 		if (current.focus || ghostKey) avoid.push(centreBox(toRect(area)));
 		const c = pickCorner(current.corner ?? "br", toRect(area), { w: me.width, h: me.height }, avoid);
@@ -210,16 +210,16 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 	const phase = current.phase?.(state, tutUi) ?? 0;
 
 	return (
-		<section ref={memoRef} className={`ui-tutorial pos-${corner}`} aria-live="polite" aria-label="Ministry induction" data-step={current.id}>
+		<section ref={memoRef} className={`ui-tutorial pos-${corner}`} aria-live="polite" aria-label="Tutorial" data-step={current.id}>
 			<header className="tut-head">
-				<span className="ui-dymo">{explaining ? "MINISTRY MEMO" : "INDUCTION MEMO"}</span>
+				<span className="ui-dymo">{explaining ? "AUTHORITY MEMO" : "TUTORIAL"}</span>
 				{!explaining && (
 					<span className="tut-count">
 						{saved.step + 1} / {TUTORIAL_STEPS.length}
 					</span>
 				)}
 				<span className="ui-grow" />
-				<button type="button" className="ui-btn tut-close" onClick={finish} title="Close the induction for good (RESTART INDUCTION in the menu brings it back)">
+				<button type="button" className="ui-btn tut-close" onClick={finish} title="Close the tutorial for good (Restart tutorial in the menu brings it back)">
 					✕ CLOSE
 				</button>
 			</header>
@@ -238,7 +238,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 					<span>
 						<b className="tut-todo">YOUR TASK:</b> {step.task}
 					</span>
-					{satisfied && <span className="tut-stamp">APPROVED</span>}
+					{satisfied && <span className="tut-stamp">DONE</span>}
 				</div>
 			)}
 			{!explaining && step.how && !satisfied && (
@@ -258,7 +258,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 			<footer className="tut-actions">
 				{!explaining && (
 					<button type="button" className="ui-btn tut-skip" onClick={finish}>
-						Skip induction
+						Skip tutorial
 					</button>
 				)}
 				<span className="ui-grow" />
@@ -274,7 +274,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 				)}
 				{!explaining && !step.task && (
 					<button type="button" className="ui-btn is-on" onClick={next}>
-						{isLast ? "File & close" : "Continue"}
+						{isLast ? "Close" : "Continue"}
 					</button>
 				)}
 				{!explaining && step.task && !satisfied && (

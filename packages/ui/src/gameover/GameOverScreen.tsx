@@ -51,7 +51,7 @@ export function GameOverScreen({ over, view, content, horror = "full", onLoad, o
 		<div className={`ui-over is-${over.kind}${ending ? ` ending-${ending}` : ""}`} ref={root} onKeyDown={onKeyDown}>
 			<article className="ui-over-memo" role="alertdialog" aria-modal="true" aria-labelledby="over-title">
 				<header className="ui-over-head">
-					<span className="ui-over-from">MINISTRY OF COMPUTATION · OFFICE OF THE MINISTER</span>
+					<span className="ui-over-from">COMPUTE AUTHORITY · ENFORCEMENT</span>
 					<span className="ui-over-form">{copy.form}</span>
 				</header>
 				<h2 className="ui-over-title" id="over-title">

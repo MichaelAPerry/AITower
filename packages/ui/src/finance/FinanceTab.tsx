@@ -14,7 +14,7 @@ export function LedgerSection({ state }: PanelProps) {
 	const today = state.view.day;
 	return (
 		<table className="ui-table ui-ledger">
-			<caption>MINISTRY OF COMPUTATION · GENERAL LEDGER · DAILY ABSTRACT</caption>
+			<caption>COMPUTE AUTHORITY · DAILY LEDGER</caption>
 			<thead>
 				<tr>
 					<th>Day</th>
@@ -23,13 +23,13 @@ export function LedgerSection({ state }: PanelProps) {
 					<th className="num">Upkeep</th>
 					<th className="num">Construction</th>
 					<th className="num">Penalties</th>
-					<th className="num" title="Ministry levy on the day's profit, charged at midnight">
+					<th className="num" title="Authority levy on the day's profit, charged at midnight">
 						Taxes
 					</th>
-					<th className="num" title="Interest on the Credit Office loan">
+					<th className="num" title="Interest on the Credit Facility loan">
 						Interest
 					</th>
-					<th className="num" title="Contracts Clerk fees withheld from earnings">
+					<th className="num" title="Contract Automation fees withheld from earnings">
 						Fees
 					</th>
 					<th className="num">Net</th>
@@ -66,9 +66,9 @@ export function CreditSection({ store, state }: PanelProps) {
 	const repay = repayPresets(info, view.cash);
 	const send = (type: "takeLoan" | "repayLoan", amount: number): void => report(store.dispatch({ type, amount }));
 	return (
-		<section className="ui-form ui-credit" aria-label="Ministry Credit Office">
+		<section className="ui-form ui-credit" aria-label="Credit Facility">
 			<div className="ui-form-head">
-				<span>MINISTRY CREDIT OFFICE · FORM CR-3</span>
+				<span>CREDIT FACILITY</span>
 				<span>LOAN APPLICATION</span>
 			</div>
 			<dl className="ui-credit-figs">
@@ -94,7 +94,7 @@ export function CreditSection({ store, state }: PanelProps) {
 				<div className="ui-credit-group" role="group" aria-label="Take a loan">
 					<span className="ui-credit-label">TAKE</span>
 					{take.map((p) => (
-						<button key={p.label} type="button" className="ui-btn ui-mini ui-credit-btn" disabled={!!p.disabled} title={p.disabled ?? `Borrow ${fmtMoney(p.amount)} from the Credit Office (${p.label} of the remaining limit)`} onClick={() => send("takeLoan", p.amount)}>
+						<button key={p.label} type="button" className="ui-btn ui-mini ui-credit-btn" disabled={!!p.disabled} title={p.disabled ?? `Borrow ${fmtMoney(p.amount)} from the Credit Facility (${p.label} of the remaining limit)`} onClick={() => send("takeLoan", p.amount)}>
 							{p.label} <span className="ui-credit-amt">{fmtMoney(p.amount)}</span>
 						</button>
 					))}
@@ -118,12 +118,12 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 	const rows = [...state.view.reports].reverse();
 	if (!rows.length) {
 		const days = content.balance?.audit?.periodDays;
-		return <div className="ui-empty ui-pad">No quarterly audit yet. The Ministry files one every {days ? `${days} days` : "few days"}, graded A to E on uptime, failed jobs, penalties, PUE and profit.</div>;
+		return <div className="ui-empty ui-pad">No quarterly audit yet. The Compute Authority audits every {days ? `${days} days` : "few days"}, graded A to E on uptime, failed jobs, penalties, PUE and profit.</div>;
 	}
 	return (
 		<div className="ui-form ui-audits">
 			<div className="ui-form-head">
-				<span>QUARTERLY AUDITS · FILED</span>
+				<span>QUARTERLY AUDITS</span>
 				<span>NEWEST FIRST</span>
 			</div>
 			<table className="ui-table">
@@ -195,12 +195,12 @@ export function RecordSection({ state }: PanelProps) {
 
 const SECTIONS: { id: FinanceSection; label: string; title: string }[] = [
 	{ id: "ledger", label: "Ledger", title: "Daily accounts" },
-	{ id: "credit", label: "Credit Office", title: "Take or repay a loan" },
-	{ id: "audits", label: "Audits", title: "Quarterly Ministry audits" },
+	{ id: "credit", label: "Credit Facility", title: "Take or repay a loan" },
+	{ id: "audits", label: "Audits", title: "Quarterly Compute Authority audits" },
 	{ id: "record", label: "Record", title: "Lifetime statistics" },
 ];
 
-/** Finance tab: the ledger, the Credit Office, past audits and lifetime stats. */
+/** Finance tab: the ledger, the Credit Facility, past audits and lifetime stats. */
 export function FinanceTab(props: PanelProps) {
 	const { ui, setUi, state } = props;
 	const loan = loanInfo(state.view.loan);

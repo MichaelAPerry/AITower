@@ -7,10 +7,10 @@ import { Stamp } from "./common";
 
 /** Severity → [stamp, ink, slip header]. */
 const SLIP: Record<Severity, [string, "red" | "green" | "amber" | "ink", string]> = {
-	error: ["URGENT", "red", "TELEX · OPS CONTROL"],
-	warn: ["NOTICE", "amber", "INTERDEPT. MEMO"],
-	good: ["COMMENDATION", "green", "MINISTRY CIRCULAR"],
-	info: ["NOTICE", "ink", "INTERDEPT. MEMO"],
+	error: ["URGENT", "red", "OPS CONTROL"],
+	warn: ["NOTICE", "amber", "NOTICE"],
+	good: ["COMMENDATION", "green", "AUTHORITY NOTICE"],
+	info: ["NOTICE", "ink", "NOTICE"],
 };
 
 interface Toast extends Notice {
@@ -77,7 +77,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 				return (
 					// biome-ignore lint/a11y/noStaticElementInteractions: click-to-dismiss is a mouse convenience on a non-essential toast
 					// biome-ignore lint/a11y/useKeyWithClickEvents: click-to-dismiss is a mouse convenience; toasts also expire on their own and are mirrored in the keyboard-reachable log
-					<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))} title="Click to file away">
+					<div key={t.id} className={`ui-toast sev-${t.severity}`} onClick={() => setToasts((l) => l.filter((x) => x.id !== t.id))} title="Click to dismiss">
 						<span className="ui-toast-head">
 							{head} · NO. {String(t.id).padStart(4, "0")}
 						</span>

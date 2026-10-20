@@ -24,7 +24,7 @@ export interface UiState {
 	paletteTab: string;
 	/** Spec card of the hovered build-dock button. */
 	dockHover?: import("./SpecCard").SpecHover | null;
-	/** Ministry inbox drawer is open. */
+	/** Compute Authority inbox drawer is open. */
 	inboxOpen: boolean;
 	/** Memos the player has stamped; the sim files them at the next tick, so they are hidden meanwhile. */
 	stamped: number[];

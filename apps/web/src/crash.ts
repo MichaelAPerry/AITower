@@ -1,6 +1,6 @@
 /**
  * Crash overlay: plain DOM, no React, so it still works when the HUD (or the renderer) is dead.
- * Styled as a Ministry "SYSTEM FAULT" memo.
+ * Styled as a Compute Authority "SYSTEM FAULT" memo.
  */
 
 export type CrashSource = "sim" | "render" | "ui";
@@ -91,9 +91,9 @@ export function showCrashOverlay(info: { source?: CrashSource; message: string }
 	title.id = `${OVERLAY_ID}-title`;
 	const where = info.source === "render" ? "the display subsystem" : info.source === "ui" ? "the instrument panels" : "the simulation";
 	memo.append(
-		el("div", "MINISTRY OF COMPUTATION — OFFICE OF CONTINUITY", "org"),
+		el("div", "COMPUTE AUTHORITY — OFFICE OF CONTINUITY", "org"),
 		title,
-		el("div", "FORM 27-B / INCIDENT NOTICE / RETAIN FOR YOUR RECORDS", "form"),
+		el("div", "INCIDENT NOTICE", "form"),
 		el("p", `A fault has halted ${where}. The last good picture has been left on screen for your reference.`),
 		el("pre", info.message || "Unknown error"),
 	);

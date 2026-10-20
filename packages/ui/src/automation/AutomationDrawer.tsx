@@ -92,10 +92,10 @@ export function AutomationDrawer({ store, content, state, openResearch }: PanelP
 			<h4 className="ui-dh">
 				<span>CONTRACTS</span>
 			</h4>
-			<section className={`ui-auto-row ${clerk.unlocked && clerk.policy.enabled ? "is-on" : "is-off"} ${clerk.unlocked ? "" : "is-locked"}`} data-order="clerk" aria-label="Contracts Clerk standing order">
+			<section className={`ui-auto-row ${clerk.unlocked && clerk.policy.enabled ? "is-on" : "is-off"} ${clerk.unlocked ? "" : "is-locked"}`} data-order="clerk" aria-label="Contract Automation standing order">
 				<div className="ui-auto-head">
 					<div className="ui-auto-name">
-						<b>Contracts Clerk</b>
+						<b>Contract Automation</b>
 						<span className="ui-auto-blurb">{clerk.unlocked ? `${clerk.acceptedTotal} booked. Rules are on the Contracts tab (C).` : clerkLockedText(content)}</span>
 					</div>
 					{clerk.unlocked ? (

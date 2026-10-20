@@ -1031,11 +1031,7 @@
 	cursor: not-allowed;
 }
 .aitower-hud .ui-item.is-locked {
-	background:
-		linear-gradient(180deg, transparent 0 22px, color-mix(in srgb, var(--red) 40%, var(--beige)) 22px 23px, transparent 23px),
-		repeating-linear-gradient(180deg, transparent 0 12px, color-mix(in srgb, var(--verdigris) 18%, var(--beige)) 12px 13px),
-		color-mix(in srgb, var(--beige) 55%, var(--paper));
-	background-position: 0 0, 0 11px, 0 0;
+	background: color-mix(in srgb, var(--beige) 55%, var(--paper));
 }
 .aitower-hud .ui-item.is-locked:hover,
 .aitower-hud .ui-item.is-poor:hover {
@@ -1047,7 +1043,7 @@
 	opacity: 0.6;
 }
 .aitower-hud .ui-item-sub.is-lock {
-	color: var(--red);
+	color: var(--amber-dk, var(--brass-dk));
 	font-weight: 600;
 }
 .aitower-hud .ui-item-icon {

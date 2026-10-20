@@ -64,7 +64,7 @@ export function effectText(e: TechEffect, content?: ContentDB): string {
 	if (e.type === "perk") return `${fmtFactor(e.factor)} ${PERK_LABEL[e.kind] ?? e.kind}`;
 	const fee = content?.balance?.clerk?.feeShare;
 	const cut = fee !== undefined ? ` (keeps ${Math.round(fee * 1000) / 10} % of each job it books)` : "";
-	return e.feature === "contractsClerk" ? `Contracts Clerk: accepts offers for you${cut}` : String(e.feature);
+	return e.feature === "contractsClerk" ? `Contract Automation: accepts offers for you${cut}` : String(e.feature);
 }
 
 /** Names of the facilities and bots whose `tech` is this node. */
@@ -89,7 +89,7 @@ export function cheapestAvailable(view: SimView, content: ContentDB): TechNode |
 		.sort((a, b) => a.cost - b.cost || a.minTier - b.minTier || a.name.localeCompare(b.name))[0];
 }
 
-/** The node that unlocks the Contracts Clerk, if the content has one. */
+/** The node that unlocks the Contract Automation, if the content has one. */
 export const clerkNode = (content: ContentDB): TechNode | undefined => techList(content).find((t) => t.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk"));
 
 /** Prerequisites with their done flag, for the card. */

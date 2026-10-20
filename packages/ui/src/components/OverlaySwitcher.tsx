@@ -30,7 +30,7 @@ export const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "contamination", label: "Growth", key: "G" },
 ];
 
-/** Button label and tooltip of an overlay: the contamination overlay is "Growth" (Ministry wording) unless horror is off. */
+/** Button label and tooltip of an overlay: the contamination overlay is "Growth" (Compute Authority wording) unless horror is off. */
 export function overlayLabel(m: { id: OverlayMode; label: string; key: string }, horror: HorrorIntensity): { label: string; title: string } {
 	if (m.id === "contamination") {
 		const w = bioWords(horror);

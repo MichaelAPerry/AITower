@@ -46,7 +46,7 @@ describe("organoid band", () => {
 });
 
 describe("horror intensity wording", () => {
-	it("uses Ministry euphemism unless horror is off", () => {
+	it("uses Compute Authority euphemism unless horror is off", () => {
 		expect(bioWords("full").gauge).toBe("ASSET GROWTH INDEX");
 		expect(bioWords("mild").gauge).toBe("ASSET GROWTH INDEX");
 		expect(bioWords("off").gauge).toBe("CONTAMINATION");
@@ -157,7 +157,7 @@ describe("dossier", () => {
 	});
 });
 
-describe("FORM A-5: ascension", () => {
+describe("ascension", () => {
 	it("is due at the minimum Clearance with no path chosen, and not before or after", () => {
 		const { content, store } = setup();
 		const v = store.get().view;
@@ -170,11 +170,11 @@ describe("FORM A-5: ascension", () => {
 		store.setTier(5);
 		const v = store.get().view;
 		const o = currentObjective(v, content, () => ({ ok: true }));
-		expect(o).toMatchObject({ action: "ascension", title: expect.stringContaining("FORM A-5") });
+		expect(o).toMatchObject({ action: "ascension", title: expect.stringContaining("Ascension") });
 		expect(currentObjective(v, content, () => ({ ok: true }), { path: "biotech", tick: v.tick }).action).toBeUndefined();
 		let opened = 0;
 		const tree = NextChip(panelProps(store, content, { openAscension: () => opened++ }));
-		click(findButton(tree, /FORM A-5/));
+		click(findButton(tree, /ASCENSION/));
 		expect(opened).toBe(1);
 	});
 	it("lists the content's paths and stamps the unavailable ones COMING SOON", () => {
@@ -182,7 +182,7 @@ describe("FORM A-5: ascension", () => {
 		const rows = pathRows(content, store.get().view);
 		expect(rows.map((r) => [r.id, r.available])).toEqual([["biotech", true], ["greentech", false], ["synthetic", false]]);
 		const html = renderToString(<AscensionForm rows={rows} tier={5} pending={null} onPick={() => {}} onConfirm={() => {}} onCancel={() => {}} onClose={() => {}} />);
-		expect(html).toContain("FORM A-5: ASCENSION");
+		expect(html).toContain("ASCENSION");
 		expect(html.match(/ui-asc-soon/g)?.length).toBe(2);
 		expect(pathToConfirm(content, "greentech")).toBeNull();
 		expect(pathToConfirm(content, "biotech")).toBe("biotech");
@@ -204,7 +204,7 @@ describe("FORM A-5: ascension", () => {
 		expect(picked).toBe("biotech");
 		expect(sent).toEqual([]); // nothing dispatched by picking
 				const bar0 = findAll(form("biotech" as never), (e) => typeof e.props.onYes === "function")[0];
-		expect(bar0.props.question).toBe("File FORM A-5 for Biotech? This cannot be undone.");
+		expect(bar0.props.question).toBe("Commit to Biotech? This cannot be undone.");
 		expect(findAll(form(null), (e) => typeof e.props.onYes === "function")).toHaveLength(0);
 		const bar = findAll(form("biotech" as never), (e) => typeof e.props.onYes === "function")[0];
 		(bar.props.onYes as () => void)();
@@ -278,14 +278,14 @@ describe("event wording", () => {
 		expect(describeEvent({ type: "botMutated", botId: 1, trait: "tendriled" }, v, content, "off").text).toMatch(/mutated \(tendriled\)/);
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content).text).toMatch(/recertified/);
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content, "off").text).toMatch(/no longer be reversed/);
-		expect(describeEvent({ type: "pathChosen", path: "biotech" }, v, content).text).toMatch(/Biotech programme/);
-		expect(describeEvent({ type: "gameOver", kind: "absorbed", ending: "absorbed" }, v, content).text).toMatch(/INCORPORATION/);
+		expect(describeEvent({ type: "pathChosen", path: "biotech" }, v, content).text).toMatch(/path committed: Biotech/);
+		expect(describeEvent({ type: "gameOver", kind: "absorbed", ending: "absorbed" }, v, content).text).toMatch(/reclassified as a Compute Authority asset/);
 		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "livingTower" }, v, content).text).toMatch(/Living Tower/);
 	});
-	it("no horror words reach a toast in the Ministry voice", () => {
+	it("no horror words reach a toast in the Compute Authority voice", () => {
 		for (const e of [{ type: "growthSprouted", facilityId: grown }, { type: "botMutated", botId: 1, trait: "fleshed" }, { type: "contaminationIrreversible" }] as const) expect(describeEvent(e, v, content).text).not.toMatch(/mutat|infect|contamin|flesh|gore|blood/i);
 	});
-	it("a failed component toasts only when the parts cage is empty; a finished job is left to the ticker", () => {
+	it("a failed component toasts only when the spare-parts stock is empty; a finished job is left to the ticker", () => {
 		expect(describeEvent({ type: "componentFailed", facilityId: 1 }, { ...v, spareParts: 3 }, content).toast).toBe(false);
 		expect(describeEvent({ type: "componentFailed", facilityId: 1 }, { ...v, spareParts: 0 }, content).toast).toBe(true);
 	});

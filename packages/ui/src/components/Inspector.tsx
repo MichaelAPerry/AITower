@@ -340,7 +340,7 @@ export function Inspector(props: PanelProps) {
 	return (
 		<aside className="ui-inspector ui-panel">
 			<div className="ui-panel-title">
-				<FormLabel form="FORM IN-3">Dossier</FormLabel>
+				<FormLabel>Details</FormLabel>
 				<button type="button" className="ui-btn ui-icon-btn ui-mini" onClick={() => store.setSelection(null)} title="Close">
 					<Icon name="close" size={11} />
 				</button>

@@ -30,43 +30,43 @@ export interface OverCopy {
 export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 	bankrupt: {
 		heading: "NOTICE OF TERMINATION",
-		form: "FORM T-1: INSOLVENCY",
+		form: "INSOLVENCY",
 		stamp: "TERMINATED",
 		tone: "red",
-		lines: ["The Treasury has been below zero for a full day. Under Statute 9(b) the premises, the racks and your position are hereby foreclosed.", "The Ministry thanks you for your service and regrets nothing."],
+		lines: ["The Treasury has been below zero for a full day. Under the lending covenant, the premises, the racks and your position are foreclosed.", "The lender has taken possession."],
 	},
 	shutdown: {
 		heading: "NOTICE OF TERMINATION",
-		form: "FORM T-7: LICENCE WITHDRAWN",
+		form: "LICENCE WITHDRAWN",
 		stamp: "SHUT DOWN",
 		tone: "red",
-		lines: ["Your Ministry standing has reached zero. The operating licence for this datacenter is withdrawn with immediate effect.", "The doors will be sealed in triplicate. Please do not remove the stationery."],
+		lines: ["Your Authority standing has reached zero. The operating licence for this datacenter is withdrawn with immediate effect.", "Site access is revoked. Please return your badge."],
 	},
 	victory: {
 		heading: "COMMENDATION",
-		form: "FORM C-1: DISTINGUISHED SERVICE",
+		form: "DISTINGUISHED SERVICE",
 		stamp: "COMMENDED",
 		tone: "green",
-		lines: ["You have reached the highest clearance the Ministry grants. The Minister has been informed and was, for a moment, almost pleased.", "The datacenter may continue to operate in the sandbox, without further inspection."],
+		lines: ["You have reached the highest clearance the Compute Authority grants. The Compute Authority has noted the result.", "The datacenter may continue to operate in the sandbox, without further inspection."],
 	},
 	// Fallback only: the sheet shows the text of content.endings (see `overCopyFor`).
 	absorbed: {
 		heading: "NOTICE OF INCORPORATION",
-		form: "FORM Ω: ASSET RECLASSIFICATION",
+		form: "ASSET RECLASSIFICATION",
 		stamp: "ABSORBED",
 		tone: "red",
-		lines: ["The facility and its superintendent have been reclassified as Ministry assets.", "No further correspondence is required."],
+		lines: ["The facility and its operator are now Compute Authority assets.", "No further correspondence is required."],
 	},
 };
 
 /** The frame (form number, stamp, tone) printed around an ending's own text. `plain` is the wording at horrorIntensity "off". */
 const ENDING_FRAME: Record<EndingId, { form: string; stamp: string; tone: "red" | "green"; plainForm: string; plainStamp: string }> = {
-	livingTower: { form: "FORM A-9: ASSET CERTIFICATION", stamp: "CERTIFIED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
-	cleanTower: { form: "FORM C-2: SANITARY COMMENDATION", stamp: "COMMENDED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
-	absorbed: { form: "FORM Ω: ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "FORM T-9: TAKEOVER", plainStamp: "TAKEN OVER" },
+	livingTower: { form: "ASSET CERTIFICATION", stamp: "CERTIFIED", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	cleanTower: { form: "SANITARY COMMENDATION", stamp: "COMMENDED", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	absorbed: { form: "ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "TAKEOVER", plainStamp: "TAKEN OVER" },
 	// M4 placeholders (M4-T3 may reword).
-	greenExemplar: { form: "FORM G-1: CARBON-NEGATIVE EXEMPLAR", stamp: "EXEMPLARY", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
-	millionMinds: { form: "FORM S-1: CONTINUITY CERTIFIED", stamp: "CONTINUOUS", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	greenExemplar: { form: "CARBON-NEGATIVE EXEMPLAR", stamp: "EXEMPLARY", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	millionMinds: { form: "CONTINUITY CERTIFIED", stamp: "CONTINUOUS", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
 };
 
 /** The ending shown for a game-over: `ending` when set, else the secret one for kind "absorbed", else none. */
@@ -111,7 +111,7 @@ export function lifetimeStats(view: SimView): StatRow[] {
 	const head: StatRow[] = [
 		{ label: "Days in service", value: String(view.day) },
 		{ label: "Clearance reached", value: `Tier ${view.tier}` },
-		{ label: "Ministry standing", value: `${Math.round(view.standing)} / 100` },
+		{ label: "Authority standing", value: `${Math.round(view.standing)} / 100` },
 		{ label: "Final treasury", value: fmtMoney(view.cash) },
 	];
 	const life = lifetimeRows(view.stats);

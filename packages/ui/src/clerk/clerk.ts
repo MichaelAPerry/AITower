@@ -1,4 +1,4 @@
-/** Pure logic for the Contracts Clerk: would it take an offer, standing-order edits, copy. */
+/** Pure logic for the Contract Automation: would it take an offer, standing-order edits, copy. */
 import type { ContentDB, ContractSpec, JobKind } from "@aitower/content";
 import type { ClerkPolicy, CommandResult } from "@aitower/sim";
 import { payPerPflopHour } from "@aitower/sim";
@@ -45,7 +45,7 @@ export function fmtRate(r: number, unit = true): string {
 /** The slip shown while the clerk is not researched. */
 export function clerkLockedText(content: ContentDB): string {
 	const n = clerkNode(content);
-	return n ? `Hire a Contracts Clerk: research ${n.name} (${n.cost} RP)` : "Hire a Contracts Clerk: research it in the Department of Research";
+	return n ? `Hire a Contract Automation: research ${n.name} (${n.cost} RP)` : "Hire a Contract Automation: research it in the Department of Research";
 }
 
 /** Toggle one job kind. The list never goes empty (the sim rejects that), and keeps the canonical order. */

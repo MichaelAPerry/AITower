@@ -11,11 +11,11 @@ import "./menu.css";
 export type MenuSection = "save" | "load" | "settings" | "controls" | "new";
 
 const DRAWERS: { id: MenuSection; label: string; form: string; title: string }[] = [
-	{ id: "save", label: "Save game", form: "FORM FC-1", title: "Save game · file the datacenter" },
-	{ id: "load", label: "Load game", form: "FORM FC-2", title: "Load game · retrieve a file" },
-	{ id: "settings", label: "Settings", form: "FORM FC-3", title: "Settings · adjust the instruments" },
-	{ id: "controls", label: "Controls", form: "FORM FC-4", title: "Controls · keys and mouse" },
-	{ id: "new", label: "New game", form: "FORM FC-5", title: "New game · requisition a fresh site" },
+	{ id: "save", label: "Save game", form: "SAVE", title: "Save game" },
+	{ id: "load", label: "Load game", form: "LOAD", title: "Load game" },
+	{ id: "settings", label: "Settings", form: "SETTINGS", title: "Settings" },
+	{ id: "controls", label: "Controls", form: "CONTROLS", title: "Controls · keys and mouse" },
+	{ id: "new", label: "New game", form: "NEW GAME", title: "New game" },
 ];
 
 export interface SystemMenuProps {
@@ -85,8 +85,8 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 			<div className="ui-menu ui-panel" role="dialog" aria-modal="true" aria-label="System menu">
 				<header className="ui-menu-head ui-panel-title">
 					<span className="ui-menu-plate">
-						<b>MINISTRY OF COMPUTATION</b>
-						<i>FILING CABINET · DRAWER 7</i>
+						<b>SYSTEM</b>
+						<i>MENU</i>
 					</span>
 					{!fromTitle && <span className="ui-dymo ui-menu-paused">GAME PAUSED</span>}
 					<span className="ui-grow" />
@@ -113,9 +113,9 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 								restartInduction();
 								menu.close();
 							}}
-							title="Reopen the Ministry induction memos"
+							title="Reopen the tutorial"
 						>
-							Restart induction
+							Restart tutorial
 						</button>
 						)}
 					</nav>
@@ -125,7 +125,7 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 							<span>{active.form}</span>
 						</div>
 						<div className="ui-menu-scroll">
-							{error && section !== "controls" && section !== "settings" && <div className="ui-menu-note is-error">Could not read the file index: {error}</div>}
+							{error && section !== "controls" && section !== "settings" && <div className="ui-menu-note is-error">Could not read saves: {error}</div>}
 							{section === "save" && <SavePane {...common} saves={saves} reload={reload} />}
 							{section === "load" && <LoadPane {...common} saves={saves} reload={reload} />}
 							{section === "settings" && <SettingsPane {...common} />}

@@ -21,7 +21,7 @@ describe("save slot formatting", () => {
 		expect(rows.map((r) => r.empty)).toEqual([false, true, false, true]);
 		expect(rows[2]).toMatchObject({ name: "Mine", summary: "DAY 12 · $1.28M · TIER 2", when: "12:04" });
 		expect(rows[0].summary).toBe("DAY 11 · $1.28M · TIER 2");
-		expect(rows[1]).toMatchObject({ name: "", summary: "Nothing filed here yet", when: "—", info: null });
+		expect(rows[1]).toMatchObject({ name: "", summary: "Empty slot", when: "—", info: null });
 	});
 	it("handles an empty list", () => {
 		expect(slotRows([]).every((r) => r.empty)).toBe(true);

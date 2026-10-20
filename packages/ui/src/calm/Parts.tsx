@@ -32,7 +32,7 @@ export function NextChip({ store, content, state, ui, setUi, openAscension }: Pa
 				<span className="ui-tag">NEXT</span>
 				<span className="ui-next-title">{obj.title}</span>
 				{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
-				{obj.action === "ascension" && <span className="ui-tag is-key">FORM A-5</span>}
+				{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
 			</button>
 			{ending && (
 				<span className="ui-next-ending" title="Days the ending condition has held without a break">

@@ -73,7 +73,7 @@ describe("automation policy helpers", () => {
 		expect(anyAutomation(locked)).toBe(false);
 		store.unlockClerk();
 		store.dispatch({ type: "setClerk", policy: { ...store.get().view.clerk.policy, enabled: true } });
-		expect(activeOrders(store.get().view)).toEqual(["Contracts Clerk"]);
+		expect(activeOrders(store.get().view)).toEqual(["Contract Automation"]);
 	});
 	it("sendAutomation builds on the policy as it is now and shows a refusal as a notice", () => {
 		const { store } = setup();
@@ -107,7 +107,7 @@ describe("Automation drawer", () => {
 		const spy = vi.spyOn(store, "dispatch");
 		let tree = AutomationDrawer(panelProps(store, content));
 		const html = render(<AutomationDrawer {...panelProps(store, content)} />);
-		for (const name of ["Research", "Spare parts", "Maintenance bots", "Works Foreman", "Contracts Clerk"]) expect(html).toContain(name);
+		for (const name of ["Research", "Spare parts", "Maintenance bots", "Works Foreman", "Contract Automation"]) expect(html).toContain(name);
 		click(findButton(tree, /Research: off/));
 		expect(spy).toHaveBeenLastCalledWith({ type: "setAutomation", policy: expect.objectContaining({ research: { enabled: true, branches: [] } }) });
 		tree = AutomationDrawer(panelProps(store, content));
@@ -149,7 +149,7 @@ describe("Automation drawer", () => {
 	});
 	it("lists the Clerk as a locked line, then as a one-line toggle that dispatches setClerk", () => {
 		const { store, content } = setup();
-		expect(textOf(AutomationDrawer(panelProps(store, content)))).toContain("Hire a Contracts Clerk");
+		expect(textOf(AutomationDrawer(panelProps(store, content)))).toContain("Hire a Contract Automation");
 		store.unlockClerk();
 		const spy = vi.spyOn(store, "dispatch");
 		click(findButton(AutomationDrawer(panelProps(store, content)), /Clerk is off/));

@@ -34,7 +34,7 @@ const step = (id: string) => {
 	return s;
 };
 
-describe("Ministry induction steps", () => {
+describe("Compute Authority induction steps", () => {
 	it("stays short: at most 9 numbered memos of at most 40 words each (owner: the old one was thick as mud)", () => {
 		expect(TUTORIAL_STEPS.length).toBeLessThanOrEqual(9);
 		for (const step of [...TUTORIAL_STEPS, MEMO_EXPLAINER]) {

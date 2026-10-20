@@ -71,11 +71,11 @@ export function rackProblem(view: SimView, content: ContentDB, f: FacilityView):
 	if (!def?.rack) return null;
 	switch (f.status) {
 		case "disabled":
-			return "Switched off. Flip MAINS in its dossier to turn it on.";
+			return "Switched off. Flip MAINS in its details to turn it on.";
 		case "failed":
 			return view.spareParts > 0
-				? "Broken. A maintenance automaton is bringing a spare part to repair it."
-				: "Broken, and the parts cage is empty. Buy spare parts so an automaton can repair it.";
+				? "Broken. A maintenance bot is bringing a spare part to repair it."
+				: "Broken, and the spare-parts stock is empty. Buy spare parts so a bot can repair it.";
 		case "tripped":
 			return def.rack.liquidFraction > 0
 				? "Overheated and tripped; it restarts once it cools. Give its coolant loop more capacity (another chiller or CDU), and an air handler for the rest of its heat."

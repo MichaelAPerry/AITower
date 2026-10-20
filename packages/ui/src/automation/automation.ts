@@ -1,5 +1,5 @@
 /**
- * Pure logic for the Automation drawer: the four standing orders (Research, Parts, Bots, Foreman), the Contracts Clerk as a
+ * Pure logic for the Automation drawer: the four standing orders (Research, Parts, Bots, Foreman), the Contract Automation as a
  * fifth one-line toggle, and how an edit becomes a `setAutomation` command built on the policy as it is at that moment.
  */
 import type { ContentDB, TechBranch, TechNode } from "@aitower/content";
@@ -19,8 +19,8 @@ export interface OrderInfo {
 
 export const ORDERS: OrderInfo[] = [
 	{ id: "research", label: "Research", blurb: "Spends research points on the next node it can afford." },
-	{ id: "parts", label: "Spare parts", blurb: "Keeps the cage stocked so repairs never wait." },
-	{ id: "bots", label: "Maintenance bots", blurb: "Buys automata as the racks multiply." },
+	{ id: "parts", label: "Spare parts", blurb: "Keeps spare parts stocked so repairs never wait." },
+	{ id: "bots", label: "Maintenance bots", blurb: "Buys maintenance bots as rack count grows." },
 	{ id: "foreman", label: "Works Foreman", blurb: "Places racks, cooling and spare power on slab you have already laid." },
 ];
 
@@ -41,7 +41,7 @@ export const orderOn = (policy: AutomationPolicy, id: OrderId): boolean => polic
 /** Names of the orders that are on, in drawer order (the Clerk last, when it is hired and on). */
 export function activeOrders(view: Pick<SimView, "automation" | "clerk">): string[] {
 	const on = ORDERS.filter((o) => orderOn(view.automation.policy, o.id) && (o.id !== "foreman" || view.automation.foremanUnlocked)).map((o) => o.label);
-	if (view.clerk?.unlocked && view.clerk.policy.enabled) on.push("Contracts Clerk");
+	if (view.clerk?.unlocked && view.clerk.policy.enabled) on.push("Contract Automation");
 	return on;
 }
 
