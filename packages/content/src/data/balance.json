@@ -62,10 +62,10 @@
   ],
   "uptime": [
    0,
+   0.93,
    0.95,
-   0.97,
-   0.99,
-   0.992
+   0.96,
+   0.97
   ],
   "reward": [
    0,
@@ -79,9 +79,9 @@
   "start": 50,
   "dailyGood": 1,
   "dailyBad": -3,
-  "dailyNearMiss": -3,
+  "dailyNearMiss": -1,
   "dailyMissSpan": 0.05,
-  "jobFailed": -4,
+  "jobFailed": -2,
   "jobCompleted": 1
  },
  "research": {

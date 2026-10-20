@@ -39,7 +39,7 @@ describe("loadContent", () => {
 	it("has the specified starter layout", () => {
 		const s = loadContent().scenarios.starter;
 		expect(s.width).toBe(48);
-		expect([s.floorMin, s.floorMax]).toEqual([-2, 10]);
+		expect([s.floorMin, s.floorMax]).toEqual([-5, 40]);
 		expect(s.lifts).toEqual([{ x: 24, floorMin: -1, floorMax: 1 }]);
 		const racks = s.facilities.filter((f) => f.defId === "rack_air_gpu");
 		expect(racks.map((r) => r.x)).toEqual([6, 8, 10, 12]);

@@ -15,7 +15,7 @@
 import type { ContentDB, FacilityDef } from "@aitower/content";
 import { acceptCheck, installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
-import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING } from "../core/constants";
+import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING, FOREMAN_RUNWAY_DAYS } from "../core/constants";
 import { cellIdx } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
@@ -310,7 +310,9 @@ function lowestNet(r: Run, floor: number, x: number, w: number): number {
 export function foremanStep(ctx: TickCtx): void {
 	const { state, content } = ctx;
 	const p = state.automation.foreman;
-	const r: Run = { ctx, reserve: p.reserve, powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
+	const lastDay = state.ledger[state.ledger.length - 1];
+	const runway = lastDay ? FOREMAN_RUNWAY_DAYS * (lastDay.energy + lastDay.upkeep + lastDay.fees) : 0;
+	const r: Run = { ctx, reserve: Math.max(p.reserve, runway), powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
 	for (let placed = 0; placed < content.balance.automation.foremanPerHour; placed++) {
 		if (state.netsDirty) rebuildNetworks(ctx);
 		const did = (p.power && tryPower(r)) || (p.cooling && tryCooling(r)) || (p.racks && (tryLogistics(r) || tryRacks(r)));

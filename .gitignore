@@ -4,3 +4,10 @@ dist/
 .DS_Store
 coverage/
 dist-artifact/
+
+# TypeScript build output (tsc -b emits next to sources; vitest would pick stale .js first)
+*.tsbuildinfo
+/vitest.config.js
+apps/*/src/**/*.js
+packages/*/src/**/*.js
+tools/*/src/**/*.js
