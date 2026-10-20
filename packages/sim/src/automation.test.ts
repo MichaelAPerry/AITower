@@ -356,6 +356,7 @@ describe("the Foreman", () => {
 	/** Unlock and switch on; `over` edits the foreman policy. */
 	function foreman(sim: SimImpl, over: Partial<AutomationPolicy["foreman"]> = {}, logistics = false): SimEvent[] {
 		grant(sim, "t_foreman");
+		if (sim.state.bots.length === 0) addBot(sim.state, "rover", 0, 0, -1); // the Foreman builds only where a bot can reach
 		toHourEdge(sim); // the order acts on the tick it is set when that tick is a top of the hour
 		return setPolicy(sim, (p) => {
 			if (!logistics) p.bots.maxBots = 0; // the older tests are about power, cooling and racks only
@@ -601,6 +602,7 @@ describe("the Foreman", () => {
 					{ defId: "grid_tie", floor: 0, x: 0 },
 					{ defId: "rack_air_gpu", floor: 2, x: 20 },
 				],
+				lifts: [{ x: 46, floorMin: 0, floorMax: 2 }],
 			});
 			const sim = newSim(content([two], perHour(1)), "twofloors");
 			sim.step();
@@ -639,10 +641,10 @@ describe("the Foreman", () => {
 
 		it("no racks while open work orders outnumber the bots; racks again once they do not", () => {
 			const sim = busy();
-			sim.state.workOrders.push({ id: 99, facilityId: 3, botId: -1, createdAt: 0, attempts: 0, retryAt: 0, retryRev: 0 });
+			for (const id of [98, 99]) sim.state.workOrders.push({ id, facilityId: 3, botId: -1, createdAt: 0, attempts: 0, retryAt: 0, retryRev: 0 });
 			sim.invalidateProjection();
 			foreman(sim, { power: false, cooling: false });
-			expect(racksNow(sim)).toBe(4); // 1 order, 0 bots
+			expect(racksNow(sim)).toBe(4); // 2 orders, 1 bot (the helper adds one so the Foreman has a floor to build on)
 			sim.state.workOrders.length = 0;
 			toHourEdge(sim);
 			sim.step();
@@ -687,6 +689,7 @@ describe("the Foreman", () => {
 			});
 			const sim = newSim(content([wide], perHour(1)), "wide");
 			grant(sim, "t_foreman");
+			addBot(sim.state, "rover", 0, 0, -1);
 			setPolicy(sim, (p) => {
 				p.bots.maxBots = 0;
 				p.foreman = { ...p.foreman, enabled: true, reserve: 0, cooling: false, power: false };

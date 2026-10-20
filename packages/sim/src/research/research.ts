@@ -2,6 +2,7 @@
 import type { ContentDB, FeatureId, PerkKind, TechNode } from "@aitower/content";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import type { SimState } from "../core/state";
+import { AFFINITY_PER_TECH, addAffinity, techPath } from "../progression/affinity";
 
 const PERKS: readonly PerkKind[] = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
 
@@ -75,6 +76,8 @@ export function planResearch(ctx: PlanCtx, techId: string): Plan {
 	return accept(0, (events) => {
 		state.researchPoints = Math.max(0, state.researchPoints - node.cost);
 		state.techResearched.push(node.id);
+		const lean = techPath(content, node);
+		if (lean) addAffinity(state, lean, AFFINITY_PER_TECH);
 		events.push({ type: "researched", techId: node.id });
 	});
 }

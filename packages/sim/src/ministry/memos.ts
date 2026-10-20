@@ -11,6 +11,7 @@ import { dayOf, minuteOfDay } from "../core/time";
 import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
+import { addAffinity } from "../progression/affinity";
 import { expireModifiers, modifierLabel } from "./modifiers";
 import { changeStanding } from "./standing";
 
@@ -146,7 +147,8 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 			else removeParts(state, content, Math.floor(-e.count));
 			break;
 		case "affinity":
-			break; // placeholder: the path-affinity task implements it
+			addAffinity(state, e.path, e.amount);
+			break;
 	}
 }
 

@@ -640,9 +640,9 @@ describe("snapshot v6", () => {
 		for (const j of s.jobs) delete j.unreported;
 	};
 
-	it("is version 6", () => {
-		expect(SNAPSHOT_VERSION).toBe(6);
-		expect(base().snapshot().version).toBe(6);
+	it("is version 7", () => {
+		expect(SNAPSHOT_VERSION).toBe(7);
+		expect(base().snapshot().version).toBe(7);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -664,7 +664,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(6);
+		expect(loaded.snapshot().version).toBe(7);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

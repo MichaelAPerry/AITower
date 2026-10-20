@@ -27,6 +27,7 @@ import { stepBots } from "./logistics/bots";
 import { stepLifts } from "./logistics/lifts";
 import { rebuildNetworks } from "./networks/rebuild";
 import { powerSolve } from "./power/powerSolve";
+import { affinityStep } from "./progression/affinity";
 import { progressionStep } from "./progression/tier";
 import { advanceTime } from "./progression/time";
 import { reliabilityStep } from "./reliability/reliabilityStep";
@@ -143,6 +144,7 @@ export class SimImpl implements Sim {
 		memoStep(ctx); //  9b modifiers expire, memos time out / are issued
 		jobStanding(ctx); //  9c standing from this tick's job outcomes
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
+		affinityStep(ctx); //  9e hourly path affinity from running facilities
 		progressionStep(ctx); // 10
 		advanceTime(ctx); // 11
 		return events;

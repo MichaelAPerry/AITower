@@ -17,6 +17,7 @@ import { facilityStatus } from "./status";
 import { clerkUnlocked, foremanUnlocked, perk } from "../research/research";
 import { cloneAutomation } from "../automation/policy";
 import { isDrought } from "../green/weather";
+import { affinityShares } from "../progression/affinity";
 
 function botState(b: Bot, def: BotDef | undefined): BotState {
 	if (def?.flying && b.leg === "walk" && b.floor !== b.goalFloor && (b.task === "depot" || b.task === "target" || b.task === "charger")) return "flying";
@@ -137,7 +138,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		path: state.path,
 		organoidPflops: m.organoidPflops,
 		endingProgress: leadingEnding(state, content.balance.endings),
-		affinity: { biotech: 0, greentech: 0, synthetic: 0 }, // placeholder: the path-affinity task implements it
+		affinity: affinityShares(state),
 		pathScore: state.path === "greentech" ? state.greenScore : state.path === "synthetic" ? state.refinement : state.corruption,
 		greenScore: state.greenScore,
 		refinement: state.refinement,

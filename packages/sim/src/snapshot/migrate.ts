@@ -15,11 +15,12 @@
  *    `endingDays`, the `growth` RNG stream, `gameOver.ending`.
  *  - v5 → v6 (M4-T1): automation policy, weather (`wind`, `droughtUntil`, the `weather` RNG stream), `greenScore`, `refinement`,
  *    `sandbox`, the greentech / synthetic `endingDays`, the green-energy and exported-heat rings, `job.unreported`.
+ *  - v6 → v7 (M4b-T1): path `affinity` points (start at 0).
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 6;
+export const SNAPSHOT_VERSION = 7;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -171,8 +172,14 @@ function migrateV5(state: RawState): RawState {
 	return state;
 }
 
+/** Path affinity starts at zero on an older save. */
+function migrateV6(state: RawState): RawState {
+	if (!isObj(state.affinity)) state.affinity = { biotech: 0, greentech: 0, synthetic: 0 };
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;
