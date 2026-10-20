@@ -173,3 +173,55 @@
 .aitower-hud.is-reduced-motion .ui-title-wait {
 	animation: none;
 }
+
+/* Scenario picker */
+.aitower-hud .ui-title-sites {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	display: grid;
+	gap: 6px;
+}
+.aitower-hud .ui-title-sites legend {
+	padding: 0;
+	margin-bottom: 6px;
+}
+.aitower-hud .ui-title-cards {
+	display: grid;
+	gap: 6px;
+}
+.aitower-hud .ui-title-card {
+	display: grid;
+	gap: 3px;
+	text-align: left;
+	padding: 8px 10px;
+	cursor: pointer;
+	color: var(--ink);
+	font: 14px/1.3 var(--f-type);
+	background: color-mix(in srgb, var(--paper) 88%, transparent);
+	border: 1px solid var(--brass-dk);
+	border-left: 5px solid var(--brass-dk);
+}
+.aitower-hud .ui-title-card.is-on {
+	border-left-color: var(--green-dim, var(--good));
+	background: var(--paper);
+	box-shadow: 0 0 0 2px var(--amber);
+}
+.aitower-hud .ui-title-card-head {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 4px 10px;
+}
+.aitower-hud .ui-title-card-head b {
+	font: 18px/1 var(--f-crt);
+	letter-spacing: 0.04em;
+}
+.aitower-hud .ui-title-card-facts {
+	margin-left: auto;
+	font: 16px/1 var(--f-crt);
+	color: var(--paper-ink, var(--ink));
+}
+.aitower-hud .ui-title-card-desc {
+	font: 14px/1.3 var(--f-type);
+}

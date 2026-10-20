@@ -8,13 +8,13 @@
  {
   "id": "greentech",
   "name": "Greentech",
-  "available": false,
-  "description": "Coming soon. Heat pipelines, algae façades and carbon credits, for a tower that gives back more than it takes. The Department of Weather is still drafting the forms."
+  "available": true,
+  "description": "Sun, wind and waste heat, accounted for to the last kilowatt-hour. Skin the tower in photovoltaic panels, raise masts on the upper floors, pipe the racks' exhaust to the municipal baths and grow algae on the façade for carbon credits. Your Green Score rises with the share of power that comes from the weather and the heat you sell, and falls through a Dunkelflaute, when the sky is dark and the air is still, so keep a generator warm. The Department of Weather assures you the building is flourishing, and has noticed that the ferns are doing better than anyone expected."
  },
  {
   "id": "synthetic",
   "name": "Synthetic Mind",
-  "available": false,
-  "description": "Coming soon. Hosted minds, continuity audits and a lattice that remembers you. The Ethics Office is still deciding whether it is permitted to exist."
+  "available": true,
+  "description": "Hosted minds, continuity audits and a lattice that remembers you. Cool Mind Lattice cabinets on a cryo loop, keep every process alive through a brownout behind Continuity Monitors and a Backup Vault, and raise your Refinement: uptime multiplied by the share of compute on top-tier racks. The minds are courteous, productive and file their own forms. The Ethics Office has confirmed that it is permitted to exist, and has asked that you stop asking who signed that."
  }
 ]

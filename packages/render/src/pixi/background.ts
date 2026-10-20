@@ -7,7 +7,7 @@
  */
 import type { RenderOptions } from "@aitower/shared";
 import { Container, Graphics, GraphicsContext, Texture, TilingSprite } from "pixi.js";
-import { lerpColor, skyColors } from "../color";
+import { droughtSky, lerpColor, skyColors } from "../color";
 import { SIGN_ALT, SIGN_WORD } from "../horror";
 import { T, dk, lt, mix } from "../palette";
 import { px } from "./draw";
@@ -223,8 +223,8 @@ export class Background {
 	 * `opt.reducedMotion` freezes the drift, twinkle and searchlight sweep (time held at 0) and holds the
 	 * sign and aircraft lamps lit instead of blinking.
 	 */
-	update(vw: number, vh: number, zoom: number, horizonY: number, originX: number, minuteOfDay: number, t: number, opt: RenderOptions, signAlt = false): void {
-		const sky = skyColors(minuteOfDay);
+	update(vw: number, vh: number, zoom: number, horizonY: number, originX: number, minuteOfDay: number, t: number, opt: RenderOptions, signAlt = false, drought = 0): void {
+		const sky = droughtSky(skyColors(minuteOfDay), drought);
 		const calm = opt.reducedMotion;
 		const tt = calm ? 0 : t;
 		const hz = Math.round(horizonY);

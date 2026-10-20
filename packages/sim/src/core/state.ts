@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { ContractSpec } from "@aitower/content";
-import type { AscensionPath, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
+import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -158,6 +158,8 @@ export interface Job {
 	/** Accepted by the Contracts Clerk: every payment withholds `balance.clerk.feeShare`. */
 	clerk: boolean;
 	finishedAt: number;
+	/** Inference revenue earned since the last `earned` event (flushed hourly and when the job ends). */
+	unreported: number;
 }
 
 export interface WorkOrder {
@@ -232,6 +234,14 @@ export interface Metrics {
 	ringItKwh: Float64Array;
 	ringShouldRun: Float64Array;
 	ringRunning: Float64Array;
+	/** kWh from solar and wind per tick (rolling 24 h, snapshot v6). */
+	ringGreenKwh: Float64Array;
+	/** kWh of heat exported per tick (rolling 24 h, snapshot v6). */
+	ringHeatKwh: Float64Array;
+	/** Solar + wind output this tick, kW (counted in `totalKw`). */
+	greenKw: number;
+	/** Heat removed and sold by exporters this tick, kW. */
+	heatExportKw: number;
 	itKw: number;
 	totalKw: number;
 	gridKw: number;
@@ -360,7 +370,20 @@ export interface SimState {
 	/** Chosen ascension path. */
 	path: AscensionPath | null;
 	/** Consecutive daily checks each path ending's condition has held. */
-	endingDays: { livingTower: number; cleanTower: number };
+	endingDays: { livingTower: number; cleanTower: number; greenExemplar: number; millionMinds: number };
+	// ── Automation, greentech, scenarios (snapshot v6) ──
+	/** Standing orders (research / parts / bots / Foreman). */
+	automation: AutomationPolicy;
+	/** Current wind strength 0.2..1, redrawn hourly from the `weather` stream. */
+	wind: number;
+	/** A Dunkelflaute is in force while `tick < droughtUntil`. */
+	droughtUntil: number;
+	/** Smoothed greentech score 0..1. */
+	greenScore: number;
+	/** Synthetic score 0..1: uptime × share of delivered compute on top-tier racks. */
+	refinement: number;
+	/** Scenario sandbox: no bankruptcy, no shutdown (re-derived from the scenario on load). */
+	sandbox: boolean;
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];
 }

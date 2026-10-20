@@ -3,6 +3,7 @@ import type { ContentDB } from "@aitower/content";
 import { TICKS_PER_DAY } from "../api";
 import { placeScenarioFacility } from "../commands/placement";
 import { stockParts } from "../commands/operations";
+import { defaultAutomation } from "../automation/policy";
 import { nextOfferDelay } from "../compute/offers";
 import { nextMemoDelay } from "../ministry/memos";
 import { createScratch } from "../core/context";
@@ -57,8 +58,8 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		nutrientNets: [],
 		storageUtil: 0,
 		nextOfferTick: 0,
-		cash: content.balance.startingCash,
-		tier: 1,
+		cash: sc.startingCash ?? content.balance.startingCash,
+		tier: Math.min(Math.max(1, Math.floor(sc.startTier ?? 1)), Math.max(1, content.balance.tiers.pflops.length)),
 		bankrupt: false,
 		negativeCashTicks: 0,
 		ledger: [],
@@ -69,6 +70,10 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 			ringItKwh: new Float64Array(TICKS_PER_DAY),
 			ringShouldRun: new Float64Array(TICKS_PER_DAY),
 			ringRunning: new Float64Array(TICKS_PER_DAY),
+			ringGreenKwh: new Float64Array(TICKS_PER_DAY),
+			ringHeatKwh: new Float64Array(TICKS_PER_DAY),
+			greenKw: 0,
+			heatExportKw: 0,
 			itKw: 0,
 			totalKw: 0,
 			gridKw: 0,
@@ -102,7 +107,13 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		irreversible: false,
 		corruption: 0,
 		path: null,
-		endingDays: { livingTower: 0, cleanTower: 0 },
+		endingDays: { livingTower: 0, cleanTower: 0, greenExemplar: 0, millionMinds: 0 },
+		automation: defaultAutomation(),
+		wind: 0.6,
+		droughtUntil: 0,
+		greenScore: 0,
+		refinement: 0,
+		sandbox: sc.sandbox === true,
 		pending: [],
 	};
 

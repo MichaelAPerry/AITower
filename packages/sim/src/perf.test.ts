@@ -84,4 +84,43 @@ describe("perf", () => {
 		expect(maxOrders).toBeGreaterThan(50); // the queue was deep, i.e. the claim path was exercised
 		expect(best).toBeLessThan(2 * SLACK);
 	});
+
+	it("the tower with every standing order on (Foreman placing up to 5 per hour): mean step() < 2 ms; the hourly step stays cheap", () => {
+		const content = towerContent();
+		content.balance.automation = { partsBatch: 5, foremanPerHour: 5 };
+		const sim = new SimImpl(content, createState(content, "tower", 7));
+		sim.state.techResearched.push("t_foreman");
+		sim.state.automation = {
+			research: { enabled: true, branches: [] },
+			parts: { enabled: true, keep: 10 },
+			bots: { enabled: true, racksPerBot: 12, maxBots: 40 },
+			foreman: { enabled: true, reserve: 0, racks: true, cooling: true, power: true },
+		};
+		sim.state.cash = 1e12; // the Foreman has something to spend, so its placement path really runs
+		const before = sim.state.facilities.length;
+		const tick = (): number => {
+			if (sim.state.tick % 150 === 0) sim.submit({ type: "buyParts", count: 15 });
+			const t0 = process.hrtime.bigint();
+			for (const e of sim.step()) if (e.type === "contractOffered") sim.submit({ type: "acceptContract", contractId: e.contractId });
+			return Number(process.hrtime.bigint() - t0) / 1e6;
+		};
+		for (let i = 0; i < 150; i++) tick();
+		const windows: number[] = [];
+		let worstHour = 0;
+		for (let w = 0; w < 4; w++) {
+			let sum = 0;
+			for (let i = 0; i < 250; i++) {
+				const hour = sim.state.tick % 60 === 0;
+				const ms = tick();
+				sum += ms;
+				if (hour) worstHour = Math.max(worstHour, ms);
+			}
+			windows.push(sum / 250);
+		}
+		const best = Math.min(...windows);
+		console.log(`perf tower+automation: mean step() per window [${windows.map((x) => x.toFixed(3)).join(", ")}] ms, best ${best.toFixed(3)} ms; worst hour tick ${worstHour.toFixed(2)} ms; Foreman added ${sim.state.facilities.length - before} facilities`);
+		expect(sim.state.facilities.length).toBeGreaterThanOrEqual(before); // (a full tower may have no room left)
+		expect(best).toBeLessThan(2 * SLACK);
+		expect(worstHour).toBeLessThan(50 * SLACK);
+	});
 });

@@ -25,5 +25,7 @@
 	{ "id": "vitoria_regia", "name": "Vitória-Régia Proteomics Foundry", "sector": "biotech", "weight": 1, "kinds": ["training", "inference"], "minTier": 3, "payMultiplier": 1.8, "needsBio": true },
 	{ "id": "orquidea_coop", "name": "Orquídea Cell-Culture Cooperative", "sector": "biotech", "weight": 1, "kinds": ["finetune", "inference"], "minTier": 3, "payMultiplier": 1.9, "needsBio": true },
 	{ "id": "morfologia_nacional", "name": "National Institute of Computational Morphology", "sector": "gov", "weight": 2, "kinds": ["training"], "minTier": 4, "payMultiplier": 2.2, "needsBio": true },
-	{ "id": "mata_atlantica_trust", "name": "Mata Atlântica Longevity Trust", "sector": "biotech", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 2.1, "needsBio": true }
+	{ "id": "mata_atlantica_trust", "name": "Mata Atlântica Longevity Trust", "sector": "biotech", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 2.1, "needsBio": true },
+	{ "id": "dunkelflaute_service", "name": "Federal Dunkelflaute Early-Warning Service", "sector": "climate", "weight": 2, "kinds": ["inference", "training"], "minTier": 3, "payMultiplier": 1.4 },
+	{ "id": "carbon_ledger_consortium", "name": "Carbon Ledger Consortium", "sector": "climate", "weight": 2, "kinds": ["training", "finetune"], "minTier": 4, "payMultiplier": 1.5 }
 ]

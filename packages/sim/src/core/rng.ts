@@ -12,6 +12,8 @@ export interface RngState {
 	events: number;
 	/** Growth sprouting rolls and which growth def sprouts. (Added in snapshot v5.) */
 	growth: number;
+	/** Hourly wind and daily Dunkelflaute rolls. (Added in snapshot v6.) */
+	weather: number;
 }
 
 export type RngStream = keyof RngState;
@@ -34,5 +36,5 @@ export function mixSeed(seed: number, salt: number): number {
 }
 
 export function createRng(seed: number): RngState {
-	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2), events: mixSeed(seed, 3), growth: mixSeed(seed, 4) };
+	return { contracts: mixSeed(seed, 1), reliability: mixSeed(seed, 2), events: mixSeed(seed, 3), growth: mixSeed(seed, 4), weather: mixSeed(seed, 5) };
 }

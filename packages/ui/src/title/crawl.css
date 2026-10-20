@@ -1,0 +1,58 @@
+/* Opening crawl: black glass, amber type, one line at a time. */
+.aitower-hud .ui-crawl {
+	position: absolute;
+	inset: 0;
+	z-index: 54;
+	pointer-events: auto;
+	display: grid;
+	place-items: center;
+	padding: 24px;
+	background: var(--bg);
+	cursor: pointer;
+	outline: none;
+}
+.aitower-hud .ui-crawl-text {
+	display: grid;
+	gap: 22px;
+	width: min(640px, 100%);
+	text-align: center;
+}
+.aitower-hud .ui-crawl-line {
+	margin: 0;
+	font: 20px/1.4 var(--f-type, var(--f-body));
+	letter-spacing: 0.04em;
+	color: var(--sodium, var(--warn));
+	text-shadow: 0 0 10px color-mix(in srgb, var(--sodium, var(--warn)) 60%, transparent);
+	opacity: 0;
+	animation: ui-crawl-in 1.4s ease-out forwards;
+}
+.aitower-hud .ui-crawl.is-still .ui-crawl-line,
+.aitower-hud.is-reduced-motion .ui-crawl .ui-crawl-line {
+	opacity: 1;
+	animation: none;
+}
+.aitower-hud .ui-crawl-skip {
+	position: absolute;
+	right: 24px;
+	bottom: 24px;
+}
+.aitower-hud .ui-crawl-skip kbd {
+	margin-left: 6px;
+	color: var(--accent);
+}
+@keyframes ui-crawl-in {
+	from {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-crawl .ui-crawl-line {
+		opacity: 1;
+		animation: none;
+	}
+}

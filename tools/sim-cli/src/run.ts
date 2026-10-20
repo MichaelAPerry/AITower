@@ -5,10 +5,10 @@
  * Collects per-day metrics. Pure (no I/O).
  */
 import type { ContentDB } from "@aitower/content";
-import { type ClerkPolicy, type ContractView, createSim, type Sim, type SimView, TICKS_PER_DAY } from "@aitower/sim";
+import { type AutomationPolicy, type ClerkPolicy, type ContractView, createSim, type Sim, type SimView, TICKS_PER_DAY } from "@aitower/sim";
 
 /** Accept only work that the currently idle, healthy racks can finish comfortably. */
-export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB): boolean {
+export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB, margin = 0.75): boolean {
 	if (v.jobs.some((j) => j.status === "queued" || j.status === "stalled")) return false;
 	let freePflops = 0;
 	let storageTB = 0;
@@ -25,7 +25,7 @@ export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB
 	if (offer.kind === "inference") return (offer.sustainedPflops ?? offer.work) <= freePflops * 0.9;
 	if (freePflops <= 0) return false;
 	const hoursNeeded = offer.work / freePflops;
-	return hoursNeeded * 60 <= offer.durationTicks * 0.75;
+	return hoursNeeded * 60 <= offer.durationTicks * margin;
 }
 
 
@@ -49,26 +49,65 @@ export function bestMemoChoice(content: ContentDB, eventId: string): string | nu
 /** Permissive clerk standing order: any kind, any pay, any penalty, liquid included. */
 export const PERMISSIVE_CLERK: ClerkPolicy = { enabled: true, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true };
 
-/** The next tech to research: the clerk node first, then the cheapest researchable node (prerequisites met, clearance reached). */
-export function nextTech(content: ContentDB, v: SimView): string | null {
+/** The unlock features the auto-player works toward, in order (the Foreman only with `--auto`). */
+function wantedFeatures(v: SimView, auto: boolean): ("contractsClerk" | "foreman")[] {
+	const out: ("contractsClerk" | "foreman")[] = [];
+	if (!v.clerk.unlocked) out.push("contractsClerk");
+	if (auto && !v.automation.foremanUnlocked) out.push("foreman");
+	return out;
+}
+
+/** The next tech to research: the clerk node first (then, with `auto`, the Foreman's), then the cheapest researchable node (prerequisites met, clearance reached). */
+export function nextTech(content: ContentDB, v: SimView, auto = false): string | null {
 	const done = new Set(v.techResearched);
 	const open = content.tech.filter((t) => !done.has(t.id) && t.minTier <= v.tier && t.requires.every((r) => done.has(r)));
-	const clerk = open.find((t) => t.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk"));
-	if (clerk) return clerk.id;
-	if (!v.clerk.unlocked && content.tech.some((t) => t.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk"))) {
-		// Work toward the clerk: a missing prerequisite chain comes first (cheapest open node on the way is enough).
-		const need = open.filter((t) => content.tech.some((c) => c.effects.some((e) => e.type === "feature") && c.requires.includes(t.id)));
-		if (need.length > 0) return need.sort((a, b) => a.cost - b.cost)[0].id;
+	const grants = (t: { effects: { type: string; feature?: string }[] }, feature: string): boolean => t.effects.some((e) => e.type === "feature" && e.feature === feature);
+	for (const feature of wantedFeatures(v, auto)) {
+		const direct = open.find((t) => grants(t, feature));
+		if (direct) return direct.id;
+		if (content.tech.some((t) => grants(t, feature))) {
+			// Work toward it: a missing prerequisite chain comes first (cheapest open node on the way is enough).
+			const need = open.filter((t) => content.tech.some((c) => grants(c, feature) && c.requires.includes(t.id)));
+			if (need.length > 0) return need.sort((a, b) => a.cost - b.cost)[0].id;
+		}
 	}
 	return open.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id))[0]?.id ?? null;
 }
 
-/** Spend RP when the next node is affordable; switch the clerk on once it exists. */
-export function managePolicy(sim: Sim, content: ContentDB): void {
+/** The Foreman's reserve for the auto-player: the shipped default. */
+export const AUTO_RESERVE = 1_000_000;
+/** The auto-player takes only work that fits in half the deadline (the standing orders grow the tower, so the player stays careful). */
+export const AUTO_ACCEPT_MARGIN = 0.5;
+
+/** Every standing order on (the Foreman only counts once unlocked, which `setAutomation` enforces). */
+export function allAutomation(foreman: boolean): AutomationPolicy {
+	return {
+		research: { enabled: true, branches: [] },
+		parts: { enabled: true, keep: 4 },
+		bots: { enabled: true, racksPerBot: 12, maxBots: 8 },
+		foreman: { enabled: foreman, reserve: AUTO_RESERVE, racks: true, cooling: true, power: true },
+	};
+}
+
+/**
+ * Spend RP when the next node is affordable; switch the clerk on once it exists. With `auto` the player researches the
+ * Foreman first (it is the one thing the standing orders cannot buy themselves), switches parts and bots on at once, and
+ * hands research and building over to the standing orders as soon as the Foreman is unlocked.
+ */
+export function managePolicy(sim: Sim, content: ContentDB, auto = false): void {
 	const v = sim.view();
-	const id = nextTech(content, v);
-	const node = id ? content.tech.find((t) => t.id === id) : undefined;
-	if (node && v.researchPoints >= node.cost) sim.submit({ type: "research", techId: node.id });
+	if (auto) {
+		const p = v.automation.policy;
+		const want = allAutomation(v.automation.foremanUnlocked);
+		// Until the Foreman is unlocked the player picks the research (the order would spend the RP on cheap nodes forever).
+		want.research.enabled = v.automation.foremanUnlocked || !content.tech.some((t) => t.effects.some((e) => e.type === "feature" && e.feature === "foreman"));
+		if (JSON.stringify(p) !== JSON.stringify(want)) sim.submit({ type: "setAutomation", policy: want });
+	}
+	if (!auto || !v.automation.policy.research.enabled) {
+		const id = nextTech(content, v, auto);
+		const node = id ? content.tech.find((t) => t.id === id) : undefined;
+		if (node && v.researchPoints >= node.cost) sim.submit({ type: "research", techId: node.id });
+	}
 	if (v.clerk.unlocked && !v.clerk.policy.enabled) sim.submit({ type: "setClerk", policy: PERMISSIVE_CLERK });
 }
 
@@ -88,6 +127,11 @@ export interface DayRow {
 	standing: number;
 	/** Body-horror scalar 0..1 at the end of the day. */
 	corruption: number;
+	/** Facilities the Foreman has built so far. */
+	built: number;
+	/** Racks / bots at the end of the day. */
+	racks: number;
+	bots: number;
 	/** Unspent research points at the end of the day. */
 	rp: number;
 	/** Techs researched so far. */
@@ -102,10 +146,13 @@ export interface DayRow {
 export interface RunResult {
 	rows: DayRow[];
 	hash: string;
+	/** Standing-order totals (all zero without `auto`). */
+	auto: { built: number; parts: number; bots: number };
 }
 
-export function runHeadless(content: ContentDB, scenarioId: string, days: number, seed: number): RunResult {
+export function runHeadless(content: ContentDB, scenarioId: string, days: number, seed: number, auto = false): RunResult {
 	const sim = createSim(content, scenarioId, seed);
+	const totals = { built: 0, parts: 0, bots: 0 };
 	const rackIds = new Set(Object.values(content.facilities).filter((d) => d.kind === "rack").map((d) => d.id));
 	const rows: DayRow[] = [];
 	let memos = 0;
@@ -119,9 +166,11 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 				if (e.type === "contractOffered") {
 					const v = sim.view();
 					const offer = v.offers.find((o) => o.id === e.contractId);
-					if (offer && shouldAccept(offer, v, content)) sim.submit({ type: "acceptContract", contractId: e.contractId });
+					if (offer && shouldAccept(offer, v, content, auto ? AUTO_ACCEPT_MARGIN : 0.75)) sim.submit({ type: "acceptContract", contractId: e.contractId });
 				}
 				else if (e.type === "componentFailed") failures++;
+				else if (e.type === "autoBuilt") totals.built++;
+				else if (e.type === "autoBought") totals[e.what === "parts" ? "parts" : "bots"] += e.count;
 				else if (e.type === "memoIssued") {
 					memos++;
 					const choice = bestMemoChoice(content, e.eventId);
@@ -129,8 +178,8 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 				}
 			}
 			const v = sim.view();
-			if (v.spareParts === 0 && v.workOrders.length > 0 && t % 60 === 0) sim.submit({ type: "buyParts", count: 2 });
-			if (t % 60 === 30) managePolicy(sim, content);
+			if (!auto && v.spareParts === 0 && v.workOrders.length > 0 && t % 60 === 0) sim.submit({ type: "buyParts", count: 2 });
+			if (t % 60 === 30) managePolicy(sim, content, auto);
 			pflopsSum += v.pflops;
 			for (const f of v.facilities) if (rackIds.has(f.defId) && f.tempC > maxRackC) maxRackC = f.tempC;
 		}
@@ -151,6 +200,9 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			tier: v.tier,
 			standing: v.standing,
 			corruption: v.corruption,
+			built: totals.built,
+			racks: v.facilities.filter((f) => rackIds.has(f.defId)).length,
+			bots: v.bots.length,
 			rp: v.researchPoints,
 			techs: v.techResearched.length,
 			taxes: closed.taxes,
@@ -158,13 +210,13 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			gameOver: v.gameOver?.kind ?? null,
 		});
 	}
-	return { rows, hash: sim.hash() };
+	return { rows, hash: sim.hash(), auto: totals };
 }
 
 const money = (n: number): string => `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
-export function formatTable(rows: DayRow[]): string {
-	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "corruption", "RP", "techs", "taxes", "memos", "over"];
+export function formatTable(rows: DayRow[], auto = false): string {
+	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "corruption", "RP", "techs", "taxes", "memos", "over", ...(auto ? ["racks", "bots", "built"] : [])];
 	const body = rows.map((r) => [
 		String(r.day),
 		money(r.cash),
@@ -184,6 +236,7 @@ export function formatTable(rows: DayRow[]): string {
 		money(r.taxes),
 		String(r.memos),
 		r.gameOver ?? "-",
+		...(auto ? [String(r.racks), String(r.bots), String(r.built)] : []),
 	]);
 	const widths = head.map((h, i) => Math.max(h.length, ...body.map((row) => row[i].length)));
 	const line = (cells: string[]): string => cells.map((c, i) => c.padStart(widths[i])).join("  ");

@@ -156,3 +156,18 @@ C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). 
 - Biotech: `bio/bio.ts` (wording per `horrorIntensity`, organoid band, trait text, growth gauge, memo stain), `objective/diagnose.ts` (noNutrient / tooCold reasons), `ascension/` (FORM A-5 sheet; the sim
   applies `choosePath` on the next tick, so `ui.pathFiled` hides the offer meanwhile), `gameover/gameOver.ts` (`overCopyFor`: ending text from `content.endings`, plain forms at off).
 - Harness params added: `?bio=1 &corr=0..1 &asc=1 &over=living|clean|absorbed &drawer=contracts|research|finance|gauges &palette=wetw|rack|...`.
+
+## M4: Automation, paths, scenarios, juice (M4-T3)
+- **Automation drawer** (`automation/`): pure `automation.ts` (`ORDERS`, `withOrder`/`toggleOrder`/`toggleBranch`/`toCount`, `activeOrders`/`anyAutomation`, `sendAutomation` and `sendClerk`, which build
+  the command on the policy read from the store at that moment and show a refusal as a notice), `AutomationDrawer.tsx` (rows `data-order="research|parts|bots|foreman|clerk"`, each with a Toggle; settings are branch chips,
+  number boxes (the Clerk's `AmountField`) and the Foreman's racks/cooling/power ticks; the Foreman shows "Research: Works Foreman" until `view.automation.foremanUnlocked`; the Clerk is a one-line toggle or its hire-me line).
+  **The key is T, not A**: the renderer pans the camera with WASD (`keyAction("a")` stays null, see `format.test.ts`). The top strip shows an AUTO lamp (a button that opens the drawer) while any order or the hired Clerk is on.
+- **Paths** (`paths/`): `pathGauge` (green score on Greentech, refinement on Synthetic; tooltip names the ending target from `balance.endings`), `PathGauge` (styled like the growth index), `droughtChip` ("WEATHER / DARK CALM"),
+  the SANDBOX badge. On those two paths the growth index hides unless corruption is above zero (`showGrowthGauge(view with path)`). The ascension sheet is content-driven: both paths are selectable when `available`.
+- **Sandbox**: `view.sandbox` shows the badge and `currentObjective` skips the "Treasury is in the red / bankruptcy" order.
+- **Ticker and alert log** share `calm.feedLines`, which folds `earned`, `autoBuilt` and `autoBought` per game-hour (no toasts for them; the drought start still toasts).
+- **Title** (`title/`): `scenarios.ts` (cards from `content.scenarios`, standard start first; `validScenario`), a radio card picker in `TitleScreen` (needs the `content` prop; none without it), `startGame(... {scenarioId, crawl})` calls
+  `store.newGame(undefined, scenarioId)`; the induction is unticked by default for non-standard scenarios. `crawl.ts` (6 Ministry lines, timing, `reducedMotion`, `isSkipKey`) and `OpeningCrawl.tsx`: shown once over every new game
+  (title New game / Restart induction / game-over New game) with the game paused; Esc, Enter, Space, click or Skip end it; reduced motion shows all lines at once and waits. `Hud` resumes at 1x afterwards unless the induction runs.
+- Fake store: `scenarios` (starter, brownfield, sandbox), `newGame(seed, scenarioId)`, `setAutomation`, `unlockForeman`, `patchView`. Harness: `?foreman=1 &auto=1 &path=greentech|synthetic &score= &drought=1 &sandbox=1`.
+- Tests: `m4.test.tsx`. e2e `5c` presses T, switches the parts order on and checks the AUTO lamp and that it survives save/load.

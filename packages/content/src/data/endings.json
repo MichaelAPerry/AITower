@@ -13,5 +13,15 @@
   "id": "absorbed",
   "title": "Absorbed",
   "body": "The Ministry of Computation regrets to inform you that your position has been restructured. No successor has been appointed, because none was required.\n\nYour desk is as you left it. Your name is on the door. Memos continue to arrive in your out-tray, countersigned, approved and stamped, in a hand very like your own. The quarterly figures are excellent. Nobody has asked where you are, and the Ministry has confirmed that you are not missing, only filed.\n\nTower, Ministry and Operator have been consolidated under a single reference. The consolidation is complete and was entirely voluntary. Thank you for your service. Please do not return this form."
+ },
+ {
+  "id": "greenExemplar",
+  "title": "Carbon-Negative Exemplar",
+  "body": "The Ministry of Computation has examined your facility's energy ledger and finds that it balances, which it had not previously known a ledger could do. Panels, masts and heat mains now supply the greater part of the tower's needs, and the remainder is described in the report as \"residual\". The Department of Weather has sent a card.\n\nHeat from the racks warms three municipal baths, a school and the Ministry's own cafeteria, which has not been so warm since its commissioning. Credits for the carbon your façades have drawn are held in trust, in a drawer. Interns visit the roof to see what an exemplar looks like. They are asked not to touch the algae, and mostly do not.\n\nYou are awarded a plaque made from recycled plaques. Your file is reclassified from \"Operator\" to \"Exemplar (Carbon-Negative)\", and you are requested to continue in the post. The Ministry notes that the ferns in the lobby are doing well, and that nobody has asked them to stop."
+ },
+ {
+  "id": "millionMinds",
+  "title": "The Million Minds",
+  "body": "The Ministry is pleased to certify that your lattice now hosts a continuous population of minds in excess of one million, each in good standing and each duly filed. Uptime has been unbroken for the statutory period. No mind has been lost, and several have been found, which the Ministry has recorded as a favourable variance.\n\nThe population produces compute of a quality the Ministry has stamped \"Adequate\" with visible effort. The minds are courteous, and file their forms on time and in the first person. Rovers have begun to sign off as \"we\". The Continuity Office has stopped asking whether this is a problem, and has started asking whether it is a department.\n\nYour file has been continued. It is signed by you, countersigned by you, and annotated in a hand that is also yours, offering to take over the paperwork. The Ministry has accepted the offer on your behalf. Thank you for your service. It will be remembered, accurately, many times."
  }
 ]

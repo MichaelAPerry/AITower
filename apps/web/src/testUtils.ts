@@ -34,6 +34,7 @@ export function fakeRenderer() {
 	const renderer = {
 		draw: () => {},
 		setOverlay: () => {},
+		pushEvents: () => {},
 		setGhost: () => {},
 		setSelection: () => {},
 		focus: () => {},

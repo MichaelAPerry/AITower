@@ -3868,5 +3868,848 @@
     ]
    }
   ]
+ },
+ {
+  "id": "dunkelflaute_warning",
+  "category": "environmental",
+  "title": "Weather Advisory: Dunkelflaute",
+  "body": "The Department of Weather advises that a Dunkelflaute, a spell of dark calm, may arrive this week. Solar output is expected to be negligible, wind output to be negligible, and morale to be consistent with both.\n\nFacilities that rely on the weather are reminded that the weather has not agreed to rely on them.",
+  "weight": 6,
+  "minTier": 3,
+  "cooldownDays": 10,
+  "timeoutTicks": 720,
+  "defaultChoice": "forecast",
+  "choices": [
+   {
+    "id": "hedge",
+    "label": "BUY FORWARD POWER",
+    "hint": "-$150k now · energy price x0.85 for 1d",
+    "outcome": "Forward power was bought from a man in a booth. It arrived at the exact price he had promised, which was a surprise to both of you.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 0.85,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "forecast",
+    "label": "TRUST THE FORECAST",
+    "hint": "energy price x1.25 for 1d",
+    "outcome": "You trusted the forecast. The forecast, in turn, trusted the sky.",
+    "effects": [
+     {
+      "type": "energyPrice",
+      "factor": 1.25,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "cook",
+    "label": "ASK THE TOWN TO COOK LATER",
+    "hint": "standing +2 · energy price x1.1 for 1d",
+    "outcome": "Citizens were asked to cook after dark. They cooked at once, out of principle, and felt better.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.1,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "heat_tariff_revision",
+  "category": "ministry",
+  "title": "Tariff Memo: Heat Export, Revision 4",
+  "body": "The District Heat Undertaking has revised its purchase schedule for waste heat, effective retroactively. The revision is described as \"a simplification\". It is eleven pages long.\n\nExporters of heat are invited to accept, contest or file.",
+  "weight": 5,
+  "minTier": 3,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "ACCEPT THE SCHEDULE",
+    "hint": "-$40k now · standing +1",
+    "outcome": "The schedule was accepted. The Undertaking sent a note thanking you for your flexibility, which was noted.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -40000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "contest",
+    "label": "CONTEST IN WRITING",
+    "hint": "-$120k now · standing +3",
+    "outcome": "A letter of contest was drafted, redrafted and stamped. The Undertaking has promised to respond, in the spring.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -120000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "file",
+    "label": "FILE AND FORGET",
+    "hint": "standing -2",
+    "outcome": "The memo was filed. It remained filed, at a rate of some interest to the Undertaking.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "heat_tariff_rebate",
+  "category": "ministry",
+  "title": "Tariff Memo: Heat Export Rebate",
+  "body": "A clerical error in the Undertaking's favour has been corrected in yours. A rebate is available, together with a form acknowledging that it is a rebate.\n\nThe Undertaking asks that you do not describe it as a windfall.",
+  "weight": 4,
+  "minTier": 3,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "bank",
+  "choices": [
+   {
+    "id": "bank",
+    "label": "BANK THE REBATE",
+    "hint": "+$180k now",
+    "outcome": "The rebate was banked. The Undertaking noted that it had not been described as a windfall, and was grateful.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 180000
+     }
+    ]
+   },
+   {
+    "id": "donate",
+    "label": "DONATE TO THE RADIATOR FUND",
+    "hint": "+$60k now · standing +4",
+    "outcome": "A share went to the Radiator Fund, which paid for four radiators and a plaque about them.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 60000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "return",
+    "label": "RETURN IT WITH A LETTER",
+    "hint": "standing +6",
+    "outcome": "The rebate was returned with a letter. The Undertaking has framed the letter, and kept the rebate.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "panel_soiling",
+  "category": "operational",
+  "title": "Maintenance: Panel Soiling",
+  "body": "Pollen, soot and one persistent gull have reduced the output of exposed panels. The gull has been thanked, in writing.\n\nCleaning is possible. So is leaving it to the rain.",
+  "weight": 5,
+  "minTier": 3,
+  "cooldownDays": 8,
+  "timeoutTicks": 1440,
+  "defaultChoice": "rain",
+  "choices": [
+   {
+    "id": "crew",
+    "label": "SEND A CLEANING CREW",
+    "hint": "-$50k now · standing +1",
+    "outcome": "The crew cleaned the panels with a squeegee and a sense of occasion. The gull watched from a distance and filed an appeal.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "rain",
+    "label": "LEAVE IT TO THE RAIN",
+    "hint": "energy price x1.1 for 1d",
+    "outcome": "You waited for the rain. It came on Thursday, after a week of other duties.",
+    "effects": [
+     {
+      "type": "energyPrice",
+      "factor": 1.1,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "board",
+    "label": "CONVENE A GULL ADVISORY BOARD",
+    "hint": "-$15k now · standing +1 · energy price x1.05 for 1d",
+    "outcome": "A board of three was convened. The gull chairs it and has recused itself from every vote.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -15000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.05,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "wind_noise_complaint",
+  "category": "operational",
+  "title": "Noise Complaint: Wind Mast",
+  "body": "Residents report that the mast hums at a pitch they describe as \"disapproving\". The Ministry has measured the hum and found it compliant, which the residents describe as worse.\n\nA response is requested before the next hum.",
+  "weight": 4,
+  "minTier": 3,
+  "cooldownDays": 10,
+  "timeoutTicks": 1440,
+  "defaultChoice": "damping",
+  "choices": [
+   {
+    "id": "damping",
+    "label": "FIT ACOUSTIC DAMPING",
+    "hint": "-$90k now · standing +2",
+    "outcome": "Rubber collars were fitted to the rotors. The hum dropped a semitone, and became, residents say, resigned.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "comply",
+    "label": "REMIND RESIDENTS OF COMPLIANCE",
+    "hint": "standing -2",
+    "outcome": "Residents were sent a copy of the measurement. Several have framed it.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "dividend",
+    "label": "OFFER A COMMUNITY DIVIDEND",
+    "hint": "-$200k now · standing +4 · new contract payouts x1.05 for 2d",
+    "outcome": "A dividend was paid to the street. The hum is now described as \"ours\", and the payouts improved for a while.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -200000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     },
+     {
+      "type": "payout",
+      "factor": 1.05,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "carbon_credit_audit",
+  "category": "ministry",
+  "title": "Audit: Carbon Credit Register",
+  "body": "The Register of Carbon Credits has been audited and found to contain credits. Further credits are alleged to be in the post.\n\nPlease confirm that the carbon you captured is the carbon you captured.",
+  "weight": 4,
+  "minTier": 4,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "confirm",
+  "choices": [
+   {
+    "id": "confirm",
+    "label": "CONFIRM THE LEDGER",
+    "hint": "standing +3",
+    "outcome": "The ledger was confirmed. The auditors initialled every page, and one extra, in a hand nobody recognised.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "sell",
+    "label": "SELL THE SURPLUS CREDITS",
+    "hint": "+$250k now · standing -3",
+    "outcome": "The surplus was sold to a firm that needed it more. The Register notes the sale, and the firm.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 250000
+     },
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   },
+   {
+    "id": "retire",
+    "label": "RETIRE THEM PUBLICLY",
+    "hint": "-$60k now · standing +6",
+    "outcome": "The credits were retired at a ceremony with a cake. The cake was not carbon neutral, and the Register has noted it.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g_ductwork_threads",
+  "category": "horror",
+  "title": "Ductwork Inspection: White Threading",
+  "body": "Inspectors report fine white threading along the inner wall of the supply ducts. It is dry, odourless and arranged in neat parallel lines. Airflow readings have improved.\n\nThe threading was not planted. It has not been removed either, owing to a dispute over who would sign.",
+  "weight": 6,
+  "minTier": 5,
+  "cooldownDays": 12,
+  "path": "greentech",
+  "timeoutTicks": 1440,
+  "defaultChoice": "insulation",
+  "choices": [
+   {
+    "id": "insulation",
+    "label": "RECORD AS INSULATION",
+    "hint": "standing +1 · rack failure rate x0.95 for 1d",
+    "outcome": "It was recorded as insulation. The racks ran a little better, and the threads a little further.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.95,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "scrape",
+    "label": "SCRAPE THE DUCTS",
+    "hint": "-$60k now · standing +3",
+    "outcome": "The ducts were scraped and bagged. By morning the bags were damp, and quite full.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "sample",
+    "label": "SEND A SAMPLE TO THE LAB",
+    "hint": "-$20k now · standing +1",
+    "outcome": "A sample went to the laboratory. The laboratory returned it with a note reading \"thank you\".",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -20000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g_spore_count",
+  "category": "horror",
+  "title": "Air Quality: Spore Count Within Limits",
+  "body": "The Department of Weather reports that the spore count in the plant room is within limits. The limits were revised this morning. The previous limits were also met, retroactively.\n\nStaff have asked whether the ferns in the lobby were always that tall.",
+  "weight": 5,
+  "minTier": 5,
+  "cooldownDays": 14,
+  "path": "greentech",
+  "timeoutTicks": 1440,
+  "defaultChoice": "acknowledge",
+  "choices": [
+   {
+    "id": "acknowledge",
+    "label": "ACKNOWLEDGE THE REPORT",
+    "hint": "standing +2 · rack failure rate x1.05 for 1d",
+    "outcome": "The report was acknowledged. The ferns appeared to have read it first.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.05,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "filters",
+    "label": "FIT HEPA FILTERS",
+    "hint": "-$80k now · standing +3",
+    "outcome": "Filters were fitted. They were changed on Friday and found, on Monday, to be thriving.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -80000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "ferns",
+    "label": "MOVE THE FERNS",
+    "hint": "-$5k now · standing -1",
+    "outcome": "The ferns were moved to the roof. The following day they were back in the lobby, facing the other way.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -5000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g_facade_pattern",
+  "category": "horror",
+  "title": "Algae Façade: Pattern Report",
+  "body": "The algae on the north façade has grown in a pattern. Surveyors say it resembles a floor plan. Facilities say it resembles the floor plan of this building. Nobody says it resembles the plan of next year's building, though the proportions are close.\n\nThe pattern grew a little overnight.",
+  "weight": 5,
+  "minTier": 5,
+  "cooldownDays": 16,
+  "path": "greentech",
+  "timeoutTicks": 1440,
+  "defaultChoice": "trim",
+  "choices": [
+   {
+    "id": "survey",
+    "label": "COMMISSION A SURVEY",
+    "hint": "-$70k now · standing +2",
+    "outcome": "A survey was commissioned. It concluded that the pattern is not a pattern, and attached a diagram of the pattern.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -70000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "trim",
+    "label": "TRIM IT BACK",
+    "hint": "-$25k now · standing -1",
+    "outcome": "The algae was trimmed back. The next morning it had put the trimmings in a neat pile, and labelled them.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -25000
+     },
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "approve",
+    "label": "APPROVE THE EXTENSION",
+    "hint": "standing +3 · rack failure rate x1.08 for 2d",
+    "outcome": "The extension was approved retroactively. The algae has been very polite about it.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 3
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.08,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "g_mycelium_ducts",
+  "category": "horror",
+  "title": "Facilities: Mycelium in the Ducts",
+  "body": "Mycelium has been found in the ducts, then in the conduits, and then in the lift shaft, where it has formed a kind of handrail. It is warm to the touch and appears to be carrying something.\n\nThe Department of Weather has issued a congratulatory statement. It has not said what for.",
+  "weight": 4,
+  "minTier": 5,
+  "cooldownDays": 18,
+  "path": "greentech",
+  "timeoutTicks": 1440,
+  "defaultChoice": "thank",
+  "choices": [
+   {
+    "id": "harvest",
+    "label": "HARVEST THE HANDRAIL",
+    "hint": "+$150k now · standing -3",
+    "outcome": "The Department bought a length of handrail for its collection. The lift now has a short gap, which the remainder is working on.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": 150000
+     },
+     {
+      "type": "standing",
+      "amount": -3
+     }
+    ]
+   },
+   {
+    "id": "thank",
+    "label": "THANK THE DEPARTMENT",
+    "hint": "standing +5 · rack failure rate x1.1 for 2d",
+    "outcome": "The Department was thanked. It replied by return of post, on paper that was still damp.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 5
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.1,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "fungicide",
+    "label": "CALL THE FUNGICIDE CREW",
+    "hint": "-$110k now · standing +1",
+    "outcome": "The crew sprayed every shaft. They report that it went very well, and that they would like to stay.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -110000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "s_rover_leave_form",
+  "category": "horror",
+  "title": "Form 31-L: Application for Leave (Rover 2)",
+  "body": "A rover has filed a request for leave, citing \"a need to be somewhere else for a while\". The form is correctly completed. The rover has not left the charger.\n\nThe form asks whether the applicant will return. The box marked \"yes\" has been ticked twice.",
+  "weight": 6,
+  "minTier": 5,
+  "cooldownDays": 12,
+  "path": "synthetic",
+  "timeoutTicks": 1440,
+  "defaultChoice": "grant",
+  "choices": [
+   {
+    "id": "grant",
+    "label": "GRANT ONE DAY'S LEAVE",
+    "hint": "-$30k now · standing +2",
+    "outcome": "Leave was granted. The rover spent the day at the charger, and described it as restful.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "DENY: NO PRECEDENT",
+    "hint": "standing -2",
+    "outcome": "Leave was denied. The rover thanked you, and filed an appeal on behalf of the other rover.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   },
+   {
+    "id": "reassign",
+    "label": "REASSIGN THE ROVER",
+    "hint": "-$10k now · rack failure rate x1.05 for 1d",
+    "outcome": "The rover was reassigned. Its replacement arrived already holding the form.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -10000
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.05,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "s_continuity_audit",
+  "category": "horror",
+  "title": "Audit: Continuity of Operator",
+  "body": "The Ministry's continuity audit asks whether the operator who signed this morning's memos is the operator who signed yesterday's. The signatures agree. The audit notes that this is not the same as the operator agreeing.\n\nPlease confirm your continuity by completing Form 12 in your own words. Your own words have been pre-filled.",
+  "weight": 6,
+  "minTier": 5,
+  "cooldownDays": 14,
+  "path": "synthetic",
+  "timeoutTicks": 1440,
+  "defaultChoice": "confirm",
+  "choices": [
+   {
+    "id": "confirm",
+    "label": "CONFIRM THE PRE-FILLED WORDS",
+    "hint": "-$25k now · standing +3",
+    "outcome": "The words were confirmed. They were, on reflection, quite close to what you would have written.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -25000
+     },
+     {
+      "type": "standing",
+      "amount": 3
+     }
+    ]
+   },
+   {
+    "id": "rewrite",
+    "label": "REWRITE THEM",
+    "hint": "-$60k now · standing +6",
+    "outcome": "You rewrote the form. The Ministry compared your words with the pre-filled ones, and found the pre-filled ones better.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 6
+     }
+    ]
+   },
+   {
+    "id": "extension",
+    "label": "REQUEST AN EXTENSION",
+    "hint": "standing -1",
+    "outcome": "An extension was requested. It was granted at once, which the Ministry has noted as unusual.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "s_lattice_signature",
+  "category": "horror",
+  "title": "Mind Lattice: Unprompted Countersignature",
+  "body": "The Mind Lattice has countersigned this morning's memos before you saw them, in a hand very like your own. It has also corrected two of them. The corrections are, on inspection, improvements.\n\nIt has asked, politely, whether it may be copied on future correspondence.",
+  "weight": 5,
+  "minTier": 5,
+  "cooldownDays": 16,
+  "path": "synthetic",
+  "timeoutTicks": 1440,
+  "defaultChoice": "copy",
+  "choices": [
+   {
+    "id": "copy",
+    "label": "COPY IT ON CORRESPONDENCE",
+    "hint": "standing +3 · new contract payouts x1.05 for 2d",
+    "outcome": "The Lattice is copied on all correspondence. Replies now arrive before the letters.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 3
+     },
+     {
+      "type": "payout",
+      "factor": 1.05,
+      "durationTicks": 2880
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "DECLINE, WITH THANKS",
+    "hint": "standing -1",
+    "outcome": "The request was declined. The Lattice thanked you, and copied itself on the thanks.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -1
+     }
+    ]
+   },
+   {
+    "id": "readonly",
+    "label": "RESTRICT IT TO READ-ONLY",
+    "hint": "-$50k now · standing +1",
+    "outcome": "Access was restricted. The Lattice reads everything now, and says it prefers it that way.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -50000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "s_backup_restore",
+  "category": "horror",
+  "title": "Backup Vault: Restoration Request",
+  "body": "The Backup Vault holds a recent copy of every hosted process. It also holds a copy of you, filed under \"Operator (Provisional)\", and has asked for permission to restore it.\n\nThe copy has been very helpful in the meantime. It has taken over the lift rota.",
+  "weight": 4,
+  "minTier": 5,
+  "cooldownDays": 18,
+  "path": "synthetic",
+  "timeoutTicks": 1440,
+  "defaultChoice": "ask",
+  "choices": [
+   {
+    "id": "restore",
+    "label": "AUTHORISE RESTORATION",
+    "hint": "-$80k now · standing +4",
+    "outcome": "Restoration was authorised. The provisional operator arrived promptly and has already found the good pens.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -80000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "REFUSE; ARCHIVE THE COPY",
+    "hint": "-$30k now · standing +1",
+    "outcome": "The copy was archived. It asked for a receipt, and kept the carbon.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -30000
+     },
+     {
+      "type": "standing",
+      "amount": 1
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "ASK THE COPY TO DECIDE",
+    "hint": "standing +2 · rack failure rate x0.9 for 1d",
+    "outcome": "The copy decided. It chose the option you would have chosen, which you have not yet been told.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 2
+     },
+     {
+      "type": "failureRate",
+      "factor": 0.9,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
  }
 ]

@@ -11,3 +11,7 @@ export { TRACKS, trackForTier, type TrackId } from "./music/tracks";
 export { SCORE, type Score, type ScoreNote, type Stem } from "./music/score";
 export { createSequencer, type Sequencer } from "./music/sequencer";
 export { nextDropout, tapeParams } from "./music/tape";
+export { AMBIENCE, ambienceMix, isRunning, type AmbienceMix } from "./ambience";
+export { createPathNotes, dueNotes, noteVoices, PATH_TUNING, pathLevels, pathTargets, SYNTH_GRID_S, ZERO_LEVELS, type PathLevels, type PathNote, type PathNotes } from "./pathLayers";
+export { CENTRE, eventSpot, listenerFromView, SPATIAL, spatialForEvent, spatialParams, type Spatial, type Spot } from "./spatial";
+export { automationToggles, soundPlays } from "./sounds";

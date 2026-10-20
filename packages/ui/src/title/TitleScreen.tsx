@@ -1,9 +1,11 @@
+import type { ContentDB } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { focusables, nextFocusIndex } from "../menu/focus";
 import type { MenuSection } from "../menu/SystemMenu";
 import { useSaves } from "../menu/useSaves";
 import { closeInduction, restartInduction } from "../tutorial/Tutorial";
+import { scenarioCards, showPicker, validScenario } from "./scenarios";
 import { continueSummary, inductionDefault, startGame, type TitleItem, titleItems } from "./titleState";
 import "./title.css";
 
@@ -13,8 +15,10 @@ export interface TitleScreenProps {
 	/** True while the system menu is open over the title (the title stops grabbing focus). */
 	menuOpen: boolean;
 	openMenu: (section: MenuSection) => void;
-	/** The player picked a game; remove the title. */
-	onStart: () => void;
+	/** The player picked a game; remove the title. A new game says so (and whether the clock should run once the crawl ends), so the HUD can play the opening crawl. */
+	onStart: (how?: { newGame: true; run: boolean }) => void;
+	/** Scenarios for the picker. Without content there is no picker. */
+	content?: ContentDB;
 }
 
 const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", new: "NEW GAME", load: "LOAD GAME", settings: "SETTINGS", controls: "CONTROLS" };
@@ -23,11 +27,14 @@ const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", new: "NEW GAME"
  * The front office of the Ministry: a bakelite cabinet with a brass AITOWER plate and a CRT menu. The game stays paused
  * until the player picks. Arrow keys and Enter drive it; Esc does nothing here.
  */
-export function TitleScreen({ store, state, menuOpen, openMenu, onStart }: TitleScreenProps) {
+export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content }: TitleScreenProps) {
 	const root = useRef<HTMLDivElement>(null);
 	const { saves } = useSaves(store, state.saveStatus.lastSavedAt);
 	const [induction, setInduction] = useState<boolean | null>(null);
-	const ticked = induction ?? (saves ? inductionDefault(saves) : true);
+	const cards = content ? scenarioCards(content) : [];
+	const [picked, setPicked] = useState<string | null>(null);
+	const scenarioId = content ? validScenario(content, picked) : undefined;
+	const ticked = induction ?? (saves ? inductionDefault(saves, scenarioId) : true);
 	const now = Date.now();
 
 	// Hold the game paused behind the title.
@@ -51,8 +58,8 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart }: Title
 			startGame(store, { kind: "continue" }, hooks);
 			onStart();
 		} else if (item === "new") {
-			startGame(store, { kind: "new", induction: ticked }, hooks);
-			onStart();
+			startGame(store, { kind: "new", induction: ticked, scenarioId, crawl: true }, hooks);
+			onStart({ newGame: true, run: !ticked });
 		} else openMenu(item);
 	};
 
@@ -119,6 +126,24 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart }: Title
 						</ul>
 					)}
 				</div>
+				{showPicker(cards) && (
+					<fieldset className="ui-title-sites">
+						<legend className="ui-dymo">CHOOSE A SITE</legend>
+						<div className="ui-title-cards" role="radiogroup" aria-label="Scenario">
+							{cards.map((c) => (
+								// biome-ignore lint/a11y/useSemanticElements: card-styled radio
+								<button key={c.id} type="button" role="radio" aria-checked={c.id === scenarioId} className={`ui-title-card ${c.id === scenarioId ? "is-on" : ""}`} data-scenario={c.id} onClick={() => setPicked(c.id)}>
+									<span className="ui-title-card-head">
+										<b>{c.name}</b>
+										{c.sandbox && <span className="ui-tag">SANDBOX</span>}
+										<span className="ui-title-card-facts">{c.facts}</span>
+									</span>
+									<span className="ui-title-card-desc">{c.description}</span>
+								</button>
+							))}
+						</div>
+					</fieldset>
+				)}
 				<div className="ui-title-foot">
 					<span className="ui-dymo">FORM 0: ENTER OR CLICK TO PROCEED</span>
 					{saves && saves.length > 0 && (
@@ -126,8 +151,8 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart }: Title
 							type="button"
 							className="ui-btn"
 							onClick={() => {
-								startGame(store, { kind: "new", induction: true }, hooks);
-								onStart();
+								startGame(store, { kind: "new", induction: true, crawl: true }, hooks);
+								onStart({ newGame: true, run: false });
 							}}
 							title="Start a fresh site with the Ministry induction"
 						>

@@ -9,7 +9,7 @@
  * Time: 1 tick = 1 game-minute, 1440 ticks per day. Day 0 starts at 06:00
  * (tick 0 ⇒ minuteOfDay 360).
  */
-import type { AscensionPath, ContentDB, ContractSpec, EndingId, JobKind } from "@aitower/content";
+import type { AscensionPath, ContentDB, ContractSpec, EndingId, JobKind, TechBranch } from "@aitower/content";
 
 export type { AscensionPath, EndingId, JobKind };
 
@@ -52,7 +52,28 @@ export type SimCommand =
 	/** Repay principal (up to what is owed and what cash allows). */
 	| { type: "repayLoan"; amount: number }
 	/** Commit to an ascension path (tier ≥ balance.ascension.minTier, path available, not chosen before). Irreversible. */
-	| { type: "choosePath"; path: AscensionPath };
+	| { type: "choosePath"; path: AscensionPath }
+	/** Replace the automation standing orders (the Foreman part needs the `foreman` feature researched). */
+	| { type: "setAutomation"; policy: AutomationPolicy };
+
+/**
+ * Standing orders, each independently toggled. Checked once per game-hour, deterministic, and paid like the player would
+ * pay (through the normal commands' rules).
+ */
+export interface AutomationPolicy {
+	/** Spend RP on the next affordable node: first by `branches` order (empty = any branch), then cheapest, then id. */
+	research: { enabled: boolean; branches: TechBranch[] };
+	/** Keep at least `keep` spare parts in stock (buys `balance.automation.partsBatch` at a time). */
+	parts: { enabled: boolean; keep: number };
+	/** Keep one bot per `racksPerBot` racks, up to `maxBots` (buys the best unlocked bot type). */
+	bots: { enabled: boolean; racksPerBot: number; maxBots: number };
+	/**
+	 * The Foreman places facilities on already-built slab with a power conduit under it: compute racks when offers go
+	 * unserved, an air handler when racks run hot, a grid tie / genset when power is short. It never spends below `reserve`
+	 * and places at most `balance.automation.foremanPerHour` per hour. It never builds slab, floors or conduits (yet).
+	 */
+	foreman: { enabled: boolean; reserve: number; racks: boolean; cooling: boolean; power: boolean };
+}
 
 /**
  * The clerk accepts, once per tick at most, the oldest offer that can start (same check as acceptContract) and matches
@@ -129,7 +150,13 @@ export type SimEvent =
 	| { type: "growthSprouted"; facilityId: number }
 	| { type: "botMutated"; botId: number; trait: BotTrait }
 	/** The contaminated share crossed `balance.bio.irreversibleShare` (emitted once). */
-	| { type: "contaminationIrreversible" };
+	| { type: "contaminationIrreversible" }
+	/** Money a job paid: training checkpoints and completion, inference summed per game-hour (for "+$" floaters). */
+	| { type: "earned"; jobId: number; amount: number }
+	| { type: "autoBuilt"; facilityId: number }
+	| { type: "autoBought"; what: "parts" | "bot"; count: number }
+	| { type: "droughtStarted" }
+	| { type: "droughtEnded" };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -426,6 +453,20 @@ export interface SimView {
 	irreversible: boolean;
 	/** Chosen ascension path, or null. */
 	path: AscensionPath | null;
+	/**
+	 * 0..1 score of the chosen path, driving its reskin stages (25/50/75/100 %): biotech = corruption, greentech =
+	 * greenScore, synthetic = refinement. With no path chosen: corruption (the wetware seeds appear before the choice).
+	 */
+	pathScore: number;
+	/** Greentech score 0..1: share of energy from solar/wind/bioreactor-free green sources blended with heat exported. */
+	greenScore: number;
+	/** Synthetic score 0..1: uptime × share of compute on top-tier racks. */
+	refinement: number;
+	/** A Dunkelflaute (calm, dark spell) is in force. */
+	drought: boolean;
+	/** The scenario is a sandbox (no bankruptcy or shutdown). */
+	sandbox: boolean;
+	automation: { policy: AutomationPolicy; foremanUnlocked: boolean };
 	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
 	organoidPflops: number;
 	/** Days the leading ending's condition has held (for the UI's progress line), or 0. */

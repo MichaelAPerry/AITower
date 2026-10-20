@@ -1,5 +1,5 @@
 /** Research: tech perks, gating, the `research` command and RP income. */
-import type { ContentDB, PerkKind, TechNode } from "@aitower/content";
+import type { ContentDB, FeatureId, PerkKind, TechNode } from "@aitower/content";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import type { SimState } from "../core/state";
 
@@ -38,14 +38,20 @@ export function perk(state: SimState, content: ContentDB, kind: PerkKind): numbe
 	return c.factors[kind];
 }
 
-/** The Contracts Clerk is available once a researched node grants the `contractsClerk` feature. */
-export function clerkUnlocked(state: SimState, content: ContentDB): boolean {
+/** A researched node grants the feature. */
+export function featureUnlocked(state: SimState, content: ContentDB, feature: FeatureId): boolean {
 	for (const id of state.techResearched) {
 		const node = techNode(content, id);
-		if (node?.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk")) return true;
+		if (node?.effects.some((e) => e.type === "feature" && e.feature === feature)) return true;
 	}
 	return false;
 }
+
+/** The Contracts Clerk is available once a researched node grants the `contractsClerk` feature. */
+export const clerkUnlocked = (state: SimState, content: ContentDB): boolean => featureUnlocked(state, content, "contractsClerk");
+
+/** The Foreman is available once a researched node grants the `foreman` feature. */
+export const foremanUnlocked = (state: SimState, content: ContentDB): boolean => featureUnlocked(state, content, "foreman");
 
 /** Reason a facility / bot gated by `tech` cannot be built or bought yet, or null. */
 export function techGate(state: SimState, content: ContentDB, tech: string | undefined): string | null {

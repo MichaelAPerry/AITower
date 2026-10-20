@@ -8,7 +8,7 @@ import { bioWords, growthTitle, showGrowthGauge } from "./bio";
  * Top-bar "ASSET GROWTH INDEX" (plain "CONTAMINATION" at horror off): a small CRT with the corruption as a percentage
  * and a meter. Appears once corruption is above zero or from Clearance 3 on.
  */
-export function GrowthIndex({ view, horror }: { view: Pick<SimView, "corruption" | "contaminatedShare" | "tier">; horror: HorrorIntensity }) {
+export function GrowthIndex({ view, horror }: { view: Pick<SimView, "corruption" | "contaminatedShare" | "tier"> & { path?: SimView["path"] }; horror: HorrorIntensity }) {
 	if (!showGrowthGauge(view)) return null;
 	const c = view.corruption ?? 0;
 	const tone = c >= 0.75 ? "error" : c >= 0.4 ? "warn" : "cyan";

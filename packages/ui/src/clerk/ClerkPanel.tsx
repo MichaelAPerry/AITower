@@ -16,7 +16,7 @@ const KIND_TITLE: Record<JobKind, string> = {
  * A number box that keeps what you type (so "1." and an empty box are fine) and sends a valid value on every change.
  * An invalid entry leaves the standing order alone and snaps back when the box loses focus.
  */
-function AmountField({ label, value, onValue, title, prefix }: { label: string; value: number; onValue: (n: number) => void; title: string; prefix?: string }) {
+export function AmountField({ label, value, onValue, title, prefix }: { label: string; value: number; onValue: (n: number) => void; title: string; prefix?: string }) {
 	const [draft, setDraft] = useState(String(value));
 	// Follow changes that came from elsewhere (a load, another control).
 	useEffect(() => {

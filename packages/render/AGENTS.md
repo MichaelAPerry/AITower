@@ -133,7 +133,7 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
   Power = warm-white line, coolant = cyan, nutrient = pale green (`conduits.ts` `drawNutrient`, row 7, risers at x 14).
 - **Stage system** (`skin.ts`, pure): `pathSkin(view)` = `{path, stage 0..4, score}`; biotech score = `corruption`, applies before the path is chosen;
   stages at 25/50/75/98 %. `skinTable`/`skinEffects(skin, kind)` say what a device shows (biotech: 1 damp+pulse, 2 veins+flesh+bile, 3 breathe+eyes,
-  4 tissue; sterilizer/quarantine hold out until 4; growths skip damp/tissue). Greentech and synthetic are M4 placeholders (empty table rows).
+  4 tissue; sterilizer/quarantine hold out until 4; growths skip damp/tissue). Greentech and synthetic: see M4-T4 below.
 - **Horror pipeline** (`horror.ts` pure: stages by skin stage x intensity, Bayer dither masks, lamp pulse, eyes/blink, breathing frame, sign word,
   contamination ramps + data-texture builder; `pixi/horror.ts` `HorrorLayer`: static decals rebuilt on layout/stage-key change, breathing frame every
   2.5 s, beads/vein pulses per frame; `pixi/bioArt.ts`: wetware bodies, growths, `skinBody` overlay painted into the cached body, status-light eyes).
@@ -143,3 +143,23 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
 - **Statuses:** `noNutrient` (bile blink, empty-tube glyph and badge) and `tooCold` (frost-blue lamp, snowflake glyph, badge, frost rime on the body).
 - **Overlays:** `nutrient` (nets + per-device satisfaction) and `contamination` (one dithered RGBA data texture, 2x nearest; colour-blind ramp).
 - **Dev:** `?scene=variety&stage=0..4&horror=full|mild|off`, keys Q-T set the stage live, keys 1-6 overlays. The variety scene has every wetware kind and growths.
+
+## M4-T4: greentech and synthetic stages, green kinds, drought, juice
+- **Skin** (`skin.ts`): `pathSkin` reads `view.pathScore` for greentech / synthetic (biotech still reads `corruption`). `GREEN_STAGES` = 25 moss, 50 fungus + vines,
+  75 plants + tank, 100 garden; `SYNTH_STAGES` = lines, glass, panels, light. `GREEN_RESPONDS` / `SYNTH_RESPONDS` say what each device class responds to
+  (sterilizer / quarantine hold out of green; wind and solar skip fungus; chiller / cdu get the fish tank; growths none). `skinTable` picks the path's table.
+- **Renderer wiring:** `refreshSkin` keeps `ppath` / `pstage` / `phorror` (separate from the biotech `stages`). Body cache key includes them; `drawBody` opts
+  `skin.path` ("biotech" default) routes to `skinBody` / `greenSkin` / `synthSkin`. `LiveFx.pskin` (+ `minute`, `tick`, `drought`) feeds `drawLive`.
+  Fungus is the quiet horror: shelves with gill ticks, spores; `horror` 0 off (nothing), 0.5 mild (half alpha), 1 full. Moss, plants, fish are not horror.
+- **Files:** `green.ts` (pure: daylight, `solarGlow`, cosmetic `windLevel`, `RotorPhases`, decal densities `cellHas`, variants), `floaters.ts` (pure: `FloaterField`,
+  `PuffField`, `fmtMoney`, `jobAnchor`, `applyEvents`), `pixi/greenArt.ts` (4 bodies, live, `greenSkin`, `synthSkin`, `pathLive`), `pixi/greenDecals.ts` (moss on slab
+  edges, vines on conduits, fish tanks in coolant loops, roof garden; rebuilt on key change), `pixi/juice.ts` (draws floaters + puffs), `color.ts` `droughtSky`.
+- **Green kinds:** solar = façade field (<6 tiles) or tilted canopy on stilts; panels dark at night, lit by `daylight` (dim in drought). Wind = lattice masts (one
+  per 2 tiles, min width 2) with two vertical-axis rotors; speed from `windLevel(tick)` (the sim does not expose real wind, so this is a cosmetic stand-in), 0 in a
+  drought or when not usable. Heat export = tank(s) + pipe along `PIPE_ROW` to the right edge with a warm dither glow (strength = `heatKw / green.exportKw`). Carbon =
+  algae tubes with green bubbles (<5 tiles) or tubes + a capture stack.
+- **Drought:** `view.drought` eases `droughtAmt` (instant under reduced motion) into `Background.update(..., drought)` -> `droughtSky` (flat, dimmer); rotors stop.
+- **Juice:** `Renderer.pushEvents` -> `Juice.push` -> `applyEvents`. `earned` = "+$" (money green `MONEY`), `jobFailed` = red "−$", over the job's racks (or the rack area);
+  floaters within 28 px and 0.9 s fold together; pool of 10, puffs 8. `autoBuilt` = a puff. Reduced motion: no rise / spread, fade only. Pools are fixed (no per-frame allocation).
+- **Dev:** `?scene=variety&path=greentech|synthetic&stage=0..4&drought=1&minute=&mpt=`; key `J` fires sample juice events. The variety scene has solar, wind, heat export and carbon rows.
+- **Needs from the sim (not blocking):** per-facility renewable output (so rotors / panels could follow the real value instead of the stand-in).

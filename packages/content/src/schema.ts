@@ -24,7 +24,12 @@ export type FacilityKind =
 	| "nutrient" // nutrient plant: feeds a nutrient net (`bio.nutrientCapacity`)
 	| "sterilizer" // sterile bay / culling room: removes contamination within `bio.radius` (and growths if `bio.cullsGrowths`)
 	| "quarantine" // quarantine lock: contamination barely crosses its cells (`balance.bio.quarantineLeak`)
-	| "bioreactor"; // power source fed by the nutrient net (`power.capacityKw`), emits contamination
+	| "bioreactor" // power source fed by the nutrient net (`power.capacityKw`), emits contamination
+	// ── Greentech (M4) ──
+	| "solar" // power source: `power.capacityKw` × daylight (0 at night, peak at 13:00) × weather
+	| "wind" // power source: `power.capacityKw` × seeded wind (changes hourly; Dunkelflaute pulls it down)
+	| "heat_export" // district-heat exchanger: removes up to `green.exportKw` of heat from air cells within `green.radius` and sells it
+	| "carbon"; // carbon capture / algae façade: earns `green.creditsPerDay` carbon credits (paid at midnight)
 
 /** `bio`: organoid tissue. Needs a nutrient net and a temperature band (`rack.bio`); too cold is also a fault. */
 export type CoolingMode = "air" | "dlc" | "immersion" | "bio";
@@ -54,6 +59,16 @@ export interface RackSpec {
 	failurePerDay: number;
 	/** cooling "bio" only. */
 	bio?: OrganoidSpec;
+}
+
+/** Greentech parameters for kinds heat_export / carbon. */
+export interface GreenSpec {
+	/** heat_export: max heat removed and sold, kW. */
+	exportKw?: number;
+	/** heat_export: reach in tiles on its own floor. */
+	radius?: number;
+	/** carbon: credits earned per day while powered (each credit pays `balance.green.creditPrice`). */
+	creditsPerDay?: number;
 }
 
 /** Biotech plant parameters for kinds nutrient / sterilizer / bioreactor (and growth sources). */
@@ -138,6 +153,7 @@ export interface FacilityDef {
 	/** Tech node that must be researched before this can be built (in addition to `unlockTier`). Absent = no research needed. */
 	tech?: string;
 	bio?: BioSpec;
+	green?: GreenSpec;
 	/**
 	 * Growth: never buildable by the player; the sim sprouts it on contaminated empty slab. It works without
 	 * conduits (free, unreliable), can be demolished, and counts as a `grown` facility in the view.
@@ -314,6 +330,28 @@ export interface Balance {
 		cleanTower: { maxCorruption: number; pflops: number; days: number };
 		/** Secret: corruption reaches this (any path, at Clearance ≥ ascension.minTier). */
 		absorbed: { corruption: number };
+		/** Greentech: path green, green score ≥ minScore and Σ delivered PFLOPS ≥ pflops, for `days` days. */
+		greenExemplar?: { minScore: number; pflops: number; days: number };
+		/** Synthetic: path synthetic, refinement ≥ minScore and Σ delivered PFLOPS ≥ pflops, for `days` days. */
+		millionMinds?: { minScore: number; pflops: number; days: number };
+	};
+	/** Greentech economy (M4). */
+	green: {
+		/** $ per kWh of heat sold by heat exporters. */
+		heatPrice: number;
+		/** $ per carbon credit. */
+		creditPrice: number;
+		/** Dunkelflaute: chance per day of a calm, dark spell that pulls solar and wind to `droughtFactor` for `droughtHours`. */
+		droughtChancePerDay: number;
+		droughtFactor: number;
+		droughtHours: number;
+	};
+	/** Automation (M4): standing orders the player can toggle. */
+	automation: {
+		/** Spare parts are bought in batches of this size. */
+		partsBatch: number;
+		/** The Foreman places at most this many facilities per game-hour. */
+		foremanPerHour: number;
 	};
 	events: {
 		/** Mean ticks between new memos (seeded jitter ±50%). */
@@ -398,6 +436,14 @@ export interface Scenario {
 	lifts: { x: number; floorMin: number; floorMax: number }[];
 	bots: { defId: string; floor: number; x: number }[];
 	spareParts: number;
+	/** One or two sentences for the title screen's scenario picker. */
+	description?: string;
+	/** Overrides `balance.startingCash`. */
+	startingCash?: number;
+	/** Starting clearance (default 1). */
+	startTier?: number;
+	/** Sandbox: no bankruptcy and no Ministry shutdown; audits still filed. */
+	sandbox?: boolean;
 }
 
 // ─── Ministry memos (events) ──────────────────────────────────────────
@@ -474,7 +520,7 @@ export type TechBranch = "compute" | "cooling" | "power" | "logistics" | "admini
 export type AscensionPath = "biotech" | "greentech" | "synthetic";
 
 /** Ending ids (see `Balance.endings`). */
-export type EndingId = "livingTower" | "cleanTower" | "absorbed";
+export type EndingId = "livingTower" | "cleanTower" | "absorbed" | "greenExemplar" | "millionMinds";
 
 /** Text of an ending, shown on the game-over sheet. */
 export interface EndingDef {
@@ -505,7 +551,8 @@ export type PerkKind =
 	| "botSpeed"; // bot walk/fly speed
 
 /** Gameplay features switched on by tech. */
-export type FeatureId = "contractsClerk";
+/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). */
+export type FeatureId = "contractsClerk" | "foreman";
 
 export type TechEffect = { type: "perk"; kind: PerkKind; factor: number } | { type: "feature"; feature: FeatureId };
 

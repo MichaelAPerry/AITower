@@ -2,7 +2,8 @@
 // Query params: ?overlay=heat|power|coolant|nutrient|contamination  ?minute=1200  ?zoom=1..4  ?focus=x,floor  ?select=facility:4  ?ghost=1|bad
 //               ?mpt=4 (minutes per tick)  ?real=1 (real content colours)
 //               ?scene=variety (every kind x tier x width, failure rows, new bots; focus=x,floor to jump)
-//               ?stage=0..4 (biotech skin stage in the variety scene; keys Q W E R T set it live)  ?horror=full|mild|off
+//               ?path=biotech|greentech|synthetic  ?drought=1  (variety scene: ?minute and ?mpt too)
+//               ?stage=0..4 (path skin stage in the variety scene; keys Q W E R T set it live; J fires sample juice events)  ?horror=full|mild|off
 //               ?cb=1 (colour-blind)  ?rm=1 (reduced motion)  ?crt=0 (CRT effects off)
 import "@fontsource/vt323";
 import { loadContent } from "@aitower/content";
@@ -15,7 +16,13 @@ const params = new URLSearchParams(location.search);
 const host = document.getElementById("world") as HTMLElement;
 const hud = document.getElementById("hud") as HTMLElement;
 const variety = params.get("scene") === "variety";
-const fx = variety ? createVarietyScene({ stage: Math.max(0, Math.min(4, Number(params.get("stage") ?? 0))) as 0 | 1 | 2 | 3 | 4 }) : createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
+const fx = variety ? createVarietyScene({
+			stage: Math.max(0, Math.min(4, Number(params.get("stage") ?? 0))) as 0 | 1 | 2 | 3 | 4,
+			path: (params.get("path") as "biotech" | "greentech" | "synthetic" | null) ?? "biotech",
+			drought: params.has("drought"),
+			mpt: Number(params.get("mpt") ?? 0),
+			minute: Number(params.get("minute") ?? 780),
+		}) : createFixture(Number(params.get("minute") ?? 600), Number(params.get("mpt") ?? 2));
 // ?real=1 draws the fixture with the real content colours (falls back to the local stub).
 let content = fixtureContent;
 if (params.has("real")) {
@@ -57,7 +64,23 @@ let overlay = (params.get("overlay") as OverlayMode | null) ?? "normal";
 renderer.setOverlay(overlay);
 window.addEventListener("keydown", (e) => {
 	const stageKey = "qwert".indexOf(e.key.toLowerCase());
-	if (stageKey >= 0) fx.view.corruption = STAGE_SCORE[stageKey];
+	if (stageKey >= 0) {
+		fx.view.pathScore = STAGE_SCORE[stageKey];
+		if (fx.view.path === "biotech" || fx.view.path === null) fx.view.corruption = STAGE_SCORE[stageKey];
+	}
+	if (e.key.toLowerCase() === "j") {
+		// Juice test: a burst of earnings, one failed job and an auto-built puff.
+		const rack = fx.view.facilities.find((f) => f.jobId !== null);
+		if (rack?.jobId != null) {
+			const jobId = rack.jobId;
+			renderer.pushEvents([
+				{ type: "earned", jobId, amount: 1200 },
+				{ type: "earned", jobId, amount: 800 },
+				{ type: "jobFailed", jobId: jobId + 999, penalty: 5000 },
+				{ type: "autoBuilt", facilityId: rack.id },
+			]);
+		}
+	}
 	const i = Number(e.key) - 1;
 	if (i >= 0 && i < modes.length) {
 		overlay = modes[i];

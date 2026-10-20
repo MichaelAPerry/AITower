@@ -29,5 +29,101 @@
 		"lifts": [{ "x": 24, "floorMin": -1, "floorMax": 1 }],
 		"bots": [{ "defId": "rover", "floor": 0, "x": 26 }],
 		"spareParts": 4
+	},
+	"brownfield": {
+		"id": "brownfield",
+		"name": "Brownfield Tower",
+		"description": "An old half-built tower, bought at auction with the debts attached. Six floors of slab, six air cabinets sharing one tired air handler, three empty storeys above them and $350k in an account the bank describes as \"optimistic\". Starts at Clearance 2.",
+		"width": 56,
+		"floorMin": -2,
+		"floorMax": 12,
+		"startTier": 2,
+		"startingCash": 350000,
+		"slabs": [
+			[-1, 4, 51],
+			[0, 0, 55],
+			[1, 4, 51],
+			[2, 4, 51],
+			[3, 4, 39],
+			[4, 4, 39]
+		],
+		"facilities": [
+			{ "defId": "grid_tie", "floor": -1, "x": 6 },
+			{ "defId": "genset", "floor": -1, "x": 12 },
+			{ "defId": "bot_charger", "floor": 0, "x": 26 },
+			{ "defId": "parts_depot", "floor": 0, "x": 29 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 6 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 8 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 10 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 12 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 14 },
+			{ "defId": "rack_air_gpu", "floor": 1, "x": 16 },
+			{ "defId": "crah_unit", "floor": 1, "x": 18 },
+			{ "defId": "rack_storage", "floor": 1, "x": 20 }
+		],
+		"conduits": [
+			["power", -1, 4, 51],
+			["power", 0, 4, 51],
+			["power", 1, 4, 51],
+			["power", 2, 4, 51],
+			["power", 3, 4, 39]
+		],
+		"lifts": [
+			{ "x": 24, "floorMin": -1, "floorMax": 4 }
+		],
+		"bots": [
+			{ "defId": "rover", "floor": 0, "x": 26 }
+		],
+		"spareParts": 2
+	},
+	"sandbox": {
+		"id": "sandbox",
+		"name": "Sandbox Annex",
+		"description": "A fully funded test lot with no bankruptcy and no shutdown; the Ministry still files its audits, out of habit. $500M and Clearance 5, for trying anything once. Research is still required.",
+		"width": 64,
+		"floorMin": -2,
+		"floorMax": 16,
+		"startTier": 5,
+		"startingCash": 500000000,
+		"sandbox": true,
+		"slabs": [
+			[-1, 4, 59],
+			[0, 0, 63],
+			[1, 4, 59],
+			[2, 4, 59],
+			[3, 4, 59]
+		],
+		"facilities": [
+			{ "defId": "grid_tie", "floor": -1, "x": 6 },
+			{ "defId": "grid_tie", "floor": -1, "x": 10 },
+			{ "defId": "genset", "floor": -1, "x": 14 },
+			{ "defId": "ups_battery", "floor": -1, "x": 18 },
+			{ "defId": "chiller", "floor": 1, "x": 22 },
+			{ "defId": "cdu", "floor": 1, "x": 27 },
+			{ "defId": "bot_charger", "floor": 0, "x": 30 },
+			{ "defId": "parts_depot", "floor": 0, "x": 33 },
+			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 6 },
+			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 8 },
+			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 10 },
+			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 12 },
+			{ "defId": "crah_unit", "floor": 1, "x": 14 },
+			{ "defId": "rack_storage", "floor": 1, "x": 16 },
+			{ "defId": "rack_storage", "floor": 1, "x": 18 }
+		],
+		"conduits": [
+			["power", -1, 4, 59],
+			["power", 0, 4, 59],
+			["power", 1, 4, 59],
+			["power", 2, 4, 59],
+			["power", 3, 4, 59],
+			["coolant", 1, 4, 59]
+		],
+		"lifts": [
+			{ "x": 40, "floorMin": -1, "floorMax": 3 }
+		],
+		"bots": [
+			{ "defId": "rover", "floor": 0, "x": 30 }
+		],
+		"spareParts": 10
 	}
 }

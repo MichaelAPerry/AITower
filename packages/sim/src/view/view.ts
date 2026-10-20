@@ -14,7 +14,9 @@ import { eventDef } from "../ministry/memos";
 import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 import { facilityStatus } from "./status";
-import { clerkUnlocked, perk } from "../research/research";
+import { clerkUnlocked, foremanUnlocked, perk } from "../research/research";
+import { cloneAutomation } from "../automation/policy";
+import { isDrought } from "../green/weather";
 
 function botState(b: Bot, def: BotDef | undefined): BotState {
 	if (def?.flying && b.leg === "walk" && b.floor !== b.goalFloor && (b.task === "depot" || b.task === "target" || b.task === "charger")) return "flying";
@@ -135,6 +137,12 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		path: state.path,
 		organoidPflops: m.organoidPflops,
 		endingProgress: leadingEnding(state, content.balance.endings),
+		pathScore: state.path === "greentech" ? state.greenScore : state.path === "synthetic" ? state.refinement : state.corruption,
+		greenScore: state.greenScore,
+		refinement: state.refinement,
+		drought: isDrought(state),
+		sandbox: state.sandbox,
+		automation: { policy: cloneAutomation(state.automation), foremanUnlocked: foremanUnlocked(state, content) },
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({

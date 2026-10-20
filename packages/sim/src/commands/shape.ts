@@ -4,6 +4,7 @@
  * NaN / Infinity, cyclic or exotic objects, huge arrays). Game-rule validation lives in the `plan*` functions.
  */
 import type { CellRef, SimCommand } from "../api";
+import { shapeAutomation } from "../automation/policy";
 
 export type Normalized = { ok: true; cmd: SimCommand } | { ok: false; reason: string };
 
@@ -32,6 +33,7 @@ const NUMERIC: Record<string, readonly string[]> = {
 	takeLoan: ["amount"],
 	repayLoan: ["amount"],
 	choosePath: [],
+	setAutomation: [],
 };
 
 /**
@@ -74,6 +76,10 @@ export function normalizeCommand(raw: unknown): Normalized {
 		if (type === "research" && typeof raw.techId !== "string") return bad("techId must be a string");
 		if (type === "choosePath" && typeof raw.path !== "string") return bad("path must be a string");
 		if (type === "setClerk") return normalizeClerk(raw.policy);
+		if (type === "setAutomation") {
+			const shaped = shapeAutomation(raw.policy);
+			return shaped.ok ? { ok: true, cmd: { type, policy: shaped.policy } } : bad(shaped.reason);
+		}
 		const out: Record<string, unknown> = { type };
 		for (const k of keys) {
 			const v = raw[k];

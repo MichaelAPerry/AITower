@@ -88,8 +88,9 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 	 * tick, so a game shown at tick 0 — paused behind the title screen or the induction — would display every rack as
 	 * unpowered. Stepping through the normal pipeline keeps it deterministic; the first tick's events are not shown.
 	 */
-	const freshSim = (seed: number): Sim => {
-		const next = createSim(content, SCENARIO, seed);
+	const freshSim = (seed: number, scenarioId: string = SCENARIO): Sim => {
+		// Unknown ids fall back to the default scenario rather than throwing from a UI click.
+		const next = createSim(content, Object.hasOwn(content.scenarios, scenarioId) ? scenarioId : SCENARIO, seed);
 		next.step();
 		return next;
 	};
@@ -255,8 +256,8 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			const { sim: next } = decodeSave(content, json); // throws before anything is replaced
 			replaceSim(next);
 		},
-		newGame(seed = (Math.random() * 2 ** 31) | 0) {
-			replaceSim(freshSim(seed));
+		newGame(seed = (Math.random() * 2 ** 31) | 0, scenarioId?: string) {
+			replaceSim(freshSim(seed, scenarioId));
 		},
 
 		async listSaves() {

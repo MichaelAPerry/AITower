@@ -116,7 +116,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 		const ctx = FakeContext.last!;
 		expect(ctx.state).toBe("running");
 		const humSources = ctx.started;
-		expect(humSources).toBe(5 + 3); // hum (incl. breath LFO) + the tape wow/drift/flutter LFOs
+		expect(humSources).toBe(5 + 3 + 6); // hum (incl. breath LFO) + the tape LFOs + ambience beds (plant 3, fans 1, wind 2)
 
 		a.update(view(2), [{ type: "jobCompleted", jobId: 1, payout: 1 }]);
 		const afterFirst = ctx.started;
@@ -132,6 +132,25 @@ describe("createAudio with a (fake) AudioContext", () => {
 		a.destroy();
 		expect(ctx.state).toBe("closed");
 		a.update(view(5), [{ type: "tierUp", tier: 2, reward: 1 }]);
+	});
+
+	it("builds the path layers only once a path is chosen, plays toggle/earned sounds, and frees all on destroy", async () => {
+		g.AudioContext = FakeContext;
+		const a = createAudio();
+		await a.resume();
+		const ctx = FakeContext.last!;
+		const policy = (on: boolean) => ({ research: { enabled: on }, parts: { enabled: false }, bots: { enabled: false }, foreman: { enabled: false } });
+		const base = { automation: { policy: policy(false) }, path: null, pathScore: 0 } as unknown as Partial<SimView>;
+		a.update(view(1, base), []);
+		const idle = ctx.started;
+		a.update(view(2, { ...base, path: "greentech", pathScore: 0.8 } as unknown as Partial<SimView>), []);
+		expect(ctx.started).toBeGreaterThan(idle + 10); // beds + LFOs built, first notes scheduled or not
+		const built = ctx.started;
+		ctx.currentTime = 1;
+		a.update(view(3, { ...base, automation: { policy: policy(true) } } as unknown as Partial<SimView>), [{ type: "earned", jobId: 1, amount: 5 }]);
+		expect(ctx.started).toBeGreaterThan(built); // toggle tick + till chime
+		a.destroy();
+		expect(ctx.sources.size).toBe(0);
 	});
 
 	it("starts the music timer on resume, stops it at music volume 0, and leaves none after destroy", async () => {

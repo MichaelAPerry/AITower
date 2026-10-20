@@ -8,7 +8,7 @@
 import type { HorrorIntensity } from "@aitower/shared";
 import type { FacilityStatus } from "@aitower/sim";
 import { clamp01, lerpColor } from "./color";
-import { STAGE_AT, type SkinStage } from "./skin";
+import { STAGE_AT, type SkinPath, type SkinStage } from "./skin";
 import { CB, T, dk, lt, mix } from "./palette";
 
 // ─── Stage selection ──────────────────────────────────────────────────
@@ -301,6 +301,12 @@ export interface LiveFx {
 	stage: SkinStage;
 	cursor: { x: number; y: number } | null;
 	paused: boolean;
+	/** Greentech / synthetic skin in force (undefined = none): its stage and the horror alpha that tones the fungus (0 off, 0.5 mild, 1 full). */
+	pskin?: { path: SkinPath; stage: SkinStage; horror: number };
+	/** Game clock for the green kinds: minute of day and tick (cosmetic daylight and wind), and whether a drought is in force. */
+	minute?: number;
+	tick?: number;
+	drought?: boolean;
 }
 
 /** No horror: the plain synthetic look at full intensity (what the art tests and old callers get). */

@@ -238,6 +238,12 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		path: null,
 		organoidPflops: 0,
 		endingProgress: null,
+		pathScore: 0,
+		greenScore: 0,
+		refinement: 0,
+		drought: false,
+		sandbox: false,
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false },
 		gameOver: null,
 	};
 

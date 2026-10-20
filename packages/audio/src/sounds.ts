@@ -3,9 +3,9 @@
  * (oscillator/noise voices with pitch glides and envelopes). The engine plays
  * recipes; nothing here touches WebAudio.
  */
-import type { SimEvent } from "@aitower/sim";
+import type { SimEvent, SimView } from "@aitower/sim";
 
-export type SoundId = "alarm" | "zap" | "blip" | "ding" | "cash" | "fanfare" | "lowWarn" | "rumble" | "fail";
+export type SoundId = "alarm" | "zap" | "blip" | "ding" | "cash" | "fanfare" | "lowWarn" | "rumble" | "fail" | "till" | "clunk" | "droughtOn" | "droughtOff" | "toggleOn" | "toggleOff";
 
 export type Wave = "sine" | "square" | "sawtooth" | "triangle" | "noise";
 
@@ -134,6 +134,51 @@ export const SOUNDS: Record<SoundId, SoundSpec> = {
 		gain: 0.3,
 		voices: [note("triangle", 392, 0, 0.18, 0.7), note("triangle", 311.13, 0.2, 0.35, 0.7, { freqEnd: 290 })],
 	},
+	// Money earned: soft till chime (rate-limited hard: inference pays every game-hour).
+	till: {
+		id: "till",
+		minIntervalMs: 2500,
+		gain: 0.16,
+		voices: [note("sine", 1567.98, 0, 0.35, 0.6, { attack: 0.003 }), note("sine", 2093, 0.07, 0.5, 0.5, { attack: 0.003 }), note("sine", 4186, 0.07, 0.12, 0.08)],
+	},
+	// Automation built something: pneumatic clunk and a short hiss.
+	clunk: {
+		id: "clunk",
+		minIntervalMs: 700,
+		gain: 0.35,
+		voices: [
+			note("sine", 150, 0, 0.14, 0.9, { freqEnd: 60, attack: 0.002 }),
+			note("noise", 2400, 0.02, 0.22, 0.35, { attack: 0.01, lowpassHz: 3000 }),
+			note("triangle", 330, 0.01, 0.06, 0.25),
+		],
+	},
+	// Greentech drought begins: a long falling, dry sigh.
+	droughtOn: {
+		id: "droughtOn",
+		minIntervalMs: 4000,
+		gain: 0.3,
+		voices: [note("sine", 330, 0, 1.4, 0.6, { freqEnd: 165, attack: 0.15 }), note("noise", 700, 0, 1.2, 0.2, { attack: 0.3, lowpassHz: 900 })],
+	},
+	// Drought over: two rising notes and a bright wash.
+	droughtOff: {
+		id: "droughtOff",
+		minIntervalMs: 4000,
+		gain: 0.28,
+		voices: [note("sine", 392, 0, 0.5, 0.6, { attack: 0.02 }), note("sine", 587.33, 0.18, 0.8, 0.6, { attack: 0.02 }), note("noise", 5000, 0.18, 0.7, 0.1, { attack: 0.2, lowpassHz: 7000 })],
+	},
+	// Automation toggles (UI feel): a short tick up / down.
+	toggleOn: {
+		id: "toggleOn",
+		minIntervalMs: 300,
+		gain: 0.2,
+		voices: [note("triangle", 660, 0, 0.05, 0.6), note("triangle", 990, 0.05, 0.08, 0.6)],
+	},
+	toggleOff: {
+		id: "toggleOff",
+		minIntervalMs: 300,
+		gain: 0.2,
+		voices: [note("triangle", 990, 0, 0.05, 0.6), note("triangle", 660, 0.05, 0.08, 0.6)],
+	},
 };
 
 export function eventToSound(e: SimEvent): SoundId | null {
@@ -156,6 +201,14 @@ export function eventToSound(e: SimEvent): SoundId | null {
 			return "rumble";
 		case "jobFailed":
 			return "fail";
+		case "earned":
+			return "till";
+		case "autoBuilt":
+			return "clunk";
+		case "droughtStarted":
+			return "droughtOn";
+		case "droughtEnded":
+			return "droughtOff";
 		default:
 			return null;
 	}
@@ -173,3 +226,28 @@ export function soundsForEvents(events: readonly SimEvent[]): SoundId[] {
 
 /** Total length of a sound in seconds. */
 export const soundDuration = (spec: SoundSpec): number => Math.max(...spec.voices.map((v) => v.start + v.dur));
+
+/** Like `soundsForEvents`, but keeps the first event that triggered each sound (for its position). */
+export function soundPlays(events: readonly SimEvent[]): { id: SoundId; event: SimEvent }[] {
+	const out: { id: SoundId; event: SimEvent }[] = [];
+	for (const event of events) {
+		const id = eventToSound(event);
+		if (id && !out.some((p) => p.id === id)) out.push({ id, event });
+	}
+	return out;
+}
+
+type Policy = SimView["automation"]["policy"];
+const POLICY_KEYS = ["research", "parts", "bots", "foreman"] as const;
+
+/** Toggle sounds for the automation switches that flipped between two policies (fixed key order). */
+export function automationToggles(prev: Policy | undefined, next: Policy | undefined): ("toggleOn" | "toggleOff")[] {
+	if (!prev || !next) return [];
+	const out: ("toggleOn" | "toggleOff")[] = [];
+	for (const k of POLICY_KEYS) {
+		const a = !!prev[k]?.enabled;
+		const b = !!next[k]?.enabled;
+		if (a !== b) out.push(b ? "toggleOn" : "toggleOff");
+	}
+	return out;
+}

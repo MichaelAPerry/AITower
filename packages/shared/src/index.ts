@@ -125,6 +125,8 @@ export interface Renderer {
 	/** Draw the world. `alpha` ∈ [0,1) is the fraction toward the next tick, for interpolation. */
 	draw(view: SimView, alpha: number): void;
 	setOverlay(mode: OverlayMode): void;
+	/** Events from the latest steps (for in-world feedback: "+$" floaters, build puffs). Called by the app after stepping. */
+	pushEvents(events: SimEvent[]): void;
 	setGhost(ghost: Ghost | null): void;
 	setSelection(sel: Selection): void;
 	/** Centre the camera on a cell. */
@@ -199,7 +201,8 @@ export interface GameStore {
 	save(): string;
 	/** Replace the current game from exported JSON. Throws Error("Invalid save: …") on bad input; the running game is kept. */
 	load(json: string): void;
-	newGame(seed?: number): void;
+	/** `scenarioId` defaults to "starter"; any id in content.scenarios is allowed (brownfield, sandbox…). */
+	newGame(seed?: number, scenarioId?: string): void;
 	/** Slots that currently hold a save, newest first. */
 	listSaves(): Promise<SaveSlotInfo[]>;
 	saveTo(slot: SaveSlotId, name?: string): Promise<CommandResult>;

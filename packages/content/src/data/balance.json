@@ -150,7 +150,28 @@
   },
   "absorbed": {
    "corruption": 0.99
+  },
+  "greenExemplar": {
+   "minScore": 0.7,
+   "pflops": 3000,
+   "days": 4
+  },
+  "millionMinds": {
+   "minScore": 0.85,
+   "pflops": 3600,
+   "days": 5
   }
+ },
+ "green": {
+  "heatPrice": 3,
+  "creditPrice": 40,
+  "droughtChancePerDay": 0.06,
+  "droughtFactor": 0.1,
+  "droughtHours": 16
+ },
+ "automation": {
+  "partsBatch": 5,
+  "foremanPerHour": 1
  },
  "events": {
   "intervalTicks": 720,

@@ -179,6 +179,19 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log(`${cards} research cards`);
 
+		stage("5c. open the Automation drawer with T, switch the spare-parts order on, see the AUTO lamp, close it with Esc");
+		assert((await page.locator(".ui-autolamp").count()) === 0, "no AUTO lamp before any order is on");
+		await page.keyboard.press("t");
+		await page.locator('[data-drawer="automation"]').waitFor();
+		for (const order of ["research", "parts", "bots", "foreman", "clerk"]) assert((await page.locator(`[data-order="${order}"]`).count()) === 1, `automation row missing: ${order}`);
+		await page.locator('[data-order="parts"] [role="switch"]').click();
+		await page.waitForFunction(() => window.aitower.store.get().view.automation.policy.parts.enabled === true);
+		await page.waitForFunction(() => document.querySelector(".ui-autolamp") !== null);
+		await page.keyboard.press("Escape");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		log("parts order on, AUTO lamp lit");
+
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
 		const saved = await game(() => window.aitower.store.saveTo("slot1", "e2e"));
@@ -198,7 +211,8 @@ async function run(url) {
 		assert(after === placed, `rack count did not survive save/load: saved ${placed}, loaded ${after}`);
 		const hashAfter = await game(() => window.aitower.store.sim().hash());
 		assert(hashAfter === hashBefore, `sim hash changed across save/load: ${hashBefore} -> ${hashAfter}`);
-		log(`racks ${after}, hash ${hashAfter}`);
+		assert(await game(() => window.aitower.store.get().view.automation.policy.parts.enabled), "the parts order did not survive save/load");
+		log(`racks ${after}, hash ${hashAfter}, parts order still on`);
 
 		stage("7. assert no page errors");
 		assert(errors.length === 0, `${errors.length} page error(s):\n    ${errors.join("\n    ")}`);

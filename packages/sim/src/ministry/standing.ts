@@ -15,7 +15,7 @@ export function changeStanding(state: SimState, delta: number, events: SimEvent[
 	const applied = next - state.standing;
 	state.standing = next;
 	if (applied !== 0) events.push({ type: "standingChanged", standing: next, delta: applied });
-	if (next <= 0) setGameOver(state, "shutdown", events);
+	if (next <= 0 && !state.sandbox) setGameOver(state, "shutdown", events); // a sandbox has no Ministry shutdown
 }
 
 /** Per-tick job outcomes: reads this tick's jobCompleted / jobFailed events and applies one combined change. */

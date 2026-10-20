@@ -17,6 +17,8 @@ import { ResearchSheet } from "./research/ResearchSheet";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { MemoDrawer, MemoPop } from "./memo/MemoDesk";
+import { reducedMotion } from "./title/crawl";
+import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
 import { Tutorial } from "./tutorial/Tutorial";
@@ -69,6 +71,17 @@ export function Hud({ store, content, title }: HudProps) {
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
+	// The opening crawl plays once over every new game (the game stays paused); `run` = resume at 1× afterwards (no induction).
+	const [crawl, setCrawl] = useState<{ run: boolean } | null>(null);
+	const crawlRef = useRef(crawl);
+	crawlRef.current = crawl;
+	const finishCrawl = useCallback(() => {
+		const c = crawlRef.current;
+		if (!c) return; // ended already (a click and the timer can both land)
+		crawlRef.current = null;
+		setCrawl(null);
+		if (c.run) store.setSpeed(1);
+	}, [store]);
 	const titleOpenRef = useRef(titleOpen);
 	titleOpenRef.current = titleOpen;
 	const overRef = useRef(false);
@@ -93,7 +106,7 @@ export function Hud({ store, content, title }: HudProps) {
 			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null })), []),
 		},
 		menu,
-		useCallback(() => titleOpenRef.current || overRef.current, []),
+		useCallback(() => titleOpenRef.current || overRef.current || crawlRef.current !== null, []),
 		{ research, ascension, audit: auditSheet, drawer: drawerCloser },
 	);
 
@@ -168,7 +181,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
-				{!titleOpen && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
+				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
 				<PalettePopover {...props} />
 				<BuildDock {...props} />
 				<Ticker {...props} />
@@ -193,7 +206,20 @@ export function Hud({ store, content, title }: HudProps) {
 				/>
 			)}
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
-			{titleOpen && <TitleScreen store={store} state={state} menuOpen={menuOpen} openMenu={openMenuAt} onStart={() => setTitleOpen(false)} />}
+			{titleOpen && (
+				<TitleScreen
+					store={store}
+					state={state}
+					content={content}
+					menuOpen={menuOpen}
+					openMenu={openMenuAt}
+					onStart={(how) => {
+						setTitleOpen(false);
+						if (how?.newGame) setCrawl({ run: how.run });
+					}}
+				/>
+			)}
+			{crawl && !titleOpen && !over && <OpeningCrawl reduced={reducedMotion(settings.reducedMotion)} onDone={finishCrawl} />}
 			{over && (
 				<GameOverScreen
 					over={over}
@@ -204,7 +230,8 @@ export function Hud({ store, content, title }: HudProps) {
 					onLoad={() => openMenuAt("load")}
 					onNewGame={() => {
 						store.newGame();
-						store.setSpeed(1);
+						store.setSpeed(0);
+						setCrawl({ run: true });
 					}}
 					onContinue={() => {
 						setDismissedOver(overKey(over));

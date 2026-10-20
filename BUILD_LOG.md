@@ -176,3 +176,29 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 - **Notes:**
   - Overlay keys are now O (coolant), U (nutrient) and G (contamination). R opens the Research drawer, and the full sheet is a button inside it.
   - **M4 carries:** the Greentech and Synthetic stage art, the Greentech growth score, and a per-hour value that ignores construction.
+
+## M4: automation, the Greentech and Synthetic paths, scenarios, juice, audio breadth
+- **Owner ask:** "automate everything for ease of life, even building … all toggled on and off". It became the **Automation drawer (T)** with these standing orders, each toggled on its own and checked once per game-hour:
+  - **Research** (branch priority)
+  - **Spare parts** (keep N in stock)
+  - **Bots** (one per N racks)
+  - **Works Foreman** (auto-build): a Clearance-1 research unlock. It fills slab you have already built, with racks, air handlers, power, chargers and depots, keeping a cash reserve and building at most one facility per hour.
+  - **Contracts Clerk**
+  
+  The Foreman never builds floors or conduits; that is the next big chunk.
+- **Agents (Sonnet, one at a time):**
+  - **sim:** automation, solar, wind, Dunkelflaute droughts, heat export, carbon credits, green and refinement scores, `pathScore`, two new endings, scenario options, `earned` events, snapshot v6.
+  - **content:** 9 Greentech and 4 Synthetic facilities, 18 research nodes, 14 events, the Brownfield and Sandbox scenarios, the endings text, and all three paths available.
+  - **ui:** the Automation drawer, the scenario picker and opening crawl, the path gauges, a drought chip, a SANDBOX badge, and ticker coalescing.
+  - **render:** Greentech stages (moss → fungus and vines → plants and fish tanks → garden) and Synthetic stages, green facility art, the drought sky, "+$" floaters and build puffs.
+  - **audio:** spatial one-shots, floor ambience, Greentech and Synthetic music layers, and event cues.
+- **Orchestrator:**
+  - **Contracts first, plus app wiring:** `newGame(seed, scenarioId)` and `renderer.pushEvents`.
+  - **The Foreman's first version over-built into a Ministry shutdown.** Sent back: it is now maintenance-aware (it waits while the crew lags, uptime is low or a day lost money, it builds chargers and depots, and it leaves room for an air handler). That rework also found an old bug: bots could never repair basement racks.
+  - **Works Foreman moved to Clearance 1:** at Clearance 2 an automated run could never reach it.
+  - **My mistake:** I discarded the content agent's uncommitted `tech.json` with a checkout, thinking it was formatting noise. The agent restored all 18 nodes and I verified them (63 nodes). Rule: inspect a diff before reverting anything.
+- **Checks:**
+  - 1,170 tests pass, along with the budget and e2e.
+  - Real build: 3 scenario cards; the crawl shows and Esc skips it; Brownfield starts; the T drawer toggles research and parts; automation acts by day 3; no game over and no page errors.
+  - `sim --auto` over 30 days: the Foreman built 17 facilities, reaching Clearance 2 with $10M and 98.7 % uptime.
+- **Moved to M5:** the Web Worker sim, desktop packaging, crash reporting, and the Foreman expanding floors and conduits. Also later: per-unit solar and wind output for the art, and the camera position for spatial audio.

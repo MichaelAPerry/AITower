@@ -2,7 +2,7 @@ import type { CommandResult, JobStatus, SimEvent } from "@aitower/sim";
 import { payPerPflopHour } from "@aitower/sim";
 import { ClerkPanel } from "../clerk/ClerkPanel";
 import { clerkRowText, clerkVerdict, fmtRate } from "../clerk/clerk";
-import { describeEvent, isNoise } from "../events";
+import { feedLines } from "./calm";
 import { fmtDuration, fmtMoney, fmtPflops, fmtPower, fmtPue, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
 import { cheapestAvailable, nodeState, techList } from "../research/tech";
@@ -199,23 +199,21 @@ export function Telemetry({ content, state }: PanelProps) {
 }
 
 export function AlertsLog({ store, content, state }: PanelProps) {
-	const items = state.log.filter((e) => !isNoise(e.event)).slice(-80).reverse();
+	const items = feedLines(state.log.slice(-400), state.view, content, state.settings.horrorIntensity).slice(-80).reverse();
 	if (!items.length) return <div className="ui-empty ui-pad">All quiet.</div>;
 	return (
 		<ul className="ui-alerts ui-crt crt-amber">
-			{items.map((e, i) => {
-				const d = describeEvent(e.event, state.view, content, state.settings.horrorIntensity);
-				const cell = d.cell;
-				const day = Math.floor(e.tick / 1440);
-				const min = (e.tick + 360) % 1440;
+			{items.map((l) => {
+				const cell = l.cell;
+				const day = Math.floor(l.tick / 1440);
+				const min = (l.tick + 360) % 1440;
 				const t = `D${day} ${String(Math.floor(min / 60)).padStart(2, "0")}:${String(min % 60).padStart(2, "0")}`;
 				return (
-					// biome-ignore lint/suspicious/noArrayIndexKey: log rows can share a tick; the tick-index pair is the stable key
 					// biome-ignore lint/a11y/useKeyWithClickEvents: click-to-focus on a log row is a mouse convenience; the log text is the accessible content
-					<li key={`${e.tick}-${i}`} className={`sev-${d.severity} ${cell ? "is-click" : ""}`} onClick={cell ? () => store.focus(cell) : undefined} title={cell ? "Click to focus" : undefined}>
+					<li key={l.key} className={`sev-${l.severity} ${cell ? "is-click" : ""}`} onClick={cell ? () => store.focus(cell) : undefined} title={cell ? "Click to focus" : undefined}>
 						<span className="ui-alert-dot" />
 						<span className="ui-alert-time">{t}</span>
-						<span className="ui-alert-text">{d.text}</span>
+						<span className="ui-alert-text">{l.text}</span>
 					</li>
 				);
 			})}

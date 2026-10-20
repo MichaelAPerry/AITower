@@ -1,20 +1,28 @@
 import { clock, type Speed } from "@aitower/shared";
+import { anyAutomation, autoLampTitle } from "../automation/automation";
 import { GrowthIndex } from "../bio/GrowthIndex";
 import { Icon, Lamp, Toggle } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
 import { InboxButton, StandingMeter } from "../memo/MemoDesk";
 import { saveLamp } from "../menu/slots";
-import { clearanceProgress, fmtRateHour, perHour } from "./calm";
+import { PathGauge } from "../paths/PathGauge";
+import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
+import { clearanceProgress, fmtRateHour, nextDrawer, perHour } from "./calm";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
-/** The one thin strip: day and clock, speed, treasury, PER HOUR, Clearance bar, standing, inbox, growth index, menu. */
+/**
+ * The one thin strip: day and clock, speed, treasury, PER HOUR, Clearance bar, standing, then the badges that appear when they
+ * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, inbox, menu.
+ */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
 	const { view, speed, muted } = state;
 	const lamp = saveLamp(state.saveStatus);
 	const rate = perHour(view);
 	const cl = clearanceProgress(view, content);
+	const drought = droughtChip(view, content);
+	const auto = anyAutomation(view);
 	return (
 		<header className="ui-strip">
 			<div className="ui-chip ui-clock" title="Game day and time (1 tick = 1 minute)">
@@ -29,7 +37,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					</button>
 				))}
 			</div>
-			<div className={`ui-chip ui-cash ${view.cash < 0 ? "is-bad" : ""}`} title={view.bankrupt ? "Bankrupt!" : "Available cash"}>
+			<div className={`ui-chip ui-cash ${view.cash < 0 ? "is-bad" : ""}`} title={view.bankrupt ? "Bankrupt!" : view.sandbox ? "Available cash (sandbox: no bankruptcy)" : "Available cash"}>
 				<span className="ui-label">TREASURY</span>
 				<span className="ui-big">{fmtMoney(view.cash)}</span>
 			</div>
@@ -47,6 +55,24 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				</span>
 			</div>
 			<StandingMeter standing={view.standing} />
+			{view.sandbox && (
+				<div className="ui-chip ui-sandbox" title={SANDBOX_TITLE} role="status">
+					SANDBOX
+				</div>
+			)}
+			{auto && (
+				<button type="button" className="ui-chip ui-autolamp is-on" data-tut="auto-lamp" aria-pressed={ui.drawer === "automation"} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, "automation") })} title={autoLampTitle(view)}>
+					<Lamp on tone="green" />
+					AUTO
+				</button>
+			)}
+			{drought && (
+				<div className="ui-chip ui-drought is-warn" title={drought.title} role="status">
+					<span className="ui-label">{drought.label}</span>
+					<span className="ui-big">{drought.value}</span>
+				</div>
+			)}
+			<PathGauge view={view} content={content} />
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<InboxButton state={state} ui={ui} setUi={setUi} />
 			<div className="ui-sysbox">

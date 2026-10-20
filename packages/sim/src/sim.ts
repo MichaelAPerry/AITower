@@ -11,6 +11,8 @@ import { type Scratch, type TickCtx, createScratch } from "./core/context";
 import { cellCount } from "./core/grid";
 import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
+import { automationStep } from "./automation/automationStep";
+import { weatherStep } from "./green/weather";
 import { memoStep } from "./ministry/memos";
 import { ambientOffset } from "./ministry/modifiers";
 import { jobStanding } from "./ministry/standing";
@@ -124,6 +126,7 @@ export class SimImpl implements Sim {
 		this.state.ambientC = ambientAt(this.content.balance, this.state.tick) + ambientOffset(this.state);
 		applyCommands(ctx); //  1
 		rebuildNetworks(ctx); //  2 (dirty only)
+		weatherStep(ctx); //  2b hourly wind, daily drought roll
 		powerSolve(ctx); //  3
 		nutrientSolve(ctx); //  3b nutrient nets
 		coolingSolve(ctx); //  4
@@ -139,6 +142,7 @@ export class SimImpl implements Sim {
 		economyStep(ctx); //  9 (incl. contract offers)
 		memoStep(ctx); //  9b modifiers expire, memos time out / are issued
 		jobStanding(ctx); //  9c standing from this tick's job outcomes
+		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		progressionStep(ctx); // 10
 		advanceTime(ctx); // 11
 		return events;

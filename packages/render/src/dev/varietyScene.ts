@@ -43,6 +43,11 @@ export const VARIETY_ROWS: VarietyRow[] = [
 	{ label: "culling room", kind: "sterilizer", flavour: "culling", widths: [2, 3] },
 	{ label: "quarantine lock", kind: "quarantine", widths: [2, 3] },
 	{ label: "bioreactor", kind: "bioreactor", widths: [3, 4] },
+	// Greentech kinds (M4).
+	{ label: "solar", kind: "solar", widths: [4, 8] },
+	{ label: "wind", kind: "wind", widths: [2, 4] },
+	{ label: "heat export", kind: "heat_export", widths: [3, 6] },
+	{ label: "carbon", kind: "carbon", widths: [4, 6] },
 ];
 
 /** Widths of the growth defs (not tiered: a growth is tissue whatever the tier). */
@@ -64,6 +69,11 @@ const CATEGORY: Record<Kind, FacilityDef["category"]> = {
 	sterilizer: "bio",
 	quarantine: "bio",
 	bioreactor: "bio",
+	// Greentech (M4).
+	solar: "power",
+	wind: "power",
+	heat_export: "cooling",
+	carbon: "cooling",
 };
 
 export const varietyId = (row: VarietyRow, tier: number, width: number): string => `var_${row.kind}${row.flavour ? `_${row.flavour}` : ""}_t${tier}_w${width}`;
@@ -94,7 +104,8 @@ function makeDef(row: VarietyRow, tier: number, width: number, i: number): Facil
 		accent: ACCENTS[(i * 2 + tier) % ACCENTS.length],
 		rack,
 		cooling: row.kind === "crah" || row.kind === "chiller" || row.kind === "cdu" ? { capacityKw: 300 } : undefined,
-		power: row.kind === "grid_tie" || row.kind === "genset" || row.kind === "ups" ? { capacityKw: 800, storageKwh: 200 } : undefined,
+		power: row.kind === "grid_tie" || row.kind === "genset" || row.kind === "ups" ? { capacityKw: 800, storageKwh: 200 } : row.kind === "solar" || row.kind === "wind" ? { capacityKw: 300 } : undefined,
+		green: row.kind === "heat_export" ? { exportKw: 400, radius: 8 } : row.kind === "carbon" ? { creditsPerDay: 1 } : undefined,
 		logistics: row.kind === "depot" || row.kind === "charger" ? { capacity: 10 } : undefined,
 		bio: row.kind === "nutrient" ? { nutrientCapacity: 10 } : row.kind === "sterilizer" ? { cleanRate: 0.05, radius: 6, cullsGrowths: f === "culling" } : row.kind === "bioreactor" ? { nutrientUse: 2, contamination: 0.01 } : undefined,
 		placement: bioRack || row.kind === "bioreactor" ? { needsNutrient: true } : undefined,
@@ -152,6 +163,12 @@ export interface VarietyOpts {
 	/** Biotech skin stage 0..4 (the scene's `corruption`). */
 	stage?: 0 | 1 | 2 | 3 | 4;
 	path?: SimView["path"];
+	/** A drought is in force (dim flat sky, rotors stopped). */
+	drought?: boolean;
+	/** Game minutes advanced per `step` (0 = the clock stands still). */
+	mpt?: number;
+	/** Start minute of the day (default 780: solar at its peak). */
+	minute?: number;
 }
 
 export function createVarietyScene(opts: VarietyOpts = {}): VarietyScene {
@@ -217,7 +234,7 @@ export function createVarietyScene(opts: VarietyOpts = {}): VarietyScene {
 			clock: status === "ok" ? 1 : 0.5,
 			health: status === "failed" ? 0.2 : 1,
 			powerKw: status === "ok" ? 30 : 0,
-			heatKw: isRack && status === "ok" ? 30 : d.kind === "chiller" || d.kind === "crah" || d.kind === "cdu" ? 120 : 0,
+			heatKw: isRack && status === "ok" ? 30 : d.kind === "heat_export" ? 260 : d.kind === "chiller" || d.kind === "crah" || d.kind === "cdu" ? 120 : 0,
 			jobId: status === "ok" ? 1 : null,
 			powerNet: powerNetOf[idx(x, floor)],
 			coolantNet: coolant[idx(x, floor)] ? 0 : null,
@@ -328,11 +345,15 @@ export function createVarietyScene(opts: VarietyOpts = {}): VarietyScene {
 		nutrientNets: [{ id: 0, supply: 40, demand: 30, satisfaction: 1 }],
 		tier: 3,
 		path: opts.path ?? "biotech",
-		corruption: STAGE_SCORE[opts.stage ?? 0],
+		corruption: (opts.path ?? "biotech") === "biotech" ? STAGE_SCORE[opts.stage ?? 0] : 0,
+		pathScore: STAGE_SCORE[opts.stage ?? 0],
+		drought: opts.drought === true,
+		minuteOfDay: opts.minute ?? 780,
 	};
 	const drone = bots[3];
 	const step = (): SimView => {
 		view.tick++;
+		if (opts.mpt) view.minuteOfDay = (view.minuteOfDay + opts.mpt) % 1440;
 		// The courier drone shuttles between floors 0 and 3 at a fractional floor.
 		const ph = (view.tick % 60) / 60;
 		drone.floor = 3 * (ph < 0.5 ? ph * 2 : 2 - ph * 2);
