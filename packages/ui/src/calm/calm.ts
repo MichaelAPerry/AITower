@@ -12,7 +12,7 @@ import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
 
-export type DrawerId = "contracts" | "research" | "automation" | "insights" | "encyclopedia" | "log";
+export type DrawerId = "contracts" | "research" | "automation" | "insights" | "primer" | "log";
 /** Drawers that have an edge tab and a hotkey (the log opens from the ticker). */
 export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: string }[] = [
 	{ id: "contracts", label: "Contracts", key: "C" },
@@ -21,7 +21,7 @@ export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: st
 	{ id: "automation", label: "Automation", key: "T" },
 	// Finance and Gauges are one panel now: both F and I open it.
 	{ id: "insights", label: "Insights", key: "I" },
-	{ id: "encyclopedia", label: "Encyclopedia", key: "K" },
+	{ id: "primer", label: "Primer", key: "K" },
 ];
 /** Extra keys that open a drawer (F was Finance, which lives in Insights now). */
 const KEY_ALIAS: Record<string, DrawerId> = { F: "insights" };

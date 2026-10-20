@@ -42,6 +42,6 @@ describe("keys", () => {
 		const { keyAction } = await import("../keyboard");
 		expect(keyAction("?")).toEqual({ type: "help" });
 		expect(keyAction("F1")).toEqual({ type: "help" });
-		expect(keyAction("k")).toEqual({ type: "drawer", id: "encyclopedia" });
+		expect(keyAction("k")).toEqual({ type: "drawer", id: "primer" });
 	});
 });

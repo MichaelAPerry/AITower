@@ -223,35 +223,41 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		log("Contracts (C), Insights (F and I), one panel at a time");
 
-		stage("5d. help mode: ? shows a tooltip with More..., which opens the Encyclopedia on an entry; K and search work");
+		stage("5d. help mode: ? shows a tooltip with More..., which opens the Primer on a chapter; K, a chapter and search work");
 		await page.keyboard.press("?");
 		await page.waitForSelector(".aitower-hud.is-help");
 		assert((await page.locator("[data-help]").count()) >= 10, "help regions missing");
 		await page.locator('[data-help="treasury"]').hover();
 		await page.locator(".ui-helpcard").waitFor();
 		await page.getByRole("button", { name: "More…" }).click();
-		await page.locator('[data-drawer="encyclopedia"]').waitFor();
-		await page.locator('[data-entry="basics:money"].is-open').waitFor();
+		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.locator('[data-chapter-view="ch:money"] svg').waitFor();
 		await page.keyboard.press("Escape"); // closes the drawer and leaves help mode in one go
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await page.waitForFunction(() => !document.querySelector(".aitower-hud.is-help"));
 		await page.keyboard.press("k");
-		await page.locator('[data-drawer="encyclopedia"]').waitFor();
-		await page.getByRole("searchbox", { name: "Search the Encyclopedia" }).fill("pue");
+		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.locator('[data-chapter="ch:heat"]').click();
+		await page.locator('[data-chapter-view="ch:heat"] svg').waitFor();
+		await page.getByRole("searchbox", { name: "Search the Primer" }).fill("chiller");
+		await page.locator('[data-entry="fac:chiller"]').waitFor();
+		await page.getByRole("searchbox").fill("uptime");
+		await page.locator('[data-chapter="ch:uptime"]').waitFor();
+		await page.getByRole("searchbox").fill("pue");
 		await page.locator('[data-entry="glossary:pue"]').waitFor();
 		await page.getByRole("searchbox").fill("");
 		await page.evaluate(() => document.activeElement?.blur());
 		await page.keyboard.press("Escape");
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
-		log("help mode, More... link, Encyclopedia search");
+		log("help mode, More... link, Primer search");
 
 		stage("5e. assistant: UNIT-7 is docked, a click gives a tip, the x turns it off (and Settings turns it back on)");
 		await page.locator(".ast-bot").waitFor();
 		await page.locator(".ast-bot").click({ force: true });
 		await page.locator(".ast-bubble").waitFor();
-		// With nothing to suggest the click gives a tip (Thanks); if a real suggestion is up, it answers that instead (Not now).
-		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now)$/ }).click();
+		// With nothing to suggest the click gives a tip (Thanks); a real suggestion (Not now) or the one-time Primer tip (Later) is answered instead.
+		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now|Later)$/ }).click();
 		await page.locator(".ast-off").click({ force: true });
 		await page.locator(".ast").waitFor({ state: "detached" });
 		assert((await game(() => window.aitower.store.get().settings.assistant)) === false, "turning the assistant off must persist in settings");

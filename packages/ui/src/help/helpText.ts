@@ -19,7 +19,7 @@ export const HELP = {
 	help: { title: "Help", text: "Turn help mode on or off. While it is on, hover any outlined part of the screen to see what it does. Press ? or F1.", entry: "basics:money" },
 	build: { title: "Build bar", text: "Pick a kind of thing to build: racks, power, cooling and more. One click opens its catalog. B opens the last one.", entry: "basics:power" },
 	catalog: { title: "Catalog", text: "Point at a card to read about it. Click a card to pick it, then click the tower to build. Esc puts the tool down.", entry: "basics:power" },
-	"build-inspector": { title: "Build inspector", text: "What the card under your pointer does, in plain words, with its real numbers. The ? button opens the encyclopedia.", entry: "basics:power" },
+	"build-inspector": { title: "Build inspector", text: "What the card under your pointer does, in plain words, with its real numbers. The ? button opens the Primer.", entry: "basics:power" },
 	goals: { title: "Goals", text: "The next one to three things to do, with progress. Do the top one and the card moves on.", entry: "basics:contracts" },
 	next: { title: "Next", text: "Appears only when something needs fixing, such as no power or an overheating rack. Click it to jump to the cause.", entry: "basics:cooling" },
 	assistant: { title: "UNIT-7, the assistant", text: "A small robot that suggests one thing at a time. Show me does it for you; Not now hides it for a while. Turn it off with the x or in Settings.", entry: "basics:contracts" },
@@ -27,7 +27,7 @@ export const HELP = {
 	"tab-research": { title: "Research (R)", text: "Spend research points on new machines, cooling and perks. Pick a branch, pick an item, press Start research. Points come from compute you deliver.", entry: "basics:research" },
 	"tab-automation": { title: "Automation (T)", text: "Standing orders so routine chores run themselves. Unlocked by research.", entry: "basics:automation" },
 	"tab-insights": { title: "Insights (I or F)", text: "Money in and out, uptime, reputation and why it changed, plus the map overlays. Details like PUE are folded away.", entry: "basics:money" },
-	"tab-encyclopedia": { title: "Encyclopedia (K)", text: "Search how everything works: machines, bots, research and the jargon.", entry: "basics:money" },
+	"tab-primer": { title: "Primer (K)", text: "A gentle guide to running a datacenter, plus a lookup for machines, bots, research and jargon.", entry: "basics:money" },
 } as const satisfies Record<string, HelpItem>;
 
 export type HelpKey = keyof typeof HELP;

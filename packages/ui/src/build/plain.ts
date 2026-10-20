@@ -42,7 +42,7 @@ export interface CatalogItem {
 	costText: string;
 	blurb: string;
 	stats: Stat[];
-	/** Encyclopedia entry for the "?" link. */
+	/** Primer page for the "?" link. */
 	entry?: string;
 	def?: FacilityDef;
 	icon?: StatIcon;

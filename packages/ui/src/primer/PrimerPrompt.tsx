@@ -53,7 +53,7 @@ export function PrimerPrompt({ content, state, setUi }: Pick<PanelProps, "conten
 				type="button"
 				className="ui-btn is-on"
 				onClick={() => {
-					setUi({ drawer: "encyclopedia", encyId: first.id, paletteOpen: false, buildHover: null });
+					setUi({ drawer: "primer", encyId: first.id, paletteOpen: false, buildHover: null });
 					setNote(null);
 				}}
 			>

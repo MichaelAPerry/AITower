@@ -184,3 +184,9 @@
 .aitower-hud .pr-new b {
 	color: var(--accent);
 }
+
+.aitower-hud.has-drawer .pr-new {
+	top: auto;
+	bottom: 56px;
+	left: 30%;
+}

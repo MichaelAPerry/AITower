@@ -26,6 +26,7 @@ import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
 import { Assistant } from "./assistant/Assistant";
+import { PrimerPrompt } from "./primer/PrimerPrompt";
 import { recommendedIds, suggestions } from "./assistant/suggest";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -206,7 +207,8 @@ export function Hud({ store, content, title }: HudProps) {
 					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
 				{assistantOn && !titleOpen && !crawl && !over && <Assistant {...props} candidates={candidates} />}
-				<DrawerTabs ui={ui} setUi={setUi} />
+				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} />
+				{!titleOpen && !crawl && !over && <PrimerPrompt content={content} state={state} setUi={setUi} />}
 				<Drawer {...props} />
 			</div>
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
@@ -256,7 +258,7 @@ export function Hud({ store, content, title }: HudProps) {
 					}}
 				/>
 			)}
-			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "encyclopedia", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
+			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "primer", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 	);
 }
