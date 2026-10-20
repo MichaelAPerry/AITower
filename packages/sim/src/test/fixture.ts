@@ -250,7 +250,11 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 export const scenario = (id: string, over: Partial<Scenario>): Scenario => ({ ...emptyScenario, ...over, id });
 
 export function newSim(content: ContentDB, scenarioId = "empty", seed = 1): SimImpl {
-	return new SimImpl(content, createState(content, scenarioId, seed));
+	const state = createState(content, scenarioId, seed);
+	// Tests predate the tick-0 opening offer and script their own offers, so start with an empty board.
+	state.offers = [];
+	state.nextId.contract = 1;
+	return new SimImpl(content, state);
 }
 
 /** Submit (asserting pre-validation passes) and run one tick; returns that tick's events. */

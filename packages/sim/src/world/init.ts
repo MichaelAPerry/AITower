@@ -4,7 +4,7 @@ import { TICKS_PER_DAY } from "../api";
 import { placeScenarioFacility } from "../commands/placement";
 import { stockParts } from "../commands/operations";
 import { defaultAutomation } from "../automation/policy";
-import { nextOfferDelay } from "../compute/offers";
+import { nextOfferDelay, seedOpeningOffer } from "../compute/offers";
 import { nextMemoDelay } from "../ministry/memos";
 import { createScratch } from "../core/context";
 import { cellCount, cellIdx, inBounds } from "../core/grid";
@@ -154,6 +154,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 	state.nutrientNetCount = labelLayer(state, state.nutrient, state.nutrientNetOf, scratch.parent, scratch.label);
 	attachToNets(state);
 	state.netsDirty = false;
+	seedOpeningOffer(state, content);
 	state.nextOfferTick = nextOfferDelay(state, content);
 	state.nextMemoTick = content.balance.events.graceTicks + nextMemoDelay(state, content);
 	return state;
