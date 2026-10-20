@@ -23,7 +23,8 @@ function harness(opts: { step?: () => unknown[]; draw?: () => void; speed?: numb
 		behind: false,
 	} as unknown as GameStoreInternals;
 	const draw = vi.fn(opts.draw ?? (() => {}));
-	const renderer = { draw } as unknown as Renderer;
+	const pushEvents = vi.fn();
+	const renderer = { draw, pushEvents } as unknown as Renderer;
 	const onCrash = vi.fn();
 	const stop = startLoop(store, renderer, null, {
 		onCrash,
@@ -40,8 +41,23 @@ function harness(opts: { step?: () => unknown[]; draw?: () => void; speed?: numb
 		const f = frames;
 		f?.(t);
 	};
-	return { store, advance, draw, onCrash, stop, tick, hasFrame: () => frames !== null };
+	return { store, advance, draw, pushEvents, onCrash, stop, tick, hasFrame: () => frames !== null };
 }
+
+describe("renderer events", () => {
+	it("hands the frame's step events to the renderer before drawing, and nothing on an empty frame", () => {
+		const ev = { type: "newDay", day: 1 };
+		const h = harness({ step: () => [ev] });
+		h.tick(0);
+		h.tick(200);
+		expect(h.pushEvents).toHaveBeenCalled();
+		expect(h.pushEvents.mock.calls.at(-1)?.[0]).toContainEqual(ev);
+		const quiet = harness({ speed: 0 });
+		quiet.tick(0);
+		quiet.tick(200);
+		expect(quiet.pushEvents).not.toHaveBeenCalled();
+	});
+});
 
 vi.spyOn(console, "error").mockImplementation(() => {});
 

@@ -91,6 +91,7 @@ export function startLoop(store: GameStoreInternals, renderer: Renderer, audio: 
 		store.behind = behind;
 
 		try {
+			if (events.length > 0) renderer.pushEvents(events);
 			renderer.draw(view, speed === 0 ? 0 : Math.min(acc / TICK_MS, 0.999));
 			renderFailures = 0;
 		} catch (err) {

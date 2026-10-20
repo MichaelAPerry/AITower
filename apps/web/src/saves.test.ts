@@ -264,4 +264,15 @@ describe("fresh games", () => {
 		expect(racks.every((f) => f.status !== "unpowered")).toBe(true);
 		expect(v.powerNets.length).toBeGreaterThan(0);
 	});
+
+	it("can start any scenario by id; an unknown id falls back to the starter", () => {
+		const { store } = setup();
+		const other = Object.keys(content.scenarios).find((id) => id !== "starter");
+		store.newGame(5, "no-such-scenario");
+		expect(store.sim().snapshot().scenarioId).toBe("starter");
+		if (other) {
+			store.newGame(5, other);
+			expect(store.sim().snapshot().scenarioId).toBe(other);
+		}
+	});
 });
