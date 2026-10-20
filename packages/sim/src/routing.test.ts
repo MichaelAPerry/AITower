@@ -3,7 +3,7 @@ import { beginSearch, createNav, ensureNav, routeTo, WALK_DIRECT } from "./logis
 import { cellCount } from "./core/grid";
 import type { SimImpl } from "./sim";
 import { chainContent, type ChainOptions } from "./test/chain";
-import { newSim } from "./test/fixture";
+import { makeContent, newSim } from "./test/fixture";
 
 function nav(o: ChainOptions) {
 	const content = chainContent(o);
@@ -84,5 +84,17 @@ describe("routing", () => {
 		ensureNav(n, sim.state, content);
 		expect(n.rev).toBe(before + 1);
 		expect(n.run).toBe(run); // buffer reused
+	});
+});
+
+describe("routing to a basement floor", () => {
+	it("a lift exit on floor -1 is a valid route (regression: -1 used to mean 'no exit')", () => {
+		const content = makeContent();
+		const sim = newSim(content, "starter");
+		const nav = createNav(sim.state.slab.length);
+		ensureNav(nav, sim.state, content);
+		beginSearch(nav, sim.state, content, 0.25, 0, 27);
+		expect(routeTo(nav, sim.state, -1, 11)).toMatchObject({ lift: 1, exit: -1 });
+		expect(routeTo(nav, sim.state, 1, 17)).toMatchObject({ lift: 1, exit: 1 });
 	});
 });

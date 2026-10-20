@@ -127,6 +127,10 @@ export const TOP_TIER_RACK = 4;
 export const HEAT_EXPORT_FLOOR_C = 20;
 /** The Foreman builds racks when less than this share of installed compute is idle. */
 export const FOREMAN_IDLE_SHARE = 0.2;
+/** …nor while any rack runs within this many °C of `okC` (cooling comes first). */
+export const FOREMAN_HEAT_MARGIN_C = 5;
+/** The Foreman builds no racks while Ministry standing is below this. */
+export const FOREMAN_MIN_STANDING = 40;
 /** Automation caps on policy numbers. */
 export const AUTOMATION_MAX_PARTS_KEEP = 1000;
 export const AUTOMATION_MAX_BOTS = 1000;

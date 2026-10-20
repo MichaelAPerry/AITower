@@ -153,21 +153,24 @@ describe("sim-cli --auto", () => {
 		expect(manual.hash).not.toBe(a.hash);
 	});
 
-	it("real content with a Foreman node: a 30-day starter run grows and stays solvent", { timeout: 120_000 }, () => {
-		const c = loadContent();
-		c.tech.push(foremanNode);
-		const { rows, auto } = runHeadless(c, "starter", 30, 1, true);
-		expect(rows).toHaveLength(30);
-		for (const r of rows) {
-			expect(Number.isFinite(r.cash)).toBe(true);
-			expect(r.cash).toBeGreaterThan(0);
-			expect(r.gameOver).toBeNull();
+	it("real content with a Foreman node and the DEFAULT policy ($1M reserve): 30 days on seeds 1-3 grow, stay solvent, no game over", { timeout: 180_000 }, () => {
+		expect(AUTO_RESERVE).toBe(1_000_000);
+		for (const seed of [1, 2, 3]) {
+			const c = loadContent();
+			c.tech.push(foremanNode);
+			const { rows, auto } = runHeadless(c, "starter", 30, seed, true);
+			expect(rows, `seed ${seed}`).toHaveLength(30);
+			for (const r of rows) {
+				expect(r.cash, `seed ${seed} day ${r.day}`).toBeGreaterThan(0);
+				expect(r.gameOver, `seed ${seed} day ${r.day}`).toBeNull();
+			}
+			expect(auto.built).toBeGreaterThan(5);
+			expect(rows[29].racks).toBeGreaterThan(rows[0].racks + 5);
+			expect(rows[29].pflops).toBeGreaterThan(rows[0].pflops * 3);
+			expect(rows[29].standing).toBeGreaterThan(10);
+			expect(rows[29].uptime).toBeGreaterThan(0.9);
+			expect(rows[29].built).toBe(auto.built);
 		}
-		expect(auto.built).toBeGreaterThan(5);
-		expect(rows[29].racks).toBeGreaterThan(rows[0].racks + 5);
-		expect(rows[29].pflops).toBeGreaterThan(rows[0].pflops * 3);
-		expect(rows[29].tier).toBeGreaterThanOrEqual(2);
-		expect(rows[29].built).toBe(auto.built);
 	});
 
 	it("real content as shipped (no Foreman node yet): --auto still runs; parts and research are automated, nothing is built", { timeout: 60_000 }, () => {

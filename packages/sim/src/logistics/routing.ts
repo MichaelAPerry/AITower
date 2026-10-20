@@ -304,7 +304,7 @@ export function routeTo(nav: Nav, state: SimState, toFloor: number, toX: number)
 	if (best < 0) return null;
 	// Walk the predecessor chain back to the source landing, remembering the first alighting.
 	const n = nav.n;
-	let exit = -1;
+	let exit = Number.NaN; // NaN = no alighting seen yet (a basement floor such as -1 is a valid exit)
 	let node = best;
 	let guard = 2 * n + 2;
 	for (;;) {
@@ -315,6 +315,6 @@ export function routeTo(nav: Nav, state: SimState, toFloor: number, toX: number)
 		node = p;
 		if (--guard < 0) return null;
 	}
-	if (node >= n || exit < 0) return null;
+	if (node >= n || Number.isNaN(exit)) return null;
 	return { lift: nav.liftIds[nav.nodeLift[node]], exit, cost: bestCost };
 }

@@ -3,6 +3,7 @@ import type { Balance, ContentDB, Scenario } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { AutomationPolicy, SimEvent } from "./api";
 import { type SimImpl, simFromSnapshot } from "./sim";
+import { addBot } from "./world/entities";
 import { exec, facilityOf, makeContent, newSim, run, scenario } from "./test/fixture";
 import { giveRp, grant, NO_OFFERS, pushOffer, QUIET_EVENTS, training } from "./test/m2b";
 
@@ -353,10 +354,13 @@ describe("bots order", () => {
 
 describe("the Foreman", () => {
 	/** Unlock and switch on; `over` edits the foreman policy. */
-	function foreman(sim: SimImpl, over: Partial<AutomationPolicy["foreman"]> = {}): SimEvent[] {
+	function foreman(sim: SimImpl, over: Partial<AutomationPolicy["foreman"]> = {}, logistics = false): SimEvent[] {
 		grant(sim, "t_foreman");
 		toHourEdge(sim); // the order acts on the tick it is set when that tick is a top of the hour
-		return setPolicy(sim, (p) => (p.foreman = { ...p.foreman, enabled: true, reserve: 0, ...over }));
+		return setPolicy(sim, (p) => {
+			if (!logistics) p.bots.maxBots = 0; // the older tests are about power, cooling and racks only
+			p.foreman = { ...p.foreman, enabled: true, reserve: 0, ...over };
+		});
 	}
 	const built = (events: SimEvent[]) => events.filter((e) => e.type === "autoBuilt");
 	const placed = (sim: SimImpl, defId: string) => sim.state.facilities.filter((f) => f.defId === defId);
@@ -453,7 +457,7 @@ describe("the Foreman", () => {
 		});
 		const withBig = (x: ContentDB): void => {
 			x.facilities.crah_big = { ...x.facilities.crah_unit, id: "crah_big", cost: 200_000, cooling: { capacityKw: 300, radius: 8 } };
-			x.balance.thermal.okC = 0; // every rack counts as running hot
+			x.balance.thermal = { ...x.balance.thermal, okC: 0 }; // every rack counts as running hot
 		};
 
 		it("puts the best CRAH within reach of the hot rack, leftmost; one unit per run is enough for one rack", () => {
@@ -483,7 +487,7 @@ describe("the Foreman", () => {
 
 		it("is skipped when the racks are cool, and when the cooling toggle is off", () => {
 			const cool = newSim(content([hot], perHour(3), (x) => withBig(x)), "hot");
-			cool.content.balance.thermal.okC = 1000;
+			cool.content.balance.thermal = { ...cool.content.balance.thermal, okC: 1000 };
 			expect(built(foreman(cool, { racks: false, power: false }))).toHaveLength(0);
 			const off = newSim(content([hot], perHour(3), withBig), "hot");
 			expect(built(foreman(off, { cooling: false, racks: false, power: false }))).toHaveLength(0);
@@ -608,6 +612,142 @@ describe("the Foreman", () => {
 			const r = sim.state.facilities.filter((f) => f.defId === "rack_air_gpu" && f.id !== 2).find((f) => f.floor !== undefined && f.x !== 20);
 			expect(r?.floor).toBe(2); // same floor as the existing rack, leftmost free cells
 			expect(r?.x).toBe(0);
+		});
+	});
+
+	describe("maintenance first", () => {
+		const farm4 = scenario("maint", {
+			slabs: [[0, 0, 47]],
+			conduits: [["power", 0, 0, 47]],
+			facilities: [
+				{ defId: "grid_tie", floor: 0, x: 0 },
+				{ defId: "bot_charger", floor: 0, x: 40 },
+				{ defId: "parts_depot", floor: 0, x: 43 },
+				...[8, 10, 12, 14].map((x) => ({ defId: "rack_air_gpu", floor: 0, x })),
+			],
+		});
+		/** Every rack busy, so the idle share is 0 and the Foreman wants racks. */
+		const busy = (): SimImpl => {
+			const sim = newSim(content([farm4], perHour(1)), "maint");
+			sim.step();
+			const id = pushOffer(sim, training({ work: 5000, durationTicks: 100_000, payout: 1, penalty: 0 }));
+			exec(sim, { type: "acceptContract", contractId: id });
+			run(sim, 2);
+			return sim;
+		};
+		const racksNow = (sim: SimImpl) => sim.state.facilities.filter((f) => f.defId === "rack_air_gpu").length;
+
+		it("no racks while open work orders outnumber the bots; racks again once they do not", () => {
+			const sim = busy();
+			sim.state.workOrders.push({ id: 99, facilityId: 3, botId: -1, createdAt: 0, attempts: 0, retryAt: 0, retryRev: 0 });
+			sim.invalidateProjection();
+			foreman(sim, { power: false, cooling: false });
+			expect(racksNow(sim)).toBe(4); // 1 order, 0 bots
+			sim.state.workOrders.length = 0;
+			toHourEdge(sim);
+			sim.step();
+			expect(racksNow(sim)).toBe(5);
+		});
+
+		it("no racks while the rolling uptime is under the tier's target", () => {
+			const sim = busy();
+			sim.content.balance.tiers = { ...sim.content.balance.tiers, uptime: [0.9, 0.95, 0.98, 0.995] };
+			sim.state.metrics.ringRunning.fill(0.5);
+			sim.state.metrics.ringShouldRun.fill(1);
+			foreman(sim, { power: false, cooling: false });
+			expect(sim.view().uptime).toBeLessThan(0.9);
+			expect(racksNow(sim)).toBe(4);
+			sim.content.balance.tiers = { ...sim.content.balance.tiers, uptime: [0.2, 0.95, 0.98, 0.995] }; // target met
+			toHourEdge(sim);
+			sim.step();
+			expect(racksNow(sim)).toBe(5);
+		});
+
+		it("no racks while standing is low, after a day in the red, or while a rack runs hot / a net is short", () => {
+			const blocked = (edit: (sim: SimImpl) => void, over: Partial<AutomationPolicy["foreman"]> = { power: false, cooling: false }): number => {
+				const sim = busy();
+				edit(sim);
+				foreman(sim, over);
+				return racksNow(sim);
+			};
+			const on = { power: true, cooling: true };
+			expect(blocked(() => {})).toBe(5); // control
+			expect(blocked((s) => (s.state.standing = 10))).toBe(4);
+			expect(blocked((s) => s.state.ledger.push({ ...s.state.today, revenue: 0, penalties: 1_000 }))).toBe(4);
+			const okC = (s: SimImpl, v: number) => (s.content.balance.thermal = { ...s.content.balance.thermal, okC: v });
+			expect(blocked((s) => okC(s, 0), on)).toBe(4); // hot racks wait for a CRAH
+			expect(blocked((s) => okC(s, 0))).toBe(5); // ...unless the cooling order is off
+		});
+
+		it("leaves a free run for air handling: a solid wall of racks is never built", () => {
+			const wide = scenario("wide", {
+				slabs: [[0, 0, 47]],
+				conduits: [["power", 0, 0, 47]],
+				facilities: [{ defId: "grid_tie", floor: 0, x: 0 }],
+			});
+			const sim = newSim(content([wide], perHour(1)), "wide");
+			grant(sim, "t_foreman");
+			setPolicy(sim, (p) => {
+				p.bots.maxBots = 0;
+				p.foreman = { ...p.foreman, enabled: true, reserve: 0, cooling: false, power: false };
+			});
+			// Every rack the Foreman adds finds the run of 2 tiles (one CRAH) within 8 tiles to its left, so the row has gaps.
+			for (let h = 0; h < 40; h++) {
+				for (const f of sim.state.facilities) f.jobId = f.defId === "rack_air_gpu" ? 1 : -1; // pretend all racks are busy so more are wanted
+				sim.state.jobs.length = 0;
+				run(sim, 60);
+			}
+			const xs = sim.state.facilities.filter((f) => f.defId === "rack_air_gpu").map((f) => f.x).sort((a, b) => a - b);
+			expect(xs.length).toBeGreaterThan(5);
+			for (let i = 1; i < xs.length; i++) expect(xs[i] - xs[i - 1] <= 2 || xs[i] - xs[i - 1] >= 4).toBe(true);
+			const gaps = xs.slice(1).filter((x, i) => x - xs[i] >= 4).length;
+			expect(gaps).toBeGreaterThan(0);
+		});
+
+		it("places the best charger when the bots order wants more bots than the docks hold (bots order on or off)", () => {
+			for (const botsOn of [true, false]) {
+				const sim = newSim(content([farm4], perHour(1), (c) => {
+					c.facilities.bot_charger_big = { ...c.facilities.bot_charger, id: "bot_charger_big", cost: 60_000, logistics: { capacity: 4, chargeKw: 5 } };
+				}), "maint");
+				// Two docks, both taken.
+				for (let i = 0; i < 2; i++) addBot(sim.state, "rover", 0, 41, facilityOf(sim, "bot_charger").id);
+				sim.invalidateProjection();
+				grant(sim, "t_foreman");
+				toHourEdge(sim);
+				setPolicy(sim, (p) => {
+					p.bots = { enabled: botsOn, racksPerBot: 1, maxBots: 8 };
+					p.foreman = { ...p.foreman, enabled: true, reserve: 0 };
+				});
+				expect(placed(sim, "bot_charger_big")).toHaveLength(1);
+				expect(placed(sim, "bot_charger")).toHaveLength(1);
+			}
+		});
+
+		it("no charger while a dock is free or no more bots are wanted; the reserve and the power conduit still apply", () => {
+			const sim = newSim(content([farm4], perHour(1)), "maint");
+			foreman(sim, {}, true);
+			expect(placed(sim, "bot_charger")).toHaveLength(1); // 4 racks / 12 per bot = 1 wanted, 0 bots, docks free: nothing to add
+			const full = newSim(content([farm4], perHour(1)), "maint");
+			for (let i = 0; i < 2; i++) addBot(full.state, "rover", 0, 41, facilityOf(full, "bot_charger").id);
+			full.invalidateProjection();
+			full.state.cash = 10_000_000;
+			setPolicy(full, (p) => (p.bots.racksPerBot = 1));
+			foreman(full, { reserve: 10_000_000 - 30_000 }, true); // a $40k charger would dip below the reserve
+			expect(placed(full, "bot_charger")).toHaveLength(1);
+		});
+
+		it("places a depot when parts are short and every depot is full; not when there is room or the parts order is off", () => {
+			const mk = (stored: number, partsOn: boolean) => {
+				const sim = newSim(content([farm4], perHour(1)), "maint");
+				facilityOf(sim, "parts_depot").stored = stored;
+				sim.invalidateProjection();
+				setPolicy(sim, (p) => (p.parts = { enabled: partsOn, keep: 30 })); // keep above the 20 a depot holds
+				foreman(sim, {}, true);
+				return sim;
+			};
+			expect(placed(mk(20, true), "parts_depot")).toHaveLength(2);
+			expect(placed(mk(5, true), "parts_depot")).toHaveLength(1); // room left
+			expect(placed(mk(20, false), "parts_depot")).toHaveLength(1);
 		});
 	});
 

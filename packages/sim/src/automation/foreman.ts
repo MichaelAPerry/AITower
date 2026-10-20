@@ -5,15 +5,21 @@
  *   2. cooling — the best CRAH within reach of the hottest rack above `thermal.okC`;
  *   3. racks   — the best air rack (a DLC rack when a coolant loop with spare capacity is reachable) when no offer fits the
  *                idle compute, or less than FOREMAN_IDLE_SHARE of the installed compute is idle.
+ * Maintenance comes before growth (and rides on the `racks` toggle): between cooling and racks the Foreman adds a charger when the bots order wants more bots than
+ * the docks hold, and a depot when the spare-parts stock is below its target and every depot is full. Racks wait while open work
+ * orders outnumber the bots, the rolling uptime is under the current tier's target, standing is under FOREMAN_MIN_STANDING, the last closed day lost money, a rack runs above `okC` (cooling on) or a
+ * power net is short (power on).
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
  */
 import type { FacilityDef } from "@aitower/content";
 import { acceptCheck, installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
-import { FOREMAN_IDLE_SHARE } from "../core/constants";
+import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING } from "../core/constants";
 import { cellIdx } from "../core/grid";
 import type { Facility } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
+import { dayCosts } from "../economy/ledger";
+import { findChargerWithSpace } from "../world/entities";
 import { getDef, isComputeRack } from "../world/defs";
 import { planNormalized } from "../commands/apply";
 import { buildable, runCommand } from "./run";
@@ -137,9 +143,51 @@ function tryCooling(r: Run): boolean {
 	return false;
 }
 
+/** Best unlocked facility of a kind by capacity, placed like any other (reserve, power conduit, nearest floor). */
+function placeBest(r: Run, kind: "charger" | "depot"): boolean {
+	const defs = Object.values(r.ctx.content.facilities)
+		.filter((d) => d.kind === kind && buildable(r.ctx, d))
+		.sort((a, b) => (b.logistics?.capacity ?? 0) - (a.logistics?.capacity ?? 0) || byId(a, b));
+	for (const d of defs) {
+		if (!affordable(r, d)) continue;
+		const spot = findSpot(r, d, allFloors(r), () => true);
+		if (spot && place(r, d, spot)) return true;
+	}
+	return false;
+}
+
+function tryLogistics(r: Run): boolean {
+	const { state, content } = r.ctx;
+	const a = state.automation;
+	let racks = 0;
+	let room = 0;
+	let stock = 0;
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (d.kind === "rack" && !d.growth) racks++;
+		if (d.kind === "depot") {
+			stock += f.stored;
+			room += Math.max(0, (d.logistics?.capacity ?? 0) - f.stored);
+		}
+	}
+	const wantBots = Math.min(a.bots.maxBots, Math.ceil(racks / a.bots.racksPerBot));
+	if (state.bots.length < wantBots && findChargerWithSpace(state, content) < 0 && placeBest(r, "charger")) return true;
+	if (a.parts.enabled && stock < a.parts.keep && room === 0 && placeBest(r, "depot")) return true;
+	return false;
+}
+
 /** Idle compute (free enabled healthy racks) and whether it is short. */
 function wantsRacks(r: Run): boolean {
 	const { state, content } = r.ctx;
+	if (state.workOrders.length > state.bots.length) return false; // repairs first
+	if (state.metrics.uptime < (content.balance.tiers.uptime[state.tier - 1] ?? 0)) return false;
+	if (state.standing < FOREMAN_MIN_STANDING) return false; // the Ministry is watching: no expansion while standing is low
+	const lastDay = state.ledger[state.ledger.length - 1];
+	if (lastDay && dayCosts(lastDay) > lastDay.revenue) return false; // no expansion after a day in the red
+	// Never grow into a shortage the Foreman is meant to be fixing: hot racks (cooling on) or a power net short of supply (power on).
+	const p = state.automation.foreman;
+	if (p.cooling && realRacks(r).some((f) => f.enabled && f.tempC > content.balance.thermal.okC - FOREMAN_HEAT_MARGIN_C)) return false;
+	if (p.power && state.powerNets.some((n) => n.satisfaction < 1)) return false;
 	let idle = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
@@ -154,6 +202,33 @@ function wantsRacks(r: Run): boolean {
 	return state.offers.every((o) => !acceptCheck(state, content, { ...o.spec, storageTB: 0 }).ok);
 }
 
+/**
+ * Racks leave room for air handling: a rack may only go where the `reach` cells to its left (the best CRAH's radius)
+ * hold a free, powered run as wide as that CRAH, or the floor's edge. Otherwise a floor fills solid and the hot racks in the
+ * middle can never get a CRAH within reach.
+ */
+function leavesRoom(r: Run, floor: number, x: number): boolean {
+	const { state, content } = r.ctx;
+	const crah = Object.values(content.facilities)
+		.filter((d) => d.kind === "crah" && buildable(r.ctx, d))
+		.sort((a, b) => (b.cooling?.capacityKw ?? 0) - (a.cooling?.capacityKw ?? 0) || byId(a, b))[0];
+	if (!crah) return true;
+	const reach = crah.cooling?.radius ?? 8;
+	let run = 0;
+	for (let cx = x - 1; cx >= x - reach; cx--) {
+		if (cx < 0) return true;
+		const i = cellIdx(state, cx, floor);
+		const free = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0;
+		if (!free) {
+			if (state.slab[i] === 0) return true; // the edge of the built floor
+			run = 0;
+			continue;
+		}
+		if (++run >= crah.width) return true;
+	}
+	return false;
+}
+
 function tryRacks(r: Run): boolean {
 	const { state, content } = r.ctx;
 	if (!wantsRacks(r)) return false;
@@ -166,7 +241,7 @@ function tryRacks(r: Run): boolean {
 		for (const d of best((x) => x.rack?.cooling === "dlc")) {
 			const load = (d.rack?.powerKw ?? 0) * (d.rack?.liquidFraction ?? 0);
 			if (load > spare || !affordable(r, d)) continue;
-			const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, floor, x, d.width) === net.id);
+			const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, floor, x, d.width) === net.id && leavesRoom(r, floor, x));
 			if (!spot || !place(r, d, spot)) continue;
 			r.coolUsed.set(net.id, (r.coolUsed.get(net.id) ?? 0) + load);
 			placed = d;
@@ -177,7 +252,7 @@ function tryRacks(r: Run): boolean {
 	if (!placed) {
 		for (const d of best((x) => x.rack?.cooling === "air")) {
 			if (!affordable(r, d)) continue;
-			const spot = findSpot(r, d, allFloors(r), () => true);
+			const spot = findSpot(r, d, allFloors(r), (floor, x) => leavesRoom(r, floor, x));
 			if (!spot || !place(r, d, spot)) continue;
 			placed = d;
 			break;
@@ -206,7 +281,7 @@ export function foremanStep(ctx: TickCtx): void {
 	const r: Run = { ctx, reserve: p.reserve, powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
 	for (let placed = 0; placed < content.balance.automation.foremanPerHour; placed++) {
 		if (state.netsDirty) rebuildNetworks(ctx);
-		const did = (p.power && tryPower(r)) || (p.cooling && tryCooling(r)) || (p.racks && tryRacks(r));
+		const did = (p.power && tryPower(r)) || (p.cooling && tryCooling(r)) || (p.racks && (tryLogistics(r) || tryRacks(r)));
 		if (!did) break;
 	}
 }

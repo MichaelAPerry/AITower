@@ -8,7 +8,7 @@ import type { ContentDB } from "@aitower/content";
 import { type AutomationPolicy, type ClerkPolicy, type ContractView, createSim, type Sim, type SimView, TICKS_PER_DAY } from "@aitower/sim";
 
 /** Accept only work that the currently idle, healthy racks can finish comfortably. */
-export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB): boolean {
+export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB, margin = 0.75): boolean {
 	if (v.jobs.some((j) => j.status === "queued" || j.status === "stalled")) return false;
 	let freePflops = 0;
 	let storageTB = 0;
@@ -25,7 +25,7 @@ export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB
 	if (offer.kind === "inference") return (offer.sustainedPflops ?? offer.work) <= freePflops * 0.9;
 	if (freePflops <= 0) return false;
 	const hoursNeeded = offer.work / freePflops;
-	return hoursNeeded * 60 <= offer.durationTicks * 0.75;
+	return hoursNeeded * 60 <= offer.durationTicks * margin;
 }
 
 
@@ -74,11 +74,10 @@ export function nextTech(content: ContentDB, v: SimView, auto = false): string |
 	return open.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id))[0]?.id ?? null;
 }
 
-/**
- * The Foreman's reserve for the auto-player. The default ($1M) lets it spend almost everything on racks, and a starter
- * tower then outgrows its repair crew (two charger docks) within three weeks; $5M keeps it growing without that.
- */
-export const AUTO_RESERVE = 5_000_000;
+/** The Foreman's reserve for the auto-player: the shipped default. */
+export const AUTO_RESERVE = 1_000_000;
+/** The auto-player takes only work that fits in half the deadline (the standing orders grow the tower, so the player stays careful). */
+export const AUTO_ACCEPT_MARGIN = 0.5;
 
 /** Every standing order on (the Foreman only counts once unlocked, which `setAutomation` enforces). */
 export function allAutomation(foreman: boolean): AutomationPolicy {
@@ -167,7 +166,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 				if (e.type === "contractOffered") {
 					const v = sim.view();
 					const offer = v.offers.find((o) => o.id === e.contractId);
-					if (offer && shouldAccept(offer, v, content)) sim.submit({ type: "acceptContract", contractId: e.contractId });
+					if (offer && shouldAccept(offer, v, content, auto ? AUTO_ACCEPT_MARGIN : 0.75)) sim.submit({ type: "acceptContract", contractId: e.contractId });
 				}
 				else if (e.type === "componentFailed") failures++;
 				else if (e.type === "autoBuilt") totals.built++;
