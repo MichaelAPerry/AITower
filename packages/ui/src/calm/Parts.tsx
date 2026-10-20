@@ -2,14 +2,10 @@ import { isSerious, AlertsLog, ResearchDrawer } from "./Panels";
 import { ContractsDrawer } from "../contracts/ContractsPanel";
 import { InsightsPanel } from "../insights/InsightsPanel";
 import type { PanelProps } from "../components/context";
-import { fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
-import { ModifierChips } from "../memo/MemoDesk";
 import { currentObjective, endingLine, isProblem } from "../objective/objective";
 import { BuildPalette } from "../components/BuildPalette";
 import { EncyclopediaDrawer } from "../encyclopedia/EncyclopediaDrawer";
-import { AffinityBars } from "../components/AffinityBars";
-import { leadingPath } from "../ascension/ascension";
 import { DRAWER_TABS, type DrawerId, feedLines, isRoutine, nextDrawer } from "./calm";
 import { Icon } from "../components/common";
 

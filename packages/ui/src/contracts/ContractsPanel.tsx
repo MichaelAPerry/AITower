@@ -1,5 +1,6 @@
 import type { CommandResult } from "@aitower/sim";
 import { ClerkPanel } from "../clerk/ClerkPanel";
+import { clerkRowText, clerkVerdict } from "../clerk/clerk";
 import { easiestOffer } from "../calm/Panels";
 import { Meter } from "../components/common";
 import type { PanelProps } from "../components/context";
@@ -84,6 +85,7 @@ export function ContractsDrawer(props: PanelProps) {
 							{KIND_NAME[o.kind]} · needs {needLine(o)}
 						</span>
 						<span className={`pnl-fit ${f.ok ? "is-ok" : "is-no"}`}>{f.ok ? "Fits your idle racks ✓" : "Can't start yet"}</span>
+						{clerk && <span className="pnl-card-sub">{clerkRowText(clerk.policy.enabled, clerkVerdict(clerk.policy, o, fit.get(o.id)))}</span>}
 					</button>
 				);
 			})}

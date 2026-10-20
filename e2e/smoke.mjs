@@ -113,10 +113,10 @@ async function run(url) {
 		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
 		await coach.waitFor();
 		assert((await page.locator(".ast-bubble").count()) === 0, "the assistant must stay quiet while the coach marks run");
-		// The sim posts an offer at tick 0 and the Contracts drawer opens itself: no waiting, no hunting for the tab.
-		await coachAt("Accept this contract");
+		// The sim posts an offer at tick 0 and the tutorial opens the Contracts panel itself: no waiting, no hunting for the tab.
+		await coachAt("Take job");
 		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
-		const acceptBtn = page.locator('[data-tut="accept"]');
+		const acceptBtn = page.locator('[data-tut="take"]');
 		await acceptBtn.waitFor({ timeout: 5_000 });
 		assert(await acceptBtn.isEnabled(), "the highlighted offer must fit the idle racks");
 		await acceptBtn.click({ force: true }); // hover tilts the button, which Playwright reads as "unstable"
@@ -213,6 +213,17 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		log("parts order on, AUTO lamp lit");
+
+		stage("5c2. Contracts and Insights: C shows the job board and Inspector, F opens Insights (one panel at a time), the reputation list is there, Esc closes");
+		await page.keyboard.press("c");
+		await page.locator('[data-drawer="contracts"] .pnl-insp').waitFor();
+		await page.keyboard.press("f");
+		await page.locator('[data-drawer="insights"]').waitFor();
+		assert((await page.locator("[data-drawer]").count()) === 1, "only one panel may be open at a time");
+		await page.locator("summary", { hasText: "Why did it change?" }).waitFor();
+		await page.keyboard.press("i"); // I toggles the same panel closed
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		log("Contracts (C), Insights (F and I), one panel at a time");
 
 		stage("5d. help mode: ? shows a tooltip with More..., which opens the Encyclopedia on an entry; K and search work");
 		await page.keyboard.press("?");
