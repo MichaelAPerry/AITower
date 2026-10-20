@@ -72,7 +72,7 @@ describe("sim-cli memo policy", () => {
 		const a = runHeadless(loadContent(), "starter", 8, 3);
 		const b = runHeadless(loadContent(), "starter", 8, 3);
 		expect(a.hash).toBe(b.hash);
-		expect(a.rows.at(-1)?.memos).toBeGreaterThan(3);
+		expect(a.rows.at(-1)?.memos).toBeGreaterThanOrEqual(2);
 		for (const r of a.rows) {
 			expect(r.standing).toBeGreaterThanOrEqual(0);
 			expect(r.standing).toBeLessThanOrEqual(100);

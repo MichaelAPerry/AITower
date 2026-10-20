@@ -224,16 +224,16 @@ describe("M4 content (bundled)", () => {
 		const green = db.events.filter((e) => e.path === "greentech");
 		const synth = db.events.filter((e) => e.path === "synthetic");
 
-		it("has six greentech memos including a Dunkelflaute warning and heat-export tariff memos", () => {
-			const ids = ["dunkelflaute_warning", "heat_tariff_revision", "heat_tariff_rebate", "panel_soiling", "wind_noise_complaint", "carbon_credit_audit"];
+		it("has greentech memos including a Dunkelflaute warning and a heat-export tariff memo", () => {
+			const ids = ["dunkelflaute_warning", "heat_tariff_revision", "carbon_credit_audit"];
 			for (const id of ids) expect(db.events.find((e) => e.id === id)?.minTier, id).toBeGreaterThanOrEqual(3);
 			expect(db.events.find((e) => e.id === "dunkelflaute_warning")?.category).toBe("environmental");
-			expect(db.events.filter((e) => /^heat_tariff_/.test(e.id)).length).toBeGreaterThanOrEqual(2);
+			expect(db.events.filter((e) => /^heat_tariff_/.test(e.id)).length).toBeGreaterThanOrEqual(1);
 		});
 
-		it("has four quiet fungal memos on the greentech path and four identity memos on the synthetic path", () => {
-			expect(green).toHaveLength(4);
-			expect(synth).toHaveLength(4);
+		it("has two quiet fungal memos on the greentech path and two identity memos on the synthetic path", () => {
+			expect(green).toHaveLength(2);
+			expect(synth).toHaveLength(2);
 			for (const e of [...green, ...synth]) {
 				expect(e.category, e.id).toBe("horror");
 				expect(e.minTier, e.id).toBe(5);
@@ -242,7 +242,7 @@ describe("M4 content (bundled)", () => {
 			}
 			expect(green.some((e) => /mycelium/i.test(e.title))).toBe(true);
 			expect(synth.some((e) => /audit/i.test(e.title))).toBe(true);
-			expect(synth.some((e) => /Form/i.test(e.title))).toBe(true);
+			expect(synth.some((e) => /Backup/i.test(e.title))).toBe(true);
 		});
 	});
 
@@ -387,7 +387,7 @@ describe("validateContent: M4 rules", () => {
 
 	it("gates horror memos by corruption except on the greentech and synthetic paths", () => {
 		expect(broken((db) => delete db.events.find((e) => e.id === "h_early_lift")!.minCorruption)).toMatch(/corruption-gated/);
-		expect(broken((db) => delete db.events.find((e) => e.id === "h_commendation")!.minCorruption)).toMatch(/corruption-gated/);
+		expect(broken((db) => delete db.events.find((e) => e.id === "h_headcount")!.minCorruption)).toMatch(/corruption-gated/);
 		expect(broken((db) => (db.events.find((e) => e.id === "g_mycelium_ducts")!.path = undefined))).toMatch(/corruption-gated/);
 		expect(broken((db) => (db.events.find((e) => e.id === "g_mycelium_ducts")!.path = "biotech"))).toMatch(/corruption-gated/);
 	});

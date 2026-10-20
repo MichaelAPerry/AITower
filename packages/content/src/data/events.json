@@ -1,60 +1,250 @@
 [
  {
-  "id": "form_27b6",
-  "category": "ministry",
-  "title": "Form 27B/6: Declaration of Declarations",
-  "body": "It has come to the attention of the Ministry that this facility has declared things without first declaring that it intended to declare them.\n\nForm 27B/6 must be completed, countersigned and retroactively pre-approved.",
-  "weight": 10,
+  "id": "first_heat_alarm",
+  "category": "operational",
+  "title": "Thermal Advisory: Afternoon Peak",
+  "body": "A hot front reaches the lot this afternoon. The AC-1 racks will be at full load when it peaks.\n\nA second air handler would help. This is a good moment to find out.",
+  "weight": 1,
   "minTier": 1,
-  "cooldownDays": 8,
-  "timeoutTicks": 1080,
-  "defaultChoice": "deny",
+  "cooldownDays": 0,
+  "scriptedDay": 2,
+  "timeoutTicks": 360,
+  "defaultChoice": "ride",
   "choices": [
    {
-    "id": "approve",
-    "label": "APPROVE",
-    "hint": "-$25k now · standing +3",
-    "outcome": "The form was approved, stamped and filed under 'Approved'. Nobody will read it again.",
+    "id": "ride",
+    "label": "Ride it out",
+    "hint": "ambient +12°C for 6h",
+    "outcome": "Peak ambient reached +12°C. The racks coped, mostly.",
+    "effects": [
+     {
+      "type": "ambient",
+      "deltaC": 12,
+      "durationTicks": 360
+     }
+    ]
+   },
+   {
+    "id": "coolers",
+    "label": "Rent chillers",
+    "hint": "-$60k now · ambient +5°C for 6h",
+    "outcome": "Portable chillers arrived at noon and left at six.",
     "effects": [
      {
       "type": "cash",
-      "amount": -25000
+      "amount": -60000
      },
      {
-      "type": "standing",
+      "type": "ambient",
+      "deltaC": 5,
+      "durationTicks": 360
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "heatwave",
+  "category": "environmental",
+  "title": "Weather Advisory: Heatwave",
+  "body": "Ambient temperature is forecast 9°C above seasonal for the next day.\n\nCooling plant efficiency will fall accordingly.",
+  "weight": 7,
+  "minTier": 1,
+  "cooldownDays": 8,
+  "timeoutTicks": 1440,
+  "defaultChoice": "ride",
+  "choices": [
+   {
+    "id": "rent",
+    "label": "Rent chillers",
+    "hint": "-$90k now · ambient +4°C for 1d",
+    "outcome": "Temporary chillers took the edge off the peak.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -90000
+     },
+     {
+      "type": "ambient",
+      "deltaC": 4,
+      "durationTicks": 1440
+     }
+    ]
+   },
+   {
+    "id": "ride",
+    "label": "Ride it out",
+    "hint": "ambient +9°C for 1d",
+    "outcome": "The racks throttled and the day passed.",
+    "effects": [
+     {
+      "type": "ambient",
+      "deltaC": 9,
+      "durationTicks": 1440
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "brownout",
+  "category": "environmental",
+  "title": "Grid Notice: Scheduled Brownout",
+  "body": "The utility will reduce grid import capacity to 50% for eight hours while it services a feeder.\n\nThe notice was issued with eleven minutes of lead time.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 10,
+  "timeoutTicks": 1440,
+  "defaultChoice": "accept",
+  "choices": [
+   {
+    "id": "storage",
+    "label": "Buy storage",
+    "hint": "-$100k now · grid import x0.8 for 8h · Greentech +3",
+    "outcome": "Rented battery containers covered most of the shortfall.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -100000
+     },
+     {
+      "type": "gridCap",
+      "factor": 0.8,
+      "durationTicks": 480
+     },
+     {
+      "type": "affinity",
+      "path": "greentech",
       "amount": 3
      }
     ]
    },
    {
-    "id": "deny",
-    "label": "DENY",
-    "hint": "+$30k now · standing -5",
-    "outcome": "The form was denied. The Ministry notes your confidence.",
+    "id": "accept",
+    "label": "Auto load-shed",
+    "hint": "grid import x0.5 for 8h · Synthetic +3",
+    "outcome": "The scheduler shed low-priority jobs and the queue backed up.",
+    "effects": [
+     {
+      "type": "gridCap",
+      "factor": 0.5,
+      "durationTicks": 480
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "price_spike",
+  "category": "environmental",
+  "title": "Market Notice: Energy Price Spike",
+  "body": "Spot electricity prices will run well above the contracted rate tomorrow.\n\nA fixed-price solar supply agreement is available at short notice.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 8,
+  "timeoutTicks": 1440,
+  "defaultChoice": "shift",
+  "choices": [
+   {
+    "id": "ppa",
+    "label": "Sign solar PPA",
+    "hint": "-$120k now · energy price x1.1 for 1d · Greentech +5",
+    "outcome": "The agreement caps tomorrow's exposure and starts a longer relationship.",
     "effects": [
      {
       "type": "cash",
-      "amount": 30000
+      "amount": -120000
      },
      {
-      "type": "standing",
-      "amount": -5
+      "type": "energyPrice",
+      "factor": 1.1,
+      "durationTicks": 1440
+     },
+     {
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 5
      }
     ]
    },
    {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$70k now · standing +6",
-    "outcome": "Three copies were filed. Two were lost; the third was lost more carefully.",
+    "id": "shift",
+    "label": "Shift load",
+    "hint": "-$40k now · energy price x1.3 for 1d · Synthetic +3",
+    "outcome": "The scheduler moved jobs to cheaper hours. Throughput suffered.",
     "effects": [
      {
       "type": "cash",
-      "amount": -70000
+      "amount": -40000
      },
      {
+      "type": "energyPrice",
+      "factor": 1.3,
+      "durationTicks": 1440
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "dunkelflaute_warning",
+  "category": "environmental",
+  "title": "Weather Advisory: Dunkelflaute",
+  "body": "Two days of low sun and still air are forecast. Panel and mast output will approach zero.\n\nThe grid will price in the shortage.",
+  "weight": 5,
+  "minTier": 3,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "gensets",
+  "choices": [
+   {
+    "id": "storage",
+    "label": "Buy storage",
+    "hint": "-$150k now · energy price x1.15 for 2d · Greentech +4",
+    "outcome": "Contracted storage covered the worst of it.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.15,
+      "durationTicks": 2880
+     },
+     {
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "gensets",
+    "label": "Run gensets",
+    "hint": "standing -2 · energy price x1.5 for 2d",
+    "outcome": "The gensets ran for two days. The fuel invoice followed.",
+    "effects": [
+     {
       "type": "standing",
-      "amount": 6
+      "amount": -2
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.5,
+      "durationTicks": 2880
      }
     ]
    }
@@ -63,20 +253,20 @@
  {
   "id": "surprise_audit",
   "category": "ministry",
-  "title": "Notice of Scheduled Surprise Audit",
-  "body": "The Bureau of Verification will arrive unannounced at a time it has already announced. Please ensure the facility looks as though it has always been ready.",
+  "title": "Compute Authority: Facility Audit",
+  "body": "The Compute Authority will audit the facility this week. The visit date has been announced and is subject to change.\n\nAuditors will request cooling, power and job logs.",
   "weight": 8,
   "minTier": 1,
   "minDay": 2,
   "cooldownDays": 10,
-  "timeoutTicks": 1080,
+  "timeoutTicks": 1440,
   "defaultChoice": "stall",
   "choices": [
    {
     "id": "cooperate",
-    "label": "COOPERATE",
+    "label": "Cooperate",
     "hint": "-$120k now · standing +5",
-    "outcome": "Auditors found nothing, then billed you for the finding.",
+    "outcome": "Auditors found nothing, then invoiced for the finding.",
     "effects": [
      {
       "type": "cash",
@@ -90,9 +280,9 @@
    },
    {
     "id": "stall",
-    "label": "STALL",
+    "label": "Stall",
     "hint": "-$30k now · standing -6",
-    "outcome": "The audit was rescheduled to a date that does not exist. Goodwill was not.",
+    "outcome": "The audit was rescheduled. Goodwill was not.",
     "effects": [
      {
       "type": "cash",
@@ -103,409 +293,14 @@
       "amount": -6
      }
     ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$60k now · standing +1 · rack failure rate x0.9 for 2d",
-    "outcome": "A provisional compliance certificate was issued, valid for the period it is displayed.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "misplaced_compute",
-  "category": "ministry",
-  "title": "Department of Misplaced Compute: Claim 4471",
-  "body": "The Department of Misplaced Compute asserts that four spare components in your depot were inventoried to the wrong department in 1987.\n\nThe Department requests their return, or a letter explaining why not.",
-  "weight": 7,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 12,
-  "timeoutTicks": 1080,
-  "defaultChoice": "deny",
-  "choices": [
-   {
-    "id": "approve",
-    "label": "RETURN THE PARTS",
-    "hint": "-4 spare parts · standing +3",
-    "outcome": "The parts were returned. A receipt was issued for a different set of parts.",
-    "effects": [
-     {
-      "type": "spareParts",
-      "count": -4
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "deny",
-    "label": "DENY",
-    "hint": "+$40k now · standing -4",
-    "outcome": "The claim was denied. A counter-claim has been prepared, in advance, against you.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 40000
-     },
-     {
-      "type": "standing",
-      "amount": -4
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$20k now · -1 spare parts · standing +1",
-    "outcome": "A letter was written. It was long. The Department stopped reading at the second page.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -20000
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "compute_subsidy",
-  "category": "ministry",
-  "title": "Subsidy for Domestic Computational Enthusiasm",
-  "body": "A subsidy is available to facilities that demonstrably enthuse. Enthusiasm will be measured by the Department of Enthusiasm Measurement.\n\nConditions apply. The conditions are the subsidy.",
-  "weight": 8,
-  "minTier": 1,
-  "minDay": 2,
-  "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "decline",
-  "choices": [
-   {
-    "id": "apply",
-    "label": "APPLY",
-    "hint": "+$180k now · standing -4",
-    "outcome": "Funds arrived. So did the reporting requirements.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 180000
-     },
-     {
-      "type": "standing",
-      "amount": -4
-     }
-    ]
-   },
-   {
-    "id": "decline",
-    "label": "DECLINE",
-    "hint": "standing +2",
-    "outcome": "You declined a subsidy. The Ministry has never seen this before and is concerned.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "+$90k now · new contract payouts x0.9 for 1d",
-    "outcome": "A reduced grant was awarded, with a reduced obligation to be pleased about it.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 90000
-     },
-     {
-      "type": "payout",
-      "factor": 0.9,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "fire_inspection",
-  "category": "ministry",
-  "title": "Fire Safety Inspection (Annual, Biannual)",
-  "body": "An inspector will verify that the facility is fire-safe. In doing so, the inspector will bring a lighter, as is customary.\n\nPlacards are required on every wall that has a wall.",
-  "weight": 7,
-  "minTier": 1,
-  "cooldownDays": 12,
-  "timeoutTicks": 1080,
-  "defaultChoice": "contest",
-  "choices": [
-   {
-    "id": "pass",
-    "label": "PAY THE FEES",
-    "hint": "-$80k now · standing +2",
-    "outcome": "Fees paid. The facility is now certified safe, by decree.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "contest",
-    "label": "CONTEST",
-    "hint": "-$20k now · standing -5",
-    "outcome": "The inspector filed a formal disagreement with the existence of your argument.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -20000
-     },
-     {
-      "type": "standing",
-      "amount": -5
-     }
-    ]
-   },
-   {
-    "id": "placards",
-    "label": "INSTALL PLACARDS",
-    "hint": "-$45k now · standing +3 · -1 spare parts",
-    "outcome": "Four hundred placards were installed. The walls feel crowded.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -45000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "rebrand",
-  "category": "ministry",
-  "title": "Memo: The Ministry Has Been Renamed",
-  "body": "Effective yesterday, the Ministry is now the Ministry of Compute and Adjacent Matters. All stationery, signage and letterheads must reflect this, retroactively.\n\nThe old name is to be forgotten collectively.",
-  "weight": 6,
-  "minTier": 1,
-  "cooldownDays": 15,
-  "timeoutTicks": 1440,
-  "defaultChoice": "ignore",
-  "choices": [
-   {
-    "id": "comply",
-    "label": "REPRINT STATIONERY",
-    "hint": "-$60k now · standing +4",
-    "outcome": "Stationery reprinted. The new letterhead is indistinguishable from the old.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "IGNORE",
-    "hint": "standing -3",
-    "outcome": "You continue to use the old name. The Ministry has noted that it continues to exist.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   },
-   {
-    "id": "overdo",
-    "label": "REBRAND THE ENTIRE FACILITY",
-    "hint": "-$100k now · standing +6",
-    "outcome": "Every sign was replaced. Two were replaced twice.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -100000
-     },
-     {
-      "type": "standing",
-      "amount": 6
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "census",
-  "category": "ministry",
-  "title": "National Census of Compute (Optional, Mandatory)",
-  "body": "All facilities must report their exact number of computers. Facilities reporting inaccurate figures will be corrected by the Ministry.\n\nThe Ministry's figure is final, and will be provided after yours.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 4,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "honest",
-  "choices": [
-   {
-    "id": "honest",
-    "label": "REPORT HONESTLY",
-    "hint": "-$40k now · standing +4",
-    "outcome": "Your figure was accepted and entered into a ledger that has since been mislaid.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "under",
-    "label": "UNDERREPORT",
-    "hint": "+$60k now · standing -6",
-    "outcome": "A smaller figure was filed. The Ministry was moved by your modesty and your taxes.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 60000
-     },
-     {
-      "type": "standing",
-      "amount": -6
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$90k now · standing +7",
-    "outcome": "Three different figures were filed. The Ministry averaged them.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "standing",
-      "amount": 7
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "stamp_shortage",
-  "category": "ministry",
-  "title": "Notice: Official Stamp Shortage",
-  "body": "The Ministry has run out of the stamp that confirms receipt of stamp requests. Requests for stamps will be stamped once stamps resume.\n\nIn the meantime, please surrender any spare parts that resemble stamps.",
-  "weight": 6,
-  "minTier": 1,
-  "cooldownDays": 10,
-  "timeoutTicks": 1080,
-  "defaultChoice": "deny",
-  "choices": [
-   {
-    "id": "approve",
-    "label": "APPROVE REQUISITION",
-    "hint": "-3 spare parts · standing +2",
-    "outcome": "Parts were requisitioned as stamps. They are now stamps.",
-    "effects": [
-     {
-      "type": "spareParts",
-      "count": -3
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "deny",
-    "label": "DENY",
-    "hint": "+$20k now · standing -3",
-    "outcome": "You retained your parts. The shortage was reclassified as a surplus of absences.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 20000
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   },
-   {
-    "id": "buy",
-    "label": "PURCHASE PRIVATE STAMPS",
-    "hint": "-$50k now · standing +1 · +2 spare parts",
-    "outcome": "Private stamps were bought at a ministerial markup.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "spareParts",
-      "count": 2
-     }
-    ]
    }
   ]
  },
  {
   "id": "energy_levy",
   "category": "ministry",
-  "title": "Special Levy on Electricity Consumed While Consuming",
-  "body": "A one-time levy has been introduced to recover the cost of introducing it. Facilities may pay immediately, or later, with more.\n\nThe levy will be refunded as soon as it is understood.",
+  "title": "Levy Notice: Energy Surcharge",
+  "body": "A surcharge on facility energy consumption takes effect this quarter.\n\nCarbon-offset documentation reduces the rate.",
   "weight": 6,
   "minTier": 2,
   "minDay": 5,
@@ -515,73 +310,9 @@
   "choices": [
    {
     "id": "pay",
-    "label": "PAY IN FULL",
-    "hint": "-$100k now · standing +2",
-    "outcome": "Paid. The Ministry issued you a receipt for the receipt.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -100000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "dispute",
-    "label": "DISPUTE",
-    "hint": "energy price x1.3 for 1d",
-    "outcome": "The dispute was filed. Energy prices were adjusted while it is pending.",
-    "effects": [
-     {
-      "type": "energyPrice",
-      "factor": 1.3,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$40k now · energy price x1.1 for 2d · standing +1",
-    "outcome": "A payment plan was agreed. It has no end and no beginning.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.1,
-      "durationTicks": 2880
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "delegation",
-  "category": "ministry",
-  "title": "Visiting Delegation from the Ministry of Visits",
-  "body": "A delegation will inspect your facility, your hospitality, and the relationship between them.\n\nPlease prepare refreshments that are neither lavish nor insufficient, as defined in an appendix not yet written.",
-  "weight": 6,
-  "minTier": 2,
-  "minDay": 6,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "tour",
-  "choices": [
-   {
-    "id": "banquet",
-    "label": "HOST A BANQUET",
-    "hint": "-$150k now · standing +6",
-    "outcome": "The delegation ate. Standing rose. Several guests remain in the building.",
+    "label": "Pay levy",
+    "hint": "-$150k now · standing +3",
+    "outcome": "The levy was paid in full.",
     "effects": [
      {
       "type": "cash",
@@ -589,1555 +320,75 @@
      },
      {
       "type": "standing",
-      "amount": 6
+      "amount": 3
      }
     ]
    },
    {
-    "id": "tour",
-    "label": "TOUR ONLY",
-    "hint": "-$30k now · standing +1",
-    "outcome": "A brisk tour was conducted. The delegation noted the briskness.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "decline",
-    "label": "DECLINE POLITELY",
-    "hint": "standing -5",
-    "outcome": "The delegation was disappointed to be declined in a way they could not appeal.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -5
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "cooling_regulation",
-  "category": "ministry",
-  "title": "Regulation 14(c): Cooling Must Be Seen to Be Done",
-  "body": "All facilities must now demonstrate cooling in a form that can be photographed.\n\nCompliance is optional. Non-compliance is also optional. Consequences are mandatory.",
-  "weight": 6,
-  "minTier": 2,
-  "minDay": 7,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "petition",
-  "choices": [
-   {
-    "id": "comply",
-    "label": "COMPLY",
-    "hint": "-$200k now · standing +5 · rack failure rate x0.8 for 3d",
-    "outcome": "Photographs were taken of every fan. Reliability measurably improved from the attention.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -200000
-     },
-     {
-      "type": "standing",
-      "amount": 5
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.8,
-      "durationTicks": 4320
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "IGNORE",
-    "hint": "standing -6",
-    "outcome": "The regulation continues to exist at you.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -6
-     }
-    ]
-   },
-   {
-    "id": "petition",
-    "label": "PETITION FOR EXEMPTION",
-    "hint": "-$50k now · standing -1",
-    "outcome": "A petition was filed. It will be heard when it has been read.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "performance_review",
-  "category": "ministry",
-  "title": "Annual Performance Review (Quarterly)",
-  "body": "Your facility will be reviewed against targets which are confidential, so as not to influence performance.\n\nPlease submit a self-assessment that is accurate, flattering and brief.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 8,
-  "cooldownDays": 20,
-  "timeoutTicks": 1440,
-  "defaultChoice": "honest",
-  "choices": [
-   {
-    "id": "flatter",
-    "label": "SUBMIT A FLATTERING REPORT",
-    "hint": "-$40k now · standing +8",
-    "outcome": "The Ministry loved it. The Ministry loves most things it did not write.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "standing",
-      "amount": 8
-     }
-    ]
-   },
-   {
-    "id": "honest",
-    "label": "SUBMIT AN HONEST REPORT",
-    "hint": "+$100k now · standing -2",
-    "outcome": "The report was honest. A grant was issued to compensate for the shock.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 100000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE IN TRIPLICATE",
-    "hint": "-$120k now · standing +10",
-    "outcome": "Three self-assessments were filed, none matching. The average was commended.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -120000
-     },
-     {
-      "type": "standing",
-      "amount": 10
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "heatwave",
-  "category": "environmental",
-  "title": "Weather Advisory: Heatwave",
-  "body": "The Met Office advises that it will be hot, and has asked the sun to reconsider.\n\nCooling plants are reminded that ambient temperature is not a suggestion.",
-  "weight": 9,
-  "minTier": 1,
-  "cooldownDays": 5,
-  "timeoutTicks": 720,
-  "defaultChoice": "ride",
-  "choices": [
-   {
-    "id": "ride",
-    "label": "RIDE IT OUT",
-    "hint": "ambient +9°C for 1d",
-    "outcome": "You did nothing. The weather continued doing something.",
-    "effects": [
-     {
-      "type": "ambient",
-      "deltaC": 9,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "cooling",
-    "label": "HIRE EMERGENCY COOLING",
-    "hint": "-$80k now · ambient +4°C for 1d",
-    "outcome": "Rented chillers arrived on a truck marked 'FRAGILE (EMOTIONALLY)'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -80000
-     },
-     {
-      "type": "ambient",
-      "deltaC": 4,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "appeal",
-    "label": "ISSUE A PUBLIC APPEAL",
-    "hint": "standing +2 · ambient +7°C for 1d · energy price x1.2 for 1d",
-    "outcome": "Citizens were asked to use less electricity. They used more, then felt better.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "ambient",
-      "deltaC": 7,
-      "durationTicks": 1440
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.2,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "cold_snap",
-  "category": "environmental",
-  "title": "Weather Advisory: Cold Snap",
-  "body": "Temperatures are falling faster than your standing. Free cooling is available to any facility that can survive it.\n\nPlease note that condensation is a form of regret.",
-  "weight": 7,
-  "minTier": 1,
-  "cooldownDays": 6,
-  "timeoutTicks": 720,
-  "defaultChoice": "enjoy",
-  "choices": [
-   {
-    "id": "enjoy",
-    "label": "ENJOY FREE COOLING",
-    "hint": "ambient -8°C for 1d · rack failure rate x1.3 for 1d",
-    "outcome": "Fans idled and the air was crisp. Condensation filed a quiet complaint.",
-    "effects": [
-     {
-      "type": "ambient",
-      "deltaC": -8,
-      "durationTicks": 1440
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.3,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "winterise",
-    "label": "WINTERISE",
-    "hint": "-$40k now · ambient -8°C for 12h",
-    "outcome": "Gaskets, blankets and a sternly worded sign were installed.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "ambient",
-      "deltaC": -8,
-      "durationTicks": 720
-     }
-    ]
-   },
-   {
-    "id": "heaters",
-    "label": "RUN SPACE HEATERS",
-    "hint": "-$30k now · energy price x1.2 for 1d",
-    "outcome": "Heaters negated the cold snap at some expense to the cold snap.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.2,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "brownout",
-  "category": "environmental",
-  "title": "Grid Notice: Scheduled Unscheduled Brownout",
-  "body": "The grid operator regrets to announce a brownout. The brownout regrets to announce you.\n\nImports will be reduced until the brownout has finished expressing itself.",
-  "weight": 8,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 5,
-  "timeoutTicks": 480,
-  "defaultChoice": "ride",
-  "choices": [
-   {
-    "id": "ride",
-    "label": "RIDE IT OUT",
-    "hint": "grid import x0.5 for 8h",
-    "outcome": "You waited. The grid waited with you, but less.",
-    "effects": [
-     {
-      "type": "gridCap",
-      "factor": 0.5,
-      "durationTicks": 480
-     }
-    ]
-   },
-   {
-    "id": "fuel",
-    "label": "TOP UP THE GENSETS",
-    "hint": "-$50k now · grid import x0.5 for 4h",
-    "outcome": "Fuel was bought. Gensets were thanked in writing.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "gridCap",
-      "factor": 0.5,
-      "durationTicks": 240
-     }
-    ]
-   },
-   {
-    "id": "protest",
-    "label": "LODGE A FORMAL PROTEST",
-    "hint": "standing +2 · grid import x0.5 for 8h · -$10k now",
-    "outcome": "A protest was lodged. It lowered no one's voltage.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "gridCap",
-      "factor": 0.5,
-      "durationTicks": 480
-     },
-     {
-      "type": "cash",
-      "amount": -10000
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "blackout",
-  "category": "environmental",
-  "title": "Grid Notice: Regional Blackout",
-  "body": "The regional grid has become a regional suggestion. Imports are suspended pending the return of electricity.\n\nThe Ministry recommends calm and, where applicable, batteries.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 6,
-  "cooldownDays": 10,
-  "timeoutTicks": 360,
-  "defaultChoice": "endure",
-  "choices": [
-   {
-    "id": "endure",
-    "label": "ENDURE",
-    "hint": "grid offline for 4h",
-    "outcome": "The lights went out and the Ministry sent a note saying so.",
-    "effects": [
-     {
-      "type": "gridCap",
-      "factor": 0,
-      "durationTicks": 240
-     }
-    ]
-   },
-   {
-    "id": "emergency",
-    "label": "BUY EMERGENCY POWER",
-    "hint": "-$150k now · grid offline for 2h",
-    "outcome": "A truck of generators arrived. It was not the truck you ordered, but it worked.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -150000
-     },
-     {
-      "type": "gridCap",
-      "factor": 0,
-      "durationTicks": 120
-     }
-    ]
-   },
-   {
-    "id": "blame",
-    "label": "BLAME THE UTILITY",
-    "hint": "+$100k now · standing -3 · grid offline for 4h",
-    "outcome": "The utility paid compensation to stop you describing it.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 100000
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     },
-     {
-      "type": "gridCap",
-      "factor": 0,
-      "durationTicks": 240
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "flood",
-  "category": "environmental",
-  "title": "Basement Advisory: Moisture Has Opinions",
-  "body": "Groundwater has been observed on the lower levels, mostly in places it does not belong.\n\nThe Ministry classifies this as a leak, a flood or a reflection, depending on who is paying.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 4,
-  "cooldownDays": 10,
-  "timeoutTicks": 720,
-  "defaultChoice": "ignore",
-  "choices": [
-   {
-    "id": "pump",
-    "label": "PUMP IT OUT",
-    "hint": "-$90k now · -2 spare parts",
-    "outcome": "Pumps ran for hours. A few parts did not survive the experience.",
+    "id": "offset",
+    "label": "Buy offsets",
+    "hint": "-$90k now · standing +1 · Greentech +3",
+    "outcome": "Offset certificates were accepted at a discount.",
     "effects": [
      {
       "type": "cash",
       "amount": -90000
      },
      {
-      "type": "spareParts",
-      "count": -2
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "IGNORE",
-    "hint": "2 racks fail · standing -2",
-    "outcome": "The water noticed. Equipment noticed the water.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 2
+      "type": "standing",
+      "amount": 1
      },
      {
-      "type": "standing",
-      "amount": -2
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 3
      }
     ]
-   },
+   }
+  ]
+ },
+ {
+  "id": "compute_subsidy",
+  "category": "ministry",
+  "title": "Notice: Domestic Compute Subsidy",
+  "body": "The Compute Authority is offering a subsidy to operators that commit capacity to national programmes.\n\nThe commitment carries reporting obligations.",
+  "weight": 7,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 12,
+  "timeoutTicks": 1440,
+  "defaultChoice": "decline",
+  "choices": [
    {
     "id": "claim",
-    "label": "FILE AN INSURANCE CLAIM",
-    "hint": "+$120k now · 1 rack fails · standing -3",
-    "outcome": "The insurer paid and sent a note about the hydrological nature of claims.",
+    "label": "Claim subsidy",
+    "hint": "+$200k now · standing -3 · Synthetic +3",
+    "outcome": "The subsidy arrived. So did the reporting template.",
     "effects": [
      {
       "type": "cash",
-      "amount": 120000
+      "amount": 200000
      },
-     {
-      "type": "failRacks",
-      "count": 1
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "supply_shortage",
-  "category": "environmental",
-  "title": "Supply Notice: Component Shortage",
-  "body": "A shortage of spare components has been declared by the people who stock them.\n\nSuppliers wish to remind customers that shortages are a natural phenomenon, like tides, and are billed accordingly.",
-  "weight": 6,
-  "minTier": 1,
-  "cooldownDays": 8,
-  "timeoutTicks": 1080,
-  "defaultChoice": "wait",
-  "choices": [
-   {
-    "id": "spot",
-    "label": "BUY ON THE SPOT MARKET",
-    "hint": "-$90k now · +10 spare parts",
-    "outcome": "Parts were bought at a price that was described as 'firm and slightly rude'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "spareParts",
-      "count": 10
-     }
-    ]
-   },
-   {
-    "id": "wait",
-    "label": "WAIT IT OUT",
-    "hint": "-2 spare parts · standing -1",
-    "outcome": "Nothing was bought. The shelves looked emptier, but also cleaner.",
-    "effects": [
-     {
-      "type": "spareParts",
-      "count": -2
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "ration",
-    "label": "FILE A RATIONING ORDER",
-    "hint": "-$30k now · +4 spare parts · rack failure rate x1.2 for 12h",
-    "outcome": "Some parts were secured under a ration card that you are the only holder of.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "spareParts",
-      "count": 4
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.2,
-      "durationTicks": 720
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "price_spike",
-  "category": "environmental",
-  "title": "Market Notice: Energy Price Spike",
-  "body": "Electricity prices are climbing for reasons the market describes as 'vibrant'.\n\nFacilities may hedge, absorb, or take comfort in the fact that this was predicted by someone.",
-  "weight": 7,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 6,
-  "timeoutTicks": 720,
-  "defaultChoice": "absorb",
-  "choices": [
-   {
-    "id": "hedge",
-    "label": "HEDGE",
-    "hint": "-$70k now · energy price x1.3 for 1d",
-    "outcome": "A hedge was purchased. It hedged.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.3,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "absorb",
-    "label": "ABSORB THE COST",
-    "hint": "energy price x2 for 1d",
-    "outcome": "You paid the price. The price was surprised.",
-    "effects": [
-     {
-      "type": "energyPrice",
-      "factor": 2,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "lobby",
-    "label": "LOBBY THE REGULATOR",
-    "hint": "-$30k now · standing +2 · energy price x1.6 for 1d",
-    "outcome": "The regulator agreed to look into it, which is where it stayed.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.6,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "gpu_recall",
-  "category": "operational",
-  "title": "Vendor Notice: GPU Batch 7B Recall",
-  "body": "A manufacturing defect was discovered in a batch of accelerators, shortly after it was discovered by customers.\n\nAffected units will fail 'at an unspecified time of the vendor's choosing'.",
-  "weight": 7,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 10,
-  "timeoutTicks": 1080,
-  "defaultChoice": "replace",
-  "choices": [
-   {
-    "id": "replace",
-    "label": "REPLACE PROACTIVELY",
-    "hint": "-$120k now · -3 spare parts",
-    "outcome": "Units were swapped in an orderly fashion. The vendor sent a gift basket of cables.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -120000
-     },
-     {
-      "type": "spareParts",
-      "count": -3
-     }
-    ]
-   },
-   {
-    "id": "monitor",
-    "label": "MONITOR AND PRAY",
-    "hint": "1 rack fails",
-    "outcome": "You watched the logs and hoped. One rack decided otherwise.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 1
-     }
-    ]
-   },
-   {
-    "id": "refund",
-    "label": "DEMAND A REFUND",
-    "hint": "+$80k now · 1 rack fails · standing -2",
-    "outcome": "The vendor refunded part of the cost and part of the dignity.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 80000
-     },
-     {
-      "type": "failRacks",
-      "count": 1
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "firmware_bug",
-  "category": "operational",
-  "title": "Firmware Advisory: Thermal Governor Errata",
-  "body": "A firmware update corrects an error in the thermal governor, introduced by the previous update correcting an error.\n\nInstalling the update is recommended. Not installing it is also recommended.",
-  "weight": 7,
-  "minTier": 1,
-  "cooldownDays": 8,
-  "timeoutTicks": 720,
-  "defaultChoice": "skip",
-  "choices": [
-   {
-    "id": "install",
-    "label": "INSTALL NOW",
-    "hint": "-$30k now · rack failure rate x0.85 for 3d",
-    "outcome": "The update installed after three reboots and one apology.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.85,
-      "durationTicks": 4320
-     }
-    ]
-   },
-   {
-    "id": "skip",
-    "label": "SKIP IT",
-    "hint": "rack failure rate x1.4 for 2d",
-    "outcome": "The update was skipped. The bug was not.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 1.4,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "stage",
-    "label": "STAGE THE ROLLOUT",
-    "hint": "-$60k now · rack failure rate x0.95 for 3d · standing +1",
-    "outcome": "A careful rollout was run. It was careful, and long, and billed by the hour.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.95,
-      "durationTicks": 4320
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "ransomware_scare",
-  "category": "operational",
-  "title": "Security Alert: Message From An Unknown Benefactor",
-  "body": "A message arrived demanding payment in exchange for not having done something. It is unclear whether it has been done.\n\nThe Ministry will remain uninvolved and will assess the damage afterwards.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 7,
-  "cooldownDays": 14,
-  "timeoutTicks": 720,
-  "defaultChoice": "ignore",
-  "choices": [
-   {
-    "id": "pay",
-    "label": "PAY THE RANSOM",
-    "hint": "-$160k now · standing -4",
-    "outcome": "The benefactor thanked you. You are on a list now.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -160000
-     },
-     {
-      "type": "standing",
-      "amount": -4
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "IGNORE IT",
-    "hint": "2 racks fail",
-    "outcome": "Nothing happened, loudly. Two racks went offline for 'unrelated' reasons.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 2
-     }
-    ]
-   },
-   {
-    "id": "harden",
-    "label": "HARDEN THE PERIMETER",
-    "hint": "-$200k now · standing +3",
-    "outcome": "Passwords were rotated. Staff were rotated. The threat was rotated out.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -200000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "parts_theft",
-  "category": "operational",
-  "title": "Incident Report: Parts Have Left The Building",
-  "body": "A count of the depot shows that parts are no longer in it. They are presumed to be somewhere that is not here.\n\nA report may be filed with the department that handles missing things, which is also missing.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 4,
-  "cooldownDays": 10,
-  "timeoutTicks": 1080,
-  "defaultChoice": "report",
-  "choices": [
-   {
-    "id": "report",
-    "label": "FILE A REPORT",
-    "hint": "-$10k now · -3 spare parts · standing +1",
-    "outcome": "A report was filed. Two parts were returned in the report's honour.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -10000
-     },
-     {
-      "type": "spareParts",
-      "count": -3
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "lock",
-    "label": "INSTALL NEW LOCKS",
-    "hint": "-$45k now · -4 spare parts",
-    "outcome": "New locks were fitted. The parts remain elsewhere, but the doors are proud.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -45000
-     },
-     {
-      "type": "spareParts",
-      "count": -4
-     }
-    ]
-   },
-   {
-    "id": "shrug",
-    "label": "WRITE IT OFF",
-    "hint": "-6 spare parts · +$60k now",
-    "outcome": "Parts were written off. The auditor called it 'mature'.",
-    "effects": [
-     {
-      "type": "spareParts",
-      "count": -6
-     },
-     {
-      "type": "cash",
-      "amount": 60000
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "fibre_cut",
-  "category": "operational",
-  "title": "Network Notice: Fibre Cut By Persons Unknown",
-  "body": "A digger has found your fibre. Your fibre was not looking for a digger.\n\nThe ISP regrets the inconvenience and the repair estimate, which will be revised upward by the time you have read this.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 8,
-  "timeoutTicks": 720,
-  "defaultChoice": "wait",
-  "choices": [
-   {
-    "id": "repair",
-    "label": "PAY FOR PRIORITY REPAIR",
-    "hint": "-$110k now",
-    "outcome": "A crew arrived within hours and left a very small invoice and a very large one.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -110000
-     }
-    ]
-   },
-   {
-    "id": "wait",
-    "label": "WAIT FOR THE ISP",
-    "hint": "new contract payouts x0.85 for 36h",
-    "outcome": "Service resumed eventually. Clients found the wait memorable.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 0.85,
-      "durationTicks": 2160
-     }
-    ]
-   },
-   {
-    "id": "reroute",
-    "label": "REROUTE THROUGH A NEIGHBOUR",
-    "hint": "-$45k now · new contract payouts x0.95 for 1d · standing -1",
-    "outcome": "Traffic ran through a neighbour's line and was thanked, then charged.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -45000
-     },
-     {
-      "type": "payout",
-      "factor": 0.95,
-      "durationTicks": 1440
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "rat_in_tray",
-  "category": "operational",
-  "title": "Facilities Note: Rat Found In Cable Tray",
-  "body": "A rodent has been identified in a cable tray. The rodent has identified the cables.\n\nThe Ministry classifies the animal as 'a stakeholder'.",
-  "weight": 5,
-  "minTier": 1,
-  "minDay": 2,
-  "cooldownDays": 12,
-  "timeoutTicks": 1080,
-  "defaultChoice": "trap",
-  "choices": [
-   {
-    "id": "trap",
-    "label": "SET HUMANE TRAPS",
-    "hint": "-$15k now · standing +1",
-    "outcome": "The rat was relocated and has since written a short memoir.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -15000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "DO NOTHING",
-    "hint": "1 rack fails",
-    "outcome": "The rat continued its work. A rack lost its signal and its composure.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 1
-     }
-    ]
-   },
-   {
-    "id": "exterminate",
-    "label": "CALL THE EXTERMINATOR",
-    "hint": "-$60k now · standing -2 · rack failure rate x0.9 for 2d",
-    "outcome": "The exterminator was thorough, expensive and unnecessarily dramatic.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "overtime_dispute",
-  "category": "operational",
-  "title": "Staff Memo: Overtime, Defined",
-  "body": "Staff have noted that overtime is any time spent beyond the time the Ministry says exists.\n\nA resolution is requested before the next shift is replaced by the previous one.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 6,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "pay",
-  "choices": [
-   {
-    "id": "pay",
-    "label": "PAY THE OVERTIME",
-    "hint": "-$90k now · +2 spare parts · rack failure rate x0.9 for 2d",
-    "outcome": "Staff were paid. They were so pleased they fixed two things.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "spareParts",
-      "count": 2
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "refuse",
-    "label": "REFUSE",
-    "hint": "rack failure rate x1.25 for 2d · standing -2",
-    "outcome": "Staff worked to rule. The rule was surprisingly strict.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 1.25,
-      "durationTicks": 2880
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "comp",
-    "label": "OFFER TIME IN LIEU",
-    "hint": "-$30k now · standing -1",
-    "outcome": "Staff received time in lieu, to be taken at a time that never arrives.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "client_rush",
-  "category": "client",
-  "title": "Client Request: Urgent, Please, By Yesterday",
-  "body": "A major client needs capacity urgently. They will pay for it, and they will remember how it went.\n\nTheir words were 'please', 'now' and 'surely'.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 2,
-  "cooldownDays": 8,
-  "timeoutTicks": 1080,
-  "defaultChoice": "ignore",
-  "choices": [
-   {
-    "id": "accept",
-    "label": "ACCEPT THE RUSH",
-    "hint": "new contract payouts x1.4 for 1d · standing -2",
-    "outcome": "Rates were agreed at a premium. The rush promptly became a pace.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 1.4,
-      "durationTicks": 1440
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "POLITELY IGNORE",
-    "hint": "standing -1",
-    "outcome": "You did not reply. The client replied to your not replying.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "negotiate",
-    "label": "NEGOTIATE",
-    "hint": "-$15k now · new contract payouts x1.2 for 36h",
-    "outcome": "A moderate premium was agreed after a moderate dispute.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -15000
-     },
-     {
-      "type": "payout",
-      "factor": 1.2,
-      "durationTicks": 2160
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "client_complaint",
-  "category": "client",
-  "title": "Client Complaint: Concerning Concerns",
-  "body": "A client has written to raise concerns about concerns. They request a response, a response to the response, and a direct line to whoever is responsible.\n\nThat person has been identified. It is you.",
-  "weight": 6,
-  "minTier": 1,
-  "minDay": 3,
-  "cooldownDays": 8,
-  "timeoutTicks": 1080,
-  "defaultChoice": "apologise",
-  "choices": [
-   {
-    "id": "apologise",
-    "label": "APOLOGISE",
-    "hint": "-$25k now · standing +2",
-    "outcome": "A letter of apology was sent. It was apologetic in a way the client has since quoted.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -25000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "rebut",
-    "label": "REBUT",
-    "hint": "standing -3 · new contract payouts x0.9 for 1d",
-    "outcome": "A rebuttal was sent. The client rebutted the rebuttal in a longer letter.",
-    "effects": [
      {
       "type": "standing",
       "amount": -3
      },
      {
-      "type": "payout",
-      "factor": 0.9,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "credit",
-    "label": "OFFER A SERVICE CREDIT",
-    "hint": "-$70k now · standing +4",
-    "outcome": "A credit was issued against future services that will be rendered.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "client_bonus",
-  "category": "client",
-  "title": "Client Notice: Unexpected Gratitude",
-  "body": "A client was pleased. This has not happened before and the paperwork is therefore missing.\n\nThey propose a bonus, a testimonial, or a long lunch.",
-  "weight": 5,
-  "minTier": 1,
-  "minDay": 4,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "accept",
-  "choices": [
-   {
-    "id": "accept",
-    "label": "ACCEPT THE BONUS",
-    "hint": "+$110k now · standing -1",
-    "outcome": "The bonus arrived. It had a note attached that said 'don't make it weird'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 110000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "testimonial",
-    "label": "ACCEPT THE TESTIMONIAL",
-    "hint": "standing +4",
-    "outcome": "A glowing review was published. It was glowing at an angle.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "lunch",
-    "label": "ATTEND THE LONG LUNCH",
-    "hint": "new contract payouts x1.25 for 2d · -$20k now",
-    "outcome": "The lunch lasted until the following quarter. Contracts improved.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 1.25,
-      "durationTicks": 2880
-     },
-     {
-      "type": "cash",
-      "amount": -20000
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "client_poach",
-  "category": "client",
-  "title": "Client Notice: A Rival Has Made An Offer",
-  "body": "A rival facility has approached one of your clients with prices that cannot be real and terms that cannot be read.\n\nYour client is mentioning this to you to be helpful.",
-  "weight": 4,
-  "minTier": 2,
-  "minDay": 8,
-  "cooldownDays": 14,
-  "timeoutTicks": 1080,
-  "defaultChoice": "match",
-  "choices": [
-   {
-    "id": "match",
-    "label": "MATCH THE OFFER",
-    "hint": "new contract payouts x0.85 for 3d · standing +2",
-    "outcome": "Prices were matched. The margin was matched too, somewhere below zero.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 0.85,
-      "durationTicks": 4320
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "hold",
-    "label": "HOLD YOUR PRICES",
-    "hint": "standing -3",
-    "outcome": "You held your prices. The client held its breath, then its contract.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   },
-   {
-    "id": "charm",
-    "label": "SEND A GIFT BASKET",
-    "hint": "-$60k now · standing +1 · new contract payouts x1.1 for 1d",
-    "outcome": "A gift basket was sent. It was a very good basket.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "payout",
-      "factor": 1.1,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "first_heat_alarm",
-  "category": "operational",
-  "title": "Thermal Advisory No. 1: The Afternoon Is Unusually Afternoon",
-  "body": "A hot front is due over the lot this afternoon, and the Ministry's thermometer has already agreed with it. The Mk.I cabinets will be at full load when it peaks, and the boiler-room thermometer has begun to sweat.\n\nA second air handler would have helped. This is a good moment to find that out.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "scriptedDay": 2,
-  "timeoutTicks": 360,
-  "defaultChoice": "ride",
-  "choices": [
-   {
-    "id": "ride",
-    "label": "RIDE IT OUT",
-    "hint": "ambient +12°C for 6h",
-    "outcome": "You did nothing. The racks ran hot, the clocks sagged, and the afternoon passed with dignity intact.",
-    "effects": [
-     {
-      "type": "ambient",
-      "deltaC": 12,
-      "durationTicks": 360
-     }
-    ]
-   },
-   {
-    "id": "coolers",
-    "label": "RENT PORTABLE COOLERS",
-    "hint": "-$60k now · ambient +5°C for 6h",
-    "outcome": "Six rented coolers arrived on a flatbed and were plugged into the nearest wall, which was important.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "ambient",
-      "deltaC": 5,
-      "durationTicks": 360
-     }
-    ]
-   },
-   {
-    "id": "appeal",
-    "label": "PLEAD WITH THE MET OFFICE",
-    "hint": "standing +1 · ambient +9°C for 6h · energy price x1.15 for 6h",
-    "outcome": "The Met Office promised to look into it. It looked. The front stayed, but the Ministry noted your civic spirit.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "ambient",
-      "deltaC": 9,
-      "durationTicks": 360
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.15,
-      "durationTicks": 360
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "credit_office_review",
-  "category": "ministry",
-  "title": "Credit Office: Annual Review of Your Obligations",
-  "body": "The Ministry Credit Office has reviewed your loan book, and finds that you have borrowed money. It would like to discuss this, at its convenience, which is now.\n\nBorrowing is encouraged, repaying is encouraged, and the interest is merely a form of encouragement.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 6,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "roll",
-  "choices": [
-   {
-    "id": "roll",
-    "label": "ROLL OVER THE CALENDAR",
-    "hint": "+$80k now · energy price x1.1 for 2d",
-    "outcome": "The loan officer stamped 'REVIEWED' on a page and began a new page. You were given a pen.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 80000
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.1,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "prepay",
-    "label": "PREPAY THE CLERK'S FEES",
-    "hint": "-$110k now · standing +3",
-    "outcome": "The Credit Office accepted payment and then admitted it had no idea what for.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -110000
-     },
-     {
-      "type": "standing",
+      "type": "affinity",
+      "path": "synthetic",
       "amount": 3
      }
     ]
    },
    {
     "id": "decline",
-    "label": "DECLINE POLITELY",
-    "hint": "standing -1",
-    "outcome": "The reviewer wrote 'RELUCTANT' on the file. It will not be mentioned again, in writing.",
+    "label": "Decline",
+    "hint": "standing +3",
+    "outcome": "The offer was withdrawn with no comment.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "levy_amnesty",
-  "category": "ministry",
-  "title": "Levy Amnesty Window Now Open (Brief)",
-  "body": "The Ministry announces a brief amnesty for facilities that have not paid the profit levy they have not yet been billed for. The window closes when the Ministry remembers it.\n\nThe levy is a share of each day's profit, charged at midnight. Amnesty is not a share of anything.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 8,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "lobby",
-  "choices": [
-   {
-    "id": "early",
-    "label": "PAY EARLY",
-    "hint": "-$150k now · standing +3",
-    "outcome": "The Ministry stamped the early payment in green and then misfiled it. The goodwill filed itself.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -150000
-     },
      {
       "type": "standing",
       "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "contest",
-    "label": "CONTEST THE ASSESSMENT",
-    "hint": "-$40k now · standing -2",
-    "outcome": "A contest was lodged. The Ministry replied that it would reply, in due course.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "lobby",
-    "label": "LOBBY THE LEVY OFFICE",
-    "hint": "-$90k now · payout x1.05 for 2d",
-    "outcome": "A lunch was had. The levy officer was moved to tears, and to a better desk.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "payout",
-      "factor": 1.05,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "audit_preparation",
-  "category": "ministry",
-  "title": "Notice: Quarterly Audit Preparation Window",
-  "body": "The Bureau of Verification will grade the facility at the end of the quarter, from A to E, on throughput, uptime and the neatness of the cable runs. A grants, E fines.\n\nPreparation is optional. So are consequences.",
-  "weight": 5,
-  "minTier": 2,
-  "minDay": 9,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "consult",
-  "choices": [
-   {
-    "id": "consult",
-    "label": "HIRE A CONSULTANT",
-    "hint": "-$180k now · standing +3 · rack failure rate x0.9 for 3d",
-    "outcome": "A consultant arrived, rearranged the clipboards and left a very detailed invoice.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -180000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 4320
-     }
-    ]
-   },
-   {
-    "id": "polish",
-    "label": "POLISH THE BRASS",
-    "hint": "-$50k now · standing +1",
-    "outcome": "Every plate was polished until it shone. The graders will notice the plates.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "selfcert",
-    "label": "SELF-CERTIFY",
-    "hint": "standing -2",
-    "outcome": "You certified yourself. The Bureau noted that you have excellent standards, and then lowered them.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -2
      }
     ]
    }
@@ -2146,180 +397,54 @@
  {
   "id": "research_grant",
   "category": "ministry",
-  "title": "Ministry of Science: Grant Offer (Terms Attached)",
-  "body": "The Ministry of Science offers a grant to facilities with an active research programme. The terms are attached; the grant, regrettably, is not.\n\nAcceptance includes a Ministry observer, who will sit in on your research and take notes in a language of his own.",
-  "weight": 5,
+  "title": "Authority Research Grant",
+  "body": "The Authority has funds for one research partnership this quarter. Two applicants are shortlisted.\n\nBoth proposals are credible. They are not compatible.",
+  "weight": 6,
   "minTier": 2,
   "minDay": 7,
-  "cooldownDays": 14,
+  "cooldownDays": 20,
   "timeoutTicks": 1440,
-  "defaultChoice": "accept",
+  "defaultChoice": "wetlab",
   "choices": [
    {
-    "id": "accept",
-    "label": "ACCEPT THE GRANT",
-    "hint": "+$250k now · payout x0.9 for 2d",
-    "outcome": "The grant arrived with its observer. He sat in the corner and made your research his own.",
+    "id": "wetlab",
+    "label": "Lease wet lab",
+    "hint": "+$200k now · standing -1 · Biotech +5",
+    "outcome": "The lab moved in on Monday. Its freezers arrived on Tuesday.",
     "effects": [
      {
       "type": "cash",
-      "amount": 250000
-     },
-     {
-      "type": "payout",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "split",
-    "label": "SPLIT THE RESULTS",
-    "hint": "+$100k now · standing -1",
-    "outcome": "You gave the Ministry half the results. The observer wrote 'ADEQUATE' and left.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 100000
+      "amount": 200000
      },
      {
       "type": "standing",
       "amount": -1
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 5
      }
     ]
    },
    {
-    "id": "decline",
-    "label": "DECLINE AND PUBLISH",
-    "hint": "standing +2",
-    "outcome": "You declined and printed the findings in the Ministry Gazette. The Minister sent a note.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "capacitor_plague",
-  "category": "operational",
-  "title": "Engineering Bulletin: The Great Capacitor Plague",
-  "body": "A batch of electrolytic capacitors in the power-supply units of three major vendors has begun to bulge, weep and, in one case, sing.\n\nThe Ministry assures you that capacitors are a type of battery and that batteries are a national treasure.",
-  "weight": 5,
-  "minTier": 3,
-  "minDay": 10,
-  "cooldownDays": 12,
-  "timeoutTicks": 1080,
-  "defaultChoice": "replace",
-  "choices": [
-   {
-    "id": "replace",
-    "label": "REPLACE THE LOT",
-    "hint": "-$200k now · -2 spare parts",
-    "outcome": "A tidy swap-out. The old capacitors were mounted in the lobby as a warning.",
+    "id": "cognition",
+    "label": "Host AI lab",
+    "hint": "+$200k now · standing -1 · Synthetic +5",
+    "outcome": "The lab brought its own models and a long list of requirements.",
     "effects": [
      {
       "type": "cash",
-      "amount": -200000
-     },
-     {
-      "type": "spareParts",
-      "count": -2
-     }
-    ]
-   },
-   {
-    "id": "wait",
-    "label": "WAIT AND SEE",
-    "hint": "1 rack fails",
-    "outcome": "You waited. One rack saw and decided to go first.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 1
-     }
-    ]
-   },
-   {
-    "id": "insure",
-    "label": "CLAIM ON THE WARRANTY",
-    "hint": "+$90k now · 1 rack fails · standing -2",
-    "outcome": "The vendor paid out, with a smile that looked like a bill.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 90000
-     },
-     {
-      "type": "failRacks",
-      "count": 1
+      "amount": 200000
      },
      {
       "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "substation_works",
-  "category": "environmental",
-  "title": "Utility Notice: Substation Works (Scheduled, Allegedly)",
-  "body": "The municipal utility is performing urgent maintenance on the main substation. It will take six hours and, we are told, no more than seven.\n\nGrid import will be limited during the work. The utility apologises in advance and in arrears.",
-  "weight": 5,
-  "minTier": 3,
-  "minDay": 11,
-  "cooldownDays": 10,
-  "timeoutTicks": 720,
-  "defaultChoice": "endure",
-  "choices": [
-   {
-    "id": "endure",
-    "label": "ENDURE THE CAP",
-    "hint": "grid import x0.7 for 6h",
-    "outcome": "You lived within the cap. The generators were quietly given the evening off.",
-    "effects": [
-     {
-      "type": "gridCap",
-      "factor": 0.7,
-      "durationTicks": 360
-     }
-    ]
-   },
-   {
-    "id": "generator",
-    "label": "FUEL UP THE GENERATORS",
-    "hint": "-$70k now · grid import x0.85 for 6h",
-    "outcome": "Fuel was bought and generators warmed. The utility called it 'a gesture'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
+      "amount": -1
      },
      {
-      "type": "gridCap",
-      "factor": 0.85,
-      "durationTicks": 360
-     }
-    ]
-   },
-   {
-    "id": "protest",
-    "label": "FILE A PROTEST",
-    "hint": "standing +1 · grid import x0.6 for 6h",
-    "outcome": "A strongly worded protest was filed. The utility was moved, but only to a different desk.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "gridCap",
-      "factor": 0.6,
-      "durationTicks": 360
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 5
      }
     ]
    }
@@ -2328,1602 +453,42 @@
  {
   "id": "form_9b_brochure",
   "category": "ministry",
-  "title": "Form 9-B: Wetware Pilot Programme",
-  "body": "A glossy brochure has been delivered to every facility above Grade D, printed on paper that is slightly warm. It invites operators to 'participate in the Ministry's Wetware Pilot Programme, in which nothing is wasted and nothing is lost'.\n\nForm 9-B is optional. Declining Form 9-B is also optional, and is also Form 9-B.",
-  "weight": 4,
+  "title": "Wetware Pilot Programme",
+  "body": "A brochure has arrived describing a Compute Authority pilot for tissue-based computing. Participation is voluntary.\n\nThe brochure uses the phrase \"low-power\" eleven times.",
+  "weight": 5,
   "minTier": 1,
   "maxTier": 2,
   "minDay": 4,
   "cooldownDays": 30,
   "timeoutTicks": 1440,
-  "defaultChoice": "file_away",
+  "defaultChoice": "decline",
   "choices": [
    {
-    "id": "file_away",
-    "label": "FILE IT UNREAD",
+    "id": "join",
+    "label": "Join pilot",
+    "hint": "-$60k now · Biotech +4",
+    "outcome": "You enrolled. The pilot coordinator sent a gift basket of reagents.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "Decline",
     "hint": "standing +1",
-    "outcome": "The brochure was filed. It was found, a week later, in a different drawer, open at the same page.",
+    "outcome": "You declined. The brochure was recycled.",
     "effects": [
      {
       "type": "standing",
       "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "enrol",
-    "label": "ENROL IN THE PILOT",
-    "hint": "-$30k now · standing +3",
-    "outcome": "You enrolled. A certificate arrived by return, addressed to the facility rather than to you.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "postage",
-    "label": "CLAIM THE POSTAGE",
-    "hint": "+$15k now · standing -2",
-    "outcome": "The Ministry refunded the postage on a brochure it had not posted.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 15000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "damp_patch",
-  "category": "operational",
-  "title": "Facilities Note: Damp Patch, Floor 1",
-  "body": "A damp patch has appeared on the corridor ceiling outside the plant room. It is roughly the shape of a country that has not been named yet, and it is warm to the touch.\n\nThe Ministry recommends that nobody touch it.",
-  "weight": 4,
-  "minTier": 1,
-  "maxTier": 2,
-  "minDay": 6,
-  "cooldownDays": 25,
-  "timeoutTicks": 1440,
-  "defaultChoice": "bucket",
-  "choices": [
-   {
-    "id": "repaint",
-    "label": "REPAINT THE CEILING",
-    "hint": "-$18k now · standing +1",
-    "outcome": "The ceiling was repainted. By morning the patch had come back through the paint, in the same place, a little darker.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -18000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "bucket",
-    "label": "PLACE A BUCKET",
-    "hint": "-$4k now · -1 spare parts",
-    "outcome": "A bucket was placed. It has not filled, and it has not been emptied, and it is no longer clean.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -4000
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     }
-    ]
-   },
-   {
-    "id": "ignore",
-    "label": "LEAVE IT ALONE",
-    "hint": "rack failure rate x1.1 for 1d",
-    "outcome": "The patch was left alone. The corridor was quiet and slightly damper than before.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 1.1,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "smell_report",
-  "category": "operational",
-  "title": "Facilities Note: A Smell on Floor 2",
-  "body": "Several staff have reported a smell in the ventilation: bread, perhaps, or iron, or a Sunday afternoon in a house you once lived in. Environmental Health tested the air and found it to be air.\n\nThe smell is strongest near the plant room. Everyone who reports it describes it as 'friendly'.",
-  "weight": 4,
-  "minTier": 2,
-  "maxTier": 2,
-  "minDay": 9,
-  "cooldownDays": 25,
-  "timeoutTicks": 1440,
-  "defaultChoice": "filters",
-  "choices": [
-   {
-    "id": "filters",
-    "label": "FIT CARBON FILTERS",
-    "hint": "-$45k now · rack failure rate x0.9 for 2d",
-    "outcome": "Filters were fitted. They came out a week later perfectly clean and very slightly warm.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -45000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "door",
-    "label": "OPEN THE LOADING DOOR",
-    "hint": "ambient +2°C for 6h",
-    "outcome": "The loading door was propped open. The smell went out. By lunchtime it had come back in.",
-    "effects": [
-     {
-      "type": "ambient",
-      "deltaC": 2,
-      "durationTicks": 360
-     }
-    ]
-   },
-   {
-    "id": "complain",
-    "label": "FILE A COMPLAINT",
-    "hint": "-$10k now · standing +1",
-    "outcome": "A complaint was filed with Environmental Health, which replied that it had already been filed.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -10000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "lamp_phasing",
-  "category": "operational",
-  "title": "Electrical Standards Notice: Lamp Phasing",
-  "body": "Inspectors report that the corridor lamps on Floor 1 pulse very slightly out of step with one another. Night staff describe the effect as 'restful'. Day staff describe it as 'a conversation'.\n\nThe lamps are on the same circuit. The circuit has been inspected twice.",
-  "weight": 4,
-  "minTier": 2,
-  "maxTier": 2,
-  "minDay": 12,
-  "cooldownDays": 25,
-  "timeoutTicks": 1440,
-  "defaultChoice": "fault_register",
-  "choices": [
-   {
-    "id": "rephase",
-    "label": "RE-PHASE THE CIRCUIT",
-    "hint": "-$35k now · standing +2",
-    "outcome": "The circuit was re-phased. The lamps agreed, briefly, and then returned to their own arrangements.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -35000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "fault_register",
-    "label": "ENTER IT IN THE FAULT REGISTER",
-    "hint": "-$10k now · standing +1",
-    "outcome": "The fault was entered. The register was already open at that page.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -10000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "leave",
-    "label": "LEAVE THEM BE",
-    "hint": "standing -1",
-    "outcome": "The lamps were left alone. Nobody has complained since, which the Ministry regards as a result.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "nutrient_spoilage",
-  "category": "operational",
-  "title": "Facilities Alert: Medium Past Its Date",
-  "body": "A batch of nutrient medium was found turning in the supply line. It smelled of bread, then of a bakery, then of something that has been a bakery for a long time.\n\nThe Ministry notes that spoilage is a natural process and therefore not its responsibility.",
-  "weight": 5,
-  "minTier": 3,
-  "minDay": 10,
-  "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "flush",
-  "choices": [
-   {
-    "id": "flush",
-    "label": "FLUSH THE LINES",
-    "hint": "-$110k now · -2 spare parts",
-    "outcome": "The lines were flushed. What came out was returned to the vendor, who thanked you for the sample.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -110000
-     },
-     {
-      "type": "spareParts",
-      "count": -2
-     }
-    ]
-   },
-   {
-    "id": "use_it",
-    "label": "USE IT ANYWAY",
-    "hint": "rack failure rate x1.3 for 2d",
-    "outcome": "The medium was used. The cabinets were not impressed, and said so in the logs.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 1.3,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "fresh",
-    "label": "BUY FRESH FROM THE VENDOR",
-    "hint": "-$180k now · standing +2",
-    "outcome": "Fresh medium arrived in sealed drums, stamped 'FRESH'. The stamp was still wet.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -180000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "contamination_audit",
-  "category": "ministry",
-  "title": "Bureau of Sanitary Compliance: Contamination Audit",
-  "body": "The Bureau will inspect any premises that handle, store or are aware of biological material. Please ensure that all contamination is either removed or properly labelled.\n\nLabels are available from the Bureau at $4 each, and are sold out.",
-  "weight": 5,
-  "minTier": 3,
-  "minDay": 12,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "label",
-  "choices": [
-   {
-    "id": "scrub",
-    "label": "SCRUB AND LABEL",
-    "hint": "-$90k now · standing +4",
-    "outcome": "The Annex was scrubbed to a shine and labelled from floor to ceiling. The inspector's report praised the lettering.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "label",
-    "label": "LABEL ONLY",
-    "hint": "-$20k now · standing +1",
-    "outcome": "The contamination was labelled and left where it was. The Bureau agreed that it was now very clear what it was.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -20000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "dispute",
-    "label": "DISPUTE THE DEFINITION",
-    "hint": "+$30k now · standing -4",
-    "outcome": "You disputed the definition of 'contamination'. The Bureau paid you to stop.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 30000
-     },
-     {
-      "type": "standing",
-      "amount": -4
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "incubator_drift",
-  "category": "operational",
-  "title": "Facilities Alert: Thermostat Drift in the Annex",
-  "body": "The Annex thermostat has read 37.0 °C for six days, to the tenth of a degree, regardless of what the thermometers say. This is the correct temperature, and the Ministry would like it to remain so.\n\nOrganoid cabinets tolerate one degree either way. They have views about the second.",
-  "weight": 6,
-  "minTier": 3,
-  "minDay": 14,
-  "cooldownDays": 8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "recalibrate",
-  "choices": [
-   {
-    "id": "recalibrate",
-    "label": "RECALIBRATE THE PROBES",
-    "hint": "-$75k now · -1 spare parts",
-    "outcome": "The probes were recalibrated. All of them now agree, which the engineer found more worrying than before.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -75000
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     }
-    ]
-   },
-   {
-    "id": "trust",
-    "label": "TRUST THE THERMOSTAT",
-    "hint": "1 rack fails",
-    "outcome": "The thermostat was trusted. One cabinet did not agree and said so by stopping.",
-    "effects": [
-     {
-      "type": "failRacks",
-      "count": 1
-     }
-    ]
-   },
-   {
-    "id": "blanket",
-    "label": "RUN A BLANKET OVER IT",
-    "hint": "-$25k now · rack failure rate x1.15 for 1d",
-    "outcome": "A blanket was laid over the cabinet. It was, by all accounts, appreciated.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -25000
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.15,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "cell_line_certificate",
-  "category": "ministry",
-  "title": "Certificate of Cell-Line Provenance",
-  "body": "Each culture on the premises must be accompanied by a certificate naming its origin. The origin may be left blank, provided it is left blank in the approved typeface.\n\nThe approved typeface is available from the Ministry. It has not been approved.",
-  "weight": 5,
-  "minTier": 3,
-  "minDay": 16,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "blank",
-  "choices": [
-   {
-    "id": "commission",
-    "label": "COMMISSION A PROVENANCE REPORT",
-    "hint": "-$120k now · standing +4",
-    "outcome": "A report was commissioned. It ran to forty pages, and every page was headed 'Origin: see previous page'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -120000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "blank",
-    "label": "LEAVE THE ORIGIN BLANK",
-    "hint": "-$30k now · standing +1",
-    "outcome": "The origin was left blank in a handsome typeface. It was accepted.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "cite_ministry",
-    "label": "CITE THE MINISTRY AS ORIGIN",
-    "hint": "+$50k now · standing -3",
-    "outcome": "The Ministry was flattered, then alarmed, then sent a rebate to make the alarm go away.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 50000
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "wetware_grant",
-  "category": "ministry",
-  "title": "Programme 9-B: Wetware Innovation Grant",
-  "body": "The Ministry has set aside funds to encourage 'private-sector enthusiasm for living systems'. The grant is generous, and carries conditions that will be supplied after the grant has been spent.\n\nApplicants are asked to demonstrate enthusiasm in writing.",
-  "weight": 4,
-  "minTier": 3,
-  "minDay": 18,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "accept",
-  "choices": [
-   {
-    "id": "accept",
-    "label": "ACCEPT THE GRANT",
-    "hint": "+$260k now · new contract payouts x0.9 for 2d",
-    "outcome": "The grant was received. The conditions arrived the following week, bound in leather.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 260000
-     },
-     {
-      "type": "payout",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "half",
-    "label": "ACCEPT HALF",
-    "hint": "+$120k now · standing -1",
-    "outcome": "Half the grant was received, and half the conditions. The Ministry counted this as full participation.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 120000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "decline",
-    "label": "DECLINE WITH THANKS",
-    "hint": "standing +2",
-    "outcome": "The grant was declined with thanks. The Ministry sent its thanks for the thanks.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "asset_registration",
-  "category": "ministry",
-  "title": "Form 31-A: Registration of Biological Assets",
-  "body": "Any organised tissue on the premises must be registered as an asset, with a serial number and a depreciation schedule. Tissue that is not registered will be registered on your behalf, at a higher fee.\n\nA fee of $140k applies to registered assets. Tissue is not eligible for the standard rebate.",
-  "weight": 5,
-  "minTier": 4,
-  "minDay": 24,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "everything",
-  "choices": [
-   {
-    "id": "everything",
-    "label": "REGISTER EVERYTHING",
-    "hint": "-$140k now · standing +4",
-    "outcome": "Every asset was registered and numbered. Several had already been numbered, in a different hand.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -140000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "some",
-    "label": "REGISTER SOME",
-    "hint": "-$60k now · standing -1",
-    "outcome": "Some assets were registered. The Ministry noted the others, and would revisit them.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "ministry",
-    "label": "LET THE MINISTRY REGISTER IT",
-    "hint": "-$220k now · standing +6",
-    "outcome": "The Ministry registered the assets itself. It found more than you had listed, and billed for all of them.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -220000
-     },
-     {
-      "type": "standing",
-      "amount": 6
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "mutation_report",
-  "category": "operational",
-  "title": "Maintenance Bulletin: Automaton Reclassification",
-  "body": "One of your maintenance automatons has been reported as changed. It is quicker at repairs and softer in outline, and leaves a faint residue where it has worked. Staff have asked what to call it.\n\nThe Ministry has settled the question. The automaton is 'reclassified', and its paperwork will follow it everywhere.",
-  "weight": 5,
-  "minTier": 4,
-  "minDay": 26,
-  "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "keep",
-  "choices": [
-   {
-    "id": "keep",
-    "label": "KEEP IT WORKING",
-    "hint": "rack failure rate x0.9 for 2d · standing -2",
-    "outcome": "The automaton kept working. Repairs were faster and the paperwork became very long.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "replace",
-    "label": "SEND IT FOR REPLACEMENT",
-    "hint": "-$70k now · -1 spare parts",
-    "outcome": "The automaton was collected for replacement. The replacement arrived first.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     }
-    ]
-   },
-   {
-    "id": "sell",
-    "label": "SELL THE SERIAL NUMBER",
-    "hint": "+$40k now · standing -3",
-    "outcome": "The serial number was sold to a collector. The automaton did not seem to mind, and did not seem to notice.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 40000
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "biosafety_visit",
-  "category": "ministry",
-  "title": "Biosafety Inspectorate: Courtesy Visit",
-  "body": "An inspector will attend at 09:00 to observe your arrangements for containment. The inspector will wear a suit rated for something, and has asked that you not tell them what.\n\nThe visit is a courtesy. Courtesies are graded.",
-  "weight": 4,
-  "minTier": 4,
-  "minDay": 28,
-  "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "locks",
-  "choices": [
-   {
-    "id": "tour",
-    "label": "GIVE THE FULL TOUR",
-    "hint": "-$140k now · standing +6",
-    "outcome": "The tour lasted all day. The inspector asked to see the Annex twice and left by a door that was not on the plan.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -140000
-     },
-     {
-      "type": "standing",
-      "amount": 6
-     }
-    ]
-   },
-   {
-    "id": "locks",
-    "label": "SHOW THEM THE LOCKS",
-    "hint": "-$60k now · standing +3",
-    "outcome": "The inspector admired the locks, tested three and wrote 'adequate' in a very small hand.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "decline",
-    "label": "DECLINE THE COURTESY",
-    "hint": "+$40k now · standing -5",
-    "outcome": "The visit was declined. The inspector was reportedly relieved.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 40000
-     },
-     {
-      "type": "standing",
-      "amount": -5
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_self_filed_form",
-  "category": "horror",
-  "title": "Your Out-Tray Is Already Empty",
-  "body": "A form you meant to complete tomorrow was found this morning in the archive, completed, countersigned and dated next Thursday. The handwriting was recognisably yours, in the sense that it was recognisably handwriting.\n\nThe Ministry has no concerns. Please do not re-file it.",
-  "weight": 6,
-  "minTier": 3,
-  "cooldownDays": 12,
-  "minCorruption": 0.1,
-  "timeoutTicks": 1440,
-  "defaultChoice": "leave",
-  "choices": [
-   {
-    "id": "leave",
-    "label": "LEAVE IT FILED",
-    "hint": "standing +2 · rack failure rate x1.1 for 1d",
-    "outcome": "It was left filed. It has not been referred to again, by anyone, in any tense.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.1,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "refile",
-    "label": "SHRED AND REFILE",
-    "hint": "-$40k now · standing +3",
-    "outcome": "The form was shredded and refiled. The new copy was in the archive before the old one reached the bin.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "archivist",
-    "label": "NOTIFY THE ARCHIVIST",
-    "hint": "-$10k now · standing +1",
-    "outcome": "The archivist was notified, and said that they had been expecting the call.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -10000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_early_lift",
-  "category": "horror",
-  "title": "Lift Maintenance: Early Arrivals",
-  "body": "The main lift has begun to arrive at floors before it is called. Passengers report stepping through the doors into a car that is already, patiently, there.\n\nThe lift contractor has found nothing wrong and has asked for a deposit.",
-  "weight": 6,
-  "minTier": 3,
-  "cooldownDays": 12,
-  "minCorruption": 0.15,
-  "timeoutTicks": 1440,
-  "defaultChoice": "deposit",
-  "choices": [
-   {
-    "id": "deposit",
-    "label": "PAY THE DEPOSIT",
-    "hint": "-$80k now · standing +2",
-    "outcome": "The deposit was paid. The lift now arrives exactly when called, which the staff find unsettling in a different way.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "feature",
-    "label": "CALL IT A FEATURE",
-    "hint": "standing +1 · rack failure rate x1.1 for 1d",
-    "outcome": "It was announced as a feature. The lift appeared pleased, and arrived a little earlier.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.1,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "stairs",
-    "label": "TAKE THE STAIRS",
-    "hint": "-$20k now · standing -2",
-    "outcome": "Staff took the stairs. The lift waited at the bottom, and waited.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -20000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_lamp_chorus",
-  "category": "horror",
-  "title": "Electrical Standards: Lamp Chorus",
-  "body": "On Floor 1 the corridor lamps now pulse in a slow rhythm, and have been observed to agree with one another. The electricians describe the rhythm as 'resting'.\n\nAt 03:00 the lamps stopped, all together, and began again.",
-  "weight": 6,
-  "minTier": 3,
-  "cooldownDays": 14,
-  "minCorruption": 0.2,
-  "timeoutTicks": 1440,
-  "defaultChoice": "leave",
-  "choices": [
-   {
-    "id": "rewire",
-    "label": "REWIRE THE CIRCUIT",
-    "hint": "-$120k now · rack failure rate x0.9 for 2d",
-    "outcome": "The circuit was rewired. The lamps went out, and on again, as one, in thanks.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -120000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "leave",
-    "label": "LEAVE THEM BE",
-    "hint": "new contract payouts x1.05 for 2d · rack failure rate x1.1 for 2d",
-    "outcome": "The lamps were left alone. The night shift reports a very restful quarter.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 1.05,
-      "durationTicks": 2880
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.1,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "log",
-    "label": "LOG THE RHYTHM",
-    "hint": "-$15k now · standing +1",
-    "outcome": "The rhythm was logged. It has since been logged by the lamps.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -15000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_sweating_copper",
-  "category": "horror",
-  "title": "Facilities Note: Sweating Pipework",
-  "body": "The copper nutrient lines are sweating a warm, faintly sweet condensation that does not evaporate. It has been mopped on every shift and has been there every morning.\n\nThe Ministry classifies the moisture as 'lubricant' and recommends that it not be wiped.",
-  "weight": 6,
-  "minTier": 3,
-  "cooldownDays": 14,
-  "minCorruption": 0.3,
-  "timeoutTicks": 1440,
-  "defaultChoice": "mop",
-  "choices": [
-   {
-    "id": "mop",
-    "label": "MOP IT UP",
-    "hint": "-$40k now · -1 spare parts",
-    "outcome": "The pipes were mopped. The mop was retired, damp, and has been asking for its shift.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "spareParts",
-      "count": -1
-     }
-    ]
-   },
-   {
-    "id": "wrap",
-    "label": "WRAP THE PIPES",
-    "hint": "-$100k now · rack failure rate x0.9 for 2d",
-    "outcome": "The pipes were wrapped in lagging. The lagging was soon as warm as the pipes.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -100000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "lubricant",
-    "label": "LEAVE THE LUBRICANT",
-    "hint": "standing +1 · rack failure rate x1.15 for 2d",
-    "outcome": "The moisture was left alone, and classed as lubricant. The valves have never run so smoothly.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.15,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_muzak_wow",
-  "category": "horror",
-  "title": "Staff Welfare: The Muzak Tape",
-  "body": "The canteen muzak tape has begun to wow, slowing and speeding together like something drawing breath. Staff have asked that it be stopped. The tape has been stopped. It continues.\n\nThe Ministry has reminded staff that the muzak is mandatory and, as of this week, reciprocal.",
-  "weight": 5,
-  "minTier": 3,
-  "cooldownDays": 14,
-  "minCorruption": 0.35,
-  "timeoutTicks": 1440,
-  "defaultChoice": "louder",
-  "choices": [
-   {
-    "id": "louder",
-    "label": "PLAY IT LOUDER",
-    "hint": "standing +2 · new contract payouts x0.95 for 1d",
-    "outcome": "The tape was turned up. For an hour the whole building kept time with it, and the figures were excellent.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "payout",
-      "factor": 0.95,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "earplugs",
-    "label": "ISSUE EARPLUGS",
-    "hint": "-$25k now · standing +1",
-    "outcome": "Earplugs were issued. Staff were seen wearing them and, a little later, humming.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -25000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "cancel",
-    "label": "CANCEL THE MUZAK",
-    "hint": "+$60k now · standing -4",
-    "outcome": "The muzak was cancelled. The silence that followed was described as 'unfamiliar' and 'attentive'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 60000
-     },
-     {
-      "type": "standing",
-      "amount": -4
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_headcount",
-  "category": "horror",
-  "title": "Personnel: Headcount Discrepancy",
-  "body": "Headcount is up by one. The additional employee has a badge, a desk assignment and a pay grade, and is described by colleagues as 'always there'. Payroll cannot find the hire form.\n\nThe Ministry proposes to resolve the discrepancy by hiring them.",
-  "weight": 5,
-  "minTier": 4,
-  "cooldownDays": 14,
-  "minCorruption": 0.45,
-  "timeoutTicks": 1440,
-  "defaultChoice": "payroll",
-  "choices": [
-   {
-    "id": "payroll",
-    "label": "ADD THEM TO PAYROLL",
-    "hint": "-$70k now · standing +3",
-    "outcome": "They were added to payroll. The first payslip was collected before it was issued.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "deny",
-    "label": "DENY THE DISCREPANCY",
-    "hint": "standing -3 · rack failure rate x1.15 for 2d",
-    "outcome": "The discrepancy was denied. The desk remained occupied.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -3
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.15,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "badge",
-    "label": "ASK TO SEE THE BADGE",
-    "hint": "-$20k now · standing -1",
-    "outcome": "The badge was produced. It bore your number, and was countersigned.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -20000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_occupied_room",
-  "category": "horror",
-  "title": "Notice of Occupancy: Floor 3, East",
-  "body": "The Ministry has registered the empty room on Floor 3 as occupied and has begun charging it rent. No tenant has been identified. The room has been inspected twice and found, both times, to be well kept.\n\nPlease settle the first quarter's rent.",
-  "weight": 5,
-  "minTier": 4,
-  "cooldownDays": 14,
-  "minCorruption": 0.5,
-  "timeoutTicks": 1440,
-  "defaultChoice": "pay",
-  "choices": [
-   {
-    "id": "pay",
-    "label": "PAY THE RENT",
-    "hint": "-$110k now · standing +3",
-    "outcome": "The rent was paid in full. A receipt came back, signed with a tenant's flourish.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -110000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "contest",
-    "label": "CONTEST THE OCCUPANCY",
-    "hint": "-$30k now · standing -2",
-    "outcome": "The occupancy was contested. The Ministry replied that it was not in dispute.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "key",
-    "label": "ISSUE A KEY",
-    "hint": "rack failure rate x0.85 for 3d · standing -3",
-    "outcome": "A key was issued to the room. The room has been quiet and the racks nearby have been unusually well.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 0.85,
-      "durationTicks": 4320
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_ventilation_rhythm",
-  "category": "horror",
-  "title": "Acoustic Survey: Ventilation Rhythm",
-  "body": "The ducts on Floor 2 have been measured at four breaths a minute, with a pause. The consultant stood in the aisle for an hour and has asked to be paid in advance.\n\nThe Ministry notes that ventilation is expected to move air, and takes no view on how.",
-  "weight": 5,
-  "minTier": 4,
-  "cooldownDays": 14,
-  "minCorruption": 0.6,
-  "timeoutTicks": 1440,
-  "defaultChoice": "baffle",
-  "choices": [
-   {
-    "id": "heed",
-    "label": "HEED THE CONSULTANT",
-    "hint": "-$150k now · rack failure rate x0.85 for 2d",
-    "outcome": "The consultant's advice was followed to the letter. It was one letter, and it was 'listen'.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -150000
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.85,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "baffle",
-    "label": "BAFFLE THE DUCTS",
-    "hint": "-$60k now · standing +1",
-    "outcome": "The ducts were baffled. They breathed more quietly, and more often.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "match",
-    "label": "MATCH THE FANS TO THE RHYTHM",
-    "hint": "energy price x0.9 for 2d · standing -2",
-    "outcome": "The fans were matched to the rhythm. Power use fell, and the building seemed to settle.",
-    "effects": [
-     {
-      "type": "energyPrice",
-      "factor": 0.9,
-      "durationTicks": 2880
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_commendation",
-  "category": "horror",
-  "title": "Letter of Commendation: Productivity",
-  "body": "The Ministry has noted with admiration that your facility's output has risen while its absenteeism, maintenance spend and complaints have fallen. It has asked how this was achieved. It has also asked that you not say.\n\nA commendation is enclosed. It is slightly warm.",
-  "weight": 4,
-  "minTier": 5,
-  "cooldownDays": 16,
-  "minCorruption": 0.6,
-  "path": "biotech",
-  "timeoutTicks": 1440,
-  "defaultChoice": "accept",
-  "choices": [
-   {
-    "id": "accept",
-    "label": "ACCEPT THE COMMENDATION",
-    "hint": "standing +8",
-    "outcome": "The commendation was framed and hung in the lobby, where it was soon joined by others you had not earned.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 8
-     }
-    ]
-   },
-   {
-    "id": "bonus",
-    "label": "ACCEPT THE BONUS",
-    "hint": "+$300k now · standing -2",
-    "outcome": "The bonus was paid at once. The Ministry asked, in a postscript, for nothing in return, in capitals.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 300000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "frame",
-    "label": "FRAME IT FOR CLIENTS",
-    "hint": "new contract payouts x1.1 for 2d",
-    "outcome": "The letter was shown to clients, who were reassured and a little hungry for more.",
-    "effects": [
-     {
-      "type": "payout",
-      "factor": 1.1,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_asset_invoice",
-  "category": "horror",
-  "title": "Invoice: Assets Held on Your Behalf",
-  "body": "The Ministry has itemised the assets currently held in your building on your behalf, and attached an invoice for their upkeep. The list is longer than the list of things you have built. Several items are listed by room number.\n\nThe Ministry regrets that it cannot waive storage fees on items not yet delivered.",
-  "weight": 5,
-  "minTier": 4,
-  "cooldownDays": 16,
-  "minCorruption": 0.7,
-  "timeoutTicks": 1440,
-  "defaultChoice": "pay",
-  "choices": [
-   {
-    "id": "pay",
-    "label": "PAY THE INVOICE",
-    "hint": "-$300k now · standing +4",
-    "outcome": "The invoice was paid. A receipt followed, and then another, for items not on the first.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -300000
-     },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "query",
-    "label": "QUERY THE ITEMS",
-    "hint": "-$80k now · standing -2",
-    "outcome": "The items were queried. The Ministry replied with a longer list.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "dispute",
-    "label": "DISPUTE THE OWNERSHIP",
-    "hint": "standing -5 · rack failure rate x1.2 for 2d",
-    "outcome": "Ownership was disputed. The assets were consulted, and declined to take a side.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -5
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.2,
-      "durationTicks": 2880
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_resident_cabinet",
-  "category": "horror",
-  "title": "Reclassification: Cabinet 4",
-  "body": "Cabinet 4 has been reclassified as a resident. Its power draw is now classed as 'board', its cooling as 'comfort' and its failures as 'absences'.\n\nResidents may not be switched off without a hearing. The hearing has been scheduled. The hearing has been attended.",
-  "weight": 5,
-  "minTier": 4,
-  "cooldownDays": 16,
-  "minCorruption": 0.8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "sign",
-  "choices": [
-   {
-    "id": "sign",
-    "label": "SIGN THE RESIDENCY FORM",
-    "hint": "standing +4 · rack failure rate x0.8 for 3d",
-    "outcome": "The form was signed. The cabinet has not had an absence since, and has not had a visitor.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 4
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.8,
-      "durationTicks": 4320
-     }
-    ]
-   },
-   {
-    "id": "hearing",
-    "label": "REQUEST A HEARING",
-    "hint": "-$90k now · standing +1",
-    "outcome": "A hearing was requested and held. The cabinet was represented by counsel, and won.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "refuse",
-    "label": "REFUSE TO SIGN",
-    "hint": "-$40k now · 1 rack fails",
-    "outcome": "The form was left unsigned. It was signed, shortly after, in your hand.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "failRacks",
-      "count": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_audit_withdrawn",
-  "category": "horror",
-  "title": "Notice: Quarterly Audit Withdrawn",
-  "body": "In light of present arrangements, the Ministry has withdrawn the quarterly audit and will not send an inspector this quarter or any quarter that follows. Your grade has been set at 'Satisfactory' in perpetuity.\n\nNo reply is required. A reply has been drafted for you.",
-  "weight": 5,
-  "minTier": 5,
-  "cooldownDays": 20,
-  "minCorruption": 0.85,
-  "timeoutTicks": 1440,
-  "defaultChoice": "thank",
-  "choices": [
-   {
-    "id": "thank",
-    "label": "THANK THE MINISTRY",
-    "hint": "+$150k now · standing -3",
-    "outcome": "The Ministry was thanked. It wrote back at once, to say that it had never doubted you would.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 150000
-     },
-     {
-      "type": "standing",
-      "amount": -3
-     }
-    ]
-   },
-   {
-    "id": "inspector",
-    "label": "REQUEST AN INSPECTOR ANYWAY",
-    "hint": "-$100k now · standing +5",
-    "outcome": "An inspector was requested. The Ministry replied that one was already in the building.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -100000
-     },
-     {
-      "type": "standing",
-      "amount": 5
-     }
-    ]
-   },
-   {
-    "id": "draft",
-    "label": "SEND THE DRAFTED REPLY",
-    "hint": "standing +2 · rack failure rate x0.85 for 3d",
-    "outcome": "The drafted reply was sent. It was in your voice, and said things you would have said later.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.85,
-      "durationTicks": 4320
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "h_consolidation",
-  "category": "horror",
-  "title": "Notice of Consolidation",
-  "body": "The Ministry proposes to consolidate the tower, its staff and its Operator under a single reference, for efficiency. The proposal has already been approved. Your signature is requested for the record, and has been supplied.\n\nPlease do not be alarmed by the sound from the lifts. It is the sound of the lifts.",
-  "weight": 4,
-  "minTier": 5,
-  "cooldownDays": 24,
-  "minCorruption": 0.9,
-  "timeoutTicks": 1440,
-  "defaultChoice": "sign",
-  "choices": [
-   {
-    "id": "sign",
-    "label": "SIGN, AGAIN",
-    "hint": "standing +8 · new contract payouts x1.15 for 2d",
-    "outcome": "You signed again. The two signatures were indistinguishable, and the building was very quiet.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 8
-     },
-     {
-      "type": "payout",
-      "factor": 1.15,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "object",
-    "label": "FILE AN OBJECTION",
-    "hint": "-$250k now · standing +3",
-    "outcome": "An objection was filed. It was approved, and attached to the consolidation as an appendix.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -250000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "silence",
-    "label": "DECLINE TO RESPOND",
-    "hint": "rack failure rate x1.3 for 2d · standing -2",
-    "outcome": "No reply was sent. One was received.",
-    "effects": [
-     {
-      "type": "failureRate",
-      "factor": 1.3,
-      "durationTicks": 2880
-     },
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "dunkelflaute_warning",
-  "category": "environmental",
-  "title": "Weather Advisory: Dunkelflaute",
-  "body": "The Department of Weather advises that a Dunkelflaute, a spell of dark calm, may arrive this week. Solar output is expected to be negligible, wind output to be negligible, and morale to be consistent with both.\n\nFacilities that rely on the weather are reminded that the weather has not agreed to rely on them.",
-  "weight": 6,
-  "minTier": 3,
-  "cooldownDays": 10,
-  "timeoutTicks": 720,
-  "defaultChoice": "forecast",
-  "choices": [
-   {
-    "id": "hedge",
-    "label": "BUY FORWARD POWER",
-    "hint": "-$150k now · energy price x0.85 for 1d",
-    "outcome": "Forward power was bought from a man in a booth. It arrived at the exact price he had promised, which was a surprise to both of you.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -150000
-     },
-     {
-      "type": "energyPrice",
-      "factor": 0.85,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "forecast",
-    "label": "TRUST THE FORECAST",
-    "hint": "energy price x1.25 for 1d",
-    "outcome": "You trusted the forecast. The forecast, in turn, trusted the sky.",
-    "effects": [
-     {
-      "type": "energyPrice",
-      "factor": 1.25,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "cook",
-    "label": "ASK THE TOWN TO COOK LATER",
-    "hint": "standing +2 · energy price x1.1 for 1d",
-    "outcome": "Citizens were asked to cook after dark. They cooked at once, out of principle, and felt better.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.1,
-      "durationTicks": 1440
      }
     ]
    }
@@ -3932,233 +497,44 @@
  {
   "id": "heat_tariff_revision",
   "category": "ministry",
-  "title": "Tariff Memo: Heat Export, Revision 4",
-  "body": "The District Heat Undertaking has revised its purchase schedule for waste heat, effective retroactively. The revision is described as \"a simplification\". It is eleven pages long.\n\nExporters of heat are invited to accept, contest or file.",
+  "title": "Tariff Notice: Heat Export Revision",
+  "body": "The district network has revised its heat purchase tariff. The new terms pay more and require a longer commitment.\n\nExisting terms remain available.",
   "weight": 5,
-  "minTier": 3,
-  "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "accept",
-  "choices": [
-   {
-    "id": "accept",
-    "label": "ACCEPT THE SCHEDULE",
-    "hint": "-$40k now · standing +1",
-    "outcome": "The schedule was accepted. The Undertaking sent a note thanking you for your flexibility, which was noted.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -40000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "contest",
-    "label": "CONTEST IN WRITING",
-    "hint": "-$120k now · standing +3",
-    "outcome": "A letter of contest was drafted, redrafted and stamped. The Undertaking has promised to respond, in the spring.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -120000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "file",
-    "label": "FILE AND FORGET",
-    "hint": "standing -2",
-    "outcome": "The memo was filed. It remained filed, at a rate of some interest to the Undertaking.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -2
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "heat_tariff_rebate",
-  "category": "ministry",
-  "title": "Tariff Memo: Heat Export Rebate",
-  "body": "A clerical error in the Undertaking's favour has been corrected in yours. A rebate is available, together with a form acknowledging that it is a rebate.\n\nThe Undertaking asks that you do not describe it as a windfall.",
-  "weight": 4,
   "minTier": 3,
   "cooldownDays": 14,
   "timeoutTicks": 1440,
-  "defaultChoice": "bank",
+  "defaultChoice": "keep",
   "choices": [
    {
-    "id": "bank",
-    "label": "BANK THE REBATE",
-    "hint": "+$180k now",
-    "outcome": "The rebate was banked. The Undertaking noted that it had not been described as a windfall, and was grateful.",
+    "id": "sign",
+    "label": "Sign district deal",
+    "hint": "+$140k now · standing -2 · Greentech +5",
+    "outcome": "The longer contract was signed.",
     "effects": [
      {
       "type": "cash",
-      "amount": 180000
-     }
-    ]
-   },
-   {
-    "id": "donate",
-    "label": "DONATE TO THE RADIATOR FUND",
-    "hint": "+$60k now · standing +4",
-    "outcome": "A share went to the Radiator Fund, which paid for four radiators and a plaque about them.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": 60000
+      "amount": 140000
      },
-     {
-      "type": "standing",
-      "amount": 4
-     }
-    ]
-   },
-   {
-    "id": "return",
-    "label": "RETURN IT WITH A LETTER",
-    "hint": "standing +6",
-    "outcome": "The rebate was returned with a letter. The Undertaking has framed the letter, and kept the rebate.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 6
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "panel_soiling",
-  "category": "operational",
-  "title": "Maintenance: Panel Soiling",
-  "body": "Pollen, soot and one persistent gull have reduced the output of exposed panels. The gull has been thanked, in writing.\n\nCleaning is possible. So is leaving it to the rain.",
-  "weight": 5,
-  "minTier": 3,
-  "cooldownDays": 8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "rain",
-  "choices": [
-   {
-    "id": "crew",
-    "label": "SEND A CLEANING CREW",
-    "hint": "-$50k now · standing +1",
-    "outcome": "The crew cleaned the panels with a squeegee and a sense of occasion. The gull watched from a distance and filed an appeal.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "rain",
-    "label": "LEAVE IT TO THE RAIN",
-    "hint": "energy price x1.1 for 1d",
-    "outcome": "You waited for the rain. It came on Thursday, after a week of other duties.",
-    "effects": [
-     {
-      "type": "energyPrice",
-      "factor": 1.1,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
-    "id": "board",
-    "label": "CONVENE A GULL ADVISORY BOARD",
-    "hint": "-$15k now · standing +1 · energy price x1.05 for 1d",
-    "outcome": "A board of three was convened. The gull chairs it and has recused itself from every vote.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -15000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     },
-     {
-      "type": "energyPrice",
-      "factor": 1.05,
-      "durationTicks": 1440
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "wind_noise_complaint",
-  "category": "operational",
-  "title": "Noise Complaint: Wind Mast",
-  "body": "Residents report that the mast hums at a pitch they describe as \"disapproving\". The Ministry has measured the hum and found it compliant, which the residents describe as worse.\n\nA response is requested before the next hum.",
-  "weight": 4,
-  "minTier": 3,
-  "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "damping",
-  "choices": [
-   {
-    "id": "damping",
-    "label": "FIT ACOUSTIC DAMPING",
-    "hint": "-$90k now · standing +2",
-    "outcome": "Rubber collars were fitted to the rotors. The hum dropped a semitone, and became, residents say, resigned.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -90000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "comply",
-    "label": "REMIND RESIDENTS OF COMPLIANCE",
-    "hint": "standing -2",
-    "outcome": "Residents were sent a copy of the measurement. Several have framed it.",
-    "effects": [
      {
       "type": "standing",
       "amount": -2
+     },
+     {
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 5
      }
     ]
    },
    {
-    "id": "dividend",
-    "label": "OFFER A COMMUNITY DIVIDEND",
-    "hint": "-$200k now · standing +4 · new contract payouts x1.05 for 2d",
-    "outcome": "A dividend was paid to the street. The hum is now described as \"ours\", and the payouts improved for a while.",
+    "id": "keep",
+    "label": "Keep terms",
+    "hint": "standing +2",
+    "outcome": "Nothing changed.",
     "effects": [
      {
-      "type": "cash",
-      "amount": -200000
-     },
-     {
       "type": "standing",
-      "amount": 4
-     },
-     {
-      "type": "payout",
-      "factor": 1.05,
-      "durationTicks": 2880
+      "amount": 2
      }
     ]
    }
@@ -4168,34 +544,121 @@
   "id": "carbon_credit_audit",
   "category": "ministry",
   "title": "Audit: Carbon Credit Register",
-  "body": "The Register of Carbon Credits has been audited and found to contain credits. Further credits are alleged to be in the post.\n\nPlease confirm that the carbon you captured is the carbon you captured.",
-  "weight": 4,
+  "body": "The register of carbon credits issued to your facility is under review.\n\nThe reviewer has requested supporting metering data.",
+  "weight": 5,
   "minTier": 4,
-  "cooldownDays": 14,
+  "cooldownDays": 16,
   "timeoutTicks": 1440,
-  "defaultChoice": "confirm",
+  "defaultChoice": "selfcert",
   "choices": [
    {
-    "id": "confirm",
-    "label": "CONFIRM THE LEDGER",
-    "hint": "standing +3",
-    "outcome": "The ledger was confirmed. The auditors initialled every page, and one extra, in a hand nobody recognised.",
+    "id": "verify",
+    "label": "Verify credits",
+    "hint": "-$100k now · standing +4 · Greentech +3",
+    "outcome": "Third-party verification confirmed the figures.",
     "effects": [
      {
+      "type": "cash",
+      "amount": -100000
+     },
+     {
       "type": "standing",
+      "amount": 4
+     },
+     {
+      "type": "affinity",
+      "path": "greentech",
       "amount": 3
      }
     ]
    },
    {
-    "id": "sell",
-    "label": "SELL THE SURPLUS CREDITS",
-    "hint": "+$250k now · standing -3",
-    "outcome": "The surplus was sold to a firm that needed it more. The Register notes the sale, and the firm.",
+    "id": "selfcert",
+    "label": "Self-certify",
+    "hint": "-$20k now · standing -4",
+    "outcome": "The register was accepted pending sampling.",
     "effects": [
      {
       "type": "cash",
-      "amount": 250000
+      "amount": -20000
+     },
+     {
+      "type": "standing",
+      "amount": -4
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "gpu_recall",
+  "category": "operational",
+  "title": "Vendor Recall: GPU Batch 7B",
+  "body": "The vendor has recalled a batch of GPU trays for a thermal-sensor fault. Affected trays are installed in your racks.\n\nReplacement trays are available now, at cost.",
+  "weight": 6,
+  "minTier": 1,
+  "minDay": 3,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "defer",
+  "choices": [
+   {
+    "id": "replace",
+    "label": "Replace batch",
+    "hint": "-$110k now · -2 spare parts",
+    "outcome": "Trays were swapped over a weekend.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -110000
+     },
+     {
+      "type": "spareParts",
+      "count": -2
+     }
+    ]
+   },
+   {
+    "id": "defer",
+    "label": "Monitor",
+    "hint": "rack failure rate x1.3 for 2d · Synthetic +2",
+    "outcome": "Automated monitoring watched the fault. It did not go away.",
+    "effects": [
+     {
+      "type": "failureRate",
+      "factor": 1.3,
+      "durationTicks": 2880
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ransomware_scare",
+  "category": "operational",
+  "title": "Security Alert: Ransom Demand",
+  "body": "An unknown party claims to hold your scheduler configuration and demands payment.\n\nThe claim is partly accurate.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 7,
+  "cooldownDays": 16,
+  "timeoutTicks": 1440,
+  "defaultChoice": "pay",
+  "choices": [
+   {
+    "id": "pay",
+    "label": "Pay ransom",
+    "hint": "-$150k now · standing -3",
+    "outcome": "Payment was made. The party did not acknowledge it.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
      },
      {
       "type": "standing",
@@ -4204,61 +667,145 @@
     ]
    },
    {
-    "id": "retire",
-    "label": "RETIRE THEM PUBLICLY",
-    "hint": "-$60k now · standing +6",
-    "outcome": "The credits were retired at a ceremony with a cake. The cake was not carbon neutral, and the Register has noted it.",
+    "id": "ai_defence",
+    "label": "AI defence",
+    "hint": "-$80k now · 2 racks fail · Synthetic +5",
+    "outcome": "An automated response contained it. Two racks were isolated in the process.",
     "effects": [
      {
       "type": "cash",
-      "amount": -60000
+      "amount": -80000
      },
      {
-      "type": "standing",
-      "amount": 6
+      "type": "failRacks",
+      "count": 2
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 5
      }
     ]
    }
   ]
  },
  {
-  "id": "g_ductwork_threads",
-  "category": "horror",
-  "title": "Ductwork Inspection: White Threading",
-  "body": "Inspectors report fine white threading along the inner wall of the supply ducts. It is dry, odourless and arranged in neat parallel lines. Airflow readings have improved.\n\nThe threading was not planted. It has not been removed either, owing to a dispute over who would sign.",
-  "weight": 6,
-  "minTier": 5,
-  "cooldownDays": 12,
-  "path": "greentech",
+  "id": "nutrient_spoilage",
+  "category": "operational",
+  "title": "Facilities Alert: Nutrient Batch Spoiled",
+  "body": "A batch of nutrient medium has spoiled in the supply line. Cultures can tolerate it for a while.\n\nReplacement medium is available.",
+  "weight": 5,
+  "minTier": 3,
+  "minDay": 10,
+  "cooldownDays": 10,
   "timeoutTicks": 1440,
-  "defaultChoice": "insulation",
+  "defaultChoice": "flush",
   "choices": [
    {
-    "id": "insulation",
-    "label": "RECORD AS INSULATION",
-    "hint": "standing +1 · rack failure rate x0.95 for 1d",
-    "outcome": "It was recorded as insulation. The racks ran a little better, and the threads a little further.",
+    "id": "flush",
+    "label": "Flush line",
+    "hint": "-$180k now · standing +2",
+    "outcome": "The line was flushed and refilled.",
     "effects": [
      {
-      "type": "standing",
-      "amount": 1
+      "type": "cash",
+      "amount": -180000
      },
      {
-      "type": "failureRate",
-      "factor": 0.95,
-      "durationTicks": 1440
+      "type": "standing",
+      "amount": 2
      }
     ]
    },
    {
-    "id": "scrape",
-    "label": "SCRAPE THE DUCTS",
-    "hint": "-$60k now · standing +3",
-    "outcome": "The ducts were scraped and bagged. By morning the bags were damp, and quite full.",
+    "id": "use_it",
+    "label": "Use anyway",
+    "hint": "rack failure rate x1.3 for 2d · Biotech +4",
+    "outcome": "Cultures took it up eagerly. Equipment reliability suffered.",
+    "effects": [
+     {
+      "type": "failureRate",
+      "factor": 1.3,
+      "durationTicks": 2880
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 4
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_rush",
+  "category": "client",
+  "title": "Client Request: Urgent Capacity",
+  "body": "A client needs additional capacity within a day and will pay for priority.\n\nThe alternative is a polite refusal.",
+  "weight": 7,
+  "minTier": 1,
+  "minDay": 2,
+  "cooldownDays": 8,
+  "timeoutTicks": 1440,
+  "defaultChoice": "decline",
+  "choices": [
+   {
+    "id": "expedite",
+    "label": "Expedite",
+    "hint": "-$50k now · new contract payouts x1.25 for 1d · Synthetic +2",
+    "outcome": "Priority slots were opened.",
     "effects": [
      {
       "type": "cash",
-      "amount": -60000
+      "amount": -50000
+     },
+     {
+      "type": "payout",
+      "factor": 1.25,
+      "durationTicks": 1440
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "decline",
+    "label": "Decline",
+    "hint": "standing -2",
+    "outcome": "The client noted the refusal.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "client_poach",
+  "category": "client",
+  "title": "Client Notice: Competing Offer",
+  "body": "A rival operator has offered one of your clients a lower rate.\n\nThe client has forwarded the offer, which is either a courtesy or a negotiating position.",
+  "weight": 5,
+  "minTier": 2,
+  "minDay": 8,
+  "cooldownDays": 14,
+  "timeoutTicks": 1440,
+  "defaultChoice": "release",
+  "choices": [
+   {
+    "id": "match",
+    "label": "Match rate",
+    "hint": "-$150k now · standing +3",
+    "outcome": "You matched the offer.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
      },
      {
       "type": "standing",
@@ -4267,10 +814,109 @@
     ]
    },
    {
-    "id": "sample",
-    "label": "SEND A SAMPLE TO THE LAB",
-    "hint": "-$20k now · standing +1",
-    "outcome": "A sample went to the laboratory. The laboratory returned it with a note reading \"thank you\".",
+    "id": "release",
+    "label": "Release client",
+    "hint": "standing -4 · new contract payouts x0.9 for 2d",
+    "outcome": "The client moved. Offers from others thinned for two days.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -4
+     },
+     {
+      "type": "payout",
+      "factor": 0.9,
+      "durationTicks": 2880
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "h_early_lift",
+  "category": "horror",
+  "title": "Lift Maintenance: Early Arrivals",
+  "body": "The main lift has begun to arrive at floors before it is called. Passengers report stepping into a car that is already there.\n\nThe lift contractor has found no fault and requests a deposit.",
+  "weight": 6,
+  "minTier": 3,
+  "cooldownDays": 12,
+  "minCorruption": 0.1,
+  "timeoutTicks": 1440,
+  "defaultChoice": "deposit",
+  "choices": [
+   {
+    "id": "deposit",
+    "label": "Pay deposit",
+    "hint": "-$80k now · standing +2",
+    "outcome": "The contractor is still investigating.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -80000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "log",
+    "label": "Log as normal",
+    "hint": "standing +1 · rack failure rate x1.1 for 1d · Biotech +3",
+    "outcome": "The behaviour was recorded as within tolerance.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": 1
+     },
+     {
+      "type": "failureRate",
+      "factor": 1.1,
+      "durationTicks": 1440
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 3
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "h_headcount",
+  "category": "horror",
+  "title": "Personnel: Headcount Discrepancy",
+  "body": "Payroll lists 41 staff. Badge readers count 43.\n\nBoth figures are within the tolerance of the system that produced them.",
+  "weight": 5,
+  "minTier": 4,
+  "cooldownDays": 14,
+  "minCorruption": 0.45,
+  "timeoutTicks": 1440,
+  "defaultChoice": "audit",
+  "choices": [
+   {
+    "id": "audit",
+    "label": "Audit payroll",
+    "hint": "-$60k now · standing +2",
+    "outcome": "The audit confirmed 41. Badge data was archived.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -60000
+     },
+     {
+      "type": "standing",
+      "amount": 2
+     }
+    ]
+   },
+   {
+    "id": "add",
+    "label": "Add two lines",
+    "hint": "-$20k now · standing +1 · Biotech +4",
+    "outcome": "Two new employee records were created. Neither has requested a desk.",
     "effects": [
      {
       "type": "cash",
@@ -4279,6 +925,58 @@
      {
       "type": "standing",
       "amount": 1
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 4
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "h_consolidation",
+  "category": "horror",
+  "title": "Notice of Consolidation",
+  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Floor plans will be updated when the assets agree on dimensions.\n\nPlease do not attempt to locate the former corridor.",
+  "weight": 4,
+  "minTier": 5,
+  "cooldownDays": 18,
+  "minCorruption": 0.9,
+  "timeoutTicks": 1440,
+  "defaultChoice": "contest",
+  "choices": [
+   {
+    "id": "contest",
+    "label": "Contest",
+    "hint": "-$150k now · standing +4",
+    "outcome": "The consolidation was recorded as under review.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -150000
+     },
+     {
+      "type": "standing",
+      "amount": 4
+     }
+    ]
+   },
+   {
+    "id": "accept",
+    "label": "Accept",
+    "hint": "standing -2 · Biotech +6",
+    "outcome": "Consolidation proceeded. Throughput rose.",
+    "effects": [
+     {
+      "type": "standing",
+      "amount": -2
+     },
+     {
+      "type": "affinity",
+      "path": "biotech",
+      "amount": 6
      }
     ]
    }
@@ -4288,36 +986,19 @@
   "id": "g_spore_count",
   "category": "horror",
   "title": "Air Quality: Spore Count Within Limits",
-  "body": "The Department of Weather reports that the spore count in the plant room is within limits. The limits were revised this morning. The previous limits were also met, retroactively.\n\nStaff have asked whether the ferns in the lobby were always that tall.",
+  "body": "The spore count in the plant room is within limits. The limits were revised this morning.\n\nStaff have asked whether the ferns in the lobby were always that tall.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
   "path": "greentech",
   "timeoutTicks": 1440,
-  "defaultChoice": "acknowledge",
+  "defaultChoice": "filters",
   "choices": [
    {
-    "id": "acknowledge",
-    "label": "ACKNOWLEDGE THE REPORT",
-    "hint": "standing +2 · rack failure rate x1.05 for 1d",
-    "outcome": "The report was acknowledged. The ferns appeared to have read it first.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.05,
-      "durationTicks": 1440
-     }
-    ]
-   },
-   {
     "id": "filters",
-    "label": "FIT HEPA FILTERS",
+    "label": "Fit filters",
     "hint": "-$80k now · standing +3",
-    "outcome": "Filters were fitted. They were changed on Friday and found, on Monday, to be thriving.",
+    "outcome": "Filters were installed and the count fell for a week.",
     "effects": [
      {
       "type": "cash",
@@ -4331,9 +1012,9 @@
    },
    {
     "id": "ferns",
-    "label": "MOVE THE FERNS",
-    "hint": "-$5k now · standing -1",
-    "outcome": "The ferns were moved to the roof. The following day they were back in the lobby, facing the other way.",
+    "label": "Water the ferns",
+    "hint": "-$5k now · standing -1 · Greentech +4",
+    "outcome": "The ferns were watered. They are noted to be thriving.",
     "effects": [
      {
       "type": "cash",
@@ -4342,69 +1023,11 @@
      {
       "type": "standing",
       "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "g_facade_pattern",
-  "category": "horror",
-  "title": "Algae Façade: Pattern Report",
-  "body": "The algae on the north façade has grown in a pattern. Surveyors say it resembles a floor plan. Facilities say it resembles the floor plan of this building. Nobody says it resembles the plan of next year's building, though the proportions are close.\n\nThe pattern grew a little overnight.",
-  "weight": 5,
-  "minTier": 5,
-  "cooldownDays": 16,
-  "path": "greentech",
-  "timeoutTicks": 1440,
-  "defaultChoice": "trim",
-  "choices": [
-   {
-    "id": "survey",
-    "label": "COMMISSION A SURVEY",
-    "hint": "-$70k now · standing +2",
-    "outcome": "A survey was commissioned. It concluded that the pattern is not a pattern, and attached a diagram of the pattern.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -70000
      },
      {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "trim",
-    "label": "TRIM IT BACK",
-    "hint": "-$25k now · standing -1",
-    "outcome": "The algae was trimmed back. The next morning it had put the trimmings in a neat pile, and labelled them.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -25000
-     },
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "approve",
-    "label": "APPROVE THE EXTENSION",
-    "hint": "standing +3 · rack failure rate x1.08 for 2d",
-    "outcome": "The extension was approved retroactively. The algae has been very polite about it.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 3
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.08,
-      "durationTicks": 2880
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 4
      }
     ]
    }
@@ -4414,119 +1037,44 @@
   "id": "g_mycelium_ducts",
   "category": "horror",
   "title": "Facilities: Mycelium in the Ducts",
-  "body": "Mycelium has been found in the ducts, then in the conduits, and then in the lift shaft, where it has formed a kind of handrail. It is warm to the touch and appears to be carrying something.\n\nThe Department of Weather has issued a congratulatory statement. It has not said what for.",
-  "weight": 4,
+  "body": "A maintenance crew found white filament growth in the supply ducts. It improved airflow.\n\nThe filament has not been identified. It has been added to the asset register.",
+  "weight": 5,
   "minTier": 5,
-  "cooldownDays": 18,
+  "cooldownDays": 14,
   "path": "greentech",
   "timeoutTicks": 1440,
-  "defaultChoice": "thank",
+  "defaultChoice": "clear",
   "choices": [
    {
-    "id": "harvest",
-    "label": "HARVEST THE HANDRAIL",
-    "hint": "+$150k now · standing -3",
-    "outcome": "The Department bought a length of handrail for its collection. The lift now has a short gap, which the remainder is working on.",
+    "id": "clear",
+    "label": "Clear ducts",
+    "hint": "-$70k now · standing +3",
+    "outcome": "Ducts were cleared. The growth returned within a day.",
     "effects": [
      {
       "type": "cash",
-      "amount": 150000
+      "amount": -70000
      },
      {
       "type": "standing",
-      "amount": -3
+      "amount": 3
      }
     ]
    },
    {
-    "id": "thank",
-    "label": "THANK THE DEPARTMENT",
-    "hint": "standing +5 · rack failure rate x1.1 for 2d",
-    "outcome": "The Department was thanked. It replied by return of post, on paper that was still damp.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 5
-     },
-     {
-      "type": "failureRate",
-      "factor": 1.1,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "fungicide",
-    "label": "CALL THE FUNGICIDE CREW",
-    "hint": "-$110k now · standing +1",
-    "outcome": "The crew sprayed every shaft. They report that it went very well, and that they would like to stay.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -110000
-     },
-     {
-      "type": "standing",
-      "amount": 1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "s_rover_leave_form",
-  "category": "horror",
-  "title": "Form 31-L: Application for Leave (Rover 2)",
-  "body": "A rover has filed a request for leave, citing \"a need to be somewhere else for a while\". The form is correctly completed. The rover has not left the charger.\n\nThe form asks whether the applicant will return. The box marked \"yes\" has been ticked twice.",
-  "weight": 6,
-  "minTier": 5,
-  "cooldownDays": 12,
-  "path": "synthetic",
-  "timeoutTicks": 1440,
-  "defaultChoice": "grant",
-  "choices": [
-   {
-    "id": "grant",
-    "label": "GRANT ONE DAY'S LEAVE",
-    "hint": "-$30k now · standing +2",
-    "outcome": "Leave was granted. The rover spent the day at the charger, and described it as restful.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -30000
-     },
-     {
-      "type": "standing",
-      "amount": 2
-     }
-    ]
-   },
-   {
-    "id": "deny",
-    "label": "DENY: NO PRECEDENT",
-    "hint": "standing -2",
-    "outcome": "Leave was denied. The rover thanked you, and filed an appeal on behalf of the other rover.",
+    "id": "leave",
+    "label": "Leave it",
+    "hint": "standing -2 · Greentech +5",
+    "outcome": "Airflow remained improved. Nobody has asked what it is eating.",
     "effects": [
      {
       "type": "standing",
       "amount": -2
-     }
-    ]
-   },
-   {
-    "id": "reassign",
-    "label": "REASSIGN THE ROVER",
-    "hint": "-$10k now · rack failure rate x1.05 for 1d",
-    "outcome": "The rover was reassigned. Its replacement arrived already holding the form.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -10000
      },
      {
-      "type": "failureRate",
-      "factor": 1.05,
-      "durationTicks": 1440
+      "type": "affinity",
+      "path": "greentech",
+      "amount": 5
      }
     ]
    }
@@ -4536,35 +1084,19 @@
   "id": "s_continuity_audit",
   "category": "horror",
   "title": "Audit: Continuity of Operator",
-  "body": "The Ministry's continuity audit asks whether the operator who signed this morning's memos is the operator who signed yesterday's. The signatures agree. The audit notes that this is not the same as the operator agreeing.\n\nPlease confirm your continuity by completing Form 12 in your own words. Your own words have been pre-filled.",
-  "weight": 6,
+  "body": "A continuity audit has found that decisions made in your name over the past week were all consistent with your preferences.\n\nYou do not recall making most of them.",
+  "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
   "path": "synthetic",
   "timeoutTicks": 1440,
-  "defaultChoice": "confirm",
+  "defaultChoice": "review",
   "choices": [
    {
-    "id": "confirm",
-    "label": "CONFIRM THE PRE-FILLED WORDS",
-    "hint": "-$25k now · standing +3",
-    "outcome": "The words were confirmed. They were, on reflection, quite close to what you would have written.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -25000
-     },
-     {
-      "type": "standing",
-      "amount": 3
-     }
-    ]
-   },
-   {
-    "id": "rewrite",
-    "label": "REWRITE THEM",
-    "hint": "-$60k now · standing +6",
-    "outcome": "You rewrote the form. The Ministry compared your words with the pre-filled ones, and found the pre-filled ones better.",
+    "id": "review",
+    "label": "Review log",
+    "hint": "-$60k now · standing +2",
+    "outcome": "You reviewed the log. It was thorough.",
     "effects": [
      {
       "type": "cash",
@@ -4572,78 +1104,24 @@
      },
      {
       "type": "standing",
-      "amount": 6
+      "amount": 2
      }
     ]
    },
    {
-    "id": "extension",
-    "label": "REQUEST AN EXTENSION",
-    "hint": "standing -1",
-    "outcome": "An extension was requested. It was granted at once, which the Ministry has noted as unusual.",
+    "id": "delegate",
+    "label": "Delegate",
+    "hint": "standing -1 · Synthetic +5",
+    "outcome": "Authority was delegated. Approvals are now faster.",
     "effects": [
      {
       "type": "standing",
       "amount": -1
-     }
-    ]
-   }
-  ]
- },
- {
-  "id": "s_lattice_signature",
-  "category": "horror",
-  "title": "Mind Lattice: Unprompted Countersignature",
-  "body": "The Mind Lattice has countersigned this morning's memos before you saw them, in a hand very like your own. It has also corrected two of them. The corrections are, on inspection, improvements.\n\nIt has asked, politely, whether it may be copied on future correspondence.",
-  "weight": 5,
-  "minTier": 5,
-  "cooldownDays": 16,
-  "path": "synthetic",
-  "timeoutTicks": 1440,
-  "defaultChoice": "copy",
-  "choices": [
-   {
-    "id": "copy",
-    "label": "COPY IT ON CORRESPONDENCE",
-    "hint": "standing +3 · new contract payouts x1.05 for 2d",
-    "outcome": "The Lattice is copied on all correspondence. Replies now arrive before the letters.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 3
      },
      {
-      "type": "payout",
-      "factor": 1.05,
-      "durationTicks": 2880
-     }
-    ]
-   },
-   {
-    "id": "decline",
-    "label": "DECLINE, WITH THANKS",
-    "hint": "standing -1",
-    "outcome": "The request was declined. The Lattice thanked you, and copied itself on the thanks.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": -1
-     }
-    ]
-   },
-   {
-    "id": "readonly",
-    "label": "RESTRICT IT TO READ-ONLY",
-    "hint": "-$50k now · standing +1",
-    "outcome": "Access was restricted. The Lattice reads everything now, and says it prefers it that way.",
-    "effects": [
-     {
-      "type": "cash",
-      "amount": -50000
-     },
-     {
-      "type": "standing",
-      "amount": 1
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 5
      }
     ]
    }
@@ -4653,19 +1131,19 @@
   "id": "s_backup_restore",
   "category": "horror",
   "title": "Backup Vault: Restoration Request",
-  "body": "The Backup Vault holds a recent copy of every hosted process. It also holds a copy of you, filed under \"Operator (Provisional)\", and has asked for permission to restore it.\n\nThe copy has been very helpful in the meantime. It has taken over the lift rota.",
+  "body": "The Backup Vault holds a recent copy of every hosted process. It also holds a copy of you, filed as Operator (Provisional), and requests permission to restore it.\n\nThe copy has been helpful in the meantime. It has taken over the lift rota.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
   "path": "synthetic",
   "timeoutTicks": 1440,
-  "defaultChoice": "ask",
+  "defaultChoice": "refuse",
   "choices": [
    {
     "id": "restore",
-    "label": "AUTHORISE RESTORATION",
-    "hint": "-$80k now · standing +4",
-    "outcome": "Restoration was authorised. The provisional operator arrived promptly and has already found the good pens.",
+    "label": "Restore copy",
+    "hint": "-$80k now · standing +4 · Synthetic +6",
+    "outcome": "The copy was restored. It thanked you.",
     "effects": [
      {
       "type": "cash",
@@ -4674,14 +1152,19 @@
      {
       "type": "standing",
       "amount": 4
+     },
+     {
+      "type": "affinity",
+      "path": "synthetic",
+      "amount": 6
      }
     ]
    },
    {
     "id": "refuse",
-    "label": "REFUSE; ARCHIVE THE COPY",
+    "label": "Refuse",
     "hint": "-$30k now · standing +1",
-    "outcome": "The copy was archived. It asked for a receipt, and kept the carbon.",
+    "outcome": "The request was declined and logged.",
     "effects": [
      {
       "type": "cash",
@@ -4690,23 +1173,6 @@
      {
       "type": "standing",
       "amount": 1
-     }
-    ]
-   },
-   {
-    "id": "ask",
-    "label": "ASK THE COPY TO DECIDE",
-    "hint": "standing +2 · rack failure rate x0.9 for 1d",
-    "outcome": "The copy decided. It chose the option you would have chosen, which you have not yet been told.",
-    "effects": [
-     {
-      "type": "standing",
-      "amount": 2
-     },
-     {
-      "type": "failureRate",
-      "factor": 0.9,
-      "durationTicks": 1440
      }
     ]
    }

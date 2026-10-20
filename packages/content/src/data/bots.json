@@ -1,7 +1,7 @@
 {
  "rover": {
   "id": "rover",
-  "name": "Maintenance Automaton",
+  "name": "Maintenance Bot",
   "cost": 50000,
   "speed": 0.25,
   "batteryTicks": 600,
@@ -10,7 +10,7 @@
  },
  "drone": {
   "id": "drone",
-  "name": "Surveyor Drone",
+  "name": "Survey Drone",
   "cost": 90000,
   "speed": 0.5,
   "batteryTicks": 240,
@@ -21,7 +21,7 @@
  },
  "lifter": {
   "id": "lifter",
-  "name": "Heavy Lifter Automaton",
+  "name": "Heavy Lifter Bot",
   "cost": 130000,
   "speed": 0.18,
   "batteryTicks": 900,
