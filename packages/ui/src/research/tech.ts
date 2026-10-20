@@ -32,7 +32,7 @@ export function nodeState(node: TechNode, view: SimView, content: ContentDB): Te
 	const done = researchedSet(view);
 	if (done.has(node.id)) return { kind: "researched" };
 	const needs: string[] = [];
-	if (view.tier < node.minTier) needs.push(`Clearance ${node.minTier}`);
+	if (view.tier < node.minTier) needs.push(`Level ${node.minTier}`);
 	for (const r of node.requires) if (!done.has(r)) needs.push(techName(content, r));
 	if (needs.length) return { kind: "locked", reason: `Requires ${needs.join(" and ")}` };
 	const rp = view.researchPoints ?? 0;

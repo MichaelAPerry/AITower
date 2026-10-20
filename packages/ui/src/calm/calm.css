@@ -333,22 +333,22 @@
 	z-index: 7;
 }
 .aitower-hud .ui-dtab {
-	writing-mode: vertical-rl;
-	font: 600 var(--fs-label) / 1 var(--f-display);
-	letter-spacing: var(--tracking);
-	text-transform: uppercase;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: var(--dtab-w);
+	font: 600 12px / 1 var(--f-body);
+	letter-spacing: 0.02em;
 	background: var(--panel);
 	color: var(--text);
 	border: 1px solid var(--panel-edge);
 	border-right: 0;
 	border-radius: var(--radius-sm) 0 0 var(--radius-sm);
-	padding: calc(var(--gap) * 1.5) calc(var(--gap) * 0.9);
+	padding: 9px 8px 9px 10px;
 	cursor: pointer;
 }
 .aitower-hud .ui-dtab kbd {
-	display: block;
-	writing-mode: horizontal-tb;
-	margin-top: 6px;
 	font: var(--fs-label) / 1 var(--f-num);
 	color: var(--accent);
 }
@@ -361,7 +361,7 @@
 }
 .aitower-hud .ui-edge {
 	position: absolute;
-	right: calc(var(--gap) * 4.5);
+	right: calc(var(--dtab-w) + var(--gap));
 	top: var(--gap);
 	bottom: calc(var(--gap) * 6);
 	width: min(var(--drawer-w), calc(100% - var(--gap) * 6));
@@ -474,7 +474,7 @@
 .aitower-hud .ui-center > .ui-right {
 	position: absolute;
 	top: var(--gap);
-	right: calc(var(--gap) * 6);
+	right: calc(var(--dtab-w) + var(--gap) * 2);
 	width: calc(var(--drawer-w) * 0.68);
 	max-height: calc(100% - var(--gap) * 9);
 	z-index: 3;
@@ -602,4 +602,22 @@
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: var(--gap);
+}
+
+/* PER HOUR hint while no contract runs: a small pill under the chip. */
+.aitower-hud .ui-perhour {
+	position: relative;
+}
+.aitower-hud .ui-perhour .ui-hint {
+	position: absolute;
+	top: calc(100% + 10px);
+	left: 0;
+	white-space: nowrap;
+	padding: 4px 8px;
+	border-radius: var(--radius-sm);
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	font: 12px / 1.2 var(--f-body);
+	color: var(--text-dim);
+	pointer-events: none;
 }

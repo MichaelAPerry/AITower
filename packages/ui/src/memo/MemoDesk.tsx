@@ -226,8 +226,8 @@ export function StandingMeter({ standing }: { standing: number }) {
 	const tone = standingTone(v);
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: a custom needle meter; a native <meter> cannot be styled into this gauge
-		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Authority standing" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Authority standing ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Compute Authority shuts you down.`}>
-			<span className="ui-dymo">STANDING</span>
+		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Reputation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Reputation with the Compute Authority: ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Compute Authority shuts you down.`}>
+			<span className="ui-dymo">REPUTATION</span>
 			<span className="ui-standing-row">
 				<span className="ui-standing-scale" aria-hidden="true">
 					<i className="ui-standing-red" />

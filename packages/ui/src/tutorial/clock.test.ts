@@ -1,8 +1,8 @@
 import type { Speed } from "@aitower/shared";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { applyClock, clockStatus, releaseClock } from "./clock";
-import { pickCorner, centreBox } from "./placement";
+import { applyClock, releaseClock } from "./clock";
+import { intersects, placeBubble } from "./placement";
 
 const mk = (speed: Speed) => {
 	const store = createFakeStore(createFakeContent());
@@ -62,41 +62,37 @@ describe("induction clock control", () => {
 		expect(running.get().speed).toBe(10);
 	});
 
-	it("tells the player the clock state and why time passes", () => {
-		expect(clockStatus("pause", 0)).toMatchObject({ running: false });
-		expect(clockStatus("pause", 0).text).toContain("nothing moves");
-		expect(clockStatus("run", 3, "so offers arrive")).toEqual({ running: true, text: "CLOCK RUNNING AT 3× · so offers arrive" });
-		expect(clockStatus("run", 0).text).toContain("press 3×");
+	it("leaves the clock to the player in free mode", () => {
+		const store = mk(3);
+		expect(applyClock(store, "free", null)).toBe("free");
+		expect(store.get().speed).toBe(3);
 	});
 });
 
-describe("memo placement", () => {
-	const area = { left: 0, top: 0, right: 900, bottom: 500 };
-	const memo = { w: 340, h: 300 };
+describe("bubble placement", () => {
+	const bounds = { left: 0, top: 0, right: 900, bottom: 500 };
+	const size = { w: 240, h: 80 };
 
-	it("keeps the preferred corner when nothing is in the way", () => {
-		expect(pickCorner("br", area, memo, [])).toBe("br");
-		expect(pickCorner("tl", area, memo, [])).toBe("tl");
+	it("sits on the preferred side with the arrow on the target's centre", () => {
+		const target = { left: 400, top: 100, right: 460, bottom: 130 };
+		const p = placeBubble(target, size, bounds, ["below"]);
+		expect(p.side).toBe("below");
+		expect(p.top).toBeGreaterThanOrEqual(target.bottom);
+		expect(p.left + p.arrow).toBeCloseTo(430);
 	});
 
-	it("moves to another corner when the preferred one would cover the target", () => {
-		const target = { left: 700, top: 300, right: 880, bottom: 480 };
-		expect(pickCorner("br", area, memo, [target])).toBe("bl");
-		const left = { left: 10, top: 300, right: 150, bottom: 480 };
-		expect(pickCorner("bl", area, memo, [left])).toBe("br");
+	it("moves to another side when the preferred one does not fit, and never covers the target", () => {
+		const target = { left: 700, top: 440, right: 880, bottom: 490 };
+		const p = placeBubble(target, size, bounds, ["below", "right"]);
+		expect(p.side).not.toBe("below");
+		expect(intersects({ left: p.left, top: p.top, right: p.left + size.w, bottom: p.top + size.h }, target)).toBe(false);
 	});
 
-	it("avoids the middle of the world where the camera puts the focus cell", () => {
-		const box = centreBox(area);
-		expect(box).toEqual({ left: 360, right: 540, top: 160, bottom: 340 });
-		// 900 wide: the 340-wide memo clears the centre box in a corner
-		expect(pickCorner("br", area, memo, [box])).toBe("br");
-		// 700 wide: both bottom corners would cover it, and so would the top ones (the memo is 300 tall, the area 500)
-		const narrow = { left: 0, top: 0, right: 700, bottom: 500 };
-		expect(pickCorner("br", narrow, memo, [centreBox(narrow)])).toBe("br");
-	});
-
-	it("falls back to the preferred corner when every corner is covered", () => {
-		expect(pickCorner("tr", area, memo, [area])).toBe("tr");
+	it("keeps the bubble inside the bounds and the arrow inside the bubble", () => {
+		const target = { left: 880, top: 10, right: 899, bottom: 30 };
+		const p = placeBubble(target, size, bounds, ["right", "below"]);
+		expect(p.left + size.w).toBeLessThanOrEqual(bounds.right);
+		expect(p.arrow).toBeLessThanOrEqual(size.w - 16);
+		expect(p.arrow).toBeGreaterThanOrEqual(16);
 	});
 });

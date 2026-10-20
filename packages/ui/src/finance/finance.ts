@@ -44,7 +44,7 @@ const FRACTIONS: [string, number][] = [
 export function takePresets(info: LoanInfo): LoanPreset[] {
 	return FRACTIONS.map(([label, f]) => {
 		const amount = f === 1 ? info.headroom : Math.floor(info.headroom * f);
-		return { label, amount, disabled: amount <= 0 ? (info.max <= 0 ? "No credit at this clearance" : "Credit limit reached") : null };
+		return { label, amount, disabled: amount <= 0 ? (info.max <= 0 ? "No credit at this level" : "Credit limit reached") : null };
 	});
 }
 
@@ -96,7 +96,7 @@ export function reportRows(r: QuarterReport): ReportRow[] {
 
 /** Sheet headline numbers: Authority standing and cash change. */
 export function auditOutcome(r: QuarterReport): { standing: string; cash: string } {
-	return { standing: `Authority standing ${signed(Math.round(r.standingDelta))}`, cash: cashDeltaText(r.cashDelta) };
+	return { standing: `Reputation ${signed(Math.round(r.standingDelta))}`, cash: cashDeltaText(r.cashDelta) };
 }
 
 // ─── Lifetime stats ──────────────────────────────────────────────────

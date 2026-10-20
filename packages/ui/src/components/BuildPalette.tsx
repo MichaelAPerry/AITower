@@ -100,7 +100,7 @@ export function defSpecs(def: FacilityDef): [string, string][] {
 /** The line a locked row shows (tier first, then research), or null when the row is available. */
 export function lockText(def: FacilityDef, view: SimView, content: ContentDB): string | null {
 	const gate = techGate(def.tech, view, content);
-	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Clearance ${def.unlockTier}` : null].filter(Boolean);
+	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Level ${def.unlockTier}` : null].filter(Boolean);
 	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
 }
 

@@ -56,7 +56,7 @@ describe("current orders", () => {
 	});
 	it("working: shows the next clearance with how many cabinets to build", () => {
 		const o = currentObjective(view({ jobs: running }), content, yes);
-		expect(o.title).toBe("Next: Clearance 2");
+		expect(o.title).toBe("Next: Level 2");
 		expect(o.detail).toMatch(/now 80/);
 		expect(o.detail).toMatch(/build 2 more Mk\.I Cabinets/);
 	});
@@ -95,14 +95,14 @@ describe("current orders", () => {
 	});
 	it("research is not suggested when nothing is affordable, and a fitting offer still comes first", () => {
 		const c = { ...content, tech: [{ id: "x", name: "Form 9", cost: 20, branch: "compute", minTier: 1, requires: [], effects: [] }] } as unknown as ContentDB;
-		expect(currentObjective(view({ jobs: running, researchPoints: 5 }), c, yes).title).toBe("Next: Clearance 2");
+		expect(currentObjective(view({ jobs: running, researchPoints: 5 }), c, yes).title).toBe("Next: Level 2");
 		expect(currentObjective(view({ jobs: running, researchPoints: 50, offers: [{ id: 5, clientName: "X" }] }), c, yes).title).toBe("Accept another contract");
 	});
 	it("a clerk that is unlocked but off is flagged; on, or locked, it is not", () => {
 		const clerk = (unlocked: boolean, enabled: boolean) => ({ unlocked, policy: { enabled }, acceptedTotal: 0 });
 		expect(currentObjective(view({ jobs: running, clerk: clerk(true, false) }), content, yes).title).toBe("Switch on Contract Automation");
-		expect(currentObjective(view({ jobs: running, clerk: clerk(true, true) }), content, yes).title).toBe("Next: Clearance 2");
-		expect(currentObjective(view({ jobs: running, clerk: clerk(false, false) }), content, yes).title).toBe("Next: Clearance 2");
+		expect(currentObjective(view({ jobs: running, clerk: clerk(true, true) }), content, yes).title).toBe("Next: Level 2");
+		expect(currentObjective(view({ jobs: running, clerk: clerk(false, false) }), content, yes).title).toBe("Next: Level 2");
 	});
 	it("installed PFLOPS ignores failed and disabled racks", () => {
 		expect(installedPflops(view({ facilities: [rack(1), rack(2, "failed"), rack(3, "ok", false)] }), content)).toBe(20);

@@ -32,7 +32,7 @@ describe("loans", () => {
 		const full = takePresets(loanInfo({ principal: 2_000_000, max: 2_000_000, dailyRate: 0.004 }));
 		expect(full.every((p) => p.disabled === "Credit limit reached")).toBe(true);
 		const none = takePresets(loanInfo({ principal: 0, max: 0, dailyRate: 0 }));
-		expect(none[0].disabled).toBe("No credit at this clearance");
+		expect(none[0].disabled).toBe("No credit at this level");
 	});
 	it("take amounts are whole dollars and never exceed the headroom", () => {
 		const odd = loanInfo({ principal: 0, max: 1_000_001, dailyRate: 0.01 });
@@ -74,7 +74,7 @@ describe("quarterly report", () => {
 		expect(cashDeltaText(50_000)).toBe("Grant +$50k");
 		expect(cashDeltaText(-20_000)).toBe("Fine −$20k");
 		expect(cashDeltaText(0)).toBe("No grant or fine");
-		expect(auditOutcome(r)).toEqual({ standing: "Authority standing −3", cash: "Fine −$20k" });
+		expect(auditOutcome(r)).toEqual({ standing: "Reputation −3", cash: "Fine −$20k" });
 	});
 });
 

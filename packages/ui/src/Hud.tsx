@@ -21,6 +21,7 @@ import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
+import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -176,12 +177,13 @@ export function Hud({ store, content, title }: HudProps) {
 		>
 			<TopStrip {...props} />
 			<div className="ui-center">
+				<GoalsCard state={state} content={content} />
 				<NextChip {...props} />
 				<Toasts content={content} state={state} />
 				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
-				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
+				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<PalettePopover {...props} />
 				<BuildDock {...props} />
 				<Ticker {...props} />

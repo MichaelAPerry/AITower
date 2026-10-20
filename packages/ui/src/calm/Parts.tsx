@@ -7,7 +7,7 @@ import { fmtMoney, fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
 import { ModifierChips } from "../memo/MemoDesk";
 import { pushNotice } from "../notices";
-import { currentObjective, endingLine } from "../objective/objective";
+import { currentObjective, endingLine, isProblem } from "../objective/objective";
 import { toolKey } from "../tools/controller";
 import { BuildPalette, defSpecs } from "../components/BuildPalette";
 import { SpecCard, type SpecHover, anchorOf } from "../components/SpecCard";
@@ -21,19 +21,23 @@ import { Icon, Swatch } from "../components/common";
 export function NextChip({ store, content, state, ui, setUi, openAscension }: PanelProps) {
 	const obj = currentObjective(state.view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null);
 	const ending = endingLine(state.view, content);
+	// NEXT is for problems; the Goals card is the everyday guide.
+	if (!isProblem(obj) && !ending) return null;
 	const go = (): void => {
 		if (obj.action === "ascension") openAscension();
 		else if (obj.key === "C") setUi({ drawer: "contracts" });
 		else if (obj.key === "R") setUi({ drawer: "research" });
 	};
 	return (
-		<section className={`ui-next tone-${obj.tone}`} aria-live="polite" aria-label="Next step">
-			<button type="button" className="ui-next-btn" onClick={go} title={obj.detail}>
-				<span className="ui-tag">NEXT</span>
-				<span className="ui-next-title">{obj.title}</span>
-				{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
-				{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
-			</button>
+		<section className={`ui-next tone-${isProblem(obj) ? obj.tone : "progress"}`} aria-live="polite" aria-label="Next step">
+			{isProblem(obj) && (
+				<button type="button" className="ui-next-btn" onClick={go} title={obj.detail}>
+					<span className="ui-tag">NEXT</span>
+					<span className="ui-next-title">{obj.title}</span>
+					{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
+					{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
+				</button>
+			)}
 			{ending && (
 				<span className="ui-next-ending" title="Days the ending condition has held without a break">
 					{ending}
@@ -120,7 +124,7 @@ export function DrawerTabs({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
 		<div className="ui-dtabs" role="tablist" aria-label="Drawers">
 			{DRAWER_TABS.map((d) => (
 				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} title={`${d.label} (${d.key})`}>
-					{d.label}
+					<span className="ui-dtab-name">{d.label}</span>
 					<kbd>{d.key}</kbd>
 				</button>
 			))}

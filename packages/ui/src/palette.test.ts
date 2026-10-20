@@ -30,7 +30,7 @@ describe("palette lists", () => {
 		expect(ids.slice(2)).toEqual(expect.arrayContaining(["depot_big", "fast"]));
 	});
 	it("words a lock as one line", () => {
-		expect(lockText(def("fast", "logistics", 3, 1), view, content)).toBe("Locked: Clearance 3");
+		expect(lockText(def("fast", "logistics", 3, 1), view, content)).toBe("Locked: Level 3");
 		expect(lockText(def("charger", "logistics", 1, 1), view, content)).toBeNull();
 		expect(lockText(content.facilities.depot_big, view, content)).toBe("Locked: Central Stores");
 	});

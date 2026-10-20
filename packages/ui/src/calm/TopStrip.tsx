@@ -13,7 +13,7 @@ import { clearanceProgress, fmtRateHour, nextDrawer, perHour } from "./calm";
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
 /**
- * The one thin strip: day and clock, speed, treasury, PER HOUR, Clearance bar, standing, then the badges that appear when they
+ * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, reputation, then the badges that appear when they
  * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, inbox, menu.
  */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
@@ -23,6 +23,8 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	const cl = clearanceProgress(view, content);
 	const drought = droughtChip(view, content);
 	const auto = anyAutomation(view);
+	// Before the first contract the red figure is only upkeep: say so, in words.
+	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running");
 	return (
 		<header className="ui-strip">
 			<div className="ui-chip ui-clock" title="Game day and time (1 tick = 1 minute)">
@@ -41,16 +43,17 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				<span className="ui-label">TREASURY</span>
 				<span className="ui-big">{fmtMoney(view.cash)}</span>
 			</div>
-			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" title="Operating income per game-hour, averaged over the last six game-hours (construction not counted)">
+			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" title={idleCost ? "Upkeep. Accept a contract to earn." : "Operating income per game-hour, averaged over the last six game-hours (construction not counted)"}>
 				<span className="ui-label">PER HOUR</span>
 				<span className="ui-big">{fmtRateHour(rate)}</span>
+				{idleCost && <span className="ui-hint">Upkeep. Accept a contract to earn.</span>}
 			</div>
-			<div className="ui-clearance" data-tut="clearance" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PFLOPS installed for Clearance ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)` : "Top Clearance reached"}>
+			<div className="ui-clearance" data-tut="clearance" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)` : "Top level reached"}>
 				<span className="ui-label">
-					<span>CLEARANCE {cl.tier}</span>
-					<span className={cl.uptimeOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF · uptime ${cl.uptimeOk ? "ok" : "low"}` : "top"}</span>
+					<span>LEVEL {cl.tier}</span>
+					<span className={cl.uptimeOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute · uptime ${cl.uptimeOk ? "ok" : "low"}` : "top"}</span>
 				</span>
-				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Clearance progress">
+				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Level progress">
 					<i style={{ width: `${Math.round(cl.frac * 100)}%` }} />
 				</span>
 			</div>

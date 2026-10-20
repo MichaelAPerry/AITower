@@ -200,7 +200,7 @@ describe("top strip", () => {
 		content.balance.endings.greenExemplar = { minScore: 0.7, pflops: 160, days: 5 };
 		const g = pathGauge({ path: "greentech", greenScore: 0.5, refinement: 0 }, content);
 		expect(g?.title).toContain("70%");
-		expect(g?.title).toContain("160 PFLOPS");
+		expect(g?.title).toContain("160 PF compute");
 		expect(g?.title).toContain("5 days");
 	});
 	it("growth index gives way to the path gauge on Greentech and Synthetic unless corruption exists", () => {
@@ -284,7 +284,7 @@ describe("scenario picker", () => {
 		expect(cards.map((c) => c.id)).toEqual(["starter", "brownfield", "sandbox"]);
 		expect(cards.every((c) => c.description.length > 20)).toBe(true);
 		expect(cards[1].description).toBe(content.scenarios.brownfield.description);
-		expect(cards[1].facts).toBe("$350k · Clearance 2");
+		expect(cards[1].facts).toBe("$350k · Level 2");
 		expect(cards[2].sandbox).toBe(true);
 		expect(showPicker(cards)).toBe(true);
 		expect(showPicker(cards.slice(0, 1))).toBe(false);

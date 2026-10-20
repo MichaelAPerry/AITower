@@ -2026,196 +2026,6 @@
 	}
 }
 
-/* ── Ministry induction (tutorial) ── */
-.aitower-hud .ui-tutorial {
-	position: absolute;
-	right: 10px;
-	bottom: 10px;
-	width: min(340px, calc(100% - 20px));
-	/* Leave the overlay strip at the top of the world visible. */
-	max-height: calc(100% - 56px);
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	pointer-events: auto;
-	background:
-		repeating-linear-gradient(180deg, transparent 0 21px, color-mix(in srgb, var(--beige) 35%, transparent) 21px 22px),
-		var(--paper);
-	color: var(--ink);
-	border: 1px solid var(--brass-dk);
-	box-shadow: 0 0 0 3px var(--housing), 0 8px 24px color-mix(in srgb, var(--ink) 70%, transparent);
-	padding: 12px 14px 10px;
-	font: 16px/1.3 var(--f-type);
-	z-index: 5;
-	animation: tut-in 260ms ease-out;
-}
-/* The memo moves to another corner when it would cover the thing it points at (see tutorial/placement.ts). */
-.aitower-hud .ui-tutorial.pos-tr,
-.aitower-hud .ui-tutorial.pos-tl {
-	top: 40px;
-	bottom: auto;
-	max-height: calc(100% - 50px);
-}
-.aitower-hud .ui-tutorial.pos-tl,
-.aitower-hud .ui-tutorial.pos-bl {
-	left: 10px;
-	right: auto;
-}
-.aitower-hud .tut-head {
-	display: flex;
-	gap: 10px;
-	align-items: center;
-	margin-bottom: 4px;
-}
-.aitower-hud .tut-close {
-	flex: none;
-	font-size: 9px;
-	padding: 5px 8px 4px;
-}
-.aitower-hud .tut-count {
-	font: 16px/1 var(--f-crt);
-	color: var(--brass-dk);
-}
-/* Header, clock strip and buttons stay in view; only the text scrolls. */
-.aitower-hud .tut-scroll {
-	min-height: 0;
-	overflow-y: auto;
-	padding-right: 2px;
-}
-.aitower-hud .tut-title {
-	font: 17px/1.2 var(--f-type);
-	margin: 4px 0 6px;
-	text-decoration: underline;
-	text-decoration-color: var(--brass-dk);
-	text-wrap: balance;
-}
-.aitower-hud .tut-body {
-	margin: 0 0 6px;
-	font-size: 14px;
-	line-height: 1.25;
-}
-.aitower-hud .tut-task {
-	position: relative;
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 8px 0 6px;
-	padding: 6px 8px;
-	border: 1px dashed var(--brass-dk);
-	background: color-mix(in srgb, var(--amber) 10%, var(--paper));
-	font-size: 14px;
-	line-height: 1.25;
-}
-.aitower-hud .tut-task.is-done {
-	background: color-mix(in srgb, var(--green-dim) 14%, var(--paper));
-}
-.aitower-hud .tut-box {
-	flex: none;
-	width: 16px;
-	height: 16px;
-	border: 2px solid var(--ink);
-	display: grid;
-	place-items: center;
-	font: 16px/1 var(--f-crt);
-	color: var(--green-dim);
-}
-.aitower-hud .tut-stamp {
-	position: absolute;
-	right: 8px;
-	top: 50%;
-	transform: translateY(-50%) rotate(-8deg);
-	font: 13px/1 var(--f-stamp);
-	letter-spacing: 0.1em;
-	color: var(--green-dim);
-	border: 2px solid var(--green-dim);
-	padding: 3px 6px;
-	animation: tut-stamp 220ms ease-out;
-}
-.aitower-hud .tut-todo {
-	font: 8px/1 var(--f-stamp);
-	letter-spacing: 0.08em;
-	color: var(--brass-dk);
-	margin-right: 2px;
-}
-.aitower-hud .tut-how {
-	margin: 4px 0 4px;
-	padding-left: 24px;
-	font-size: 14px;
-	line-height: 1.25;
-}
-.aitower-hud .tut-how li {
-	margin: 2px 0;
-	color: color-mix(in srgb, var(--ink) 70%, var(--paper));
-}
-.aitower-hud .tut-how li.is-now {
-	color: var(--ink);
-	font-weight: bold;
-	text-shadow: 0 0 0.5px var(--ink);
-}
-.aitower-hud .tut-how li.is-past {
-	text-decoration: line-through;
-	opacity: 0.55;
-}
-.aitower-hud .tut-clock {
-	display: flex;
-	align-items: center;
-	gap: 8px;
-	margin: 8px 0 2px;
-	padding: 4px 8px 3px;
-	font: 8px/1.3 var(--f-stamp);
-	letter-spacing: 0.06em;
-	text-transform: uppercase;
-	color: var(--paper);
-	background: var(--housing);
-	border: 1px solid var(--ink);
-}
-.aitower-hud .tut-clock-lamp {
-	flex: none;
-	width: 9px;
-	height: 9px;
-	border-radius: 50%;
-	background: var(--red);
-	box-shadow: 0 0 6px color-mix(in srgb, var(--red) 70%, transparent);
-}
-.aitower-hud .tut-clock.is-running .tut-clock-lamp {
-	background: var(--green);
-	box-shadow: 0 0 6px color-mix(in srgb, var(--green) 70%, transparent);
-}
-.aitower-hud .tut-actions {
-	display: flex;
-	gap: 6px;
-	align-items: center;
-	margin-top: 8px;
-}
-.aitower-hud .tut-skip,
-.aitower-hud .tut-later {
-	opacity: 0.75;
-}
-/* The element the current memo talks about. */
-.aitower-hud [data-tut-target] {
-	outline: 3px solid var(--amber);
-	outline-offset: 2px;
-	z-index: 3;
-	animation: tut-pulse 1.2s ease-in-out infinite;
-}
-@keyframes tut-pulse {
-	0%, 100% { outline-color: var(--amber); box-shadow: 0 0 0 0 color-mix(in srgb, var(--amber) 60%, transparent); }
-	50% { outline-color: var(--sodium); box-shadow: 0 0 14px 2px color-mix(in srgb, var(--amber) 45%, transparent); }
-}
-@keyframes tut-in {
-	from { transform: translateY(12px); opacity: 0; }
-	to { transform: none; opacity: 1; }
-}
-@keyframes tut-stamp {
-	from { transform: translateY(-50%) rotate(-8deg) scale(1.8); opacity: 0; }
-	to { transform: translateY(-50%) rotate(-8deg) scale(1); opacity: 1; }
-}
-@media (prefers-reduced-motion: reduce) {
-	.aitower-hud .ui-tutorial,
-	.aitower-hud .tut-stamp,
-	.aitower-hud [data-tut-target] { animation: none; }
-}
-
 /* ─── System menu button + save lamp (top bar) ─────────────────────── */
 .aitower-hud .ui-sysbox {
 	display: flex;
@@ -2292,8 +2102,7 @@
 .aitower-hud.is-reduced-motion .ui-crt::after,
 .aitower-hud.is-reduced-motion .ui-lamp.is-blink,
 .aitower-hud.is-reduced-motion .ui-toast,
-.aitower-hud.is-reduced-motion .ui-tutorial,
-.aitower-hud.is-reduced-motion .tut-stamp,
+.aitower-hud.is-reduced-motion .ui-coach,
 .aitower-hud.is-reduced-motion [data-tut-target] {
 	animation: none;
 }
@@ -2438,24 +2247,12 @@
 	width: min(500px, 92%);
 }
 /* Toasts make room for the memo slips: they move to the left half while a tutorial memo or a Ministry memo is on the right. */
-.aitower-hud .ui-center:has(.ui-memo-pop, .ui-memo-drawer, .ui-tutorial.pos-br, .ui-tutorial.pos-tr) .ui-toasts {
-	left: 0;
+.aitower-hud .ui-center:has(.ui-memo-pop, .ui-memo-drawer) .ui-toasts {
+	left: 266px; /* clear of the Goals card */
 	transform: none;
-	width: min(480px, calc(100% - 450px));
+	width: min(480px, calc(100% - 266px - 450px));
 	min-width: 230px;
 	align-items: flex-start;
-}
-.aitower-hud .ui-center:has(.ui-tutorial.pos-bl, .ui-tutorial.pos-tl):not(:has(.ui-memo-pop, .ui-memo-drawer)) .ui-toasts {
-	left: auto;
-	right: 0;
-	transform: none;
-	width: min(480px, calc(100% - 360px));
-	min-width: 230px;
-	align-items: flex-end;
-}
-.aitower-hud .ui-center:has(.ui-tutorial) .ui-toolhint {
-	max-width: calc(100% - 396px);
-	white-space: normal;
 }
 
 /* Cramped (about 850 px effective or narrower, e.g. text size 150% on a 1280 screen). */
@@ -2494,11 +2291,6 @@
 }
 .aitower-hud.is-density-cramped .ui-supplies {
 	padding: 6px 8px 8px;
-}
-.aitower-hud.is-density-cramped .ui-tutorial {
-	width: min(300px, calc(100% - 12px));
-	max-height: calc(100% - 48px);
-	padding: 8px 10px 8px;
 }
 .aitower-hud.is-density-cramped .ui-toast {
 	padding: 7px 96px 7px 14px;

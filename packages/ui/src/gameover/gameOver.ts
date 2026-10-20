@@ -40,14 +40,14 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		form: "LICENCE WITHDRAWN",
 		stamp: "SHUT DOWN",
 		tone: "red",
-		lines: ["Your Authority standing has reached zero. The operating licence for this datacenter is withdrawn with immediate effect.", "Site access is revoked. Please return your badge."],
+		lines: ["Your reputation with the Authority has reached zero. The operating licence for this datacenter is withdrawn with immediate effect.", "Site access is revoked. Please return your badge."],
 	},
 	victory: {
 		heading: "COMMENDATION",
 		form: "DISTINGUISHED SERVICE",
 		stamp: "COMMENDED",
 		tone: "green",
-		lines: ["You have reached the highest clearance the Compute Authority grants. The Compute Authority has noted the result.", "The datacenter may continue to operate in the sandbox, without further inspection."],
+		lines: ["You have reached the highest level the Compute Authority grants. The Compute Authority has noted the result.", "The datacenter may continue to operate in the sandbox, without further inspection."],
 	},
 	// Fallback only: the sheet shows the text of content.endings (see `overCopyFor`).
 	absorbed: {
@@ -110,8 +110,8 @@ export type { StatRow };
 export function lifetimeStats(view: SimView): StatRow[] {
 	const head: StatRow[] = [
 		{ label: "Days in service", value: String(view.day) },
-		{ label: "Clearance reached", value: `Tier ${view.tier}` },
-		{ label: "Authority standing", value: `${Math.round(view.standing)} / 100` },
+		{ label: "Level reached", value: `Tier ${view.tier}` },
+		{ label: "Reputation", value: `${Math.round(view.standing)} / 100` },
 		{ label: "Final treasury", value: fmtMoney(view.cash) },
 	];
 	const life = lifetimeRows(view.stats);

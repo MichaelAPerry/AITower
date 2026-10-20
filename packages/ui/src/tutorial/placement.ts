@@ -1,5 +1,3 @@
-import type { Corner } from "./steps";
-
 export interface Rect {
 	left: number;
 	top: number;
@@ -7,38 +5,55 @@ export interface Rect {
 	bottom: number;
 }
 
-export const intersects = (a: Rect, b: Rect): boolean => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+/** Where the bubble sits relative to its target: "below" puts it under the target with the arrow pointing up. */
+export type Side = "above" | "below" | "left" | "right";
 
-const ORDER: Record<Corner, Corner[]> = {
-	br: ["br", "bl", "tr", "tl"],
-	bl: ["bl", "br", "tl", "tr"],
-	tr: ["tr", "tl", "br", "bl"],
-	tl: ["tl", "tr", "bl", "br"],
+export interface Placed {
+	left: number;
+	top: number;
+	side: Side;
+	/** Distance of the arrow tip from the bubble's left (above/below) or top (left/right) edge. */
+	arrow: number;
+}
+
+const ARROW_PAD = 16;
+
+const at = (side: Side, t: Rect, w: number, h: number, gap: number): { left: number; top: number } => {
+	const cx = (t.left + t.right) / 2;
+	const cy = (t.top + t.bottom) / 2;
+	switch (side) {
+		case "below":
+			return { left: cx - w / 2, top: t.bottom + gap };
+		case "above":
+			return { left: cx - w / 2, top: t.top - gap - h };
+		case "left":
+			return { left: t.left - gap - w, top: cy - h / 2 };
+		case "right":
+			return { left: t.right + gap, top: cy - h / 2 };
+	}
 };
 
-/** Where the memo would sit in a corner of `area`. */
-export function cornerRect(corner: Corner, area: Rect, w: number, h: number): Rect {
-	const left = corner === "tl" || corner === "bl" ? area.left : area.right - w;
-	const top = corner === "tl" || corner === "tr" ? area.top : area.bottom - h;
-	return { left, top, right: left + w, bottom: top + h };
-}
+const inside = (p: { left: number; top: number }, w: number, h: number, b: Rect): boolean => p.left >= b.left && p.top >= b.top && p.left + w <= b.right && p.top + h <= b.bottom;
 
 /**
- * The corner of the world area for the memo: the preferred one if it does not cover any of `avoid`, else the
- * first of the others (nearest first) that does not. If every corner overlaps, the preferred one is kept.
+ * Place a bubble of `size` next to `target` on the first of `prefer` (then the other sides) where it fits inside `bounds`
+ * without touching the target; if none fits, the first preferred side, clamped into the bounds. The arrow always points at the
+ * target's centre, kept inside the bubble's edge.
  */
-export function pickCorner(preferred: Corner, area: Rect, memo: { w: number; h: number }, avoid: Rect[], pad = 6): Corner {
-	const grown = avoid.map((r) => ({ left: r.left - pad, top: r.top - pad, right: r.right + pad, bottom: r.bottom + pad }));
-	for (const c of ORDER[preferred]) {
-		const r = cornerRect(c, area, memo.w, memo.h);
-		if (!grown.some((a) => intersects(r, a))) return c;
-	}
-	return preferred;
+export function placeBubble(target: Rect, size: { w: number; h: number }, bounds: Rect, prefer: Side[] = ["below", "above", "right", "left"], gap = 14): Placed {
+	const { w, h } = size;
+	const order = [...prefer, ...(["below", "above", "right", "left"] as Side[]).filter((s) => !prefer.includes(s))];
+	const clamp = (p: { left: number; top: number }) => ({ left: Math.max(bounds.left, Math.min(p.left, bounds.right - w)), top: Math.max(bounds.top, Math.min(p.top, bounds.bottom - h)) });
+	const clear = (p: { left: number; top: number }) => !intersects({ left: p.left, top: p.top, right: p.left + w, bottom: p.top + h }, target);
+	// First choice: a side where it fits as is. Second: a side where, clamped into the bounds, it still clears the target.
+	let side = order.find((s) => inside(at(s, target, w, h, gap), w, h, bounds));
+	if (!side) side = order.find((s) => clear(clamp(at(s, target, w, h, gap)))) ?? order[0];
+	const { left, top } = clamp(at(side, target, w, h, gap));
+	const horizontal = side === "above" || side === "below";
+	const tip = horizontal ? (target.left + target.right) / 2 - left : (target.top + target.bottom) / 2 - top;
+	const len = horizontal ? w : h;
+	return { left, top, side, arrow: Math.max(ARROW_PAD, Math.min(len - ARROW_PAD, tip)) };
 }
 
-/** A box around the middle of the world area: where the camera puts a step's focus cell and its ghost. */
-export function centreBox(area: Rect, half = 90): Rect {
-	const cx = (area.left + area.right) / 2;
-	const cy = (area.top + area.bottom) / 2;
-	return { left: cx - half, right: cx + half, top: cy - half, bottom: cy + half };
-}
+/** True when the two rectangles overlap. */
+export const intersects = (a: Rect, b: Rect): boolean => a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;

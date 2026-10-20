@@ -1,0 +1,118 @@
+/* Coach marks: one small bubble beside the thing to click, with a soft pulse on the target. */
+.aitower-hud .ui-coach {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 244px;
+	box-sizing: border-box;
+	padding: 10px 12px 8px;
+	background: var(--panel-solid, #182430);
+	color: var(--text);
+	border: 1px solid var(--accent);
+	border-radius: 8px;
+	box-shadow: 0 6px 22px rgba(0, 0, 0, 0.5);
+	font: 14px/1.35 var(--f-body);
+	z-index: 20;
+	pointer-events: auto;
+	visibility: hidden;
+}
+.aitower-hud .ui-coach.is-placed {
+	visibility: visible;
+	animation: coach-in 200ms ease-out;
+}
+.aitower-hud .ui-coach.is-done {
+	border-color: var(--good);
+}
+.aitower-hud .coach-text {
+	margin: 0;
+	font-size: 15px;
+	font-weight: 600;
+}
+.aitower-hud .coach-tick {
+	color: var(--good);
+}
+.aitower-hud .coach-actions {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-top: 8px;
+	font-size: 12px;
+}
+.aitower-hud .coach-count {
+	color: var(--text-dim);
+}
+.aitower-hud .coach-link {
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--text-dim);
+	text-decoration: underline;
+	cursor: pointer;
+	font: inherit;
+}
+.aitower-hud .coach-link:hover {
+	color: var(--text);
+}
+.aitower-hud .coach-ok {
+	padding: 3px 12px;
+}
+/* The arrow: a rotated square on the edge that faces the target, centred on `--arrow`. */
+.aitower-hud .ui-coach::before {
+	content: "";
+	position: absolute;
+	width: 12px;
+	height: 12px;
+	background: inherit;
+	border: inherit;
+	border-right-color: transparent;
+	border-bottom-color: transparent;
+	transform: rotate(45deg);
+}
+.aitower-hud .ui-coach.side-below::before {
+	top: -7px;
+	left: calc(var(--arrow, 50%) - 6px);
+}
+.aitower-hud .ui-coach.side-above::before {
+	bottom: -7px;
+	left: calc(var(--arrow, 50%) - 6px);
+	transform: rotate(225deg);
+}
+.aitower-hud .ui-coach.side-right::before {
+	left: -7px;
+	top: calc(var(--arrow, 50%) - 6px);
+	transform: rotate(-45deg);
+}
+.aitower-hud .ui-coach.side-left::before {
+	right: -7px;
+	top: calc(var(--arrow, 50%) - 6px);
+	transform: rotate(135deg);
+}
+/* The element the bubble points at. */
+.aitower-hud [data-tut-target] {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	animation: coach-pulse 1.6s ease-in-out infinite;
+}
+@keyframes coach-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+	}
+	50% {
+		box-shadow: 0 0 12px 3px color-mix(in srgb, var(--accent) 40%, transparent);
+	}
+}
+@keyframes coach-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ui-coach.is-placed,
+	.aitower-hud [data-tut-target] {
+		animation: none;
+	}
+}

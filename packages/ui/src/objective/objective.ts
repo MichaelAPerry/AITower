@@ -32,7 +32,7 @@ export interface MoneyLine {
 
 const ACTIVE = new Set(["queued", "running", "stalled"]);
 
-/** Σ nominal PFLOPS of enabled, healthy compute racks (what tier progress counts). */
+/** Σ nominal PF compute of enabled, healthy compute racks (what tier progress counts). */
 export function installedPflops(view: SimView, content: ContentDB): number {
 	let p = 0;
 	for (const f of view.facilities) {
@@ -99,7 +99,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		return {
 			tone: "action",
 			title: "Choose your Ascension path",
-			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the review below to read the options.`,
+			detail: `Level ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the review below to read the options.`,
 			action: "ascension",
 		};
 	}
@@ -176,18 +176,21 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			const idleNote = idle > 0 ? ` ${idle} cabinet${idle === 1 ? " is" : "s are"} idle, waiting for an offer that fits.` : "";
 			return {
 				tone: "progress",
-				title: `Next: Clearance ${next + 1}`,
-				detail: `Install ${need} PFLOPS (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${idleNote}`,
+				title: `Next: Level ${next + 1}`,
+				detail: `Reach ${need} PF compute (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${idleNote}`,
 			};
 		}
 		return {
 			tone: "progress",
-			title: `Next: Clearance ${next + 1}`,
-			detail: `Compute is enough (${have} PFLOPS). Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; clearance is reviewed at midnight.`,
+			title: `Next: Level ${next + 1}`,
+			detail: `Compute is enough (${have} PF). Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; your level is reviewed at midnight.`,
 		};
 	}
-	return { tone: "progress", title: "Top clearance reached", detail: "Keep the Treasury growing and the Compute Authority's standing high." };
+	return { tone: "progress", title: "Top level reached", detail: "Keep the Treasury growing and the Compute Authority's reputation high." };
 }
+
+/** True for problems (broken, too hot, no power, the red, a decision due); the Goals card carries plain progress. */
+export const isProblem = (o: Objective): boolean => o.tone === "alert" || o.action === "ascension" || o.title.includes("lift access") || o.title.startsWith("No offer fits");
 
 /** "Living Tower: 2 of 3 days" for the ending the tower is closest to; null when none (the secret ending is never announced). */
 export function endingLine(view: SimView, content: ContentDB): string | null {
