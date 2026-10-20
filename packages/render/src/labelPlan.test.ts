@@ -1,6 +1,6 @@
 import type { FacilityStatus } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { fitName, hits, planTags, statusWord, type TagFacility } from "./labelPlan";
+import { fitName, hits, pillWidth, planTags, statusWord, type TagFacility } from "./labelPlan";
 
 const ALL: FacilityStatus[] = ["ok", "idle", "disabled", "unpowered", "brownout", "noCoolant", "noNutrient", "tooCold", "throttled", "tripped", "failed"];
 const fac = (id: number, x: number, o: Partial<TagFacility> = {}): TagFacility => ({ id, defId: "rack", floor: 0, x, width: 2, status: "ok", enabled: true, ...o });
@@ -58,6 +58,17 @@ describe("planTags", () => {
 	it("fits long names to the width", () => {
 		expect(fitName("Liquid-cooled GPU rack", 2).length).toBeLessThanOrEqual(12);
 		expect(fitName("Short", 1)).toBe("Short");
+	});
+});
+
+describe("status pills", () => {
+	it("merges close same-word pills on a floor and never overlaps different words", () => {
+		const gap = [fac(1, 0, { status: "unpowered" }), fac(2, 4, { defId: "crac", status: "unpowered" })];
+		expect(planTags(gap, name).filter((t) => t.text === "NO POWER")).toHaveLength(1);
+		const mixed = planTags([fac(1, 0, { status: "unpowered" }), fac(2, 2, { defId: "crac", status: "throttled" })], name);
+		expect(mixed.map((t) => t.text).sort()).toEqual(["HOT", "NO POWER"]);
+		const [a, b] = mixed.sort((x, y) => x.cx - y.cx);
+		expect(b.cx - a.cx).toBeGreaterThanOrEqual(pillWidth(a.text) / 16);
 	});
 });
 

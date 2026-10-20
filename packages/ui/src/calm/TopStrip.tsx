@@ -8,6 +8,7 @@ import { InboxButton, StandingMeter } from "../memo/MemoDesk";
 import { saveLamp } from "../menu/slots";
 import { PathGauge } from "../paths/PathGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
+import { currentObjective, isProblem } from "../objective/objective";
 import { clearanceProgress, fmtRateHour, nextDrawer, perHour } from "./calm";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
@@ -24,7 +25,9 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	const drought = droughtChip(view, content);
 	const auto = anyAutomation(view);
 	// Before the first contract the red figure is only upkeep: say so, in words.
-	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running");
+	// ...and the hint yields the top centre to a NEXT alert.
+	const nextShown = isProblem(currentObjective(view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null));
+	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running") && !nextShown;
 	return (
 		<header className="ui-strip">
 			<div className="ui-chip ui-clock" data-help="day">

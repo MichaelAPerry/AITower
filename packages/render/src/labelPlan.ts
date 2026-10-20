@@ -108,17 +108,55 @@ export function planTags(facilities: readonly TagFacility[], nameOf: (defId: str
 	return declutter(out);
 }
 
-/** Rough width of a tag in tiles (VT323 at 9 px is about 3.2 world px per character). */
+/** Rough width of a name tag in tiles (VT323 at 9 px is about 3.2 world px per character). */
 const TILES_PER_CHAR = 0.24;
+/** Status pills: width in world px for a word (10 px font, 3.6 px per character, plus padding and border). */
+export const pillWidth = (word: string): number => Math.ceil(word.length * 3.6 + 8);
+/** Same word closer than this many tiles (centre to centre) on one floor reads as one fact. */
+const MERGE_TILES = 8;
 
 /**
- * Drop name tags that would overlap another tag on the same floor, left to right. Status words always stay (and are placed
- * first), so trouble is never hidden by a label.
+ * Status pills: merge same-word pills that are close on one floor into one (centred on the group), then nudge
+ * different words right until they no longer overlap. A unique word is never dropped. Pure.
+ */
+function layoutWords(words: Tag[]): Tag[] {
+	const out: Tag[] = [];
+	const byFloor = new Map<number, Tag[]>();
+	for (const w of words) byFloor.set(w.floor, [...(byFloor.get(w.floor) ?? []), w]);
+	for (const list of byFloor.values()) {
+		list.sort((a, b) => a.cx - b.cx);
+		const merged: Tag[] = [];
+		const groups: { tag: Tag; lo: number; hi: number }[] = [];
+		for (const t of list) {
+			const g = groups.find((x) => x.tag.text === t.text && t.cx - x.hi <= MERGE_TILES);
+			if (g) {
+				g.hi = t.cx;
+				g.tag = { ...g.tag, cx: (g.lo + g.hi) / 2 };
+			} else groups.push({ tag: t, lo: t.cx, hi: t.cx });
+		}
+		for (const g of groups) merged.push(g.tag);
+		merged.sort((a, b) => a.cx - b.cx);
+		let edge = Number.NEGATIVE_INFINITY;
+		for (const t of merged) {
+			const w = pillWidth(t.text) / 16;
+			// Pills are drawn just right of the facility's centre (its badge sits there): `lead` is that offset in tiles.
+			const left = t.cx + 7 / 16;
+			const cx = left < edge + 2 / 16 ? t.cx + (edge + 2 / 16 - left) : t.cx;
+			out.push({ ...t, cx });
+			edge = cx + 7 / 16 + w;
+		}
+	}
+	return out;
+}
+
+/**
+ * Drop name tags that would overlap another tag on the same floor, left to right. Status pills always stay (and are
+ * placed first), so trouble is never hidden by a label.
  */
 export function declutter(tags: Tag[]): Tag[] {
-	const kept: Tag[] = [];
-	const clash = (t: Tag): boolean => kept.some((k) => k.floor === t.floor && Math.abs(k.cx - t.cx) < ((k.text.length + t.text.length) * TILES_PER_CHAR) / 2 + 0.5);
-	for (const t of tags) if (t.tone !== "name") kept.push(t);
+	const words = layoutWords(tags.filter((t) => t.tone !== "name"));
+	const kept: Tag[] = [...words];
+	const clash = (t: Tag): boolean => kept.some((k) => k.floor === t.floor && Math.abs(k.cx - t.cx) < ((k.tone === "name" ? k.text.length * TILES_PER_CHAR : pillWidth(k.text) / 16) + t.text.length * TILES_PER_CHAR) / 2 + 0.5);
 	for (const t of tags) if (t.tone === "name" && !clash(t)) kept.push(t);
 	return kept;
 }
