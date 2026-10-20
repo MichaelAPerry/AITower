@@ -69,7 +69,7 @@ export function fitName(name: string, tiles: number): string {
 /**
  * One status word over each facility that needs attention, and one name tag over each run of side-by-side
  * facilities of the same type. A run with an amber or red word in it gets no name tag (the word takes the line).
- * Quiet words (IDLE, OFF) never get a tag of their own: when the whole run shares one, it is appended to the name.
+ * Quiet words (IDLE, OFF) are never shown in the world. Name tags are only drawn on hover and in help mode (the renderer decides).
  */
 export function planTags(facilities: readonly TagFacility[], nameOf: (defId: string) => string | undefined): Tag[] {
 	const out: Tag[] = [];
@@ -94,8 +94,7 @@ export function planTags(facilities: readonly TagFacility[], nameOf: (defId: str
 		const blocked = words.some((w) => w && w.tone !== "dim");
 		if (name && !blocked) {
 			const span = last.x + last.width - first.x;
-			const quiet = words[0]?.tone === "dim" && words.every((w) => w?.word === words[0]?.word) ? ` · ${words[0].word}` : "";
-			out.push({ text: fitName(name, span + 2) + quiet, tone: "name", cx: first.x + span / 2, floor: first.floor });
+			out.push({ text: fitName(name, span + 2), tone: "name", cx: first.x + span / 2, floor: first.floor });
 		}
 		run = [];
 	};

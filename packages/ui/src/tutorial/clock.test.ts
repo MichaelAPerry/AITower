@@ -88,6 +88,13 @@ describe("bubble placement", () => {
 		expect(intersects({ left: p.left, top: p.top, right: p.left + size.w, bottom: p.top + size.h }, target)).toBe(false);
 	});
 
+	it("prefers a side that does not cover an open panel", () => {
+		const target = { left: 700, top: 100, right: 760, bottom: 130 };
+		const panel = { left: 600, top: 140, right: 800, bottom: 400 };
+		const p = placeBubble(target, size, bounds, ["below", "above", "left"], 14, [panel]);
+		expect(intersects({ left: p.left, top: p.top, right: p.left + size.w, bottom: p.top + size.h }, panel)).toBe(false);
+	});
+
 	it("keeps the bubble inside the bounds and the arrow inside the bubble", () => {
 		const target = { left: 880, top: 10, right: 899, bottom: 30 };
 		const p = placeBubble(target, size, bounds, ["right", "below"]);

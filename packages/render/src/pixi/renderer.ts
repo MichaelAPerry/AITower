@@ -398,7 +398,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			tagLabels.begin();
 			pillBg.clear();
 			pillLabels.begin();
-			const showNames = overlay === "normal" && cam.zoom >= 2;
+			// Name tags are quiet: only on hover (below) and in help mode. Status words stay on.
+			const helpOn = typeof document !== "undefined" && document.querySelector(".aitower-hud.is-help") !== null;
+			const showNames = helpOn && overlay === "normal" && cam.zoom >= 2;
 			for (const tg of tags) {
 				const isWord = tg.tone !== "name";
 				if (!isWord && !showNames) continue;
@@ -453,7 +455,16 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				const wx = (pointer.sx - o.x) / cam.zoom;
 				const wy = (pointer.sy - o.y) / cam.zoom;
 				let hovered = false;
-				for (const b of view.bots) {
+				for (const f of view.facilities) {
+					const fd = content.facilities[f.defId];
+					const fty = floorTop(view, f.floor);
+					if (fd && hits(wx, wy, { x: f.x * TILE, y: fty + FAC_TOP, w: fd.width * TILE, h: FAC_BOTTOM - FAC_TOP }, 0)) {
+						tagLabels.put(fd.name, (f.x + fd.width / 2) * TILE, fty + FAC_TOP - 4, TAG_FILL.name);
+						hovered = true;
+						break;
+					}
+				}
+				for (const b of hovered ? [] : view.bots) {
 					const p = botPos(b);
 					const w = botDims(botKind(content.bots[b.defId])).w;
 					const bb = botBox(view, p.x, p.y, w);

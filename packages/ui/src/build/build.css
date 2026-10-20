@@ -303,3 +303,8 @@
 	left: calc(76px + 304px + var(--gap) * 4);
 	bottom: calc(var(--gap) * 5);
 }
+
+/* While a coach mark points at the drawer tabs, the Inspector slides down so the bubble does not cover it. */
+.aitower-hud .ui-right > .bld-insp {
+	margin-top: var(--coach-push, 0px);
+}

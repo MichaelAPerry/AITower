@@ -40,13 +40,17 @@ const inside = (p: { left: number; top: number }, w: number, h: number, b: Rect)
  * without touching the target; if none fits, the first preferred side, clamped into the bounds. The arrow always points at the
  * target's centre, kept inside the bubble's edge.
  */
-export function placeBubble(target: Rect, size: { w: number; h: number }, bounds: Rect, prefer: Side[] = ["below", "above", "right", "left"], gap = 14): Placed {
+export function placeBubble(target: Rect, size: { w: number; h: number }, bounds: Rect, prefer: Side[] = ["below", "above", "right", "left"], gap = 14, avoid: Rect[] = []): Placed {
 	const { w, h } = size;
 	const order = [...prefer, ...(["below", "above", "right", "left"] as Side[]).filter((s) => !prefer.includes(s))];
 	const clamp = (p: { left: number; top: number }) => ({ left: Math.max(bounds.left, Math.min(p.left, bounds.right - w)), top: Math.max(bounds.top, Math.min(p.top, bounds.bottom - h)) });
-	const clear = (p: { left: number; top: number }) => !intersects({ left: p.left, top: p.top, right: p.left + w, bottom: p.top + h }, target);
-	// First choice: a side where it fits as is. Second: a side where, clamped into the bounds, it still clears the target.
-	let side = order.find((s) => inside(at(s, target, w, h, gap), w, h, bounds));
+	const box = (p: { left: number; top: number }): Rect => ({ left: p.left, top: p.top, right: p.left + w, bottom: p.top + h });
+	const clear = (p: { left: number; top: number }) => !intersects(box(p), target);
+	const free = (p: { left: number; top: number }) => !avoid.some((a) => intersects(box(p), a));
+	// First choice: a side where it fits as is and covers no obstacle (open panels). Then one that fits. Then one that,
+	// clamped into the bounds, still clears the target.
+	let side = order.find((s) => inside(at(s, target, w, h, gap), w, h, bounds) && free(at(s, target, w, h, gap)));
+	if (!side) side = order.find((s) => inside(at(s, target, w, h, gap), w, h, bounds));
 	if (!side) side = order.find((s) => clear(clamp(at(s, target, w, h, gap)))) ?? order[0];
 	const { left, top } = clamp(at(side, target, w, h, gap));
 	const horizontal = side === "above" || side === "below";

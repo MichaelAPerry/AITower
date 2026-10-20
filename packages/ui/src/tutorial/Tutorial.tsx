@@ -262,7 +262,24 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 		const cx = center.clientWidth / 2;
 		const cy = center.clientHeight / 2;
 		const target = first ? local(first.getBoundingClientRect()) : { left: cx - 20, top: cy - 20, right: cx + 20, bottom: cy + 20 };
-		const p = placeBubble(target, { w: el.offsetWidth, h: el.offsetHeight }, bounds, bubble.sides);
+		// Open build panels are obstacles (unless the target is inside one), so the bubble never covers the Inspector.
+		const avoid = [...document.querySelectorAll(".aitower-hud .bld-insp, .aitower-hud .bld-catalog")].filter((o) => !(first && o.contains(first))).map((o) => local(o.getBoundingClientRect()));
+		const p = placeBubble(target, { w: el.offsetWidth, h: el.offsetHeight }, bounds, bubble.sides, undefined, avoid);
+		// A bubble that points at the drawer tabs would land on the Inspector beside them: slide the Inspector down below it.
+		const hud = el.closest(".aitower-hud") as HTMLElement | null;
+		const insp = document.querySelector(".aitower-hud .bld-insp");
+		if (hud) {
+			let push = 0;
+			if (insp && first && !insp.contains(first)) {
+				const ir = local(insp.getBoundingClientRect());
+				const pushed = Number.parseFloat(hud.style.getPropertyValue("--coach-push")) || 0;
+				const natural = ir.top - pushed;
+				const t = target;
+				if (t.right > ir.left - 30 && t.left < ir.right + 30 && t.top < ir.bottom && t.bottom > natural - 4) push = Math.max(0, t.bottom + 14 + el.offsetHeight + 10 - natural);
+			}
+			if (push) hud.style.setProperty("--coach-push", `${Math.round(push)}px`);
+			else hud.style.removeProperty("--coach-push");
+		}
 		const key = `${bubble.id}|${Math.round(p.left)}|${Math.round(p.top)}|${p.side}|${Math.round(p.arrow)}`;
 		setPlaced((old) => (old?.key === key ? old : { ...p, key }));
 	}, [bubble]);
