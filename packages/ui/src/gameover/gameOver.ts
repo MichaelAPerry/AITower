@@ -64,6 +64,9 @@ const ENDING_FRAME: Record<EndingId, { form: string; stamp: string; tone: "red" 
 	livingTower: { form: "FORM A-9: ASSET CERTIFICATION", stamp: "CERTIFIED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
 	cleanTower: { form: "FORM C-2: SANITARY COMMENDATION", stamp: "COMMENDED", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
 	absorbed: { form: "FORM Ω: ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "FORM T-9: TAKEOVER", plainStamp: "TAKEN OVER" },
+	// M4 placeholders (M4-T3 may reword).
+	greenExemplar: { form: "FORM G-1: CARBON-NEGATIVE EXEMPLAR", stamp: "EXEMPLARY", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	millionMinds: { form: "FORM S-1: CONTINUITY CERTIFIED", stamp: "CONTINUOUS", tone: "green", plainForm: "FORM C-1: DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
 };
 
 /** The ending shown for a game-over: `ending` when set, else the secret one for kind "absorbed", else none. */

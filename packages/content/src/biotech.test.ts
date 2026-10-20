@@ -97,9 +97,10 @@ describe("biotech content (bundled)", () => {
 		expect(db.paths[1].description.toLowerCase()).toContain("coming soon");
 	});
 
-	it("has three endings of two or three paragraphs, with no gore words", () => {
-		expect(db.endings.map((e) => e.id)).toEqual(["livingTower", "cleanTower", "absorbed"]);
-		for (const e of db.endings) {
+	it("has the three biotech endings of two or three paragraphs, with no gore words", () => {
+		const bio = ["livingTower", "cleanTower", "absorbed"];
+		expect(db.endings.map((e) => e.id).slice(0, 3)).toEqual(bio);
+		for (const e of db.endings.filter((x) => bio.includes(x.id))) {
 			const n = e.body.split("\n\n").length;
 			expect(n, e.id).toBeGreaterThanOrEqual(2);
 			expect(n, e.id).toBeLessThanOrEqual(3);
@@ -241,7 +242,7 @@ describe("validateContent: M3 rules", () => {
 		expect(broken((db) => (db.clients.find((c) => c.needsBio)!.needsLiquid = true))).toMatch(/mutually exclusive/);
 		expect(broken((db) => db.paths.pop())).toMatch(/missing "synthetic"/);
 		expect(broken((db) => { for (const p of db.paths) p.available = false; })).toMatch(/at least one path/);
-		expect(broken((db) => db.endings.pop())).toMatch(/missing "absorbed"/);
+		expect(broken((db) => { db.endings = db.endings.filter((e) => e.id !== "absorbed"); })).toMatch(/missing "absorbed"/);
 		expect(broken((db) => (db.endings[0].body = ""))).toMatch(/body/);
 		expect(broken((db) => (db.balance.ascension.minTier = 9))).toMatch(/minTier/);
 		expect(broken((db) => (db.balance.bio.decay = 2))).toMatch(/decay/);

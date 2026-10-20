@@ -71,6 +71,11 @@ const RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	// The clean devices hold out: sterile bays and quarantine locks only give way at the very end.
 	sterilizer: ["damp", "tissue"],
 	quarantine: ["damp", "tissue"],
+	// M4 placeholders (M4-T4 gives greentech devices their own responses).
+	solar: ["damp", "tissue"],
+	wind: ["damp", "tissue"],
+	heat_export: ["damp", "veins", "tissue"],
+	carbon: ["damp", "flesh", "tissue"],
 	// Growths are already tissue.
 	growth: ["pulse", "veins", "breathe", "eyes"],
 };

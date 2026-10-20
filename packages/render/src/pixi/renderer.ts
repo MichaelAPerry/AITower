@@ -1,7 +1,7 @@
 /** Pixi v8 implementation of the `Renderer` contract. */
 import type { ContentDB } from "@aitower/content";
 import type { CellPointerEvent, Ghost, OverlayMode, Renderer, RenderOptions, Selection } from "@aitower/shared";
-import type { CellRef, SimView } from "@aitower/sim";
+import type { CellRef, SimEvent, SimView } from "@aitower/sim";
 import { Application, Container, Graphics, Sprite, Texture, TextureSource, TilingSprite } from "pixi.js";
 import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
 import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
@@ -284,6 +284,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	};
 
 	const renderer: Renderer = {
+		pushEvents(_events: SimEvent[]) {
+			// M4 placeholder (M4-T4 draws "+$" floaters and build puffs from these).
+		},
 		setOptions(o: RenderOptions) {
 			// Cheap when nothing changed: only changed keys invalidate anything.
 			const changed = pres.set(o);

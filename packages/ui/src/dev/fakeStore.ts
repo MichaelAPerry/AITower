@@ -121,6 +121,8 @@ export function createFakeContent(): ContentDB {
 			loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
 			tax: { profitShare: 0 },
 			bio: { diffusion: 0.05, slabFactor: 0.3, decay: 0.0005, quarantineLeak: 0.05, hazardPerContamination: 2, botSlowPerContamination: 0.5, mutationThreshold: 0.5, mutationExposureTicks: 720, growthThreshold: 0.7, growthChancePerDay: 0.05, irreversibleShare: 0.4, irreversibleCleanFactor: 0.25, nutrientPrice: 2 },
+			green: { heatPrice: 3, creditPrice: 40, droughtChancePerDay: 0.08, droughtFactor: 0.1, droughtHours: 18 },
+			automation: { partsBatch: 5, foremanPerHour: 1 },
 			ascension: { minTier: 5 },
 			endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
 			audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
@@ -200,6 +202,12 @@ function buildView(content: ContentDB): SimView {
 		path: null,
 		organoidPflops: 0,
 		endingProgress: null,
+		pathScore: 0,
+		greenScore: 0,
+		refinement: 0,
+		drought: false,
+		sandbox: false,
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false },
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;

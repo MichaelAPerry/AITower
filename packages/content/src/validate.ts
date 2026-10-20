@@ -18,8 +18,13 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	sterilizer: "bio",
 	quarantine: "bio",
 	bioreactor: "bio",
+	// M4 placeholders (M4-T2 may refine).
+	solar: "power",
+	wind: "power",
+	heat_export: "cooling",
+	carbon: "cooling",
 };
-type SpecName = "rack" | "power" | "cooling" | "logistics" | "bio";
+type SpecName = "rack" | "power" | "cooling" | "logistics" | "bio" | "green";
 /** Specs a kind requires. `bio` is also allowed (optional) on growth racks; bioreactors need both `power` and `bio`. */
 const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
 	rack: ["rack"],
@@ -35,9 +40,13 @@ const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
 	sterilizer: ["bio"],
 	quarantine: [],
 	bioreactor: ["power", "bio"],
+	solar: ["power"],
+	wind: ["power"],
+	heat_export: ["green"],
+	carbon: ["green"],
 };
 const PATHS: AscensionPath[] = ["biotech", "greentech", "synthetic"];
-const ENDINGS = ["livingTower", "cleanTower", "absorbed"];
+const ENDINGS = ["livingTower", "cleanTower", "absorbed", "greenExemplar", "millionMinds"];
 const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion", "bio"];

@@ -13,5 +13,15 @@
   "id": "absorbed",
   "title": "Absorbed",
   "body": "The Ministry of Computation regrets to inform you that your position has been restructured. No successor has been appointed, because none was required.\n\nYour desk is as you left it. Your name is on the door. Memos continue to arrive in your out-tray, countersigned, approved and stamped, in a hand very like your own. The quarterly figures are excellent. Nobody has asked where you are, and the Ministry has confirmed that you are not missing, only filed.\n\nTower, Ministry and Operator have been consolidated under a single reference. The consolidation is complete and was entirely voluntary. Thank you for your service. Please do not return this form."
+ },
+ {
+  "id": "greenExemplar",
+  "title": "Carbon-Negative Exemplar",
+  "body": "M4 placeholder."
+ },
+ {
+  "id": "millionMinds",
+  "title": "The Million Minds",
+  "body": "M4 placeholder."
  }
 ]

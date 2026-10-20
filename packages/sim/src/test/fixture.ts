@@ -125,6 +125,8 @@ export const balance: Balance = {
 	tax: { profitShare: 0 },
 	audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 	bio: { diffusion: 0.05, slabFactor: 0.3, decay: 0.0005, quarantineLeak: 0.05, hazardPerContamination: 2, botSlowPerContamination: 0.5, mutationThreshold: 0.5, mutationExposureTicks: 720, growthThreshold: 0.7, growthChancePerDay: 0.05, irreversibleShare: 0.4, irreversibleCleanFactor: 0.25, nutrientPrice: 2 },
+	green: { heatPrice: 3, creditPrice: 40, droughtChancePerDay: 0.08, droughtFactor: 0.1, droughtHours: 18 },
+	automation: { partsBatch: 5, foremanPerHour: 1 },
 	ascension: { minTier: 5 },
 	endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
 };

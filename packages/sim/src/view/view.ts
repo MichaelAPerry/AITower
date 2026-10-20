@@ -3,7 +3,7 @@
  * entity arrays are rebuilt small each call.
  */
 import type { BotDef, ContentDB } from "@aitower/content";
-import type { BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
+import type { AutomationPolicy, BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
@@ -55,6 +55,14 @@ function memoViews(state: SimState, content: ContentDB): MemoView[] {
 	}
 	return out;
 }
+
+/** M4 placeholder (M4-T1 keeps the policy in state). */
+const DEFAULT_AUTOMATION: AutomationPolicy = {
+	research: { enabled: false, branches: [] },
+	parts: { enabled: false, keep: 4 },
+	bots: { enabled: false, racksPerBot: 12, maxBots: 8 },
+	foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true },
+};
 
 export function buildView(state: SimState, content: ContentDB): SimView {
 	const m = state.metrics;
@@ -135,6 +143,13 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		path: state.path,
 		organoidPflops: m.organoidPflops,
 		endingProgress: leadingEnding(state, content.balance.endings),
+		// M4 placeholders (M4-T1 implements).
+		pathScore: state.corruption,
+		greenScore: 0,
+		refinement: 0,
+		drought: false,
+		sandbox: false,
+		automation: { policy: DEFAULT_AUTOMATION, foremanUnlocked: false },
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({

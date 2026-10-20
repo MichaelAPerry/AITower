@@ -64,6 +64,11 @@ const CATEGORY: Record<Kind, FacilityDef["category"]> = {
 	sterilizer: "bio",
 	quarantine: "bio",
 	bioreactor: "bio",
+	// M4 placeholders.
+	solar: "power",
+	wind: "power",
+	heat_export: "cooling",
+	carbon: "cooling",
 };
 
 export const varietyId = (row: VarietyRow, tier: number, width: number): string => `var_${row.kind}${row.flavour ? `_${row.flavour}` : ""}_t${tier}_w${width}`;
