@@ -26,6 +26,8 @@ import { showTitleAtBoot } from "./title/titleState";
 import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
+import { Assistant } from "./assistant/Assistant";
+import { recommendedIds, suggestions } from "./assistant/suggest";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
@@ -175,6 +177,10 @@ export function Hud({ store, content, title }: HudProps) {
 		if (ascensionStale) ascension.close();
 	}, [ascensionStale, ascension]);
 
+	// UNIT-7: candidates come from the pure helper; the same list feeds the catalog's Recommended row.
+	const assistantOn = settings.assistant !== false;
+	const candidates = useMemo(() => (assistantOn ? suggestions(state.view, content) : []), [assistantOn, state.view, content]);
+	const recommended = useMemo(() => recommendedIds(candidates), [candidates]);
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
@@ -191,12 +197,13 @@ export function Hud({ store, content, title }: HudProps) {
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
 				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
-				<PalettePopover {...props} />
+				<PalettePopover {...props} recommended={recommended} />
 				<BuildBar ui={ui} setUi={setUi} />
 				<Ticker {...props} />
 				<div className="ui-right">
 					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
+				{assistantOn && !titleOpen && !crawl && !over && <Assistant {...props} candidates={candidates} />}
 				<DrawerTabs ui={ui} setUi={setUi} />
 				<Drawer {...props} />
 			</div>

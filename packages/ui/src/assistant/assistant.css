@@ -1,0 +1,184 @@
+/* UNIT-7, the helper robot. Bottom-right, left of the drawer tabs and above the ticker; slides left when a drawer is open. */
+.aitower-hud .ast {
+	position: absolute;
+	right: calc(var(--dtab-w) + var(--gap) * 2);
+	bottom: calc(var(--gap) * 5);
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 6px;
+	z-index: 6;
+	pointer-events: none;
+	transition: right 0.2s ease;
+}
+.aitower-hud.has-drawer .ast {
+	right: calc(var(--drawer-w) + var(--dtab-w) + var(--gap) * 2);
+}
+.aitower-hud .ast > * {
+	pointer-events: auto;
+}
+.aitower-hud .ast-bubble {
+	position: relative;
+	width: 248px;
+	padding: 10px 12px;
+	border: 1px solid var(--accent);
+	border-radius: var(--radius);
+	white-space: normal;
+	animation: ast-in 0.25s ease-out;
+}
+.aitower-hud .ast-bubble::after {
+	content: "";
+	position: absolute;
+	right: 26px;
+	bottom: -6px;
+	width: 10px;
+	height: 10px;
+	background: var(--panel);
+	border-right: 1px solid var(--accent);
+	border-bottom: 1px solid var(--accent);
+	transform: rotate(45deg);
+}
+.aitower-hud .ast-name {
+	font: 600 var(--fs-label) / 1 var(--f-display);
+	letter-spacing: var(--tracking);
+	color: var(--accent);
+}
+.aitower-hud .ast-text {
+	margin: 5px 0 9px;
+	font: 400 13px / 1.4 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .ast-btns {
+	display: flex;
+	gap: 6px;
+}
+.aitower-hud .ast-dock {
+	position: relative;
+}
+.aitower-hud .ast-bot {
+	display: block;
+	padding: 4px 6px 2px;
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	cursor: pointer;
+	line-height: 0;
+}
+.aitower-hud .ast-svg {
+	animation: ast-bob 4.5s ease-in-out infinite;
+}
+.aitower-hud .ast-bot:hover,
+.aitower-hud .ast-bot:focus-visible {
+	border-color: var(--accent);
+}
+.aitower-hud .ast-bot.has-news {
+	border-color: var(--accent);
+	box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.aitower-hud .ast-off {
+	position: absolute;
+	top: -7px;
+	left: -7px;
+	width: 18px;
+	height: 18px;
+	padding: 0;
+	border-radius: 50%;
+	background: var(--bg);
+	border: 1px solid var(--panel-edge);
+	color: var(--text-dim);
+	font: 500 13px / 1 var(--f-body);
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.15s;
+}
+.aitower-hud .ast-dock:hover .ast-off,
+.aitower-hud .ast-off:focus-visible {
+	opacity: 1;
+}
+.aitower-hud .ast-off:hover {
+	color: var(--text);
+	border-color: var(--accent);
+}
+/* Robot drawing */
+.aitower-hud .ast-head,
+.aitower-hud .ast-body {
+	fill: var(--housing-hi);
+	stroke: var(--accent);
+	stroke-width: 1.5;
+}
+.aitower-hud .ast-visor {
+	fill: var(--bg);
+	stroke: var(--panel-edge);
+}
+.aitower-hud .ast-eye,
+.aitower-hud .ast-bulb,
+.aitower-hud .ast-led {
+	fill: var(--accent);
+}
+.aitower-hud .ast-smile {
+	fill: none;
+	stroke: var(--accent);
+	stroke-width: 1.6;
+	stroke-linecap: round;
+}
+.aitower-hud .ast-ant {
+	stroke: var(--text-dim);
+	stroke-width: 1.6;
+}
+.aitower-hud .ast-ear,
+.aitower-hud .ast-arm,
+.aitower-hud .ast-foot {
+	fill: var(--olive);
+	stroke: var(--accent);
+	stroke-width: 1;
+}
+.aitower-hud .ast-panel {
+	fill: var(--bg);
+	stroke: var(--panel-edge);
+}
+.aitower-hud .ast-eye {
+	transform-box: fill-box;
+	transform-origin: center;
+	animation: ast-blink 5.5s infinite;
+}
+.aitower-hud .ast-bulb {
+	animation: ast-pulse 2.6s ease-in-out infinite;
+}
+.aitower-hud .ast-svg.is-talk .ast-smile {
+	stroke-width: 2.2;
+}
+@keyframes ast-blink {
+	0%, 94%, 100% { transform: scaleY(1); }
+	97% { transform: scaleY(0.1); }
+}
+@keyframes ast-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.35; }
+}
+@keyframes ast-bob {
+	0%, 100% { transform: translateY(0); }
+	50% { transform: translateY(-2px); }
+}
+@keyframes ast-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: none; }
+}
+.aitower-hud.is-reduced-motion .ast,
+.aitower-hud.is-reduced-motion .ast *,
+.aitower-hud.is-reduced-motion .ast *::after {
+	animation: none !important;
+	transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .ast,
+	.aitower-hud .ast *,
+	.aitower-hud .ast *::after {
+		animation: none !important;
+		transition: none !important;
+	}
+}
+/* Cramped screens: just the robot, small. */
+.aitower-hud.is-density-cramped .ast-bot .ast-svg {
+	width: 40px;
+	height: 47px;
+}

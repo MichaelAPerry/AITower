@@ -78,13 +78,13 @@ export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategor
 
 
 /** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
-function Card({ item, picked, poor, onPick, onHover }: { item: CatalogItem; picked: boolean; poor: boolean; onPick: () => void; onHover: (key: string | null) => void }) {
+function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; onPick: () => void; onHover: (key: string | null) => void }) {
 	const d = item.def;
 	return (
 		<button
 			key={item.key}
 			type="button"
-			data-tut={`card-${d ? d.id : item.key}`}
+			data-tut={plain ? undefined : `card-${d ? d.id : item.key}`}
 			aria-pressed={picked}
 			className={`bld-card ${picked ? "is-on" : ""} ${poor ? "is-poor" : ""} ${item.danger ? "is-danger" : ""}`}
 			onClick={onPick}
@@ -118,7 +118,7 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		store.setTool(active === toolKey(item.tool) ? { kind: "select" } : item.tool);
 	};
 	// Called as a plain function (no hooks), so tests can walk the returned element tree.
-	const card = (item: CatalogItem) => Card({ item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, onPick: () => pick(item), onHover: hover });
+	const card = (item: CatalogItem, plain = false) => Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, onPick: () => pick(item), onHover: hover });
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
@@ -156,10 +156,10 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 				{rec.length > 0 && (
 					<section className="bld-rec" aria-label="Recommended">
 						<h4 className="bld-sub">Recommended</h4>
-						<div className="bld-grid">{rec.map(card)}</div>
+						<div className="bld-grid">{rec.map((i) => card(i, true))}</div>
 					</section>
 				)}
-				{tab !== "supplies" && <div className="bld-grid">{cards.map(card)}</div>}
+				{tab !== "supplies" && <div className="bld-grid">{cards.map((i) => card(i))}</div>}
 				{tab !== "supplies" && cards.length === 0 && lockedLines.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
 				{lockedLines.length > 0 && (
 					<div className="bld-locked" data-tut="locked-row">

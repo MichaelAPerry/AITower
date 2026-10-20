@@ -112,6 +112,7 @@ async function run(url) {
 		const coach = page.locator(".ui-coach");
 		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
 		await coach.waitFor();
+		assert((await page.locator(".ast-bubble").count()) === 0, "the assistant must stay quiet while the coach marks run");
 		// The sim posts an offer at tick 0 and the Contracts drawer opens itself: no waiting, no hunting for the tab.
 		await coachAt("Accept this contract");
 		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
@@ -235,6 +236,19 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		log("help mode, More... link, Encyclopedia search");
+
+		stage("5e. assistant: UNIT-7 is docked, a click gives a tip, the x turns it off (and Settings turns it back on)");
+		await page.locator(".ast-bot").waitFor();
+		await page.locator(".ast-bot").click({ force: true });
+		await page.locator(".ast-bubble").waitFor();
+		// With nothing to suggest the click gives a tip (Thanks); if a real suggestion is up, it answers that instead (Not now).
+		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now)$/ }).click();
+		await page.locator(".ast-off").click({ force: true });
+		await page.locator(".ast").waitFor({ state: "detached" });
+		assert((await game(() => window.aitower.store.get().settings.assistant)) === false, "turning the assistant off must persist in settings");
+		await game(() => window.aitower.store.setSettings({ assistant: true }));
+		await page.locator(".ast-bot").waitFor();
+		log("robot docked, tip, off and on");
 
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
