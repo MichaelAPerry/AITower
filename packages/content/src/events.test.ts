@@ -88,6 +88,8 @@ describe("events.json", () => {
 						case "spareParts":
 							expect(c.hint, w).toContain(`${fx.count >= 0 ? "+" : "-"}${Math.abs(fx.count)} spare parts`);
 							break;
+						case "affinity":
+							break; // the hint names the lean in words; no fixed format
 						case "gridCap":
 							expect(c.hint, w).toMatch(fx.factor === 0 ? /grid offline/ : new RegExp(`x${fx.factor}\\b`));
 							break;

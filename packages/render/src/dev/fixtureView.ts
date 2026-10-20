@@ -238,6 +238,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		path: null,
 		organoidPflops: 0,
 		endingProgress: null,
+		affinity: { biotech: 0, greentech: 0, synthetic: 0 },
 		pathScore: 0,
 		greenScore: 0,
 		refinement: 0,

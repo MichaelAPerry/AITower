@@ -469,7 +469,9 @@ export type EventEffect =
 	| { type: "failureRate"; factor: number; durationTicks: number }
 	/** Immediately fail N random healthy racks (seeded). */
 	| { type: "failRacks"; count: number }
-	| { type: "spareParts"; count: number };
+	| { type: "spareParts"; count: number }
+	/** Nudge the tower toward an ascension path (affinity points; see SimView.affinity). */
+	| { type: "affinity"; path: AscensionPath; amount: number };
 
 export interface EventChoice {
 	/** Stable id, e.g. "approve" | "deny" | "file". */

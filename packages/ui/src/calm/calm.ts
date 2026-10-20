@@ -148,6 +148,8 @@ export function effectChip(e: EventEffect): string {
 			return `${e.count} rack${e.count === 1 ? "" : "s"} fail`;
 		case "spareParts":
 			return `${sign(e.count)}${Math.abs(e.count)} parts`;
+		case "affinity":
+			return `${e.path} ${sign(e.amount)}`;
 	}
 }
 

@@ -137,6 +137,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		path: state.path,
 		organoidPflops: m.organoidPflops,
 		endingProgress: leadingEnding(state, content.balance.endings),
+		affinity: { biotech: 0, greentech: 0, synthetic: 0 }, // placeholder: the path-affinity task implements it
 		pathScore: state.path === "greentech" ? state.greenScore : state.path === "synthetic" ? state.refinement : state.corruption,
 		greenScore: state.greenScore,
 		refinement: state.refinement,

@@ -145,6 +145,8 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 			if (e.count >= 0) stockParts({ state, content }, Math.floor(e.count));
 			else removeParts(state, content, Math.floor(-e.count));
 			break;
+		case "affinity":
+			break; // placeholder: the path-affinity task implements it
 	}
 }
 
