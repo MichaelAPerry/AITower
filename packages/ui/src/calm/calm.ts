@@ -3,17 +3,22 @@
  * and which events are routine enough to stay out of the ticker.
  */
 import type { ContentDB, EventEffect, FacilityDef } from "@aitower/content";
-import type { LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
+import type { HorrorIntensity } from "@aitower/shared";
+import type { CellRef, LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
+import { describeEvent, isNoise } from "../events";
+import type { Severity } from "../notices";
 import { fmtMoney } from "../format";
 import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
 
-export type DrawerId = "contracts" | "research" | "finance" | "gauges" | "log";
+export type DrawerId = "contracts" | "research" | "automation" | "finance" | "gauges" | "log";
 /** Drawers that have an edge tab and a hotkey (the log opens from the ticker). */
 export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: string }[] = [
 	{ id: "contracts", label: "Contracts", key: "C" },
 	{ id: "research", label: "Research", key: "R" },
+	// A is not free: the renderer pans the camera with WASD. T (as in "autoTomation") is.
+	{ id: "automation", label: "Automation", key: "T" },
 	{ id: "finance", label: "Finance", key: "F" },
 	{ id: "gauges", label: "Gauges", key: "I" },
 ];
@@ -193,4 +198,61 @@ export function isRoutine(ev: SimEvent, view: Pick<SimView, "spareParts">): bool
 		default:
 			return false;
 	}
+}
+
+/** One line of the ticker or the alert log. Hourly sums of `earned`, `autoBuilt` and `autoBought` are one line each. */
+export interface FeedLine {
+	key: string;
+	/** Tick of the latest event folded into this line. */
+	tick: number;
+	text: string;
+	severity: Severity;
+	cell?: CellRef;
+}
+
+const hourOf = (tick: number): number => Math.floor(tick / HOUR);
+const plural = (n: number, one: string, many = `${one}s`): string => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * Turn log entries into feed lines. Events that arrive in streams are folded per game-hour so they cannot drown the rest:
+ * payouts (`earned`), the Foreman's builds (`autoBuilt`) and the stores' purchases (`autoBought`, per kind). Everything else
+ * is one line per event. Lines keep the order of their latest event. `keep` filters entries first (the ticker drops routine ones).
+ */
+export function feedLines(log: readonly { tick: number; event: SimEvent }[], view: SimView, content: ContentDB, horror: HorrorIntensity, keep: (ev: SimEvent) => boolean = () => true): FeedLine[] {
+	const out = new Map<string, FeedLine>();
+	const sums = new Map<string, { n: number; amount: number; jobs: Set<number>; first?: FeedLine }>();
+	const put = (key: string, line: FeedLine): void => {
+		out.delete(key); // re-inserting moves the line to the end: it is the newest
+		out.set(key, line);
+	};
+	log.forEach((e, i) => {
+		const ev = e.event;
+		if (isNoise(ev) || !keep(ev)) return;
+		const h = hourOf(e.tick);
+		const own = describeEvent(ev, view, content, horror);
+		if (ev.type === "earned" || ev.type === "autoBuilt" || ev.type === "autoBought") {
+			const key = ev.type === "autoBought" ? `${ev.type}:${ev.what}:${h}` : `${ev.type}:${h}`;
+			const s = sums.get(key) ?? { n: 0, amount: 0, jobs: new Set<number>() };
+			sums.set(key, s);
+			s.n += ev.type === "autoBought" ? ev.count : 1;
+			if (ev.type === "earned") {
+				s.amount += ev.amount;
+				s.jobs.add(ev.jobId);
+			}
+			const base: FeedLine = { key, tick: e.tick, severity: own.severity, cell: own.cell, text: own.text };
+			s.first ??= base;
+			let text = s.first.text; // a single event keeps its own wording
+			let cell = s.first.cell;
+			if (ev.type === "earned" && s.n > 1) text = `Contracts paid ${fmtMoney(s.amount)} this hour (${plural(s.n, "payout")}${s.jobs.size > 1 ? `, ${plural(s.jobs.size, "job")}` : ""})`;
+			else if (ev.type === "autoBuilt" && s.n > 1) {
+				text = `The Works Foreman placed ${s.n} facilities this hour`;
+				cell = undefined;
+			}
+			else if (ev.type === "autoBought") text = ev.what === "parts" ? `Stores bought ${plural(s.n, "spare part")}` : `Stores bought ${plural(s.n, "bot")}`;
+			put(key, { ...base, text, cell });
+			return;
+		}
+		put(`e${i}`, { key: `e${i}`, tick: e.tick, text: own.text, severity: own.severity, cell: own.cell });
+	});
+	return [...out.values()];
 }

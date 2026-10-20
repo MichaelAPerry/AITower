@@ -102,8 +102,14 @@ export const traitName = (trait: BotTrait, h: HorrorIntensity): string => (h ===
 
 // ─── HUD: corruption gauge and memo stain ────────────────────────────────────
 
-/** The top-bar gauge shows once any corruption exists, or from Clearance 3 on. */
-export const showGrowthGauge = (view: Pick<SimView, "corruption" | "tier">): boolean => (view.corruption ?? 0) > 0 || view.tier >= 3;
+/**
+ * The top-bar gauge shows once any corruption exists, or from Clearance 3 on. On the Greentech and Synthetic paths it
+ * gives way to the path's own gauge and returns only if corruption is actually above zero.
+ */
+export const showGrowthGauge = (view: Pick<SimView, "corruption" | "tier"> & { path?: SimView["path"] }): boolean => {
+	if ((view.corruption ?? 0) > 0) return true;
+	return view.tier >= 3 && view.path !== "greentech" && view.path !== "synthetic";
+};
 
 /** Gauge tooltip. */
 export function growthTitle(view: Pick<SimView, "corruption" | "contaminatedShare">, h: HorrorIntensity): string {

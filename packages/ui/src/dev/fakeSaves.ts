@@ -12,7 +12,8 @@ export interface FakeSavesCtx {
 	patchState(patch: Partial<GameState>): void;
 	/** Replace the world view (and notify). */
 	setView(view: SimView): void;
-	freshView(): SimView;
+	/** A new world; `scenarioId` picks the lot (default: the standard start). */
+	freshView(scenarioId?: string): SimView;
 	delayMs: number;
 }
 
@@ -49,8 +50,8 @@ export function createFakeSaves(ctx: FakeSavesCtx, seed: Partial<Record<SaveSlot
 			apply(json);
 			status({ error: null });
 		},
-		newGame(): void {
-			ctx.setView(ctx.freshView());
+		newGame(_seed?: number, scenarioId?: string): void {
+			ctx.setView(ctx.freshView(scenarioId));
 		},
 		async listSaves(): Promise<SaveSlotInfo[]> {
 			await wait(ctx.delayMs);

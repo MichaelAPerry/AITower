@@ -3,14 +3,14 @@ import { isSerious, AlertsLog, ContractsDrawer, ResearchDrawer, Telemetry } from
 import { FinanceTab } from "../finance/FinanceTab";
 import { OverlaySwitcher } from "../components/OverlaySwitcher";
 import type { PanelProps } from "../components/context";
-import { describeEvent, isNoise } from "../events";
 import { fmtMoney, fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
+import { AutomationDrawer } from "../automation/AutomationDrawer";
 import { ModifierChips } from "../memo/MemoDesk";
 import { pushNotice } from "../notices";
 import { currentObjective, endingLine } from "../objective/objective";
 import { toolKey } from "../tools/controller";
 import { BuildPalette, defHeadline } from "../components/BuildPalette";
-import { DRAWER_TABS, type DockPick, dockPicks, isRoutine, nextDrawer } from "./calm";
+import { DRAWER_TABS, type DockPick, dockPicks, feedLines, isRoutine, nextDrawer } from "./calm";
 import { Icon, Swatch } from "../components/common";
 
 /** NEXT: one line from the current objective, with the key to press. The detail is its tooltip. */
@@ -42,22 +42,18 @@ export function NextChip({ store, content, state, ui, setUi, openAscension }: Pa
 /** One line at the bottom of the world: the latest events that need a person, a count, and a click into the log. */
 export function Ticker({ content, state, ui, setUi }: PanelProps) {
 	const { view } = state;
-	const items = state.log.filter((e) => !isNoise(e.event) && !isRoutine(e.event, view)).slice(-3);
+	const items = feedLines(state.log.slice(-300), view, content, state.settings.horrorIntensity, (ev) => !isRoutine(ev, view)).slice(-3);
 	const unseen = state.log.filter((e) => e.tick > ui.alertsSeenTick && isSerious(e.event) && !isRoutine(e.event, view)).length;
 	const glyph = { good: "✓", info: "·", warn: "▲", error: "✕" } as const;
 	return (
 		<button type="button" className="ui-ticker" onClick={() => setUi({ drawer: ui.drawer === "log" ? null : "log" })} title="Open the alert log" aria-live="polite">
 			<span className={`ui-tag ${unseen ? "is-alert" : ""}`}>{unseen || "LOG"}</span>
 			{items.length === 0 && <span className="ui-dim">All quiet</span>}
-			{items.map((e, i) => {
-				const d = describeEvent(e.event, view, content, state.settings.horrorIntensity);
-				return (
-					// biome-ignore lint/suspicious/noArrayIndexKey: log rows can share a tick; the tick-index pair is the stable key
-					<span key={`${e.tick}-${i}`} className={`ui-tk sev-${d.severity}`}>
-						{glyph[d.severity]} {d.text}
-					</span>
-				);
-			})}
+			{items.map((l) => (
+				<span key={l.key} className={`ui-tk sev-${l.severity}`}>
+					{glyph[l.severity]} {l.text}
+				</span>
+			))}
 		</button>
 	);
 }
@@ -175,6 +171,7 @@ export function Drawer(props: PanelProps) {
 			</button>
 			{d === "contracts" && <ContractsDrawer {...props} />}
 			{d === "research" && <ResearchDrawer {...props} />}
+			{d === "automation" && <AutomationDrawer {...props} />}
 			{d === "finance" && <FinanceTab {...props} />}
 			{d === "gauges" && <GaugesDrawer {...props} />}
 			{d === "log" && <AlertsLog {...props} />}

@@ -62,6 +62,16 @@ const over = q.get("over");
 if (over === "living" || over === "clean") store.triggerGameOver("victory", over === "living" ? "livingTower" : "cleanTower");
 else if (over === "absorbed") store.triggerGameOver("absorbed", "absorbed");
 else if (over) store.triggerGameOver(over as "bankrupt");
+// M4: ?foreman=1 (Works Foreman hired) &auto=1 (parts + research orders on) &path=greentech|synthetic &score=0..1 &drought=1 &sandbox=1
+if (q.get("foreman") === "1") store.unlockForeman();
+if (q.get("auto") === "1") {
+	const p = store.get().view.automation.policy;
+	store.dispatch({ type: "setAutomation", policy: { ...p, parts: { ...p.parts, enabled: true }, research: { ...p.research, enabled: true } } });
+}
+const path = q.get("path");
+if (path === "greentech" || path === "synthetic") store.patchView({ path, ...(path === "greentech" ? { greenScore: num("score") ?? 0.62 } : { refinement: num("score") ?? 0.4 }) });
+if (q.get("drought") === "1") store.patchView({ drought: true });
+if (q.get("sandbox") === "1") store.patchView({ sandbox: true });
 // Induction: ?tut=<step id> jumps to that step, ?tut=none closes it (default: step 1, as on a first visit).
 try {
 	const tut = q.get("tut");

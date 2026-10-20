@@ -45,7 +45,8 @@ export function installedPflops(view: SimView, content: ContentDB): number {
 export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult, filed: PathFiled | null = null): Objective {
 	const active = view.jobs.filter((j) => ACTIVE.has(j.status));
 
-	if (view.cash < 0) {
+	// A sandbox lot has no bankruptcy, so a negative balance is no warning there.
+	if (view.cash < 0 && !view.sandbox) {
 		const room = view.loan ? view.loan.max - view.loan.principal : 0;
 		const credit = room > 0 ? ` Or borrow up to ${fmtMoney(room)} from the Ministry Credit Office (Finance tab): it is interest, not income.` : "";
 		return {

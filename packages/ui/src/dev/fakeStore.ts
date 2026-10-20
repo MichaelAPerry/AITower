@@ -2,7 +2,7 @@
  * Dev-only fake GameStore backed by a hand-built SimView fixture. Uses content *types* only and a small
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
-import type { ContentDB, EventDef, FacilityDef, TechNode } from "@aitower/content";
+import type { ContentDB, EventDef, FacilityDef, Scenario, TechNode } from "@aitower/content";
 import type { AscensionPath, AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
@@ -127,14 +127,24 @@ export function createFakeContent(): ContentDB {
 			endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
 			audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
-		scenarios: {},
+		scenarios: FAKE_SCENARIOS,
 		events: FAKE_EVENTS,
 		tech: FAKE_TECH,
 		generateContract: () => ({ clientId: "x", clientName: "X", kind: "training", work: 100, durationTicks: 1440, payout: 1, penalty: 0, needsLiquid: false, storageTB: 0, checkpointTicks: 60 }),
 	};
 }
 
-function buildView(content: ContentDB): SimView {
+const lot = (id: string, name: string, extra: Partial<Scenario> = {}): Scenario => ({ id, name, width: 40, floorMin: -1, floorMax: 9, slabs: [], facilities: [], conduits: [], lifts: [], bots: [], spareParts: 0, ...extra });
+
+/** The three lots of the real content, cut down: the standard start (no description of its own), a brownfield and a sandbox. */
+const FAKE_SCENARIOS: Record<string, Scenario> = {
+	starter: lot("starter", "Garage Cluster"),
+	brownfield: lot("brownfield", "Auction Lot", { description: "An old half-built tower, bought at auction with the debts attached. Starts at Clearance 2.", startingCash: 350_000, startTier: 2 }),
+	sandbox: lot("sandbox", "Test Lot", { description: "A fully funded test lot with no bankruptcy and no shutdown. Try anything once.", startingCash: 500_000_000, startTier: 5, sandbox: true }),
+};
+
+function buildView(content: ContentDB, scenarioId?: string): SimView {
+	const sc = scenarioId ? content.scenarios[scenarioId] : undefined;
 	const width = 40;
 	const floorMin = -1;
 	const floorMax = 9;
@@ -261,6 +271,12 @@ function buildView(content: ContentDB): SimView {
 	}
 	for (const s of h) s.totalKw = s.itKw * s.pue;
 	v.history = h;
+	if (sc) {
+		// A chosen lot overrides the money, the Clearance and the sandbox flag (the fake world keeps its own buildings).
+		v.cash = sc.startingCash ?? content.balance.startingCash;
+		v.tier = sc.startTier ?? 1;
+		v.sandbox = !!sc.sandbox;
+	}
 	return v;
 }
 
@@ -353,6 +369,10 @@ export interface FakeStore extends GameStore {
 	addResearchPoints(n: number): void;
 	/** Research a node as if the player had (no RP or prerequisite checks); unlocks the clerk if the node does. */
 	unlockClerk(): void;
+	/** Unlock the Works Foreman (harness and tests). */
+	unlockForeman(): void;
+	/** Merge fields into the view (harness and tests; no rules applied). */
+	patchView(patch: Partial<SimView>): void;
 }
 
 export function createFakeStore(content: ContentDB = createFakeContent(), opts: { saveDelayMs?: number } = {}): FakeStore {
@@ -382,7 +402,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 		getState: () => state,
 		patchState: (patch) => set(patch),
 		setView: (v) => newView(v),
-		freshView: () => buildView(content),
+		freshView: (id) => buildView(content, id),
 		delayMs: opts.saveDelayMs ?? 150,
 	});
 	const ok: CommandResult = { ok: true };
@@ -502,6 +522,10 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 		unlockClerk() {
 			newView({ clerk: { ...view.clerk, unlocked: true }, techResearched: view.techResearched.includes("adm_clerk") ? view.techResearched : [...view.techResearched, "adm_clerk"] });
 		},
+		patchView: (patch) => newView(patch),
+		unlockForeman() {
+			newView({ automation: { ...view.automation, foremanUnlocked: true } });
+		},
 		get: () => state,
 		subscribe(cb) {
 			subs.add(cb);
@@ -565,7 +589,8 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (view.tier < n.minTier) return no(`Requires Clearance ${n.minTier}`);
 					if (view.researchPoints < n.cost) return no(`Needs ${n.cost} RP, have ${Math.floor(view.researchPoints)}`);
 					const clerk = n.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk") ? { ...view.clerk, unlocked: true } : view.clerk;
-					newView({ researchPoints: view.researchPoints - n.cost, techResearched: [...view.techResearched, n.id], clerk });
+					const automation = n.effects.some((e) => e.type === "feature" && e.feature === "foreman") ? { ...view.automation, foremanUnlocked: true } : view.automation;
+					newView({ researchPoints: view.researchPoints - n.cost, techResearched: [...view.techResearched, n.id], clerk, automation });
 					pushEvents([{ type: "researched", techId: n.id }]);
 					return ok;
 				}
@@ -574,6 +599,14 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (view.tier < content.balance.ascension.minTier) return no(`Requires Clearance ${content.balance.ascension.minTier}`);
 					if (!content.paths.find((p) => p.id === cmd.path)?.available) return no("That path is not available yet");
 					queuedPath = cmd.path;
+					return ok;
+				}
+				case "setAutomation": {
+					const p = cmd.policy;
+					const nums = [p?.parts?.keep, p?.bots?.racksPerBot, p?.bots?.maxBots, p?.foreman?.reserve];
+					if (!p || !nums.every((x) => typeof x === "number" && Number.isFinite(x) && x >= 0)) return no("Automation orders are malformed");
+					if (p.foreman.enabled && !view.automation.foremanUnlocked) return no("The Works Foreman has not been hired");
+					newView({ automation: { ...view.automation, policy: { research: { ...p.research, branches: [...p.research.branches] }, parts: { ...p.parts }, bots: { ...p.bots }, foreman: { ...p.foreman } } } });
 					return ok;
 				}
 				case "setClerk": {

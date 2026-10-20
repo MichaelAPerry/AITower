@@ -173,17 +173,18 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			const trait = traitName(ev.trait, horror);
 			return { text: plain ? `Automaton #${ev.botId} has mutated (${trait})` : `Automaton #${ev.botId} has been reclassified (${trait}). No action is required`, severity: plain ? "warn" : "info", toast: false };
 		}
-		// M4 placeholders (M4-T3 words these and routes them to the ticker or floaters).
 		case "earned":
 			return { text: `${job(ev.jobId)} paid ${fmtMoney(ev.amount)}`, severity: "good", toast: false };
-		case "autoBuilt":
-			return { text: `The Foreman built ${fac(ev.facilityId).name}`, severity: "info", toast: false, cell: fac(ev.facilityId).cell };
+		case "autoBuilt": {
+			const f = fac(ev.facilityId);
+			return { text: `The Works Foreman placed ${f.name}`, severity: "info", toast: false, cell: f.cell };
+		}
 		case "autoBought":
-			return { text: ev.what === "parts" ? `Stores bought ${ev.count} spare parts` : `Stores bought ${ev.count} bot${ev.count === 1 ? "" : "s"}`, severity: "info", toast: false };
+			return { text: ev.what === "parts" ? `Stores bought ${ev.count} spare part${ev.count === 1 ? "" : "s"}` : `Stores bought ${ev.count} bot${ev.count === 1 ? "" : "s"}`, severity: "info", toast: false };
 		case "droughtStarted":
-			return { text: "Dunkelflaute: no sun, no wind", severity: "warn", toast: true };
+			return { text: "Dunkelflaute: calm and dark. Solar and wind output has collapsed until it passes", severity: "warn", toast: true };
 		case "droughtEnded":
-			return { text: "The Dunkelflaute has passed", severity: "good", toast: false };
+			return { text: "The Dunkelflaute has passed. Solar and wind are back", severity: "good", toast: false };
 		case "contaminationIrreversible": {
 			const k = content.balance?.bio?.irreversibleCleanFactor;
 			const strength = k === undefined ? "" : ` Sterile bays now work at ${Math.round(k * 100)} % of rated effect.`;

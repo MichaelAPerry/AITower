@@ -1,6 +1,7 @@
 /** Pure logic for the title screen: when it shows, which entries it offers, and how a pick starts the game. */
 import type { GameStore, SaveSlotInfo } from "@aitower/shared";
 import { fmtMoney } from "../format";
+import { DEFAULT_SCENARIO } from "./scenarios";
 
 /** Shown at boot unless the URL has ?new (the e2e smoke test relies on that). */
 export const showTitleAtBoot = (search: string): boolean => !new URLSearchParams(search).has("new");
@@ -20,8 +21,11 @@ export function titleItems(saves: readonly SaveSlotInfo[]): TitleItem[] {
 	return items;
 }
 
-/** The induction box is ticked by default on a first visit and when there is nothing to continue. */
-export const inductionDefault = (saves: readonly SaveSlotInfo[]): boolean => saves.length === 0;
+/**
+ * The induction box is ticked by default on a first visit and when there is nothing to continue. The induction is written for
+ * the standard start, so it is unticked by default for any other scenario.
+ */
+export const inductionDefault = (saves: readonly SaveSlotInfo[], scenarioId: string = DEFAULT_SCENARIO): boolean => saves.length === 0 && scenarioId === DEFAULT_SCENARIO;
 
 /** "just now", "5 min ago", "3 h ago", "2 d ago". */
 export function agoText(ms: number, now: number): string {
@@ -44,20 +48,23 @@ export interface StartHooks {
 }
 
 /**
- * Leave the title screen into a game. Continue plays the loaded autosave at 1×. New game starts a fresh site;
- * with the induction on, the induction takes over the clock (its first memo stops it) instead of running at 1×.
+ * Leave the title screen into a game. Continue plays the loaded autosave at 1×. New game starts a fresh site of the chosen
+ * scenario (the standard start when none is given); with the induction on, the induction takes over the clock (its first memo
+ * stops it) instead of running at 1×. With `crawl`, the clock stays stopped: the opening crawl plays first and the HUD sets
+ * the speed when it ends.
  */
-export function startGame(store: GameStore, how: { kind: "continue" } | { kind: "new"; induction: boolean }, hooks: StartHooks): void {
+export function startGame(store: GameStore, how: { kind: "continue" } | { kind: "new"; induction: boolean; scenarioId?: string; crawl?: boolean }, hooks: StartHooks): void {
 	if (how.kind === "continue") {
 		store.setSpeed(1);
 		return;
 	}
-	store.newGame();
+	if (how.scenarioId) store.newGame(undefined, how.scenarioId);
+	else store.newGame();
 	if (how.induction) {
 		hooks.restartInduction();
 		store.setSpeed(0);
 	} else {
 		hooks.closeInduction();
-		store.setSpeed(1);
+		store.setSpeed(how.crawl ? 0 : 1);
 	}
 }
