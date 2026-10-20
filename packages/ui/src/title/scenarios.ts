@@ -27,7 +27,7 @@ export function scenarioCards(content: ContentDB): ScenarioCard[] {
 			id: s.id,
 			name: s.name,
 			description: s.description?.trim() || DEFAULT_BLURB,
-			facts: `${fmtMoney(s.startingCash ?? content.balance?.startingCash ?? 0)} · Clearance ${s.startTier ?? 1}`,
+			facts: `${fmtMoney(s.startingCash ?? content.balance?.startingCash ?? 0)} · Level ${s.startTier ?? 1}`,
 			sandbox: !!s.sandbox,
 		}));
 }

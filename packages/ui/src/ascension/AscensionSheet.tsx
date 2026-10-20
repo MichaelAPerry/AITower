@@ -22,7 +22,7 @@ export function AscensionForm({ rows, tier, affinity, content, pending, onPick, 
 				</button>
 			</header>
 			<p className="ui-asc-intro">
-				Clearance {tier} entitles the tower to commit to one path of Ascension. The election is entered once. It cannot be amended, withdrawn or appealed, and the Board will not be reminded of it.
+				Level {tier} entitles the tower to commit to one path of Ascension. The election is entered once. It cannot be amended, withdrawn or appealed, and the Board will not be reminded of it.
 			</p>
 			{affinity && content && <AffinityBars affinity={affinity} content={content} leading={leadingPath(affinity)} />}
 			{affinity && leadingPath(affinity) && <p className="ui-asc-lead">Your build, research and memo choices lead to {rows.find((r) => r.id === leadingPath(affinity))?.name}. It is pre-selected; you can pick another.</p>}

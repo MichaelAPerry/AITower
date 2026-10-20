@@ -7,10 +7,12 @@ import { fmtMoney, fmtPct, fmtPower, fmtPue, fmtTemp } from "../format";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
 import { ModifierChips } from "../memo/MemoDesk";
 import { pushNotice } from "../notices";
-import { currentObjective, endingLine } from "../objective/objective";
+import { currentObjective, endingLine, isProblem } from "../objective/objective";
 import { toolKey } from "../tools/controller";
 import { BuildPalette, defSpecs } from "../components/BuildPalette";
-import { SpecCard, type SpecHover, anchorOf } from "../components/SpecCard";
+import { SpecCard, type SpecHover, anchorOf, softHide } from "../components/SpecCard";
+import { facilityEntryId } from "../encyclopedia/entries";
+import { EncyclopediaDrawer } from "../encyclopedia/EncyclopediaDrawer";
 import { AffinityBars } from "../components/AffinityBars";
 import { leadingPath } from "../ascension/ascension";
 import { hudScale } from "../settings";
@@ -21,19 +23,23 @@ import { Icon, Swatch } from "../components/common";
 export function NextChip({ store, content, state, ui, setUi, openAscension }: PanelProps) {
 	const obj = currentObjective(state.view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null);
 	const ending = endingLine(state.view, content);
+	// NEXT is for problems; the Goals card is the everyday guide.
+	if (!isProblem(obj) && !ending) return null;
 	const go = (): void => {
 		if (obj.action === "ascension") openAscension();
 		else if (obj.key === "C") setUi({ drawer: "contracts" });
 		else if (obj.key === "R") setUi({ drawer: "research" });
 	};
 	return (
-		<section className={`ui-next tone-${obj.tone}`} aria-live="polite" aria-label="Next step">
-			<button type="button" className="ui-next-btn" onClick={go} title={obj.detail}>
-				<span className="ui-tag">NEXT</span>
-				<span className="ui-next-title">{obj.title}</span>
-				{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
-				{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
-			</button>
+		<section className={`ui-next tone-${isProblem(obj) ? obj.tone : "progress"}`} aria-live="polite" aria-label="Next step" data-help="next">
+			{isProblem(obj) && (
+				<button type="button" className="ui-next-btn" onClick={go} title={obj.detail}>
+					<span className="ui-tag">NEXT</span>
+					<span className="ui-next-title">{obj.title}</span>
+					{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
+					{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
+				</button>
+			)}
 			{ending && (
 				<span className="ui-next-ending" title="Days the ending condition has held without a break">
 					{ending}
@@ -68,6 +74,7 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 	const picks = dockPicks(view, content);
 	const hover = ui.dockHover ?? null;
 	const setHover = (h: SpecHover | null): void => setUi({ dockHover: h });
+	const soft = softHide(() => setHover(null));
 	const cost = (p: DockPick): number => (p.kind === "parts" ? content.structure.sparePart * 5 : content.facilities[p.defId].cost);
 	const run = (p: DockPick): void => {
 		if (cost(p) > view.cash) {
@@ -84,7 +91,7 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 		store.setTool(toolKey(tool) === toolKey(t) ? { kind: "select" } : t);
 	};
 	return (
-		<section className="ui-dock" aria-label="Build dock">
+		<section className="ui-dock" aria-label="Build dock" data-help="build">
 			<div className="ui-dockhead">
 				<span className="ui-label">BUILD</span>
 				<span className="ui-label">B</span>
@@ -96,8 +103,11 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 				const on = p.kind === "place" && toolKey(tool) === toolKey({ kind: "place", defId: p.defId });
 				return (
 					<button key={key} type="button" data-tut={`dock-${key}`} className={`ui-dockbtn ${can ? "can" : ""} ${on ? "is-on" : ""}`} onClick={() => run(p)}
-						onMouseLeave={() => setHover(null)}
-						onMouseEnter={(e) => setHover({ anchor: { ...anchorOf(e.currentTarget), right: e.currentTarget.getBoundingClientRect().right + 80 * hudScale(state.settings) }, ...(def ? { title: def.name, body: def.description, specs: defSpecs(def) } : { title: "Spare parts ×5", body: "Replacement parts for maintenance bots. Each repair uses one.", specs: [["Cost", fmtMoney(cost(p))]] }) })}>
+						onMouseLeave={soft.hide}
+						onMouseEnter={(e) => {
+							soft.keep();
+							setHover({ anchor: { ...anchorOf(e.currentTarget), right: e.currentTarget.getBoundingClientRect().right + 80 * hudScale(state.settings) }, ...(def ? { entry: facilityEntryId(def.id), title: def.name, body: def.description, specs: defSpecs(def) } : { title: "Spare parts ×5", body: "Replacement parts for maintenance bots. Each repair uses one.", specs: [["Cost", fmtMoney(cost(p))]] }) });
+						}}>
 						<span className="ui-dock-ic">{def ? <Swatch color={def.color} accent={def.accent} size={22} /> : <Icon name="bolt" size={14} />}</span>
 						<span className="ui-dock-name">{def ? def.name : "Spare parts ×5"}</span>
 						<span className="ui-dock-cost">{fmtMoney(cost(p))}</span>
@@ -109,7 +119,7 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 				<span className="ui-dock-name">More</span>
 				<span className="ui-dock-cost">▸</span>
 			</button>
-			{hover && <SpecCard hover={hover} scale={hudScale(state.settings)} />}
+			{hover && <SpecCard hover={hover} scale={hudScale(state.settings)} onEnter={soft.keep} onLeave={soft.hide} onMore={(entry) => { setHover(null); setUi({ drawer: "encyclopedia", encyId: entry }); }} />}
 		</section>
 	);
 }
@@ -119,8 +129,8 @@ export function DrawerTabs({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
 	return (
 		<div className="ui-dtabs" role="tablist" aria-label="Drawers">
 			{DRAWER_TABS.map((d) => (
-				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} title={`${d.label} (${d.key})`}>
-					{d.label}
+				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} data-help={`tab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} aria-label={`${d.label} (${d.key})`}>
+					<span className="ui-dtab-name">{d.label}</span>
 					<kbd>{d.key}</kbd>
 				</button>
 			))}
@@ -187,6 +197,7 @@ export function Drawer(props: PanelProps) {
 			{d === "automation" && <AutomationDrawer {...props} />}
 			{d === "finance" && <FinanceTab {...props} />}
 			{d === "gauges" && <GaugesDrawer {...props} />}
+			{d === "encyclopedia" && <EncyclopediaDrawer {...props} />}
 			{d === "log" && <AlertsLog {...props} />}
 		</section>
 	);

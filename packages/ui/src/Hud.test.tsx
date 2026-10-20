@@ -175,7 +175,7 @@ describe("SystemMenu (server render)", () => {
 		expect(resolved).toMatchObject({ toast: true });
 		expect(resolved.text).toBe("Memo answered: COMPLY. The Inspector counted 4,112 cables and left.");
 		expect(describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: true }, v, content).text).toContain("unanswered, resolved as COMPLY");
-		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Authority standing falls by 8 to 42", severity: "warn", toast: true });
+		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Reputation falls by 8 to 42", severity: "warn", toast: true });
 		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
 		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");
 		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");

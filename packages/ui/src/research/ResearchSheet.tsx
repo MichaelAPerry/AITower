@@ -26,7 +26,7 @@ export function TechCard({ node, view, content, store }: { node: TechNode; view:
 			</header>
 			<div className="ui-tech-meta">
 				<Pill tone="dim">{branchLabel(node.branch)}</Pill>
-				{node.minTier > 1 && <span className="ui-tech-tier">Clearance {node.minTier}</span>}
+				{node.minTier > 1 && <span className="ui-tech-tier">Level {node.minTier}</span>}
 			</div>
 			{node.effects.length > 0 && (
 				<ul className="ui-tech-fx">

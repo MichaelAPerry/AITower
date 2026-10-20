@@ -28,7 +28,7 @@ describe("nodeState", () => {
 	});
 	it("locked by clearance, naming the level", () => {
 		const s = nodeState(TECH[1], view({ tier: 1, techResearched: ["a"], researchPoints: 99 }), content);
-		expect(s).toEqual({ kind: "locked", reason: "Requires Clearance 2" });
+		expect(s).toEqual({ kind: "locked", reason: "Requires Level 2" });
 	});
 	it("locked by a missing prerequisite, naming it", () => {
 		const s = nodeState(TECH[1], view({ tier: 2, researchPoints: 99 }), content);
@@ -36,7 +36,7 @@ describe("nodeState", () => {
 	});
 	it("lists every missing reason; locked beats poor", () => {
 		const s = nodeState(TECH[3], view({ tier: 1, researchPoints: 0 }), content);
-		expect(s).toEqual({ kind: "locked", reason: "Requires Clearance 3 and Alpha and Beta" });
+		expect(s).toEqual({ kind: "locked", reason: "Requires Level 3 and Alpha and Beta" });
 	});
 	it("treats a missing techResearched as empty", () => {
 		expect(nodeState(TECH[0], { tier: 1, researchPoints: 99 } as unknown as SimView, content).kind).toBe("available");

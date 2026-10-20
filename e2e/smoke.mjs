@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // End-to-end smoke test: boots the built app under `vite preview` in headless Chromium and plays a short path
-// (tutorial, contract, build a rack, Esc menu, save, reload, load, assert state survived, no page errors).
+// (coach marks, contract, build a rack, Esc menu, save, reload, load, assert state survived, no page errors).
 //
 // Usage: npm run build && npm run e2e
 // Env:   E2E_URL        use an already-running server instead of starting `vite preview`
@@ -108,29 +108,31 @@ async function run(url) {
 		const start = await game(() => ({ day: window.aitower.store.get().view.day, tick: window.aitower.store.get().view.tick }));
 		log(`HUD up, day ${start.day}`);
 
-		stage("2. follow the tutorial: read the welcome, accept the highlighted contract, watch it start");
-		const memo = async () => (await page.locator(".ui-tutorial .tut-count").textContent())?.replace(/\s+/g, "") ?? "";
-		const at = (n) => page.waitForFunction((k) => document.querySelector(".ui-tutorial .tut-count")?.textContent?.replace(/\s+/g, "").startsWith(`${k}/`), n, { timeout: 60_000 });
-		await page.locator(".ui-tutorial").waitFor();
-		assert((await memo()).startsWith("1/"), `expected memo 1, got ${await memo()}`);
-		assert((await game(() => window.aitower.store.get().speed)) === 0, "the clock must be stopped while reading the welcome memo");
-		await page.getByRole("button", { name: "Continue" }).click();
-		await at(2);
-		// The tutorial runs the clock until an offer is posted, then stops it and highlights the ACCEPT button.
-		await page.locator('[data-tut="dtab-contracts"]').click();
+		stage("2. follow the coach marks: the offer is ready, accept it, press play, watch PER HOUR, then skip");
+		const coach = page.locator(".ui-coach");
+		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
+		await coach.waitFor();
+		// The sim posts an offer at tick 0 and the Contracts drawer opens itself: no waiting, no hunting for the tab.
+		await coachAt("Accept this contract");
+		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
 		const acceptBtn = page.locator('[data-tut="accept"]');
-		await acceptBtn.waitFor({ timeout: 60_000 });
+		await acceptBtn.waitFor({ timeout: 5_000 });
 		assert(await acceptBtn.isEnabled(), "the highlighted offer must fit the idle racks");
 		await acceptBtn.click({ force: true }); // hover tilts the button, which Playwright reads as "unstable"
-		await at(4); // step 3 (compute) ticks itself off once the racks start; step 4 is the NEXT-chip memo
+		await coachAt("Press play");
+		await page.locator('[data-tut="speed-1"]').click();
+		await coachAt("PER HOUR"); // step 3: it turns green on its own once income is positive
+		await coachAt("build menu"); // step 4 follows by itself
 		await page.getByRole("button", { name: "Skip tutorial" }).click();
-		await page.locator(".ui-tutorial").waitFor({ state: "detached" });
-		log("welcome read, contract accepted through the tutorial, tutorial skipped at step 4");
+		await coach.waitFor({ state: "detached" });
+		await page.waitForSelector('[data-goal="earn-first"]');
+		log("offer accepted through the coach marks, income turned green, tutorial skipped at step 4, Goals card shown");
 
-		stage("3. the accepted contract is running and the NEXT chip is shown");
+		stage("3. the accepted contract is running and the Goals card is shown");
 		const running = await game(() => ({ jobs: window.aitower.store.get().view.jobs.length, pflops: window.aitower.store.get().view.pflops }));
 		assert(running.jobs > 0 && running.pflops > 0, `expected a running job, got ${JSON.stringify(running)}`);
-		assert((await page.locator(".ui-next").count()) === 1, "NEXT chip missing");
+		assert((await page.locator(".ui-goals").count()) === 1, "Goals card missing");
+		assert((await page.locator(".ui-next-btn").count()) === 0, "NEXT is for problems only; none expected here");
 		log(`job running at ${running.pflops} PF`);
 
 		stage("4. place a rack through window.aitower.store.dispatch");
@@ -191,6 +193,29 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		log("parts order on, AUTO lamp lit");
+
+		stage("5d. help mode: ? shows a tooltip with More..., which opens the Encyclopedia on an entry; K and search work");
+		await page.keyboard.press("?");
+		await page.waitForSelector(".aitower-hud.is-help");
+		assert((await page.locator("[data-help]").count()) >= 10, "help regions missing");
+		await page.locator('[data-help="treasury"]').hover();
+		await page.locator(".ui-helpcard").waitFor();
+		await page.getByRole("button", { name: "More…" }).click();
+		await page.locator('[data-drawer="encyclopedia"]').waitFor();
+		await page.locator('[data-entry="basics:money"].is-open').waitFor();
+		await page.keyboard.press("Escape"); // closes the drawer and leaves help mode in one go
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await page.waitForFunction(() => !document.querySelector(".aitower-hud.is-help"));
+		await page.keyboard.press("k");
+		await page.locator('[data-drawer="encyclopedia"]').waitFor();
+		await page.getByRole("searchbox", { name: "Search the Encyclopedia" }).fill("pue");
+		await page.locator('[data-entry="glossary:pue"]').waitFor();
+		await page.getByRole("searchbox").fill("");
+		await page.evaluate(() => document.activeElement?.blur());
+		await page.keyboard.press("Escape");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		log("help mode, More... link, Encyclopedia search");
 
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());

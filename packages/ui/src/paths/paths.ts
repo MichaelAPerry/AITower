@@ -17,7 +17,7 @@ const endingTarget = (content: ContentDB, id: "greenExemplar" | "millionMinds", 
 	const e = content.balance?.endings?.[id];
 	if (!e) return "";
 	const title = content.endings?.find((x) => x.id === id)?.title ?? id;
-	return ` ${title} needs ${what} of ${fmtPct(e.minScore, 0)} and ${e.pflops} PFLOPS, held for ${e.days} day${e.days === 1 ? "" : "s"}.`;
+	return ` ${title} needs ${what} of ${fmtPct(e.minScore, 0)} and ${e.pflops} PF compute, held for ${e.days} day${e.days === 1 ? "" : "s"}.`;
 };
 
 /** The gauge of the chosen path: green score for Greentech, refinement for Synthetic; null on any other path. */

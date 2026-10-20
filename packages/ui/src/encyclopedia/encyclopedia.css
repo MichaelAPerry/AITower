@@ -1,0 +1,97 @@
+.aitower-hud .ui-ency-search {
+	width: 100%;
+	box-sizing: border-box;
+	padding: 6px 8px;
+	background: rgba(10, 14, 19, 0.7);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	font: var(--fs-body) / 1.2 var(--f-body);
+}
+.aitower-hud .ui-ency-search:focus {
+	outline: 1px solid var(--accent);
+}
+.aitower-hud .ui-ency-tabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+.aitower-hud .ui-ency-tab {
+	padding: 3px 8px;
+	background: none;
+	border: 1px solid var(--panel-edge);
+	border-radius: 999px;
+	color: var(--text-dim);
+	font: 12px / 1.2 var(--f-body);
+	cursor: pointer;
+}
+.aitower-hud .ui-ency-tab.is-on {
+	color: var(--accent);
+	border-color: var(--accent);
+}
+.aitower-hud .ui-ency-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 2px;
+}
+.aitower-hud .ui-ency-head {
+	display: flex;
+	align-items: center;
+	gap: var(--gap);
+	width: 100%;
+	padding: 6px 4px;
+	background: none;
+	border: 0;
+	border-bottom: 1px solid var(--panel-edge);
+	color: var(--text);
+	font: var(--fs-body) / 1.25 var(--f-body);
+	text-align: left;
+	cursor: pointer;
+}
+.aitower-hud .ui-ency-title {
+	flex: 1;
+	min-width: 0;
+}
+.aitower-hud .ui-ency-lock {
+	font: 10px / 1 var(--f-body);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+	color: var(--text-dim);
+}
+.aitower-hud .ui-ency-item.is-open .ui-ency-head {
+	color: var(--accent);
+}
+.aitower-hud .ui-ency-body {
+	padding: 6px 4px 10px;
+	color: var(--text-dim);
+	font: 13px / 1.4 var(--f-body);
+}
+.aitower-hud .ui-ency-body p {
+	margin: 0 0 6px;
+}
+.aitower-hud .ui-ency-needs {
+	color: var(--text);
+}
+.aitower-hud .ui-ency-locktext {
+	color: var(--warn);
+}
+.aitower-hud .ui-ency-stats {
+	margin: 6px 0 0;
+	display: grid;
+	gap: 2px;
+}
+.aitower-hud .ui-ency-stats > div {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--gap);
+}
+.aitower-hud .ui-ency-stats dt {
+	color: var(--text-dim);
+}
+.aitower-hud .ui-ency-stats dd {
+	margin: 0;
+	color: var(--text);
+	font-family: var(--f-num);
+}

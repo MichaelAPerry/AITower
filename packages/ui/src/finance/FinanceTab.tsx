@@ -77,7 +77,7 @@ export function CreditSection({ store, state }: PanelProps) {
 					<dd className={info.principal > 0 ? "is-neg-soft" : ""}>{fmtMoney(info.principal)}</dd>
 				</div>
 				<div>
-					<dt title="The most the Office lends at your clearance">Limit</dt>
+					<dt title="The most the Office lends at your level">Limit</dt>
 					<dd>{fmtMoney(info.max)}</dd>
 				</div>
 				<div>
@@ -133,7 +133,7 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 					<th>Days</th>
 					<th>Grade</th>
 					<th className="num">Profit</th>
-					<th className="num">Standing</th>
+					<th className="num">Reputation</th>
 					<th>Grant / fine</th>
 					<th>Remark</th>
 					<th />

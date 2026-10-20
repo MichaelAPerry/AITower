@@ -10,3 +10,4 @@ export const createRenderer: CreateRenderer = (host, content) => createPixiRende
 export * from "./camera";
 export { FLOOR_H, TILE, ZOOMS } from "./constants";
 export { heatColor, netColor, satisfactionColor, skyColors } from "./color";
+export { fitName, planTags, statusWord, type Tag, type TagTone } from "./labelPlan";

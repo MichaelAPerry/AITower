@@ -1,20 +1,20 @@
 import type { ContentDB } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { UiState } from "../components/context";
-import { applyClock, clockStatus, releaseClock } from "./clock";
-import { centreBox, pickCorner, type Rect } from "./placement";
-import { type Baseline, type ClockMode, type Corner, MEMO_EXPLAINER, needsMemoExplainer, stepClock, TUTORIAL_STEPS, type TutorialUi, baselineOf } from "./steps";
+import { applyClock, releaseClock } from "./clock";
+import { type Placed, placeBubble, type Rect, type Side } from "./placement";
+import { activeHint, type Baseline, baselineOf, type ClockMode, HINTS, type HintId, type HintsSeen, hotRack, TUTORIAL_STEPS, type TutorialUi } from "./steps";
+import "./coach.css";
 
-const STORAGE_KEY = "aitower.induction.v1";
-/** Pause after a task is ticked off, so the player sees the APPROVED stamp before the next memo. */
-const ADVANCE_MS = 1400;
+const STORAGE_KEY = "aitower.induction.v2";
+const HINTS_KEY = "aitower.hints.v1";
+/** Pause after the action is done, so the player sees the tick before the next bubble. */
+const ADVANCE_MS = 700;
 
 interface Saved {
 	step: number;
 	done: boolean;
-	/** The first-memo explainer has been shown. */
-	memoExplained?: boolean;
 }
 
 function readSaved(): Saved {
@@ -35,7 +35,25 @@ function writeSaved(s: Saved) {
 	}
 }
 
-/** Global hook so the menu and the title screen can restart or close the induction without prop drilling. */
+function readHints(): HintsSeen {
+	try {
+		const raw = localStorage.getItem(HINTS_KEY);
+		if (raw) return JSON.parse(raw) as HintsSeen;
+	} catch {
+		/* storage unavailable: show the hints */
+	}
+	return {};
+}
+
+function writeHints(h: HintsSeen) {
+	try {
+		localStorage.setItem(HINTS_KEY, JSON.stringify(h));
+	} catch {
+		/* best effort */
+	}
+}
+
+/** Global hook so the menu and the title screen can restart or close the tutorial without prop drilling. */
 const listeners = new Set<() => void>();
 const notify = (): void => {
 	for (const l of listeners) l();
@@ -44,7 +62,7 @@ export function restartInduction() {
 	writeSaved({ step: 0, done: false });
 	notify();
 }
-/** Close the induction for good (New game with the induction box unchecked). */
+/** Close the tutorial for good (New game with the tutorial box unchecked). */
 export function closeInduction() {
 	writeSaved({ step: 0, done: true });
 	notify();
@@ -52,14 +70,18 @@ export function closeInduction() {
 
 const HL = "data-tut-target";
 
-/** Mark exactly the elements the step points at (first match per selector). Uses an attribute, which React never rewrites. */
-function syncHighlight(selectors: string[]): void {
+/** Pulse exactly the elements the step points at (first match per selector); returns the first one found. */
+function syncHighlight(selectors: string[]): Element | null {
 	const root = document.querySelector(".aitower-hud");
-	if (!root) return;
+	if (!root) return null;
 	const want = new Set<Element>();
+	let first: Element | null = null;
 	for (const sel of selectors) {
 		const el = root.querySelector(sel);
-		if (el) want.add(el);
+		if (el) {
+			want.add(el);
+			first ??= el;
+		}
 	}
 	for (const el of root.querySelectorAll(`[${HL}]`)) if (!want.has(el)) el.removeAttribute(HL);
 	for (const el of want)
@@ -67,26 +89,39 @@ function syncHighlight(selectors: string[]): void {
 			el.setAttribute(HL, "");
 			el.scrollIntoView?.({ block: "nearest" });
 		}
+	return first;
 }
-
-const toRect = (r: DOMRect): Rect => ({ left: r.left, top: r.top, right: r.right, bottom: r.bottom });
 
 export interface TutorialProps {
 	store: GameStore;
 	content: ContentDB;
 	state: GameState;
 	ui: UiState;
+	setUi: (patch: Partial<UiState>) => void;
 }
 
-export function Tutorial({ store, content, state, ui }: TutorialProps) {
+interface Bubble {
+	id: string;
+	text: string;
+	targets: string[];
+	sides: Side[];
+	/** Step counter ("2 of 5"), absent for hints. */
+	count?: string;
+	onGotIt?: () => void;
+	done: boolean;
+}
+
+export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 	const [saved, setSaved] = useState<Saved>(readSaved);
+	const [seen, setSeen] = useState<HintsSeen>(readHints);
 	const [completedAt, setCompletedAt] = useState<number | null>(null);
-	const [corner, setCorner] = useState<Corner>("br");
 	const baseline = useRef<Baseline | null>(null);
 	const enteredStep = useRef<number>(-1);
 	const clockMode = useRef<ClockMode | null>(null);
 	const hadGhost = useRef(false);
-	const memoRef = useRef<HTMLElement>(null);
+	const openedByUs = useRef(false);
+	const uiRef = useRef(ui);
+	uiRef.current = ui;
 	const ctx = { content };
 	const tutUi: TutorialUi = { paletteTab: ui.paletteTab, drawer: ui.drawer, paletteOpen: ui.paletteOpen, tool: state.tool };
 
@@ -108,24 +143,34 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		writeSaved(s);
 		setSaved(s);
 	};
+	const hintId: HintId | null = activeHint(state, seen, ctx);
+	const dismissHint = (id: HintId) => {
+		const n = { ...seen, [id]: true };
+		writeHints(n);
+		setSeen(n);
+	};
+	// Opening the inbox is what the memo hint asks for: it has done its job.
+	useEffect(() => {
+		if (hintId === "memo" && ui.inboxOpen) dismissHint("memo");
+	});
+	// Point the camera at the hot rack once, when its hint first shows.
+	const hotId = hintId === "heat" ? hotRack(state, ctx) : undefined;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: focus once per hint
+	useEffect(() => {
+		if (hotId) store.focus({ x: hotId.x, floor: hotId.floor });
+	}, [hotId?.id]);
 
 	const step = saved.done ? undefined : TUTORIAL_STEPS[saved.step];
-	const explaining = !!step && needsMemoExplainer(!!saved.memoExplained, saved.done, state.view.memos.length);
-	const current = explaining ? MEMO_EXPLAINER : step;
 	const finish = () => {
-		update({ step: saved.step, done: true, memoExplained: saved.memoExplained });
+		update({ step: saved.step, done: true });
 		releaseClock(store);
 	};
 	const next = () => {
 		const n = saved.step + 1;
 		if (n >= TUTORIAL_STEPS.length) finish();
-		else update({ ...saved, step: n, done: false });
+		else update({ step: n, done: false });
 	};
-	const back = () => update({ ...saved, step: Math.max(0, saved.step - 1), done: false });
-	const explained = () => {
-		clockMode.current = null;
-		update({ ...saved, memoExplained: true });
-	};
+	const back = () => update({ step: Math.max(0, saved.step - 1), done: false });
 
 	// Enter a step: capture its baseline, run side effects, move the camera.
 	// biome-ignore lint/correctness/useExhaustiveDependencies: run once per step change; state, ctx and store are read at entry and must not re-trigger it
@@ -135,20 +180,21 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		baseline.current = baselineOf(state, ctx);
 		clockMode.current = null;
 		setCompletedAt(null);
-		step.onEnter?.(store);
+		openedByUs.current = step.id === "accept" && uiRef.current.drawer !== "contracts";
+		step.onEnter?.(store, setUi);
 		if (step.focus) store.focus(step.focus);
 	}, [saved.step, step]);
 
-	// Clock policy: applied on entry and whenever the step's wanted mode changes, never forced in between.
-	const mode: ClockMode | null = current ? stepClock(current, state) : null;
-	// biome-ignore lint/correctness/useExhaustiveDependencies: runs when the wanted mode or the step changes; a speed the player picks in between is deliberately left alone
+	// Clock policy: applied on entry and whenever the step changes, never forced in between.
+	const mode: ClockMode | null = step ? step.clock : null;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: runs when the step changes; a speed the player picks in between is deliberately left alone
 	useEffect(() => {
 		if (!mode) return;
 		clockMode.current = applyClock(store, mode, clockMode.current);
-	}, [mode, current?.id, saved.step]);
+	}, [mode, step?.id]);
 
-	// Ghost marking the spot in the world.
-	const ghost = current?.ghost?.(state, tutUi) ?? null;
+	// Ghost marking the spot in the world (only while a step shows it).
+	const ghost = !hintId ? (step?.ghost?.(state, tutUi) ?? null) : null;
 	const ghostKey = ghost ? JSON.stringify(ghost) : "";
 	// biome-ignore lint/correctness/useExhaustiveDependencies: keyed on the serialised ghost
 	useEffect(() => {
@@ -156,7 +202,7 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		else if (hadGhost.current) store.setGhost(null);
 		hadGhost.current = !!ghostKey;
 	}, [ghostKey]);
-	// biome-ignore lint/correctness/useExhaustiveDependencies: clear our ghost when the step changes or the memo goes away
+	// biome-ignore lint/correctness/useExhaustiveDependencies: clear our ghost when the step changes
 	useEffect(
 		() => () => {
 			if (hadGhost.current) {
@@ -164,25 +210,79 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 				hadGhost.current = false;
 			}
 		},
-		[current?.id],
+		[step?.id],
 	);
 
-	// Spotlight the exact elements; move the memo away from them.
-	const targets = current?.targets?.(state, tutUi) ?? [];
-	// Runs every render on purpose: targets appear and disappear as panels change, and the work is idempotent.
+	// Build step: once the card is picked the palette gets out of the way of the blueprint spot.
+	const armed = step?.id === "build" && state.tool.kind === "place" && ui.paletteOpen;
 	useEffect(() => {
-		syncHighlight(targets);
-		const area = document.querySelector(".aitower-hud .ui-center")?.getBoundingClientRect();
-		const me = memoRef.current?.getBoundingClientRect();
-		if (!area || !me || !current) return;
-		const avoid: Rect[] = [];
-		for (const el of document.querySelectorAll(`.aitower-hud [${HL}]`)) avoid.push(toRect(el.getBoundingClientRect()));
-		// Never sit on a Authority memo or on CURRENT ORDERS (the induction points at it in step 3).
-		for (const el of document.querySelectorAll(".aitower-hud .ui-memo-pop, .aitower-hud .ui-memo-drawer, .aitower-hud .ui-next")) avoid.push(toRect(el.getBoundingClientRect()));
-		if (current.focus || ghostKey) avoid.push(centreBox(toRect(area)));
-		const c = pickCorner(current.corner ?? "br", toRect(area), { w: me.width, h: me.height }, avoid);
-		setCorner((old) => (old === c ? old : c));
-	});
+		if (armed) setUi({ paletteOpen: false });
+	}, [armed, setUi]);
+
+	const satisfied = !hintId && !!step?.done && !!baseline.current && step.done(state, baseline.current, ctx);
+	useEffect(() => {
+		if (satisfied && completedAt === null) setCompletedAt(Date.now());
+	}, [satisfied, completedAt]);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: one-shot advance timer keyed on completedAt; `next` is recreated every render and must not restart it
+	useEffect(() => {
+		if (completedAt === null) return;
+		const t = setTimeout(() => {
+			// The drawer the tutorial opened for the accept step closes again so the world is visible.
+			if (step?.id === "accept" && openedByUs.current && uiRef.current.drawer === "contracts") setUi({ drawer: null });
+			next();
+		}, step?.linger ?? ADVANCE_MS);
+		return () => clearTimeout(t);
+	}, [completedAt]);
+
+	// What the bubble says now: a hint interrupts the steps.
+	let bubble: Bubble | null = null;
+	if (hintId) {
+		const h = HINTS[hintId];
+		bubble = { id: `hint-${h.id}`, text: h.text, targets: h.targets, sides: h.sides, onGotIt: () => dismissHint(h.id), done: false };
+	} else if (step) {
+		bubble = {
+			id: step.id,
+			text: satisfied && step.doneText ? step.doneText : step.text(state, tutUi),
+			targets: step.targets(state, tutUi),
+			sides: step.sides ?? ["below"],
+			count: `${saved.step + 1} of ${TUTORIAL_STEPS.length}`,
+			onGotIt: step.done ? undefined : next,
+			done: satisfied,
+		};
+	}
+
+	// Pulse the targets; place the bubble next to the first one.
+	const bubbleRef = useRef<HTMLElement>(null);
+	const [placed, setPlaced] = useState<(Placed & { key: string }) | null>(null);
+	const targetsKey = bubble ? bubble.targets.join("|") : "";
+	const measure = useCallback(() => {
+		const el = bubbleRef.current;
+		const center = document.querySelector(".aitower-hud .ui-center");
+		if (!bubble || !el || !center) return;
+		const first = syncHighlight(bubble.targets);
+		const cr = center.getBoundingClientRect();
+		const scale = center.clientWidth > 0 ? cr.width / center.clientWidth : 1;
+		const local = (r: DOMRect): Rect => ({ left: (r.left - cr.left) / scale, top: (r.top - cr.top) / scale, right: (r.right - cr.left) / scale, bottom: (r.bottom - cr.top) / scale });
+		const bounds: Rect = { left: 8, top: 8, right: center.clientWidth - 8, bottom: center.clientHeight - 8 };
+		// No element to point at (a spot in the world): float above the middle of the world.
+		const cx = center.clientWidth / 2;
+		const cy = center.clientHeight / 2;
+		const target = first ? local(first.getBoundingClientRect()) : { left: cx - 20, top: cy - 20, right: cx + 20, bottom: cy + 20 };
+		const p = placeBubble(target, { w: el.offsetWidth, h: el.offsetHeight }, bounds, bubble.sides);
+		const key = `${bubble.id}|${Math.round(p.left)}|${Math.round(p.top)}|${p.side}|${Math.round(p.arrow)}`;
+		setPlaced((old) => (old?.key === key ? old : { ...p, key }));
+	}, [bubble]);
+	// Runs every render on purpose: targets appear and move as panels open, and the work is idempotent.
+	useLayoutEffect(measure);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: re-measure on resize and on a slow tick (drawers slide in)
+	useEffect(() => {
+		window.addEventListener("resize", measure);
+		const iv = setInterval(measure, 400);
+		return () => {
+			window.removeEventListener("resize", measure);
+			clearInterval(iv);
+		};
+	}, [measure, targetsKey]);
 	useEffect(
 		() => () => {
 			for (const el of document.querySelectorAll(`.aitower-hud [${HL}]`)) el.removeAttribute(HL);
@@ -190,96 +290,40 @@ export function Tutorial({ store, content, state, ui }: TutorialProps) {
 		[],
 	);
 
-	const satisfied = !explaining && !!step?.done && !!baseline.current && step.done(state, baseline.current, ctx);
-
-	useEffect(() => {
-		if (satisfied && completedAt === null) setCompletedAt(Date.now());
-	}, [satisfied, completedAt]);
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: one-shot advance timer keyed on completedAt; `next` is recreated every render and must not restart it
-	useEffect(() => {
-		if (completedAt === null) return;
-		const t = setTimeout(() => next(), ADVANCE_MS);
-		return () => clearTimeout(t);
-	}, [completedAt]);
-
-	if (!step || !current) return null;
-
-	const isLast = saved.step === TUTORIAL_STEPS.length - 1;
-	const clock = clockStatus(mode ?? "pause", state.speed, current.runReason);
-	const phase = current.phase?.(state, tutUi) ?? 0;
-
+	if (!bubble) return null;
 	return (
-		<section ref={memoRef} className={`ui-tutorial pos-${corner}`} aria-live="polite" aria-label="Tutorial" data-step={current.id}>
-			<header className="tut-head">
-				<span className="ui-dymo">{explaining ? "AUTHORITY MEMO" : "TUTORIAL"}</span>
-				{!explaining && (
-					<span className="tut-count">
-						{saved.step + 1} / {TUTORIAL_STEPS.length}
+		<section
+			ref={bubbleRef}
+			className={`ui-coach side-${placed?.side ?? "below"} ${bubble.done ? "is-done" : ""} ${placed ? "is-placed" : ""}`}
+			style={placed ? { left: placed.left, top: placed.top, "--arrow": `${placed.arrow}px` } as React.CSSProperties : undefined}
+			aria-live="polite"
+			aria-label="Tutorial"
+			data-step={bubble.id}
+		>
+			<p className="coach-text">
+				{bubble.done && (
+					<span className="coach-tick" aria-hidden="true">
+						✓{" "}
 					</span>
 				)}
-				<span className="ui-grow" />
-				<button type="button" className="ui-btn tut-close" onClick={finish} title="Close the tutorial for good (Restart tutorial in the menu brings it back)">
-					✕ CLOSE
-				</button>
-			</header>
-			<div className="tut-scroll">
-			<h3 className="tut-title">{current.title}</h3>
-			{current.body.map((p) => (
-				<p key={p} className="tut-body">
-					{p}
-				</p>
-			))}
-			{!explaining && step.task && (
-				<div className={`tut-task ${satisfied ? "is-done" : ""}`}>
-					<span className="tut-box" aria-hidden="true">
-						{satisfied ? "✓" : ""}
-					</span>
-					<span>
-						<b className="tut-todo">YOUR TASK:</b> {step.task}
-					</span>
-					{satisfied && <span className="tut-stamp">DONE</span>}
-				</div>
-			)}
-			{!explaining && step.how && !satisfied && (
-				<ol className="tut-how">
-					{step.how.map((h, i) => (
-						<li key={h} className={i < phase ? "is-past" : i === phase ? "is-now" : ""}>
-							{h}
-						</li>
-					))}
-				</ol>
-			)}
-			</div>
-			<div className={`tut-clock ${clock.running ? "is-running" : "is-stopped"}`} role="status">
-				<span className="tut-clock-lamp" aria-hidden="true" />
-				{clock.text}
-			</div>
-			<footer className="tut-actions">
-				{!explaining && (
-					<button type="button" className="ui-btn tut-skip" onClick={finish}>
+				{bubble.text}
+			</p>
+			<footer className="coach-actions">
+				{bubble.count && <span className="coach-count">{bubble.count}</span>}
+				{bubble.count && saved.step > 0 && (
+					<button type="button" className="coach-link" onClick={back}>
+						Back
+					</button>
+				)}
+				{bubble.count && (
+					<button type="button" className="coach-link" onClick={finish}>
 						Skip tutorial
 					</button>
 				)}
 				<span className="ui-grow" />
-				{!explaining && saved.step > 0 && (
-					<button type="button" className="ui-btn" onClick={back}>
-						Back
-					</button>
-				)}
-				{explaining && (
-					<button type="button" className="ui-btn is-on" onClick={explained}>
-						Understood
-					</button>
-				)}
-				{!explaining && !step.task && (
-					<button type="button" className="ui-btn is-on" onClick={next}>
-						{isLast ? "Close" : "Continue"}
-					</button>
-				)}
-				{!explaining && step.task && !satisfied && (
-					<button type="button" className="ui-btn tut-later" onClick={next} title="Skip this task">
-						Skip task
+				{bubble.onGotIt && (
+					<button type="button" className="ui-btn is-on coach-ok" onClick={bubble.onGotIt}>
+						Got it
 					</button>
 				)}
 			</footer>

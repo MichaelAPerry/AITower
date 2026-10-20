@@ -21,6 +21,8 @@ import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
+import { HelpLayer } from "./help/HelpLayer";
+import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
@@ -38,6 +40,7 @@ import "./research/research.css";
 import "./bio/bio.css";
 import "./calm/calm.css";
 import "./calm/theme.css";
+import "./help/help.css";
 
 export interface HudProps {
 	store: GameStore;
@@ -67,7 +70,7 @@ export function Hud({ store, content, title }: HudProps) {
 	// Esc closes the open drawer or the palette popover (the key handler is a stable object, so it reads the state through a ref).
 	const uiRef = useRef(ui);
 	uiRef.current = ui;
-	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false })) }), []);
+	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen || !!uiRef.current.help, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false, help: false })) }), []);
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
@@ -104,6 +107,7 @@ export function Hud({ store, content, title }: HudProps) {
 		{
 			toggleDrawer: useCallback((id) => setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false })), []),
 			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null })), []),
+			toggleHelp: useCallback(() => setUiState((u) => ({ ...u, help: !u.help })), []),
 		},
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current || crawlRef.current !== null, []),
@@ -171,17 +175,19 @@ export function Hud({ store, content, title }: HudProps) {
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch: research.open, openAscension: ascension.open, openAudit: setAudit };
 	return (
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<TopStrip {...props} />
+			<HelpLayer ui={ui} setUi={setUi} scale={scale} />
 			<div className="ui-center">
+				<GoalsCard state={state} content={content} />
 				<NextChip {...props} />
 				<Toasts content={content} state={state} />
 				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
-				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} />}
+				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<PalettePopover {...props} />
 				<BuildDock {...props} />
 				<Ticker {...props} />
@@ -239,7 +245,7 @@ export function Hud({ store, content, title }: HudProps) {
 					}}
 				/>
 			)}
-			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
+			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "encyclopedia", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 	);
 }

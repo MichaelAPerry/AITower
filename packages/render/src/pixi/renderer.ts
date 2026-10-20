@@ -26,6 +26,10 @@ import { Overlays } from "./overlays";
 import { Pneumatics } from "./pneumatics";
 import { Presentation } from "../presentation";
 import { T } from "../palette";
+import { type Tag, type TagTone, hits, pillWidth, planTags } from "../labelPlan";
+import { px } from "./draw";
+import { botBox, BOT_H } from "./bots";
+import { botDims, botKind } from "../botArt";
 import { Structure } from "./structure";
 
 /** Screen-space CRT finish: faint scanlines + vignette, both ≤ 8 % opacity (STYLE §1). */
@@ -108,6 +112,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const facBodies = new Graphics();
 	const facLive = new Graphics();
 	const facLabels = new TextPool(9);
+	const tagLabels = new TextPool(9);
+	const pillBg = new Graphics();
+	const pillLabels = new TextPool(10);
 	const pneumatics = new Pneumatics(content);
 	const bots = new Bots(content);
 	const effects = new Effects(content);
@@ -131,6 +138,9 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		facBodies,
 		facLive,
 		facLabels.root,
+		tagLabels.root,
+		pillBg,
+		pillLabels.root,
 		horror.live,
 		feedback.dark,
 		pneumatics.g,
@@ -158,6 +168,10 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	let lastTickAt = 0;
 	let lastFrame = performance.now();
 	const keys = { slab: -1, conduit: -1, fac: "", lift: "", grid: "" };
+	// Name tags and status words (planned once per tick), and their colours.
+	let tags: Tag[] = [];
+	const TAG_FILL: Record<TagTone, number> = { name: 0xc9d9e2, warn: 0xffd27a, fault: 0xff8a8a, dim: T.steel };
+	const TAG_EDGE: Record<TagTone, number> = { name: 0, warn: T.amber, fault: T.red, dim: T.steel };
 	const botInterp = new Interpolator(3);
 	const liftInterp = new Interpolator(3);
 	const t0 = performance.now();
@@ -299,6 +313,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor), { grown: f.grown, plain, skin });
 			}
 		}
+		tags = planTags(view.facilities, (id) => content.facilities[id]?.name);
 		feedback.onTick(view);
 		pneumatics.onTick(view, (now - t0) / 1000);
 		overlayDirty = true;
@@ -379,6 +394,31 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				drawLive(facLive, def, f, fx, ft, t, opt, facLabels, live);
 			}
 			facLabels.end();
+			// Name tags (calm: only in the normal view, and not zoomed out) and status words (always: they say where the trouble is).
+			tagLabels.begin();
+			pillBg.clear();
+			pillLabels.begin();
+			const showNames = overlay === "normal" && cam.zoom >= 2;
+			for (const tg of tags) {
+				const isWord = tg.tone !== "name";
+				if (!isWord && !showNames) continue;
+				// Status pills sit just right of the facility's own warning badge, which hangs at its centre.
+				const pw = isWord ? pillWidth(tg.text) : 0;
+				const tx = tg.cx * TILE + (isWord ? 7 + pw / 2 : 0);
+				if (tx > vx1 || tx < vx0) continue;
+				const ty = floorTop(view, tg.floor);
+				if (ty > vy1 || ty < vy0) continue;
+				const cy = ty + FAC_TOP - 4;
+				if (!isWord) {
+					tagLabels.put(tg.text, tx, cy, TAG_FILL.name);
+					continue;
+				}
+				px(pillBg, tx - pw / 2, cy - 6, pw, 12, TAG_EDGE[tg.tone]);
+				px(pillBg, tx - pw / 2 + 1, cy - 5, pw - 2, 10, T.ink);
+				pillLabels.put(tg.text, tx, cy, TAG_FILL[tg.tone]);
+			}
+			pillLabels.end();
+
 			pneumatics.draw(t, opt);
 			const liftPos = (id: number): number | null => liftInterp.get(id, a)?.y ?? null;
 			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t, opt);
@@ -408,6 +448,58 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				liftPos,
 			);
 			drawSelection(selectionG, rect, t);
+			// Hover label for the bot or lift under the pointer.
+			if (pointer && overlay === "normal") {
+				const wx = (pointer.sx - o.x) / cam.zoom;
+				const wy = (pointer.sy - o.y) / cam.zoom;
+				let hovered = false;
+				for (const b of view.bots) {
+					const p = botPos(b);
+					const w = botDims(botKind(content.bots[b.defId])).w;
+					const bb = botBox(view, p.x, p.y, w);
+					if (hits(wx, wy, { x: bb.x, y: bb.y, w, h: BOT_H })) {
+						tagLabels.put(content.bots[b.defId]?.name ?? "Bot", bb.x + w / 2, bb.y - 7, TAG_FILL.name);
+						hovered = true;
+						break;
+					}
+				}
+				if (!hovered) {
+					for (const l of view.lifts) {
+						const ly = floorTop(view, liftPos(l.id) ?? l.carFloor) + FAC_TOP;
+						if (hits(wx, wy, { x: l.x * TILE, y: ly, w: TILE, h: FAC_BOTTOM - FAC_TOP })) {
+							tagLabels.put("Lift", l.x * TILE + TILE / 2, ly - 4, TAG_FILL.name);
+							break;
+						}
+					}
+				}
+			}
+			tagLabels.end();
+			// Hover label for the bot or lift under the pointer.
+			if (pointer && overlay === "normal") {
+				const wx = (pointer.sx - o.x) / cam.zoom;
+				const wy = (pointer.sy - o.y) / cam.zoom;
+				let hovered = false;
+				for (const b of view.bots) {
+					const p = botPos(b);
+					const w = botDims(botKind(content.bots[b.defId])).w;
+					const bb = botBox(view, p.x, p.y, w);
+					if (hits(wx, wy, { x: bb.x, y: bb.y, w, h: BOT_H })) {
+						tagLabels.put(content.bots[b.defId]?.name ?? "Bot", bb.x + w / 2, bb.y - 7, TAG_FILL.name);
+						hovered = true;
+						break;
+					}
+				}
+				if (!hovered) {
+					for (const l of view.lifts) {
+						const ly = floorTop(view, liftPos(l.id) ?? l.carFloor) + FAC_TOP;
+						if (hits(wx, wy, { x: l.x * TILE, y: ly, w: TILE, h: FAC_BOTTOM - FAC_TOP })) {
+							tagLabels.put("Lift", l.x * TILE + TILE / 2, ly - 4, TAG_FILL.name);
+							break;
+						}
+					}
+				}
+			}
+			tagLabels.end();
 			arrows.update(view, cam, t, opt);
 
 			app.render();

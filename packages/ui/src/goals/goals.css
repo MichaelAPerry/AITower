@@ -1,0 +1,86 @@
+.aitower-hud .ui-goals {
+	position: absolute;
+	top: var(--gap);
+	left: var(--gap);
+	width: 250px;
+	padding: 8px 10px;
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	z-index: 4;
+	font: var(--fs-body) / 1.25 var(--f-body);
+}
+.aitower-hud .ui-goals.is-collapsed {
+	width: auto;
+	max-width: 250px;
+}
+.aitower-hud .ui-goals-head {
+	display: flex;
+	align-items: center;
+	gap: var(--gap);
+	width: 100%;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--accent);
+	cursor: pointer;
+	text-align: left;
+}
+.aitower-hud .ui-goals-peek {
+	flex: 1;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--text);
+}
+.aitower-hud .ui-goals-head .ui-label {
+	flex: 1;
+}
+.aitower-hud .ui-goals.is-collapsed .ui-goals-head .ui-label {
+	flex: none;
+}
+.aitower-hud .ui-goals-list {
+	list-style: none;
+	margin: 8px 0 0;
+	padding: 0;
+	display: grid;
+	gap: 8px;
+}
+.aitower-hud .ui-goal {
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 3px var(--gap);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-goal.is-main {
+	color: var(--text);
+	font-weight: 600;
+}
+.aitower-hud .ui-goal-num {
+	font: var(--fs-label) / 1.4 var(--f-num);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-goal-bar {
+	grid-column: 1 / -1;
+	height: 4px;
+	border-radius: 2px;
+	background: color-mix(in srgb, var(--text) 14%, transparent);
+	overflow: hidden;
+}
+.aitower-hud .ui-goal-bar i {
+	display: block;
+	height: 100%;
+	background: var(--accent);
+	transition: width 300ms ease-out;
+}
+.aitower-hud .ui-goal.is-main .ui-goal-bar i {
+	background: var(--accent-2, var(--accent));
+}
+.aitower-hud .ui-goal.is-done {
+	color: var(--good);
+	grid-template-columns: 1fr;
+}
+.aitower-hud .ui-goal-tick {
+	margin-right: 6px;
+}

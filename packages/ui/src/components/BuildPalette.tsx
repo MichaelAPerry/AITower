@@ -9,7 +9,8 @@ import { hudScale } from "../settings";
 import { conduitUnitCost, toolKey } from "../tools/controller";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
-import { SpecCard, type SpecHover, type SpecInfo, anchorOf } from "./SpecCard";
+import { SpecCard, type SpecHover, type SpecInfo, anchorOf, softHide } from "./SpecCard";
+import { facilityEntryId } from "../encyclopedia/entries";
 import type { PanelProps } from "./context";
 
 export type Tab = "structure" | BuildCategory;
@@ -100,7 +101,7 @@ export function defSpecs(def: FacilityDef): [string, string][] {
 /** The line a locked row shows (tier first, then research), or null when the row is available. */
 export function lockText(def: FacilityDef, view: SimView, content: ContentDB): string | null {
 	const gate = techGate(def.tech, view, content);
-	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Clearance ${def.unlockTier}` : null].filter(Boolean);
+	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Level ${def.unlockTier}` : null].filter(Boolean);
 	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
 }
 
@@ -122,10 +123,15 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	const st = content.structure;
 
 	const pick = (t: Tool): void => {
+		setHover(null);
 		store.setGhost(null);
 		store.setTool(active === toolKey(t) ? { kind: "select" } : t);
 	};
-	const hoverAt = (e: MouseEvent<HTMLElement>, h: SpecInfo): void => setHover({ ...h, anchor: anchorOf(e.currentTarget, root.current) });
+	const soft = softHide(() => setHover(null));
+	const hoverAt = (e: MouseEvent<HTMLElement>, h: SpecInfo): void => {
+		soft.keep();
+		setHover({ ...h, anchor: anchorOf(e.currentTarget, root.current) });
+	};
 
 	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "leaf" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
 		{ tool: { kind: "slab" }, icon: "slab", name: "Floor slab", cost: `${fmtMoney(st.slabPerTile)}/tile`, hint: `basement ${fmtMoney(st.basementSlabPerTile)}/tile`, body: "Drag horizontally along one floor. Floors above ground need slab underneath." },
@@ -145,7 +151,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	};
 
 	return (
-		<aside ref={root} className="ui-palette ui-panel" onMouseLeave={() => setHover(null)}>
+		<aside ref={root} className="ui-palette ui-panel" onMouseLeave={soft.hide}>
 			<div className="ui-panel-title">
 				<span className="ui-panel-name">Build</span>
 				<button
@@ -177,7 +183,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 							data-tut={`card-${s.icon}${s.tool.kind === "conduit" ? `-${s.tool.layer}` : ""}`}
 							className={`ui-item ui-card ${active === toolKey(s.tool) ? "is-on" : ""} ${s.icon === "demolish" ? "is-danger" : ""}`}
 							onClick={() => pick(s.tool)}
-							onMouseLeave={() => setHover(null)}
+							onMouseLeave={soft.hide}
 							onMouseEnter={(e) => hoverAt(e, { title: s.name, body: s.body, specs: [["Cost", s.cost], ["How", s.hint]] })}
 						>
 							<span className={`ui-item-icon ic-${s.icon}`}>
@@ -209,9 +215,10 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 								onClick={() => {
 									if (!locked && !poor) pick(t);
 								}}
-								onMouseLeave={() => setHover(null)}
+								onMouseLeave={soft.hide}
 								onMouseEnter={(e) =>
 									hoverAt(e, {
+										entry: facilityEntryId(d.id),
 										title: d.name,
 										body: d.description,
 										specs: defSpecs(d),
@@ -280,8 +287,8 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 					</div>
 				)}
 			</div>
-			{hover && (
-				<SpecCard hover={hover} scale={hudScale(state.settings)} />
+			{hover && tool.kind === "select" && (
+				<SpecCard hover={hover} scale={hudScale(state.settings)} onEnter={soft.keep} onLeave={soft.hide} onMore={(entry) => { setHover(null); setUi({ paletteOpen: false, drawer: "encyclopedia", encyId: entry }); }} />
 			)}
 		</aside>
 	);

@@ -587,7 +587,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					if (view.techResearched.includes(n.id)) return no(`${n.name} is already filed`);
 					const missing = n.requires.find((r) => !view.techResearched.includes(r));
 					if (missing) return no(`Requires ${content.tech.find((t) => t.id === missing)?.name ?? missing} first`);
-					if (view.tier < n.minTier) return no(`Requires Clearance ${n.minTier}`);
+					if (view.tier < n.minTier) return no(`Requires Level ${n.minTier}`);
 					if (view.researchPoints < n.cost) return no(`Needs ${n.cost} RP, have ${Math.floor(view.researchPoints)}`);
 					const clerk = n.effects.some((e) => e.type === "feature" && e.feature === "contractsClerk") ? { ...view.clerk, unlocked: true } : view.clerk;
 					const automation = n.effects.some((e) => e.type === "feature" && e.feature === "foreman") ? { ...view.automation, foremanUnlocked: true } : view.automation;
@@ -597,7 +597,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 				}
 				case "choosePath": {
 					if (view.path) return no("A path has already been chosen");
-					if (view.tier < content.balance.ascension.minTier) return no(`Requires Clearance ${content.balance.ascension.minTier}`);
+					if (view.tier < content.balance.ascension.minTier) return no(`Requires Level ${content.balance.ascension.minTier}`);
 					if (!content.paths.find((p) => p.id === cmd.path)?.available) return no("That path is not available yet");
 					queuedPath = cmd.path;
 					return ok;

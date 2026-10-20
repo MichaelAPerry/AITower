@@ -111,7 +111,7 @@ describe("Research sheet", () => {
 		expect(html).toContain("<b>Unlocks:</b> Chiller"); // scanned from facilities
 		expect(html).toContain("<b>Unlocks:</b> Rotor Drone"); // and from bots
 		expect(html).toContain("Researched");
-		expect(html).toContain("Requires Clearance 3 and Silicon Binning"); // locked, with the reason
+		expect(html).toContain("Requires Level 3 and Silicon Binning"); // locked, with the reason
 		expect(html).toContain("GAME PAUSED");
 		expect(html).toMatch(/aria-modal="true"/);
 	});
@@ -341,7 +341,7 @@ describe("Quarterly audit sheet", () => {
 		expect(html).toContain("QUARTER 2");
 		expect(html).toMatch(/ui-audit-stamp[^>]*>D</);
 		expect(html).toContain("stamp-red");
-		expect(html).toContain("Authority standing −3");
+		expect(html).toContain("Reputation −3");
 		expect(html).toContain("Fine −$29k");
 		expect(html).toContain("regrettable"); // the remark (React escapes its quotes)
 		expect(html).toContain("Uptime");
@@ -388,7 +388,7 @@ describe("Hud", () => {
 		expect(html).not.toContain("ui-research-backdrop");
 		expect(html).not.toContain("ui-audit-backdrop");
 	});
-	it("shows the clerk slip in the Contracts tab while the clerk is locked", () => {
+	it("shows the clerk slip in the Contracts tab while the clerk is locked and a few contracts are done", () => {
 		const { content, store } = setup();
 		expect(renderToString(<ContractsDrawer {...panelProps(store, content)} />)).toContain("Hire a Contract Automation: research");
 	});

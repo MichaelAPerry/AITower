@@ -12,7 +12,8 @@ export type KeyAction =
 	| { type: "escape" }
 	| { type: "demolish" }
 	| { type: "drawer"; id: DrawerId }
-	| { type: "palette" };
+	| { type: "palette" }
+	| { type: "help" };
 
 const SPEED_KEYS: Record<string, Speed> = { "1": 0, "2": 1, "3": 3, "4": 10, "5": 30 };
 const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "power", o: "coolant", u: "nutrient", g: "contamination" };
@@ -20,12 +21,13 @@ const OVERLAY_KEYS: Record<string, OverlayMode> = { n: "normal", h: "heat", p: "
 /**
  * Pure key → action map. WASD and arrows are deliberately unused (the renderer pans the camera with them).
  * Overlay keys: N normal, H heat, P power, O coolant, U nutrient, G contamination ("growth").
- * Drawers: C contracts, R research, F finance, I gauges (one open at a time). B opens the full build palette.
+ * Drawers: C contracts, R research, T automation, F finance, I gauges, K encyclopedia (one open at a time). ? or F1: help mode. B opens the full build palette.
  * Speed keys follow the button order: 1 = pause, 2 = 1×, 3 = 3×, 4 = 10×, 5 = 30×.
  */
 export function keyAction(key: string): KeyAction | null {
 	if (key === " " || key === "Spacebar") return { type: "togglePause" };
 	if (key === "Escape") return { type: "escape" };
+	if (key === "?" || key === "F1") return { type: "help" };
 	if (key in SPEED_KEYS) return { type: "speed", speed: SPEED_KEYS[key] };
 	const k = key.toLowerCase();
 	if (k in OVERLAY_KEYS) return { type: "overlay", mode: OVERLAY_KEYS[k] };
@@ -46,6 +48,8 @@ export interface KeyEnv {
 	toggleDrawer: (id: DrawerId) => void;
 	/** Open or close the full build palette. */
 	togglePalette: () => void;
+	/** Help mode on or off (? or F1). */
+	toggleHelp?: () => void;
 	/** The research sheet: R toggles it (opening pauses the game, closing restores the speed). */
 	research?: MenuController;
 	/** FORM A-5, the ascension sheet: modal like research, but only Esc acts (its own handler closes it too). */
@@ -105,6 +109,9 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 		case "palette":
 			env.togglePalette();
 			break;
+		case "help":
+			env.toggleHelp?.();
+			break;
 		case "demolish":
 			store.setGhost(null);
 			store.setTool(s.tool.kind === "demolish" ? { kind: "select" } : { kind: "demolish" });
@@ -114,7 +121,7 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 }
 
 /** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
-export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: DrawerId) => void; togglePalette: () => void }, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable; drawer?: Closable } = {}): void {
+export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: DrawerId) => void; togglePalette: () => void; toggleHelp?: () => void }, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable; drawer?: Closable } = {}): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggles);
 	toggleRef.current = toggles;
@@ -122,7 +129,7 @@ export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: D
 	blockedRef.current = blocked;
 	const { research, ascension, audit, drawer } = sheets;
 	useEffect(() => {
-		const env: KeyEnv = { menu, research, ascension, audit, drawer, lastSpeed, toggleDrawer: (id) => toggleRef.current.toggleDrawer(id), togglePalette: () => toggleRef.current.togglePalette() };
+		const env: KeyEnv = { menu, research, ascension, audit, drawer, lastSpeed, toggleDrawer: (id) => toggleRef.current.toggleDrawer(id), togglePalette: () => toggleRef.current.togglePalette(), toggleHelp: () => toggleRef.current.toggleHelp?.() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 			if (blockedRef.current() && !menu.isOpen()) return;

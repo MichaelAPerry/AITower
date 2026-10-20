@@ -1,0 +1,49 @@
+/* Help mode: faint dashed outline on every region that has help; the tooltip card matches the toast pills. */
+.aitower-hud.is-help [data-help] {
+	outline: 1px dashed rgba(95, 212, 230, 0.55);
+	outline-offset: 2px;
+}
+.aitower-hud .ui-help-btn {
+	min-width: 28px;
+	font-weight: 700;
+}
+.aitower-hud .ui-help-btn.is-on {
+	color: var(--ink);
+	background: var(--accent);
+}
+.aitower-hud .ui-helpcard {
+	position: fixed;
+	z-index: 40;
+	pointer-events: auto;
+	width: 260px;
+	box-sizing: border-box;
+	padding: 8px 10px;
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	font: 13px / 1.4 var(--f-body);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+.aitower-hud .ui-helpcard b {
+	display: block;
+	margin-bottom: 2px;
+	color: var(--accent);
+	font: 600 12px / 1.2 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+}
+.aitower-hud .ui-helpcard p {
+	margin: 0;
+	color: var(--text-dim);
+}
+.aitower-hud .ui-helpcard button {
+	margin-top: 6px;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--accent);
+	font: inherit;
+	cursor: pointer;
+	text-decoration: underline;
+}

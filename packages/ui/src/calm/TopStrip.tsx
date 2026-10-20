@@ -8,12 +8,13 @@ import { InboxButton, StandingMeter } from "../memo/MemoDesk";
 import { saveLamp } from "../menu/slots";
 import { PathGauge } from "../paths/PathGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
+import { currentObjective, isProblem } from "../objective/objective";
 import { clearanceProgress, fmtRateHour, nextDrawer, perHour } from "./calm";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
 /**
- * The one thin strip: day and clock, speed, treasury, PER HOUR, Clearance bar, standing, then the badges that appear when they
+ * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, reputation, then the badges that appear when they
  * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, inbox, menu.
  */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
@@ -23,34 +24,39 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	const cl = clearanceProgress(view, content);
 	const drought = droughtChip(view, content);
 	const auto = anyAutomation(view);
+	// Before the first contract the red figure is only upkeep: say so, in words.
+	// ...and the hint yields the top centre to a NEXT alert.
+	const nextShown = isProblem(currentObjective(view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null));
+	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running") && !nextShown;
 	return (
 		<header className="ui-strip">
-			<div className="ui-chip ui-clock" title="Game day and time (1 tick = 1 minute)">
+			<div className="ui-chip ui-clock" data-help="day">
 				<span className="ui-label">DAY {view.day}</span>
 				<span className="ui-big">{clock(view.minuteOfDay)}</span>
 			</div>
 			{/* biome-ignore lint/a11y/useSemanticElements: a div group of buttons; a fieldset would bring unwanted default styling */}
-			<div className="ui-speeds" role="group" aria-label="Simulation speed">
+			<div className="ui-speeds" role="group" aria-label="Simulation speed" data-help="speed">
 				{SPEEDS.map((s, i) => (
-					<button key={s} type="button" data-tut={`speed-${s}`} className={`ui-speed ${speed === s ? "is-on" : ""}`} onClick={() => store.setSpeed(s)} title={`${s === 0 ? "Pause (Space)" : `${s}× speed`}: key ${i + 1}`} aria-pressed={speed === s}>
+					<button key={s} type="button" data-tut={`speed-${s}`} className={`ui-speed ${speed === s ? "is-on" : ""}`} onClick={() => store.setSpeed(s)} aria-label={`${s === 0 ? "Pause" : `${s}× speed`} (key ${i + 1})`} aria-pressed={speed === s}>
 						<span className="ui-speed-cap">{s === 0 ? <Icon name="pause" size={12} /> : `${s}×`}</span>
 					</button>
 				))}
 			</div>
-			<div className={`ui-chip ui-cash ${view.cash < 0 ? "is-bad" : ""}`} title={view.bankrupt ? "Bankrupt!" : view.sandbox ? "Available cash (sandbox: no bankruptcy)" : "Available cash"}>
+			<div className={`ui-chip ui-cash ${view.cash < 0 ? "is-bad" : ""}`} data-help="treasury">
 				<span className="ui-label">TREASURY</span>
 				<span className="ui-big">{fmtMoney(view.cash)}</span>
 			</div>
-			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" title="Operating income per game-hour, averaged over the last six game-hours (construction not counted)">
+			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" data-help="perhour">
 				<span className="ui-label">PER HOUR</span>
 				<span className="ui-big">{fmtRateHour(rate)}</span>
+				{idleCost && <span className="ui-hint">Upkeep. Accept a contract to earn.</span>}
 			</div>
-			<div className="ui-clearance" data-tut="clearance" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PFLOPS installed for Clearance ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)` : "Top Clearance reached"}>
+			<div className="ui-clearance" data-tut="clearance" data-help="level" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)` : "Top level reached"}>
 				<span className="ui-label">
-					<span>CLEARANCE {cl.tier}</span>
-					<span className={cl.uptimeOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF · uptime ${cl.uptimeOk ? "ok" : "low"}` : "top"}</span>
+					<span>LEVEL {cl.tier}</span>
+					<span className={cl.uptimeOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute · uptime ${cl.uptimeOk ? "ok" : "low"}` : "top"}</span>
 				</span>
-				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Clearance progress">
+				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Level progress">
 					<i style={{ width: `${Math.round(cl.frac * 100)}%` }} />
 				</span>
 			</div>
@@ -76,6 +82,9 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<InboxButton state={state} ui={ui} setUi={setUi} />
 			<div className="ui-sysbox">
+				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>
+					?
+				</button>
 				<button type="button" className="ui-btn ui-menu-btn" onClick={openMenu} title="System menu (Esc): save, load, settings, controls">
 					Menu
 				</button>

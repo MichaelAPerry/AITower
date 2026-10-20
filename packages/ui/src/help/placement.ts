@@ -1,0 +1,34 @@
+/** Pure placement for the help card. Rects are viewport px; the result is CSS px of the zoomed HUD (divided by `scale`). */
+export interface Box {
+	left: number;
+	top: number;
+	right: number;
+	bottom: number;
+}
+
+const GAP = 6;
+const MARGIN = 8;
+
+/** Hover delay: instant in help mode, a short beat otherwise so passing the mouse over the strip stays quiet. */
+export const tipDelay = (helpOn: boolean): number => (helpOn ? 0 : 650);
+
+/**
+ * Below the element when it sits in the upper half, above it when low; beside it (to its left) when it hugs the right edge
+ * (the drawer tabs). Clamped inside the viewport.
+ */
+export function tipPos(r: Box, card: { w: number; h: number }, vw: number, vh: number, scale: number): { left: number; top: number } {
+	const w = card.w * scale;
+	const h = card.h * scale;
+	let left: number;
+	let top: number;
+	if (r.left > vw * 0.85) {
+		left = r.left - w - GAP;
+		top = r.top;
+	} else {
+		left = r.left;
+		top = r.bottom + GAP + h <= vh - MARGIN ? r.bottom + GAP : r.top - GAP - h;
+	}
+	left = Math.max(MARGIN, Math.min(left, vw - w - MARGIN));
+	top = Math.max(MARGIN, Math.min(top, vh - h - MARGIN));
+	return { left: left / scale, top: top / scale };
+}

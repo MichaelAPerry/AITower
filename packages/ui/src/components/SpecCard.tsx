@@ -6,6 +6,8 @@ export interface SpecInfo {
 	body: string;
 	specs: [string, string][];
 	warn?: string;
+	/** Encyclopedia entry id: the card then shows a "More..." link. */
+	entry?: string;
 }
 
 export interface Anchor {
@@ -40,7 +42,21 @@ export function anchorOf(row: Element, edge?: Element | null): Anchor {
 	return { right: (edge ?? row).getBoundingClientRect().right, rowTop: r.top, rowBottom: r.bottom };
 }
 
-export function SpecCard({ hover, scale }: { hover: SpecHover; scale: number }) {
+let hideTimer: ReturnType<typeof setTimeout> | undefined;
+/**
+ * A hover card whose clearing is delayed, so the pointer can travel from the row to a "More..." link on the card.
+ * `hide()` clears after a beat unless `keep()` (the card was entered, or a new hover began) comes first.
+ * Not a hook (the dock is rendered as a plain function in tests); only one hover card exists at a time.
+ */
+export const softHide = (clear: () => void): { hide: () => void; keep: () => void } => ({
+	hide: () => {
+		clearTimeout(hideTimer);
+		hideTimer = setTimeout(clear, 250);
+	},
+	keep: () => clearTimeout(hideTimer),
+});
+
+export function SpecCard({ hover, scale, onMore, onEnter, onLeave }: { hover: SpecHover; scale: number; onMore?: (entry: string) => void; onEnter?: () => void; onLeave?: () => void }) {
 	const ref = useRef<HTMLDivElement>(null);
 	useLayoutEffect(() => {
 		const el = ref.current;
@@ -54,7 +70,7 @@ export function SpecCard({ hover, scale }: { hover: SpecHover; scale: number }) 
 	const host = typeof document === "undefined" ? null : document.querySelector(".aitower-hud");
 	if (!host) return null;
 	return createPortal(
-		<div ref={ref} className="ui-tooltip ui-speccard" role="tooltip" style={{ visibility: "hidden" }}>
+		<div ref={ref} className="ui-tooltip ui-speccard" role="tooltip" style={{ visibility: "hidden", ...(hover.entry ? { pointerEvents: "auto" } : {}) }} onMouseEnter={onEnter} onMouseLeave={onLeave}>
 			<div className="ui-tooltip-title">{hover.title}</div>
 			<p>{hover.body}</p>
 			<div className="ui-tooltip-specs">
@@ -66,6 +82,11 @@ export function SpecCard({ hover, scale }: { hover: SpecHover; scale: number }) 
 				))}
 			</div>
 			{hover.warn && <div className="ui-tooltip-warn">{hover.warn}</div>}
+			{hover.entry && onMore && (
+				<button type="button" className="ui-more-link" onClick={() => onMore(hover.entry as string)}>
+					More…
+				</button>
+			)}
 		</div>,
 		host,
 	);

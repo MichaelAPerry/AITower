@@ -12,7 +12,7 @@ import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
 
-export type DrawerId = "contracts" | "research" | "automation" | "finance" | "gauges" | "log";
+export type DrawerId = "contracts" | "research" | "automation" | "finance" | "gauges" | "encyclopedia" | "log";
 /** Drawers that have an edge tab and a hotkey (the log opens from the ticker). */
 export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: string }[] = [
 	{ id: "contracts", label: "Contracts", key: "C" },
@@ -21,6 +21,7 @@ export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: st
 	{ id: "automation", label: "Automation", key: "T" },
 	{ id: "finance", label: "Finance", key: "F" },
 	{ id: "gauges", label: "Gauges", key: "I" },
+	{ id: "encyclopedia", label: "Encyclopedia", key: "K" },
 ];
 export const drawerForKey = (key: string): DrawerId | null => DRAWER_TABS.find((d) => d.key === key.toUpperCase())?.id ?? null;
 /** One drawer at a time: pressing the key of the open one closes it. */
