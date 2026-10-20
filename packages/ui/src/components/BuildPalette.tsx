@@ -122,6 +122,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	const st = content.structure;
 
 	const pick = (t: Tool): void => {
+		setHover(null);
 		store.setGhost(null);
 		store.setTool(active === toolKey(t) ? { kind: "select" } : t);
 	};
@@ -280,7 +281,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 					</div>
 				)}
 			</div>
-			{hover && (
+			{hover && tool.kind === "select" && (
 				<SpecCard hover={hover} scale={hudScale(state.settings)} />
 			)}
 		</aside>

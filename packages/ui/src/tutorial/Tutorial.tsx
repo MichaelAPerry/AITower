@@ -119,6 +119,9 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 	const enteredStep = useRef<number>(-1);
 	const clockMode = useRef<ClockMode | null>(null);
 	const hadGhost = useRef(false);
+	const openedByUs = useRef(false);
+	const uiRef = useRef(ui);
+	uiRef.current = ui;
 	const ctx = { content };
 	const tutUi: TutorialUi = { paletteTab: ui.paletteTab, drawer: ui.drawer, paletteOpen: ui.paletteOpen, tool: state.tool };
 
@@ -177,6 +180,7 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 		baseline.current = baselineOf(state, ctx);
 		clockMode.current = null;
 		setCompletedAt(null);
+		openedByUs.current = step.id === "accept" && uiRef.current.drawer !== "contracts";
 		step.onEnter?.(store, setUi);
 		if (step.focus) store.focus(step.focus);
 	}, [saved.step, step]);
@@ -209,6 +213,12 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 		[step?.id],
 	);
 
+	// Build step: once the card is picked the palette gets out of the way of the blueprint spot.
+	const armed = step?.id === "build" && state.tool.kind === "place" && ui.paletteOpen;
+	useEffect(() => {
+		if (armed) setUi({ paletteOpen: false });
+	}, [armed, setUi]);
+
 	const satisfied = !hintId && !!step?.done && !!baseline.current && step.done(state, baseline.current, ctx);
 	useEffect(() => {
 		if (satisfied && completedAt === null) setCompletedAt(Date.now());
@@ -216,7 +226,11 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: one-shot advance timer keyed on completedAt; `next` is recreated every render and must not restart it
 	useEffect(() => {
 		if (completedAt === null) return;
-		const t = setTimeout(() => next(), step?.linger ?? ADVANCE_MS);
+		const t = setTimeout(() => {
+			// The drawer the tutorial opened for the accept step closes again so the world is visible.
+			if (step?.id === "accept" && openedByUs.current && uiRef.current.drawer === "contracts") setUi({ drawer: null });
+			next();
+		}, step?.linger ?? ADVANCE_MS);
 		return () => clearTimeout(t);
 	}, [completedAt]);
 

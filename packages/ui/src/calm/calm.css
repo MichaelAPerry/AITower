@@ -575,10 +575,6 @@
 		radial-gradient(ellipse at 8% 4%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 48%);
 }
 
-/* Toasts stay out of the NEXT chip's way */
-.aitower-hud .ui-toasts {
-	top: calc(var(--gap) * 6);
-}
 .aitower-hud .ui-toolhint {
 	left: calc(var(--dock-w) + var(--gap) * 2);
 	bottom: calc(var(--gap) * 5);

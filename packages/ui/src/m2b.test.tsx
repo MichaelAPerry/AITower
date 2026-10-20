@@ -388,7 +388,7 @@ describe("Hud", () => {
 		expect(html).not.toContain("ui-research-backdrop");
 		expect(html).not.toContain("ui-audit-backdrop");
 	});
-	it("shows the clerk slip in the Contracts tab while the clerk is locked", () => {
+	it("shows the clerk slip in the Contracts tab while the clerk is locked and a few contracts are done", () => {
 		const { content, store } = setup();
 		expect(renderToString(<ContractsDrawer {...panelProps(store, content)} />)).toContain("Hire a Contract Automation: research");
 	});

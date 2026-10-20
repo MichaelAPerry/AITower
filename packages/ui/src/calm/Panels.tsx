@@ -44,7 +44,8 @@ export function ContractsDrawer(props: PanelProps) {
 					</button>
 				</div>
 			)}
-			{(!clerk || ui.clerkEdit) && <ClerkPanel {...props} />}
+			{/* The "hire a clerk" upsell is noise for a beginner: it waits until a few contracts are done. */}
+			{((!clerk && (view.stats?.jobsCompleted ?? 0) >= 3) || ui.clerkEdit) && <ClerkPanel {...props} />}
 			<h4 className="ui-dh">
 				<span>OFFERS</span>
 				<span>{view.offers.length}</span>

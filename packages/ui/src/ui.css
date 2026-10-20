@@ -1304,85 +1304,63 @@
 	white-space: nowrap;
 }
 
-/* Toasts: teletype memo slips */
+/* Toasts: small dark pills, bottom right, clear of the coach bubbles and the Goals card */
 .aitower-hud .ui-toasts {
 	position: absolute;
-	top: 54px;
-	left: 50%;
-	transform: translateX(-50%);
+	right: calc(var(--dtab-w, 104px) + 16px);
+	bottom: 64px;
 	display: flex;
 	flex-direction: column;
-	align-items: center;
-	gap: 8px;
-	width: min(500px, 72%);
+	align-items: flex-end;
+	gap: 6px;
+	width: min(420px, 50%);
 	pointer-events: none;
 	z-index: 10;
 }
 .aitower-hud .ui-toast {
-	position: relative;
 	pointer-events: auto;
 	cursor: pointer;
 	display: flex;
-	flex-wrap: wrap;
 	align-items: baseline;
-	column-gap: 8px;
-	row-gap: 2px;
-	width: 100%;
-	padding: 9px 130px 9px 16px;
-	color: var(--ink);
-	background:
-		radial-gradient(circle at 6px 6px, var(--housing-lo) 0 2px, transparent 2.5px) 0 0 / 100% 100% no-repeat,
-		linear-gradient(90deg, transparent 0 9px, color-mix(in srgb, var(--red) 45%, var(--paper)) 9px 10px, transparent 10px),
-		var(--paper);
-	border-radius: 1px;
-	box-shadow:
-		0 0 0 1px var(--beige),
-		3px 5px 0 var(--shade),
-		0 8px 20px var(--shade);
-	/* torn bottom edge */
-	clip-path: polygon(0 0, 100% 0, 100% calc(100% - 3px), 97% 100%, 93% calc(100% - 2px), 88% 100%, 82% calc(100% - 3px), 76% 100%, 70% calc(100% - 2px), 63% 100%, 57% calc(100% - 3px), 50% 100%, 44% calc(100% - 2px), 37% 100%, 31% calc(100% - 3px), 24% 100%, 18% calc(100% - 2px), 11% 100%, 5% calc(100% - 3px), 0 100%);
-	animation: ui-teletype 0.32s steps(6) both;
+	gap: 8px;
+	max-width: 100%;
+	padding: 6px 12px;
+	color: var(--text);
+	background: var(--panel);
+	border: 1px solid var(--panel-edge);
+	border-radius: 999px;
+	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+	font: 13px/1.3 var(--f-body);
+	animation: ui-toast-in 180ms ease-out both;
 }
-.aitower-hud .ui-toast:nth-child(even) {
-	transform: rotate(0.5deg);
-}
-.aitower-hud .ui-toast:nth-child(odd) {
-	transform: rotate(-0.4deg);
-}
-.aitower-hud .ui-toast-head {
-	flex-basis: 100%;
-	font: 8px/1 var(--f-stamp);
-	letter-spacing: 0.08em;
-	color: var(--paper-ink);
-	padding-bottom: 4px;
-	border-bottom: 1px dashed var(--beige);
-	margin-bottom: 3px;
+.aitower-hud .ui-toast-glyph {
+	flex: none;
+	font-weight: 700;
 }
 .aitower-hud .ui-toast-text {
 	flex: 1;
-	font: 15px/1.3 var(--f-type);
 }
 .aitower-hud .ui-toast-count {
-	font: 18px/1 var(--f-crt);
-	color: var(--paper-ink);
+	color: var(--text-dim);
+	font: 12px/1 var(--f-num);
 }
-.aitower-hud .ui-toast-stamp {
-	position: absolute;
-	right: 14px;
-	top: 50%;
-	margin-top: -12px;
-	font-size: 14px;
+.aitower-hud .ui-toast.sev-good {
+	border-color: color-mix(in srgb, var(--good) 55%, transparent);
 }
-.aitower-hud .ui-toast.sev-good .ui-toast-stamp {
-	font-size: 11px;
-	letter-spacing: 0.08em;
+.aitower-hud .ui-toast.sev-warn {
+	border-color: color-mix(in srgb, var(--warn) 55%, transparent);
 }
-@keyframes ui-teletype {
+.aitower-hud .ui-toast.sev-error {
+	border-color: color-mix(in srgb, var(--bad) 70%, transparent);
+}
+@keyframes ui-toast-in {
 	from {
-		clip-path: inset(0 0 100% 0);
+		opacity: 0;
+		transform: translateY(6px);
 	}
 	to {
-		clip-path: inset(0 0 0 0);
+		opacity: 1;
+		transform: none;
 	}
 }
 .aitower-hud .ui-toolhint {
@@ -1414,12 +1392,6 @@
 }
 .aitower-hud .sev-error {
 	color: var(--red);
-}
-.aitower-hud .ui-toast.sev-info,
-.aitower-hud .ui-toast.sev-good,
-.aitower-hud .ui-toast.sev-warn,
-.aitower-hud .ui-toast.sev-error {
-	color: var(--ink);
 }
 .aitower-hud .ui-alert-dot {
 	flex: none;
@@ -2243,18 +2215,6 @@
 .aitower-hud.is-density-cramped .ui-bottom.is-open {
 	height: clamp(120px, calc(34vh / var(--hud-scale)), 180px);
 }
-.aitower-hud.is-density-cramped .ui-toasts {
-	width: min(500px, 92%);
-}
-/* Toasts make room for the memo slips: they move to the left half while a tutorial memo or a Ministry memo is on the right. */
-.aitower-hud .ui-center:has(.ui-memo-pop, .ui-memo-drawer) .ui-toasts {
-	left: 266px; /* clear of the Goals card */
-	transform: none;
-	width: min(480px, calc(100% - 266px - 450px));
-	min-width: 230px;
-	align-items: flex-start;
-}
-
 /* Cramped (about 850 px effective or narrower, e.g. text size 150% on a 1280 screen). */
 .aitower-hud.is-density-cramped .ui-tier,
 .aitower-hud.is-density-cramped .ui-mute {
@@ -2291,17 +2251,6 @@
 }
 .aitower-hud.is-density-cramped .ui-supplies {
 	padding: 6px 8px 8px;
-}
-.aitower-hud.is-density-cramped .ui-toast {
-	padding: 7px 96px 7px 14px;
-}
-.aitower-hud.is-density-cramped .ui-toast-text {
-	font-size: 13px;
-	line-height: 1.2;
-}
-.aitower-hud.is-density-cramped .ui-toast-stamp {
-	right: 8px;
-	font-size: 11px;
 }
 .aitower-hud.is-density-cramped .ui-overlay {
 	padding: 4px 8px 4px 6px;
