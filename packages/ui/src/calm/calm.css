@@ -617,3 +617,14 @@
 	color: var(--text-dim);
 	pointer-events: none;
 }
+
+.aitower-hud .ui-speccard .ui-more-link {
+	margin-top: 6px;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--accent);
+	font: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+}

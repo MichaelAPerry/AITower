@@ -28,13 +28,15 @@ export interface SystemMenuProps {
 	fromTitle?: boolean;
 	/** The running game was replaced by a load or import (the title screen leaves on this). */
 	onReplaced?: () => void;
+	/** Close the menu and open the Encyclopedia drawer. */
+	onEncyclopedia?: () => void;
 }
 
 /**
  * The system menu: a bakelite filing cabinet. Modal: focus is trapped, Esc closes (restoring the game
  * speed), and key presses never reach the game's hotkeys or the camera while it is open.
  */
-export function SystemMenu({ store, state, menu, initial = "save", fromTitle = false, onReplaced }: SystemMenuProps) {
+export function SystemMenu({ store, state, menu, initial = "save", fromTitle = false, onReplaced, onEncyclopedia }: SystemMenuProps) {
 	const [section, setSection] = useState<MenuSection>(initial);
 	const [flash, setFlash] = useState<Flash | null>(null);
 	const root = useRef<HTMLDivElement>(null);
@@ -105,6 +107,19 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 							</button>
 						))}
 						<span className="ui-grow" />
+						{!fromTitle && onEncyclopedia && (
+							<button
+								type="button"
+								className="ui-btn ui-induct-btn"
+								onClick={() => {
+									menu.close();
+									onEncyclopedia();
+								}}
+								title="How everything works (K)"
+							>
+								Encyclopedia
+							</button>
+						)}
 						{!fromTitle && (
 						<button
 							type="button"

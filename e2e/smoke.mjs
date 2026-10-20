@@ -194,6 +194,29 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("parts order on, AUTO lamp lit");
 
+		stage("5d. help mode: ? shows a tooltip with More..., which opens the Encyclopedia on an entry; K and search work");
+		await page.keyboard.press("?");
+		await page.waitForSelector(".aitower-hud.is-help");
+		assert((await page.locator("[data-help]").count()) >= 10, "help regions missing");
+		await page.locator('[data-help="treasury"]').hover();
+		await page.locator(".ui-helpcard").waitFor();
+		await page.getByRole("button", { name: "More…" }).click();
+		await page.locator('[data-drawer="encyclopedia"]').waitFor();
+		await page.locator('[data-entry="basics:money"].is-open').waitFor();
+		await page.keyboard.press("Escape"); // closes the drawer and leaves help mode in one go
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await page.waitForFunction(() => !document.querySelector(".aitower-hud.is-help"));
+		await page.keyboard.press("k");
+		await page.locator('[data-drawer="encyclopedia"]').waitFor();
+		await page.getByRole("searchbox", { name: "Search the Encyclopedia" }).fill("pue");
+		await page.locator('[data-entry="glossary:pue"]').waitFor();
+		await page.getByRole("searchbox").fill("");
+		await page.evaluate(() => document.activeElement?.blur());
+		await page.keyboard.press("Escape");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		log("help mode, More... link, Encyclopedia search");
+
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
 		const saved = await game(() => window.aitower.store.saveTo("slot1", "e2e"));

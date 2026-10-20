@@ -49,7 +49,7 @@ export function GoalsCard({ state, content }: Pick<PanelProps, "state" | "conten
 	};
 	const main = goals[0];
 	return (
-		<section className={`ui-goals ${collapsed ? "is-collapsed" : ""}`} data-tut="goals" aria-label="Goals">
+		<section className={`ui-goals ${collapsed ? "is-collapsed" : ""}`} data-tut="goals" data-help="goals" aria-label="Goals">
 			<button type="button" className="ui-goals-head" onClick={toggle} aria-expanded={!collapsed} title={collapsed ? "Show goals" : "Hide goals"}>
 				<span className="ui-label">GOALS</span>
 				{collapsed && main && <span className="ui-goals-peek">{main.title}</span>}

@@ -212,7 +212,7 @@ export function MemoDrawer({ store, content, state, ui, setUi }: { store: GameSt
 export function InboxButton({ state, ui, setUi }: { state: GameState; ui: UiState; setUi: SetUi }) {
 	const n = openMemos(state.view.memos, ui.stamped).length;
 	return (
-		<button type="button" className={`ui-btn ui-inbox ${ui.inboxOpen ? "is-on" : ""}`} data-tut="inbox" onClick={() => setUi({ inboxOpen: !ui.inboxOpen })} aria-expanded={ui.inboxOpen} title={n ? `${n} Authority memo${n === 1 ? "" : "s"} waiting` : "Compute Authority inbox: no memos waiting"}>
+		<button type="button" className={`ui-btn ui-inbox ${ui.inboxOpen ? "is-on" : ""}`} data-tut="inbox" data-help="inbox" onClick={() => setUi({ inboxOpen: !ui.inboxOpen })} aria-expanded={ui.inboxOpen}>
 			<Lamp on={n > 0} tone="red" blink={n > 0} plain />
 			<span className="ui-inbox-label ui-hide-narrow">INBOX</span>
 			<span className={`ui-inbox-count ${n ? "has" : ""}`}>{n}</span>
@@ -226,7 +226,7 @@ export function StandingMeter({ standing }: { standing: number }) {
 	const tone = standingTone(v);
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: a custom needle meter; a native <meter> cannot be styled into this gauge
-		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Reputation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)} title={`Reputation with the Compute Authority: ${Math.round(v)} of 100. Below 25 is dangerous; at 0 the Compute Authority shuts you down.`}>
+		<div className={`ui-standing tone-${tone}`} data-tut="standing" role="meter" aria-label="Reputation" data-help="reputation" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(v)}>
 			<span className="ui-dymo">REPUTATION</span>
 			<span className="ui-standing-row">
 				<span className="ui-standing-scale" aria-hidden="true">

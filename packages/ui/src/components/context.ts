@@ -32,6 +32,10 @@ export interface UiState {
 	financeTab: FinanceTab;
 	/** Memos the player set aside (no slip pops up for them; they stay in the inbox). */
 	aside: number[];
+	/** Help mode: hover any outlined part of the HUD for a plain-language tooltip. */
+	help?: boolean;
+	/** Encyclopedia entry to open (set by "More..." links; the drawer consumes it). */
+	encyId?: string | null;
 	/** The ascension path just filed (the sim applies it on the next tick), so CURRENT ORDERS stops offering FORM A-5 meanwhile. */
 	pathFiled?: PathFiled | null;
 }
