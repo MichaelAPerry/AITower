@@ -1,14 +1,15 @@
-import type { BuildCategory, FacilityDef } from "@aitower/content";
-import type { SimCommand } from "@aitower/sim";
+import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
+import type { SimCommand, SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
-import { type MouseEvent, useState } from "react";
+import { type MouseEvent, useRef, useState } from "react";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
 import { techGate } from "../research/tech";
 import { hudScale } from "../settings";
 import { conduitUnitCost, toolKey } from "../tools/controller";
 import { bandText } from "../bio/bio";
-import { FormLabel, Icon, Stamp, Swatch } from "./common";
+import { Icon, Swatch } from "./common";
+import { SpecCard, type SpecHover, type SpecInfo, anchorOf } from "./SpecCard";
 import type { PanelProps } from "./context";
 
 export type Tab = "structure" | BuildCategory;
@@ -20,14 +21,6 @@ const TABS: { id: Tab; label: string }[] = [
 	{ id: "logistics", label: "Logis" },
 	{ id: "bio", label: "Wetware" },
 ];
-
-interface Hover {
-	top: number;
-	title: string;
-	body: string;
-	specs: [string, string][];
-	warn?: string;
-}
 
 /** One-line headline numbers for a facility card. */
 export function defHeadline(def: FacilityDef): string {
@@ -56,7 +49,7 @@ export function defHeadline(def: FacilityDef): string {
 	return parts.join(" · ");
 }
 
-function defSpecs(def: FacilityDef): [string, string][] {
+export function defSpecs(def: FacilityDef): [string, string][] {
 	const s: [string, string][] = [
 		["Cost", fmtMoney(def.cost)],
 		["Upkeep", `${fmtMoney(def.upkeepPerDay)}/day`],
@@ -104,17 +97,26 @@ function defSpecs(def: FacilityDef): [string, string][] {
 	return s;
 }
 
-/**
- * `top` for the fixed spec sheet. `rectTop` is a viewport coordinate; the HUD is zoomed by `scale`, so the
- * CSS value is in zoomed pixels: divide the viewport numbers by the scale.
- */
-export function tooltipTop(rectTop: number, viewportH: number, scale: number): number {
-	return Math.max(60 / scale, Math.min(rectTop, viewportH - 320 * scale) / scale);
+/** The line a locked row shows (tier first, then research), or null when the row is available. */
+export function lockText(def: FacilityDef, view: SimView, content: ContentDB): string | null {
+	const gate = techGate(def.tech, view, content);
+	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Clearance ${def.unlockTier}` : null].filter(Boolean);
+	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
+}
+
+/** A tab's rows: unlocked first, each group by unlock tier, then cost. */
+export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategory): FacilityDef[] {
+	return Object.values(content.facilities)
+		.filter((d) => d.category === cat && !d.growth)
+		.map((d) => ({ d, locked: lockText(d, view, content) !== null }))
+		.sort((a, b) => Number(a.locked) - Number(b.locked) || a.d.unlockTier - b.d.unlockTier || a.d.cost - b.d.cost || a.d.id.localeCompare(b.d.id))
+		.map((x) => x.d);
 }
 
 export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	const tab = ui.paletteTab as Tab;
-	const [hover, setHover] = useState<Hover | null>(null);
+	const [hover, setHover] = useState<SpecHover | null>(null);
+	const root = useRef<HTMLElement>(null);
 	const { view, tool } = state;
 	const active = toolKey(tool);
 	const st = content.structure;
@@ -123,10 +125,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 		store.setGhost(null);
 		store.setTool(active === toolKey(t) ? { kind: "select" } : t);
 	};
-	const hoverAt = (e: MouseEvent<HTMLElement>, h: Omit<Hover, "top">): void => {
-		const r = e.currentTarget.getBoundingClientRect();
-		setHover({ ...h, top: r.top });
-	};
+	const hoverAt = (e: MouseEvent<HTMLElement>, h: SpecInfo): void => setHover({ ...h, anchor: anchorOf(e.currentTarget, root.current) });
 
 	const structure: { tool: Tool; icon: "slab" | "bolt" | "drop" | "leaf" | "lift" | "demolish"; name: string; cost: string; hint: string; body: string }[] = [
 		{ tool: { kind: "slab" }, icon: "slab", name: "Floor slab", cost: `${fmtMoney(st.slabPerTile)}/tile`, hint: `basement ${fmtMoney(st.basementSlabPerTile)}/tile`, body: "Drag horizontally along one floor. Floors above ground need slab underneath." },
@@ -137,9 +136,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 		{ tool: { kind: "demolish" }, icon: "demolish", name: "Demolish", cost: "50% refund", hint: "click or drag", body: "Removes the top-most thing in a cell: facility ▸ lift ▸ conduit ▸ slab." },
 	];
 
-	const defs = Object.values(content.facilities)
-		.filter((d) => d.category === tab && !d.growth)
-		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost);
+	const defs = tab === "structure" ? [] : paletteDefs(content, view, tab);
 
 	const bots = Object.values(content.bots);
 	const buy = (cmd: SimCommand): void => {
@@ -148,9 +145,9 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	};
 
 	return (
-		<aside className="ui-palette ui-panel" onMouseLeave={() => setHover(null)}>
+		<aside ref={root} className="ui-palette ui-panel" onMouseLeave={() => setHover(null)}>
 			<div className="ui-panel-title">
-				<FormLabel form="DEPT. OF">Provisioning</FormLabel>
+				<span className="ui-panel-name">Build</span>
 				<button
 					type="button"
 					className={`ui-btn ui-icon-btn ui-select-btn ${tool.kind === "select" ? "is-on" : ""}`}
@@ -198,8 +195,8 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 				{tab !== "structure" && defs.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
 				{tab !== "structure" &&
 					defs.map((d) => {
-						const locked = d.unlockTier > view.tier;
-						const gate = techGate(d.tech, view, content);
+						const lock = lockText(d, view, content);
+						const locked = lock !== null;
 						const poor = view.cash < d.cost;
 						const t: Tool = { kind: "place", defId: d.id };
 						return (
@@ -207,11 +204,10 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 								key={d.id}
 								type="button"
 								data-tut={`card-${d.id}`}
-								aria-disabled={locked || poor || !!gate}
-								title={gate ?? undefined}
-								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : gate ? "is-tech-locked" : poor ? "is-poor" : ""}`}
+								aria-disabled={locked || poor}
+								className={`ui-item ui-card ${active === toolKey(t) ? "is-on" : ""} ${locked ? "is-locked" : poor ? "is-poor" : ""}`}
 								onClick={() => {
-									if (!locked && !poor && !gate) pick(t);
+									if (!locked && !poor) pick(t);
 								}}
 								onMouseLeave={() => setHover(null)}
 								onMouseEnter={(e) =>
@@ -219,7 +215,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 										title: d.name,
 										body: d.description,
 										specs: defSpecs(d),
-										warn: locked ? `Unlocks at Tier ${d.unlockTier}` : gate ? `${gate} (R)` : poor ? `Need ${fmtMoney(d.cost - view.cash)} more` : undefined,
+										warn: lock ? lock : poor ? `Need ${fmtMoney(d.cost - view.cash)} more` : undefined,
 									})
 								}
 							>
@@ -227,28 +223,20 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 								<span className="ui-item-main">
 									<span className="ui-item-name">
 										{d.name}
-										{locked && (
-											<span className="ui-lock">
-												<Icon name="lock" size={10} /> T{d.unlockTier}
-											</span>
-										)}
 									</span>
 									<span className="ui-item-foot">
-										<span className={`ui-item-sub ${gate ? "is-tech" : ""}`}>{gate ?? defHeadline(d)}</span>
+										<span className={`ui-item-sub ${locked ? "is-lock" : ""}`}>
+											{locked && <Icon name="lock" size={10} />} {lock ?? defHeadline(d)}
+										</span>
 										<span className={`ui-item-cost ${poor ? "is-short" : ""}`}>{fmtMoney(d.cost)}</span>
 									</span>
 								</span>
-								{locked && (
-									<Stamp tone="red" className="ui-card-stamp">
-										Restricted
-									</Stamp>
-								)}
 							</button>
 						);
 					})}
 			</div>
 			<div className="ui-supplies">
-				<span className="ui-dymo ui-supplies-title">STORES REQUISITION</span>
+				<span className="ui-dymo ui-supplies-title">SUPPLIES</span>
 				<div className="ui-supply">
 					<span className="ui-k">Spare parts</span>
 					<span className="ui-v ui-crt crt-amber">{view.spareParts}</span>
@@ -293,20 +281,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 				)}
 			</div>
 			{hover && (
-				<div className="ui-tooltip ui-panel" style={{ top: tooltipTop(hover.top, window.innerHeight, hudScale(state.settings)) }}>
-					<div className="ui-tooltip-form">SPECIFICATION SHEET · FORM SP-4</div>
-					<div className="ui-tooltip-title">{hover.title}</div>
-					<p>{hover.body}</p>
-					<div className="ui-tooltip-specs">
-						{hover.specs.map(([k, v]) => (
-							<div key={k} className="ui-row">
-								<span className="ui-k">{k}</span>
-								<span className="ui-v">{v}</span>
-							</div>
-						))}
-					</div>
-					{hover.warn && <div className="ui-tooltip-warn">{hover.warn}</div>}
-				</div>
+				<SpecCard hover={hover} scale={hudScale(state.settings)} />
 			)}
 		</aside>
 	);

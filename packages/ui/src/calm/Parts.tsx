@@ -9,7 +9,11 @@ import { ModifierChips } from "../memo/MemoDesk";
 import { pushNotice } from "../notices";
 import { currentObjective, endingLine } from "../objective/objective";
 import { toolKey } from "../tools/controller";
-import { BuildPalette, defHeadline } from "../components/BuildPalette";
+import { BuildPalette, defSpecs } from "../components/BuildPalette";
+import { SpecCard, type SpecHover, anchorOf } from "../components/SpecCard";
+import { AffinityBars } from "../components/AffinityBars";
+import { leadingPath } from "../ascension/ascension";
+import { hudScale } from "../settings";
 import { DRAWER_TABS, type DockPick, dockPicks, feedLines, isRoutine, nextDrawer } from "./calm";
 import { Icon, Swatch } from "../components/common";
 
@@ -62,6 +66,8 @@ export function Ticker({ content, state, ui, setUi }: PanelProps) {
 export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 	const { view, tool } = state;
 	const picks = dockPicks(view, content);
+	const hover = ui.dockHover ?? null;
+	const setHover = (h: SpecHover | null): void => setUi({ dockHover: h });
 	const cost = (p: DockPick): number => (p.kind === "parts" ? content.structure.sparePart * 5 : content.facilities[p.defId].cost);
 	const run = (p: DockPick): void => {
 		if (cost(p) > view.cash) {
@@ -89,7 +95,9 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 				const can = cost(p) <= view.cash;
 				const on = p.kind === "place" && toolKey(tool) === toolKey({ kind: "place", defId: p.defId });
 				return (
-					<button key={key} type="button" data-tut={`dock-${key}`} className={`ui-dockbtn ${can ? "can" : ""} ${on ? "is-on" : ""}`} onClick={() => run(p)} title={def ? `${def.name}: ${defHeadline(def)}` : "Five spare parts for the maintenance automata"}>
+					<button key={key} type="button" data-tut={`dock-${key}`} className={`ui-dockbtn ${can ? "can" : ""} ${on ? "is-on" : ""}`} onClick={() => run(p)}
+						onMouseLeave={() => setHover(null)}
+						onMouseEnter={(e) => setHover({ anchor: { ...anchorOf(e.currentTarget), right: e.currentTarget.getBoundingClientRect().right + 80 * hudScale(state.settings) }, ...(def ? { title: def.name, body: def.description, specs: defSpecs(def) } : { title: "Spare parts ×5", body: "Replacement parts for maintenance bots. Each repair uses one.", specs: [["Cost", fmtMoney(cost(p))]] }) })}>
 						<span className="ui-dock-ic">{def ? <Swatch color={def.color} accent={def.accent} size={22} /> : <Icon name="bolt" size={14} />}</span>
 						<span className="ui-dock-name">{def ? def.name : "Spare parts ×5"}</span>
 						<span className="ui-dock-cost">{fmtMoney(cost(p))}</span>
@@ -101,6 +109,7 @@ export function BuildDock({ store, content, state, ui, setUi }: PanelProps) {
 				<span className="ui-dock-name">More</span>
 				<span className="ui-dock-cost">▸</span>
 			</button>
+			{hover && <SpecCard hover={hover} scale={hudScale(state.settings)} />}
 		</section>
 	);
 }
@@ -146,6 +155,10 @@ function GaugesDrawer(props: PanelProps) {
 				<span>OVERLAYS</span>
 			</h4>
 			<OverlaySwitcher {...props} embedded />
+			<h4 className="ui-dh">
+				<span>PATH AFFINITY</span>
+			</h4>
+			<AffinityBars affinity={view.affinity} content={props.content} leading={view.path ?? leadingPath(view.affinity)} />
 			{view.modifiers.length > 0 && (
 				<>
 					<h4 className="ui-dh">

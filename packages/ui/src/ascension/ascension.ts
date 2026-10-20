@@ -53,3 +53,22 @@ export function filePath(store: GameStore, content: ContentDB, id: AscensionPath
 	}
 	return { path: id, tick: store.get().view.tick };
 }
+
+/** Path order and colours (one hue per path; used by the bars, the memo chips and the sheet). */
+export const PATH_ORDER: readonly AscensionPath[] = ["biotech", "greentech", "synthetic"];
+export const PATH_COLOR: Record<AscensionPath, string> = { biotech: "#d9669c", greentech: "#4ee08a", synthetic: "#9b8cff" };
+
+/** The path with the largest affinity share; null when all are zero or the top two tie. */
+export function leadingPath(affinity: Record<AscensionPath, number>): AscensionPath | null {
+	const sorted = [...PATH_ORDER].sort((a, b) => affinity[b] - affinity[a]);
+	return affinity[sorted[0]] > 0 && affinity[sorted[0]] > affinity[sorted[1]] ? sorted[0] : null;
+}
+
+/** The path the sheet opens with selected: the leading one if it can be chosen. */
+export function preselectedPath(content: ContentDB, affinity: Record<AscensionPath, number>): AscensionPath | null {
+	const lead = leadingPath(affinity);
+	return lead ? pathToConfirm(content, lead) : null;
+}
+
+/** "Biotech 62%" style label for a share. */
+export const sharePct = (share: number): string => `${Math.round(share * 100)}%`;

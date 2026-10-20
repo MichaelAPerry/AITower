@@ -2,7 +2,7 @@
  * Pure helpers for the Calm HUD: money per hour, Clearance progress, the build dock picks, memo effect chips and urgency,
  * and which events are routine enough to stay out of the ticker.
  */
-import type { ContentDB, EventEffect, FacilityDef } from "@aitower/content";
+import type { AscensionPath, ContentDB, EventEffect, FacilityDef } from "@aitower/content";
 import type { HorrorIntensity } from "@aitower/shared";
 import type { CellRef, LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
 import { describeEvent, isNoise } from "../events";
@@ -125,6 +125,8 @@ export function dockPicks(view: SimView, content: ContentDB): DockPick[] {
 
 // ─── Memos ────────────────────────────────────────────────────────────────
 
+const pathLabel = (p: string): string => (p === "synthetic" ? "Synthetic" : p === "greentech" ? "Greentech" : p === "biotech" ? "Biotech" : p);
+
 /** "−$160k", "★−4", "2 racks fail": one effect as a compact chip. */
 export function effectChip(e: EventEffect): string {
 	const sign = (n: number): string => (n >= 0 ? "+" : "−");
@@ -149,8 +151,13 @@ export function effectChip(e: EventEffect): string {
 		case "spareParts":
 			return `${sign(e.count)}${Math.abs(e.count)} parts`;
 		case "affinity":
-			return `${e.path} ${sign(e.amount)}`;
+			return `${pathLabel(e.path)} ${sign(e.amount)}${Math.abs(e.amount)}`;
 	}
+}
+
+/** The chip as React content: affinity effects get a path-coloured pill, everything else plain text. */
+export function chipParts(effects: readonly EventEffect[]): { text: string; path?: AscensionPath }[] {
+	return effects.map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectChip(e) }));
 }
 
 /** The compact consequence of a choice: its effects joined with " · ", or "no effect". */

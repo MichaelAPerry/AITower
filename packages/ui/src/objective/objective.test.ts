@@ -119,3 +119,16 @@ describe("current orders", () => {
 		expect(m.breakdown).not.toMatch(/penalties/);
 	});
 });
+
+describe("lift access hint", () => {
+	const c = { ...content, bots: { maint: { id: "maint" } }, facilities: { ...content.facilities } } as unknown as ContentDB;
+	const base = { bots: [{ defId: "maint", floor: 1 }], lifts: [{ x: 3, floorMin: 1, floorMax: 2 }], facilities: [{ ...rack(1), floor: 1 }, { ...rack(2), floor: 7 }] };
+	it("names a floor with facilities but no lift reach", () => {
+		const o = currentObjective(view(base), c, yes);
+		expect(o.title).toBe("F7 has no lift access: extend a lift");
+	});
+	it("is quiet once a lift reaches it", () => {
+		const o = currentObjective(view({ ...base, lifts: [{ x: 3, floorMin: 1, floorMax: 7 }] }), c, yes);
+		expect(o.title).not.toContain("lift access");
+	});
+});

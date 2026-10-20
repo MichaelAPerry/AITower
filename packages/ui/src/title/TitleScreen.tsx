@@ -24,7 +24,7 @@ export interface TitleScreenProps {
 const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", new: "NEW GAME", load: "LOAD GAME", settings: "SETTINGS", controls: "CONTROLS" };
 
 /**
- * The front office of the Ministry: a bakelite cabinet with a brass AITOWER plate and a CRT menu. The game stays paused
+ * The title screen: the AITOWER nameplate and the menu. The game stays paused
  * until the player picks. Arrow keys and Enter drive it; Esc does nothing here.
  */
 export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content }: TitleScreenProps) {
@@ -82,17 +82,17 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 		// biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal; the key handler implements arrow navigation and the focus loop
 		<div className="ui-title" ref={root} onKeyDown={onKeyDown} data-menu-open={menuOpen || undefined}>
 			<div className="ui-title-sky" aria-hidden="true">
-				<span className="ui-title-sign">MINISTRY</span>
+				<span className="ui-title-sign">COMPUTE AUTHORITY</span>
 			</div>
 			<div className="ui-title-cabinet ui-panel" role="dialog" aria-modal="true" aria-label="AItower title screen">
 				<div className="ui-title-plate">
 					<span className="ui-title-brand">
 						AI<b>TOWER</b>
 					</span>
-					<span className="ui-title-sub">MINISTRY OF COMPUTATION · FRONT OFFICE</span>
+					<span className="ui-title-sub">LICENSED AI COMPUTE OPERATOR</span>
 				</div>
 				<div className="ui-crt crt-amber ui-title-crt">
-					{!saves && <p className="ui-title-wait">CHECKING THE ARCHIVE…</p>}
+					{!saves && <p className="ui-title-wait">LOADING SAVES…</p>}
 					{saves && (
 						<ul className="ui-title-menu">
 							{items.map((item) => (
@@ -103,7 +103,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 										</span>
 										<span className="ui-title-label">{LABEL[item]}</span>
 										{item === "continue" && auto && <span className="ui-title-detail">{continueSummary(auto, now)}</span>}
-										{item === "load" && <span className="ui-title-detail">{saves.length} filed</span>}
+										{item === "load" && <span className="ui-title-detail">{saves.length} saved</span>}
 									</button>
 									{item === "new" && (
 										<label className="ui-title-check">
@@ -118,7 +118,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 													}
 												}}
 											/>
-											<span>Ministry induction (tutorial)</span>
+											<span>Tutorial</span>
 										</label>
 									)}
 								</li>
@@ -145,7 +145,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 					</fieldset>
 				)}
 				<div className="ui-title-foot">
-					<span className="ui-dymo">FORM 0: ENTER OR CLICK TO PROCEED</span>
+					<span className="ui-dymo">ENTER OR CLICK TO PROCEED</span>
 					{saves && saves.length > 0 && (
 						<button
 							type="button"
@@ -154,9 +154,9 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 								startGame(store, { kind: "new", induction: true, crawl: true }, hooks);
 								onStart({ newGame: true, run: false });
 							}}
-							title="Start a fresh site with the Ministry induction"
+							title="Start a fresh site with the tutorial"
 						>
-							Restart induction
+							Restart tutorial
 						</button>
 					)}
 				</div>

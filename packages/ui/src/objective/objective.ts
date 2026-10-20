@@ -7,7 +7,7 @@ import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 import { cheapestAvailable, effectText, fmtRp } from "../research/tech";
 import { ascensionDue, type PathFiled, pathPending } from "../ascension/ascension";
-import { rackProblem } from "./diagnose";
+import { rackProblem, unreachedFloors } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
 
@@ -102,6 +102,13 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			detail: `Clearance ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the form below to read the options.`,
 			action: "ascension",
 		};
+	}
+
+	// Facilities on a floor no bot can reach cannot be serviced: say which floor and the fix.
+	const unreached = unreachedFloors(view, content);
+	if (unreached.length > 0) {
+		const f = unreached[0];
+		return { tone: "action", title: `F${f} has no lift access: extend a lift`, detail: `F${f} has facilities that maintenance bots cannot reach, so they cannot be repaired or serviced. Drag a lift from a served floor up or down to F${f} (Build, Service lift); extending costs per added floor.` };
 	}
 
 	// Idle racks earn nothing: whenever an offer can start on them, taking it is the best next step.

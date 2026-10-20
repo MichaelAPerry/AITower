@@ -294,6 +294,7 @@ describe("event wording", () => {
 describe("Wetware tab, nutrient tool and overlays", () => {
 	it("has a Wetware tab listing the bio category, with the headline band", () => {
 		const { content, store } = setup();
+		store.setTier(5);
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "bio", paletteOpen: true } })} />);
 		expect(html).toContain("Wetware");
 		expect(html).toContain("Nutrient Plant");

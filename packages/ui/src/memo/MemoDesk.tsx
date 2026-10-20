@@ -1,7 +1,8 @@
 import type { ContentDB } from "@aitower/content";
 import type { MemoView, ModifierView, SimView } from "@aitower/sim";
 import { memoStain } from "../bio/bio";
-import { choiceChips, effectsOf, isUrgentMemo } from "../calm/calm";
+import { PATH_COLOR } from "../ascension/ascension";
+import { chipParts, effectsOf, isUrgentMemo } from "../calm/calm";
 import type { GameState, GameStore } from "@aitower/shared";
 import { useEffect } from "react";
 import { Icon, Lamp, Stamp } from "../components/common";
@@ -13,7 +14,30 @@ import "./memo.css";
 
 type SetUi = (patch: Partial<UiState>) => void;
 
-const CATEGORY: Record<string, string> = { ministry: "MINISTRY", environmental: "WEATHER BUREAU", operational: "OPERATIONS", client: "CLIENT LIAISON", horror: "CLASSIFIED" };
+/** The consequence of a choice: plain chips, with affinity effects as path-coloured pills. */
+function choiceChipsNode(effects: Parameters<typeof chipParts>[0]) {
+	const parts = chipParts(effects);
+	if (parts.length === 0) return <em>no effect</em>;
+	return (
+		<em>
+			{parts.map((c, i) => (
+				// biome-ignore lint/suspicious/noArrayIndexKey: static list
+				<span key={i}>
+					{i > 0 && " · "}
+					{c.path ? (
+						<span className="ui-pathchip" data-path={c.path} style={{ color: PATH_COLOR[c.path] }}>
+							{c.text}
+						</span>
+					) : (
+						c.text
+					)}
+				</span>
+			))}
+		</em>
+	);
+}
+
+const CATEGORY: Record<string, string> = { ministry: "COMPUTE AUTHORITY", environmental: "WEATHER BUREAU", operational: "OPERATIONS", client: "CLIENT LIAISON", horror: "CLASSIFIED" };
 
 /** Stamp a memo. The memo is hidden at once; the store applies the answer immediately (or on the next tick while running). */
 function answer(store: GameStore, ui: UiState, setUi: SetUi, memo: MemoView, choiceId: string): void {
@@ -32,7 +56,7 @@ export function MemoCard({ memo, tick, onAnswer, onAside }: { memo: MemoView; ti
 		<article className={`memo-card ${urgent ? "is-urgent" : ""}`} data-memo={memo.id} aria-labelledby={`${id}-t`}>
 			<header className="memo-head">
 				<span className="memo-from">
-					FROM: {CATEGORY[memo.category] ?? "MINISTRY"} · NO. {String(memo.id).padStart(4, "0")}
+					FROM: {CATEGORY[memo.category] ?? "COMPUTE AUTHORITY"} · NO. {String(memo.id).padStart(4, "0")}
 				</span>
 				{urgent && <Stamp tone="red" className="memo-urgent">Urgent</Stamp>}
 			</header>
@@ -89,7 +113,7 @@ export function MemoSlip({ memo, content, tick, open, onRead, onAnswer, onAside 
 	return (
 		<article className="memo-slip" data-memo={memo.id} aria-label={memo.title}>
 			<header className="memo-slip-from">
-				<span>{CATEGORY[memo.category] ?? "MINISTRY"} · URGENT</span>
+				<span>{CATEGORY[memo.category] ?? "COMPUTE AUTHORITY"} · URGENT</span>
 				<span title="The memo is filed under its default stamp when the time runs out">{memoCountdown(memo, tick)}</span>
 			</header>
 			<h3 className="memo-slip-title">{memo.title}</h3>
@@ -97,7 +121,7 @@ export function MemoSlip({ memo, content, tick, open, onRead, onAnswer, onAside 
 				{memo.choices.map((c) => (
 					<button key={c.id} type="button" className={`memo-slip-stamp ${c.id === memo.defaultChoice ? "is-default" : ""}`} title={c.hint} onClick={() => onAnswer(c.id)}>
 						<span>{c.label}</span>
-						<em>{choiceChips(effectsOf(content, memo, c.id))}</em>
+						{choiceChipsNode(effectsOf(content, memo, c.id))}
 					</button>
 				))}
 			</div>

@@ -231,12 +231,12 @@ describe("Research key, pause and Esc", () => {
 });
 
 describe("Top bar and build palette", () => {
-	it("items whose tech is not researched show 'Requires research: <name>' and cannot be armed", () => {
+	it("items whose tech is not researched show 'Locked: <name>' and cannot be armed", () => {
 		const { content, store } = setup();
 		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
-		expect(html).toContain("Requires research: Heat Exchange Theory"); // chiller
+		expect(html).toContain("Locked: Heat Exchange Theory"); // chiller
 		expect(html).toMatch(/aria-disabled="true"[^>]*data-tut="card-chiller"|data-tut="card-chiller"[^>]*aria-disabled="true"/);
-		expect(html).toContain("is-tech-locked");
+		expect(html).toContain("is-locked");
 		store.dispatch({ type: "research", techId: "cool_exchange" });
 		const after = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling" } })} />);
 		expect(after).not.toContain("Heat Exchange Theory");

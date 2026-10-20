@@ -140,7 +140,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 		title: "Add a cabinet",
 		body: ["More racks, more contracts. The marked spot on F1 already has floor, power and cooling. Press Esc afterwards."],
 		task: "Build one more compute cabinet on F1",
-		how: ["Press MORE in the build dock (bottom left)", "Click the RACKS tab", "Click the first card: Mk.I Air-Cooled Compute Cabinet", "Click the blue blueprint on F1"],
+		how: ["Press MORE in the build dock (bottom left)", "Click the RACKS tab", "Click the first card (the air-cooled rack)", "Click the blue blueprint on F1"],
 		phase: (_s, ui) => (placing(ui, "rack_air_gpu") ? 3 : !ui.paletteOpen ? 0 : ui.paletteTab !== "rack" ? 1 : 2),
 		targets: (_s, ui) => (placing(ui, "rack_air_gpu") ? [] : !ui.paletteOpen ? [t("dock-more")] : ui.paletteTab !== "rack" ? [t("tab-rack")] : [t("card-rack_air_gpu")]),
 		ghost: (_s, ui) => (placing(ui, "rack_air_gpu") ? { cells: RACK_SPOT, valid: true, defId: "rack_air_gpu", label: "CLICK HERE" } : null),
