@@ -165,14 +165,13 @@ describe("M4 content (bundled)", () => {
 			}
 		});
 
-		it("the Works Foreman is a tier-2 administration node worth 3-4 days of research that switches on the foreman", () => {
+		it("the Works Foreman is a tier-1 administration node (so a fully automated run can reach Clearance 2) that switches on the foreman", () => {
 			const n = byTech.get("works_foreman")!;
 			expect(n.name).toBe("Works Foreman");
 			expect(n.branch).toBe("administration");
-			expect(n.minTier).toBe(2);
+			expect(n.minTier).toBe(1);
 			expect(n.effects).toEqual([{ type: "feature", feature: "foreman" }]);
-			expect(days("works_foreman")).toBeGreaterThanOrEqual(3);
-			expect(days("works_foreman")).toBeLessThanOrEqual(4);
+			expect(n.cost).toBe(2200);
 			expect(n.requires).toEqual(["contracts_clerk"]);
 			expect(n.description).toContain(`${db.balance.automation.foremanPerHour} facility per game-hour`);
 			expect(n.path).toBeUndefined();

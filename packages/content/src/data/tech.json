@@ -673,5 +673,266 @@
    }
   ],
   "path": "biotech"
+ },
+ {
+  "id": "works_foreman",
+  "name": "Works Foreman",
+  "description": "A hard hat, a clipboard and a licence to requisition. Switches on the Works Foreman: once ordered, it builds racks, cooling and spare power where the Ministry's forms say you are short, at most 1 facility per game-hour.",
+  "branch": "administration",
+  "minTier": 1,
+  "cost": 2200,
+  "requires": [
+   "contracts_clerk"
+  ],
+  "effects": [
+   {
+    "type": "feature",
+    "feature": "foreman"
+   }
+  ]
+ },
+ {
+  "id": "standing_orders_binder",
+  "name": "Standing Orders Binder",
+  "description": "A ring binder of stamped instructions that the bots have, against expectations, begun to read. Bot walking and flying speed +8%.",
+  "branch": "administration",
+  "minTier": 3,
+  "cost": 3600,
+  "requires": [
+   "works_foreman"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "botSpeed",
+    "factor": 1.08
+   }
+  ]
+ },
+ {
+  "id": "solar_charter",
+  "name": "Form 11-S: Solar Skin Charter",
+  "description": "The sun is declared a public utility, provided it files. Unlocks the Photovoltaic Skin Panels: 150 kW at noon on a clear day, nothing at night.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3400,
+  "requires": [
+   "substation_licence"
+  ],
+  "effects": []
+ },
+ {
+  "id": "wind_permit",
+  "name": "Wind Mast Permit",
+  "description": "A permit to harvest the draught, countersigned by the draught. Unlocks the Vertical-Axis Wind Mast: up to 300 kW, on the third floor or above.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3600,
+  "requires": [
+   "substation_licence"
+  ],
+  "effects": []
+ },
+ {
+  "id": "district_heat_accord",
+  "name": "District Heat Accord",
+  "description": "Your waste heat is formally recognised as waste, and therefore saleable. Unlocks the District-Heat Exchanger: 400 kW of heat sold at $3 a kWh.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3800,
+  "requires": [
+   "chilled_loop"
+  ],
+  "effects": []
+ },
+ {
+  "id": "algae_licence",
+  "name": "Algae Cultivation Licence",
+  "description": "A licence to grow, on the outside of the building, what the Ministry would prefer not to grow on the inside. Unlocks the Algae Façade: 160 carbon credits a day.",
+  "branch": "power",
+  "minTier": 3,
+  "cost": 3500,
+  "requires": [
+   "desk_fan_standard"
+  ],
+  "effects": []
+ },
+ {
+  "id": "neuromorphic_cards",
+  "name": "Neuromorphic Punch Cards",
+  "description": "Cards that fire only when there is something to say, a rarity in a ministry. Unlocks the Neuromorphic Spiking Cabinet: 22 PFLOPS from 12 kW.",
+  "branch": "compute",
+  "minTier": 3,
+  "cost": 4000,
+  "requires": [
+   "batch_cards"
+  ],
+  "effects": []
+ },
+ {
+  "id": "canopy_array",
+  "name": "Canopy Array Dossier",
+  "description": "Forty pages of load calculations and one of apology to the pigeons. Unlocks the Rooftop Photovoltaic Canopy: 420 kW at noon on a clear day.",
+  "branch": "power",
+  "minTier": 5,
+  "cost": 32000,
+  "requires": [
+   "solar_charter",
+   "wind_permit"
+  ],
+  "effects": [],
+  "path": "greentech"
+ },
+ {
+  "id": "heat_pipeline_franchise",
+  "name": "Heat Pipeline Franchise",
+  "description": "An exclusive right to warm the baths, the school and the cafeteria. Unlocks the Municipal Heat Pipeline: 1,600 kW of heat sold at $3 a kWh.",
+  "branch": "power",
+  "minTier": 5,
+  "cost": 36000,
+  "requires": [
+   "district_heat_accord"
+  ],
+  "effects": [],
+  "path": "greentech"
+ },
+ {
+  "id": "carbon_capture_dossier",
+  "name": "Carbon Capture Dossier",
+  "description": "A bound volume proving that the carbon you remove is carbon that was there. Unlocks the Carbon Capture Stack: 1,100 carbon credits a day.",
+  "branch": "power",
+  "minTier": 5,
+  "cost": 34000,
+  "requires": [
+   "algae_licence"
+  ],
+  "effects": [],
+  "path": "greentech"
+ },
+ {
+  "id": "green_ledger",
+  "name": "Green Ledger",
+  "description": "Every kilowatt-hour is entered in green ink, which the grid operator finds reassuring and the accountants find expensive. Grid energy price -8%.",
+  "branch": "power",
+  "minTier": 5,
+  "cost": 30000,
+  "requires": [
+   "carbon_capture_dossier",
+   "heat_pipeline_franchise"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "energyPrice",
+    "factor": 0.92
+   }
+  ],
+  "path": "greentech"
+ },
+ {
+  "id": "photonic_bench",
+  "name": "Photonic Bench Dossier",
+  "description": "A bench, a lens and a very long form. Unlocks the Photonic Interconnect Cabinet: 330 PFLOPS from 40 kW.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 42000,
+  "requires": [
+   "neuromorphic_cards",
+   "canopy_array"
+  ],
+  "effects": [],
+  "path": "greentech"
+ },
+ {
+  "id": "cryo_core_dossier",
+  "name": "Cryo Core Dossier",
+  "description": "A refrigeration schematic with a margin note reading \"colder\". Unlocks the Cryo Core Cooler: 3,000 kW of heat removed at a COP of 16.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 36000,
+  "requires": [
+   "adiabatic_cooling"
+  ],
+  "effects": [],
+  "path": "synthetic"
+ },
+ {
+  "id": "continuity_form",
+  "name": "Form S-3: Continuity of Service",
+  "description": "A form certifying that the process which began is the process which ends. Unlocks the Continuity Monitor: 800 kW and 400 kWh of ride-through.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 30000,
+  "requires": [
+   "accumulator_charter"
+  ],
+  "effects": [],
+  "path": "synthetic"
+ },
+ {
+  "id": "backup_vault_charter",
+  "name": "Backup Vault Charter",
+  "description": "A charter to keep, in cold storage, everything that should not be lost and some things that should. Unlocks the Backup Vault: 20,000 TB.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 30000,
+  "requires": [
+   "tape_silo"
+  ],
+  "effects": [],
+  "path": "synthetic"
+ },
+ {
+  "id": "mind_lattice_dossier",
+  "name": "Mind Lattice Dossier",
+  "description": "A forty-page specification of a rack that would prefer to be called a resident. Unlocks the Mind Lattice Cabinet: 640 PFLOPS from 220 kW.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 44000,
+  "requires": [
+   "cryo_core_dossier",
+   "manifold_blade"
+  ],
+  "effects": [],
+  "path": "synthetic"
+ },
+ {
+  "id": "identity_register",
+  "name": "Register of Identities",
+  "description": "An index of every hosted process, each in the first person. Contract payouts +6%.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 34000,
+  "requires": [
+   "mind_lattice_dossier"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "payout",
+    "factor": 1.06
+   }
+  ],
+  "path": "synthetic"
+ },
+ {
+  "id": "continuity_doctrine",
+  "name": "Continuity Doctrine",
+  "description": "The policy that no process is ever finished, only filed. Rack failure rate -8%.",
+  "branch": "compute",
+  "minTier": 5,
+  "cost": 34000,
+  "requires": [
+   "continuity_form",
+   "backup_vault_charter"
+  ],
+  "effects": [
+   {
+    "type": "perk",
+    "kind": "failureRate",
+    "factor": 0.92
+   }
+  ],
+  "path": "synthetic"
  }
 ]
