@@ -239,6 +239,7 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			patch({ selection });
 		},
 		setGhost: (g: Ghost | null) => renderer?.setGhost(g),
+		setTitleScene: (on) => renderer?.setTitleScene?.(on),
 		focus: (cell) => renderer?.focus(cell),
 		setMuted(muted) {
 			store.setSettings({ muted });

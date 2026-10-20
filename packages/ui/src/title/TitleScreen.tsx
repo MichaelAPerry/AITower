@@ -6,7 +6,7 @@ import type { MenuSection } from "../menu/SystemMenu";
 import { useSaves } from "../menu/useSaves";
 import { closeInduction, restartInduction } from "../tutorial/Tutorial";
 import { scenarioCards, showPicker, validScenario } from "./scenarios";
-import { continueSummary, inductionDefault, startGame, type TitleItem, titleItems } from "./titleState";
+import { backdropCaption, continueSummary, inductionDefault, startGame, type TitleItem, titleBackdrop, titleItems } from "./titleState";
 import "./title.css";
 
 export interface TitleScreenProps {
@@ -40,6 +40,12 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 	// Hold the game paused behind the title.
 	useEffect(() => {
 		store.setSpeed(0);
+	}, [store]);
+
+	// The renderer shows the loaded tower behind the menu, panning slowly with a day/night cycle.
+	useEffect(() => {
+		store.setTitleScene?.(true);
+		return () => store.setTitleScene?.(false);
 	}, [store]);
 
 	// Focus the first entry when the list appears and whenever the menu hands control back.
@@ -82,7 +88,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 		// biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal; the key handler implements arrow navigation and the focus loop
 		<div className="ui-title" ref={root} onKeyDown={onKeyDown} data-menu-open={menuOpen || undefined}>
 			<div className="ui-title-sky" aria-hidden="true">
-				<span className="ui-title-sign">COMPUTE AUTHORITY</span>
+				<span className="ui-title-sign">{saves ? backdropCaption(titleBackdrop(saves)) : "COMPUTE AUTHORITY"}</span>
 			</div>
 			<div className="ui-title-cabinet ui-panel" role="dialog" aria-modal="true" aria-label="AItower title screen">
 				<div className="ui-title-plate">

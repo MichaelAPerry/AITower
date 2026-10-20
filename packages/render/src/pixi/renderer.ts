@@ -78,6 +78,10 @@ function makeScreenFx(): { root: Container; resize: (w: number, h: number) => vo
 }
 
 /** Cache key of the facility bodies: layout, growths, and the skin (stage x intensity) the cached art was drawn for. */
+/** Game minutes per real second while the title scene shows its slow day (a full day takes six minutes). */
+const TITLE_DAY_RATE = 4;
+const TITLE_ZOOM = 1;
+
 const facilityKey = (view: SimView, skinKey: string): string => `${skinKey}#${view.facilities.map((f) => `${f.id}:${f.defId}:${f.floor}:${f.x}:${f.grown ? 1 : 0}`).join("|")}`;
 
 export async function createPixiRenderer(host: HTMLElement, content: ContentDB): Promise<Renderer> {
@@ -183,6 +187,11 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	// Greentech / synthetic skin (separate from the biotech horror stages): path, stage and the fungus's horror alpha.
 	let ppath: "greentech" | "synthetic" | null = null;
 	let pstage: SkinStage = 0;
+	let bgPath: "biotech" | "greentech" | "synthetic" | null = null;
+	let bgStage: SkinStage = 0;
+	let titleScene = false;
+	let titleCx = 0;
+	let titleCam: Camera | null = null;
 	let phorror = 1;
 	let droughtAmt = 0;
 	const live: LiveFx = { stages, score: 0, stage: 0, cursor: null, paused: false };
@@ -207,6 +216,8 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		ppath = skin.path === "greentech" || skin.path === "synthetic" ? skin.path : null;
 		pstage = ppath ? skin.stage : 0;
 		phorror = pres.options.horrorIntensity === "off" ? 0 : pres.options.horrorIntensity === "mild" ? 0.5 : 1;
+		bgPath = off && skin.path === "biotech" ? null : skin.path;
+		bgStage = skin.path === "biotech" ? stage : pstage;
 		skinKey = `${stage}${pres.options.horrorIntensity[0]}${ppath ? `${ppath[0]}${pstage}` : ""}`;
 		live.pskin = ppath && pstage > 0 ? { path: ppath, stage: pstage, horror: phorror } : undefined;
 		live.stages = stages;
@@ -358,10 +369,19 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			// A drought dims and flattens the sky (eased; instant under reduced motion).
 			const dTarget = view.drought ? 1 : 0;
 			droughtAmt = opt.reducedMotion || Math.abs(droughtAmt - dTarget) < 0.002 ? dTarget : easeToward(droughtAmt, dTarget, dt, 1.2);
-			live.minute = view.minuteOfDay;
+			// Title scene: a slow virtual day and a lazy pan; the sim and the saved game stay untouched.
+			let minute = view.minuteOfDay;
+			if (titleScene) {
+				const sway = opt.reducedMotion ? 0 : Math.sin(t * 0.05) * (cam.vw / TITLE_ZOOM / 3);
+				cam = { ...cam, zoom: TITLE_ZOOM, cx: titleCx + sway, cy: grid ? groundY(grid) - (cam.vh * 0.24) / TITLE_ZOOM : cam.cy };
+				if (grid) cam = clampCamera(cam, grid);
+				if (!opt.reducedMotion) minute = (minute + t * TITLE_DAY_RATE) % 1440;
+			}
+			background.setStyle(view.tier, bgPath, bgStage);
+			live.minute = minute;
 			live.tick = view.tick;
 			live.drought = view.drought;
-			background.update(cam.vw, cam.vh, cam.zoom, o.y + groundY(view) * cam.zoom, o.x, view.minuteOfDay, t, opt, signWord(stages, t, opt.reducedMotion) !== SIGN_WORD, droughtAmt);
+			background.update(cam.vw, cam.vh, titleScene ? 2 : cam.zoom, o.y + groundY(view) * cam.zoom, o.x, minute, t, opt, signWord(stages, t, opt.reducedMotion) !== SIGN_WORD, droughtAmt);
 			// Eyes follow the cursor slowly: ease a world-space point toward the pointer.
 			if (pointer && stages.eyes) {
 				const wx = (pointer.sx - o.x) / cam.zoom;
@@ -527,8 +547,20 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		setSelection(sel) {
 			selection = sel;
 		},
+		setTitleScene(on) {
+			if (on === titleScene) return;
+			titleScene = on;
+			if (on) {
+				titleCx = cam.cx;
+				titleCam = cam;
+			} else if (titleCam) {
+				cam = { ...cam, zoom: titleCam.zoom, cx: titleCx, cy: titleCam.cy };
+				if (grid) cam = clampCamera(cam, grid);
+			}
+		},
 		focus(cell) {
 			centreOn(cell);
+			if (titleScene) titleCx = cam.cx;
 		},
 		onPointer(cb: (e: CellPointerEvent) => void) {
 			return input.subscribe(cb);

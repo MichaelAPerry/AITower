@@ -8,26 +8,20 @@
 	padding: 20px;
 	overflow-x: hidden;
 	overflow-y: auto;
+	/* The live world shows through: a dim wash, darker at the top and centre so the panel stays readable. */
 	background:
-		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 20%, transparent) 2px 3px),
-		linear-gradient(180deg, color-mix(in srgb, var(--ink) 92%, var(--smog)) 0%, color-mix(in srgb, var(--smog) 38%, var(--ink)) 62%, color-mix(in srgb, var(--sodium) 22%, var(--ink)) 100%);
+		repeating-linear-gradient(0deg, transparent 0 2px, color-mix(in srgb, var(--ink) 14%, transparent) 2px 3px),
+		radial-gradient(ellipse 60% 55% at 50% 50%, color-mix(in srgb, var(--ink) 58%, transparent), transparent 100%),
+		linear-gradient(180deg, color-mix(in srgb, var(--ink) 62%, transparent) 0%, color-mix(in srgb, var(--ink) 28%, transparent) 60%, color-mix(in srgb, var(--ink) 40%, transparent) 100%);
 }
 .aitower-hud .ui-title-sky {
 	position: absolute;
 	inset: 0;
 	pointer-events: none;
-	background:
-		linear-gradient(var(--ink), var(--ink)) 6% 100% / 9% 38% no-repeat,
-		linear-gradient(var(--ink), var(--ink)) 17% 100% / 7% 52% no-repeat,
-		linear-gradient(var(--ink), var(--ink)) 26% 100% / 11% 30% no-repeat,
-		linear-gradient(var(--ink), var(--ink)) 74% 100% / 10% 46% no-repeat,
-		linear-gradient(var(--ink), var(--ink)) 86% 100% / 7% 60% no-repeat,
-		linear-gradient(var(--ink), var(--ink)) 95% 100% / 8% 34% no-repeat;
-	opacity: 0.85;
 }
 .aitower-hud .ui-title-sign {
 	position: absolute;
-	top: 5%;
+	bottom: 14px;
 	left: 50%;
 	transform: translateX(-50%);
 	font: 14px/1 var(--f-stamp);
@@ -44,6 +38,7 @@
 	width: min(560px, 100%);
 	padding: 26px 30px 20px;
 	display: grid;
+	grid-template-columns: minmax(0, 1fr);
 	gap: 18px;
 }
 .aitower-hud .ui-title-plate {
@@ -126,7 +121,7 @@
 	margin-left: auto;
 	font-size: 19px;
 	opacity: 0.85;
-	white-space: nowrap;
+	text-align: right;
 }
 .aitower-hud .ui-title-check {
 	display: flex;
@@ -236,4 +231,8 @@
 }
 .aitower-hud .ui-title-sub {
 	font-size: 10px;
+}
+/* The HUD chrome waits behind the title so the live world reads as a backdrop (the system menu still opens over it). */
+.aitower-hud:has(> .ui-title) > :not(.ui-title):not(.ui-menu-backdrop) {
+	visibility: hidden;
 }

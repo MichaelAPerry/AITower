@@ -135,6 +135,8 @@ export interface Renderer {
 	setSelection(sel: Selection): void;
 	/** Centre the camera on a cell. */
 	focus(cell: CellRef): void;
+	/** Title screen backdrop: pan slowly and cycle day and night over the loaded game (a still frame under reduced motion). Never touches the sim. */
+	setTitleScene?(on: boolean): void;
 	onPointer(cb: (e: CellPointerEvent) => void): () => void;
 	/** Apply presentation settings. Must be cheap and safe to call every time settings change. */
 	setOptions(o: RenderOptions): void;
@@ -191,6 +193,8 @@ export interface GameStore {
 	canPlace(defId: string, floor: number, x: number): CommandResult;
 	setSpeed(s: Speed): void;
 	setOverlay(m: OverlayMode): void;
+	/** Title screen backdrop on or off (see `Renderer.setTitleScene`). Absent in test stores. */
+	setTitleScene?(on: boolean): void;
 	setTool(t: Tool): void;
 	setSelection(s: Selection): void;
 	setGhost(g: Ghost | null): void;

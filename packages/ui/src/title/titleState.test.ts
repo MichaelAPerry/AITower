@@ -1,7 +1,7 @@
 import type { SaveSlotInfo } from "@aitower/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { agoText, continueSummary, inductionDefault, showTitleAtBoot, startGame, titleItems } from "./titleState";
+import { agoText, backdropCaption, continueSummary, inductionDefault, showTitleAtBoot, startGame, titleBackdrop, titleItems } from "./titleState";
 
 const info = (id: SaveSlotInfo["id"], savedAt = 0): SaveSlotInfo => ({ id, name: id, savedAt, day: 11, cash: 1_103_200, tier: 2 });
 
@@ -68,5 +68,21 @@ describe("title screen state", () => {
 		expect(hooks.closeInduction).toHaveBeenCalledTimes(1);
 		expect(hooks.restartInduction).not.toHaveBeenCalled();
 		expect(store.get().speed).toBe(1);
+	});
+});
+
+const base = (id: SaveSlotInfo["id"]): SaveSlotInfo => ({ id, name: id, savedAt: 1, day: 1, cash: 1, tier: 1 });
+
+describe("titleBackdrop", () => {
+	const info = (id: SaveSlotInfo["id"], day = 5, tier = 3): SaveSlotInfo => ({ ...base(id), day, tier });
+	it("shows the saved tower when an autosave exists", () => {
+		expect(titleBackdrop([info("slot1"), info("auto", 12, 4)])).toEqual({ kind: "save", day: 12, tier: 4 });
+		expect(backdropCaption(titleBackdrop([info("auto", 12, 4)]))).toBe("YOUR TOWER · DAY 12 · LEVEL 4");
+	});
+	it("falls back to the demo tower with no autosave, no saves, or before the saves load", () => {
+		expect(titleBackdrop([info("slot1")])).toEqual({ kind: "demo" });
+		expect(titleBackdrop([])).toEqual({ kind: "demo" });
+		expect(titleBackdrop(null)).toEqual({ kind: "demo" });
+		expect(backdropCaption({ kind: "demo" })).toBe("DEMO TOWER");
 	});
 });
