@@ -18,7 +18,7 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	sterilizer: "bio",
 	quarantine: "bio",
 	bioreactor: "bio",
-	// M4 placeholders (M4-T2 may refine).
+	// Greentech (M4): panels and masts are power sources; the exporters and carbon plants sit in the cooling tab.
 	solar: "power",
 	wind: "power",
 	heat_export: "cooling",
@@ -53,7 +53,7 @@ const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
-const FEATURES = ["contractsClerk"];
+const FEATURES = ["contractsClerk", "foreman"];
 /** Letter grades A..E used by `balance.audit`. */
 const GRADES = 5;
 
@@ -113,6 +113,19 @@ function validateBio(p: Problems, w: string, d: FacilityDef): void {
 	if (d.growth) num(p, `${w}.contamination`, b.contamination, { gt: 0 });
 }
 
+function validateGreen(p: Problems, w: string, d: FacilityDef): void {
+	const g = d.green;
+	if (!g) return;
+	for (const k of ["exportKw", "radius", "creditsPerDay"] as const) {
+		if (g[k] !== undefined) num(p, `${w}.${k}`, g[k], { min: 0 });
+	}
+	if (d.kind === "heat_export") {
+		num(p, `${w}.exportKw`, g.exportKw, { gt: 0 });
+		num(p, `${w}.radius`, g.radius, { gt: 0 });
+	}
+	if (d.kind === "carbon") num(p, `${w}.creditsPerDay`, g.creditsPerDay, { gt: 0 });
+}
+
 function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: number): void {
 	const w = `facilities.${key}`;
 	if (d.id !== key) p.push(`${w}: id "${d.id}" does not match key`);
@@ -137,7 +150,7 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	if (typeof d.accent !== "string" || !HEX.test(d.accent)) p.push(`${w}.accent: expected #rrggbb`);
 
 	const specs = SPECS_FOR_KIND[d.kind];
-	for (const s of ["rack", "power", "cooling", "logistics", "bio"] as const) {
+	for (const s of ["rack", "power", "cooling", "logistics", "bio", "green"] as const) {
 		if (specs.includes(s) && !d[s]) p.push(`${w}: kind ${d.kind} requires a "${s}" spec`);
 		if (!specs.includes(s) && d[s] && !(s === "bio" && d.growth && d.kind === "rack")) p.push(`${w}: unexpected "${s}" spec for kind ${d.kind}`);
 	}
@@ -149,6 +162,8 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		if (d.kind !== "rack") p.push(`${w}.kind: a growth must be a rack`);
 	}
 	if (d.bio) validateBio(p, `${w}.bio`, d);
+	if (d.green) validateGreen(p, `${w}.green`, d);
+	if ((d.kind === "solar" || d.kind === "wind") && d.placement?.needsPower === false) p.push(`${w}.placement.needsPower: a ${d.kind} source must sit on a power conduit`);
 	if (d.placement?.needsNutrient && d.category !== "bio") p.push(`${w}.placement.needsNutrient: only wetware facilities use nutrient`);
 	if (d.category === "bio" && !d.growth && ["nutrient", "bioreactor", "rack"].includes(d.kind) && !d.placement?.needsNutrient) {
 		p.push(`${w}.placement.needsNutrient: a ${d.kind} must sit on a nutrient pipe`);
@@ -292,6 +307,10 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	num(p, `${w}.floorMin`, s.floorMin, { max: 0, int: true });
 	num(p, `${w}.floorMax`, s.floorMax, { min: 0, int: true });
 	num(p, `${w}.spareParts`, s.spareParts, { min: 0, int: true });
+	if (s.description !== undefined) str(p, `${w}.description`, s.description);
+	if (s.startingCash !== undefined) num(p, `${w}.startingCash`, s.startingCash, { min: 0 });
+	if (s.startTier !== undefined) num(p, `${w}.startTier`, s.startTier, { min: 1, max: Math.max(1, db.balance?.tiers?.pflops?.length ?? 1), int: true });
+	if (s.sandbox !== undefined && typeof s.sandbox !== "boolean") p.push(`${w}.sandbox: expected a boolean`);
 	if (!isNum(s.width) || !isNum(s.floorMin) || !isNum(s.floorMax) || s.floorMin > s.floorMax) return;
 
 	const W = s.width;
@@ -458,7 +477,7 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 	if (e.minDay !== undefined) num(p, `${w}.minDay`, e.minDay, { min: 0, int: true });
 	num(p, `${w}.cooldownDays`, e.cooldownDays, { min: 0, int: true });
 	if (e.minCorruption !== undefined) num(p, `${w}.minCorruption`, e.minCorruption, { min: 0, max: 1 });
-	else if (e.category === "horror") p.push(`${w}.minCorruption: horror memos must be corruption-gated`);
+	else if (e.category === "horror" && e.path !== "greentech" && e.path !== "synthetic") p.push(`${w}.minCorruption: horror memos must be corruption-gated`);
 	if (e.path !== undefined && !PATHS.includes(e.path)) p.push(`${w}.path: unknown path "${e.path}"`);
 	if (e.scriptedDay !== undefined) num(p, `${w}.scriptedDay`, e.scriptedDay, { min: 0, int: true });
 	num(p, `${w}.timeoutTicks`, e.timeoutTicks, { gt: 0, int: true });
@@ -562,6 +581,7 @@ function validateBioBalance(p: Problems, db: ContentDB): void {
 	}
 	if (!b.ascension) p.push("balance.ascension: missing");
 	else num(p, "balance.ascension.minTier", b.ascension.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
+	validateGreenBalance(p, b);
 	const e = b.endings;
 	if (!e?.livingTower || !e.cleanTower || !e.absorbed) {
 		p.push("balance.endings: livingTower, cleanTower and absorbed are required");
@@ -576,6 +596,30 @@ function validateBioBalance(p: Problems, db: ContentDB): void {
 	num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
 	if (e.cleanTower.maxCorruption >= e.livingTower.minCorruption) p.push("balance.endings: cleanTower.maxCorruption must be below livingTower.minCorruption");
 	if (e.absorbed.corruption <= e.livingTower.minCorruption) p.push("balance.endings: absorbed.corruption must be above livingTower.minCorruption");
+}
+
+function validateGreenBalance(p: Problems, b: ContentDB["balance"]): void {
+	if (!b.green) p.push("balance.green: missing");
+	else {
+		num(p, "balance.green.heatPrice", b.green.heatPrice, { min: 0 });
+		num(p, "balance.green.creditPrice", b.green.creditPrice, { min: 0 });
+		num(p, "balance.green.droughtChancePerDay", b.green.droughtChancePerDay, { min: 0, max: 1 });
+		num(p, "balance.green.droughtFactor", b.green.droughtFactor, { min: 0, max: 1 });
+		num(p, "balance.green.droughtHours", b.green.droughtHours, { gt: 0, int: true });
+	}
+	if (!b.automation) p.push("balance.automation: missing");
+	else {
+		num(p, "balance.automation.partsBatch", b.automation.partsBatch, { min: 1, int: true });
+		num(p, "balance.automation.foremanPerHour", b.automation.foremanPerHour, { min: 1, int: true });
+	}
+	const e = b.endings;
+	for (const id of ["greenExemplar", "millionMinds"] as const) {
+		const x = e?.[id];
+		if (x === undefined) continue;
+		num(p, `balance.endings.${id}.minScore`, x.minScore, { gt: 0, max: 1 });
+		num(p, `balance.endings.${id}.pflops`, x.pflops, { gt: 0 });
+		num(p, `balance.endings.${id}.days`, x.days, { min: 1, int: true });
+	}
 }
 
 function validatePathsAndEndings(p: Problems, db: ContentDB): void {
@@ -643,6 +687,8 @@ function validateTech(p: Problems, db: ContentDB): void {
 			});
 		if (!Array.isArray(n.requires)) p.push(`${w}.requires: expected an array`);
 		if (n.path !== undefined && !PATHS.includes(n.path)) p.push(`${w}.path: unknown path "${n.path}"`);
+		const ascend = db.balance?.ascension?.minTier;
+		if (n.path !== undefined && isNum(ascend) && isNum(n.minTier) && n.minTier < ascend) p.push(`${w}.minTier: a path node cannot come before the path is chosen (Clearance ${ascend})`);
 	});
 	for (const n of byId.values()) {
 		if (!Array.isArray(n.requires)) continue;
@@ -682,7 +728,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 }
 
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
-const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 3, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2 };
+const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 3, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
 
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];

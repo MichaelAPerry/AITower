@@ -55,7 +55,7 @@ describe("biotech content (bundled)", () => {
 		expect(node?.path).toBe("biotech");
 		expect(db.tech.find((n) => n.id === "wetware_annex")?.minTier).toBe(3);
 		expect(db.tech.filter((n) => n.branch === "wetware").length).toBeGreaterThanOrEqual(8);
-		expect(db.tech.filter((n) => n.path).every((n) => n.minTier === 5 && n.branch === "wetware")).toBe(true);
+		expect(db.tech.filter((n) => n.path === "biotech").every((n) => n.minTier === 5 && n.branch === "wetware")).toBe(true);
 	});
 
 	it("has free, unreliable, unbuildable growths", () => {
@@ -91,10 +91,12 @@ describe("biotech content (bundled)", () => {
 		expect(b.ascension.minTier).toBe(5);
 	});
 
-	it("offers biotech now and the other two paths as coming soon", () => {
-		expect(db.paths.map((p) => [p.id, p.available])).toEqual([["biotech", true], ["greentech", false], ["synthetic", false]]);
-		for (const p of db.paths) expect(p.description.length).toBeGreaterThan(60);
-		expect(db.paths[1].description.toLowerCase()).toContain("coming soon");
+	it("offers all three paths, each with a real description (Greentech and Synthetic arrived in M4)", () => {
+		expect(db.paths.map((p) => [p.id, p.available])).toEqual([["biotech", true], ["greentech", true], ["synthetic", true]]);
+		for (const p of db.paths) {
+			expect(p.description.length).toBeGreaterThan(200);
+			expect(p.description.toLowerCase()).not.toContain("coming soon");
+		}
 	});
 
 	it("has the three biotech endings of two or three paragraphs, with no gore words", () => {
@@ -109,7 +111,8 @@ describe("biotech content (bundled)", () => {
 	});
 
 	it("has at least 10 horror memos escalating from 0.1 to 0.9 corruption, none before Clearance 3", () => {
-		const h = db.events.filter((e) => e.category === "horror");
+		// The greentech and synthetic horror memos are gated by path (they have no corruption score); see m4.test.ts.
+		const h = db.events.filter((e) => e.category === "horror" && e.path !== "greentech" && e.path !== "synthetic");
 		expect(h.length).toBeGreaterThanOrEqual(10);
 		const cs = h.map((e) => e.minCorruption as number);
 		expect(Math.min(...cs)).toBe(0.1);

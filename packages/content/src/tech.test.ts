@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadContent, validateContent } from "./load";
+import { M4_FACILITIES, M4_TECH } from "./m4ids";
 import type { ContentDB, PerkKind, TechNode } from "./schema";
 
 const PERKS: PerkKind[] = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
@@ -17,8 +18,9 @@ describe("tech tree (bundled)", () => {
 
 	it("loads and validates with about 45 nodes across all six branches and five tiers", () => {
 		expect(validateContent(db)).toEqual([]);
-		expect(db.tech.length).toBeGreaterThanOrEqual(43);
-		expect(db.tech.length).toBeLessThanOrEqual(47);
+		const older = db.tech.filter((n) => !M4_TECH.includes(n.id));
+		expect(older.length).toBeGreaterThanOrEqual(43);
+		expect(older.length).toBeLessThanOrEqual(47);
 		for (const b of BRANCHES) expect(db.tech.some((n) => n.branch === b), b).toBe(true);
 		for (let t = 1; t <= db.balance.tiers.pflops.length; t++) expect(db.tech.some((n) => n.minTier === t), `tier ${t}`).toBe(true);
 	});
@@ -30,7 +32,8 @@ describe("tech tree (bundled)", () => {
 		expect(n.minTier).toBe(1);
 		expect(n.requires).toEqual([]);
 		expect(n.effects).toEqual([{ type: "feature", feature: "contractsClerk" }]);
-		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature"))).toHaveLength(1);
+		// The Works Foreman (M4) is the only other feature node.
+		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature")).map((x) => x.id)).toEqual(["contracts_clerk", "works_foreman"]);
 		// Affordable after about one game day of full starter utilisation (4 racks x 20 PF x 24 h).
 		const fullDay = 4 * 20 * 24 * db.balance.research.pointsPerPflopHour;
 		expect(n.cost).toBeLessThanOrEqual(fullDay);
@@ -108,6 +111,7 @@ describe("tech tree (bundled)", () => {
 		let total = 0;
 		let wetware = 0;
 		for (const n of db.tech) {
+			if (M4_TECH.includes(n.id)) continue; // M4 content has its own economy test in m4.test.ts
 			const days = n.cost / typical[n.minTier];
 			if (n.branch === "wetware") wetware += days;
 			else total += days;
@@ -131,7 +135,7 @@ describe("tech tree (bundled)", () => {
 describe("new trunk content", () => {
 	const db = loadContent();
 	// The trunk (pre-M3) content; the biotech additions have their own tests in biotech.test.ts.
-	const trunk = Object.values(db.facilities).filter((d) => d.category !== "bio");
+	const trunk = Object.values(db.facilities).filter((d) => d.category !== "bio" && !M4_FACILITIES.includes(d.id));
 	const racks = trunk.filter((d) => d.rack);
 	const f = db.facilities;
 	// Same value measure as events.test.ts: PFLOPS per $ with a share of the baseline cooling plant included.
@@ -214,7 +218,7 @@ describe("new trunk content", () => {
 
 	it("adds about 10 clients for tiers 2-4, some needing liquid, across all sectors", () => {
 		const fresh = db.clients.filter((c) => !c.needsBio && c.minTier >= 2).slice(-10);
-		expect(db.clients.filter((c) => !c.needsBio)).toHaveLength(23);
+		expect(db.clients.filter((c) => !c.needsBio)).toHaveLength(23 + 2); // + the two M4 climate clients
 		expect(fresh.every((c) => c.minTier >= 2 && c.minTier <= 4)).toBe(true);
 		expect(fresh.some((c) => c.needsLiquid)).toBe(true);
 		expect(new Set(db.clients.map((c) => c.sector)).size).toBe(6);

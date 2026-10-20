@@ -9,12 +9,13 @@ describe("events.json", () => {
 
 	it("has the specified category mix (the 37 M2 memos plus the M3 seeds, biotech and horror memos)", () => {
 		const by = (c: string): number => db.events.filter((e) => e.category === c).length;
-		expect(db.events).toHaveLength(62);
-		expect(by("ministry")).toBe(16 + 1 + 5);
-		expect(by("environmental")).toBe(8);
-		expect(by("operational")).toBe(9 + 3 + 3);
+		// Plus the M4 memos: 6 greentech (1 environmental, 3 ministry, 2 operational) and 8 path horror memos.
+		expect(db.events).toHaveLength(62 + 6 + 8);
+		expect(by("ministry")).toBe(16 + 1 + 5 + 3);
+		expect(by("environmental")).toBe(8 + 1);
+		expect(by("operational")).toBe(9 + 3 + 3 + 2);
 		expect(by("client")).toBe(4);
-		expect(by("horror")).toBe(13);
+		expect(by("horror")).toBe(13 + 8);
 	});
 
 	it("validates (unique ids, defaults, effects, durations, weights)", () => {

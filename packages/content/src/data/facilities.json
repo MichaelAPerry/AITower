@@ -1041,5 +1041,308 @@
    "contamination": 0.004
   },
   "growth": true
+ },
+ "solar_skin": {
+  "id": "solar_skin",
+  "name": "Photovoltaic Skin Panels",
+  "description": "Blue-grey cells clipped to the south wall in a pattern the Ministry calls \"load-bearing optimism\". Peaks at 150 kW at 13:00 on a clear day, makes nothing at night and about 37% of its peak averaged over a day. Needs a power conduit under it, and the weather's cooperation.",
+  "kind": "solar",
+  "category": "power",
+  "width": 4,
+  "cost": 450000,
+  "upkeepPerDay": 300,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#3c4f5e",
+  "accent": "#d9b44a",
+  "power": {
+   "capacityKw": 150
+  },
+  "placement": {
+   "needsPower": true,
+   "minFloor": 1
+  },
+  "tech": "solar_charter"
+ },
+ "solar_canopy": {
+  "id": "solar_canopy",
+  "name": "Rooftop Photovoltaic Canopy",
+  "description": "A tilted field of panels on stilts, with a gangway for the inspectors and a bench for the gull. Peaks at 420 kW at 13:00 on a clear day, nothing at night. Must stand on the second floor or above, where the sun can find it.",
+  "kind": "solar",
+  "category": "power",
+  "width": 8,
+  "cost": 1100000,
+  "upkeepPerDay": 600,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#364a59",
+  "accent": "#e3c15a",
+  "power": {
+   "capacityKw": 420
+  },
+  "placement": {
+   "needsPower": true,
+   "minFloor": 2
+  },
+  "tech": "canopy_array"
+ },
+ "wind_mast": {
+  "id": "wind_mast",
+  "name": "Vertical-Axis Wind Mast",
+  "description": "A tall lattice mast with two slow rotors, bolted to an upper floor where the draught is better and the neighbours are not. Delivers up to 300 kW, about 60% of that on a typical day, and next to nothing in a Dunkelflaute.",
+  "kind": "wind",
+  "category": "power",
+  "width": 2,
+  "cost": 1250000,
+  "upkeepPerDay": 900,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#8a9490",
+  "accent": "#9fd0c0",
+  "power": {
+   "capacityKw": 300
+  },
+  "placement": {
+   "needsPower": true,
+   "minFloor": 3
+  },
+  "tech": "wind_permit"
+ },
+ "heat_exchanger": {
+  "id": "heat_exchanger",
+  "name": "District-Heat Exchanger",
+  "description": "A plate exchanger with a municipal flange, bolted into the exhaust stream. Draws up to 400 kW of heat from the air within 8 tiles and sells it to the district at $3 a kWh. Takes 25 kW of pumping to do so.",
+  "kind": "heat_export",
+  "category": "cooling",
+  "width": 3,
+  "cost": 950000,
+  "upkeepPerDay": 1400,
+  "unlockTier": 3,
+  "facilityKw": 25,
+  "color": "#9a7a56",
+  "accent": "#e0653f",
+  "green": {
+   "exportKw": 400,
+   "radius": 8
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "district_heat_accord"
+ },
+ "heat_pipeline": {
+  "id": "heat_pipeline",
+  "name": "Municipal Heat Pipeline",
+  "description": "Lagged brass trunking that leaves the building for the baths, the school and the Ministry cafeteria. Draws up to 1,600 kW of heat from the air within 14 tiles and sells it at $3 a kWh, for 70 kW of pumping.",
+  "kind": "heat_export",
+  "category": "cooling",
+  "width": 6,
+  "cost": 3400000,
+  "upkeepPerDay": 3200,
+  "unlockTier": 5,
+  "facilityKw": 70,
+  "color": "#8d6e4c",
+  "accent": "#e8754b",
+  "green": {
+   "exportKw": 1600,
+   "radius": 14
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "heat_pipeline_franchise"
+ },
+ "algae_facade": {
+  "id": "algae_facade",
+  "name": "Algae Façade",
+  "description": "Green-glass tubes of circulating algae down the north wall, lit by the sun and, at night, by a lamp the Ministry would prefer you did not ask about. Banks 160 carbon credits a day while powered, at $40 each.",
+  "kind": "carbon",
+  "category": "cooling",
+  "width": 4,
+  "cost": 480000,
+  "upkeepPerDay": 700,
+  "unlockTier": 3,
+  "facilityKw": 8,
+  "color": "#4c6e47",
+  "accent": "#a8d672",
+  "green": {
+   "creditsPerDay": 160
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "algae_licence"
+ },
+ "carbon_capture": {
+  "id": "carbon_capture",
+  "name": "Carbon Capture Stack",
+  "description": "A riveted scrubber column with an amine bath and an enthusiastic flue. Banks 1,100 carbon credits a day while powered, at $40 each, for 60 kW of fans and pumps. Credits are paid at midnight, in triplicate.",
+  "kind": "carbon",
+  "category": "cooling",
+  "width": 6,
+  "cost": 2600000,
+  "upkeepPerDay": 2800,
+  "unlockTier": 5,
+  "facilityKw": 60,
+  "color": "#56685a",
+  "accent": "#b9d98a",
+  "green": {
+   "creditsPerDay": 1100
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "carbon_capture_dossier"
+ },
+ "rack_neuromorphic": {
+  "id": "rack_neuromorphic",
+  "name": "Neuromorphic Spiking Cabinet",
+  "description": "Boards of pulse-coupled silicon neurons that compute only when something happens. Delivers 22 PFLOPS from only 12 kW of air-cooled draw, 1.8 PFLOPS per kW, the thriftiest silicon the Ministry will certify. Failures are rare, brief and described as \"moods\".",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 750000,
+  "upkeepPerDay": 3000,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#a9b3a0",
+  "accent": "#8fd6a2",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 12,
+   "liquidFraction": 0,
+   "pflops": 22,
+   "storageTB": 0,
+   "failurePerDay": 0.22
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "neuromorphic_cards"
+ },
+ "rack_photonic": {
+  "id": "rack_photonic",
+  "name": "Photonic Interconnect Cabinet",
+  "description": "Light, not copper, carries the arithmetic: 330 PFLOPS from only 40 kW of air-cooled draw, 8.3 PFLOPS per kW. The Ministry stamps it \"Frugal\", which it has never done for anything else, and signs the stamp in green.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 6500000,
+  "upkeepPerDay": 9000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#b8c4b6",
+  "accent": "#7be0c3",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 40,
+   "liquidFraction": 0,
+   "pflops": 330,
+   "storageTB": 0,
+   "failurePerDay": 0.16
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "photonic_bench"
+ },
+ "cryo_core": {
+  "id": "cryo_core",
+  "name": "Cryo Core Cooler",
+  "description": "A frosted cylinder of cascade refrigeration that holds the coolant loop colder than any weather. Removes 3,000 kW at a COP of 16 for 25 kW of upkeep. Sits on a coolant loop and sweats politely.",
+  "kind": "chiller",
+  "category": "cooling",
+  "width": 6,
+  "cost": 5200000,
+  "upkeepPerDay": 6000,
+  "unlockTier": 5,
+  "facilityKw": 25,
+  "color": "#7c8e9a",
+  "accent": "#b6e4f0",
+  "cooling": {
+   "capacityKw": 3000,
+   "cop": 16.0
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "cryo_core_dossier"
+ },
+ "rack_mind_lattice": {
+  "id": "rack_mind_lattice",
+  "name": "Mind Lattice Cabinet",
+  "description": "A liquid-cooled lattice of hosted processes that remembers what you asked last time, and the time before. Delivers 640 PFLOPS from 220 kW, 85% of it leaving through the manifold, and needs a 187 kW share of coolant capacity. It is a rack, and also, in the Ethics Office's view, a tenant.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 8500000,
+  "upkeepPerDay": 15000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#8d8fa8",
+  "accent": "#b9a6ff",
+  "rack": {
+   "cooling": "dlc",
+   "powerKw": 220,
+   "liquidFraction": 0.85,
+   "pflops": 640,
+   "storageTB": 0,
+   "failurePerDay": 0.2
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "mind_lattice_dossier"
+ },
+ "continuity_monitor": {
+  "id": "continuity_monitor",
+  "name": "Continuity Monitor",
+  "description": "A cabinet of flywheels and watchful dials that keeps hosted processes running through a dip: 800 kW of charge and discharge, 400 kWh of storage at 97% efficiency. The dials are labelled with names.",
+  "kind": "ups",
+  "category": "power",
+  "width": 3,
+  "cost": 1800000,
+  "upkeepPerDay": 1800,
+  "unlockTier": 5,
+  "facilityKw": 6,
+  "color": "#6d7188",
+  "accent": "#9bd6ff",
+  "power": {
+   "capacityKw": 800,
+   "storageKwh": 400,
+   "efficiency": 0.97
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "continuity_form"
+ },
+ "backup_vault": {
+  "id": "backup_vault",
+  "name": "Backup Vault",
+  "description": "A cold, dry room of magnetic reels holding a recent copy of every hosted process, indexed by name. Stores 20,000 TB for 30 kW of air-cooled draw. The reels are labelled in a hand that is not the archivist's.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 3,
+  "cost": 1600000,
+  "upkeepPerDay": 1500,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#6f7488",
+  "accent": "#c9b6ff",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 30,
+   "liquidFraction": 0,
+   "pflops": 0,
+   "storageTB": 20000,
+   "failurePerDay": 0.05
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "backup_vault_charter"
  }
 }
