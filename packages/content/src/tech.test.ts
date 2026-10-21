@@ -388,3 +388,43 @@ describe("validateContent: research balance", () => {
 		expect(broken((db) => delete (db.balance as { audit?: unknown }).audit)).toMatch(/balance\.audit: missing/);
 	});
 });
+
+describe("research lanes (bundled)", () => {
+	const db = loadContent();
+	const LANES = ["adm", "log", "pow", "cool", "comp", "wet", "green", "syn"];
+	const ADVISORS = ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Lucien Ferro"];
+
+	it("every tech has a lane that has metadata, and lines only appear in cooling and compute", () => {
+		for (const n of db.tech) {
+			expect(LANES, n.id).toContain(n.lane);
+			expect(
+				(db.lanes ?? []).some((l) => l.id === n.lane),
+				n.id,
+			).toBe(true);
+			if (n.line !== undefined) {
+				expect(["air", "liquid", "immersion"]).toContain(n.line);
+				expect(["cool", "comp"]).toContain(n.lane);
+			}
+		}
+		// Wetware nodes are the wetware lane; every other branch keeps its own lane family.
+		expect(db.tech.filter((n) => n.branch === "wetware").every((n) => n.lane === "wet")).toBe(true);
+	});
+
+	it("has one metadata entry per lane with an advisor, identity, signature number and one-line pitch", () => {
+		expect((db.lanes ?? []).map((l) => l.id)).toEqual(LANES);
+		for (const l of db.lanes ?? []) {
+			expect(ADVISORS, l.id).toContain(l.advisor);
+			for (const k of ["name", "short", "identity", "signature", "pitch"] as const) expect(l[k].length, `${l.id}.${k}`).toBeGreaterThan(3);
+			expect(l.pitch, l.id).not.toContain("\n");
+			expect(l.color).toMatch(/^#[0-9a-f]{6}$/i);
+		}
+		expect(db.tech.length).toBe(68);
+	});
+
+	it("validation rejects an unknown lane, a missing lane entry and a line outside cooling and compute", () => {
+		expect(broken((d) => ((d.tech[0] as { lane?: string }).lane = "nope"))).toContain(".lane");
+		expect(broken((d) => ((d.tech[0] as { lane?: string }).lane = undefined))).toContain(".lane");
+		expect(broken((d) => (d.lanes = (d.lanes ?? []).filter((l) => l.id !== "cool")))).toContain('lanes: missing "cool"');
+		expect(broken((d) => (d.tech[0].line = "air"))).toContain("equipment lines");
+	});
+});

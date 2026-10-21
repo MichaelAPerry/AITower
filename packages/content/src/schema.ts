@@ -542,6 +542,32 @@ export interface EventDef {
 
 export type TechBranch = "compute" | "cooling" | "power" | "logistics" | "administration" | "wetware";
 
+/** Lanes of the research tree: one row-group per branch of the player's choices. Wetware, Green and Synthetic are path lanes. */
+export type TechLane = "adm" | "log" | "pow" | "cool" | "comp" | "wet" | "green" | "syn";
+
+/** Equipment line inside the Cooling and Compute lanes. */
+export type TechLine = "air" | "liquid" | "immersion";
+
+/** Identity and advisor pitch of one research lane (data/lanes.json); the tree shows it on hover and in the Inspector. */
+export interface LaneDef {
+	id: TechLane;
+	name: string;
+	/** Short label for chips and narrow headers. */
+	short: string;
+	/** Present for the path lanes (Wetware, Green, Synthetic). */
+	path?: AscensionPath;
+	/** Lane colour (hex). */
+	color: string;
+	/** Advisor who sells the lane: Cass Parr, Bea Altasar, Dr. Mel Kiorre or Lucien Ferro. */
+	advisor: string;
+	/** What the lane is for, in a few words. */
+	identity: string;
+	/** A number or two the player can check against the catalogue. */
+	signature: string;
+	/** One line in the advisor's voice: why go down this lane. */
+	pitch: string;
+}
+
 export type AscensionPath = "biotech" | "greentech" | "synthetic";
 
 /** Ending ids (see `Balance.endings`). */
@@ -587,6 +613,10 @@ export interface TechNode {
 	/** One or two sentences in Ministry voice that also state the real effect. */
 	description: string;
 	branch: TechBranch;
+	/** Row-group in the research tree (see `LaneDef`). Content validation requires it; hand-built test fixtures may omit it (the UI falls back to the branch). */
+	lane?: TechLane;
+	/** Equipment line (Air, Liquid, Immersion) for nodes in the Cooling and Compute lanes; absent = no sub-lane. */
+	line?: TechLine;
 	/** Clearance (tier) required before it can be researched. */
 	minTier: number;
 	/** Research points. */
@@ -610,6 +640,8 @@ export interface ContentDB {
 	scenarios: Record<string, Scenario>;
 	events: EventDef[];
 	tech: TechNode[];
+	/** Research tree lanes, in display order (always present in loaded content). */
+	lanes?: LaneDef[];
 	paths: PathDef[];
 	endings: EndingDef[];
 	generateContract: ContractGenerator;

@@ -7,7 +7,10 @@ import { pushNotice } from "../notices";
 import { ListHeading, PanelHead, PanelTabs, PrimaryAction, SplitPane } from "../panel/PanelShell";
 import { Jargon, TermScope } from "../glossary/Term";
 import { branchView, chain, defaultBranch, defaultPick, etaText, getLines, groupOf, isSpoilerTech, PATH_NOTE, plainName, rpPerHour, tabsFor, whyText } from "./researchText";
-import { fmtRp, nodeState, techList } from "./tech";
+import { ResearchTree } from "./ResearchTree";
+import { cheapestAvailable, fmtRp, nodeState, techList } from "./tech";
+import { laneOf, lanesOf } from "./treeLayout";
+import { leadsTo } from "./treeState";
 
 const rpText = (n: number): string => `${Math.floor(Math.max(0, n) + 1e-9).toLocaleString("en-US")} RP`;
 
@@ -17,13 +20,16 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 	const tabs = tabsFor(content, view);
 	const nodes = techList(content);
 	const picked = ui.researchSel ? nodes.find((n) => n.id === ui.researchSel) : undefined;
+	const listMode = ui.researchView === "list";
 	const tab: TechBranch = (ui.researchTab && tabs.some((t) => t.id === ui.researchTab) ? ui.researchTab : null) ?? picked?.branch ?? defaultBranch(content, view);
 	const bv = branchView(content, view, tab);
-	const sel = picked && picked.branch === tab ? picked : nodes.find((n) => n.id === defaultPick(content, view, tab));
+	const bvWet = branchView(content, view, "wetware");
+	const sel = listMode ? (picked && picked.branch === tab ? picked : nodes.find((n) => n.id === defaultPick(content, view, tab))) : (picked ?? cheapestAvailable(view, content) ?? nodes.find((n) => nodeState(n, view, content).kind !== "researched") ?? nodes[0]);
+	const laneDefs = lanesOf(content);
 	const rp = view.researchPoints ?? 0;
 	const perHour = rpPerHour(view, content);
 
-	const nextId = defaultPick(content, view, tab);
+	const nextId = defaultPick(content, view, sel && !listMode ? sel.branch : tab);
 	const nextPick = nextId && nextId !== sel?.id ? nodes.find((n) => n.id === nextId) : undefined;
 	const goal = sel && nodeState(sel, view, content).kind !== "researched" ? sel : undefined;
 
@@ -60,7 +66,10 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 		const s = nodeState(sel, view, content);
 		const masked = isSpoilerTech(sel) && s.kind !== "researched" && s.kind !== "available" && s.kind !== "poor";
 		const steps = chain(sel, view, content);
-		const kicker = `Research · ${tabs.find((t) => t.id === sel.branch)?.label ?? sel.branch}${sel.minTier > 1 ? ` · Level ${sel.minTier}` : ""}`;
+		const lane = laneDefs.find((l) => l.id === laneOf(sel));
+		const kicker = `Research · ${lane?.name ?? tabs.find((t) => t.id === sel.branch)?.label ?? sel.branch}${sel.minTier > 1 ? ` · Level ${sel.minTier}` : ""}`;
+		const wetOpen = bvWet.ready.length + bvWet.next.length + bvWet.done.length > 0;
+		const leads = leadsTo(content, sel.id).filter((c) => !isSpoilerTech(c) || wetOpen);
 		inspector = (
 			<>
 				<div className="bld-kicker">{kicker}</div>
@@ -101,6 +110,20 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 						<p className="bld-blurb">
 							<Jargon text={whyText(sel, content)} />
 						</p>
+						{lane?.pitch && (
+							<>
+								<h4 className="res-h">Why go this way</h4>
+								<p className="bld-blurb res-pitch" style={{ borderLeftColor: lane.color }}>
+									<b>{lane.advisor}:</b> “{lane.pitch}”
+								</p>
+							</>
+						)}
+						{leads.length > 0 && (
+							<>
+								<h4 className="res-h">Leads to</h4>
+								<p className="bld-blurb">{leads.map((c) => c.name).join(", ")}</p>
+							</>
+						)}
 					</>
 				)}
 				{steps.length > 0 && (
@@ -163,11 +186,34 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 		</>
 	);
 
+	const need = view.tierNeed;
+	const inspectorNode = <TermScope key={sel?.id ?? "none"}>{inspector}</TermScope>;
+	const views = [
+		{ id: "tree" as const, label: "Tree" },
+		{ id: "list" as const, label: "List" },
+	];
+
 	return (
 		<>
 			<PanelHead kicker="Unlock new machines and bonuses" title="Research" aside={<span className="res-rp" title="Research points. Racks earn them while they run jobs.">{fmtRp(rp)}</span>} />
-			<p className="pnl-note res-rate">{perHour > 0 ? `Earning about ${perHour < 10 ? perHour.toFixed(1) : Math.round(perHour)} RP per game hour from your racks.` : "Not earning yet. Racks earn research points while they run jobs."}</p>
-			{goal && (
+			<div className="res-info">
+				<div className="res-notes">
+					<p className="pnl-note res-rate">{perHour > 0 ? `Earning about ${perHour < 10 ? perHour.toFixed(1) : Math.round(perHour)} RP per game hour from your racks.` : "Not earning yet. Racks earn research points while they run jobs."}</p>
+					{need !== undefined && (
+						<p className="pnl-note res-tier" data-help="res-level">
+							{need === null ? "You are at the top Level." : need.techs > 0 ? `Level ${need.tier} needs ${need.techs} technologies researched: ${Math.min(need.techsDone, need.techs)} done.` : `Level ${need.tier} needs no research, only output and uptime.`}
+						</p>
+					)}
+				</div>
+				<div className="res-views">
+					{views.map((v) => (
+						<button key={v.id} type="button" className={`pnl-tab ${(v.id === "list") === listMode ? "is-on" : ""}`} aria-pressed={(v.id === "list") === listMode} onClick={() => setUi({ researchView: v.id })}>
+							{v.label}
+						</button>
+					))}
+				</div>
+			</div>
+			{goal && listMode && (
 				<div className="res-top">
 					<Meter value={Math.min(1, rp / Math.max(1, goal.cost))} tone={rp >= goal.cost ? "good" : "warn"} height={5} />
 					<span>
@@ -175,8 +221,14 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 					</span>
 				</div>
 			)}
-			<PanelTabs label="Research branch" value={tab} onPick={(id) => setUi({ researchTab: id, researchSel: null })} tabs={tabs.map((t) => ({ id: t.id, label: t.ready > 0 ? `${t.label} · ${t.ready}` : t.label, title: t.ready > 0 ? `${t.ready} ready to start` : undefined }))} />
-			<SplitPane list={list} inspector={<TermScope key={sel?.id ?? "none"}>{inspector}</TermScope>} />
+			{listMode ? (
+				<>
+					<PanelTabs label="Research branch" value={tab} onPick={(id) => setUi({ researchTab: id, researchSel: null })} tabs={tabs.map((t) => ({ id: t.id, label: t.ready > 0 ? `${t.label} · ${t.ready}` : t.label, title: t.ready > 0 ? `${t.ready} ready to start` : undefined }))} />
+					<SplitPane list={list} inspector={inspectorNode} />
+				</>
+			) : (
+				<ResearchTree content={content} view={view} selId={sel?.id ?? null} onSelect={(id) => setUi({ researchSel: id, researchTab: nodes.find((n) => n.id === id)?.branch ?? null })} inspector={inspectorNode} />
+			)}
 		</>
 	);
 }
