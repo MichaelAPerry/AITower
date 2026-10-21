@@ -46,6 +46,12 @@ describe("flavor quotes", () => {
 		for (const b of Object.values(db.bots)) expect(b.flavor, b.id).toBeDefined();
 		for (const { id, f } of flavors(db)) expect(f.quote.split(/\s+/).length, id).toBeLessThanOrEqual(25);
 	});
+	it("keeps the voice varied: the King James Bible at most 3 times, any other author at most 4", () => {
+		const count = new Map<string, number>();
+		for (const { f } of flavors(db)) count.set(f.author, (count.get(f.author) ?? 0) + 1);
+		expect(count.get("King James Bible") ?? 0).toBeLessThanOrEqual(3);
+		for (const [author, n] of count) expect(n, author).toBeLessThanOrEqual(4);
+	});
 	it("lists every quote in docs/QUOTES.md with the item id, author and a verification URL", () => {
 		for (const { id, f } of flavors(db)) {
 			const row = rows.find((r) => r.startsWith(`| \`${id}\` |`));
