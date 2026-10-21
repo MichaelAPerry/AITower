@@ -916,7 +916,7 @@ describe("snapshot v5", () => {
 		expect(loaded.state.path).toBeNull();
 		expect(loaded.state.nutrient.length).toBe(loaded.state.slab.length);
 		expect(loaded.state.rng.growth).toBe(sim.state.rng.growth); // mixSeed(seed, 4), same as at creation
-		expect(loaded.snapshot().version).toBe(7);
+		expect(loaded.snapshot().version).toBe(8);
 		// The save predates the nutrient pipe, so the pipe is gone; only compare what is common after re-adding it.
 		expect(loaded.state.bots[0]).toMatchObject({ trait: null, exposure: 0 });
 		run(loaded, 200);

@@ -15,6 +15,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	const d = Object.hasOwn(ctx.content.facilities, defId) ? ctx.content.facilities[defId] : undefined;
 	if (!d) return reject(`unknown facility '${defId}'`);
 	if (d.growth && !opts.ignoreTier) return reject("growths cannot be built");
+	if (d.retired && !opts.ignoreTier) return reject(`${d.name} is no longer built`);
 	if (!inBounds(s, x, floor) || !inBounds(s, x + d.width - 1, floor)) return reject("out of bounds");
 	const p = d.placement ?? {};
 	if (p.minFloor !== undefined && floor < p.minFloor) return reject(`must be on floor ${p.minFloor} or above`);

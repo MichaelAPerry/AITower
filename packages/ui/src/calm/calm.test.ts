@@ -43,6 +43,13 @@ describe("Clearance bar", () => {
 		expect(c.frac).toBeLessThanOrEqual(1);
 		expect(clearanceProgress({ ...view, tier: 1, uptime: 0.5 }, content).uptimeOk).toBe(false);
 	});
+	it("also asks for researched nodes, from the view's tierNeed", () => {
+		const content = createFakeContent();
+		const { view } = createFakeStore(content).get();
+		const c = clearanceProgress({ ...view, tier: 1, tierNeed: { tier: 2, pflops: 20, uptime: 0.99, techs: 2, techsDone: 1 } }, content);
+		expect(c).toMatchObject({ techs: 2, techsDone: 1, techsOk: false });
+		expect(clearanceProgress({ ...view, tier: 1, tierNeed: { tier: 2, pflops: 20, uptime: 0.99, techs: 2, techsDone: 2 } }, content).techsOk).toBe(true);
+	});
 	it("is full at the top Clearance", () => {
 		const content = createFakeContent();
 		const { view } = createFakeStore(content).get();

@@ -59,6 +59,7 @@ function basics(c: ContentDB): Entry[] {
 	const b = c.balance;
 	const pf = b.tiers.pflops;
 	const up = b.tiers.uptime;
+	const tn = b.tiers.techs ?? [];
 	const t = b.thermal;
 	const L = (id: string, title: string, ...lines: string[]): Entry => mk({ id: `basics:${id}`, section: "basics", title, lines });
 	return [
@@ -69,8 +70,8 @@ function basics(c: ContentDB): Entry[] {
 		L("loops", "Coolant loops", "Liquid-cooled racks need a coolant line under them, running from a chiller through a distribution unit (CDU).", "Lay the pipe with the coolant tool, connect a chiller, then add a CDU for capacity. A rack over its loop's capacity shows NO COOLANT.", "Liquid cooling moves much more heat than air, which is what lets you pack in powerful racks."),
 		L("lifts", "Lifts and bots", `Maintenance bots repair broken parts. They walk the floors and ride lifts between them (up to ${c.lift.capacity} per car), so a tower with several floors needs a lift.`, "Chargers recharge and house the bots. Flying drones skip the lift. Hover a bot or lift in the tower to see its name."),
 		L("parts", "Spare parts", `Bots need a spare part for each repair, from a depot. A part costs ${fmtMoney(c.structure.sparePart)}.`, "Racks fail now and then. A rack with BROKEN over it is waiting for a bot and a part, so keep the depot stocked."),
-		L("research", "Research", "Racks and finished jobs earn research points (RP). Spend them in Research (R) on new machines, cooling, power and perks.", `Each step needs its prerequisites and a high enough Level. The first level-up needs ${pf[0]} PF of compute.`),
-		L("level", "Level", `Your Level rises when you have installed enough compute and kept uptime high. Level 2 needs ${pf[0]} PF compute and ${Math.round((up[0] ?? 0) * 100)}% uptime.`, "Each Level unlocks bigger machines and larger contracts, and pays a bonus."),
+		L("research", "Research", "Racks and finished jobs earn research points (RP). Spend them in Research (R) on new machines, cooling, power and perks.", `Each step needs its prerequisites and a high enough Level. The first level-up needs ${pf[1]} PF of compute${tn[1] ? ` and ${tn[1]} researched nodes` : ""}.`),
+		L("level", "Level", `Your Level rises when you have installed enough compute, kept uptime high and researched enough nodes. Level 2 needs ${pf[1]} PF compute, ${Math.round((up[1] ?? 0) * 100)}% uptime${tn[1] ? ` and ${tn[1]} researched nodes` : ""}.`, `Each later Level asks for more: ${pf.slice(2).join(", ")} PF${tn.length > 2 ? ` and ${tn.slice(2).join(", ")} researched nodes` : ""}.`, "Each Level unlocks bigger machines and larger contracts, and pays a bonus."),
 		L("reputation", "Reputation", `Reputation (0 to 100) is the Compute Authority's trust in you. You start at ${b.standing.start}.`, `A day that meets your level's uptime target raises it (+${b.standing.dailyGood}); a day below it lowers it by ${Math.abs(b.standing.dailyNearMiss)} for a near miss, up to ${Math.abs(b.standing.dailyBad)} for a big one; a failed job costs ${Math.abs(b.standing.jobFailed)}. At 0 you are shut down.`),
 		L("memos", "Memos and the Compute Authority", "The Compute Authority is the Ministry body you answer to. It sends memos to your Inbox with choices: take the offer, decline it, or file it for later.", "Each choice has a price and a payoff, shown as chips on the memo. Most can wait; urgent ones say so."),
 		L("paths", "Paths and Ascension", `At Level ${b.ascension.minTier} the Compute Authority offers Ascension: a one-time, permanent choice of direction for your tower.`, `Paths on offer: ${c.paths.map((p) => p.name).join(", ")}.`, "The choice is irreversible. Read the form before you sign."),

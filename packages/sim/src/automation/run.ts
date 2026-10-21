@@ -17,5 +17,5 @@ export function runCommand(ctx: TickCtx, cmd: SimCommand): boolean {
 
 /** Buildable now: tier and research gates pass, not a growth. */
 export function buildable(ctx: TickCtx, d: FacilityDef): boolean {
-	return !d.growth && d.unlockTier <= ctx.state.tier && techGate(ctx.state, ctx.content, d.tech) === null;
+	return !d.growth && !d.retired && d.unlockTier <= ctx.state.tier && techGate(ctx.state, ctx.content, d.tech) === null;
 }

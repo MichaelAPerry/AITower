@@ -80,7 +80,7 @@ export function AutomationDrawer({ store, content, state, openResearch }: PanelP
 									</label>
 								))}
 								<span className="ui-auto-note">
-									At most {facts.foremanPerHour} per hour, on slab with a power conduit under it. Reserve {fmtMoney(policy.foreman.reserve)}.
+									At most {view.automation.foremanPerHour ?? facts.foremanPerHour} per hour, on slab with a power conduit under it. Reserve {fmtMoney(policy.foreman.reserve)}.
 								</span>
 							</div>
 						)}

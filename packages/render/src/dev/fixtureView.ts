@@ -224,6 +224,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		standing: 50,
 		standingLog: [],
 		uptimeTarget: 0.95,
+		tierNeed: { tier: 2, pflops: 120, uptime: 0.93, techs: 2, techsDone: 0 },
 		researchPoints: 0,
 		techResearched: [],
 		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: false }, acceptedTotal: 0 },
@@ -246,7 +247,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		refinement: 0,
 		drought: false,
 		sandbox: false,
-		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false },
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false, foremanPerHour: 1 },
 		gameOver: null,
 	};
 

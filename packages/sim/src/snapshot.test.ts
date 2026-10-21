@@ -221,7 +221,7 @@ describe("snapshot migrations", () => {
 	});
 
 	it("is at the current version and a v1 save (before bot routing fields) migrates", () => {
-		expect(SNAPSHOT_VERSION).toBe(7);
+		expect(SNAPSHOT_VERSION).toBe(8);
 		const snap = clone(savedJson()) as unknown as Json;
 		// Rewrite as a genuine v1 save: no topologyRev, no routing fields.
 		snap.version = 1;
@@ -244,6 +244,24 @@ describe("snapshot migrations", () => {
 		delete bot.exitFloor;
 		const migrated = load({ ...snap, state: { ...snap.state, lifts: snap.state.lifts.map((l: Json) => ({ ...l, riders: [bot.id] })) } }) as SimImpl;
 		expect(migrated.state.bots[0].exitFloor).toBe(1);
+	});
+
+	it("v7 -> v8: merged tech ids are renamed (unique), and a tower with liquid plant is granted chilled_loop", () => {
+		const step = migrations[7];
+		const plant = step({ techResearched: ["t_clerk", "neuromorphic_cards", "inference_foundry", "identity_register", "mind_lattice_dossier"], facilities: [{ defId: "cdu" }] });
+		expect(plant.techResearched).toEqual(["t_clerk", "inference_foundry", "mind_lattice_dossier", "chilled_loop"]);
+		const plain = step({ techResearched: ["neuromorphic_cards"], facilities: [{ defId: "rack_air_gpu" }] });
+		expect(plain.techResearched).toEqual(["inference_foundry"]);
+		expect(step({ techResearched: ["chilled_loop"], facilities: [{ defId: "chiller" }] }).techResearched).toEqual(["chilled_loop"]);
+		expect(step({}).techResearched).toBeUndefined(); // a state without the list is left alone
+	});
+
+	it("researched ids the content no longer has are dropped on load, not fatal", () => {
+		const snap = clone(savedJson()) as unknown as Json;
+		snap.state.techResearched = ["t_clerk", "a_node_removed_in_a_later_version"];
+		const sim = load(snap) as SimImpl;
+		expect(sim.state.techResearched).toEqual(["t_clerk"]);
+		for (let i = 0; i < 50; i++) sim.step();
 	});
 
 	it("an old version without a registered migration is rejected cleanly", () => {

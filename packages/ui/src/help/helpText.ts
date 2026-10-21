@@ -13,7 +13,7 @@ export const HELP = {
 	speed: { title: "Speed", text: "Pause, play, or fast-forward. Space pauses; keys 1 to 5 pick a speed. Pausing is free: you can plan while it is stopped.", entry: "basics:money" },
 	treasury: { title: "Treasury", text: "Cash on hand. Builds and parts spend it; finished contracts refill it. Below zero for long, the Compute Authority shuts you down.", entry: "basics:money" },
 	perhour: { title: "Per hour", text: "How much money you are making or losing each game hour, averaged over the last six. Red means upkeep and power cost more than you earn.", entry: "basics:money" },
-	level: { title: "Level", text: "Your standing with the Compute Authority. Install more compute and keep uptime high to reach the next level, which unlocks bigger builds.", entry: "basics:level" },
+	level: { title: "Level", text: "Your standing with the Compute Authority. Install more compute, keep uptime high and finish enough research to reach the next level, which unlocks bigger builds.", entry: "basics:level" },
 	reputation: { title: "Reputation", text: "How much the Compute Authority trusts you, 0 to 100. Good uptime and finished jobs raise it; missed deadlines lower it. At 0 you are shut down.", entry: "basics:reputation" },
 	inbox: { title: "Inbox", text: "Memos from the Compute Authority. Most are choices with a price. They never expire in a hurry, so read them when you are ready.", entry: "basics:memos" },
 	help: { title: "Help", text: "Turn help mode on or off. While it is on, hover any outlined part of the screen to see what it does. Press ? or F1.", entry: "basics:money" },

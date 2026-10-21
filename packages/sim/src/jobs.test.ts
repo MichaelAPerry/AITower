@@ -1,6 +1,7 @@
 import type { ContractSpec } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import { failRack } from "./reliability/reliabilityStep";
+import { allocateRacks } from "./compute/allocation";
 import type { SimImpl } from "./sim";
 import { exec, facilityOf, makeContent, newSim, run, scenario } from "./test/fixture";
 
@@ -59,7 +60,7 @@ describe("jobs", () => {
 		const sim = newSim(noOffers(), "farm");
 		const jobId = acceptSpec(sim, training());
 		const job = sim.state.jobs.find((j) => j.id === jobId);
-		expect(job?.rackIds).toHaveLength(4); // all free compute racks (≤ 8)
+		expect(job?.rackIds.length).toBeGreaterThan(2); // it reaches for idle racks instead of standing short
 		run(sim, 1); // racks now drawing full power
 		expect(job?.pflops).toBeCloseTo(80, 6);
 		expect(job?.progress).toBeCloseTo(80 / 60, 6);
@@ -175,6 +176,19 @@ describe("jobs", () => {
 		}
 		run(sim, 3);
 		expect(sim.state.today.penalties - pen0).toBeGreaterThan(0); // the running service broke its SLA
+	});
+
+	it("an inference service counts what its racks deliver, so throttled racks make it claim idle ones (no standing SLA breach)", () => {
+		const sim = newSim(noOffers(), "farm");
+		const jobId = acceptSpec(sim, { ...training(), kind: "inference", work: 40, sustainedPflops: 40, durationTicks: 500, payout: 50_000 });
+		const job = sim.state.jobs.find((j) => j.id === jobId);
+		expect(job?.rackIds).toHaveLength(2);
+		for (const id of job?.rackIds ?? []) {
+			const f = sim.state.facilities.find((x) => x.id === id);
+			if (f) f.clock = 0.5; // thermally throttled: 2 x 20 PF x 0.5 = 20 PF delivered, 40 sustained
+		}
+		allocateRacks(sim.state, sim.content, new Set([jobId]));
+		expect(job?.rackIds.length).toBeGreaterThan(2); // it reaches for idle racks instead of standing short
 	});
 
 	it("training that misses its deadline fails with a penalty", () => {

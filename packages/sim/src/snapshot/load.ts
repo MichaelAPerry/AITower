@@ -35,6 +35,11 @@ export function loadSnapshot(content: ContentDB, snap: SimSnapshot): SimState {
 			const n = normalizeCommand(c);
 			return n.ok ? [n.cmd] : [];
 		});
+	// Researched nodes the content no longer has (removed or merged in a later version) are dropped, not fatal.
+	if (Array.isArray(migrated.techResearched)) {
+		const known = new Set(content.tech.map((t) => t.id));
+		migrated.techResearched = migrated.techResearched.filter((id) => typeof id !== "string" || known.has(id));
+	}
 	if (migrated.scenarioId !== snap.scenarioId) throw new InvalidSaveError("state belongs to a different scenario");
 	const state = validateState(content, migrated);
 	state.sandbox = content.scenarios[state.scenarioId]?.sandbox === true; // follows the scenario, not the save

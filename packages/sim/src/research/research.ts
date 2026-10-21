@@ -20,6 +20,13 @@ export function techNode(content: ContentDB, id: string): TechNode | undefined {
 	return content.tech.find((t) => t.id === id);
 }
 
+/** Researched nodes that still exist in the content (ids from older saves that were removed do not count). */
+export function researchedCount(state: SimState, content: ContentDB): number {
+	let n = 0;
+	for (const id of state.techResearched) if (techNode(content, id)) n++;
+	return n;
+}
+
 export const isResearched = (state: SimState, id: string): boolean => state.techResearched.includes(id);
 
 /** Product of the factors of every researched node's perk of `kind` (1 when none). Memo modifiers are separate. */
@@ -50,6 +57,10 @@ export function featureUnlocked(state: SimState, content: ContentDB, feature: Fe
 
 /** The Contracts Clerk is available once a researched node grants the `contractsClerk` feature. */
 export const clerkUnlocked = (state: SimState, content: ContentDB): boolean => featureUnlocked(state, content, "contractsClerk");
+
+/** The Foreman's placements per game-hour: the base rate, doubled once a researched node grants `foremanPace`. */
+export const foremanPerHour = (state: SimState, content: ContentDB): number =>
+	content.balance.automation.foremanPerHour * (featureUnlocked(state, content, "foremanPace") ? 2 : 1);
 
 /** The Foreman is available once a researched node grants the `foreman` feature. */
 export const foremanUnlocked = (state: SimState, content: ContentDB): boolean => featureUnlocked(state, content, "foreman");

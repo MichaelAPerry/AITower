@@ -122,7 +122,7 @@ function levelAdvice(n: number, c: ContentDB): { next: string; mistakes: string 
 
 function levelChapter(n: number, c: ContentDB): Chapter {
 	const { pflops, uptime, reward } = c.balance.tiers;
-	const defs = Object.values(c.facilities).filter((d) => d.unlockTier === n && !d.growth);
+	const defs = Object.values(c.facilities).filter((d) => d.unlockTier === n && !d.growth && !d.retired);
 	const ready = defs.filter((d) => !d.tech).map((d) => d.name);
 	const later = defs.filter((d) => !!d.tech).map((d) => d.name);
 	const adv = levelAdvice(n, c);
@@ -132,7 +132,7 @@ function levelChapter(n: number, c: ContentDB): Chapter {
 		{ h: "What is new", p: news || `Nothing new to build. Research is where Level ${n} pays off.` },
 		{ h: "Build next", p: adv.next },
 		{ h: "Mistakes to avoid", p: adv.mistakes },
-		{ h: top ? "After this" : `Reach Level ${n + 1}`, p: top ? `There is no Level ${n + 1}. Keep uptime at ${pct(uptime[n - 1] ?? 0)} or better, grow compute, and choose a path with Ascension.` : `Install ${pflops[n]} PF of compute and keep uptime at ${pct(uptime[n])} or better. The check happens at midnight and pays ${fmtMoney(reward[n])}.` },
+		{ h: top ? "After this" : `Reach Level ${n + 1}`, p: top ? `There is no Level ${n + 1}. Keep uptime at ${pct(uptime[n - 1] ?? 0)} or better, grow compute, and choose a path with Ascension.` : `Install ${pflops[n]} PF of compute, have ${c.balance.tiers.techs?.[n] ?? 0} nodes researched (the Research drawer, R) and keep uptime at ${pct(uptime[n])} or better. The check happens at midnight and pays ${fmtMoney(reward[n])}.` },
 	];
 	return { id: `ch:level${n}`, group: "level", title: `Making the most of Level ${n}`, blocks, tryIt: { label: top ? "Open Insights" : "See my progress", id: "insights" }, unlock: { kind: "level", n }, keywords: `level ${n} ${blocks.map((x) => x.p).join(" ")}`.toLowerCase() };
 }

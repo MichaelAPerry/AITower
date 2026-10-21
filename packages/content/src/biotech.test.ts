@@ -20,9 +20,9 @@ describe("biotech content (bundled)", () => {
 		expect(validateContent(db)).toEqual([]);
 	});
 
-	it("has the eight biotech facilities, three of them hardware, and every one gated by wetware tech", () => {
-		expect(player.map((d) => d.id).sort()).toEqual(["bioreactor", "culling_room", "dna_vault", "neural_pit", "nutrient_plant", "organoid_incubator", "quarantine_lock", "sterile_bay"]);
-		expect(player.filter((d) => d.rack)).toHaveLength(3);
+	it("has the nine biotech facilities, four of them hardware, and every one gated by wetware tech", () => {
+		expect(player.map((d) => d.id).sort()).toEqual(["bioreactor", "culling_room", "dna_vault", "neural_pit", "nutrient_plant", "organoid_incubator", "quarantine_lock", "rack_organoid_2", "sterile_bay"]);
+		expect(player.filter((d) => d.rack)).toHaveLength(4);
 		const byId = new Map(db.tech.map((n) => [n.id, n]));
 		for (const d of player) {
 			const node = byId.get(d.tech as string);
@@ -36,11 +36,11 @@ describe("biotech content (bundled)", () => {
 		expect(f.bioreactor.power?.capacityKw).toBeGreaterThan(0);
 	});
 
-	it("organoids deliver about 3x the PFLOPS per kW of the best T4 rack, at 37 C +- 1", () => {
+	it("organoids deliver at least 1.3x the PFLOPS per kW of the best non-bio rack, at 37 C +- 1", () => {
 		const perKw = (id: string): number => (f[id].rack?.pflops ?? 0) / (f[id].rack?.powerKw ?? 1);
-		const bestT4 = Math.max(...Object.values(f).filter((d) => d.rack && d.rack.cooling !== "bio" && d.unlockTier <= 4).map((d) => perKw(d.id)));
+		const bestT4 = Math.max(...Object.values(f).filter((d) => d.rack && d.rack.cooling !== "bio" && d.unlockTier <= 4 && d.id !== "rack_photonic").map((d) => perKw(d.id)));
 		for (const id of ["organoid_incubator", "neural_pit"]) {
-			expect(perKw(id) / bestT4, id).toBeGreaterThan(2.8);
+			expect(perKw(id) / bestT4, id).toBeGreaterThan(1.3);
 			expect(perKw(id) / bestT4, id).toBeLessThan(3.4);
 			expect(f[id].rack?.bio).toMatchObject({ targetC: 37, toleranceC: 1 });
 		}

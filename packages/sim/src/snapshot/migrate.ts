@@ -16,11 +16,13 @@
  *  - v5 → v6 (M4-T1): automation policy, weather (`wind`, `droughtUntil`, the `weather` RNG stream), `greenScore`, `refinement`,
  *    `sandbox`, the greentech / synthetic `endingDays`, the green-energy and exported-heat rings, `job.unreported`.
  *  - v6 → v7 (M4b-T1): path `affinity` points (start at 0).
+ *  - v7 → v8 (tree restructure): merged tech nodes are renamed in `techResearched`, and a tower that already runs
+ *    liquid-cooling plant keeps building it (it is granted `chilled_loop`, which now gates those facilities).
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 7;
+export const SNAPSHOT_VERSION = 8;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -178,8 +180,26 @@ function migrateV6(state: RawState): RawState {
 	return state;
 }
 
+/** Tech nodes folded into others by the tree restructure. */
+export const RENAMED_TECH: Readonly<Record<string, string>> = { neuromorphic_cards: "inference_foundry", identity_register: "mind_lattice_dossier" };
+const LIQUID_PLANT = ["rack_dlc_gpu", "cdu", "chiller"];
+
+/** Merged nodes become their successors; a tower with liquid plant already placed keeps the right to build more of it. */
+function migrateV7(state: RawState): RawState {
+	if (!Array.isArray(state.techResearched)) return state;
+	const out: unknown[] = [];
+	for (const id of state.techResearched) {
+		const next = typeof id === "string" && Object.hasOwn(RENAMED_TECH, id) ? RENAMED_TECH[id] : id;
+		if (!out.includes(next)) out.push(next);
+	}
+	const hasPlant = Array.isArray(state.facilities) && state.facilities.some((f) => isObj(f) && typeof f.defId === "string" && LIQUID_PLANT.includes(f.defId));
+	if (hasPlant && !out.includes("chilled_loop")) out.push("chilled_loop");
+	state.techResearched = out;
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

@@ -121,7 +121,6 @@ describe("snapshot v4", () => {
 			expect(() => simFromSnapshot(content(), base() as never)).not.toThrow();
 		});
 		it("rejects bad research, clerk, loan, audit and stats state", () => {
-			bad((s) => { s.techResearched.push("ghost"); }, /^Invalid save: .*unknown tech 'ghost'/);
 			bad((s) => { s.techResearched.push(s.techResearched[0]); }, /^Invalid save: .*repeats/);
 			bad((s) => { s.techResearched = [7]; }, /^Invalid save: techResearched\[0\]/);
 			bad((s) => { s.researchPoints = -1; }, /^Invalid save: researchPoints/);

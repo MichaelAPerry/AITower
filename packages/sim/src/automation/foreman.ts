@@ -24,6 +24,7 @@ import { findChargerWithSpace } from "../world/entities";
 import { getDef, isComputeRack } from "../world/defs";
 import { planNormalized } from "../commands/apply";
 import { buildable, runCommand } from "./run";
+import { foremanPerHour } from "../research/research";
 
 const byId = (a: FacilityDef, b: FacilityDef): number => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0);
 
@@ -313,7 +314,7 @@ export function foremanStep(ctx: TickCtx): void {
 	const lastDay = state.ledger[state.ledger.length - 1];
 	const runway = lastDay ? FOREMAN_RUNWAY_DAYS * (lastDay.energy + lastDay.upkeep + lastDay.fees) : 0;
 	const r: Run = { ctx, reserve: Math.max(p.reserve, runway), powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
-	for (let placed = 0; placed < content.balance.automation.foremanPerHour; placed++) {
+	for (let placed = 0; placed < foremanPerHour(state, content); placed++) {
 		if (state.netsDirty) rebuildNetworks(ctx);
 		const did = (p.power && tryPower(r)) || (p.cooling && tryCooling(r)) || (p.racks && (tryLogistics(r) || tryRacks(r)));
 		if (!did) break;

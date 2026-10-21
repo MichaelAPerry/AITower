@@ -117,7 +117,7 @@ describe("path affinity", () => {
 	});
 });
 
-describe("snapshot v7", () => {
+describe("snapshot v7+", () => {
 	it("round-trips affinity; a v6 save (no affinity) migrates to zero and keeps running", () => {
 		const sim = newSim(mk(), "afflot");
 		run(sim, 300);
@@ -129,7 +129,7 @@ describe("snapshot v7", () => {
 		delete snap.state.affinity;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
 		expect(aff(old)).toEqual({ biotech: 0, greentech: 0, synthetic: 0 });
-		expect(old.snapshot().version).toBe(7);
+		expect(old.snapshot().version).toBe(8);
 		run(old, 120);
 		expect(old.state.affinity.greentech).toBeGreaterThan(0);
 	});

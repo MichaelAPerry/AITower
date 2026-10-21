@@ -158,6 +158,9 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		const need = tiers.pflops[next];
 		const have = installedPflops(view, content);
 		const uptime = tiers.uptime[next];
+		const techNeed = view.tierNeed?.techs ?? tiers.techs?.[next] ?? 0;
+		const techDone = view.tierNeed?.techsDone ?? view.techResearched?.length ?? 0;
+		const research = techNeed > techDone ? ` Research ${techNeed - techDone} more node${techNeed - techDone === 1 ? "" : "s"} (${techDone} of ${techNeed} done).` : "";
 		if (have < need) {
 			const air = content.facilities.rack_air_gpu;
 			const per = air?.rack?.pflops ?? 20;
@@ -177,13 +180,13 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			return {
 				tone: "progress",
 				title: `Next: Level ${next + 1}`,
-				detail: `Reach ${need} PF compute (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${idleNote}`,
+				detail: `Reach ${need} PF compute (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${research}${idleNote}`,
 			};
 		}
 		return {
 			tone: "progress",
 			title: `Next: Level ${next + 1}`,
-			detail: `Compute is enough (${have} PF). Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; your level is reviewed at midnight.`,
+			detail: `Compute is enough (${have} PF).${research || " "}Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; your level is reviewed at midnight.`,
 		};
 	}
 	return { tone: "progress", title: "Top level reached", detail: "Keep the Treasury growing and the Compute Authority's reputation high." };

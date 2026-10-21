@@ -229,7 +229,9 @@ export function suggestions(view: SimView, content: ContentDB): Suggestion[] {
 		out.push({ id: "level", text: "The tower is cleared to choose an Ascension path. It is a one-way decision, so read it first.", cta: "Show me", action: { kind: "ascension" }, urgent: false, recommend: [] });
 	} else {
 		const c = clearanceProgress(view, content);
-		if (c.next !== null && c.frac >= 1 && !c.uptimeOk) {
+		if (c.next !== null && c.frac >= 1 && !c.techsOk) {
+			out.push({ id: "level", text: `Compute is enough for Level ${c.next}, but research is short: ${c.techsDone} of ${c.techs} nodes done.`, cta: "Show me", action: { kind: "research" }, urgent: false, recommend: [] });
+		} else if (c.next !== null && c.frac >= 1 && !c.uptimeOk) {
 			out.push({ id: "level", text: `Compute is enough for Level ${c.next}. Hold uptime at ${Math.round(c.uptimeNeed * 100)}% or better and it comes at midnight.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" }, urgent: false, recommend: [] });
 		} else if (c.next !== null && c.frac >= 0.6 && c.frac < 1 && cheapRack) {
 			out.push({

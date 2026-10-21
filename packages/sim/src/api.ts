@@ -461,6 +461,8 @@ export interface SimView {
 	standingLog: StandingLogEntry[];
 	/** Rolling 24 h uptime the current tier asks for; a day below it costs reputation (more the further below). */
 	uptimeTarget: number;
+	/** What the next Level asks for (null at the top Level): installed PF, rolling uptime, researched nodes (techsDone counts the ones held now). */
+	tierNeed: { tier: number; pflops: number; uptime: number; techs: number; techsDone: number } | null;
 	/**
 	 * Body-horror scalar 0..1 (drives render, audio and memos). Grows with the contaminated share, wetware share of
 	 * compute and growths; never decreases by more than a little per day (the building remembers).
@@ -491,7 +493,7 @@ export interface SimView {
 	drought: boolean;
 	/** The scenario is a sandbox (no bankruptcy or shutdown). */
 	sandbox: boolean;
-	automation: { policy: AutomationPolicy; foremanUnlocked: boolean };
+	automation: { policy: AutomationPolicy; foremanUnlocked: boolean; /** Placements per game-hour the Foreman is allowed now. */ foremanPerHour: number };
 	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
 	organoidPflops: number;
 	/** Days the leading ending's condition has held (for the UI's progress line), or 0. */

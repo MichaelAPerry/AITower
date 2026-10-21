@@ -152,6 +152,8 @@ export interface FacilityDef {
 	placement?: PlacementRules;
 	/** Tech node that must be researched before this can be built (in addition to `unlockTier`). Absent = no research needed. */
 	tech?: string;
+	/** Superseded: not offered for building, but saves that already hold one keep working. */
+	retired?: boolean;
 	bio?: BioSpec;
 	green?: GreenSpec;
 	/**
@@ -253,7 +255,13 @@ export interface Balance {
 		offerExpiryTicks: number;
 	};
 	/** Tier thresholds: tier n requires totalPflops ≥ pflops[n-1] AND uptime ≥ uptime[n-1] (rolling day). */
-	tiers: { pflops: number[]; uptime: number[]; reward: number[] };
+	tiers: {
+		pflops: number[];
+		uptime: number[];
+		reward: number[];
+		/** Minimum researched tech nodes to reach tier n (index n−1; 0 or absent = no research needed). */
+		techs?: number[];
+	};
 	/** Ministry standing (0..100). Reaching 0 ends the game ("shutdown"). */
 	standing: {
 		start: number;
@@ -558,8 +566,8 @@ export type PerkKind =
 	| "botSpeed"; // bot walk/fly speed
 
 /** Gameplay features switched on by tech. */
-/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). */
-export type FeatureId = "contractsClerk" | "foreman";
+/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). foremanPace: the Foreman builds twice as many facilities per hour. */
+export type FeatureId = "contractsClerk" | "foreman" | "foremanPace";
 
 export type TechEffect = { type: "perk"; kind: PerkKind; factor: number } | { type: "feature"; feature: FeatureId };
 

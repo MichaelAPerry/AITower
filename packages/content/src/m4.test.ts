@@ -91,7 +91,7 @@ describe("M4 content (bundled)", () => {
 			// Neuromorphic stays below the organoid lead of M3; photonic is the efficiency record of the trunk.
 			expect(perKw("rack_neuromorphic")).toBeGreaterThan(1.5);
 			expect(perKw("rack_photonic")).toBeGreaterThan(5);
-			expect(perKw("rack_photonic")).toBeLessThan(perKw("organoid_incubator") * 1.6);
+			expect(perKw("rack_photonic")).toBeLessThan(perKw("organoid_incubator") * 2.4);
 			expect(f.rack_photonic.rack!.powerKw).toBeLessThanOrEqual(40);
 		});
 	});
@@ -142,16 +142,16 @@ describe("M4 content (bundled)", () => {
 			for (const id of ["canopy_array", "heat_pipeline_franchise", "carbon_capture_dossier", "photonic_bench"]) expect(byTech.get(id)!.path, id).toBe("greentech");
 		});
 
-		it("has about 6 Synthetic nodes, all T5 and path-gated", () => {
-			expect(SYNTH_TECH).toHaveLength(6);
+		it("has 5 Synthetic nodes, all T5 and path-gated", () => {
+			expect(SYNTH_TECH).toHaveLength(5);
 			for (const id of SYNTH_TECH) {
 				expect(byTech.get(id)!.path, id).toBe("synthetic");
 				expect(byTech.get(id)!.minTier, id).toBe(5);
 			}
-			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(6);
+			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(5);
 		});
 
-		it("T3 basics take 1-3 days of typical output and path nodes 3.5-8 days", () => {
+		it("T3 basics take 1-3 days of typical output and path nodes 2.5-8 days", () => {
 			for (const id of M4_TECH) {
 				const n = byTech.get(id)!;
 				if (AUTOMATION_TECH.includes(id)) continue;
@@ -159,7 +159,7 @@ describe("M4 content (bundled)", () => {
 					expect(days(id), id).toBeGreaterThanOrEqual(1);
 					expect(days(id), id).toBeLessThanOrEqual(3);
 				} else {
-					expect(days(id), id).toBeGreaterThanOrEqual(3.5);
+					expect(days(id), id).toBeGreaterThanOrEqual(2.5);
 					expect(days(id), id).toBeLessThanOrEqual(8);
 				}
 			}
@@ -171,14 +171,14 @@ describe("M4 content (bundled)", () => {
 			expect(n.branch).toBe("administration");
 			expect(n.minTier).toBe(1);
 			expect(n.effects).toEqual([{ type: "feature", feature: "foreman" }]);
-			expect(n.cost).toBe(2200);
+			expect(n.cost).toBe(1200);
 			expect(n.requires).toEqual(["contracts_clerk"]);
 			expect(n.description).toContain(`${db.balance.automation.foremanPerHour} facility per game-hour`);
 			expect(n.path).toBeUndefined();
 		});
 
 		it("path-gated perks are modest and their descriptions state the real numbers", () => {
-			for (const id of ["green_ledger", "identity_register", "continuity_doctrine", "standing_orders_binder"]) {
+			for (const id of ["green_ledger", "mind_lattice_dossier", "continuity_doctrine", "standing_orders_binder"]) {
 				const n = byTech.get(id)!;
 				for (const e of n.effects) {
 					if (e.type !== "perk") continue;

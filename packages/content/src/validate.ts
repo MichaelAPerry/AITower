@@ -53,7 +53,7 @@ const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
 const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
-const FEATURES = ["contractsClerk", "foreman"];
+const FEATURES = ["contractsClerk", "foreman", "foremanPace"];
 /** Letter grades A..E used by `balance.audit`. */
 const GRADES = 5;
 
@@ -296,6 +296,17 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	tr.reward.forEach((v, i) => {
 		num(p, `balance.tiers.reward[${i}]`, v, { min: 0 });
 	});
+	if (tr.techs !== undefined) {
+		if (!Array.isArray(tr.techs) || tr.techs.length !== n) p.push(`balance.tiers.techs: expected ${n} entries (one per tier)`);
+		else {
+			const techs = tr.techs;
+			techs.forEach((v, i) => {
+				num(p, `balance.tiers.techs[${i}]`, v, { min: 0, int: true });
+				if (i > 0 && v < techs[i - 1]) p.push(`balance.tiers.techs: must be non-decreasing at ${i}`);
+			});
+		}
+		if (tr.techs?.[0]) p.push("balance.tiers: tier 1 must be free (techs[0] = 0)");
+	}
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 

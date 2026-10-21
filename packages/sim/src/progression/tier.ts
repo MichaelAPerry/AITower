@@ -1,6 +1,6 @@
 /**
  * Tick stage 10: tier rating, evaluated on the last tick of each day. Tier n needs installed
- * PFLOPS ≥ tiers.pflops[n-1] and rolling uptime ≥ tiers.uptime[n-1]; each new tier pays its reward.
+ * PFLOPS ≥ tiers.pflops[n-1], rolling uptime ≥ tiers.uptime[n-1] and at least tiers.techs[n-1] researched nodes; each new tier pays its reward.
  * Tiers never decrease. Midnight order: daily standing, tier rating (its reward is revenue), loan interest, the levy on the day's profit, then
  * the day is recorded for the quarterly audit (filed when the day is the last of a period, graded against the clearance held
  * during the day, i.e. before a tier-up at this midnight).
@@ -14,6 +14,7 @@ import { closeAuditDay } from "../economy/audit";
 import { midnightCredit } from "../economy/credit";
 import { earn } from "../economy/ledger";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
+import { researchedCount } from "../research/research";
 import { getDef } from "../world/defs";
 
 /** Midnight: every enabled, powered carbon facility earns `creditsPerDay` × `creditPrice`. */
@@ -33,9 +34,10 @@ export function progressionStep(ctx: TickCtx): void {
 	const tiers = content.balance.tiers;
 	const pflops = installedPflops(state, content);
 	const before = state.tier;
+	const techsDone = researchedCount(state, content);
 	while (state.tier < tiers.pflops.length) {
 		const n = state.tier + 1;
-		if (pflops < tiers.pflops[n - 1] || state.metrics.uptime < tiers.uptime[n - 1]) break;
+		if (pflops < tiers.pflops[n - 1] || state.metrics.uptime < tiers.uptime[n - 1] || techsDone < (tiers.techs?.[n - 1] ?? 0)) break;
 		state.tier = n;
 		const reward = tiers.reward[n - 1] ?? 0;
 		earn(state, reward);

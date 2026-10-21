@@ -48,7 +48,8 @@
   "placement": {
    "needsPower": true,
    "needsCoolant": true
-  }
+  },
+  "tech": "chilled_loop"
  },
  "rack_storage": {
   "id": "rack_storage",
@@ -116,7 +117,8 @@
   "placement": {
    "needsPower": true,
    "needsCoolant": true
-  }
+  },
+  "tech": "chilled_loop"
  },
  "cdu": {
   "id": "cdu",
@@ -137,7 +139,8 @@
   "placement": {
    "needsPower": true,
    "needsCoolant": true
-  }
+  },
+  "tech": "chilled_loop"
  },
  "grid_tie": {
   "id": "grid_tie",
@@ -249,11 +252,11 @@
  "rack_air_gpu2": {
   "id": "rack_air_gpu2",
   "name": "AC-3 Rear-Door Rack",
-  "description": "Eight-GPU trays behind a water-cooled rear door that scrubs the exhaust before it reaches the aisle. 55 kW and 32 PFLOPS per cabinet, but it needs an air handler that can keep up.",
+  "description": "Eight-GPU trays behind a water-cooled rear door that scrubs the exhaust before it reaches the aisle. 55 kW and 42 PFLOPS per cabinet, but it needs an air handler that can keep up.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
-  "cost": 600000,
+  "cost": 550000,
   "upkeepPerDay": 1800,
   "unlockTier": 2,
   "facilityKw": 0,
@@ -263,7 +266,7 @@
    "cooling": "air",
    "powerKw": 55,
    "liquidFraction": 0,
-   "pflops": 32,
+   "pflops": 42,
    "storageTB": 0,
    "failurePerDay": 0.22
   },
@@ -275,7 +278,7 @@
  "rack_air_gpu3": {
   "id": "rack_air_gpu3",
   "name": "AC-4 Hot-Aisle Rack",
-  "description": "A sealed hot-aisle cabinet with ducted exhaust and tuned fan curves, delivering 52 PFLOPS from 70 kW of air-cooled silicon. The practical ceiling of air cooling.",
+  "description": "A sealed hot-aisle cabinet with ducted exhaust and tuned fan curves, delivering 52 PFLOPS from 70 kW of air-cooled silicon. The practical ceiling of air cooling. Superseded; no longer built.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -296,7 +299,8 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "hot_aisle"
+  "tech": "hot_aisle",
+  "retired": true
  },
  "rack_dlc_gpu2": {
   "id": "rack_dlc_gpu2",
@@ -409,11 +413,11 @@
  "rack_infer": {
   "id": "rack_infer",
   "name": "IA-1 Inference Accelerator",
-  "description": "Fixed-function inference cards: 54 PFLOPS from only 36 kW, so 1.5 PFLOPS per kW, three times the AC-1. Air-cooled and light on the electricity bill, though it costs $1.3M.",
+  "description": "Fixed-function inference cards: 95 PFLOPS from only 36 kW, so 2.6 PFLOPS per kW, five times the AC-1. Air-cooled and light on the electricity bill, though it costs $1.1M.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
-  "cost": 1300000,
+  "cost": 1100000,
   "upkeepPerDay": 3500,
   "unlockTier": 3,
   "facilityKw": 0,
@@ -423,7 +427,7 @@
    "cooling": "air",
    "powerKw": 36,
    "liquidFraction": 0,
-   "pflops": 54,
+   "pflops": 95,
    "storageTB": 0,
    "failurePerDay": 0.18
   },
@@ -907,11 +911,11 @@
  "neural_pit": {
   "id": "neural_pit",
   "name": "OC-4 Neural Vat",
-  "description": "A four-tile vat of cultured neural tissue. 460 PFLOPS from 80 kW: 5.75 PFLOPS per kW. Must be held at 37 °C within 1 °C, draws 10 units of nutrient medium a tick, and is the most contaminating unit on the catalogue.",
+  "description": "A four-tile vat of cultured neural tissue. 560 PFLOPS from 80 kW: 7 PFLOPS per kW. Must be held at 37 °C within 1 °C, draws 10 units of nutrient medium a tick, and is the most contaminating unit on the catalogue.",
   "kind": "rack",
   "category": "bio",
   "width": 4,
-  "cost": 7500000,
+  "cost": 7000000,
   "upkeepPerDay": 16000,
   "unlockTier": 5,
   "facilityKw": 0,
@@ -921,7 +925,7 @@
    "cooling": "bio",
    "powerKw": 80,
    "liquidFraction": 0,
-   "pflops": 460,
+   "pflops": 560,
    "storageTB": 0,
    "failurePerDay": 0.35,
    "bio": {
@@ -1197,11 +1201,11 @@
  "rack_neuromorphic": {
   "id": "rack_neuromorphic",
   "name": "NM-1 Neuromorphic Rack",
-  "description": "Boards of spiking-neuron silicon that compute only when something happens. Delivers 22 PFLOPS from only 12 kW of air-cooled draw, 1.8 PFLOPS per kW. Failures are rare and brief.",
+  "description": "Boards of spiking-neuron silicon that compute only when something happens. Delivers 50 PFLOPS from only 12 kW of air-cooled draw, 4.2 PFLOPS per kW. Failures are rare and brief.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
-  "cost": 750000,
+  "cost": 800000,
   "upkeepPerDay": 3000,
   "unlockTier": 3,
   "facilityKw": 0,
@@ -1211,19 +1215,19 @@
    "cooling": "air",
    "powerKw": 12,
    "liquidFraction": 0,
-   "pflops": 22,
+   "pflops": 50,
    "storageTB": 0,
    "failurePerDay": 0.22
   },
   "placement": {
    "needsPower": true
   },
-  "tech": "neuromorphic_cards"
+  "tech": "inference_foundry"
  },
  "rack_photonic": {
   "id": "rack_photonic",
   "name": "PH-1 Photonic Rack",
-  "description": "Optical interconnect carries the arithmetic: 330 PFLOPS from only 40 kW of air-cooled draw, 8.3 PFLOPS per kW.",
+  "description": "Optical interconnect carries the arithmetic: 480 PFLOPS from only 40 kW of air-cooled draw, 12 PFLOPS per kW.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -1237,7 +1241,7 @@
    "cooling": "air",
    "powerKw": 40,
    "liquidFraction": 0,
-   "pflops": 330,
+   "pflops": 480,
    "storageTB": 0,
    "failurePerDay": 0.16
   },
@@ -1272,11 +1276,11 @@
  "rack_mind_lattice": {
   "id": "rack_mind_lattice",
   "name": "ML-1 Mind Lattice Rack",
-  "description": "A liquid-cooled lattice of hosted processes with persistent memory. Delivers 640 PFLOPS from 220 kW, 85% of it leaving through the coolant loop, and needs a 187 kW share of coolant capacity. Ethics review classes it as a tenant.",
+  "description": "A liquid-cooled lattice of hosted processes with persistent memory. Delivers 700 PFLOPS from 220 kW, 85% of it leaving through the coolant loop, and needs a 187 kW share of coolant capacity. Ethics review classes it as a tenant.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
-  "cost": 8500000,
+  "cost": 8000000,
   "upkeepPerDay": 15000,
   "unlockTier": 5,
   "facilityKw": 0,
@@ -1286,7 +1290,7 @@
    "cooling": "dlc",
    "powerKw": 220,
    "liquidFraction": 0.85,
-   "pflops": 640,
+   "pflops": 700,
    "storageTB": 0,
    "failurePerDay": 0.2
   },
@@ -1344,5 +1348,87 @@
    "needsPower": true
   },
   "tech": "backup_vault_charter"
+ },
+ "grid_tie_4": {
+  "id": "grid_tie_4",
+  "name": "Grid Intake 20 MW",
+  "description": "A dedicated 220 kV substation with a gatehouse. Imports up to 20 MW at the going rate.",
+  "kind": "grid_tie",
+  "category": "power",
+  "width": 10,
+  "cost": 3400000,
+  "upkeepPerDay": 11000,
+  "unlockTier": 5,
+  "facilityKw": 100,
+  "color": "#4a4f35",
+  "accent": "#f0e8cc",
+  "power": {
+   "capacityKw": 20000
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "grid_autonomy"
+ },
+ "rack_imm_gpu3": {
+  "id": "rack_imm_gpu3",
+  "name": "IM-3 Vault Immersion Tank",
+  "description": "A vault-sized immersion tank. 380 kW and 800 PFLOPS per tank, 95% of the heat taken by a condenser coil the size of a lorry.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 4,
+  "cost": 6500000,
+  "upkeepPerDay": 16000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#5f6563",
+  "accent": "#ffd84a",
+  "rack": {
+   "cooling": "immersion",
+   "powerKw": 380,
+   "liquidFraction": 0.95,
+   "pflops": 800,
+   "storageTB": 0,
+   "failurePerDay": 0.16
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "immersion_vault"
+ },
+ "rack_organoid_2": {
+  "id": "rack_organoid_2",
+  "name": "OC-2 Organoid Vat Bank",
+  "description": "A bank of cultured tissue in a single vat. 300 PFLOPS from 45 kW: 6.7 PFLOPS per kW. Held at 37 °C within 1 °C, fed 5 units of nutrient medium a tick. Sheds contamination faster than the OC-1, as vats do.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 3,
+  "cost": 4500000,
+  "upkeepPerDay": 9000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#b9a88f",
+  "accent": "#c98a86",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 45,
+   "liquidFraction": 0,
+   "pflops": 300,
+   "storageTB": 0,
+   "failurePerDay": 0.3,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 5,
+    "contamination": 0.003
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "organoid_vats"
  }
 }
