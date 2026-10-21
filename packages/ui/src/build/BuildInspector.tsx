@@ -28,15 +28,7 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 	const picked = itemForTool(tool, content);
 	const hovered = findItem(ui.buildHover, content);
 	const item = hovered ?? picked;
-	if (!item) {
-		return (
-			<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector">
-				<div className="bld-kicker">Inspector</div>
-				<h2 className="bld-h">Pick something to build</h2>
-				<p className="bld-blurb">Point at any card to see what it does and what it costs. Click it to pick it, then click the tower to put it down.</p>
-			</aside>
-		);
-	}
+	if (!item) return null; // nothing hovered or picked: keep the screen clear
 	const isPicked = !!picked && picked.key === item.key;
 	const missing = item.def ? item.cost - view.cash : 0;
 	const openEntry = (): void => setUi({ drawer: "primer", encyId: item.entry, paletteOpen: false, buildHover: null });
