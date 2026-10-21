@@ -308,3 +308,28 @@
 .aitower-hud .ui-right > .bld-insp {
 	margin-top: var(--coach-push, 0px);
 }
+/* Flavour quotes: a quiet italic line with the author, source on hover. */
+.aitower-hud .ui-flavor {
+	margin: 4px 0 0;
+	padding: 8px 0 0;
+	border-top: 1px solid var(--panel-edge);
+	display: grid;
+	gap: 2px;
+	cursor: help;
+}
+.aitower-hud .ui-flavor-q {
+	margin: 0;
+	font: italic 12px/1.4 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-flavor-by {
+	font: 11px/1.3 var(--f-body);
+	color: var(--text-dim);
+	opacity: 0.8;
+}
+.aitower-hud .ui-flavor.is-epigraph {
+	border-top: 0;
+	border-left: 2px solid var(--panel-edge);
+	padding: 0 0 0 10px;
+	margin: 0 0 10px;
+}

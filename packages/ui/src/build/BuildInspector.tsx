@@ -1,5 +1,6 @@
 import { fmtMoney } from "../format";
 import { Icon } from "../components/common";
+import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
 import { findItem, itemForTool } from "./catalog";
 import { CATEGORY_LABEL, type Stat } from "./plain";
@@ -64,6 +65,7 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 					<p className="bld-placing">Click the card to pick it.</p>
 				)}
 			</div>
+			<FlavorLine flavor={item.def?.flavor} />
 		</aside>
 	);
 }

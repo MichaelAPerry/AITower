@@ -128,6 +128,14 @@ export interface PlacementRules {
 	needsNutrient?: boolean;
 }
 
+/** A short real quotation shown as quiet flavour text. Every one is recorded, with a verification URL, in docs/QUOTES.md. */
+export interface Flavor {
+	quote: string;
+	author: string;
+	/** Short citation shown on hover, e.g. "Mind, 1950". */
+	source?: string;
+}
+
 export interface FacilityDef {
 	id: string;
 	name: string;
@@ -161,6 +169,7 @@ export interface FacilityDef {
 	 * conduits (free, unreliable), can be demolished, and counts as a `grown` facility in the view.
 	 */
 	growth?: boolean;
+	flavor?: Flavor;
 }
 
 export interface BotDef {
@@ -180,6 +189,7 @@ export interface BotDef {
 	flying?: boolean;
 	/** Spare parts carried per depot trip (default 1); repairs queued work orders in turn. */
 	carry?: number;
+	flavor?: Flavor;
 }
 
 export interface StructureCosts {
@@ -587,6 +597,7 @@ export interface TechNode {
 	effects: TechEffect[];
 	/** Only researchable after this ascension path was chosen. */
 	path?: AscensionPath;
+	flavor?: Flavor;
 }
 
 export interface ContentDB {

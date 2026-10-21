@@ -92,3 +92,16 @@ describe("jargon", () => {
 		for (const w of caps) expect(ok.has(w) || gloss.has(w.toLowerCase()), w).toBe(true);
 	});
 });
+
+describe("chapter epigraphs", () => {
+	it("every chapter has a real quote that is recorded in docs/QUOTES.md with a URL", async () => {
+		const { readFileSync } = await import("node:fs");
+		const docs = readFileSync(new URL("../../../../docs/QUOTES.md", import.meta.url), "utf8");
+		for (const c of chapters) {
+			expect(c.flavor, c.id).toBeDefined();
+			const row = docs.split("\n").find((l) => l.startsWith(`| \`${c.id}\` |`));
+			expect(row, c.id).toContain(c.flavor?.quote);
+			expect(row, c.id).toMatch(/https?:\/\/\S+/);
+		}
+	});
+});

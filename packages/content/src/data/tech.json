@@ -12,7 +12,12 @@
     "type": "feature",
     "feature": "contractsClerk"
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "The division of labour can be applied with equal success to mental as to mechanical operations",
+   "author": "Charles Babbage",
+   "source": "On the Economy of Machinery and Manufactures, 1832"
+  }
  },
  {
   "id": "reading_room",
@@ -30,7 +35,12 @@
     "kind": "researchRate",
     "factor": 1.1
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Self-education is, I firmly believe, the only kind of education there is.",
+   "author": "Isaac Asimov",
+   "source": "Science Past, Science Future, 1975"
+  }
  },
  {
   "id": "vendor_stamp",
@@ -48,7 +58,12 @@
     "kind": "payout",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Seest thou a man diligent in his business? he shall stand before kings; he shall not stand before mean men.",
+   "author": "King James Bible",
+   "source": "Proverbs 22:29 (KJV, 1611)"
+  }
  },
  {
   "id": "ledger_audit",
@@ -66,7 +81,12 @@
     "kind": "upkeep",
     "factor": 0.92
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "When you can measure what you are speaking about, and express it in numbers, you know something about it",
+   "author": "Lord Kelvin",
+   "source": "Electrical Units of Measurement, lecture of 3 May 1883"
+  }
  },
  {
   "id": "ministry_liaison",
@@ -84,7 +104,12 @@
     "kind": "payout",
     "factor": 1.04
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "The Circumlocution Office was (as everybody knows without being told) the most important Department under Government.",
+   "author": "Charles Dickens",
+   "source": "Little Dorrit, book 1, ch. 10"
+  }
  },
  {
   "id": "procurement_committee",
@@ -102,7 +127,12 @@
     "kind": "upkeep",
     "factor": 0.93
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "And if one prevail against him, two shall withstand him; and a threefold cord is not quickly broken.",
+   "author": "King James Bible",
+   "source": "Ecclesiastes 4:12 (KJV, 1611)"
+  }
  },
  {
   "id": "grand_concordat",
@@ -126,7 +156,12 @@
     "kind": "researchRate",
     "factor": 1.15
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "In this world nothing can be said to be certain, except death and taxes.",
+   "author": "Benjamin Franklin",
+   "source": "Letter to Jean-Baptiste Le Roy, 13 November 1789"
+  }
  },
  {
   "id": "batch_cards",
@@ -142,7 +177,12 @@
     "kind": "payout",
     "factor": 1.03
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "We may say most aptly that the Analytical Engine weaves algebraical patterns just as the Jacquard-loom weaves flowers and leaves.",
+   "author": "Ada Lovelace",
+   "source": "Notes on the Analytical Engine, 1843"
+  }
  },
  {
   "id": "rear_door_drawings",
@@ -154,7 +194,12 @@
   "requires": [
    "batch_cards"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Premature optimization is the root of all evil (or at least most of it) in programming.",
+   "author": "Donald Knuth",
+   "source": "Computer Programming as an Art, CACM, 1974"
+  }
  },
  {
   "id": "tape_silo",
@@ -166,7 +211,12 @@
   "requires": [
    "batch_cards"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Science is what we understand well enough to explain to a computer. Art is everything else we do.",
+   "author": "Donald Knuth",
+   "source": "Foreword to A=B, 1996"
+  }
  },
  {
   "id": "hot_aisle",
@@ -184,7 +234,12 @@
     "kind": "coolingCapacity",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Shuffling is the only thing which Nature cannot undo.",
+   "author": "Arthur Eddington",
+   "source": "The Nature of the Physical World, 1928"
+  }
  },
  {
   "id": "cold_plate_gen3",
@@ -197,7 +252,12 @@
    "rear_door_drawings",
    "chilled_loop"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Nothing is too wonderful to be true, if it be consistent with the laws of nature",
+   "author": "Michael Faraday",
+   "source": "Laboratory journal, 19 March 1849"
+  }
  },
  {
   "id": "inference_foundry",
@@ -209,7 +269,12 @@
   "requires": [
    "batch_cards"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "The Analytical Engine has no pretensions whatever to originate any thing.",
+   "author": "Ada Lovelace",
+   "source": "Notes by the Translator, Scientific Memoirs, 1843"
+  }
  },
  {
   "id": "manifold_blade",
@@ -221,7 +286,12 @@
   "requires": [
    "cold_plate_gen3"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "The art of programming is the art of organizing complexity",
+   "author": "Edsger W. Dijkstra",
+   "source": "EWD249, 1970"
+  }
  },
  {
   "id": "desk_fan_standard",
@@ -237,7 +307,12 @@
     "kind": "coolingCapacity",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Humans are allergic to change.",
+   "author": "Grace Hopper",
+   "source": "OCLC Newsletter, March/April 1987"
+  }
  },
  {
   "id": "rear_door_exchanger",
@@ -249,7 +324,12 @@
   "requires": [
    "desk_fan_standard"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "There cannot be a greater mistake than that of looking superciliously upon the practical applications of science.",
+   "author": "Lord Kelvin",
+   "source": "Electrical Units of Measurement, lecture of 3 May 1883"
+  }
  },
  {
   "id": "chilled_loop",
@@ -267,7 +347,12 @@
     "kind": "coolingCapacity",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Who hath divided a watercourse for the overflowing of waters",
+   "author": "King James Bible",
+   "source": "Job 38:25 (KJV, 1611)"
+  }
  },
  {
   "id": "high_capacity_air",
@@ -279,7 +364,12 @@
   "requires": [
    "rear_door_exchanger"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Just moving the little trim tab builds a low pressure that pulls the rudder around.",
+   "author": "Buckminster Fuller",
+   "source": "Playboy interview, February 1972"
+  }
  },
  {
   "id": "tower_hydraulics",
@@ -291,7 +381,12 @@
   "requires": [
    "chilled_loop"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Many waters cannot quench love, neither can the floods drown it",
+   "author": "King James Bible",
+   "source": "Song of Solomon 8:7 (KJV, 1611)"
+  }
  },
  {
   "id": "dielectric_handbook",
@@ -304,7 +399,12 @@
    "tower_hydraulics",
    "cold_plate_gen3"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Work. Finish. Publish.",
+   "author": "Michael Faraday",
+   "source": "Advice to William Crookes, in Gladstone, Michael Faraday, 1874"
+  }
  },
  {
   "id": "adiabatic_cooling",
@@ -322,7 +422,12 @@
     "kind": "coolingCapacity",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "And God said, Let there be a firmament in the midst of the waters, and let it divide the waters from the waters.",
+   "author": "King James Bible",
+   "source": "Genesis 1:6 (KJV, 1611)"
+  }
  },
  {
   "id": "two_phase_immersion",
@@ -341,7 +446,12 @@
     "kind": "failureRate",
     "factor": 0.95
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "The energy of the universe is constant. The entropy of the universe tends to a maximum.",
+   "author": "Rudolf Clausius",
+   "source": "Ninth Memoir, 1865"
+  }
  },
  {
   "id": "surge_memo",
@@ -357,7 +467,12 @@
     "kind": "failureRate",
     "factor": 0.95
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Sufficient unto the day is the evil thereof.",
+   "author": "King James Bible",
+   "source": "Matthew 6:34 (KJV, 1611)"
+  }
  },
  {
   "id": "offpeak_petition",
@@ -373,7 +488,12 @@
     "kind": "energyPrice",
     "factor": 0.95
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "To every thing there is a season, and a time to every purpose under the heaven",
+   "author": "King James Bible",
+   "source": "Ecclesiastes 3:1 (KJV, 1611)"
+  }
  },
  {
   "id": "substation_licence",
@@ -385,7 +505,12 @@
   "requires": [
    "offpeak_petition"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Electrical energy obtained by harnessing a waterfall is probably fifty times more effective than fuel energy.",
+   "author": "Nikola Tesla",
+   "source": "Electrical World and Engineer, 7 January 1905"
+  }
  },
  {
   "id": "flywheel_patent",
@@ -397,7 +522,12 @@
   "requires": [
    "surge_memo"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Genius is one per cent inspiration, ninety-nine per cent perspiration",
+   "author": "Thomas Edison",
+   "source": "Quoted in Harper's Monthly, September 1932"
+  }
  },
  {
   "id": "gas_concession",
@@ -415,7 +545,12 @@
     "kind": "energyPrice",
     "factor": 0.97
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "And, behold, the bush burned with fire, and the bush was not consumed.",
+   "author": "King James Bible",
+   "source": "Exodus 3:2 (KJV, 1611)"
+  }
  },
  {
   "id": "accumulator_charter",
@@ -427,7 +562,12 @@
   "requires": [
    "flywheel_patent"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Lay not up for yourselves treasures upon earth, where moth and rust doth corrupt, and where thieves break through and steal",
+   "author": "King James Bible",
+   "source": "Matthew 6:19 (KJV, 1611)"
+  }
  },
  {
   "id": "feeder_treaty",
@@ -446,7 +586,12 @@
     "kind": "energyPrice",
     "factor": 0.95
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "I hear America singing, the varied carols I hear",
+   "author": "Walt Whitman",
+   "source": "Leaves of Grass"
+  }
  },
  {
   "id": "pit_crew",
@@ -462,7 +607,12 @@
     "kind": "repairSpeed",
     "factor": 1.15
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Whatsoever thy hand findeth to do, do it with thy might",
+   "author": "King James Bible",
+   "source": "Ecclesiastes 9:10 (KJV, 1611)"
+  }
  },
  {
   "id": "brass_gearing",
@@ -480,7 +630,12 @@
     "kind": "botSpeed",
     "factor": 1.1
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "I wish to God these calculations had been executed by steam.",
+   "author": "Charles Babbage",
+   "source": "Recalled 1839 (of 1821); Buxton and Hyman, 1988"
+  }
  },
  {
   "id": "logistics_drone",
@@ -492,7 +647,12 @@
   "requires": [
    "brass_gearing"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "I will lift up mine eyes unto the hills, from whence cometh my help.",
+   "author": "King James Bible",
+   "source": "Psalm 121:1 (KJV, 1611)"
+  }
  },
  {
   "id": "central_stores",
@@ -504,7 +664,12 @@
   "requires": [
    "pit_crew"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Cast thy bread upon the waters: for thou shalt find it after many days.",
+   "author": "King James Bible",
+   "source": "Ecclesiastes 11:1 (KJV, 1611)"
+  }
  },
  {
   "id": "fast_charge",
@@ -516,7 +681,12 @@
   "requires": [
    "logistics_drone"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Please cut off a nanosecond and send it over to me.",
+   "author": "Grace Hopper",
+   "source": "60 Minutes interview, 24 August 1986"
+  }
  },
  {
   "id": "logistics_lifter",
@@ -529,7 +699,12 @@
    "brass_gearing",
    "central_stores"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "In the sweat of thy face shalt thou eat bread, till thou return unto the ground",
+   "author": "King James Bible",
+   "source": "Genesis 3:19 (KJV, 1611)"
+  }
  },
  {
   "id": "maintenance_corps",
@@ -553,7 +728,12 @@
     "kind": "botSpeed",
     "factor": 1.05
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "If the iron be blunt, and he do not whet the edge, then must he put to more strength: but wisdom is profitable to direct.",
+   "author": "King James Bible",
+   "source": "Ecclesiastes 10:10 (KJV, 1611)"
+  }
  },
  {
   "id": "wetware_annex",
@@ -565,7 +745,12 @@
   "requires": [
    "culture_media"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "I had worked hard for nearly two years, for the sole purpose of infusing life into an inanimate body.",
+   "author": "Mary Shelley",
+   "source": "Frankenstein, ch. 5"
+  }
  },
  {
   "id": "sterile_protocols",
@@ -577,7 +762,12 @@
   "requires": [
    "wetware_annex"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "From then on, when anything went wrong with a computer, we said it had bugs in it.",
+   "author": "Grace Hopper",
+   "source": "Time, 16 April 1984"
+  }
  },
  {
   "id": "quarantine_doctrine",
@@ -589,7 +779,12 @@
   "requires": [
    "sterile_protocols"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Nothing is so painful to the human mind as a great and sudden change.",
+   "author": "Mary Shelley",
+   "source": "Frankenstein, ch. 23"
+  }
  },
  {
   "id": "culling_licence",
@@ -601,7 +796,12 @@
   "requires": [
    "quarantine_doctrine"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Out, out, brief candle!",
+   "author": "William Shakespeare",
+   "source": "Macbeth, act 5, scene 5"
+  }
  },
  {
   "id": "dna_archive_charter",
@@ -613,7 +813,12 @@
   "requires": [
    "wetware_annex"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "There is grandeur in this view of life, with its several powers, having been originally breathed into a few forms or into one",
+   "author": "Charles Darwin",
+   "source": "On the Origin of Species, closing paragraph"
+  }
  },
  {
   "id": "bioreactor_permit",
@@ -626,7 +831,12 @@
    "wetware_annex",
    "sterile_protocols"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "A false balance is abomination to the LORD: but a just weight is his delight.",
+   "author": "King James Bible",
+   "source": "Proverbs 11:1 (KJV, 1611)"
+  }
  },
  {
   "id": "neural_pit_dossier",
@@ -640,7 +850,12 @@
    "quarantine_doctrine"
   ],
   "effects": [],
-  "path": "biotech"
+  "path": "biotech",
+  "flavor": {
+   "quote": "Beware, for I am fearless and therefore powerful.",
+   "author": "Mary Shelley",
+   "source": "Frankenstein, ch. 20"
+  }
  },
  {
   "id": "tissue_scaffolds",
@@ -659,7 +874,12 @@
     "factor": 0.93
    }
   ],
-  "path": "biotech"
+  "path": "biotech",
+  "flavor": {
+   "quote": "My substance was not hid from thee, when I was made in secret, and curiously wrought in the lowest parts of the earth.",
+   "author": "King James Bible",
+   "source": "Psalm 139:15 (KJV, 1611)"
+  }
  },
  {
   "id": "asset_register",
@@ -678,7 +898,12 @@
     "factor": 1.1
    }
   ],
-  "path": "biotech"
+  "path": "biotech",
+  "flavor": {
+   "quote": "Remove not the ancient landmark, which thy fathers have set.",
+   "author": "King James Bible",
+   "source": "Proverbs 22:28 (KJV, 1611)"
+  }
  },
  {
   "id": "works_foreman",
@@ -695,7 +920,12 @@
     "type": "feature",
     "feature": "foreman"
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "Management has authority only as long as it performs.",
+   "author": "Peter Drucker",
+   "source": "Management: Tasks, Responsibilities, Practices, 1973"
+  }
  },
  {
   "id": "standing_orders_binder",
@@ -717,7 +947,12 @@
     "type": "feature",
     "feature": "foremanPace"
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "A system must be managed. It will not manage itself.",
+   "author": "W. Edwards Deming",
+   "source": "The New Economics, 1993"
+  }
  },
  {
   "id": "solar_charter",
@@ -729,7 +964,12 @@
   "requires": [
    "substation_licence"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "he maketh his sun to rise on the evil and on the good, and sendeth rain on the just and on the unjust.",
+   "author": "King James Bible",
+   "source": "Matthew 5:45 (KJV, 1611)"
+  }
  },
  {
   "id": "wind_permit",
@@ -741,7 +981,12 @@
   "requires": [
    "substation_licence"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "The winds, the sea, and the moving tides are what they are.",
+   "author": "Rachel Carson",
+   "source": "National Book Award acceptance speech, 1952"
+  }
  },
  {
   "id": "district_heat_accord",
@@ -753,7 +998,12 @@
   "requires": [
    "chilled_loop"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "Behold, how good and how pleasant it is for brethren to dwell together in unity!",
+   "author": "King James Bible",
+   "source": "Psalm 133:1 (KJV, 1611)"
+  }
  },
  {
   "id": "algae_licence",
@@ -765,7 +1015,12 @@
   "requires": [
    "desk_fan_standard"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "And God said, Let the waters bring forth abundantly the moving creature that hath life",
+   "author": "King James Bible",
+   "source": "Genesis 1:20 (KJV, 1611)"
+  }
  },
  {
   "id": "canopy_array",
@@ -779,7 +1034,12 @@
    "wind_permit"
   ],
   "effects": [],
-  "path": "greentech"
+  "path": "greentech",
+  "flavor": {
+   "quote": "there is nothing hid from the heat thereof.",
+   "author": "King James Bible",
+   "source": "Psalm 19:6 (KJV, 1611)"
+  }
  },
  {
   "id": "heat_pipeline_franchise",
@@ -792,7 +1052,12 @@
    "district_heat_accord"
   ],
   "effects": [],
-  "path": "greentech"
+  "path": "greentech",
+  "flavor": {
+   "quote": "Render therefore unto Caesar the things which are Caesar’s; and unto God the things that are God’s.",
+   "author": "King James Bible",
+   "source": "Matthew 22:21 (KJV, 1611)"
+  }
  },
  {
   "id": "carbon_capture_dossier",
@@ -805,7 +1070,12 @@
    "algae_licence"
   ],
   "effects": [],
-  "path": "greentech"
+  "path": "greentech",
+  "flavor": {
+   "quote": "The “control of nature” is a phrase conceived in arrogance",
+   "author": "Rachel Carson",
+   "source": "Silent Spring, 1962"
+  }
  },
  {
   "id": "green_ledger",
@@ -825,7 +1095,12 @@
     "factor": 0.92
    }
   ],
-  "path": "greentech"
+  "path": "greentech",
+  "flavor": {
+   "quote": "The cost of a thing is the amount of what I will call life which is required to be exchanged for it",
+   "author": "Henry David Thoreau",
+   "source": "Walden, 1854"
+  }
  },
  {
   "id": "photonic_bench",
@@ -839,7 +1114,12 @@
    "canopy_array"
   ],
   "effects": [],
-  "path": "greentech"
+  "path": "greentech",
+  "flavor": {
+   "quote": "Any sufficiently advanced technology is indistinguishable from magic.",
+   "author": "Arthur C. Clarke",
+   "source": "Profiles of the Future, rev. ed., 1973"
+  }
  },
  {
   "id": "cryo_core_dossier",
@@ -852,7 +1132,12 @@
    "adiabatic_cooling"
   ],
   "effects": [],
-  "path": "synthetic"
+  "path": "synthetic",
+  "flavor": {
+   "quote": "The waters are hid as with a stone, and the face of the deep is frozen.",
+   "author": "King James Bible",
+   "source": "Job 38:30 (KJV, 1611)"
+  }
  },
  {
   "id": "continuity_form",
@@ -865,7 +1150,12 @@
    "accumulator_charter"
   ],
   "effects": [],
-  "path": "synthetic"
+  "path": "synthetic",
+  "flavor": {
+   "quote": "For a successful technology, reality must take precedence over public relations, for nature cannot be fooled.",
+   "author": "Richard Feynman",
+   "source": "Rogers Commission Report, Appendix F, 1986"
+  }
  },
  {
   "id": "backup_vault_charter",
@@ -878,7 +1168,12 @@
    "tape_silo"
   ],
   "effects": [],
-  "path": "synthetic"
+  "path": "synthetic",
+  "flavor": {
+   "quote": "A prudent man foreseeth the evil, and hideth himself: but the simple pass on, and are punished.",
+   "author": "King James Bible",
+   "source": "Proverbs 22:3 (KJV, 1611)"
+  }
  },
  {
   "id": "mind_lattice_dossier",
@@ -898,7 +1193,12 @@
     "factor": 1.1
    }
   ],
-  "path": "synthetic"
+  "path": "synthetic",
+  "flavor": {
+   "quote": "The stuff of the world is mind-stuff.",
+   "author": "Arthur Eddington",
+   "source": "The Nature of the Physical World, 1928"
+  }
  },
  {
   "id": "continuity_doctrine",
@@ -918,7 +1218,12 @@
     "factor": 0.92
    }
   ],
-  "path": "synthetic"
+  "path": "synthetic",
+  "flavor": {
+   "quote": "The saddest aspect of life right now is that science gathers knowledge faster than society gathers wisdom.",
+   "author": "Isaac Asimov",
+   "source": "Isaac Asimov's Book of Science and Nature Quotations, 1988"
+  }
  },
  {
   "id": "culture_media",
@@ -936,7 +1241,12 @@
     "kind": "failureRate",
     "factor": 0.97
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "And God said, Behold, I have given you every herb bearing seed, which is upon the face of all the earth",
+   "author": "King James Bible",
+   "source": "Genesis 1:29 (KJV, 1611)"
+  }
  },
  {
   "id": "fleet_command",
@@ -949,7 +1259,12 @@
    "logistics_lifter",
    "fast_charge"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "It is better to pick the wrong priority than none at all.",
+   "author": "Peter Drucker",
+   "source": "Management: Tasks, Responsibilities, Practices, 1973"
+  }
  },
  {
   "id": "grid_autonomy",
@@ -961,7 +1276,12 @@
   "requires": [
    "feeder_treaty"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "I went to the woods because I wished to live deliberately",
+   "author": "Henry David Thoreau",
+   "source": "Walden, 1854"
+  }
  },
  {
   "id": "immersion_vault",
@@ -973,7 +1293,12 @@
   "requires": [
    "two_phase_immersion"
   ],
-  "effects": []
+  "effects": [],
+  "flavor": {
+   "quote": "These see the works of the LORD, and his wonders in the deep.",
+   "author": "King James Bible",
+   "source": "Psalm 107:24 (KJV, 1611)"
+  }
  },
  {
   "id": "authority_charter",
@@ -991,7 +1316,12 @@
     "kind": "researchRate",
     "factor": 1.2
    }
-  ]
+  ],
+  "flavor": {
+   "quote": "The law’s delay, the insolence of office",
+   "author": "William Shakespeare",
+   "source": "Hamlet, act 3, scene 1"
+  }
  },
  {
   "id": "organoid_vats",
@@ -1004,7 +1334,12 @@
    "neural_pit_dossier"
   ],
   "effects": [],
-  "path": "biotech"
+  "path": "biotech",
+  "flavor": {
+   "quote": "And the LORD God formed man of the dust of the ground, and breathed into his nostrils the breath of life",
+   "author": "King James Bible",
+   "source": "Genesis 2:7 (KJV, 1611)"
+  }
  },
  {
   "id": "synaptic_mesh",
@@ -1023,6 +1358,11 @@
     "factor": 0.9
    }
   ],
-  "path": "biotech"
+  "path": "biotech",
+  "flavor": {
+   "quote": "I am large, I contain multitudes.",
+   "author": "Walt Whitman",
+   "source": "Song of Myself, Leaves of Grass"
+  }
  }
 ]

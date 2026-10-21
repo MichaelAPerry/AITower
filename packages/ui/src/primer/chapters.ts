@@ -2,7 +2,7 @@
  * The Datacenter Primer as data. Pure: chapters come from content, and unlocking is a function of the view.
  * Six core chapters (plain, under 120 words each), one "Making the most of Level N" per Level, one per path.
  */
-import type { AscensionPath, ContentDB, FacilityDef } from "@aitower/content";
+import type { AscensionPath, ContentDB, FacilityDef, Flavor } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 
@@ -23,6 +23,8 @@ export interface Chapter {
 	diagram?: DiagramId;
 	tryIt: { label: string; id: TryId };
 	unlock: Unlock;
+	/** A real quotation shown atop the chapter (all verified in docs/QUOTES.md). */
+	flavor?: Flavor;
 	/** Lower-case search text. */
 	keywords: string;
 }
@@ -179,10 +181,28 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	return { id: `ch:path-${p}`, group: "path", title: `Making the most of the ${name} path`, blocks, tryIt: { label: "Open Research", id: "research" }, unlock: { kind: "path", path: p }, keywords: `${name} path ascension ${blocks.map((x) => x.p).join(" ")}`.toLowerCase() };
 }
 
+/** Chapter epigraphs. Each is a real quotation, verified in docs/QUOTES.md. */
+export const CHAPTER_FLAVOR: Record<string, Flavor> = {
+	"ch:what": { quote: "We can only see a short distance ahead, but we can see plenty there that needs to be done.", author: "Alan Turing", source: "Computing Machinery and Intelligence, Mind, 1950" },
+	"ch:power": { quote: "Electricity ought to be as cheap as oxygen, for it can not be destroyed.", author: "Thomas Edison", source: "Quoted in The Fra, April 1910" },
+	"ch:heat": { quote: "The law that entropy always increases, holds, I think, the supreme position among the laws of Nature.", author: "Arthur Eddington", source: "The Nature of the Physical World, 1928" },
+	"ch:break": { quote: "Everything fails all the time.", author: "Werner Vogels", source: "The Next Web conference, 2008 (reported by TNW, 4 April 2008)" },
+	"ch:uptime": { quote: "Simplicity is prerequisite for reliability.", author: "Edsger W. Dijkstra", source: "EWD498, 1975" },
+	"ch:money": { quote: "Remember that time is money.", author: "Benjamin Franklin", source: "Advice to a Young Tradesman, 1748" },
+	"ch:level1": { quote: "For which of you, intending to build a tower, sitteth not down first, and counteth the cost, whether he have sufficient to finish it?", author: "King James Bible", source: "Luke 14:28 (KJV, 1611)" },
+	"ch:level2": { quote: "Hence plan to throw one away; you will, anyhow.", author: "Fred Brooks", source: "The Mythical Man-Month, 1975" },
+	"ch:level3": { quote: "Plans are worthless, but planning is everything.", author: "Dwight D. Eisenhower", source: "Address to the National Defense Executive Reserve Conference, 14 November 1957" },
+	"ch:level4": { quote: "The complexity for minimum component costs has increased at a rate of roughly a factor of two per year.", author: "Gordon Moore", source: "Cramming more components onto integrated circuits, Electronics, 1965" },
+	"ch:level5": { quote: "Go to, let us build us a city and a tower, whose top may reach unto heaven", author: "King James Bible", source: "Genesis 11:4 (KJV, 1611)" },
+	"ch:path-biotech": { quote: "It was on a dreary night of November that I beheld the accomplishment of my toils.", author: "Mary Shelley", source: "Frankenstein, ch. 5" },
+	"ch:path-greentech": { quote: "Those who contemplate the beauty of the earth find reserves of strength that will endure as long as life lasts.", author: "Rachel Carson", source: "The Sense of Wonder, 1965" },
+	"ch:path-synthetic": { quote: "I see no limit to the capabilities of machines.", author: "Claude Shannon", source: "Omni, August 1987" },
+};
+
 /** Every chapter in reading order: core, then Levels, then paths. */
 export function buildChapters(c: ContentDB): Chapter[] {
 	const levels = Array.from({ length: c.balance.tiers.pflops.length }, (_, i) => levelChapter(i + 1, c));
-	return [...core(c), ...levels, ...(["biotech", "greentech", "synthetic"] as const).map((p) => pathChapter(p, c))];
+	return [...core(c), ...levels, ...(["biotech", "greentech", "synthetic"] as const).map((p) => pathChapter(p, c))].map((ch) => (CHAPTER_FLAVOR[ch.id] ? { ...ch, flavor: CHAPTER_FLAVOR[ch.id] } : ch));
 }
 
 /** Old "More..." targets that now have a Primer chapter. */

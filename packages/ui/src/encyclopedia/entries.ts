@@ -2,7 +2,7 @@
  * The Encyclopedia as data: pure generation from content (and the view, for lock state) plus search.
  * Basics and glossary are hand-written; facilities, bots and research are generated, so they never drift from the numbers.
  */
-import type { ContentDB, FacilityDef, TechNode } from "@aitower/content";
+import type { ContentDB, FacilityDef, Flavor, TechNode } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { defSpecs, lockText } from "../components/BuildPalette";
 import { fmtMoney } from "../format";
@@ -29,6 +29,8 @@ export interface Entry {
 	/** Horror content: while locked, only the name and the unlock requirement show. */
 	spoiler: boolean;
 	ref?: { kind: "facility" | "bot" | "tech"; id: string };
+	/** A real quotation for facility, bot and research pages. */
+	flavor?: Flavor;
 	/** Lower-case search text. */
 	keywords: string;
 }
@@ -124,6 +126,7 @@ export function buildEntries(c: ContentDB): Entry[] {
 					needs: facilityNeeds(d),
 					spoiler: isBioFacility(d),
 					ref: { kind: "facility", id: d.id },
+					flavor: d.flavor,
 				},
 				`${d.kind} ${d.category}`,
 			),
@@ -144,6 +147,7 @@ export function buildEntries(c: ContentDB): Entry[] {
 					...(bot.carry && bot.carry > 1 ? ([["Carries", `${bot.carry} parts`]] as [string, string][]) : []),
 				],
 				ref: { kind: "bot", id: bot.id },
+				flavor: bot.flavor,
 			}),
 		);
 	}
@@ -163,6 +167,7 @@ export function buildEntries(c: ContentDB): Entry[] {
 					],
 					spoiler: isSpoilerTech(n),
 					ref: { kind: "tech", id: n.id },
+					flavor: n.flavor,
 				},
 				n.branch,
 			),

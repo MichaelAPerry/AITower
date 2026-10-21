@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ContentDB } from "@aitower/content";
 import type { PanelProps } from "../components/context";
+import { FlavorLine } from "../components/FlavorLine";
 import { type Entry, buildEntries, lockFor, SECTIONS, type Section, searchEntries, sectionOf } from "../encyclopedia/entries";
 import { PanelHead, SplitPane } from "../panel/PanelShell";
 import { type Chapter, buildChapters, isUnlocked, lockText, primerTarget, type TryId } from "./chapters";
@@ -171,6 +172,7 @@ function ChapterView({ c, n, next, onGo, ...p }: { c: Chapter; n: number; next?:
 		<article className="pr-chap" data-chapter-view={c.id}>
 			<div className="pr-kicker">{kicker}</div>
 			<h2 className="pr-h">{c.title}</h2>
+			<FlavorLine flavor={c.flavor} className="is-epigraph" />
 			{c.blocks.map((b, i) => (
 				<div key={b.h ?? i}>
 					{b.h && <h3 className="pr-sub">{b.h}</h3>}
@@ -206,6 +208,7 @@ function EntryView({ e, content, state, openResearch }: { e: Entry } & PanelProp
 					Open in Research
 				</button>
 			)}
+			{!hidden && <FlavorLine flavor={e.flavor} />}
 			{!hidden && e.needs.length > 0 && <p className="ui-ency-needs">Needs: {e.needs.join(" / ")}</p>}
 			{!hidden && e.stats.length > 0 && (
 				<dl className="ui-ency-stats">

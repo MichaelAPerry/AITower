@@ -1,5 +1,6 @@
 import type { TechBranch, TechNode } from "@aitower/content";
 import { Meter } from "../components/common";
+import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
 import { PATH_COLOR } from "../ascension/ascension";
 import { pushNotice } from "../notices";
@@ -129,6 +130,7 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 						onClick={() => start(sel)}
 					/>
 				)}
+				{!masked && <FlavorLine flavor={sel.flavor} />}
 			</>
 		);
 	} else {
