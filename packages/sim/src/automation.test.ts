@@ -57,7 +57,7 @@ describe("setAutomation", () => {
 			research: { enabled: false, branches: [] },
 			parts: { enabled: false, keep: 4 },
 			bots: { enabled: false, racksPerBot: 12, maxBots: 8 },
-			foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true },
+			foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" },
 		});
 	});
 
@@ -622,6 +622,7 @@ describe("the Foreman", () => {
 			exec(sim, { type: "buildConduit", layer: "nutrient", cells: rowCells(0, 20, 40) });
 			exec(sim, { type: "place", defId: "nutrient_plant", floor: 0, x: 22 });
 			run(sim, 2); // the plant's supply is solved from the next tick on
+			sim.state.path = "biotech"; // path items are only built automatically once that path is chosen
 			foreman(sim, { power: false, cooling: false });
 
 			expect(placed(sim, "organoid_rack")).toHaveLength(1);
@@ -821,5 +822,110 @@ describe("the Foreman", () => {
 		run(a, 1500);
 		run(twin, 1500);
 		expect(twin.hash()).toBe(a.hash());
+	});
+});
+
+describe("the Foreman follows the ladder", () => {
+	function on(sim: SimImpl, over: Partial<AutomationPolicy["foreman"]> = {}): void {
+		grant(sim, "t_foreman");
+		if (sim.state.bots.length === 0) addBot(sim.state, "rover", 0, 0, -1);
+		toHourEdge(sim);
+		setPolicy(sim, (p) => {
+			p.bots.maxBots = 0;
+			p.foreman = { ...p.foreman, enabled: true, reserve: 0, ...over };
+		});
+	}
+	const status = (sim: SimImpl): string => sim.view().automation.foremanStatus.join(" | ");
+	const placed = (sim: SimImpl, defId: string) => sim.state.facilities.filter((f) => f.defId === defId);
+	const perHour = (n: number): Partial<Balance> => ({ automation: { partsBatch: 5, foremanPerHour: n } });
+	const wet = scenario("ladderwet", {
+		slabs: [[0, 0, 47]],
+		conduits: [
+			["power", 0, 0, 47],
+			["coolant", 0, 20, 40],
+		],
+		facilities: [
+			{ defId: "grid_tie", floor: 0, x: 0 },
+			{ defId: "cdu", floor: 0, x: 22 },
+			{ defId: "chiller", floor: 0, x: 30 },
+		],
+	});
+	const mk = (tier: number) => {
+		const adv = (c: ContentDB): void => {
+			const base = c.facilities.rack_dlc_gpu;
+			// Level 3, far more PFLOPS but worse value per dollar than the Level 2 rack: "best value" would never pick it.
+			c.facilities.rack_dlc_adv = { ...base, id: "rack_dlc_adv", name: "LC-3", unlockTier: 3, cost: base.cost * 6, rack: { ...(base.rack as NonNullable<typeof base.rack>), pflops: (base.rack?.pflops ?? 0) * 2 } };
+		};
+		const sim = newSim(content([wet], perHour(1), adv), "ladderwet");
+		sim.state.tier = tier;
+		sim.state.cash = 1e9;
+		for (const t of ["chilled_loop"]) grant(sim, t);
+		return sim;
+	};
+
+	it("builds the best unlocked item of the chosen line, not the best value", () => {
+		const sim = mk(3);
+		on(sim, { rackLine: "liquid", power: false, cooling: false });
+		expect(placed(sim, "rack_dlc_adv")).toHaveLength(1); // LC-3 beats LC-2, which is cheaper per PF
+		expect(placed(sim, "rack_dlc_gpu")).toHaveLength(0);
+	});
+
+	it("respects the tier cap", () => {
+		const sim = mk(3);
+		on(sim, { rackLine: "liquid", rackCap: "standard", power: false, cooling: false });
+		expect(placed(sim, "rack_dlc_gpu")).toHaveLength(1);
+		expect(placed(sim, "rack_dlc_adv")).toHaveLength(0);
+	});
+
+	it("never builds path items unless that path was chosen", () => {
+		const sim = mk(3);
+		on(sim, { power: false, cooling: false });
+		expect(sim.state.facilities.some((f) => f.defId === "organoid_rack")).toBe(false);
+	});
+
+	it("builds support first: an air handler, then the rack, and never overheats", () => {
+		const bare = scenario("ladderair", { slabs: [[0, 0, 47]], conduits: [["power", 0, 0, 47]], facilities: [{ defId: "grid_tie", floor: 0, x: 0 }] });
+		const sim = newSim(content([bare], perHour(1)), "ladderair");
+		on(sim, { rackLine: "air" });
+		expect(placed(sim, "crah_unit")).toHaveLength(1);
+		expect(sim.state.facilities.filter((f) => f.defId.startsWith("rack_"))).toHaveLength(0);
+		expect(status(sim)).toMatch(/Racks: Next: .*, then rack_air_gpu/);
+		run(sim, 60);
+		expect(sim.state.facilities.filter((f) => f.defId === "rack_air_gpu").length).toBeGreaterThanOrEqual(1);
+		// Whatever it builds over the next days, the air around the racks stays inside what the handlers can carry.
+		run(sim, 60 * 24);
+		const crahKw = placed(sim, "crah_unit").length * (sim.content.facilities.crah_unit.cooling?.capacityKw ?? 0);
+		const rackKw = sim.state.facilities.filter((f) => f.defId === "rack_air_gpu").length * (sim.content.facilities.rack_air_gpu.rack?.powerKw ?? 0);
+		expect(rackKw).toBeLessThanOrEqual(crahKw);
+	});
+
+	it("explains a power wait with the kW needed and free", () => {
+		const small = scenario("ladderpow", { slabs: [[0, 0, 47]], conduits: [["power", 0, 0, 47]], facilities: [{ defId: "genset", floor: 0, x: 0 }] });
+		const sim = newSim(content([small], perHour(1), (c) => {
+			c.facilities.grid_tie.cost = 1e12; // no supply unit can be paid for
+			c.facilities.genset.cost = 1e12;
+			c.facilities.genset.power = { ...(c.facilities.genset.power as NonNullable<typeof c.facilities.genset.power>), capacityKw: 30 };
+		}), "ladderpow");
+		on(sim, { rackLine: "air", powerCap: "standard", cooling: false });
+		run(sim, 2);
+		expect(status(sim)).toMatch(/Racks: Waiting: 40 kW needed, \d+ kW free/);
+		expect(placed(sim, "rack_air_gpu")).toHaveLength(0); // never placed into a power shortfall
+	});
+
+	it("says why it is idle", () => {
+		const sim = newSim(content([], perHour(1)), "lot");
+		on(sim, { rackLine: "immersion" });
+		expect(status(sim)).toMatch(/Racks: .*(Waiting|Enough)/);
+		expect(status(sim)).toContain("Cooling:");
+		expect(status(sim)).toContain("Power:");
+	});
+
+	it("loads an older policy without a build spec as auto", () => {
+		const sim = newSim(content(), "lot");
+		const snap = JSON.parse(JSON.stringify(sim.snapshot()));
+		for (const k of ["rackLine", "rackCap", "coolingCap", "powerCap"]) delete snap.state.automation.foreman[k];
+		const back = simFromSnapshot(sim.content, snap) as SimImpl;
+		expect(back.view().automation.policy.foreman.rackLine).toBe("auto");
+		expect(back.view().automation.policy.foreman.powerCap).toBe("auto");
 	});
 });

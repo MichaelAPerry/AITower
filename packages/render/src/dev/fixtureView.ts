@@ -248,7 +248,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		refinement: 0,
 		drought: false,
 		sandbox: false,
-		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false, foremanPerHour: 1 },
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" } }, foremanUnlocked: false, foremanStatus: [], foremanPerHour: 1 },
 		gameOver: null,
 	};
 

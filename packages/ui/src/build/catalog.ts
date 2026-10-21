@@ -22,7 +22,7 @@ export function findItem(key: string | null | undefined, content: ContentDB): Ca
 	const s = structure(content).find((i) => i.key === key);
 	if (s) return s;
 	const d = content.facilities[key];
-	return d && !d.growth ? facilityItem(d) : null;
+	return d && !d.growth ? facilityItem(d, content) : null;
 }
 
 /** The catalog item the armed tool belongs to, if any. */

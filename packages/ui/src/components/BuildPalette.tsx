@@ -7,6 +7,7 @@ import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
 import { findItem, structure } from "../build/catalog";
 import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
+import { OutputBar, TierMark } from "../build/TierMark";
 import { toolKey } from "../tools/controller";
 import type { PanelProps } from "./context";
 
@@ -86,7 +87,7 @@ function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean;
 			type="button"
 			data-tut={plain ? undefined : `card-${d ? d.id : item.key}`}
 			aria-pressed={picked}
-			className={`bld-card ${picked ? "is-on" : ""} ${poor ? "is-poor" : ""} ${item.danger ? "is-danger" : ""}`}
+			className={["bld-card", picked ? "is-on" : "", item.tier ? `${item.tier.className} is-tier` : "", poor ? "is-poor" : "", item.danger ? "is-danger" : ""].filter(Boolean).join(" ")}
 			onClick={onPick}
 			onMouseEnter={() => onHover(item.key)}
 			onMouseLeave={() => onHover(null)}
@@ -94,7 +95,10 @@ function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean;
 			onBlur={() => onHover(null)}
 		>
 			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
+			{item.tier && <TierMark t={item.tier} />}
 			<span className="bld-name">{item.name}</span>
+			{item.tier?.output && <OutputBar t={item.tier} />}
+			{item.tier?.note && <span className="bld-note">{item.tier.note}</span>}
 			<span className={`bld-cost ${poor ? "is-short" : ""}`}>{item.costText}</span>
 		</button>
 	);

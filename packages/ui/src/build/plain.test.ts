@@ -3,6 +3,7 @@ import type { SimView } from "@aitower/sim";
 import { renderToString } from "react-dom/server";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
+import { BuildInspector } from "./BuildInspector";
 import { BuildPalette } from "../components/BuildPalette";
 import { CURSOR_HINT_PLACEMENTS, cursorHintVisible } from "../components/CursorHint";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
@@ -93,5 +94,35 @@ describe("putting the tool down", () => {
 		expect(cursorHintVisible(0)).toBe(true);
 		expect(cursorHintVisible(CURSOR_HINT_PLACEMENTS - 1)).toBe(true);
 		expect(cursorHintVisible(CURSOR_HINT_PLACEMENTS)).toBe(false);
+	});
+});
+
+describe("tier on the cards", () => {
+	it("every card carries exactly one tier class and a badge; path items add the diamond", () => {
+		const fc = createFakeContent();
+		const props = panelProps(createFakeStore(fc), fc, { ui: { paletteTab: "rack", paletteOpen: true } });
+		const html = renderToString(createElement(BuildPalette, props));
+		const cards = html.match(/<button[^>]*class="bld-card[^"]*"/g) ?? [];
+		expect(cards.length).toBeGreaterThan(0);
+		for (const c of cards) expect(c.match(/\bt-(std|adv|fro|bio|green|syn)\b/g)).toHaveLength(1);
+		expect(html).toContain("tier-badge");
+	});
+	it("catalogue items map to the right class, label and bar", () => {
+		const t = (id: string) => findItem(id, content)?.tier;
+		expect(t("rack_air_gpu")?.className).toBe("t-std");
+		expect(t("rack_dlc_gpu2")?.className).toBe("t-adv");
+		expect(t("rack_imm_gpu2")?.className).toBe("t-fro");
+		expect(t("organoid_incubator")).toMatchObject({ className: "t-bio", label: "Path: Wetware", isPath: true });
+		expect(t("rack_mind_lattice")?.className).toBe("t-syn");
+		expect(t("rack_imm_gpu3")?.output?.share).toBe(1);
+		expect(t("rack_air_gpu2")?.note).toBe("Air tops out here");
+	});
+	it("renders the Inspector with the badge, bar and note", () => {
+		const fc = createFakeContent();
+		const props = panelProps(createFakeStore(fc), fc, { ui: { paletteTab: "rack", paletteOpen: true, buildHover: "rack_air_gpu" } });
+		const html = renderToString(createElement(BuildInspector, props));
+		expect(html).toContain("t-std");
+		expect(html).toContain("Standard");
+		expect(html).toContain("tier-bar");
 	});
 });

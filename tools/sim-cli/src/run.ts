@@ -85,7 +85,7 @@ export function allAutomation(foreman: boolean): AutomationPolicy {
 		research: { enabled: true, branches: [] },
 		parts: { enabled: true, keep: 4 },
 		bots: { enabled: true, racksPerBot: 12, maxBots: 8 },
-		foreman: { enabled: foreman, reserve: AUTO_RESERVE, racks: true, cooling: true, power: true },
+		foreman: { enabled: foreman, reserve: AUTO_RESERVE, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" },
 	};
 }
 

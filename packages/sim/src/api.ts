@@ -75,7 +75,29 @@ export interface AutomationPolicy {
 	 * unserved, an air handler when racks run hot, a grid tie / genset when power is short. It never spends below `reserve`
 	 * and places at most `balance.automation.foremanPerHour` per hour. It never builds slab, floors or conduits (yet).
 	 */
-	foreman: { enabled: boolean; reserve: number; racks: boolean; cooling: boolean; power: boolean };
+	foreman: ForemanPolicy;
+}
+
+/** Which rack line the Foreman builds: one cooling line, or "auto" (best PFLOPS per dollar of what it can support). */
+export type ForemanLine = "auto" | "air" | "liquid" | "immersion";
+/** Highest tier a category may build: "auto" is the highest unlocked (no cap). Path items need the path chosen, whatever the cap. */
+export type ForemanTierCap = "auto" | "standard" | "advanced" | "frontier";
+
+/**
+ * The Foreman's build spec. `racks`, `cooling` and `power` switch the three kinds of job. Racks follow `rackLine` ("Racks: Liquid line")
+ * and build the best unlocked item of it up to `rackCap`; cooling matches the racks and power matches the load, each up to its own cap.
+ * With `cooling` / `power` on, a rack is only placed with cooling / power headroom, and the support item is queued first.
+ */
+export interface ForemanPolicy {
+	enabled: boolean;
+	reserve: number;
+	racks: boolean;
+	cooling: boolean;
+	power: boolean;
+	rackLine: ForemanLine;
+	rackCap: ForemanTierCap;
+	coolingCap: ForemanTierCap;
+	powerCap: ForemanTierCap;
 }
 
 /**
@@ -517,7 +539,7 @@ export interface SimView {
 	drought: boolean;
 	/** The scenario is a sandbox (no bankruptcy or shutdown). */
 	sandbox: boolean;
-	automation: { policy: AutomationPolicy; foremanUnlocked: boolean; /** Placements per game-hour the Foreman is allowed now. */ foremanPerHour: number };
+	automation: { policy: AutomationPolicy; foremanUnlocked: boolean; /** Why the Foreman skipped or queued each job at its last check ("Racks: Waiting: 160 kW needed, 110 kW free"). Empty before the first check after a load. */ foremanStatus: string[]; /** Placements per game-hour the Foreman is allowed now. */ foremanPerHour: number };
 	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
 	organoidPflops: number;
 	/** Days the leading ending's condition has held (for the UI's progress line), or 0. */

@@ -1,6 +1,6 @@
 /** Automation policy: defaults, structural shape check (for `normalizeCommand` and saves) and the `setAutomation` plan. */
 import type { TechBranch } from "@aitower/content";
-import type { AutomationPolicy } from "../api";
+import type { AutomationPolicy, ForemanLine, ForemanTierCap } from "../api";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import { AUTOMATION_MAX_BOTS, AUTOMATION_MAX_PARTS_KEEP } from "../core/constants";
 import { foremanUnlocked } from "../research/research";
@@ -13,7 +13,7 @@ export function defaultAutomation(): AutomationPolicy {
 		research: { enabled: false, branches: [] },
 		parts: { enabled: false, keep: 4 },
 		bots: { enabled: false, racksPerBot: 12, maxBots: 8 },
-		foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true },
+		foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" },
 	};
 }
 
@@ -23,6 +23,9 @@ export const cloneAutomation = (p: AutomationPolicy): AutomationPolicy => ({
 	bots: { ...p.bots },
 	foreman: { ...p.foreman },
 });
+
+export const FOREMAN_LINES: readonly ForemanLine[] = ["auto", "air", "liquid", "immersion"];
+export const FOREMAN_CAPS: readonly ForemanTierCap[] = ["auto", "standard", "advanced", "frontier"];
 
 const isObj = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 const isNum = (v: unknown): v is number => typeof v === "number" && Number.isFinite(v);
@@ -45,13 +48,18 @@ export function shapeAutomation(raw: unknown): { ok: true; policy: AutomationPol
 		!isNum(foreman.reserve)
 	)
 		return { ok: false, reason: "policy.foreman needs enabled, reserve, racks, cooling and power" };
+	// The build spec arrived with M6.2: a save or command without it gets the defaults.
+	const line = foreman.rackLine ?? "auto";
+	if (!FOREMAN_LINES.includes(line as ForemanLine)) return { ok: false, reason: "policy.foreman.rackLine must be auto, air, liquid or immersion" };
+	const caps = [foreman.rackCap ?? "auto", foreman.coolingCap ?? "auto", foreman.powerCap ?? "auto"];
+	if (!caps.every((c) => FOREMAN_CAPS.includes(c as ForemanTierCap))) return { ok: false, reason: "the Foreman's tier caps must be auto, standard, advanced or frontier" };
 	return {
 		ok: true,
 		policy: {
 			research: { enabled: research.enabled, branches: research.branches.map((b: unknown) => (typeof b === "string" ? b : "")) as TechBranch[] },
 			parts: { enabled: parts.enabled, keep: parts.keep },
 			bots: { enabled: bots.enabled, racksPerBot: bots.racksPerBot, maxBots: bots.maxBots },
-			foreman: { enabled: foreman.enabled, reserve: foreman.reserve, racks: foreman.racks, cooling: foreman.cooling, power: foreman.power },
+			foreman: { enabled: foreman.enabled, reserve: foreman.reserve, racks: foreman.racks, cooling: foreman.cooling, power: foreman.power, rackLine: line as ForemanLine, rackCap: caps[0] as ForemanTierCap, coolingCap: caps[1] as ForemanTierCap, powerCap: caps[2] as ForemanTierCap },
 		},
 	};
 }

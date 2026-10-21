@@ -6,7 +6,7 @@ import { Toggle } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { BRANCHES } from "../research/tech";
 import { fmtMoney } from "../format";
-import { automationFacts, branchSummary, foremanLockedText, MAX_RESERVE, ORDERS, sendAutomation, sendClerk, toCount, toggleBranch, toggleOrder, withOrder } from "./automation";
+import { automationFacts, branchSummary, CAP_OPTIONS, LINE_OPTIONS, foremanLockedText, MAX_RESERVE, ORDERS, sendAutomation, sendClerk, toCount, toggleBranch, toggleOrder, withOrder } from "./automation";
 import "./automation.css";
 
 /** The Automation drawer (key T; A would pan the camera): one row per standing order with its ON/OFF switch and settings, and the Clerk as a one-liner. */
@@ -79,6 +79,36 @@ export function AutomationDrawer({ store, content, state, openResearch }: PanelP
 										{k}
 									</label>
 								))}
+								<div className="ui-auto-spec" data-foreman-spec>
+									<span className="ui-auto-k">Racks build</span>
+									{/* biome-ignore lint/a11y/useSemanticElements: a row of toggle chips; a fieldset would bring its own box */}
+									<span className="ui-auto-chips" role="group" aria-label="Rack line">
+										{LINE_OPTIONS.map((o) => (
+											<button key={o.id} type="button" title={o.title} className={`ui-auto-chip ${policy.foreman.rackLine === o.id ? "is-on" : ""}`} aria-pressed={policy.foreman.rackLine === o.id} onClick={() => edit("foreman", { rackLine: o.id })}>
+												{o.label}
+											</button>
+										))}
+									</span>
+									{(["rackCap", "coolingCap", "powerCap"] as const).map((k) => (
+										<div key={k} className="ui-auto-cap">
+											<span className="ui-auto-k">{k === "rackCap" ? "Racks up to" : k === "coolingCap" ? "Cooling: match racks, up to" : "Power: match load, up to"}</span>
+											{/* biome-ignore lint/a11y/useSemanticElements: a row of toggle chips */}
+											<span className="ui-auto-chips" role="group" aria-label={`${k} tier cap`}>
+												{CAP_OPTIONS.map((o) => (
+													<button key={o.id} type="button" title={o.title} className={`ui-auto-chip ${policy.foreman[k] === o.id ? "is-on" : ""}`} aria-pressed={policy.foreman[k] === o.id} onClick={() => edit("foreman", { [k]: o.id })}>
+														{o.label}
+													</button>
+												))}
+											</span>
+										</div>
+									))}
+									<span className="ui-auto-note">Path items are only built once that path is chosen. With cooling and power on, a rack is only placed with headroom, and the support goes first.</span>
+								</div>
+								{on && (
+									<ul className="ui-auto-status" data-foreman-status aria-label="Foreman status">
+										{view.automation.foremanStatus.length === 0 ? <li className="ui-dim">Next check at the top of the hour.</li> : view.automation.foremanStatus.map((l) => <li key={l}>{l}</li>)}
+									</ul>
+								)}
 								<span className="ui-auto-note">
 									At most {view.automation.foremanPerHour ?? facts.foremanPerHour} per hour, on slab with a power conduit under it. Reserve {fmtMoney(policy.foreman.reserve)}.
 								</span>

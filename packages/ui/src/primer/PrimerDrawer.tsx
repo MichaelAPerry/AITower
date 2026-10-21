@@ -1,3 +1,4 @@
+import { TierMark } from "../build/TierMark";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { ContentDB } from "@aitower/content";
 import type { PanelProps } from "../components/context";
@@ -229,6 +230,11 @@ function EntryView({ e, content, state, openResearch, onGo }: { e: Entry; onGo: 
 		<article className="pr-chap" data-entry-view={e.id}>
 			<div className="pr-kicker">{e.section === "glossary" ? "WORD" : e.section.toUpperCase()}</div>
 			<h2 className="pr-h">{e.title}</h2>
+			{e.tier && !hidden && (
+				<div className={`pr-tier ${e.tier.className}`}>
+					<TierMark t={e.tier} />
+				</div>
+			)}
 			{lock && <p className="ui-ency-locktext">{lock}</p>}
 			{!hidden && e.lines.map((l) => <p key={l} className="pr-p">{l}</p>)}
 			{e.at && (

@@ -1,0 +1,87 @@
+/* Tier ladder: Standard slate frame, Advanced cyan with a top stripe, Frontier amber with an inner outline, Path colour plus diamond. */
+.aitower-hud .t-std { --tc: var(--t-std); }
+.aitower-hud .t-adv { --tc: var(--t-adv); }
+.aitower-hud .t-fro { --tc: var(--t-fro); }
+.aitower-hud .t-bio { --tc: var(--t-bio); }
+.aitower-hud .t-green { --tc: var(--t-green); }
+.aitower-hud .t-syn { --tc: var(--t-syn); }
+
+.aitower-hud .is-tier {
+	border-color: color-mix(in srgb, var(--tc) 55%, var(--panel-edge));
+	border-top: 3px solid var(--tc);
+}
+.aitower-hud .is-tier.t-fro {
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tc) 70%, transparent);
+}
+.aitower-hud .bld-card.is-tier:hover,
+.aitower-hud .bld-card.is-tier:focus-visible {
+	border-color: var(--tc);
+}
+.aitower-hud .bld-card.is-tier.is-on {
+	border-color: var(--tc);
+	box-shadow: inset 0 0 0 1px var(--tc), 0 0 12px color-mix(in srgb, var(--tc) 30%, transparent);
+}
+.aitower-hud .tier-mark {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	max-width: 100%;
+}
+.aitower-hud .tier-badge {
+	font: 500 10px/1 var(--f-num);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	color: var(--bg);
+	background: var(--tc, var(--t-std));
+	padding: 2px 5px;
+	border-radius: 2px;
+	white-space: nowrap;
+}
+.aitower-hud .tier-diamond {
+	width: 8px;
+	height: 8px;
+	background: var(--tc);
+	transform: rotate(45deg);
+	flex: none;
+}
+.aitower-hud .tier-out {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	width: 100%;
+}
+.aitower-hud .tier-bar {
+	display: block;
+	height: 4px;
+	border-radius: 2px;
+	background: var(--bg);
+	overflow: hidden;
+}
+.aitower-hud .tier-bar i {
+	display: block;
+	height: 100%;
+	background: var(--tc);
+}
+.aitower-hud .tier-out-text {
+	font: 400 11px/1.2 var(--f-num);
+	color: var(--text-dim);
+}
+.aitower-hud .bld-note {
+	font: 500 11px/1.3 var(--f-body);
+	color: var(--warn);
+	margin: 0;
+}
+/* Small inline chip used in lists (research unlocks, Handbook). */
+.aitower-hud .tier-chip {
+	display: inline-block;
+	font: 500 10px/1 var(--f-num);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--tc);
+	border: 1px solid var(--tc);
+	border-radius: 2px;
+	padding: 1px 4px;
+	margin-left: 6px;
+	vertical-align: middle;
+}
+.aitower-hud .pr-tier { margin: 2px 0 8px; }

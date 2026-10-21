@@ -3,6 +3,7 @@ import { Icon } from "../components/common";
 import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
 import { Jargon, TermScope } from "../glossary/Term";
+import { OutputBar, TierMark } from "./TierMark";
 import { findItem, itemForTool } from "./catalog";
 import { CATEGORY_LABEL, type Stat } from "./plain";
 
@@ -42,11 +43,14 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 	const openEntry = (): void => setUi({ drawer: "primer", encyId: item.entry, paletteOpen: false, buildHover: null });
 	return (
 		<TermScope key={item.key}>
-		<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
+		<aside className={`bld-insp ui-panel ${item.tier ? `${item.tier.className} is-tier` : ""}`} aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
 			<div className="bld-kicker">
 				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
 			</div>
+			{item.tier && <TierMark t={item.tier} />}
 			<h2 className="bld-h">{item.name}</h2>
+			{item.tier?.note && <p className="bld-note">{item.tier.note}. The next rack down the line costs more per PFLOPS.</p>}
+			{item.tier?.output && <OutputBar t={item.tier} labelled />}
 			<p className="bld-blurb">
 				<Jargon text={item.blurb} />
 			</p>

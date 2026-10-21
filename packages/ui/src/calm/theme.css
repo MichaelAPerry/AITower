@@ -19,6 +19,13 @@
 	--warn: #f2b84b;
 	--bad: #ff5d5d;
 	--money: #7cf0b0;
+	/* tier ladder (M6.2): one colour per tier, the same on cards, Inspector, research and Handbook */
+	--t-std: #8fa1ad;
+	--t-adv: #5fd4e6;
+	--t-fro: #f2b84b;
+	--t-bio: #ff7aa8;
+	--t-green: #9be564;
+	--t-syn: #a99cff;
 	--radius: 6px;
 	--radius-sm: 4px;
 	--f-display: "Chakra Petch", system-ui, sans-serif;

@@ -4,6 +4,7 @@ import type { SimSnapshot } from "../api";
 import { normalizeCommand } from "../commands/shape";
 import type { SimState } from "../core/state";
 import { decode } from "./codec";
+import { shapeAutomation } from "../automation/policy";
 import { InvalidSaveError, migrateState, type RawState, SNAPSHOT_VERSION } from "./migrate";
 import { validateState } from "./validate";
 
@@ -42,6 +43,8 @@ export function loadSnapshot(content: ContentDB, snap: SimSnapshot): SimState {
 	}
 	if (migrated.scenarioId !== snap.scenarioId) throw new InvalidSaveError("state belongs to a different scenario");
 	const state = validateState(content, migrated);
+	const shaped = shapeAutomation(state.automation);
+	if (shaped.ok) state.automation = shaped.policy; // fills the Foreman build spec on a save from before M6.2
 	state.sandbox = content.scenarios[state.scenarioId]?.sandbox === true; // follows the scenario, not the save
 	return state;
 }

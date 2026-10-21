@@ -4,7 +4,7 @@
  */
 import type { ContentDB, TechBranch, TechNode } from "@aitower/content";
 import type { GameStore } from "@aitower/shared";
-import type { AutomationPolicy, ClerkPolicy, CommandResult, SimView } from "@aitower/sim";
+import type { AutomationPolicy, ClerkPolicy, CommandResult, ForemanLine, ForemanTierCap, SimView } from "@aitower/sim";
 import { pushNotice } from "../notices";
 import { BRANCHES, techList } from "../research/tech";
 
@@ -109,3 +109,24 @@ export const autoLampTitle = (view: Pick<SimView, "automation" | "clerk">): stri
 	const on = activeOrders(view);
 	return on.length ? `Standing orders on: ${on.join(", ")}. Click to open the Automation drawer (T)` : "No standing orders are on. Open the Automation drawer (T)";
 };
+
+export const LINE_OPTIONS: { id: ForemanLine; label: string; title: string }[] = [
+	{ id: "auto", label: "Auto", title: "Best PFLOPS per dollar of what it can support right now" },
+	{ id: "air", label: "Air", title: "Air-cooled racks only" },
+	{ id: "liquid", label: "Liquid", title: "Liquid-cooled (cold-plate, blade) racks only" },
+	{ id: "immersion", label: "Immersion", title: "Immersion tanks only" },
+];
+
+export const CAP_OPTIONS: { id: ForemanTierCap; label: string; title: string }[] = [
+	{ id: "auto", label: "Highest", title: "The highest tier you have unlocked" },
+	{ id: "standard", label: "Standard", title: "Standard items only" },
+	{ id: "advanced", label: "To Advanced", title: "Standard and Advanced items" },
+	{ id: "frontier", label: "To Frontier", title: "Everything on the core ladder" },
+];
+
+/** The three category specs as one line each, in the wording of the design: "Racks: Liquid line". */
+export function foremanSpec(p: AutomationPolicy["foreman"]): string[] {
+	const line = LINE_OPTIONS.find((o) => o.id === p.rackLine)?.label ?? "Auto";
+	const cap = (c: ForemanTierCap): string => CAP_OPTIONS.find((o) => o.id === c)?.label.toLowerCase() ?? "highest";
+	return [`Racks: ${line}${p.rackLine === "auto" ? "" : " line"}, ${cap(p.rackCap)}`, `Cooling: match racks, ${cap(p.coolingCap)}`, `Power: match load, ${cap(p.powerCap)}`];
+}

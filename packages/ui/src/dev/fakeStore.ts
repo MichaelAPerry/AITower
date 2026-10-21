@@ -223,7 +223,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		refinement: 0,
 		drought: false,
 		sandbox: false,
-		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false, foremanPerHour: 1 },
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" } }, foremanUnlocked: false, foremanStatus: [], foremanPerHour: 1 },
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;
