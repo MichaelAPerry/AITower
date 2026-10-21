@@ -1,6 +1,7 @@
 /** Tick stage 1: validate & apply queued commands. */
 import type { SimCommand } from "../api";
 import type { TickCtx } from "../core/context";
+import { lessonBlocksCommand } from "../lesson/lesson";
 import { planSetClerk } from "../economy/clerk";
 import { planRepayLoan, planTakeLoan } from "../economy/credit";
 import { spend } from "../economy/ledger";
@@ -41,6 +42,8 @@ export function planNormalized(ctx: PlanCtx, cmd: SimCommand): Plan {
 }
 
 function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
+	const refused = lessonBlocksCommand(ctx.state, ctx.content, cmd.type);
+	if (refused) return reject(refused);
 	let plan: Plan;
 	switch (cmd.type) {
 		case "buildSlab":

@@ -12,6 +12,7 @@ import { cellCount } from "./core/grid";
 import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
 import { automationStep } from "./automation/automationStep";
+import { lessonStep } from "./lesson/lesson";
 import { weatherStep } from "./green/weather";
 import { decisionStep } from "./ministry/decisions";
 import { ambientOffset } from "./ministry/modifiers";
@@ -146,6 +147,7 @@ export class SimImpl implements Sim {
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		affinityStep(ctx); //  9e hourly path affinity from running facilities
 		progressionStep(ctx); // 10
+		lessonStep(ctx); // 10b lesson beats, steps, success
 		advanceTime(ctx); // 11
 		return events;
 	}

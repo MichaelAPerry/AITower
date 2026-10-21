@@ -17,6 +17,7 @@ import { emptyLedgerDay } from "../economy/ledger";
 import { emptyStats } from "../economy/stats";
 import { attachToNets } from "../networks/rebuild";
 import { labelLayer } from "../networks/unionFind";
+import { LESSON_NEVER, newLessonState } from "../lesson/lesson";
 import { addBot, addLift, findChargerWithSpace } from "./entities";
 
 export function createState(content: ContentDB, scenarioId: string, seed: number): SimState {
@@ -120,6 +121,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		refinement: 0,
 		sandbox: sc.sandbox === true,
 		pending: [],
+		lesson: null,
 	};
 
 	const fail = (what: string): never => {
@@ -161,5 +163,14 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 	seedOpeningOffer(state, content);
 	state.nextOfferTick = nextOfferDelay(state, content);
 	state.nextDecisionTick = content.balance.events.graceTicks + nextDecisionDelay(state, content);
+	const lesson = sc.lesson ? content.lessons.find((l) => l.id === sc.lesson) : undefined;
+	if (sc.lesson && !lesson) throw new Error(`scenario '${scenarioId}': unknown lesson '${sc.lesson}'`);
+	if (lesson) {
+		// A lesson is a quiet room: no random offers or decisions, only the script.
+		state.lesson = newLessonState(lesson, 0);
+		state.offers = [];
+		state.nextOfferTick = LESSON_NEVER;
+		state.nextDecisionTick = LESSON_NEVER;
+	}
 	return state;
 }
