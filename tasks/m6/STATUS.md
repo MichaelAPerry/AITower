@@ -25,3 +25,13 @@
 **Remaining after M6.4:**
 - M6.5: Lessons 2–6 and the Ops view.
 - M6.6: graphics pass (direction A with B's lighting).
+
+## Owner playtest notes (latest build): fix first, small
+1. **Foreman builds a liquid-cooled rack, then puts an air handler next to it.**
+   - Check whether that is intended. Liquid racks have `liquidFraction < 1`, so some of their heat still goes to air.
+   - If so, the Foreman should cover that residual with existing air capacity, or say why ("residual 20% heat needs air").
+   - If not, fix the cooling choice in `packages/sim/src/automation/foreman.ts` so the support it builds matches the rack's line.
+2. **Advisor portraits and tips sometimes cover the build catalog and inspector.**
+   - The strip must never overlap the build bar, catalog or inspector.
+   - Move or shrink it while the catalog is open, or dock it elsewhere.
+   - Files: `packages/ui/src/advisors/`, `packages/ui/src/build/`.
