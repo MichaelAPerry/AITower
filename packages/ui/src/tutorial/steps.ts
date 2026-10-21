@@ -1,7 +1,7 @@
 /**
  * The first-session coach marks: five doing-steps on the starter site, each one short sentence in a bubble next to the thing
  * to click. A step completes when the player does the action. Pure data + predicates over GameState so the flow is
- * unit-testable without React. Just-in-time hints (heat, the first memo) live here too.
+ * unit-testable without React. Just-in-time hints (heat) live here too.
  *
  * Clock policy: the clock is left to the player ("free") except while building, which stops time so nothing happens
  * behind the player's clicks ("pause").
@@ -136,7 +136,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
 
 // ─── Just-in-time hints ──────────────────────────────────────────────────
 
-export type HintId = "heat" | "memo";
+export type HintId = "heat";
 export type HintsSeen = Partial<Record<HintId, boolean>>;
 
 export interface Hint {
@@ -148,7 +148,6 @@ export interface Hint {
 
 export const HINTS: Record<HintId, Hint> = {
 	heat: { id: "heat", text: "Too hot: add an air handler nearby.", targets: [], sides: ["above"] },
-	memo: { id: "memo", text: "A memo arrived. Answer it here, or open the inbox.", targets: [".ui-memo-pop", t("inbox")], sides: ["left", "below"] },
 };
 
 /** The rack that is running hot (slowed down), if any. */
@@ -158,6 +157,5 @@ export const hotRack = (s: GameState, ctx: TutorialCtx): GameState["view"]["faci
 /** The hint to show now: the first one whose moment has come and that the player has not seen. */
 export function activeHint(s: GameState, seen: HintsSeen, ctx: TutorialCtx): HintId | null {
 	if (!seen.heat && hotRack(s, ctx)) return "heat";
-	if (!seen.memo && s.view.memos.length > 0) return "memo";
 	return null;
 }

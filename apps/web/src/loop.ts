@@ -74,12 +74,19 @@ export function startLoop(store: GameStoreInternals, renderer: Renderer, audio: 
 		try {
 			const t0 = clock();
 			let done = 0;
+			let held = false;
 			while (done < n) {
-				for (const e of store.advance(1)) events.push(e);
+				const stepped = store.advance(1);
+				for (const e of stepped) events.push(e);
 				done++;
+				if (stepped.some((e) => e.type === "decisionIssued")) {
+					acc = 0; // a decision opened: the clock is held, do not chase the backlog
+					held = true;
+					break;
+				}
 				if (done < n && clock() - t0 > budgetMs) break;
 			}
-			if (done < n) {
+			if (done < n && !held) {
 				acc = 0; // drop the backlog rather than chase it
 				behind = true;
 			}

@@ -446,6 +446,7 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	}
 }
 
+const ADVISORS = ["cass", "bea", "mel", "lucien"];
 const EVENT_CATEGORIES = ["ministry", "environmental", "operational", "client", "horror"];
 const ID_RE = /^[a-z0-9_]+$/;
 
@@ -526,7 +527,7 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 	else if (e.category === "horror" && e.path !== "greentech" && e.path !== "synthetic") p.push(`${w}.minCorruption: horror memos must be corruption-gated`);
 	if (e.path !== undefined && !PATHS.includes(e.path)) p.push(`${w}.path: unknown path "${e.path}"`);
 	if (e.scriptedDay !== undefined) num(p, `${w}.scriptedDay`, e.scriptedDay, { min: 0, int: true });
-	num(p, `${w}.timeoutTicks`, e.timeoutTicks, { gt: 0, int: true });
+	if (!ADVISORS.includes(e.advisor)) p.push(`${w}.advisor: unknown advisor "${e.advisor}"`);
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
 		p.push(`${w}.choices: at least one choice required`);
 		return;
@@ -537,7 +538,15 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 		if (ids.has(c.id)) p.push(`${w}.choices[${k}]: duplicate choice id "${c.id}"`);
 		ids.add(c.id);
 	});
-	if (!ids.has(e.defaultChoice)) p.push(`${w}.defaultChoice: "${e.defaultChoice}" is not one of the choices`);
+	if (!ids.has(e.recommended)) p.push(`${w}.recommended: "${e.recommended}" is not one of the choices`);
+	if (e.votes !== undefined) {
+		const who = (e.votes ?? []).map((v) => v.advisor).join(",");
+		if (who !== "cass,bea,mel") p.push(`${w}.votes: expected one vote each from cass, bea and mel, in that order`);
+		for (const [k, v] of (e.votes ?? []).entries()) {
+			if (typeof v.approve !== "boolean") p.push(`${w}.votes[${k}].approve: expected true or false`);
+			str(p, `${w}.votes[${k}].line`, v.line);
+		}
+	}
 }
 
 function validateEvents(p: Problems, db: ContentDB): void {
@@ -549,7 +558,6 @@ function validateEvents(p: Problems, db: ContentDB): void {
 	} else p.push("balance.standing: missing");
 	if (b?.events) {
 		num(p, "balance.events.intervalTicks", b.events.intervalTicks, { min: 1, int: true });
-		num(p, "balance.events.maxOpen", b.events.maxOpen, { min: 1, int: true });
 		num(p, "balance.events.graceTicks", b.events.graceTicks, { min: 0, int: true });
 	} else p.push("balance.events: missing");
 	if (!Array.isArray(db.events)) {

@@ -16,7 +16,7 @@ import {
 	planDeclineContract,
 	planSetEnabled,
 } from "./operations";
-import { planResolveMemo } from "../ministry/memos";
+import { planDeferDecision, planDecisionGate, planMarkTip, planResolveDecision } from "../ministry/decisions";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
 import { normalizeCommand } from "./shape";
@@ -76,8 +76,17 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 		case "buyBot":
 			plan = planBuyBot(ctx, cmd.defId);
 			break;
-		case "resolveMemo":
-			plan = planResolveMemo(ctx, cmd.memoId, cmd.choiceId);
+		case "resolveDecision":
+			plan = planResolveDecision(ctx, cmd.decisionId, cmd.choiceId);
+			break;
+		case "deferDecision":
+			plan = planDeferDecision(ctx, cmd.decisionId);
+			break;
+		case "decisionGate":
+			plan = planDecisionGate(ctx, cmd.open);
+			break;
+		case "markTip":
+			plan = planMarkTip(ctx, cmd.tipId);
 			break;
 		case "research":
 			plan = planResearch(ctx, cmd.techId);

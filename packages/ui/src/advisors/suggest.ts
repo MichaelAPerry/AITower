@@ -1,9 +1,10 @@
 /**
- * UNIT-7's brain: a pure function from the sim view + content to a ranked list of suggestions, each with one action.
- * No React, no clock, no storage: `pace.ts` decides when one may be shown, the component only draws it.
+ * The advisors' problem-spotting: a pure function from the sim view + content to a ranked list of suggestions, each with one
+ * action, an owner advisor and Handbook links. No React, no clock, no storage: the strip decides when one may be shown.
+ * Text may carry `{{term-id|label}}` markers, drawn as underlined Terms.
  * Mirrors the NEXT logic (objective.ts / diagnose.ts) for the rules they share, and `dockPicks` for the hot-rack test.
  */
-import type { ContentDB, FacilityDef } from "@aitower/content";
+import type { AdvisorId, ContentDB, FacilityDef } from "@aitower/content";
 import type { CellRef, FacilityView, SimView, StandingLogEntry } from "@aitower/sim";
 import { isBuildable } from "../build/catalog";
 import type { DrawerId } from "../calm/calm";
@@ -14,8 +15,8 @@ import { rackIsHot } from "../objective/heat";
 import { ascensionDue } from "../ascension/ascension";
 import { cheapestAvailable } from "../research/tech";
 
-/** What "Show me" does. */
-export type AssistantAction =
+/** What the "Show me" button does. */
+export type AdvisorAction =
 	/** Open the Build catalog on the item's tab and pick it (focus the camera on `focus` when given). */
 	| { kind: "build"; defId: string; focus?: CellRef }
 	/** Pick the Service lift tool. */
@@ -23,21 +24,29 @@ export type AssistantAction =
 	/** Open the Supplies tab of the catalog (spare parts). */
 	| { kind: "supplies"; focus?: CellRef }
 	| { kind: "drawer"; drawer: DrawerId; focus?: CellRef }
-	/** Open the Department of Research. */
-	| { kind: "research" }
-	/** Open the memo inbox. */
-	| { kind: "inbox" }
+	/** Open the Department of Research, on one node when `techId` is given. */
+	| { kind: "research"; techId?: string }
 	/** Open FORM A-5. */
 	| { kind: "ascension" };
 
+/** A Handbook link chip: opens the entry (an Encyclopedia or Primer id). */
+export interface HandbookLink {
+	label: string;
+	entry: string;
+}
+
 export interface Suggestion {
-	/** Stable per kind of problem, so dismissal and cooldown can key on it. */
+	/** Stable per kind of problem; also the concept id of its tip, which fires once per game. */
 	id: string;
+	/** The advisor who owns this area. */
+	advisor: AdvisorId;
+	/** Handbook links (usually one). */
+	links: HandbookLink[];
 	/** One or two plain sentences. */
 	text: string;
 	/** Label of the primary button. */
 	cta: string;
-	action: AssistantAction;
+	action: AdvisorAction;
 	/** Problems (heat, broken, red) may break the quiet interval a little; the rest wait their turn. */
 	urgent: boolean;
 	/** Catalog items for the "Recommended" row. */
@@ -57,7 +66,7 @@ export function cheapestOf(kind: string, view: SimView, content: ContentDB): Fac
 
 /**
  * Racks running hot, by the sim's definition (`rackIsHot`). With `confirmed` (from `watchHeat`) only racks whose heat has
- * lasted count, so a momentary blip never makes UNIT-7 speak.
+ * lasted count, so a momentary blip never makes an advisor speak.
  */
 export function hotRacks(view: SimView, content: ContentDB, confirmed?: ReadonlySet<number>): FacilityView[] {
 	return view.facilities.filter((f) => rackIsHot(f, content) && (!confirmed || confirmed.has(f.id)));
@@ -69,7 +78,7 @@ export function recentLosses(view: SimView): StandingLogEntry[] {
 	return view.standingLog.filter((e) => e.delta < 0 && e.tick >= since).reverse();
 }
 
-function reputation(view: SimView): Suggestion | null {
+function reputation(view: SimView): Omit<Suggestion, "advisor" | "links"> | null {
 	const losses = recentLosses(view);
 	const last = losses[0];
 	if (!last) return null;
@@ -85,15 +94,29 @@ function reputation(view: SimView): Suggestion | null {
 		case "audit":
 			return { ...base, text: `${lead}: ${detail}. Insights has the audit under Money.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
 		default:
-			return { ...base, text: `${lead}: ${detail}. It came from a memo; the inbox has the story.`, cta: "Show me", action: { kind: "inbox" } };
+			return { ...base, text: `${lead}: ${detail}. It came from a decision you made; Insights has the log.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
 	}
 }
 
 const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
+const META: Record<string, { advisor: AdvisorId; links: HandbookLink[] }> = {
+	cash: { advisor: "lucien", links: [{ label: "How money works", entry: "basics:money" }] },
+	parts: { advisor: "cass", links: [{ label: "Spare parts", entry: "basics:parts" }] },
+	hot: { advisor: "cass", links: [{ label: "Cooling and heat", entry: "ch:heat" }] },
+	power: { advisor: "bea", links: [{ label: "Power", entry: "ch:power" }] },
+	uptime: { advisor: "bea", links: [{ label: "Uptime", entry: "ch:uptime" }] },
+	backup: { advisor: "bea", links: [{ label: "Power", entry: "ch:power" }] },
+	lift: { advisor: "cass", links: [{ label: "Lifts and bots", entry: "basics:lifts" }] },
+	reputation: { advisor: "lucien", links: [{ label: "Reputation", entry: "basics:reputation" }] },
+	idle: { advisor: "mel", links: [{ label: "Contracts", entry: "basics:contracts" }] },
+	research: { advisor: "mel", links: [{ label: "Research", entry: "basics:research" }] },
+	level: { advisor: "lucien", links: [{ label: "Level", entry: "basics:level" }] },
+};
+
 /** All suggestions that apply to this view, most important first. Empty when the tower is fine. */
 export function suggestions(view: SimView, content: ContentDB, confirmedHot?: ReadonlySet<number>): Suggestion[] {
-	const out: Suggestion[] = [];
+	const out: Omit<Suggestion, "advisor" | "links">[] = [];
 	const defs = content.facilities;
 	const racks = view.facilities.filter((f) => isRack(f, content));
 	/** "an Air Handler", "a Battery Bank". */
@@ -134,7 +157,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 	if (hot.length > 0 && crah) {
 		out.push({
 			id: "hot",
-			text: `${hot.length === 1 ? "A rack is" : `${hot.length} racks are`} running hot and slowing down. ${cap(an(crah))} within a few tiles cools it.`,
+			text: `${Math.round(Math.max(...hot.map((f) => f.tempC)))} °C in ${hot.length === 1 ? "a rack" : `${hot.length} racks`}, over the ${content.balance.thermal.okC} °C line, so ${hot.length === 1 ? "it is" : "they are"} {{throttle|throttling}}. All power ends up as heat. ${cap(an(crah))} within a few tiles removes it.`,
 			cta: "Show me",
 			action: { kind: "build", defId: crah.id, focus: cell(hot[0]) },
 			urgent: true,
@@ -151,7 +174,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 		const pick = genset ?? (ups as FacilityDef);
 		out.push({
 			id: "power",
-			text: `Power is running short, so racks are slowing or dark. ${cap(an(pick))} adds supply${ups && ups !== pick ? `; ${an(ups)} evens out the dips` : ""}.`,
+			text: `Racks are getting ${Math.round(Math.min(1, ...view.powerNets.map((n) => n.satisfaction)) * 100)}% of the power they ask for: a {{brownout|brownout}}. ${cap(an(pick))} adds supply${ups && ups !== pick ? `; ${an(ups)} evens out the dips` : ""}.`,
 			cta: "Show me",
 			action: { kind: "build", defId: pick.id },
 			urgent: true,
@@ -174,7 +197,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 		const pick = ups ?? (genset as FacilityDef);
 		out.push({
 			id: "backup",
-			text: `Nothing backs up your power yet. ${cap(an(pick))} would carry the racks if supply dips.`,
+			text: `${racks.length} racks and nothing behind them. A {{ups|UPS}} carries the load for seconds, until a {{genset|genset}} starts. ${cap(an(pick))} fits.`,
 			cta: "Show me",
 			action: { kind: "build", defId: pick.id },
 			urgent: false,
@@ -247,7 +270,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 			});
 		}
 	}
-	return out;
+	return out.map((o) => ({ ...o, ...(META[o.id] ?? { advisor: "lucien" as AdvisorId, links: [] }) }));
 }
 
 /** Def ids for the catalog's "Recommended" row: from every applying suggestion, in rank order, at most `max`. */
@@ -256,16 +279,3 @@ export function recommendedIds(list: readonly Suggestion[], max = 3): string[] {
 	for (const s of list) for (const id of s.recommend) if (!ids.includes(id) && ids.length < max) ids.push(id);
 	return ids;
 }
-
-/** Short general tips for when the robot is clicked and has nothing urgent. Picked by `tipFor`. */
-export const TIPS = [
-	"Racks earn only while a contract runs on them. Idle racks are the cheapest money to fix.",
-	"Heat slows racks down long before it breaks them. Insights has a heat map.",
-	"Pausing is free. Plan your build with the clock stopped, then press play.",
-	"Spare parts are cheap; broken racks are not. Keep a few in the cage.",
-	"Reputation moves slowly. Late jobs and low uptime cost it; finished jobs earn it back.",
-	"Press ? to turn on help mode, then point at anything for a plain explanation.",
-];
-
-/** A tip that changes each game day (no clock or randomness in the UI). */
-export const tipFor = (tick: number, bump = 0): string => TIPS[(Math.floor(tick / 1440) + bump) % TIPS.length];

@@ -62,7 +62,7 @@ describe("events.json", () => {
 		const cash = (c: (typeof e.choices)[number]): number => c.effects.reduce((s, f) => (f.type === "cash" ? s + f.amount : s), 0);
 		expect(e.choices.every((c) => spike(c) > 0 && c.effects.some((f) => f.type === "ambient" && f.durationTicks <= 720))).toBe(true);
 		// The default (do nothing) is free and the hottest; paying cash buys a smaller spike.
-		const ride = e.choices.find((c) => c.id === e.defaultChoice);
+		const ride = e.choices.find((c) => c.effects.every((f) => f.type !== "cash"));
 		const paid = e.choices.filter((c) => cash(c) < 0);
 		expect(ride && cash(ride)).toBe(0);
 		expect(paid.length).toBeGreaterThan(0);
@@ -83,7 +83,7 @@ describe("events.json", () => {
 		for (const e of db.events) {
 			expect(e.choices.length, e.id).toBeGreaterThanOrEqual(2);
 			expect(e.choices.length, e.id).toBeLessThanOrEqual(3);
-			expect(e.choices.map((c) => c.id), e.id).toContain(e.defaultChoice);
+			expect(e.choices.map((c) => c.id), e.id).toContain(e.recommended);
 			expect(new Set(e.choices.map((c) => c.id)).size, e.id).toBe(e.choices.length);
 			expect(new Set(e.choices.map((c) => c.hint)).size, e.id).toBe(e.choices.length);
 			expect(e.body.split("\n\n").length, e.id).toBeLessThanOrEqual(3);
@@ -151,11 +151,34 @@ describe("events.json", () => {
 		}
 	});
 
+	it("every decision has an owner advisor, a recommended choice and a short, number-bearing body", () => {
+		for (const e of db.events) {
+			expect(["cass", "bea", "mel", "lucien"], e.id).toContain(e.advisor);
+			expect(e.choices.some((c) => c.id === e.recommended), e.id).toBe(true);
+			expect(e.body.split(/\s+/).length, e.id).toBeLessThanOrEqual(45);
+			expect(e.body, e.id).toMatch(/\d/);
+			expect(e).not.toHaveProperty("timeoutTicks");
+		}
+		for (const a of ["cass", "bea", "mel", "lucien"]) expect(db.events.filter((e) => e.advisor === a).length, a).toBeGreaterThanOrEqual(3);
+	});
+
+	it("MAGI votes: Cass, Bea and Mel each vote with a line, on a handful of multi-area decisions", () => {
+		const voted = db.events.filter((e) => e.votes);
+		expect(voted.length).toBeGreaterThanOrEqual(6);
+		for (const e of voted) {
+			expect(e.votes?.map((v) => v.advisor), e.id).toEqual(["cass", "bea", "mel"]);
+			for (const v of e.votes ?? []) expect(v.line.length, e.id).toBeGreaterThan(5);
+		}
+		const bad = loadContent();
+		const x = bad.events.find((v) => v.votes);
+		if (x?.votes) x.votes = x.votes.slice(1);
+		expect(validateContent(bad).join("\n")).toMatch(/votes/);
+	});
+
 	it("uses only valid tiers and sane magnitudes", () => {
 		const tiers = db.balance.tiers.pflops.length;
 		for (const e of db.events) {
 			expect(e.minTier, e.id).toBeLessThanOrEqual(tiers);
-			expect(e.timeoutTicks, e.id).toBeGreaterThanOrEqual(360);
 			for (const c of e.choices) for (const f of c.effects) if (f.type === "standing") expect(Math.abs(f.amount), e.id).toBeLessThanOrEqual(10);
 		}
 	});
@@ -195,7 +218,7 @@ describe("validateContent: events", () => {
 	it("flags duplicate ids, bad ids and a missing default choice", () => {
 		expect(broken((db) => db.events.push({ ...first(db) }))).toMatch(/duplicate id/);
 		expect(broken((db) => (first(db).id = "Bad Id"))).toMatch(/lowercase/);
-		expect(broken((db) => (first(db).defaultChoice = "nope"))).toMatch(/defaultChoice/);
+		expect(broken((db) => (first(db).recommended = "nope"))).toMatch(/recommended/);
 		expect(broken((db) => first(db).choices.push({ ...first(db).choices[0] }))).toMatch(/duplicate choice id/);
 		expect(broken((db) => (first(db).choices = []))).toMatch(/at least one choice/);
 	});
@@ -218,9 +241,9 @@ describe("validateContent: events", () => {
 		expect(broken((db) => fx(db).push({ type: "failureRate", factor: 2, durationTicks: 1.5 }))).toMatch(/durationTicks/);
 	});
 
-	it("flags non-positive weights, bad timeouts, tiers and categories", () => {
+	it("flags non-positive weights, bad advisors, tiers and categories", () => {
 		expect(broken((db) => (first(db).weight = 0))).toMatch(/weight/);
-		expect(broken((db) => (first(db).timeoutTicks = 0))).toMatch(/timeoutTicks/);
+		expect(broken((db) => ((first(db) as { advisor: string }).advisor = "ned"))).toMatch(/advisor/);
 		expect(broken((db) => (first(db).cooldownDays = -1))).toMatch(/cooldownDays/);
 		expect(broken((db) => (first(db).minTier = 0))).toMatch(/minTier/);
 		expect(broken((db) => {
@@ -236,14 +259,13 @@ describe("validateContent: events", () => {
 	it("flags bad standing/events balance", () => {
 		expect(broken((db) => (db.balance.standing.start = 0))).toMatch(/standing\.start/);
 		expect(broken((db) => (db.balance.standing.dailyBad = Number.NaN))).toMatch(/dailyBad/);
-		expect(broken((db) => (db.balance.events.maxOpen = 0))).toMatch(/maxOpen/);
 		expect(broken((db) => (db.balance.events.intervalTicks = 0))).toMatch(/intervalTicks/);
 		expect(broken((db) => (db.balance.events.graceTicks = -1))).toMatch(/graceTicks/);
 	});
 
 	it("loadContent throws listing every problem when events.json is invalid (via validateContent)", () => {
 		const db = loadContent();
-		db.events[0].defaultChoice = "x";
+		db.events[0].recommended = "x";
 		db.events[1].weight = -1;
 		expect(validateContent(db).length).toBe(2);
 	});

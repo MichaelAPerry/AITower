@@ -377,11 +377,9 @@ export interface Balance {
 		foremanPerHour: number;
 	};
 	events: {
-		/** Mean ticks between new memos (seeded jitter ±50%). */
+		/** Mean ticks between new advisor decisions (seeded jitter ±50%). */
 		intervalTicks: number;
-		/** At most this many unresolved memos at once. */
-		maxOpen: number;
-		/** First memo no earlier than this tick (lets the player settle in). */
+		/** First decision no earlier than this tick (lets the player settle in). */
 		graceTicks: number;
 	};
 }
@@ -469,12 +467,24 @@ export interface Scenario {
 	sandbox?: boolean;
 }
 
-// ─── Ministry memos (events) ──────────────────────────────────────────
+// ─── Advisor decisions (events) ───────────────────────────────────────
+
+/** The four advisors: Cass Parr (Facilities, Cooling), Bea Altasar (Power, Green), Dr. Mel Kiorre (Compute, Wetware, Synthetic), Lucien Ferro (CFO). */
+export type AdvisorId = "cass" | "bea" | "mel" | "lucien";
+export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "lucien"];
+
+/** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
+export interface EventVote {
+	advisor: "cass" | "bea" | "mel";
+	approve: boolean;
+	/** One short line of reasoning. */
+	line: string;
+}
 
 export type EventCategory = "ministry" | "environmental" | "operational" | "client" | "horror";
 
 /**
- * Effects are applied by the sim when a memo choice is resolved (or when the memo times out with its default choice).
+ * Effects are applied by the sim when the player resolves a decision. Waiting never applies anything.
  * Durations are in ticks. Multipliers stack multiplicatively while active.
  */
 export type EventEffect =
@@ -503,7 +513,7 @@ export interface EventChoice {
 	label: string;
 	/** One-line plain-English consequence shown under the button (must state the real numbers). */
 	hint: string;
-	/** Memo shown after resolving. */
+	/** Text shown after resolving. */
 	outcome: string;
 	effects: EventEffect[];
 }
@@ -511,9 +521,11 @@ export interface EventChoice {
 export interface EventDef {
 	id: string;
 	category: EventCategory;
-	/** Memo heading. */
+	/** The advisor who brings it. */
+	advisor: AdvisorId;
+	/** Decision heading. */
 	title: string;
-	/** Memo body: dry Ministry prose, 1–3 short paragraphs separated by "\n\n". */
+	/** Advisor text: short, numbers first, under 40 words. */
 	body: string;
 	/** Relative pick weight among eligible events. */
 	weight: number;
@@ -532,9 +544,10 @@ export interface EventDef {
 	 * minTier/maxTier). Never picked randomly.
 	 */
 	scriptedDay?: number;
-	/** Auto-resolve with `defaultChoice` after this many ticks unanswered. */
-	timeoutTicks: number;
-	defaultChoice: string;
+	/** The advisor's recommended choice id (marked on the card). */
+	recommended: string;
+	/** MAGI vote (Cass, Bea, Mel, in that order) when the decision touches more than one specialist area. Lucien then names the price. */
+	votes?: EventVote[];
 	choices: EventChoice[];
 }
 

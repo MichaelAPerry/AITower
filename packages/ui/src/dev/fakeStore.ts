@@ -3,7 +3,7 @@
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
 import type { ContentDB, EventDef, FacilityDef, Scenario, TechNode } from "@aitower/content";
-import type { AscensionPath, AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, MemoView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import type { AscensionPath, AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, DecisionView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -20,13 +20,13 @@ const FAKE_EVENTS: EventDef[] = [
 	{
 		id: "heatwave",
 		category: "environmental",
+		advisor: "cass",
+		recommended: "credits",
 		title: "Notice of Unseasonable Warmth",
-		body: "The Weather Bureau advises that the outside air will be 8 °C warmer than the Ministry considers reasonable for the next fourteen hours.\n\nYou may purchase emergency chilled-water credits, or endure.",
+		body: "Outside air will run 8 °C warm for fourteen hours. Chilled-water credits cost $12k and hold the rise to 4 °C.",
 		weight: 1,
 		minTier: 1,
 		cooldownDays: 5,
-		timeoutTicks: 720,
-		defaultChoice: "endure",
 		choices: [
 			{ id: "credits", label: "BUY CREDITS", hint: "Pay $12k now. The heatwave is only +4 °C for 14 h.", outcome: "Credits purchased. The Weather Bureau thanks you for your cheque.", effects: [{ type: "cash", amount: -12_000 }] },
 			{ id: "endure", label: "FILE IN TRIPLICATE", hint: "Free. Outside air +8 °C for 14 h; failures run higher.", outcome: "Filed. The heat is noted and will not be discussed further.", effects: [] },
@@ -35,13 +35,13 @@ const FAKE_EVENTS: EventDef[] = [
 	{
 		id: "audit",
 		category: "ministry",
+		advisor: "lucien",
+		recommended: "comply",
 		title: "Form A-9: Surprise Inspection",
-		body: "An Inspector will visit tomorrow to count your cables.",
+		body: "An Inspector will visit tomorrow to count your cables. Complying is free; protesting costs 10 reputation.",
 		weight: 1,
 		minTier: 1,
 		cooldownDays: 5,
-		timeoutTicks: 360,
-		defaultChoice: "comply",
 		choices: [
 			{ id: "bribe", label: "OFFER TEA", hint: "Pay $5k. Standing +0, no inspection.", outcome: "The Inspector enjoyed the tea.", effects: [] },
 			{ id: "comply", label: "COMPLY", hint: "Free. Standing −5 if uptime is under target.", outcome: "The Inspector counted 4,112 cables and left.", effects: [] },
@@ -116,7 +116,7 @@ export function createFakeContent(): ContentDB {
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 240, offerExpiryTicks: 720 },
 			tiers: { techs: [0, 2, 6, 14, 26], pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
 			standing: { start: 50, dailyGood: 1, dailyBad: -3, dailyNearMiss: -1, dailyMissSpan: 0.05, jobFailed: -2, jobCompleted: 1 },
-			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
+			events: { intervalTicks: 720, graceTicks: 1440 },
 			research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
 			clerk: { feeShare: 0.05 },
 			loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },
@@ -192,8 +192,11 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		ledger: [],
 		history: [],
 		bankrupt: false,
-		memos: [],
-		memoHistory: [],
+		decision: null,
+		decisionReturnsAt: null,
+		decisionGate: true,
+		decisionHistory: [],
+		advisorTips: [],
 		modifiers: [],
 		standing: 50,
 		standingLog: [],
@@ -206,7 +209,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		reports: [
 			{ quarter: 1, fromDay: 0, toDay: 6, revenue: 310_000, costs: 1_420_000, uptime: 0.981, pue: 1.52, jobsCompleted: 3, jobsFailed: 1, penalties: 25_000, grade: "D", standingDelta: -3, cashDelta: -20_000, remark: "The Ministry notes that construction is not, strictly speaking, a revenue stream." },
 		],
-		stats: { revenue: 2_120_000, pflopHours: 8_450, jobsCompleted: 21, jobsFailed: 2, peakPflops: 61.2, facilitiesBuilt: 47, componentFailures: 6, repairs: 5, memosAnswered: 3, researchPointsEarned: 42 },
+		stats: { revenue: 2_120_000, pflopHours: 8_450, jobsCompleted: 21, jobsFailed: 2, peakPflops: 61.2, facilitiesBuilt: 47, componentFailures: 6, repairs: 5, decisionsMade: 3, researchPointsEarned: 42 },
 		nutrient: new Uint8Array(n),
 		nutrientNetOf: new Int32Array(n).fill(-1),
 		contamination: new Float32Array(n),
@@ -356,8 +359,8 @@ export interface FakeStore extends GameStore {
 	ghost: Ghost | null;
 	/** Put a save into a slot without going through saveTo (harness and tests). */
 	seedSlot: ReturnType<typeof createFakeSaves>["seedSlot"];
-	/** Open a fake Ministry memo from the fixture events (`eventId` default: heatwave) expiring in `ticks`. */
-	issueMemo(eventId?: string, ticks?: number): number;
+	/** Open a fake advisor decision from the fixture events (`eventId` default: heatwave). It never expires. */
+	issueDecision(eventId?: string): number;
 	/** Set Ministry standing (0..100). Reaching 0 triggers the shutdown game over, like the real sim. */
 	setStanding(standing: number): void;
 	addModifier(m: ModifierView): void;
@@ -416,41 +419,43 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 
 	const canPlace = (defId: string, floor: number, x: number): CommandResult => canPlaceFor(view, content, defId, floor, x);
 
-	// Memos and standing, mimicking the sim: resolveMemo is queued and applied on the next advance().
-	let nextMemo = 1;
-	const queued: { memoId: number; choiceId: string }[] = [];
+	// Decisions and standing, mimicking the sim: resolveDecision is queued and applied on the next advance().
+	let nextDecision = 1;
+	const queued: { decisionId: number; choiceId: string }[] = [];
 	let queuedPath: AscensionPath | null = null;
-	const memoByEvent = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
-	const fileMemo = (memoId: number, choiceId: string, auto: boolean): void => {
-		const m = view.memos.find((x) => x.id === memoId);
-		if (!m) return;
-		const def = memoByEvent(m.eventId);
+	const eventById = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
+	const fileDecision = (decisionId: number, choiceId: string): void => {
+		const m = view.decision;
+		if (!m || m.id !== decisionId) return;
+		const def = eventById(m.eventId);
 		const outcome = def.choices.find((c) => c.id === choiceId)?.outcome ?? "Filed.";
 		newView({
-			memos: view.memos.filter((x) => x.id !== memoId),
-			memoHistory: [...view.memoHistory, { memoId, eventId: m.eventId, title: m.title, choiceId, outcome, tick: view.tick, auto }].slice(-20),
+			decision: null,
+			decisionHistory: [...view.decisionHistory, { decisionId, eventId: m.eventId, title: m.title, choiceId, outcome, tick: view.tick }].slice(-20),
 		});
-		pushEvents([{ type: "memoResolved", memoId, eventId: m.eventId, choiceId, auto }]);
+		pushEvents([{ type: "decisionResolved", decisionId, eventId: m.eventId, choiceId }]);
 	};
 
 	const store: FakeStore = {
 		ghost: null,
-		issueMemo(eventId = "heatwave", ticks = 720) {
-			const def = memoByEvent(eventId);
-			const memo: MemoView = {
-				id: nextMemo++,
+		issueDecision(eventId = "heatwave") {
+			const def = eventById(eventId);
+			const decision: DecisionView = {
+				id: nextDecision++,
 				eventId: def.id,
+				advisor: def.advisor,
 				category: def.category,
 				title: def.title,
 				body: def.body,
 				choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
-				defaultChoice: def.defaultChoice,
+				recommended: def.recommended,
+				votes: def.votes,
 				issuedAt: view.tick,
-				expiresAt: view.tick + ticks,
+				canDefer: true,
 			};
-			newView({ memos: [...view.memos, memo] });
-			pushEvents([{ type: "memoIssued", memoId: memo.id, eventId: def.id }]);
-			return memo.id;
+			newView({ decision });
+			pushEvents([{ type: "decisionIssued", decisionId: decision.id, eventId: def.id }]);
+			return decision.id;
 		},
 		setStanding(standing) {
 			const next = Math.min(100, Math.max(0, standing));
@@ -579,13 +584,25 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 				case "demolish":
 					newView({ facilities: view.facilities.filter((f) => !(f.floor === cmd.floor && cmd.x >= f.x && cmd.x < f.x + f.width)) });
 					return ok;
-				case "resolveMemo": {
-					const m = view.memos.find((x) => x.id === cmd.memoId);
-					if (!m || queued.some((q) => q.memoId === cmd.memoId)) return no("That memo is no longer on file");
+				case "resolveDecision": {
+					const m = view.decision;
+					if (!m || m.id !== cmd.decisionId || queued.some((q) => q.decisionId === cmd.decisionId)) return no("That decision is no longer open");
 					if (!m.choices.some((c) => c.id === cmd.choiceId)) return no("Unknown choice");
-					queued.push({ memoId: cmd.memoId, choiceId: cmd.choiceId });
+					queued.push({ decisionId: cmd.decisionId, choiceId: cmd.choiceId });
 					return ok;
 				}
+				case "deferDecision": {
+					const m = view.decision;
+					if (!m || m.id !== cmd.decisionId || !m.canDefer) return no("Cannot defer");
+					newView({ decision: null, decisionReturnsAt: view.tick + 1440 });
+					return ok;
+				}
+				case "markTip":
+					newView({ advisorTips: view.advisorTips.includes(cmd.tipId) ? view.advisorTips : [...view.advisorTips, cmd.tipId] });
+					return ok;
+				case "decisionGate":
+					newView({ decisionGate: cmd.open });
+					return ok;
 				case "research": {
 					const n = content.tech.find((t) => t.id === cmd.techId);
 					if (!n) return no(`Unknown research: ${cmd.techId}`);
@@ -669,14 +686,13 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			const tick = view.tick + minutes;
 			// Like the sim, queued commands apply only when the clock actually advances.
 			if (minutes > 0) {
-				for (const q of queued.splice(0)) fileMemo(q.memoId, q.choiceId, false);
+				for (const q of queued.splice(0)) fileDecision(q.decisionId, q.choiceId);
 				if (queuedPath) {
 					const path = queuedPath;
 					queuedPath = null;
 					newView({ path });
 					pushEvents([{ type: "pathChosen", path }]);
 				}
-				for (const m of view.memos) if (m.expiresAt <= tick) fileMemo(m.id, m.defaultChoice, true);
 			}
 			const ph = tick / 97;
 			const facilities = view.facilities.map((f) => {

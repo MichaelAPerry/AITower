@@ -4,6 +4,9 @@ import { createSim, simFromSnapshot, TICKS_PER_DAY } from "@aitower/sim";
 import { makeContent } from "../../../packages/sim/src/test/fixture";
 import { allAutomation, AUTO_RESERVE, bestMemoChoice, formatTable, nextTech, PERMISSIVE_CLERK, runHeadless } from "./run";
 
+/** Long synchronous runs block the worker; yield between seeds so Vitest's RPC (onTaskUpdate) is not starved on slow CI runners. */
+const yieldToRunner = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
+
 describe("sim-cli runHeadless", () => {
 	it("produces one row per day and a deterministic hash", () => {
 		const a = runHeadless(makeContent(), "starter", 2, 5);
@@ -59,8 +62,8 @@ describe("sim-cli memo policy", () => {
 				weight: 1,
 				minTier: 1,
 				cooldownDays: 0,
-				timeoutTicks: 100,
-				defaultChoice: "x",
+				advisor: "lucien",
+				recommended: "x",
 				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("y", [{ type: "cash", amount: 50 }, { type: "standing", amount: -5 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }])],
 			},
 		];
@@ -153,9 +156,10 @@ describe("sim-cli --auto", () => {
 		expect(manual.hash).not.toBe(a.hash);
 	});
 
-	it("real content with a Foreman node and the DEFAULT policy ($1M reserve): 30 days on seeds 1-3 grow, stay solvent, no game over", { timeout: 180_000 }, () => {
+	it("real content with a Foreman node and the DEFAULT policy ($1M reserve): 30 days on seeds 1-3 grow, stay solvent, no game over", { timeout: 180_000 }, async () => {
 		expect(AUTO_RESERVE).toBe(1_000_000);
 		for (const seed of [1, 2, 3]) {
+			await yieldToRunner();
 			const c = loadContent();
 			c.tech.push(foremanNode);
 			const { rows, auto } = runHeadless(c, "starter", 30, seed, true);
@@ -183,8 +187,9 @@ describe("sim-cli --auto", () => {
 
 describe("reputation regression (M5b)", () => {
 	// Tier 4 used to ask for 99 % uptime, which a healthy tower never hit: every day cost 3 and reputation fell to 0.
-	it("an unattended tier-4 run (automation and Foreman on) for 10 days does not lose more than 10 reputation", { timeout: 120_000 }, () => {
+	it("an unattended tier-4 run (automation and Foreman on) for 10 days does not lose more than 10 reputation", { timeout: 120_000 }, async () => {
 		for (const seed of [1, 2]) {
+			await yieldToRunner();
 			const c = loadContent();
 			c.tech.push(foremanNode);
 			c.balance.tiers.pflops = [0, 1, 2, 3, 1e12]; // start the run already in tier 4

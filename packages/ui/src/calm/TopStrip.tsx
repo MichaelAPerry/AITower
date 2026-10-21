@@ -4,7 +4,7 @@ import { GrowthIndex } from "../bio/GrowthIndex";
 import { Icon, Lamp, Toggle } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
-import { InboxButton, StandingMeter } from "../memo/MemoDesk";
+import { StandingMeter } from "../status/Status";
 import { saveLamp } from "../menu/slots";
 import { PathGauge } from "../paths/PathGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
@@ -15,7 +15,7 @@ export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
 /**
  * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, reputation, then the badges that appear when they
- * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, inbox, menu.
+ * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, menu.
  */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
 	const { view, speed, muted } = state;
@@ -95,7 +95,6 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 			)}
 			<PathGauge view={view} content={content} />
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
-			<InboxButton state={state} ui={ui} setUi={setUi} />
 			<div className="ui-sysbox">
 				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>
 					?

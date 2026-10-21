@@ -18,11 +18,14 @@
  *  - v6 → v7 (M4b-T1): path `affinity` points (start at 0).
  *  - v7 → v8 (tree restructure): merged tech nodes are renamed in `techResearched`, and a tower that already runs
  *    liquid-cooling plant keeps building it (it is granted `chilled_loop`, which now gates those facilities).
+ *  - v8 → v9 (M6.3 advisors): pending memos become one pending `decision` (no expiry; the first memo is kept, any others are
+ *    dropped), `memoHistory` → `decisionHistory`, `nextMemoTick` → `nextDecisionTick`, `nextId.memo` → `nextId.decision`,
+ *    `stats.memosAnswered` → `decisionsMade`, standing cause "memo" → "decision"; new `lastDecisionDay`, `decisionGate`, `advisorTips`.
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 8;
+export const SNAPSHOT_VERSION = 9;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -198,8 +201,35 @@ function migrateV7(state: RawState): RawState {
 	return state;
 }
 
+/** Memos become advisor decisions: a pending memo is kept as the one pending decision (waiting never expires it). */
+function migrateV8(state: RawState): RawState {
+	// Idempotent per field: each legacy field is converted only if it is there (a current-format state passes through untouched).
+	if (Array.isArray(state.memos)) {
+		const first = state.memos.find((m) => isObj(m) && typeof m.id === "number" && typeof m.eventId === "string");
+		state.decision = isObj(first) ? { id: first.id, eventId: first.eventId, issuedAt: typeof first.issuedAt === "number" ? first.issuedAt : 0, deferred: false, hiddenUntil: 0 } : null;
+	} else if (state.decision === undefined) state.decision = null;
+	if (Array.isArray(state.memoHistory)) {
+		state.decisionHistory = state.memoHistory.filter(isObj).map((h) => ({ decisionId: h.memoId, eventId: h.eventId, title: h.title, choiceId: h.choiceId, outcome: h.outcome, tick: h.tick }));
+	} else if (!Array.isArray(state.decisionHistory)) state.decisionHistory = [];
+	if (typeof state.nextMemoTick === "number") state.nextDecisionTick = state.nextMemoTick;
+	const tick = typeof state.tick === "number" ? state.tick : 0;
+	if (typeof state.lastDecisionDay !== "number") state.lastDecisionDay = state.decision ? Math.floor(tick / 1440) : -1;
+	if (typeof state.decisionGate !== "boolean") state.decisionGate = true;
+	if (!Array.isArray(state.advisorTips)) state.advisorTips = [];
+	if (isObj(state.nextId) && typeof state.nextId.memo === "number") {
+		const keepAbove = isObj(state.decision) ? (state.decision.id as number) + 1 : 1;
+		state.nextId.decision = Math.max(state.nextId.memo, keepAbove);
+	}
+	if (isObj(state.stats) && typeof state.stats.memosAnswered === "number") state.stats.decisionsMade = state.stats.memosAnswered;
+	if (Array.isArray(state.standingLog)) for (const e of state.standingLog) if (isObj(e) && e.cause === "memo") e.cause = "decision";
+	for (const k of ["memos", "memoHistory", "nextMemoTick"]) delete state[k];
+	if (isObj(state.nextId)) delete state.nextId.memo;
+	if (isObj(state.stats)) delete state.stats.memosAnswered;
+	return state;
+}
+
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7 };
+export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

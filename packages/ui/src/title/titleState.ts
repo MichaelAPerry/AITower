@@ -59,7 +59,7 @@ export interface StartHooks {
 
 /**
  * Leave the title screen into a game. Continue plays the loaded autosave at 1×. New game starts a fresh site of the chosen
- * scenario (the standard start when none is given); with the induction on, the induction takes over the clock (its first memo
+ * scenario (the standard start when none is given); with the induction on, the induction takes over the clock (its first coach mark
  * stops it) instead of running at 1×. With `crawl`, the clock stays stopped: the opening crawl plays first and the HUD sets
  * the speed when it ends.
  */

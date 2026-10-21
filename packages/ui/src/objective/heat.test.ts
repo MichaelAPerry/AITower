@@ -1,14 +1,14 @@
 import { loadContent } from "@aitower/content";
 import type { FacilityView, SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { suggestions } from "../assistant/suggest";
+import { suggestions } from "../advisors/suggest";
 import { rackProblem } from "./diagnose";
 import { HOT_CLEAR_TICKS, HOT_SUSTAIN_TICKS, initialHeatWatch, rackIsHot, watchHeat } from "./heat";
 
 const content = loadContent();
 const okC = content.balance.thermal.okC;
 const rack = (status: string, tempC: number, id = 1): FacilityView => ({ id, defId: "rack_air_gpu", floor: 1, x: 3, status, enabled: true, tempC }) as unknown as FacilityView;
-const view = (tick: number, ...fs: FacilityView[]): SimView => ({ tick, cash: 9e6, tier: 1, sandbox: false, memos: [], spareParts: 3, jobs: [], offers: [], bots: [], lifts: [], powerNets: [], techResearched: [], researchPoints: 0, standingLog: [], uptime: 1, uptimeTarget: 0.95, facilities: fs, coolantNets: [] }) as unknown as SimView;
+const view = (tick: number, ...fs: FacilityView[]): SimView => ({ tick, cash: 9e6, tier: 1, sandbox: false, spareParts: 3, jobs: [], offers: [], bots: [], lifts: [], powerNets: [], techResearched: [], researchPoints: 0, standingLog: [], uptime: 1, uptimeTarget: 0.95, facilities: fs, coolantNets: [] }) as unknown as SimView;
 
 describe("one definition of too hot", () => {
 	it("agrees with the sim: throttling means above okC, and a hair above it is not yet hot", () => {

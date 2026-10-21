@@ -3,7 +3,7 @@
  * entity arrays are rebuilt small each call.
  */
 import type { BotDef, ContentDB } from "@aitower/content";
-import type { BotState, BotView, FacilityView, JobView, MaintenanceView, MemoView, SimView, WorkOrderView } from "../api";
+import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, SimView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
 import { createNav, type Nav, reachableRuns, runAtTile } from "../logistics/routing";
@@ -13,7 +13,7 @@ import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
 import { loanMax } from "../economy/credit";
 import { facilityContamination } from "../bio/index";
 import { leadingEnding } from "../bio/path";
-import { eventDef } from "../ministry/memos";
+import { eventDef } from "../ministry/decisions";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
@@ -43,24 +43,24 @@ function botState(b: Bot, def: BotDef | undefined): BotState {
 	}
 }
 
-function memoViews(state: SimState, content: ContentDB): MemoView[] {
-	const out: MemoView[] = [];
-	for (const m of state.memos) {
-		const def = eventDef(content, m.eventId);
-		if (!def) continue;
-		out.push({
-			id: m.id,
-			eventId: m.eventId,
-			category: def.category,
-			title: def.title,
-			body: def.body,
-			choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
-			defaultChoice: def.defaultChoice,
-			issuedAt: m.issuedAt,
-			expiresAt: m.expiresAt,
-		});
-	}
-	return out;
+function decisionView(state: SimState, content: ContentDB): DecisionView | null {
+	const d = state.decision;
+	if (!d || d.hiddenUntil > 0) return null;
+	const def = eventDef(content, d.eventId);
+	if (!def) return null;
+	return {
+		id: d.id,
+		eventId: d.eventId,
+		advisor: def.advisor,
+		category: def.category,
+		title: def.title,
+		body: def.body,
+		choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
+		recommended: def.recommended,
+		votes: def.votes?.map((v) => ({ ...v })),
+		issuedAt: d.issuedAt,
+		canDefer: !d.deferred,
+	};
 }
 
 function tierNeed(state: SimState, content: ContentDB): SimView["tierNeed"] {
@@ -228,8 +228,11 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		ledger: [...state.ledger, state.today],
 		history: state.history,
 		bankrupt: state.bankrupt,
-		memos: memoViews(state, content),
-		memoHistory: state.memoHistory.map((h) => ({ ...h })),
+		decision: decisionView(state, content),
+		decisionReturnsAt: state.decision && state.decision.hiddenUntil > 0 ? state.decision.hiddenUntil : null,
+		decisionGate: state.decisionGate,
+		decisionHistory: state.decisionHistory.map((h) => ({ ...h })),
+		advisorTips: [...state.advisorTips],
 		modifiers: state.modifiers
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),

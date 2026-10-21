@@ -1,6 +1,6 @@
 /**
  * Pure helpers for the Biotech / body-horror layer of the HUD: wording per `horrorIntensity`, the organoid temperature
- * band, bot traits, the corruption gauge and the memo stain.
+ * band, bot traits, the corruption gauge and the decision-card stain.
  *
  * The Compute Authority never acknowledges the horror: growths are "assets", a mutated bot is "reclassified", contamination is an
  * "asset growth index". `horrorIntensity: "off"` keeps every mechanic and switches to plain wording.
@@ -100,7 +100,7 @@ export function traitInfo(trait: BotTrait, h: HorrorIntensity): TraitInfo {
 /** Short trait name for event text ("Schedule F" / "fleshed"). */
 export const traitName = (trait: BotTrait, h: HorrorIntensity): string => (h === "off" ? trait : trait === "fleshed" ? "Schedule F" : "Schedule T");
 
-// ─── HUD: corruption gauge and memo stain ────────────────────────────────────
+// ─── HUD: corruption gauge and decision stain ────────────────────────────────────
 
 /**
  * The top-bar gauge shows once any corruption exists, or from Clearance 3 on. On the Greentech and Synthetic paths it
@@ -121,8 +121,8 @@ export function growthTitle(view: Pick<SimView, "corruption" | "contaminatedShar
 
 export type Stain = "none" | "faint" | "heavy";
 
-/** How stained the memo slip is. Off: never. Mild: half as much (a faint stain only, at a higher corruption). */
-export function memoStain(corruption: number, h: HorrorIntensity): Stain {
+/** How stained the decision card is. Off: never. Mild: half as much (a faint stain only, at a higher corruption). */
+export function decisionStain(corruption: number, h: HorrorIntensity): Stain {
 	if (h === "off") return "none";
 	if (h === "mild") return corruption >= 0.6 ? "faint" : "none";
 	return corruption >= 0.75 ? "heavy" : corruption >= 0.4 ? "faint" : "none";

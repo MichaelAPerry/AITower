@@ -56,11 +56,6 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 		};
 	}
 
-	const urgent = view.memos.find((m) => m.expiresAt - view.tick <= 120);
-	if (urgent) {
-		return { tone: "alert", title: "An Authority memo is about to auto-resolve", detail: `Answer “${urgent.title}” in the memo inbox (top bar), or it resolves to its default choice.` };
-	}
-
 	const broken = view.facilities.filter((f) => f.status === "failed").length;
 	if (broken > 0 && view.spareParts === 0) {
 		return {

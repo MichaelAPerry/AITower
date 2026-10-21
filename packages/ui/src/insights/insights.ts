@@ -59,7 +59,7 @@ const CAUSE: Record<StandingLogEntry["cause"], string> = {
 	job: "A job result",
 	"daily-uptime": "Daily uptime check",
 	audit: "Quarterly audit",
-	memo: "A memo decision",
+	decision: "An advisor decision",
 };
 
 export interface WhyRow {

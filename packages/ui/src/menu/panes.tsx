@@ -223,8 +223,8 @@ export function SettingsPane({ store, state }: PaneProps) {
 			<SettingRow label="Text size" hint="Scales the whole control room, 85% to 150%.">
 				<Slider label="Text size" value={s.textScale} min={TEXT_SCALE_MIN} max={TEXT_SCALE_MAX} step={0.05} readout={`${Math.round(s.textScale * 100)}%`} onChange={(v) => set({ textScale: v })} />
 			</SettingRow>
-			<SettingRow label="Assistant" hint="UNIT-7, the little robot that suggests what to do next. It never nags; turn it off any time.">
-				<Toggle on={s.assistant} onClick={() => set({ assistant: !s.assistant })} label="BOT" />
+			<SettingRow label="Advisor tips" hint="Short tips from the four advisors, once each per game. Decisions always appear, and clicking a portrait still answers.">
+				<Toggle on={s.advisorTips} onClick={() => set({ advisorTips: !s.advisorTips })} label="TIPS" />
 			</SettingRow>
 			<SettingRow label="CRT effects" hint="Scanlines, vignette and screen flicker.">
 				<Toggle on={s.crtEffects} onClick={() => set({ crtEffects: !s.crtEffects })} label="CRT" />

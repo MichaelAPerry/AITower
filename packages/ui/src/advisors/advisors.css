@@ -1,0 +1,368 @@
+/* Advisors (M6.3): the docked strip, the Ask card, and the decision card. Each advisor brings its own --adv colour. */
+
+.aitower-hud .adv-strip {
+	position: absolute;
+	left: calc(76px + var(--gap) * 2);
+	bottom: calc(var(--gap) * 2 + 30px);
+	width: min(720px, calc(100% - 76px - var(--dtab-w, 104px) - var(--gap) * 6));
+	z-index: 6;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	pointer-events: none;
+	transition: width 0.2s ease;
+}
+.aitower-hud .adv-strip > * {
+	pointer-events: auto;
+}
+.aitower-hud.has-drawer .adv-strip {
+	width: min(720px, calc(100% - 76px - var(--drawer-w) - var(--dtab-w, 104px) - var(--gap) * 8));
+}
+.aitower-hud .adv-bar {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 5px 10px 5px 6px;
+	min-height: 50px;
+}
+.aitower-hud .adv-faces {
+	display: flex;
+	gap: 4px;
+	flex: none;
+}
+.aitower-hud .adv-face {
+	position: relative;
+	display: block;
+	padding: 2px;
+	background: none;
+	border: 2px solid transparent;
+	border-radius: 50%;
+	cursor: pointer;
+	line-height: 0;
+}
+.aitower-hud .adv-face:hover,
+.aitower-hud .adv-face:focus-visible,
+.aitower-hud .adv-face.is-asked {
+	border-color: var(--adv);
+	outline: none;
+}
+.aitower-hud .adv-face.is-speaking {
+	border-color: var(--adv);
+	animation: adv-pulse 1.6s ease-out 1;
+}
+@keyframes adv-pulse {
+	from {
+		box-shadow: 0 0 0 0 color-mix(in srgb, var(--adv) 70%, transparent);
+	}
+	to {
+		box-shadow: 0 0 0 10px transparent;
+	}
+}
+.aitower-hud .adv-dot {
+	position: absolute;
+	right: 0;
+	top: 0;
+	width: 10px;
+	height: 10px;
+	border-radius: 50%;
+	background: var(--adv);
+	border: 2px solid var(--panel);
+}
+.aitower-hud .adv-portrait .adv-disc {
+	fill: color-mix(in srgb, var(--adv) 30%, var(--housing-lo));
+	stroke: var(--adv);
+	stroke-width: 1.4;
+}
+.aitower-hud .adv-line {
+	flex: 1;
+	min-width: 0;
+	font: var(--fs-body) / 1.3 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .adv-quiet {
+	color: var(--text-dim);
+}
+.aitower-hud .adv-tip {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	animation: adv-in 0.25s ease-out;
+}
+@keyframes adv-in {
+	from {
+		opacity: 0;
+		transform: translateY(4px);
+	}
+}
+.aitower-hud .adv-who {
+	flex: none;
+	color: var(--adv);
+	font: 600 var(--fs-body) / 1.3 var(--f-display);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.aitower-hud .adv-text {
+	display: inline;
+	margin: 0 8px 0 0;
+}
+.aitower-hud .adv-body {
+	flex: 1;
+	min-width: 0;
+}
+.aitower-hud .adv-ask .adv-text {
+	display: block;
+	margin: 0 0 4px;
+}
+.aitower-hud .adv-acts {
+	display: inline-flex;
+	vertical-align: middle;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+}
+.aitower-hud .adv-go {
+	padding: 3px 9px;
+}
+.aitower-hud .adv-link {
+	background: none;
+	border: 0;
+	padding: 0;
+	color: var(--text-dim);
+	font: var(--fs-body) / 1 var(--f-body);
+	text-decoration: underline dotted;
+	cursor: pointer;
+}
+.aitower-hud .adv-link:hover,
+.aitower-hud .adv-link:focus-visible {
+	color: var(--accent);
+}
+.aitower-hud .adv-x {
+	flex: none;
+	padding: 1px 7px;
+	line-height: 1.2;
+}
+
+/* Ask: ranked answer above the strip. */
+.aitower-hud .adv-ask {
+	border: 1px solid var(--adv);
+	padding: 10px 12px;
+	animation: adv-in 0.2s ease-out;
+}
+.aitower-hud .adv-ask-head {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin-bottom: 8px;
+}
+.aitower-hud .adv-ask-head > div {
+	flex: 1;
+	display: grid;
+}
+.aitower-hud .adv-ask-head small {
+	color: var(--text-dim);
+}
+.aitower-hud .adv-ranked {
+	margin: 0;
+	padding: 0 0 0 20px;
+	display: grid;
+	gap: 8px;
+	font: var(--fs-body) / 1.35 var(--f-body);
+}
+.aitower-hud .adv-ranked li::marker {
+	color: var(--adv);
+	font-family: var(--f-num);
+}
+
+/* Decision card: centred over the world, never over the build catalog or inspector (it pauses the game). */
+.aitower-hud .adv-scrim {
+	position: absolute;
+	inset: 0;
+	z-index: 9;
+	display: grid;
+	place-items: center;
+	padding: 56px 84px 70px 84px;
+	background: color-mix(in srgb, var(--ink) 38%, transparent);
+	pointer-events: auto;
+}
+.aitower-hud .adv-card {
+	width: min(560px, 100%);
+	max-height: 100%;
+	overflow-y: auto;
+	display: grid;
+	gap: 10px;
+	padding: 14px 16px;
+	border: 1px solid var(--adv);
+	animation: adv-in 0.28s ease-out;
+}
+.aitower-hud .adv-card-head {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+}
+.aitower-hud .adv-card-head small {
+	display: block;
+	color: var(--text-dim);
+	font: var(--fs-body) / 1.2 var(--f-num);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+.aitower-hud .adv-card-head h3 {
+	margin: 2px 0;
+	font: 600 calc(var(--fs-body) + 4px) / 1.2 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .adv-card-by {
+	color: var(--adv);
+	font: var(--fs-body) / 1.2 var(--f-body);
+}
+.aitower-hud .adv-card-body {
+	margin: 0;
+	font: var(--fs-body) / 1.4 var(--f-body);
+}
+.aitower-hud .adv-magi {
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	padding: 6px 8px;
+	background: color-mix(in srgb, var(--housing-lo) 70%, transparent);
+}
+.aitower-hud .adv-magi header {
+	display: flex;
+	justify-content: space-between;
+	color: var(--text-dim);
+	font: var(--fs-body) / 1.2 var(--f-num);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	margin-bottom: 4px;
+}
+.aitower-hud .adv-magi ul {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 3px;
+}
+.aitower-hud .adv-magi li {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	font: var(--fs-body) / 1.25 var(--f-body);
+}
+.aitower-hud .adv-magi li > svg {
+	flex: none;
+}
+.aitower-hud .adv-magi em {
+	font-style: normal;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+}
+.aitower-hud .adv-magi .is-yes em {
+	color: var(--good);
+}
+.aitower-hud .adv-magi .is-no em {
+	color: var(--warn);
+}
+.aitower-hud .adv-magi .is-price {
+	border-top: 1px dotted var(--panel-edge);
+	padding-top: 3px;
+}
+.aitower-hud .adv-magi .is-price em {
+	color: var(--adv);
+}
+.aitower-hud .adv-opts {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+.aitower-hud .adv-opt {
+	display: grid;
+	gap: 6px;
+	align-content: start;
+	text-align: left;
+	padding: 9px 11px;
+	background: var(--housing);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+	color: var(--text);
+	font: var(--fs-body) / 1.25 var(--f-body);
+	cursor: pointer;
+}
+.aitower-hud .adv-opt:hover,
+.aitower-hud .adv-opt:focus-visible {
+	border-color: var(--accent);
+	outline: none;
+}
+.aitower-hud .adv-opt.is-rec {
+	border-color: var(--adv);
+	box-shadow: inset 0 0 0 1px var(--adv);
+}
+.aitower-hud .adv-opt-top {
+	display: grid;
+	gap: 3px;
+}
+.aitower-hud .adv-opt-top b {
+	font: 600 calc(var(--fs-body) + 1px) / 1.2 var(--f-display);
+}
+.aitower-hud .adv-rec {
+	color: var(--adv);
+	font: var(--fs-body) / 1 var(--f-num);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+.aitower-hud .adv-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+.aitower-hud .adv-chip {
+	padding: 2px 6px;
+	border: 1px solid var(--panel-edge);
+	border-radius: 999px;
+	font: var(--fs-body) / 1.2 var(--f-num);
+	color: var(--text);
+	white-space: nowrap;
+}
+.aitower-hud .adv-chip.is-none {
+	color: var(--text-dim);
+}
+.aitower-hud .adv-chip.ui-pathchip {
+	border-color: currentColor;
+}
+.aitower-hud .adv-card-foot {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 10px;
+	color: var(--text-dim);
+	font: var(--fs-body) / 1.2 var(--f-body);
+}
+/* Biotech stain on the card: damp tint, never a face or an eye. */
+.aitower-hud .adv-card.has-stain-faint {
+	background-image: radial-gradient(ellipse at 88% 100%, color-mix(in srgb, var(--good) 14%, transparent), transparent 60%);
+}
+.aitower-hud .adv-card.has-stain-heavy {
+	background-image:
+		radial-gradient(ellipse at 88% 100%, color-mix(in srgb, var(--good) 26%, transparent), transparent 62%),
+		radial-gradient(ellipse at 8% 4%, color-mix(in srgb, var(--accent-2) 16%, transparent), transparent 48%);
+}
+@media (max-width: 760px) {
+	.aitower-hud .adv-opts {
+		grid-template-columns: 1fr;
+	}
+	.aitower-hud .adv-scrim {
+		padding: 56px 8px 70px;
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .adv-tip,
+	.aitower-hud .adv-ask,
+	.aitower-hud .adv-card,
+	.aitower-hud .adv-face.is-speaking {
+		animation: none;
+	}
+}
+.aitower-hud.is-reduced-motion .adv-tip,
+.aitower-hud.is-reduced-motion .adv-ask,
+.aitower-hud.is-reduced-motion .adv-card,
+.aitower-hud.is-reduced-motion .adv-face.is-speaking {
+	animation: none;
+}

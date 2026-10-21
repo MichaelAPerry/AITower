@@ -4,7 +4,7 @@ import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { AscensionForm } from "./ascension/AscensionForm";
 import { ascensionDue, filePath, pathPending, pathRows, pathToConfirm } from "./ascension/ascension";
-import { bandText, bioWords, memoStain, organoidBand, showGrowthGauge, tissueState, traitInfo } from "./bio/bio";
+import { bandText, bioWords, decisionStain, organoidBand, showGrowthGauge, tissueState, traitInfo } from "./bio/bio";
 import { NextChip, Ticker } from "./calm/Parts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
@@ -14,7 +14,7 @@ import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { click, findAll, findButton, panelProps, textOf } from "./dev/walk";
 import { describeEvent } from "./events";
 import { endingOf, overCopyFor } from "./gameover/gameOver";
-import { MemoSlip, urgentToPop } from "./memo/MemoDesk";
+import { DecisionCard } from "./advisors/DecisionCard";
 import { currentObjective, endingLine } from "./objective/objective";
 import { nutrientLoopProblem, rackProblem } from "./objective/diagnose";
 import { Inspector } from "./components/Inspector";
@@ -58,12 +58,12 @@ describe("horror intensity wording", () => {
 		expect(traitInfo("fleshed", "off").label).toBe("Mutated: fleshed");
 	});
 	it("stains the memo slip subtly, half as much at mild, never at off", () => {
-		expect(memoStain(0.3, "full")).toBe("none");
-		expect(memoStain(0.5, "full")).toBe("faint");
-		expect(memoStain(0.9, "full")).toBe("heavy");
-		expect(memoStain(0.5, "mild")).toBe("none");
-		expect(memoStain(0.9, "mild")).toBe("faint");
-		expect(memoStain(1, "off")).toBe("none");
+		expect(decisionStain(0.3, "full")).toBe("none");
+		expect(decisionStain(0.5, "full")).toBe("faint");
+		expect(decisionStain(0.9, "full")).toBe("heavy");
+		expect(decisionStain(0.5, "mild")).toBe("none");
+		expect(decisionStain(0.9, "mild")).toBe("faint");
+		expect(decisionStain(1, "off")).toBe("none");
 	});
 	it("shows the growth gauge once corruption is above zero or from Clearance 3", () => {
 		expect(showGrowthGauge({ corruption: 0, tier: 2 })).toBe(false);
@@ -369,23 +369,23 @@ describe("Calm HUD interactions", () => {
 		click(findButton(Ticker(props), /Open the alert log/));
 		expect(patches).toEqual([{ drawer: "log" }]);
 	});
-	it("the memo slip shows stamps with effect numbers, and the prose only after 'read memo'", () => {
+	it("the decision card shows choices with effect numbers, marks the recommended one and answers by id", () => {
 		const { content, store } = setup();
-		store.issueMemo("heatwave", 600);
+		store.issueDecision("heatwave");
 		const view = store.get().view;
-		const m = view.memos[0];
-		expect(urgentToPop(view, content, [], [])?.id).toBe(m.id);
+		expect(view.decision?.recommended).toBe("credits");
 		const answers: string[] = [];
-		const slip = (open: boolean) => MemoSlip({ memo: m, content, tick: view.tick, open, onRead: () => {}, onAnswer: (c) => answers.push(c), onAside: () => {} });
-		expect(textOf(slip(false))).toContain("BUY CREDITS −$12k");
-		expect(textOf(slip(false))).not.toContain("Weather Bureau advises");
-		expect(textOf(slip(true))).toContain("Weather Bureau advises");
-		click(findButton(slip(false), /BUY CREDITS/));
-		expect(answers).toEqual(["credits"]);
-		// not urgent, not popped
-		store.issueMemo("audit", 5000);
-		const v2 = store.get().view;
-		expect(urgentToPop(v2, content, [m.id], [])).toBeNull();
+		const dispatch = (c: unknown) => {
+			answers.push((c as { choiceId?: string; type: string }).choiceId ?? (c as { type: string }).type);
+			return { ok: true } as const;
+		};
+		const card = DecisionCard({ store: { ...store, dispatch } as never, content, state: store.get() });
+		expect(textOf(card)).toContain("BUY CREDITS");
+		expect(textOf(card)).toContain("−$12k");
+		expect(textOf(card)).toContain("Recommended by Cass");
+		click(findButton(card, /BUY CREDITS/));
+		click(findButton(card, /Defer one day/));
+		expect(answers).toEqual(["credits", "deferDecision"]);
 	});
 });
 

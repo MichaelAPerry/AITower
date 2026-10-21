@@ -80,7 +80,7 @@ describe("quarterly report", () => {
 
 describe("lifetime stats", () => {
 	it("gives ten rows, and none when the view has no stats", () => {
-		const s = { revenue: 2_500_000, pflopHours: 12_345.6, jobsCompleted: 30, jobsFailed: 2, peakPflops: 120, facilitiesBuilt: 44, componentFailures: 9, repairs: 8, memosAnswered: 5, researchPointsEarned: 77.9 };
+		const s = { revenue: 2_500_000, pflopHours: 12_345.6, jobsCompleted: 30, jobsFailed: 2, peakPflops: 120, facilitiesBuilt: 44, componentFailures: 9, repairs: 8, decisionsMade: 5, researchPointsEarned: 77.9 };
 		const rows = lifetimeRows(s);
 		expect(rows).toHaveLength(10);
 		expect(rows[0]).toEqual({ label: "Lifetime revenue", value: "$2.50M" });

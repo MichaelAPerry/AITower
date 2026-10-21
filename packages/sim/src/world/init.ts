@@ -5,7 +5,7 @@ import { placeScenarioFacility } from "../commands/placement";
 import { stockParts } from "../commands/operations";
 import { defaultAutomation } from "../automation/policy";
 import { nextOfferDelay, seedOpeningOffer } from "../compute/offers";
-import { nextMemoDelay } from "../ministry/memos";
+import { nextDecisionDelay } from "../ministry/decisions";
 import { createScratch } from "../core/context";
 import { cellCount, cellIdx, inBounds } from "../core/grid";
 import { createRng } from "../core/rng";
@@ -52,7 +52,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		offers: [],
 		jobs: [],
 		workOrders: [],
-		nextId: { facility: 1, lift: 1, bot: 1, contract: 1, job: 1, workOrder: 1, memo: 1 },
+		nextId: { facility: 1, lift: 1, bot: 1, contract: 1, job: 1, workOrder: 1, decision: 1 },
 		powerNets: [],
 		coolantNets: [],
 		nutrientNets: [],
@@ -87,10 +87,13 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		},
 		ambientC: ambient,
 		rng: createRng(seed),
-		memos: [],
-		memoHistory: [],
+		decision: null,
+		decisionHistory: [],
 		modifiers: [],
-		nextMemoTick: 0,
+		nextDecisionTick: 0,
+		lastDecisionDay: -1,
+		decisionGate: true,
+		advisorTips: [],
 		lastIssuedDay: {},
 		standing: content.balance.standing.start,
 		standingLog: [],
@@ -157,6 +160,6 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 	state.netsDirty = false;
 	seedOpeningOffer(state, content);
 	state.nextOfferTick = nextOfferDelay(state, content);
-	state.nextMemoTick = content.balance.events.graceTicks + nextMemoDelay(state, content);
+	state.nextDecisionTick = content.balance.events.graceTicks + nextDecisionDelay(state, content);
 	return state;
 }

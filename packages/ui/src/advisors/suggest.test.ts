@@ -1,8 +1,7 @@
 import { loadContent } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { acted, dismiss, initialPace, MIN_GAP, pace, URGENT_GAP, DISMISS_COOLDOWN } from "./pace";
-import { recommendedIds, suggestions, tipFor } from "./suggest";
+import { recommendedIds, suggestions } from "./suggest";
 
 const content = loadContent();
 const rack = (id: number, status = "ok", extra: Record<string, unknown> = {}) => ({ id, defId: "rack_air_gpu", floor: 1, x: id * 3, status, enabled: true, tempC: 40, ...extra });
@@ -12,7 +11,6 @@ function view(p: Partial<Record<keyof SimView, unknown>> = {}): SimView {
 		cash: 5_000_000,
 		tier: 1,
 		sandbox: false,
-		memos: [],
 		spareParts: 3,
 		jobs: [],
 		offers: [],
@@ -94,42 +92,13 @@ describe("suggestions", () => {
 		expect(list[0].id).toBe("hot");
 		expect(recommendedIds(list)).toEqual(["crah_unit", "ups_battery"]);
 	});
-	it("tips rotate by day", () => {
-		expect(tipFor(0)).not.toBe(tipFor(1440));
-	});
-});
-
-describe("pacing", () => {
-	const hot = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 })] }), content);
-	const idle = suggestions(view({ facilities: [rack(1, "idle")], offers: [{ id: 1 }] }), content);
-	it("shows the first suggestion, keeps it, and says nothing when quiet", () => {
-		expect(pace(initialPace(), hot, 0, true).current).toBeNull();
-		const a = pace(initialPace(), hot, 100, false);
-		expect(a.current?.id).toBe("hot");
-		expect(pace(a.state, hot, 105, false).current?.id).toBe("hot");
-	});
-	it("dismissal silences it for a day, then it may return", () => {
-		const a = pace(initialPace(), idle, 100, false);
-		const d = dismiss(a.state, "idle", 100);
-		expect(pace(d, idle, 100 + MIN_GAP + 1, false).current).toBeNull();
-		expect(pace(d, idle, 100 + DISMISS_COOLDOWN + MIN_GAP + 1, false).current?.id).toBe("idle");
-	});
-	it("a global gap holds the next suggestion back; urgent ones wait less", () => {
-		const a = pace(initialPace(), idle, 100, false);
-		const done = acted(a.state, "idle", 110);
-		expect(pace(done, hot, 110 + 10, false).current).toBeNull();
-		expect(pace(done, hot, 110 + URGENT_GAP, false).current?.id).toBe("hot");
-		expect(pace(done, idle.concat(hot).filter((s) => s.id !== "hot" && s.id !== "idle"), 110 + MIN_GAP, false).current).toBeNull();
-	});
-	it("an urgent problem takes over from a nice-to-have on screen", () => {
-		const a = pace(initialPace(), idle, 100, false);
-		expect(a.current?.id).toBe("idle");
-		expect(pace(a.state, [...hot, ...idle], 110, false).current?.id).toBe("hot");
-	});
-	it("frees the slot when the problem goes away", () => {
-		const a = pace(initialPace(), hot, 100, false);
-		const gone = pace(a.state, [], 120, false);
-		expect(gone.current).toBeNull();
-		expect(gone.state.shown).toBeNull();
+	it("each suggestion has an owner advisor and a Handbook link; the hot-rack text leads with the number", () => {
+		const list = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 })], powerNets: [{ satisfaction: 0.6 }] }), content);
+		for (const s of list) expect(["cass", "bea", "mel", "lucien"]).toContain(s.advisor);
+		const hot = list.find((s) => s.id === "hot");
+		expect(hot?.advisor).toBe("cass");
+		expect(hot?.text).toMatch(/^86 °C in a rack/);
+		expect(hot?.links[0].entry).toBe("ch:heat");
+		expect(list.find((s) => s.id === "power")?.advisor).toBe("bea");
 	});
 });

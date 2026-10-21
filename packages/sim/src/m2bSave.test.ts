@@ -9,7 +9,7 @@ import { cmdSetClerk, farmContent, giveRp, pushOffer, training } from "./test/m2
 type Raw = Record<string, any>;
 
 const scripted: EventDef = {
-	id: "scr", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 0, scriptedDay: 1, timeoutTicks: 300, defaultChoice: "a",
+	id: "scr", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 0, scriptedDay: 1, advisor: "cass", recommended: "a",
 	choices: [{ id: "a", label: "A", hint: "", outcome: "", effects: [] }],
 };
 
@@ -19,7 +19,7 @@ const content = () =>
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 3, offerIntervalTicks: 120, offerExpiryTicks: 900 },
 			audit: { periodDays: 2, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 			tax: { profitShare: 0.1 },
-			events: { intervalTicks: 700, maxOpen: 3, graceTicks: 600 },
+			events: { intervalTicks: 700, graceTicks: 600 },
 		},
 		[scripted, { ...scripted, id: "rnd", scriptedDay: undefined, weight: 3 }],
 	);
@@ -33,7 +33,7 @@ function play(seed: number, days: number, onDay?: (sim: SimImpl, day: number) =>
 	exec(sim, cmdSetClerk());
 	for (let d = 0; d < days; d++) {
 		for (let t = 0; t < 1440; t++) {
-			for (const e of sim.step()) if (e.type === "memoIssued") sim.submit({ type: "resolveMemo", memoId: e.memoId, choiceId: "a" });
+			for (const e of sim.step()) if (e.type === "decisionIssued") sim.submit({ type: "resolveDecision", decisionId: e.decisionId, choiceId: "a" });
 		}
 		onDay?.(sim, d);
 	}
@@ -51,7 +51,7 @@ describe("determinism with research, clerk, loans, audits and scripted events", 
 		expect(a.state.stats.jobsCompleted).toBeGreaterThan(0);
 		expect(a.state.today.fees + a.state.ledger.reduce((s, l) => s + l.fees, 0)).toBeGreaterThan(0);
 		expect(a.state.scriptedIssued).toEqual(["scr"]);
-		expect(a.state.stats.memosAnswered).toBeGreaterThan(0);
+		expect(a.state.stats.decisionsMade).toBeGreaterThan(0);
 	});
 
 	it("every day's save reloads to the identical hash and continues identically", () => {
@@ -99,7 +99,7 @@ describe("snapshot v4", () => {
 		for (const d of [...old.state.ledger, old.state.today]) expect(d).toMatchObject({ taxes: 0, interest: 0, fees: 0 });
 		expect(old.state.bots).toHaveLength(1);
 		expect(old.state.bots[0].parts).toBe(1);
-		expect(old.state.stats).toEqual({ revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 });
+		expect(old.state.stats).toEqual({ revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, decisionsMade: 0, researchPointsEarned: 0 });
 		expect(old.view().loan).toMatchObject({ principal: 0, max: 2_000_000 });
 		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
 		run(old, 3 * 1440); // reaches an audit

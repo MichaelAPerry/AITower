@@ -32,6 +32,15 @@ describe("mergeSettings", () => {
 	});
 });
 
+describe("advisor tips setting", () => {
+	it("defaults on; a stored pre-advisor `assistant: false` keeps tips off; the new key wins", () => {
+		expect(DEFAULT_SETTINGS.advisorTips).toBe(true);
+		expect(loadSettings(memoryStorage({ [SETTINGS_KEY]: JSON.stringify({ assistant: false }) }), false).advisorTips).toBe(false);
+		expect(loadSettings(memoryStorage({ [SETTINGS_KEY]: JSON.stringify({ assistant: false, advisorTips: true }) }), false).advisorTips).toBe(true);
+		expect(mergeSettings(DEFAULT_SETTINGS, { advisorTips: false }).advisorTips).toBe(false);
+	});
+});
+
 describe("store settings", () => {
 	const make = (init: Record<string, string> = {}, prefersReducedMotion = false) => {
 		const storage = memoryStorage(init);

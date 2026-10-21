@@ -551,11 +551,11 @@ describe("scenarios", () => {
 		const c = content([custom, plain]);
 		const sb = newSim(c, "custom");
 		const ev: SimEvent[] = [];
-		changeStanding(sb.state, -1000, ev, "memo", "test");
+		changeStanding(sb.state, -1000, ev, "decision", "test");
 		expect(sb.state.standing).toBe(0);
 		expect(sb.state.gameOver).toBeNull();
 		const normal = newSim(c, "plain");
-		changeStanding(normal.state, -1000, ev, "memo", "test");
+		changeStanding(normal.state, -1000, ev, "decision", "test");
 		expect(normal.state.gameOver?.kind).toBe("shutdown");
 	});
 
@@ -641,8 +641,8 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(8);
-		expect(base().snapshot().version).toBe(8);
+		expect(SNAPSHOT_VERSION).toBe(9);
+		expect(base().snapshot().version).toBe(9);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -664,7 +664,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(8);
+		expect(loaded.snapshot().version).toBe(9);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

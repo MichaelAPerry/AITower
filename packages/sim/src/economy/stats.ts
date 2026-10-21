@@ -11,7 +11,7 @@ export const emptyStats = (): LifetimeStats => ({
 	facilitiesBuilt: 0,
 	componentFailures: 0,
 	repairs: 0,
-	memosAnswered: 0,
+	decisionsMade: 0,
 	researchPointsEarned: 0,
 });
 

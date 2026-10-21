@@ -166,7 +166,7 @@ export function stingerForEvent(e: SimEvent, intensity: HorrorIntensity = "full"
 		case "tierUp":
 			id = "fanfare";
 			break;
-		case "memoIssued":
+		case "decisionIssued":
 			id = "teletype";
 			break;
 		case "researched":

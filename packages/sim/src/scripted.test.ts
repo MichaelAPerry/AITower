@@ -8,7 +8,7 @@ import { farmContent } from "./test/m2b";
 import { newSim } from "./test/fixture";
 
 const ev = (over: Partial<EventDef>): EventDef => ({
-	id: "scr", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 99, timeoutTicks: 600, defaultChoice: "a",
+	id: "scr", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 99, advisor: "cass", recommended: "a",
 	choices: [{ id: "a", label: "A", hint: "", outcome: "", effects: [] }], ...over,
 });
 
@@ -16,14 +16,14 @@ function issueTicks(sim: SimImpl, ticks: number, id: string): { tick: number; da
 	const out: { tick: number; day: number; minute: number }[] = [];
 	for (let i = 0; i < ticks; i++) {
 		const tick = sim.state.tick;
-		for (const e of sim.step()) if (e.type === "memoIssued" && e.eventId === id) out.push({ tick, day: dayOf(tick), minute: minuteOfDay(tick) });
+		for (const e of sim.step()) if (e.type === "decisionIssued" && e.eventId === id) out.push({ tick, day: dayOf(tick), minute: minuteOfDay(tick) });
 	}
 	return out;
 }
 
 describe("scripted events", () => {
 	it("are issued once at 09:00 (minuteOfDay 540) on their day, ignoring maxOpen, grace and cooldown, and never randomly", () => {
-		const c = farmContent({ events: { intervalTicks: 10, maxOpen: 0, graceTicks: 1_000_000 } }, [ev({ scriptedDay: 2 })]);
+		const c = farmContent({ events: { intervalTicks: 10, graceTicks: 1_000_000 } }, [ev({ scriptedDay: 2 })]);
 		const sim = newSim(c, "farm", 1);
 		const got = issueTicks(sim, 5 * 1440, "scr");
 		expect(got).toEqual([{ tick: 2 * 1440 + 180, day: 2, minute: 540 }]);

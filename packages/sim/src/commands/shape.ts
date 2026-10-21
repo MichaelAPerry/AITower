@@ -27,7 +27,10 @@ const NUMERIC: Record<string, readonly string[]> = {
 	cancelJob: ["jobId"],
 	buyParts: ["count"],
 	buyBot: [],
-	resolveMemo: ["memoId"],
+	resolveDecision: ["decisionId"],
+	deferDecision: ["decisionId"],
+	decisionGate: [],
+	markTip: [],
 	research: [],
 	setClerk: [],
 	takeLoan: ["amount"],
@@ -72,7 +75,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 		const keys = Object.hasOwn(NUMERIC, type) ? NUMERIC[type] : undefined;
 		if (!keys) return { ok: false, reason: "unknown command type" };
 		if ((type === "place" || type === "buyBot") && typeof raw.defId !== "string") return bad("defId must be a string");
-		if (type === "resolveMemo" && typeof raw.choiceId !== "string") return bad("choiceId must be a string");
+		if (type === "resolveDecision" && typeof raw.choiceId !== "string") return bad("choiceId must be a string");
 		if (type === "research" && typeof raw.techId !== "string") return bad("techId must be a string");
 		if (type === "choosePath" && typeof raw.path !== "string") return bad("path must be a string");
 		if (type === "setClerk") return normalizeClerk(raw.policy);
@@ -87,7 +90,15 @@ export function normalizeCommand(raw: unknown): Normalized {
 			out[k] = v;
 		}
 		if (type === "place" || type === "buyBot") out.defId = raw.defId;
-		if (type === "resolveMemo") out.choiceId = raw.choiceId;
+		if (type === "resolveDecision") out.choiceId = raw.choiceId;
+		if (type === "markTip") {
+			if (typeof raw.tipId !== "string") return bad("tipId must be a string");
+			out.tipId = raw.tipId;
+		}
+		if (type === "decisionGate") {
+			if (typeof raw.open !== "boolean") return bad("open must be a boolean");
+			out.open = raw.open;
+		}
 		if (type === "research") out.techId = raw.techId;
 		if (type === "choosePath") out.path = raw.path;
 		if (type === "demolish") {

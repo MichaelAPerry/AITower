@@ -25,7 +25,7 @@ export function AscensionForm({ rows, tier, affinity, content, pending, onPick, 
 				Level {tier} entitles the tower to commit to one path of Ascension. The election is entered once. It cannot be amended, withdrawn or appealed, and the Board will not be reminded of it.
 			</p>
 			{affinity && content && <AffinityBars affinity={affinity} content={content} leading={leadingPath(affinity)} />}
-			{affinity && leadingPath(affinity) && <p className="ui-asc-lead">Your build, research and memo choices lead to {rows.find((r) => r.id === leadingPath(affinity))?.name}. It is pre-selected; you can pick another.</p>}
+			{affinity && leadingPath(affinity) && <p className="ui-asc-lead">Your build, research and decision choices lead to {rows.find((r) => r.id === leadingPath(affinity))?.name}. It is pre-selected; you can pick another.</p>}
 			<ul className="ui-asc-paths">
 				{rows.map((r) => (
 					<li key={r.id} className={`ui-asc-path ${r.available ? "" : "is-soon"} ${r.id === pending ? "is-picked" : ""}`} data-path={r.id}>
