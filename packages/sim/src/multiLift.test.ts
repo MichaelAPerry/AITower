@@ -37,7 +37,11 @@ function tower(shafts: { x: number; min: number; max: number }[], top: number, b
 
 const failAll = (sim: SimImpl): number => {
 	let n = 0;
-	for (const f of [...sim.state.facilities]) if (f.defId.startsWith("rack_") && !f.failed) (failRack(sim.state, f, []), n++);
+	for (const f of [...sim.state.facilities]) {
+		if (!f.defId.startsWith("rack_") || f.failed) continue;
+		failRack(sim.state, f, []);
+		n++;
+	}
 	return n;
 };
 

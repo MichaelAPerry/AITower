@@ -148,7 +148,7 @@ function tryPower(r: Run): boolean {
 }
 
 function tryCooling(r: Run): boolean {
-	const { state, content } = r.ctx;
+	const { content } = r.ctx;
 	const okC = content.balance.thermal.okC;
 	const hot = realRacks(r)
 		.filter((f) => f.enabled && f.tempC > okC && !r.coolDone.has(f.id))

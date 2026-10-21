@@ -31,7 +31,7 @@ function StatRow({ s }: { s: Stat }) {
  * The persistent Inspector beside the catalog. Hovering a card previews it; the picked item shows when nothing is hovered
  * and stays while the player places it. Replaces the old floating spec card.
  */
-export function BuildInspector({ store, content, state, ui, setUi }: PanelProps) {
+export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 	const { view, tool } = state;
 	const picked = itemForTool(tool, content);
 	const hovered = findItem(ui.buildHover, content);
