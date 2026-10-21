@@ -1304,11 +1304,12 @@
 	white-space: nowrap;
 }
 
-/* Toasts: small dark pills, bottom right, clear of the coach bubbles and the Goals card */
+/* Toasts: small dark pills, top right beside the drawer tabs: never over the advisor strip at the bottom. At most two. */
 .aitower-hud .ui-toasts {
 	position: absolute;
 	right: calc(var(--dtab-w, 104px) + 16px);
-	bottom: 64px;
+	top: var(--gap);
+	transition: right 0.2s ease;
 	display: flex;
 	flex-direction: column;
 	align-items: flex-end;
@@ -2073,8 +2074,7 @@
 .aitower-hud.is-reduced-motion .ui-crt::after,
 .aitower-hud.is-reduced-motion .ui-lamp.is-blink,
 .aitower-hud.is-reduced-motion .ui-toast,
-.aitower-hud.is-reduced-motion .ui-coach,
-.aitower-hud.is-reduced-motion [data-tut-target] {
+.aitower-hud.is-reduced-motion [data-lesson-pulse] {
 	animation: none;
 }
 .aitower-hud.is-reduced-motion .ui-dial-needle,
@@ -2254,8 +2254,8 @@
 .aitower-hud.is-density-cramped .ui-overlay {
 	padding: 4px 8px 4px 6px;
 }
-.aitower-hud.is-density-cramped .ui-toasts {
-	top: 44px;
+.aitower-hud.has-drawer .ui-toasts {
+	right: calc(var(--dtab-w, 104px) + var(--drawer-w) + var(--gap) * 3);
 }
 .aitower-hud.is-density-cramped .ui-supply {
 	gap: 6px;

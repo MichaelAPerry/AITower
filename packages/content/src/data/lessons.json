@@ -1,0 +1,252 @@
+{
+	"lessons": [
+		{
+			"id": "first_watt",
+			"number": 1,
+			"title": "First Watt",
+			"advisor": "bea",
+			"concept": "Power: kW is a rate, capacity is a ceiling, and load above capacity means a blackout.",
+			"goal": "Two racks, one day, no blackouts.",
+			"scenario": "lesson_first_watt",
+			"speed": 3,
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				},
+				{
+					"type": "gridCap",
+					"factor": 0.08,
+					"durationTicks": 100000000,
+					"label": "Utility feeder limit 120 kW"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision"
+			],
+			"steps": [
+				{
+					"id": "rack1",
+					"text": "Build your first rack on the glowing slot",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 2
+						}
+					],
+					"slot": {
+						"floor": 1,
+						"x": 11,
+						"defId": "rack_air_gpu"
+					},
+					"handbook": "ch:power",
+					"say": [
+						"Welcome to the hall, operator. I'm Bea; I keep the lights on. Today's goal is simple: two racks working for one full day with no blackouts.",
+						"Start with one. Open Racks in the build bar, pick the AC-1 rack and click the glowing slot. Everything else is locked until it's down."
+					],
+					"after": [
+						"That rack is working flat out, pulling 40 kW. A {{kw|kW}} is a rate: how hard something pulls right now. The goal bar shows the whole hall's load, 93 kW, against the feeder's capacity of 120 kW."
+					],
+					"pause": true
+				},
+				{
+					"id": "rack2",
+					"text": "Build a second rack on the next slot",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 2
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 2
+						}
+					],
+					"slot": {
+						"floor": 1,
+						"x": 15,
+						"defId": "rack_air_gpu"
+					},
+					"handbook": "ch:power",
+					"say": [
+						"{{capacity|Capacity}} is the most the supply can give. This feeder is limited to 120 kW. The hall already pulls 53 kW before any rack works (the air handler, the lift and the intake itself), and one working rack brings it to 93. Add the second and watch the load bar."
+					],
+					"afterBeat": "trip",
+					"after": [
+						"There. The breaker tripped. Two racks flat out want 133 kW and this feeder only gives 120. Load above capacity and the lights go out. That is the whole job: keep capacity above load, with some {{headroom|headroom}} to spare.",
+						"The Power overlay is on so you can see the net. Next, a generator: it covers what the feeder can't."
+					],
+					"pause": true
+				},
+				{
+					"id": "genset",
+					"text": "Add the diesel generator in Power",
+					"when": [
+						{
+							"metric": "gensets",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"slot": {
+						"floor": -1,
+						"x": 12,
+						"defId": "genset"
+					},
+					"overlay": "power",
+					"handbook": "ch:power",
+					"say": [
+						"Open Power in the build bar, pick the Diesel Genset and click the glowing slot. It starts itself when the grid runs short.",
+						"A {{genset|generator}} adds capacity: the feeder's 120 kW plus the generator's 800 kW. Headroom is the gap between capacity and load."
+					],
+					"after": [
+						"That's {{headroom|headroom}}: a lot of capacity above a small load. Hold both racks at full load for one game day and you've passed."
+					],
+					"pause": false
+				},
+				{
+					"id": "day",
+					"text": "Hold both racks at full load for one day",
+					"when": [],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 2
+						},
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"handbook": "ch:power",
+					"say": [
+						"Keep the clock running. Headroom must stay above 10% the whole day, and nothing may go dark."
+					]
+				}
+			],
+			"beats": [
+				{
+					"id": "job1",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 20,
+							"durationTicks": 9000,
+							"payout": 300000
+						}
+					]
+				},
+				{
+					"id": "job2",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 2
+						}
+					],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 20,
+							"durationTicks": 9000,
+							"payout": 300000
+						}
+					]
+				},
+				{
+					"id": "trip",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 2
+						},
+						{
+							"metric": "shortKw",
+							"op": ">",
+							"value": 0
+						}
+					],
+					"effects": [
+						{
+							"type": "gridCap",
+							"factor": 0,
+							"durationTicks": 25,
+							"label": "Feeder tripped"
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "racksBusy",
+						"op": ">=",
+						"value": 2
+					},
+					{
+						"metric": "headroomPct",
+						"op": ">",
+						"value": 10
+					},
+					{
+						"metric": "racksDark",
+						"op": "<=",
+						"value": 0
+					}
+				],
+				"holdTicks": 1440
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				}
+			],
+			"stars": {
+				"headroomPct": 50,
+				"maxDarkTicks": 600
+			},
+			"learned": "{{kw|kW}} is how hard equipment pulls right now; {{capacity|capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.",
+			"handbook": [
+				"ch:power",
+				"ch:power#kw"
+			],
+			"next": "Where the Heat Goes",
+			"bonus": 50000,
+			"outro": "Two racks, a full day, no blackouts. You'll sleep better knowing the headroom is there. Come back and see me when you want to learn where all that power ends up."
+		}
+	]
+}

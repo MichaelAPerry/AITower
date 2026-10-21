@@ -18,7 +18,7 @@ const DEFAULT_BLURB = "The standard start: a bare garage lot, a grid tie and a m
 
 /** Cards for `content.scenarios`: the standard start first, then the rest in the content's order. */
 export function scenarioCards(content: ContentDB): ScenarioCard[] {
-	const all = Object.values(content.scenarios ?? {}) as Scenario[];
+	const all = (Object.values(content.scenarios ?? {}) as Scenario[]).filter((s) => !s.lesson);
 	const rank = (s: Scenario): number => (s.id === DEFAULT_SCENARIO ? 0 : 1);
 	return all
 		.map((s, i) => ({ s, i }))
@@ -38,6 +38,6 @@ export const showPicker = (cards: readonly ScenarioCard[]): boolean => cards.len
 /** The selected id if the content has it, else the standard start (or the first scenario). */
 export function validScenario(content: ContentDB, id: string | null | undefined): string {
 	const s = content.scenarios ?? {};
-	if (id && s[id]) return id;
+	if (id && s[id] && !s[id].lesson) return id;
 	return s[DEFAULT_SCENARIO] ? DEFAULT_SCENARIO : (Object.keys(s)[0] ?? DEFAULT_SCENARIO);
 }

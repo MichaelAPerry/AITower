@@ -282,6 +282,26 @@ export interface AuditTracker {
 	jobsFailed: number;
 }
 
+/** A running lesson (snapshot v10). Null in Free Build. */
+export interface LessonState {
+	id: string;
+	status: "active" | "won" | "lost";
+	/** Checklist steps completed, in order. */
+	stepsDone: string[];
+	beatsFired: string[];
+	/** Consecutive ticks the success conditions have held. */
+	holdTicks: number;
+	/** Lowest headroom % seen while the success conditions held (100 until they do). */
+	minHeadroom: number;
+	/** Game-minutes the racks were dark or over capacity after the first scripted beat. */
+	downTicks: number;
+	startTick: number;
+	endTick: number;
+	stars: number;
+	/** The lesson's setup effects have been applied. */
+	setupDone: boolean;
+}
+
 export interface SimState {
 	scenarioId: string;
 	seed: number;
@@ -399,4 +419,6 @@ export interface SimState {
 	sandbox: boolean;
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];
+	/** The lesson this site runs, or null (snapshot v10). */
+	lesson: LessonState | null;
 }

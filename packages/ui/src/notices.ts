@@ -9,6 +9,8 @@ export interface Notice {
 	severity: Severity;
 	/** Notices with the same key coalesce into one toast with a counter. */
 	key?: string;
+	/** Notices of one group collapse into a single toast whose text is `groupText(count)` ("3 racks failed, repairs queued"). */
+	group?: { id: string; text: (count: number) => string };
 }
 
 type Listener = (n: Notice) => void;

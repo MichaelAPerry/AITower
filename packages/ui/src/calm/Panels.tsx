@@ -7,7 +7,7 @@ import { downsample, Sparkline } from "../components/Sparkline";
 const SERIOUS = new Set<SimEvent["type"]>(["rackTripped", "componentFailed", "powerShortfall", "jobFailed", "bankrupt", "upsDepleted"]);
 export const isSerious = (e: SimEvent): boolean => SERIOUS.has(e.type);
 
-/** The offer the induction points at: one that needs neither liquid cooling nor stored data, so the starter site can serve it. */
+/** The offer the Free Build Goals card points at: one that needs neither liquid cooling nor stored data, so the starter site can serve it. */
 export function easiestOffer<T extends { needsLiquid: boolean; storageTB: number }>(offers: readonly T[]): T | undefined {
 	return offers.find((o) => !o.needsLiquid && o.storageTB === 0) ?? offers.find((o) => !o.needsLiquid) ?? offers[0];
 }

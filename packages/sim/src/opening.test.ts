@@ -4,7 +4,8 @@ import { SimImpl } from "./sim";
 import { createState } from "./world/init";
 
 const content = loadContent();
-const ids = Object.keys(content.scenarios);
+// Lesson sites are scripted: they hold no random offers.
+const ids = Object.values(content.scenarios).filter((s) => !s.lesson).map((s) => s.id);
 
 describe("opening offer", () => {
 	it("every scenario starts with at least one offer at tick 0", () => {

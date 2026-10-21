@@ -29,7 +29,7 @@ export type AdvisorAction =
 	/** Open FORM A-5. */
 	| { kind: "ascension" };
 
-/** A Handbook link chip: opens the entry (an Encyclopedia or Primer id). */
+/** A Handbook link chip: opens the entry (an Encyclopedia or chapter id). */
 export interface HandbookLink {
 	label: string;
 	entry: string;

@@ -40,7 +40,7 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 	if (!item) return null; // nothing hovered or picked: keep the screen clear
 	const isPicked = !!picked && picked.key === item.key;
 	const missing = item.def ? item.cost - view.cash : 0;
-	const openEntry = (): void => setUi({ drawer: "primer", encyId: item.entry, paletteOpen: false, buildHover: null });
+	const openEntry = (): void => setUi({ drawer: "handbook", encyId: item.entry, paletteOpen: false, buildHover: null });
 	return (
 		<TermScope key={item.key}>
 		<aside className={`bld-insp ui-panel ${item.tier ? `${item.tier.className} is-tier` : ""}`} aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">

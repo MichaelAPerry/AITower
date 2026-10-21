@@ -465,6 +465,118 @@ export interface Scenario {
 	startTier?: number;
 	/** Sandbox: no bankruptcy and no Ministry shutdown; audits still filed. */
 	sandbox?: boolean;
+	/** A lesson scenario: the id of the `LessonDef` this site runs (it never appears in the Free Build picker). */
+	lesson?: string;
+}
+
+// ─── Lessons (M6.4) ───────────────────────────────────────────────────
+
+/** Values the sim already tracks that a lesson may test. Everything is read from the tick that was just solved. */
+export type LessonMetric =
+	/** Compute racks built (any state). */
+	| "racks"
+	/** Compute racks that hold a job and are powered. */
+	| "racksBusy"
+	/** Compute racks that have no power (a blackout). */
+	| "racksDark"
+	| "gensets"
+	/** Power on offer minus power demanded, as a percentage of the power on offer (all nets). Negative when short. */
+	| "headroomPct"
+	/** Demand in kW (all nets). */
+	| "demandKw"
+	/** Supply in kW (all nets). */
+	| "supplyKw"
+	/** kW demanded beyond what is on offer (0 when covered). */
+	| "shortKw"
+	/** Hottest rack, °C. */
+	| "maxRackC"
+	| "uptime"
+	| "cash"
+	| "pflops"
+	| "day";
+export type LessonOp = ">=" | ">" | "<=" | "<";
+export interface LessonCond {
+	metric: LessonMetric;
+	op: LessonOp;
+	value: number;
+}
+/** What a scripted beat does to the sim when it fires. */
+export type LessonEffect =
+	/** A client job starts at once (inference; needs `pflops` sustained). */
+	| { type: "job"; pflops: number; durationTicks: number; payout: number }
+	/** The grid import is scaled by `factor` for `durationTicks` (0 = a tripped feeder). */
+	| { type: "gridCap"; factor: number; durationTicks: number; label: string }
+	/** Component failures are scaled by `factor` for `durationTicks` (0 = nothing breaks). */
+	| { type: "failureRate"; factor: number; durationTicks: number; label: string };
+/** A scripted moment: fires once, the first tick every `when` holds. */
+export interface LessonBeat {
+	id: string;
+	when: LessonCond[];
+	effects: LessonEffect[];
+}
+/** One checklist line. Steps complete in order; a done step stays done. */
+export interface LessonStep {
+	id: string;
+	/** The checklist line. */
+	text: string;
+	/** Done when all hold. */
+	when: LessonCond[];
+	/** What the player may build from this step on: facility ids, each with an optional cap on how many may exist. */
+	allow: { defId: string; max?: number }[];
+	/** The teacher's lines for this step, shown one at a time. Markup {{term|label}} links a Handbook term. */
+	say: string[];
+	/** Optional: the blueprint slot to highlight for a placement step. */
+	slot?: { floor: number; x: number; defId: string };
+	/** Lines the teacher says once the step is done (and `afterBeat`, if given, has fired). */
+	after?: string[];
+	afterBeat?: string;
+	/** The overlay to switch on when this step begins. */
+	overlay?: "normal" | "heat" | "power" | "coolant";
+	/** Pause the clock while the teacher talks (the player presses Continue). */
+	pause?: boolean;
+	/** Handbook article for the "?" chip on the checklist. */
+	handbook?: string;
+}
+export interface LessonStars {
+	/** Star 2: the lowest headroom % seen during the success day is at least this. */
+	headroomPct: number;
+	/** Star 3: no more than this many game-minutes without power over the whole lesson. */
+	maxDarkTicks: number;
+}
+export interface LessonDef {
+	id: string;
+	number: number;
+	title: string;
+	advisor: AdvisorId;
+	/** The real datacenter concept, one sentence (Lessons tab, result screen). */
+	concept: string;
+	/** The goal bar: "Two racks, one day, no blackouts." */
+	goal: string;
+	/** The scenario this lesson runs on (`Scenario.lesson` points back). */
+	scenario: string;
+	/** Speed the game runs at (the lesson sets it; the player may change it). */
+	speed: 1 | 3 | 10;
+	/** Effects applied when the lesson starts, before tick 0 (a permanent feeder limit, say). Only `gridCap` and `failureRate` are supported. */
+	setup?: LessonEffect[];
+	/** Command types the player may issue; any other is refused ("Not part of this lesson"). */
+	commands: string[];
+	steps: LessonStep[];
+	beats: LessonBeat[];
+	/** Success: all hold, continuously, for `holdTicks`. */
+	win: { when: LessonCond[]; holdTicks: number };
+	/** Failure: any holds. */
+	lose: LessonCond[];
+	stars: LessonStars;
+	/** One line on the result screen. */
+	learned: string;
+	/** Handbook article ids linked from the result screen. */
+	handbook: string[];
+	/** Title of the next lesson, or absent for the last available. */
+	next?: string;
+	/** Free Build starting-cash bonus the first time it is completed, $. */
+	bonus: number;
+	/** Teacher's closing line on the result screen. */
+	outro: string;
 }
 
 // ─── Advisor decisions (events) ───────────────────────────────────────
@@ -651,6 +763,8 @@ export interface ContentDB {
 	lift: LiftSpec;
 	balance: Balance;
 	scenarios: Record<string, Scenario>;
+	/** Lessons in order (see `Scenario.lesson`). */
+	lessons: LessonDef[];
 	events: EventDef[];
 	tech: TechNode[];
 	/** Research tree lanes, in display order (always present in loaded content). */

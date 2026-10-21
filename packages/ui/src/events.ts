@@ -14,7 +14,12 @@ export interface Described {
 	cell?: CellRef;
 	/** Show as a toast when it happens. */
 	toast: boolean;
+	/** Repeats of this kind merge into one toast (see `Notice.group`). */
+	group?: { id: string; text: (count: number) => string };
 }
+
+/** Rack failures arrive in bursts; one toast counts them. */
+export const FAILURE_GROUP = { id: "rack-failures", text: (n: number): string => (n === 1 ? "A rack failed — repair queued" : `${n} racks failed — repairs queued`) };
 
 const commandName: Record<SimCommand["type"], string> = {
 	buildSlab: "Build slab",
@@ -78,7 +83,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "rackTripped": {
 			const f = fac(ev.facilityId);
-			return { text: `${f.name} TRIPPED on over-temperature`, severity: "error", cell: f.cell, toast: true };
+			return { text: `${f.name} TRIPPED on over-temperature`, severity: "error", cell: f.cell, toast: true, group: FAILURE_GROUP };
 		}
 		case "rackRecovered": {
 			const f = fac(ev.facilityId);
@@ -86,7 +91,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "componentFailed": {
 			const f = fac(ev.facilityId);
-			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: view.spareParts === 0 };
+			return { text: `${f.name} component failed — repair queued`, severity: "error", cell: f.cell, toast: view.spareParts === 0, group: FAILURE_GROUP };
 		}
 		case "repaired": {
 			const f = fac(ev.facilityId);

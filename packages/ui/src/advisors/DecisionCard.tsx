@@ -1,4 +1,4 @@
-import type { ContentDB } from "@aitower/content";
+import type { AdvisorId, ContentDB } from "@aitower/content";
 import type { DecisionView } from "@aitower/sim";
 import type { GameState, GameStore } from "@aitower/shared";
 import { PATH_COLOR } from "../ascension/ascension";
@@ -49,7 +49,15 @@ export function MagiVote({ decision, content }: { decision: DecisionView; conten
  * An advisor's decision. The game is paused while it is open (the store holds the clock); there is no timeout and
  * waiting costs nothing. The recommended choice is marked; "Defer one day" hides it once.
  */
-export function DecisionCard({ store, content, state }: { store: GameStore; content: ContentDB; state: GameState }) {
+/** The Handbook chapter that goes with each advisor's area. */
+export const DECISION_ARTICLE: Record<AdvisorId, { id: string; label: string }> = {
+	cass: { id: "ch:heat", label: "Heat and cooling" },
+	bea: { id: "ch:power", label: "Power and backup" },
+	mel: { id: "ch:what", label: "What is a datacenter" },
+	lucien: { id: "ch:money", label: "Money" },
+};
+
+export function DecisionCard({ store, content, state, onHandbook }: { store: GameStore; content: ContentDB; state: GameState; onHandbook?: (id: string) => void }) {
 	const d = state.view.decision;
 	if (!d) return null;
 	const a = ADVISORS[d.advisor];
@@ -102,6 +110,11 @@ export function DecisionCard({ store, content, state }: { store: GameStore; cont
 				</div>
 				<footer className="adv-card-foot">
 					<span>Waiting costs nothing. The clock stays stopped.</span>
+					{onHandbook && (
+						<button type="button" className="adv-link" data-decision-handbook onClick={() => onHandbook(DECISION_ARTICLE[d.advisor].id)}>
+							Handbook: {DECISION_ARTICLE[d.advisor].label}
+						</button>
+					)}
 					{d.canDefer && (
 						<button type="button" className="ui-btn" onClick={defer} title="Hide this decision for one game day. You can do this once.">
 							Defer one day

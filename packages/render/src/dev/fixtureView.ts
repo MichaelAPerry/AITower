@@ -63,6 +63,7 @@ export const fixtureContent = {
 	bots: fixtureBots,
 	clients: [],
 	scenarios: {},
+	lessons: [],
 } as unknown as ContentDB;
 
 // ─── Fixture world ──────────────────────────────────────────────────────
@@ -224,6 +225,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		decisionGate: true,
 		decisionHistory: [],
 		advisorTips: [],
+		lesson: null,
 		modifiers: [],
 		standing: 50,
 		standingLog: [],

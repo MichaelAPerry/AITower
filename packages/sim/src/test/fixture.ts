@@ -241,6 +241,7 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 		lift: { speed: 0.2, capacity: 2, dwellTicks: 4, facilityKw: 10 },
 		balance: { ...balance, ...balanceOverride },
 		scenarios,
+		lessons: [],
 		events: [],
 		generateContract: fixtureGenerator,
 	};

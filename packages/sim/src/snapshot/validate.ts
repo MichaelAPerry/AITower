@@ -300,6 +300,16 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning", "ringGreenKwh", "ringHeatKwh"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
 	fields(s.rng, { contracts: "num", reliability: "num", events: "num", growth: "num", weather: "num" }, "rng");
 	validateMinistry(content, s, nextId.decision);
+	if (s.lesson === undefined) s.lesson = null;
+	if (s.lesson !== null) {
+		const l = fields(s.lesson, { id: "str", status: "str", holdTicks: "int", minHeadroom: "num", downTicks: "int", startTick: "int", endTick: "int", stars: "int", setupDone: "bool" }, "lesson");
+		if (!content.lessons.some((x) => x.id === l.id)) fail(`lesson '${String(l.id)}' is unknown`);
+		if (!["active", "won", "lost"].includes(l.status as string)) fail("lesson.status is invalid");
+		for (const k of ["stepsDone", "beatsFired"]) {
+			const a = (l as Obj)[k];
+			if (!Array.isArray(a) || a.some((x) => typeof x !== "string")) fail(`lesson.${k} must be an array of strings`);
+		}
+	}
 	validateManagement(content, s);
 	validateBiotech(s);
 	validateGreen(s);

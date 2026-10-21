@@ -21,11 +21,12 @@
  *  - v8 → v9 (M6.3 advisors): pending memos become one pending `decision` (no expiry; the first memo is kept, any others are
  *    dropped), `memoHistory` → `decisionHistory`, `nextMemoTick` → `nextDecisionTick`, `nextId.memo` → `nextId.decision`,
  *    `stats.memosAnswered` → `decisionsMade`, standing cause "memo" → "decision"; new `lastDecisionDay`, `decisionGate`, `advisorTips`.
+ *  - v9 → v10 (M6.4 lessons): `lesson` (null for every earlier game).
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 9;
+export const SNAPSHOT_VERSION = 10;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -229,7 +230,13 @@ function migrateV8(state: RawState): RawState {
 }
 
 /** Exported (mutable) so tests can register a migration for a fake older version. */
-export const migrations: Record<number, StateMigration> = { 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** Lessons (M6.4): every earlier game is a Free Build. */
+function migrateV9(state: RawState): RawState {
+	if (state.lesson === undefined) state.lesson = null;
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

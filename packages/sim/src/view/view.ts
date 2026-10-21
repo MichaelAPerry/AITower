@@ -3,7 +3,8 @@
  * entity arrays are rebuilt small each call.
  */
 import type { BotDef, ContentDB } from "@aitower/content";
-import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, SimView, WorkOrderView } from "../api";
+import { currentStepIndex, lessonAllowed, lessonMetrics } from "../lesson/lesson";
+import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
 import { createNav, type Nav, reachableRuns, runAtTile } from "../logistics/routing";
@@ -22,6 +23,31 @@ import { cloneAutomation } from "../automation/policy";
 import { foremanStatusOf } from "../automation/status";
 import { isDrought } from "../green/weather";
 import { affinityShares } from "../progression/affinity";
+
+function lessonView(state: SimState, content: ContentDB): LessonView | null {
+	const ls = state.lesson;
+	const def = ls ? content.lessons.find((l) => l.id === ls.id) : undefined;
+	if (!ls || !def) return null;
+	const m = lessonMetrics(state, content);
+	return {
+		id: ls.id,
+		status: ls.status,
+		stepsDone: [...ls.stepsDone],
+		current: currentStepIndex(def, ls),
+		beatsFired: [...ls.beatsFired],
+		holdTicks: ls.holdTicks,
+		holdGoal: def.win.holdTicks,
+		minHeadroom: ls.minHeadroom,
+		downTicks: ls.downTicks,
+		stars: ls.stars,
+		allowed: ls.status === "active" ? lessonAllowed(def, ls) : [],
+		loadKw: m.demandKw,
+		capacityKw: m.supplyKw,
+		headroomPct: m.headroomPct,
+		startTick: ls.startTick,
+		endTick: ls.endTick,
+	};
+}
 
 function botState(b: Bot, def: BotDef | undefined): BotState {
 	if (def?.flying && b.leg === "walk" && b.floor !== b.goalFloor && (b.task === "depot" || b.task === "target" || b.task === "charger")) return "flying";
@@ -233,6 +259,7 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		decisionGate: state.decisionGate,
 		decisionHistory: state.decisionHistory.map((h) => ({ ...h })),
 		advisorTips: [...state.advisorTips],
+		lesson: lessonView(state, content),
 		modifiers: state.modifiers
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),

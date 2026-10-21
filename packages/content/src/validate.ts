@@ -341,6 +341,71 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 
+const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day"];
+const LESSON_OPS = [">=", ">", "<=", "<"];
+
+function validateLessons(p: Problems, db: ContentDB): void {
+	const w0 = "lessons";
+	if (!Array.isArray(db.lessons)) return void p.push(`${w0}: expected an array`);
+	const ids = new Set<string>();
+	const conds = (w: string, cs: unknown): void => {
+		if (!Array.isArray(cs)) return void p.push(`${w}: expected an array of conditions`);
+		cs.forEach((c, i) => {
+			const m = (c as { metric?: string })?.metric;
+			if (!m || !LESSON_METRICS.includes(m)) p.push(`${w}[${i}].metric: unknown metric '${String(m)}'`);
+			if (!LESSON_OPS.includes((c as { op?: string })?.op ?? "")) p.push(`${w}[${i}].op: unknown operator`);
+			num(p, `${w}[${i}].value`, (c as { value?: unknown })?.value);
+		});
+	};
+	const effects = (w: string, es: unknown): void => {
+		if (!Array.isArray(es)) return void p.push(`${w}: expected an array of effects`);
+		es.forEach((e, i) => {
+			const t = (e as { type?: string })?.type;
+			if (t === "job") {
+				num(p, `${w}[${i}].pflops`, (e as { pflops?: unknown }).pflops, { gt: 0 });
+				num(p, `${w}[${i}].durationTicks`, (e as { durationTicks?: unknown }).durationTicks, { min: 1, int: true });
+				num(p, `${w}[${i}].payout`, (e as { payout?: unknown }).payout, { min: 0 });
+			} else if (t === "gridCap" || t === "failureRate") {
+				num(p, `${w}[${i}].factor`, (e as { factor?: unknown }).factor, { min: 0 });
+				num(p, `${w}[${i}].durationTicks`, (e as { durationTicks?: unknown }).durationTicks, { min: 1, int: true });
+				str(p, `${w}[${i}].label`, (e as { label?: unknown }).label);
+			} else p.push(`${w}[${i}].type: unknown effect '${String(t)}'`);
+		});
+	};
+	for (const l of db.lessons) {
+		const w = `lessons.${l.id}`;
+		str(p, `${w}.id`, l.id);
+		if (ids.has(l.id)) p.push(`${w}: duplicate id`);
+		ids.add(l.id);
+		str(p, `${w}.title`, l.title);
+		str(p, `${w}.goal`, l.goal);
+		str(p, `${w}.learned`, l.learned);
+		if (!["cass", "bea", "mel", "lucien"].includes(l.advisor)) p.push(`${w}.advisor: unknown advisor`);
+		const sc = db.scenarios?.[l.scenario];
+		if (!sc) p.push(`${w}.scenario: unknown scenario '${l.scenario}'`);
+		else if (sc.lesson !== l.id) p.push(`${w}.scenario: scenario '${l.scenario}' must name lesson '${l.id}'`);
+		if (!Array.isArray(l.steps) || l.steps.length === 0) p.push(`${w}.steps: need at least one step`);
+		const beatIds = new Set((l.beats ?? []).map((b) => b.id));
+		for (const s of l.steps ?? []) {
+			conds(`${w}.steps.${s.id}.when`, s.when);
+			for (const a of s.allow ?? []) if (!db.facilities[a.defId]) p.push(`${w}.steps.${s.id}.allow: unknown facility '${a.defId}'`);
+			if (s.slot && !db.facilities[s.slot.defId]) p.push(`${w}.steps.${s.id}.slot: unknown facility '${s.slot.defId}'`);
+			if (!Array.isArray(s.say) || s.say.length === 0) p.push(`${w}.steps.${s.id}.say: the teacher needs a line`);
+			if (s.afterBeat && !beatIds.has(s.afterBeat)) p.push(`${w}.steps.${s.id}.afterBeat: unknown beat '${s.afterBeat}'`);
+		}
+		for (const b of l.beats ?? []) {
+			conds(`${w}.beats.${b.id}.when`, b.when);
+			effects(`${w}.beats.${b.id}.effects`, b.effects);
+		}
+		effects(`${w}.setup`, l.setup ?? []);
+		conds(`${w}.win.when`, l.win?.when);
+		num(p, `${w}.win.holdTicks`, l.win?.holdTicks, { min: 1, int: true });
+		conds(`${w}.lose`, l.lose);
+		num(p, `${w}.bonus`, l.bonus, { min: 0 });
+		if (!Array.isArray(l.commands) || l.commands.length === 0) p.push(`${w}.commands: expected a list of command types`);
+	}
+}
+
 function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB): void {
 	const w = `scenarios.${key}`;
 	if (s.id !== key) p.push(`${w}: id "${s.id}" does not match key`);
@@ -353,6 +418,7 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	if (s.startingCash !== undefined) num(p, `${w}.startingCash`, s.startingCash, { min: 0 });
 	if (s.startTier !== undefined) num(p, `${w}.startTier`, s.startTier, { min: 1, max: Math.max(1, db.balance?.tiers?.pflops?.length ?? 1), int: true });
 	if (s.sandbox !== undefined && typeof s.sandbox !== "boolean") p.push(`${w}.sandbox: expected a boolean`);
+	if (s.lesson !== undefined) str(p, `${w}.lesson`, s.lesson);
 	if (!isNum(s.width) || !isNum(s.floorMin) || !isNum(s.floorMax) || s.floorMin > s.floorMax) return;
 
 	const W = s.width;
@@ -893,6 +959,7 @@ export function validateContent(db: ContentDB): string[] {
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");
 	for (const [key, s] of Object.entries(scenarios)) validateScenario(p, key, s, db);
 
+	validateLessons(p, db);
 	if (typeof db.generateContract !== "function") p.push("generateContract: missing");
 	return p;
 }

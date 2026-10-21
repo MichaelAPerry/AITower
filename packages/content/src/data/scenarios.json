@@ -6,28 +6,103 @@
 		"floorMin": -5,
 		"floorMax": 40,
 		"slabs": [
-			[-1, 4, 43],
-			[0, 0, 47],
-			[1, 4, 43]
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
 		],
 		"facilities": [
-			{ "defId": "grid_tie", "floor": -1, "x": 6 },
-			{ "defId": "bot_charger", "floor": 0, "x": 26 },
-			{ "defId": "parts_depot", "floor": 0, "x": 29 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 6 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 8 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 10 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 12 },
-			{ "defId": "crah_unit", "floor": 1, "x": 14 },
-			{ "defId": "rack_storage", "floor": 1, "x": 16 }
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 26
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 29
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 14
+			},
+			{
+				"defId": "rack_storage",
+				"floor": 1,
+				"x": 16
+			}
 		],
 		"conduits": [
-			["power", -1, 4, 43],
-			["power", 0, 4, 43],
-			["power", 1, 4, 43]
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
 		],
-		"lifts": [{ "x": 24, "floorMin": -1, "floorMax": 1 }],
-		"bots": [{ "defId": "rover", "floor": 0, "x": 26 }],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [
+			{
+				"defId": "rover",
+				"floor": 0,
+				"x": 26
+			}
+		],
 		"spareParts": 4
 	},
 	"brownfield": {
@@ -40,39 +115,144 @@
 		"startTier": 2,
 		"startingCash": 350000,
 		"slabs": [
-			[-1, 4, 51],
-			[0, 0, 55],
-			[1, 4, 51],
-			[2, 4, 51],
-			[3, 4, 39],
-			[4, 4, 39]
+			[
+				-1,
+				4,
+				51
+			],
+			[
+				0,
+				0,
+				55
+			],
+			[
+				1,
+				4,
+				51
+			],
+			[
+				2,
+				4,
+				51
+			],
+			[
+				3,
+				4,
+				39
+			],
+			[
+				4,
+				4,
+				39
+			]
 		],
 		"facilities": [
-			{ "defId": "grid_tie", "floor": -1, "x": 6 },
-			{ "defId": "genset", "floor": -1, "x": 12 },
-			{ "defId": "bot_charger", "floor": 0, "x": 26 },
-			{ "defId": "parts_depot", "floor": 0, "x": 29 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 6 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 8 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 10 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 12 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 14 },
-			{ "defId": "rack_air_gpu", "floor": 1, "x": 16 },
-			{ "defId": "crah_unit", "floor": 1, "x": 18 },
-			{ "defId": "rack_storage", "floor": 1, "x": 20 }
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "genset",
+				"floor": -1,
+				"x": 12
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 26
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 29
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 14
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 16
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 18
+			},
+			{
+				"defId": "rack_storage",
+				"floor": 1,
+				"x": 20
+			}
 		],
 		"conduits": [
-			["power", -1, 4, 51],
-			["power", 0, 4, 51],
-			["power", 1, 4, 51],
-			["power", 2, 4, 51],
-			["power", 3, 4, 39]
+			[
+				"power",
+				-1,
+				4,
+				51
+			],
+			[
+				"power",
+				0,
+				4,
+				51
+			],
+			[
+				"power",
+				1,
+				4,
+				51
+			],
+			[
+				"power",
+				2,
+				4,
+				51
+			],
+			[
+				"power",
+				3,
+				4,
+				39
+			]
 		],
 		"lifts": [
-			{ "x": 24, "floorMin": -1, "floorMax": 4 }
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 4
+			}
 		],
 		"bots": [
-			{ "defId": "rover", "floor": 0, "x": 26 }
+			{
+				"defId": "rover",
+				"floor": 0,
+				"x": 26
+			}
 		],
 		"spareParts": 2
 	},
@@ -87,43 +267,230 @@
 		"startingCash": 500000000,
 		"sandbox": true,
 		"slabs": [
-			[-1, 4, 59],
-			[0, 0, 63],
-			[1, 4, 59],
-			[2, 4, 59],
-			[3, 4, 59]
+			[
+				-1,
+				4,
+				59
+			],
+			[
+				0,
+				0,
+				63
+			],
+			[
+				1,
+				4,
+				59
+			],
+			[
+				2,
+				4,
+				59
+			],
+			[
+				3,
+				4,
+				59
+			]
 		],
 		"facilities": [
-			{ "defId": "grid_tie", "floor": -1, "x": 6 },
-			{ "defId": "grid_tie", "floor": -1, "x": 10 },
-			{ "defId": "genset", "floor": -1, "x": 14 },
-			{ "defId": "ups_battery", "floor": -1, "x": 18 },
-			{ "defId": "chiller", "floor": 1, "x": 22 },
-			{ "defId": "cdu", "floor": 1, "x": 27 },
-			{ "defId": "bot_charger", "floor": 0, "x": 30 },
-			{ "defId": "parts_depot", "floor": 0, "x": 33 },
-			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 6 },
-			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 8 },
-			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 10 },
-			{ "defId": "rack_dlc_gpu", "floor": 1, "x": 12 },
-			{ "defId": "crah_unit", "floor": 1, "x": 14 },
-			{ "defId": "rack_storage", "floor": 1, "x": 16 },
-			{ "defId": "rack_storage", "floor": 1, "x": 18 }
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 10
+			},
+			{
+				"defId": "genset",
+				"floor": -1,
+				"x": 14
+			},
+			{
+				"defId": "ups_battery",
+				"floor": -1,
+				"x": 18
+			},
+			{
+				"defId": "chiller",
+				"floor": 1,
+				"x": 22
+			},
+			{
+				"defId": "cdu",
+				"floor": 1,
+				"x": 27
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 30
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 33
+			},
+			{
+				"defId": "rack_dlc_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_dlc_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_dlc_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "rack_dlc_gpu",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 14
+			},
+			{
+				"defId": "rack_storage",
+				"floor": 1,
+				"x": 16
+			},
+			{
+				"defId": "rack_storage",
+				"floor": 1,
+				"x": 18
+			}
 		],
 		"conduits": [
-			["power", -1, 4, 59],
-			["power", 0, 4, 59],
-			["power", 1, 4, 59],
-			["power", 2, 4, 59],
-			["power", 3, 4, 59],
-			["coolant", 1, 4, 59]
+			[
+				"power",
+				-1,
+				4,
+				59
+			],
+			[
+				"power",
+				0,
+				4,
+				59
+			],
+			[
+				"power",
+				1,
+				4,
+				59
+			],
+			[
+				"power",
+				2,
+				4,
+				59
+			],
+			[
+				"power",
+				3,
+				4,
+				59
+			],
+			[
+				"coolant",
+				1,
+				4,
+				59
+			]
 		],
 		"lifts": [
-			{ "x": 40, "floorMin": -1, "floorMax": 3 }
+			{
+				"x": 40,
+				"floorMin": -1,
+				"floorMax": 3
+			}
 		],
 		"bots": [
-			{ "defId": "rover", "floor": 0, "x": 30 }
+			{
+				"defId": "rover",
+				"floor": 0,
+				"x": 30
+			}
 		],
 		"spareParts": 10
+	},
+	"lesson_first_watt": {
+		"id": "lesson_first_watt",
+		"name": "Lesson 1: First Watt",
+		"description": "A bare hall, a lift, a floor, an air handler and one grid feeder. Bea teaches you what kW and capacity mean.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 1500000,
+		"sandbox": true,
+		"lesson": "first_watt",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 8
+			}
+		],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0
 	}
 }

@@ -1,26 +1,28 @@
+import type { ContentDB } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Icon } from "../components/common";
-import { restartInduction } from "../tutorial/Tutorial";
 import { focusables, nextFocusIndex } from "./focus";
 import type { MenuController } from "./menuController";
-import { ControlsPane, type Flash, LoadPane, NewGamePane, SavePane, SettingsPane } from "./panes";
+import { ControlsPane, type Flash, LessonsPane, LoadPane, NewGamePane, SavePane, SettingsPane } from "./panes";
 import { useSaves } from "./useSaves";
 import "./menu.css";
 
-export type MenuSection = "save" | "load" | "settings" | "controls" | "new";
+export type MenuSection = "save" | "load" | "settings" | "controls" | "new" | "lessons";
 
 const DRAWERS: { id: MenuSection; label: string; form: string; title: string }[] = [
 	{ id: "save", label: "Save game", form: "SAVE", title: "Save game" },
 	{ id: "load", label: "Load game", form: "LOAD", title: "Load game" },
 	{ id: "settings", label: "Settings", form: "SETTINGS", title: "Settings" },
 	{ id: "controls", label: "Controls", form: "CONTROLS", title: "Controls · keys and mouse" },
+	{ id: "lessons", label: "Lessons", form: "LESSONS", title: "Lessons · learn by doing" },
 	{ id: "new", label: "New game", form: "NEW GAME", title: "New game" },
 ];
 
 export interface SystemMenuProps {
 	store: GameStore;
 	state: GameState;
+	content?: ContentDB;
 	menu: MenuController;
 	/** Drawer to show first (dev harness / tests, title screen, game-over screen). */
 	initial?: MenuSection;
@@ -28,7 +30,7 @@ export interface SystemMenuProps {
 	fromTitle?: boolean;
 	/** The running game was replaced by a load or import (the title screen leaves on this). */
 	onReplaced?: () => void;
-	/** Close the menu and open the Primer drawer. */
+	/** Close the menu and open the Handbook drawer. */
 	onEncyclopedia?: () => void;
 }
 
@@ -36,7 +38,7 @@ export interface SystemMenuProps {
  * The system menu: a bakelite filing cabinet. Modal: focus is trapped, Esc closes (restoring the game
  * speed), and key presses never reach the game's hotkeys or the camera while it is open.
  */
-export function SystemMenu({ store, state, menu, initial = "save", fromTitle = false, onReplaced, onEncyclopedia }: SystemMenuProps) {
+export function SystemMenu({ store, state, content, menu, initial = "save", fromTitle = false, onReplaced, onEncyclopedia }: SystemMenuProps) {
 	const [section, setSection] = useState<MenuSection>(initial);
 	const [flash, setFlash] = useState<Flash | null>(null);
 	const root = useRef<HTMLDivElement>(null);
@@ -77,9 +79,9 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 		setSection(id);
 		setFlash(null);
 	};
-	const drawers = fromTitle ? DRAWERS.filter((d) => d.id === "load" || d.id === "settings" || d.id === "controls") : DRAWERS;
+	const drawers = fromTitle ? DRAWERS.filter((d) => d.id === "load" || d.id === "settings" || d.id === "controls" || d.id === "lessons") : DRAWERS;
 	const active = drawers.find((d) => d.id === section) ?? drawers[0];
-	const common = { store, state, menu, flash: setFlash, onReplaced };
+	const common = { store, state, content, menu, flash: setFlash, onReplaced };
 
 	return (
 		// biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop; key handling implements the focus trap
@@ -115,23 +117,10 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 									menu.close();
 									onEncyclopedia();
 								}}
-								title="Datacenter Primer (K)"
+								title="Handbook (H)"
 							>
-								Primer
+								Handbook
 							</button>
-						)}
-						{!fromTitle && (
-						<button
-							type="button"
-							className="ui-btn ui-induct-btn"
-							onClick={() => {
-								restartInduction();
-								menu.close();
-							}}
-							title="Reopen the tutorial"
-						>
-							Restart tutorial
-						</button>
 						)}
 					</nav>
 					<section className="ui-menu-pane ui-form" aria-label={active.label}>
@@ -146,6 +135,7 @@ export function SystemMenu({ store, state, menu, initial = "save", fromTitle = f
 							{section === "settings" && <SettingsPane {...common} />}
 							{section === "controls" && <ControlsPane />}
 							{section === "new" && <NewGamePane {...common} />}
+							{section === "lessons" && <LessonsPane {...common} fromTitle={fromTitle} />}
 						</div>
 						<div className={`ui-menu-note ${flash ? `is-${flash.tone}` : "is-idle"}`} role="status" aria-live="polite">
 							{flash?.text ?? " "}

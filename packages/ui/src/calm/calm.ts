@@ -13,7 +13,7 @@ import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
 
-export type DrawerId = "contracts" | "research" | "automation" | "insights" | "primer" | "log";
+export type DrawerId = "contracts" | "research" | "automation" | "insights" | "handbook" | "log";
 /** Drawers that have an edge tab and a hotkey (the log opens from the ticker). */
 export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: string }[] = [
 	{ id: "contracts", label: "Contracts", key: "C" },
@@ -22,10 +22,10 @@ export const DRAWER_TABS: { id: Exclude<DrawerId, "log">; label: string; key: st
 	{ id: "automation", label: "Automation", key: "T" },
 	// Finance and Gauges are one panel now: both F and I open it.
 	{ id: "insights", label: "Insights", key: "I" },
-	{ id: "primer", label: "Primer", key: "K" },
+	{ id: "handbook", label: "Handbook", key: "H" },
 ];
 /** Extra keys that open a drawer (F was Finance, which lives in Insights now). */
-const KEY_ALIAS: Record<string, DrawerId> = { F: "insights" };
+const KEY_ALIAS: Record<string, DrawerId> = { F: "insights", K: "handbook" };
 export const drawerForKey = (key: string): DrawerId | null => DRAWER_TABS.find((d) => d.key === key.toUpperCase())?.id ?? KEY_ALIAS[key.toUpperCase()] ?? null;
 /** One drawer at a time: pressing the key of the open one closes it. */
 export const nextDrawer = (cur: DrawerId | null, pressed: DrawerId): DrawerId | null => (cur === pressed ? null : pressed);

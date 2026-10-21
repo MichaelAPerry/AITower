@@ -12,6 +12,7 @@ import { cellCount } from "./core/grid";
 import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
 import { automationStep } from "./automation/automationStep";
+import { lessonStep } from "./lesson/lesson";
 import { weatherStep } from "./green/weather";
 import { decisionStep } from "./ministry/decisions";
 import { ambientOffset } from "./ministry/modifiers";
@@ -146,6 +147,7 @@ export class SimImpl implements Sim {
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		affinityStep(ctx); //  9e hourly path affinity from running facilities
 		progressionStep(ctx); // 10
+		lessonStep(ctx); // 10b lesson beats, steps, success
 		advanceTime(ctx); // 11
 		return events;
 	}
@@ -169,8 +171,11 @@ export class SimImpl implements Sim {
 	}
 }
 
-export function createSim(content: ContentDB, scenarioId: string, seed: number): Sim {
-	return new SimImpl(content, createState(content, scenarioId, seed));
+/** `opts.bonusCash`: extra starting cash for a Free Build site (the lesson campaign reward). Lesson sites ignore it. */
+export function createSim(content: ContentDB, scenarioId: string, seed: number, opts: { bonusCash?: number } = {}): Sim {
+	const state = createState(content, scenarioId, seed);
+	if (opts.bonusCash && opts.bonusCash > 0 && !state.lesson) state.cash += opts.bonusCash;
+	return new SimImpl(content, state);
 }
 
 export function simFromSnapshot(content: ContentDB, snap: SimSnapshot): Sim {

@@ -35,7 +35,7 @@ export interface Entry {
 	flavor?: Flavor;
 	/** Facilities: tier, frame class and note. */
 	tier?: TierView;
-	/** Glossary words: the Primer chapter that teaches it. */
+	/** Glossary words: the Handbook chapter that teaches it. */
 	at?: string;
 	/** Lower-case search text. */
 	keywords: string;
@@ -74,7 +74,7 @@ function basics(c: ContentDB): Entry[] {
 		L("money", "How money works", `You start with ${fmtMoney(b.startingCash)}. Contracts pay when they finish; builds, upkeep and electricity take money out every day.`, "PER HOUR at the top shows whether you are ahead right now. Red with no contract running is just upkeep.", `At midnight the Ministry takes ${Math.round(b.tax.profitShare * 100)}% of a day's profit as tax. Open Finance (F) for the ledger.`),
 		L("contracts", "Contracts: training and inference", "A contract is a job a client pays for. Accept one in Contracts (C), and your racks work on it until it is done.", "Training jobs are big, have a deadline, and pay well. Inference jobs are steady and small, and pay by the hour of work. Some need stored data or liquid cooling, and the card says so before you accept.", "Missing a deadline costs money and Reputation."),
 		L("power", "Power", "Racks, coolers and bots all draw electrical power. A grid connection brings it in; conduits (the power lines under the floor) carry it to machines.", "If supply is short, machines slow down (a brownout). With none at all they stop and show NO POWER over them.", "A generator or battery (UPS) bridges short outages. Solar and wind help if you have them."),
-		L("cooling", "Cooling and heat", `Every watt a rack uses becomes heat. Racks run fine up to ${t.okC} °C, slow down (throttle) toward ${t.throttleC} °C, and trip offline at ${t.tripC} °C.`, "Air handlers cool nearby racks on their floor. Hot air rises, so top floors run warmer. HOT over a rack means it is throttling.", "The Gauges drawer (I) has a heat overlay (H) that shows where it builds up."),
+		L("cooling", "Cooling and heat", `Every watt a rack uses becomes heat. Racks run fine up to ${t.okC} °C, slow down (throttle) toward ${t.throttleC} °C, and trip offline at ${t.tripC} °C.`, "Air handlers cool nearby racks on their floor. Hot air rises, so top floors run warmer. HOT over a rack means it is throttling.", "The Gauges drawer (I) has a heat overlay (E) that shows where it builds up."),
 		L("loops", "Coolant loops", "Liquid-cooled racks need a coolant line under them, running from a chiller through a distribution unit (CDU).", "Lay the pipe with the coolant tool, connect a chiller, then add a CDU for capacity. A rack over its loop's capacity shows NO COOLANT.", "Liquid cooling moves much more heat than air, which is what lets you pack in powerful racks."),
 		L("lifts", "Lifts and bots", `Maintenance bots repair broken parts. They walk the floors and ride lifts between them (up to ${c.lift.capacity} per car), so a tower with several floors needs a lift.`, "A lift needs power: lay a power conduit under or right beside its shaft, or its car stays dark and no bot will route through it. Chargers recharge and house the bots. Flying drones skip the lift. Hover a bot or lift in the tower to see its name."),
 		L("parts", "Spare parts", `Bots need a spare part for each repair, from a depot. A part costs ${fmtMoney(c.structure.sparePart)}.`, "Racks fail now and then. A rack marked BROKEN #2 is second in the repair queue; NO ROUTE means no bot can reach its floor yet (a lift is missing, unpowered or not joined to the bots' floor). Keep the depot stocked."),

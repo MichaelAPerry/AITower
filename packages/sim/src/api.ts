@@ -459,6 +459,32 @@ export interface ModifierView {
 	endsAt: number;
 }
 
+/** The running (or just finished) lesson, for the goal bar, checklist and result screen. */
+export interface LessonView {
+	id: string;
+	status: "active" | "won" | "lost";
+	/** Ids of the steps done, in order. */
+	stepsDone: string[];
+	/** Index of the first step not done (= steps.length when all are). */
+	current: number;
+	/** Ids of the beats that have fired. */
+	beatsFired: string[];
+	/** Ticks the success conditions have held, of `holdGoal`. */
+	holdTicks: number;
+	holdGoal: number;
+	minHeadroom: number;
+	downTicks: number;
+	stars: number;
+	/** Facilities that may be placed right now (all others are refused), with how many may exist. */
+	allowed: { defId: string; max?: number }[];
+	/** Live: all power nets summed, kW. */
+	loadKw: number;
+	capacityKw: number;
+	headroomPct: number;
+	startTick: number;
+	endTick: number;
+}
+
 export interface SimView {
 	tick: number;
 	day: number;
@@ -518,6 +544,8 @@ export interface SimView {
 	decisionHistory: { decisionId: number; eventId: string; title: string; choiceId: string; outcome: string; tick: number }[];
 	/** Advisor tip ids already shown this game. */
 	advisorTips: string[];
+	/** The lesson this site runs (null in Free Build). */
+	lesson: LessonView | null;
 	modifiers: ModifierView[];
 	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
 	standing: number;

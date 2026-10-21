@@ -23,7 +23,7 @@ const writeCollapsed = (v: boolean): void => {
 
 export const MODES: { id: OverlayMode; label: string; key: string }[] = [
 	{ id: "normal", label: "Normal", key: "N" },
-	{ id: "heat", label: "Heat", key: "H" },
+	{ id: "heat", label: "Heat", key: "E" },
 	{ id: "power", label: "Power", key: "P" },
 	{ id: "coolant", label: "Coolant", key: "C" },
 	{ id: "nutrient", label: "Nutrient", key: "U" },

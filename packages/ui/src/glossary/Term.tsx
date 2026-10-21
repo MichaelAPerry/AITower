@@ -2,14 +2,14 @@ import { createContext, type ReactNode, useCallback, useContext, useId, useMemo,
 import { termById, type TermDef } from "./terms";
 import "./term.css";
 
-/** Where the Primer shows a term: its chapter (scrolled to the word) or, for reference-only words, the Words list. */
+/** Where the Handbook shows a term: its chapter (scrolled to the word) or, for reference-only words, the Words list. */
 export const termTarget = (t: TermDef): string => (t.at === "words" ? `glossary:${t.id}` : `${t.at}#${t.id}`);
 
 type Opener = (target: string) => void;
 const OpenCtx = createContext<Opener | null>(null);
 const ScopeCtx = createContext<Map<string, string> | null>(null);
 
-/** Supplies "More in the Primer": the HUD passes a function that opens the Primer at a target. */
+/** Supplies "More in the Handbook": the HUD passes a function that opens the Handbook at a target. */
 export function TermProvider({ open, children }: { open: Opener; children: ReactNode }) {
 	return <OpenCtx.Provider value={open}>{children}</OpenCtx.Provider>;
 }
@@ -23,10 +23,10 @@ export function TermScope({ children }: { children: ReactNode }) {
 	return <ScopeCtx.Provider value={seen.current}>{children}</ScopeCtx.Provider>;
 }
 
-/** A jargon word with a dotted underline; hover or focus shows the one-line definition and a link to the Primer. */
+/** A jargon word with a dotted underline; hover or focus shows the one-line definition and a link to the Handbook. */
 export function Term({ id, children }: { id: string; children?: ReactNode }) {
 	const def = termById(id);
-	const openPrimer = useContext(OpenCtx);
+	const openHandbook = useContext(OpenCtx);
 	const scope = useContext(ScopeCtx);
 	const uid = useId();
 	const [on, setOn] = useState(false);
@@ -69,9 +69,9 @@ export function Term({ id, children }: { id: string; children?: ReactNode }) {
 					<span className="ui-term-card">
 						<b className="ui-term-name">{def.name}</b>
 						<span className="ui-term-def">{def.def}</span>
-						{openPrimer && (
-							<button type="button" className="ui-term-more" onClick={(e) => { e.stopPropagation(); setOn(false); openPrimer(termTarget(def)); }}>
-								More in the Primer
+						{openHandbook && (
+							<button type="button" className="ui-term-more" onClick={(e) => { e.stopPropagation(); setOn(false); openHandbook(termTarget(def)); }}>
+								More in the Handbook
 							</button>
 						)}
 					</span>

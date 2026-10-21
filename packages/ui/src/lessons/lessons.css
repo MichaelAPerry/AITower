@@ -1,0 +1,334 @@
+/* Lessons (M6.4): the goal bar and checklist are part of the HUD, the teacher speaks in the advisor strip, the result is a card. */
+
+.aitower-hud .les-goal {
+	position: absolute;
+	top: var(--gap);
+	left: var(--gap);
+	right: calc(var(--dtab-w, 104px) + var(--gap) * 2);
+	z-index: 4;
+	display: flex;
+	align-items: center;
+	gap: calc(var(--gap) * 2);
+	padding: 8px 12px;
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	transition: right 0.2s ease;
+}
+.aitower-hud.has-drawer .les-goal {
+	right: calc(var(--dtab-w, 104px) + var(--drawer-w) + var(--gap) * 3);
+}
+.aitower-hud .les-goal-head {
+	display: grid;
+	gap: 3px;
+	min-width: 0;
+	flex: 1.2 1 150px;
+}
+.aitower-hud.has-drawer .les-hold,
+.aitower-hud.has-drawer .les-goal-acts .ui-btn:not(.les-skip) {
+	display: none;
+}
+.aitower-hud.has-drawer .les-goal {
+	gap: var(--gap);
+}
+.aitower-hud .les-goal-text {
+	font: 600 calc(var(--fs-body) + 2px) / 1.2 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .les-meter {
+	flex: 1.6 1 190px;
+	min-width: 0;
+	display: grid;
+	gap: 5px;
+}
+.aitower-hud .les-meter-line {
+	display: flex;
+	gap: calc(var(--gap) * 1.5);
+	font: var(--fs-body) / 1 var(--f-num);
+	white-space: nowrap;
+}
+.aitower-hud .les-meter-line .ui-label {
+	margin-right: 3px;
+}
+.aitower-hud .les-bar {
+	height: 8px;
+	border-radius: 4px;
+	background: var(--housing-lo);
+	border: 1px solid var(--panel-edge);
+	overflow: hidden;
+}
+.aitower-hud .les-bar > i {
+	display: block;
+	height: 100%;
+	background: var(--good);
+	transition: width 0.25s ease, background 0.25s ease;
+}
+.aitower-hud .les-meter.tone-warn .les-bar > i {
+	background: var(--warn);
+}
+.aitower-hud .les-meter.tone-bad .les-bar > i {
+	background: var(--bad);
+}
+.aitower-hud .les-meter.tone-bad .les-meter-line b {
+	color: var(--bad);
+}
+.aitower-hud .les-hold {
+	flex: 0.9;
+	min-width: 120px;
+	display: grid;
+	gap: 4px;
+}
+.aitower-hud .les-hold small {
+	color: var(--text-dim);
+	font: var(--fs-label) / 1 var(--f-num);
+	white-space: nowrap;
+}
+.aitower-hud .les-bar.is-hold > i {
+	background: var(--accent);
+}
+.aitower-hud .les-goal-acts {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	flex: none;
+}
+.aitower-hud .les-skip {
+	color: var(--text-dim);
+}
+
+/* Steps checklist: under the goal bar, left. */
+.aitower-hud .les-steps {
+	position: absolute;
+	top: calc(var(--gap) * 2 + 74px);
+	left: var(--gap);
+	width: 262px;
+	z-index: 4;
+	padding: 8px 12px 10px;
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+}
+.aitower-hud .les-steps ol {
+	list-style: none;
+	margin: 6px 0 4px;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+}
+.aitower-hud .les-steps li {
+	display: flex;
+	gap: 8px;
+	align-items: flex-start;
+	color: var(--text-dim);
+	font: var(--fs-body) / 1.25 var(--f-body);
+}
+.aitower-hud .les-steps li.is-now {
+	color: var(--text);
+}
+.aitower-hud .les-steps li.is-done {
+	color: var(--text-dim);
+	text-decoration: line-through;
+	text-decoration-color: var(--panel-edge);
+}
+.aitower-hud .les-tick {
+	flex: none;
+	width: 18px;
+	height: 18px;
+	border-radius: 50%;
+	display: grid;
+	place-items: center;
+	border: 1px solid var(--panel-edge);
+	font: 600 11px / 1 var(--f-num);
+}
+.aitower-hud .les-steps li.is-now .les-tick {
+	border-color: var(--accent);
+	color: var(--accent);
+}
+.aitower-hud .les-steps li.is-done .les-tick {
+	background: var(--good);
+	border-color: var(--good);
+	color: var(--bg);
+}
+
+/* The teacher in the advisor strip. */
+.aitower-hud .les-teacher .adv-text {
+	display: block;
+	margin: 0 0 6px;
+}
+.aitower-hud .les-count {
+	color: var(--text-dim);
+	font: var(--fs-label) / 1 var(--f-num);
+}
+
+/* A thing to click next. */
+.aitower-hud [data-lesson-pulse] {
+	outline: 2px solid var(--accent);
+	outline-offset: 2px;
+	animation: les-pulse 1.6s ease-in-out infinite;
+}
+@keyframes les-pulse {
+	0%,
+	100% {
+		box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 55%, transparent);
+	}
+	50% {
+		box-shadow: 0 0 12px 3px color-mix(in srgb, var(--accent) 40%, transparent);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud [data-lesson-pulse] {
+		animation: none;
+	}
+}
+
+/* Result: a card over the world; the world and the Handbook drawer stay usable around it. */
+.aitower-hud .les-result-back {
+	position: absolute;
+	inset: 0;
+	z-index: 6;
+	display: grid;
+	place-items: center;
+	pointer-events: none;
+	padding-bottom: 60px;
+}
+.aitower-hud .les-result {
+	pointer-events: auto;
+	width: min(520px, calc(100% - 32px));
+	padding: 18px 22px 16px;
+	display: grid;
+	gap: 10px;
+	border: 1px solid var(--adv, var(--accent));
+	border-radius: var(--radius);
+	background: var(--panel);
+	backdrop-filter: blur(8px);
+}
+.aitower-hud .les-result h2 {
+	margin: 0;
+	font: 600 26px / 1.1 var(--f-display);
+}
+.aitower-hud .les-stars {
+	font-size: 30px;
+	letter-spacing: 4px;
+	line-height: 1;
+}
+.aitower-hud .les-stars b {
+	color: var(--housing-hi);
+	font-weight: 400;
+}
+.aitower-hud .les-stars b.is-on {
+	color: var(--warn);
+}
+.aitower-hud .les-rows {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+}
+.aitower-hud .les-rows li {
+	display: grid;
+	grid-template-columns: 18px 84px 1fr;
+	gap: 6px;
+	color: var(--text-dim);
+}
+.aitower-hud .les-rows li.is-on .les-star-dot {
+	color: var(--warn);
+}
+.aitower-hud .les-rows li b {
+	color: var(--text);
+	font-weight: 600;
+}
+.aitower-hud .les-learned {
+	margin: 4px 0 0;
+	line-height: 1.35;
+}
+.aitower-hud .les-links {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+.aitower-hud .les-outro {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+	color: var(--text-dim);
+}
+.aitower-hud .les-outro p {
+	margin: 0;
+}
+.aitower-hud .les-bonus {
+	margin: 0;
+	color: var(--money);
+}
+.aitower-hud .les-result-acts {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	flex-wrap: wrap;
+}
+.aitower-hud .les-next {
+	flex: 1;
+	min-width: 160px;
+	color: var(--text-dim);
+	font: var(--fs-label) / 1.2 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: uppercase;
+}
+
+/* The lesson list (title screen and menu). */
+.les-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+}
+.les-list li {
+	display: grid;
+	grid-template-columns: 28px 1fr auto;
+	gap: 10px;
+	align-items: center;
+	padding: 6px 8px;
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
+}
+.les-list li.is-locked {
+	opacity: 0.55;
+}
+.les-list .les-n {
+	font: 600 16px / 1 var(--f-num);
+	color: var(--accent);
+}
+.les-list small {
+	display: block;
+	color: var(--text-dim);
+}
+.les-list .les-stars {
+	font-size: 16px;
+	letter-spacing: 1px;
+}
+
+/* Calm: nothing of the lesson crowds a small screen. */
+.aitower-hud.is-density-cramped .les-hold {
+	display: none;
+}
+@media (max-width: 1100px) {
+	.aitower-hud .les-hold {
+		display: none;
+	}
+}
+
+/* Toasts sit below the goal bar during a lesson. */
+.aitower-hud.is-lesson .ui-toasts {
+	top: 84px;
+}
+
+/* Calm: the build catalog never covers the advisor strip, and the inspector starts below the goal bar. */
+.aitower-hud.is-lesson .ui-center > .ui-right {
+	top: 82px;
+	max-height: calc(100% - 82px - var(--gap) * 6);
+}
+.aitower-hud.is-lesson .ui-perhour .ui-hint {
+	display: none;
+}
+.aitower-hud.is-lesson {
+	--adv-h: 118px;
+}
