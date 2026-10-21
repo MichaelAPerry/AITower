@@ -70,7 +70,7 @@ export function lockText(def: FacilityDef, view: SimView, content: ContentDB): s
 /** A tab's rows: unlocked first, each group by unlock tier, then cost. */
 export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategory): FacilityDef[] {
 	return Object.values(content.facilities)
-		.filter((d) => d.category === cat && !d.growth)
+		.filter((d) => d.category === cat && !d.growth && !d.retired)
 		.map((d) => ({ d, locked: lockText(d, view, content) !== null }))
 		.sort((a, b) => Number(a.locked) - Number(b.locked) || a.d.unlockTier - b.d.unlockTier || a.d.cost - b.d.cost || a.d.id.localeCompare(b.d.id))
 		.map((x) => x.d);
@@ -125,7 +125,7 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 	if (tab === "structure") cards = structure(content);
 	else if (tab !== "supplies") {
 		const defs = Object.values(content.facilities)
-			.filter((d) => d.category === tab && !d.growth)
+			.filter((d) => d.category === tab && !d.growth && !d.retired)
 			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 		cards = defs.filter((d) => !lockReason(d, view, content)).map((d) => findItem(d.id, content) as CatalogItem);
 		lockedLines = lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);

@@ -74,6 +74,10 @@ export interface Clearance {
 	uptime: number;
 	uptimeNeed: number;
 	uptimeOk: boolean;
+	/** Researched nodes the next Level asks for, and how many are held now. */
+	techs: number;
+	techsDone: number;
+	techsOk: boolean;
 }
 
 export function clearanceProgress(view: SimView, content: ContentDB): Clearance {
@@ -82,7 +86,9 @@ export function clearanceProgress(view: SimView, content: ContentDB): Clearance 
 	const need = pflops[view.tier] ?? 0;
 	const uptimeNeed = uptime[view.tier] ?? 0;
 	const top = view.tier >= pflops.length;
-	return { tier: view.tier, next: top ? null : view.tier + 1, have, need, frac: top ? 1 : need > 0 ? Math.min(1, have / need) : 1, uptime: view.uptime, uptimeNeed, uptimeOk: top || view.uptime >= uptimeNeed };
+	const techs = top ? 0 : (view.tierNeed?.techs ?? content.balance.tiers.techs?.[view.tier] ?? 0);
+	const techsDone = view.tierNeed?.techsDone ?? view.techResearched?.length ?? 0;
+	return { techs, techsDone, techsOk: techsDone >= techs, tier: view.tier, next: top ? null : view.tier + 1, have, need, frac: top ? 1 : need > 0 ? Math.min(1, have / need) : 1, uptime: view.uptime, uptimeNeed, uptimeOk: top || view.uptime >= uptimeNeed };
 }
 
 // ─── Build dock ───────────────────────────────────────────────────────────
@@ -90,7 +96,7 @@ export function clearanceProgress(view: SimView, content: ContentDB): Clearance 
 export type DockPick = { kind: "place"; defId: string } | { kind: "parts" };
 
 const buildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean =>
-	!d.growth && d.unlockTier <= view.tier && (!d.tech || view.techResearched.includes(d.tech)) && content.facilities[d.id] === d;
+	!d.growth && !d.retired && d.unlockTier <= view.tier && (!d.tech || view.techResearched.includes(d.tech)) && content.facilities[d.id] === d;
 
 /**
  * The (at most) 3 most useful builds for the current state, in this order of need: a CRAH when racks run hot, parts when the

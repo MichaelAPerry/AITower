@@ -20,7 +20,6 @@ export const GREEN_TECH = [
 	"wind_permit",
 	"district_heat_accord",
 	"algae_licence",
-	"neuromorphic_cards",
 	"canopy_array",
 	"heat_pipeline_franchise",
 	"carbon_capture_dossier",
@@ -28,8 +27,12 @@ export const GREEN_TECH = [
 	"photonic_bench",
 ];
 
-export const SYNTH_TECH = ["cryo_core_dossier", "continuity_form", "backup_vault_charter", "mind_lattice_dossier", "identity_register", "continuity_doctrine"];
+export const SYNTH_TECH = ["cryo_core_dossier", "continuity_form", "backup_vault_charter", "mind_lattice_dossier", "continuity_doctrine"];
 
 export const AUTOMATION_TECH = ["works_foreman", "standing_orders_binder"];
+
+/** Tree restructure (balance audit 7b): shared L5 nodes, the second biotech nodes, culture media and the fleet bot. */
+export const V2_TECH = ["culture_media", "fleet_command", "grid_autonomy", "immersion_vault", "authority_charter", "organoid_vats", "synaptic_mesh"];
+export const V2_FACILITIES = ["grid_tie_4", "rack_imm_gpu3", "rack_organoid_2"];
 
 export const M4_TECH = [...GREEN_TECH, ...SYNTH_TECH, ...AUTOMATION_TECH];

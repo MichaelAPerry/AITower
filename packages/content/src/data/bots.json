@@ -29,5 +29,16 @@
   "color": "#6d7a58",
   "tech": "logistics_lifter",
   "carry": 3
+ },
+ "fleet": {
+  "id": "fleet",
+  "name": "Fleet Coordinator Bot",
+  "cost": 220000,
+  "speed": 0.3,
+  "batteryTicks": 1200,
+  "repairTicks": 14,
+  "color": "#7a8c6d",
+  "tech": "fleet_command",
+  "carry": 5
  }
 }

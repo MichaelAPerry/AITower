@@ -11,7 +11,7 @@ export const structure = (content: ContentDB): CatalogItem[] => structureItems(c
 /** Buildable facilities of a category: those the player can build now first (by level, then cost), locked ones separately. */
 export function categoryDefs(content: ContentDB, view: SimView, cat: BuildCategory): { open: FacilityDef[]; locked: FacilityDef[] } {
 	const defs = Object.values(content.facilities)
-		.filter((d) => d.category === cat && !d.growth)
+		.filter((d) => d.category === cat && !d.growth && !d.retired)
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 	return { open: defs.filter((d) => !lockReason(d, view, content)), locked: defs.filter((d) => lockReason(d, view, content)) };
 }
@@ -37,4 +37,4 @@ export function tabForItem(item: CatalogItem): Tab {
 	return item.category;
 }
 
-export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !lockReason(d, view, content) && !techGate(d.tech, view, content);
+export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !lockReason(d, view, content) && !techGate(d.tech, view, content);

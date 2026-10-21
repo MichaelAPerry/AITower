@@ -113,7 +113,7 @@ export function createFakeContent(): ContentDB {
 			ambientSwingC: 6,
 			thermal: { airCellHeatCapacity: 50, airConductance: 1, slabConductance: 0.3, envelopeConductance: 0.2, buoyancy: 0.2, rackEase: 0.05, rackDeltaC: 25, okC: 65, throttleC: 80, tripC: 92, tripHysteresisC: 8, minClock: 0.4, tripCooldownTicks: 30, coolantSupplyC: 30, hazardPerDegree: 0.1 },
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 240, offerExpiryTicks: 720 },
-			tiers: { pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
+			tiers: { techs: [0, 2, 6, 14, 26], pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
 			standing: { start: 50, dailyGood: 1, dailyBad: -3, dailyNearMiss: -1, dailyMissSpan: 0.05, jobFailed: -2, jobCompleted: 1 },
 			events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
 			research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
@@ -196,6 +196,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		standing: 50,
 		standingLog: [],
 		uptimeTarget: 0.95,
+		tierNeed: { tier: 2, pflops: 20, uptime: 0.99, techs: 2, techsDone: 0 },
 		researchPoints: 42,
 		techResearched: [],
 		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true }, acceptedTotal: 0 },
@@ -220,7 +221,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		refinement: 0,
 		drought: false,
 		sandbox: false,
-		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false },
+		automation: { policy: { research: { enabled: false, branches: [] }, parts: { enabled: false, keep: 4 }, bots: { enabled: false, racksPerBot: 12, maxBots: 8 }, foreman: { enabled: false, reserve: 1_000_000, racks: true, cooling: true, power: true } }, foremanUnlocked: false, foremanPerHour: 1 },
 		gameOver: null,
 	};
 	for (let f = -1; f <= 6; f++) for (let x = f < 0 ? 2 : 0; x < (f < 0 ? 20 : f > 4 ? 24 : 36); x++) v.slab[cellIndex(v, x, f)] = 1;

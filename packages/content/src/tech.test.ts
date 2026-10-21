@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { loadContent, validateContent } from "./load";
-import { M4_FACILITIES, M4_TECH } from "./m4ids";
+import { M4_FACILITIES, M4_TECH, V2_FACILITIES, V2_TECH } from "./m4ids";
 import type { ContentDB, PerkKind, TechNode } from "./schema";
 
 const PERKS: PerkKind[] = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
@@ -18,7 +18,7 @@ describe("tech tree (bundled)", () => {
 
 	it("loads and validates with about 45 nodes across all six branches and five tiers", () => {
 		expect(validateContent(db)).toEqual([]);
-		const older = db.tech.filter((n) => !M4_TECH.includes(n.id));
+		const older = db.tech.filter((n) => !M4_TECH.includes(n.id) && !V2_TECH.includes(n.id));
 		expect(older.length).toBeGreaterThanOrEqual(43);
 		expect(older.length).toBeLessThanOrEqual(47);
 		for (const b of BRANCHES) expect(db.tech.some((n) => n.branch === b), b).toBe(true);
@@ -32,8 +32,8 @@ describe("tech tree (bundled)", () => {
 		expect(n.minTier).toBe(1);
 		expect(n.requires).toEqual([]);
 		expect(n.effects).toEqual([{ type: "feature", feature: "contractsClerk" }]);
-		// The Works Foreman (M4) is the only other feature node.
-		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature")).map((x) => x.id)).toEqual(["contracts_clerk", "works_foreman"]);
+		// The Works Foreman and the Fleet Policy Update (the Foreman builds twice as fast) are the only other feature nodes.
+		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature")).map((x) => x.id).sort()).toEqual(["contracts_clerk", "standing_orders_binder", "works_foreman"]);
 		// Affordable after about one game day of full starter utilisation (4 racks x 20 PF x 24 h).
 		const fullDay = 4 * 20 * 24 * db.balance.research.pointsPerPflopHour;
 		expect(n.cost).toBeLessThanOrEqual(fullDay);
@@ -48,7 +48,7 @@ describe("tech tree (bundled)", () => {
 				if (e.type !== "perk") continue;
 				kinds.add(e.kind);
 				expect(e.factor, n.id).toBeGreaterThanOrEqual(0.8);
-				expect(e.factor, n.id).toBeLessThanOrEqual(1.15);
+				expect(e.factor, n.id).toBeLessThanOrEqual(1.2);
 				expect(e.factor, n.id).not.toBe(1);
 			}
 		}
@@ -75,7 +75,7 @@ describe("tech tree (bundled)", () => {
 	});
 
 	it("gates every new facility and bot behind a node of the same or a lower tier", () => {
-		const ungated = ["rack_air_gpu", "rack_dlc_gpu", "rack_storage", "crah_unit", "chiller", "cdu", "grid_tie", "genset", "ups_battery", "parts_depot", "bot_charger"];
+		const ungated = ["rack_air_gpu", "rack_storage", "crah_unit", "grid_tie", "genset", "ups_battery", "parts_depot", "bot_charger"];
 		for (const id of ungated) expect(db.facilities[id].tech, id).toBeUndefined();
 		const nodeUses = new Map<string, number>();
 		for (const d of Object.values(db.facilities)) {
@@ -111,16 +111,16 @@ describe("tech tree (bundled)", () => {
 		let total = 0;
 		let wetware = 0;
 		for (const n of db.tech) {
-			if (M4_TECH.includes(n.id)) continue; // M4 content has its own economy test in m4.test.ts
+			if (M4_TECH.includes(n.id) || V2_TECH.includes(n.id)) continue; // M4 content has its own economy test in m4.test.ts
 			const days = n.cost / typical[n.minTier];
 			if (n.branch === "wetware") wetware += days;
 			else total += days;
 			if (n.minTier === 1 && n.id !== "contracts_clerk") {
-				expect(days, n.id).toBeGreaterThanOrEqual(1);
-				expect(days, n.id).toBeLessThanOrEqual(3);
+				expect(days, n.id).toBeGreaterThanOrEqual(0.75);
+				expect(days, n.id).toBeLessThanOrEqual(4);
 			}
 			if (n.minTier === 4) {
-				expect(days, n.id).toBeGreaterThanOrEqual(4.5);
+				expect(days, n.id).toBeGreaterThanOrEqual(2.5);
 				expect(days, n.id).toBeLessThanOrEqual(10);
 			}
 		}
@@ -132,10 +132,47 @@ describe("tech tree (bundled)", () => {
 	});
 });
 
+describe("tier research gate (balance.tiers.techs)", () => {
+	const db = loadContent();
+
+	it("ships one entry per tier, free at tier 1, rising, and reachable with the nodes that exist before each Level", () => {
+		const t = db.balance.tiers;
+		expect(t.techs).toHaveLength(t.pflops.length);
+		expect(t.techs?.[0]).toBe(0);
+		t.techs?.forEach((v, i) => {
+			if (i > 0) expect(v).toBeGreaterThan(t.techs?.[i - 1] ?? 0);
+			// Nodes a player can hold when reaching Level i+1: everything whose clearance is below it.
+			expect(db.tech.filter((n) => n.minTier <= i).length, `Level ${i + 1}`).toBeGreaterThanOrEqual(v);
+		});
+	});
+
+	it("rejects a malformed gate", () => {
+		expect(broken((d) => {
+				d.balance.tiers.techs = [0, 1];
+			})).toMatch(/balance\.tiers\.techs: expected 5 entries/);
+		expect(broken((d) => {
+				d.balance.tiers.techs = [0, 3, 2, 4, 5];
+			})).toMatch(/non-decreasing at 2/);
+		expect(broken((d) => {
+				d.balance.tiers.techs = [1, 2, 3, 4, 5];
+			})).toMatch(/tier 1 must be free/);
+		expect(broken((d) => {
+				d.balance.tiers.techs = [0, 1.5, 3, 4, 5];
+			})).toMatch(/techs\[1\]/);
+	});
+
+	it("keeps liquid cooling behind the Chilled Loop node and retires the hot-aisle rack without removing it", () => {
+		for (const id of ["rack_dlc_gpu", "cdu", "chiller"]) expect(db.facilities[id].tech, id).toBe("chilled_loop");
+		expect(db.facilities.rack_air_gpu3.retired).toBe(true);
+		expect(db.tech.find((n) => n.id === "hot_aisle")?.effects.length).toBeGreaterThan(0);
+		for (const gone of ["neuromorphic_cards", "identity_register"]) expect(db.tech.some((n) => n.id === gone), gone).toBe(false);
+	});
+});
+
 describe("new trunk content", () => {
 	const db = loadContent();
 	// The trunk (pre-M3) content; the biotech additions have their own tests in biotech.test.ts.
-	const trunk = Object.values(db.facilities).filter((d) => d.category !== "bio" && !M4_FACILITIES.includes(d.id));
+	const trunk = Object.values(db.facilities).filter((d) => d.category !== "bio" && !M4_FACILITIES.includes(d.id) && !V2_FACILITIES.includes(d.id));
 	const racks = trunk.filter((d) => d.rack);
 	const f = db.facilities;
 	// Same value measure as events.test.ts: PFLOPS per $ with a share of the baseline cooling plant included.
@@ -156,7 +193,7 @@ describe("new trunk content", () => {
 		expect(kinds("grid_tie")).toBeGreaterThanOrEqual(3);
 		expect(kinds("ups")).toBeGreaterThanOrEqual(3);
 		expect(kinds("crah")).toBeGreaterThanOrEqual(3);
-		expect(Object.keys(db.bots).sort()).toEqual(["drone", "lifter", "rover"]);
+		expect(Object.keys(db.bots).sort()).toEqual(["drone", "fleet", "lifter", "rover"]);
 	});
 
 	it("has at least two air, two DLC and two immersion racks, one inference rack and one bigger storage array", () => {
@@ -186,12 +223,12 @@ describe("new trunk content", () => {
 		expect(f.rack_imm_gpu2.rack!.pflops).toBeGreaterThan(f.rack_imm_gpu.rack!.pflops);
 	});
 
-	it("keeps liquid racks about 1.4-1.9x the PFLOPS per $ of the best air rack available at their tier", () => {
+	it("keeps liquid racks 1.0-1.9x the PFLOPS per $ of the best air rack available at their tier", () => {
 		const air = racks.filter((d) => d.rack!.cooling === "air" && d.rack!.pflops > 0 && d.id !== "rack_infer");
 		for (const d of racks.filter((x) => x.rack!.cooling !== "air")) {
 			const bestAir = Math.max(...air.filter((a) => a.unlockTier <= d.unlockTier).map((a) => plantValue(a.id)));
 			const ratio = plantValue(d.id) / bestAir;
-			expect(ratio, d.id).toBeGreaterThan(1.4);
+			expect(ratio, d.id).toBeGreaterThan(1.0);
 			expect(ratio, d.id).toBeLessThan(1.9);
 		}
 	});

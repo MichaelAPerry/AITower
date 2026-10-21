@@ -5,7 +5,7 @@ import { goalLadder, newlyDone, VISIBLE_GOALS, visibleGoals } from "./goals";
 
 const content = {
 	facilities: { rack_air_gpu: { rack: { pflops: 20 } } },
-	balance: { tiers: { pflops: [0, 120, 400, 900], uptime: [0, 0.95, 0.97, 0.98], reward: [0, 1, 2, 3] } },
+	balance: { tiers: { techs: [0, 2, 6, 12], pflops: [0, 120, 400, 900], uptime: [0, 0.95, 0.97, 0.98], reward: [0, 1, 2, 3] } },
 } as unknown as ContentDB;
 
 const racks = (n: number) => Array.from({ length: n }, (_, i) => ({ id: i, defId: "rack_air_gpu", enabled: true, status: "ok" }));
@@ -27,10 +27,16 @@ describe("goal ladder", () => {
 		expect(ids(view({ jobs: [{ status: "running" }], stats: { revenue: 60_000, jobsCompleted: 1 }, facilities: racks(5) }))).toEqual(["research", "level-2", "earn-big"]);
 	});
 
+	it("the Reach Level goals show the research they need too", () => {
+		const g = goalLadder(view({ techResearched: ["a"] }), content).find((x) => x.id === "level-2");
+		expect(g?.progress).toBe("80 / 120 PF compute · 1 / 2 research");
+		expect(goalLadder(view(), content).find((x) => x.id === "level-4")?.progress).toContain("0 / 12 research");
+	});
+
 	it("reports progress in plain words", () => {
 		const g = goalLadder(view({ stats: { revenue: 12_000, jobsCompleted: 0 } }), content);
 		expect(g.find((x) => x.id === "earn-first")?.progress).toBe("$12k / $50k");
-		expect(g.find((x) => x.id === "level-2")?.progress).toBe("80 / 120 PF compute");
+		expect(g.find((x) => x.id === "level-2")?.progress).toBe("80 / 120 PF compute · 0 / 2 research");
 		expect(g.find((x) => x.id === "contract")?.done).toBe(false);
 	});
 

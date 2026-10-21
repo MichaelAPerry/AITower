@@ -108,14 +108,15 @@ export function allocateRacks(state: SimState, content: ContentDB, runnable: Set
 			if (!rackSuits(job.spec, d)) continue;
 			r.jobId = job.id;
 			job.rackIds.push(r.id);
-			have += d.rack?.pflops ?? 0;
+			have += (d.rack?.pflops ?? 0) * r.clock;
 		}
 	}
 }
 
+/** What a rack delivers right now: nominal PFLOPS × its clock (thermal throttle, brownout, nutrient). A throttled rack must not count as full, or a job stops claiming idle racks while it runs short. */
 function pflopsOf(state: SimState, content: ContentDB, id: number): number {
 	const r = findById(state.facilities, id);
-	return r ? (getDef(content, r.defId).rack?.pflops ?? 0) : 0;
+	return r ? (getDef(content, r.defId).rack?.pflops ?? 0) * r.clock : 0;
 }
 
 /** Installed compute: Σ nominal PFLOPS of enabled, non-failed racks. */
@@ -150,7 +151,7 @@ export function acceptCheck(
 			const d = getDef(content, r.defId);
 			if (!rackSuits(spec, d)) continue;
 			claimed.add(r.id);
-			have += d.rack?.pflops ?? 0;
+			have += (d.rack?.pflops ?? 0) * r.clock;
 			count++;
 		}
 		return have;

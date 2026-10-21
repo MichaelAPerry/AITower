@@ -33,6 +33,22 @@ describe("economy & progression", () => {
 		expect(sim.state.cash).toBeLessThan(before + 123); // upkeep/energy also applied
 	});
 
+	it("a tier also needs its researched nodes (tiers.techs): held back until enough are done, and ids that no longer exist do not count", () => {
+		const content = makeContent([], { tiers: { pflops: [0, 60], uptime: [0, 0.5], reward: [0, 123], techs: [0, 2] } });
+		const sim = newSim(content, "starter"); // 80 PFLOPS installed: the compute and uptime are there
+		run(sim, 1440);
+		expect(sim.state.tier).toBe(1);
+		expect(sim.view().tierNeed).toEqual({ tier: 2, pflops: 60, uptime: 0.5, techs: 2, techsDone: 0 });
+		sim.state.techResearched.push("t_clerk", "retired_node_from_an_old_save"); // one real node, one unknown id
+		run(sim, 1440);
+		expect(sim.state.tier).toBe(1);
+		expect(sim.view().tierNeed?.techsDone).toBe(1);
+		sim.state.techResearched.push("t_chain");
+		run(sim, 1440);
+		expect(sim.state.tier).toBe(2);
+		expect(sim.view().tierNeed).toBeNull(); // top of this two-tier ladder
+	});
+
 	it("bankrupt after a full day of negative cash; the sim keeps running", () => {
 		const content = makeContent([], { startingCash: 10, tiers: { pflops: [0, 1e9], uptime: [0, 1], reward: [0, 0] } });
 		const sim = newSim(content, "starter");

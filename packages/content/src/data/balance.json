@@ -73,6 +73,13 @@
    3750000,
    10000000,
    25000000
+  ],
+  "techs": [
+   0,
+   2,
+   6,
+   14,
+   26
   ]
  },
  "standing": {
@@ -86,7 +93,7 @@
  },
  "research": {
   "pointsPerPflopHour": 0.1,
-  "pointsPerJob": 8
+  "pointsPerJob": 25
  },
  "clerk": {
   "feeShare": 0.06

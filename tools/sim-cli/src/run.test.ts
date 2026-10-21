@@ -188,6 +188,7 @@ describe("reputation regression (M5b)", () => {
 			const c = loadContent();
 			c.tech.push(foremanNode);
 			c.balance.tiers.pflops = [0, 1, 2, 3, 1e12]; // start the run already in tier 4
+			c.balance.tiers.techs = [0, 0, 0, 0, 0];
 			const { rows } = runHeadless(c, "brownfield", 10, seed, true);
 			expect(rows[0].tier, `seed ${seed}`).toBeGreaterThanOrEqual(4);
 			const start = c.balance.standing.start;

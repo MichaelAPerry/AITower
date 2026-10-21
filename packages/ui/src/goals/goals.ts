@@ -44,7 +44,11 @@ export function goalLadder(view: SimView, content: ContentDB): Goal[] {
 	// One goal per Level still to climb, in order; each is done once the tower's Level has reached it.
 	for (let tier = 1; tier < pflops.length; tier++) {
 		const target = tier + 1;
-		goals.push({ ...compute(`level-${target}`, `Reach Level ${target}`, pf, pflops[tier]), done: view.tier >= target });
+		const techs = content.balance.tiers.techs?.[tier] ?? 0;
+		const done = view.techResearched.length;
+		const g = compute(`level-${target}`, `Reach Level ${target}`, pf, pflops[tier]);
+		// The Level also asks for researched nodes: say so on the card, and count it in the bar.
+		goals.push({ ...g, progress: techs > 0 ? `${g.progress} · ${Math.min(done, techs)} / ${techs} research` : g.progress, done: view.tier >= target });
 		if (target === 2) goals.push(money("earn-big", "Earn $250k in total", earned, BIG_EARNINGS));
 	}
 	return goals;

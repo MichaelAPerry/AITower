@@ -14,7 +14,7 @@ import { eventDef } from "../ministry/memos";
 import { modFactor } from "../ministry/modifiers";
 import { getDef } from "../world/defs";
 import { facilityStatus } from "./status";
-import { clerkUnlocked, foremanUnlocked, perk } from "../research/research";
+import { clerkUnlocked, foremanPerHour, foremanUnlocked, perk, researchedCount } from "../research/research";
 import { cloneAutomation } from "../automation/policy";
 import { isDrought } from "../green/weather";
 import { affinityShares } from "../progression/affinity";
@@ -57,6 +57,13 @@ function memoViews(state: SimState, content: ContentDB): MemoView[] {
 		});
 	}
 	return out;
+}
+
+function tierNeed(state: SimState, content: ContentDB): SimView["tierNeed"] {
+	const t = content.balance.tiers;
+	const i = state.tier; // index of the next tier's requirement
+	if (i >= t.pflops.length) return null;
+	return { tier: i + 1, pflops: t.pflops[i], uptime: t.uptime[i], techs: t.techs?.[i] ?? 0, techsDone: researchedCount(state, content) };
 }
 
 export function buildView(state: SimState, content: ContentDB): SimView {
@@ -144,7 +151,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		refinement: state.refinement,
 		drought: isDrought(state),
 		sandbox: state.sandbox,
-		automation: { policy: cloneAutomation(state.automation), foremanUnlocked: foremanUnlocked(state, content) },
+		automation: { policy: cloneAutomation(state.automation), foremanUnlocked: foremanUnlocked(state, content), foremanPerHour: foremanPerHour(state, content) },
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({
@@ -196,6 +203,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		standing: state.standing,
 		standingLog: state.standingLog.map((e) => ({ ...e })),
 		uptimeTarget: content.balance.tiers.uptime[state.tier - 1] ?? 0,
+		tierNeed: tierNeed(state, content),
 		researchPoints: state.researchPoints,
 		techResearched: state.techResearched.slice(),
 		clerk: { unlocked: clerkUnlocked(state, content), policy: { ...state.clerkPolicy, kinds: state.clerkPolicy.kinds.slice() }, acceptedTotal: state.clerkAccepted },
