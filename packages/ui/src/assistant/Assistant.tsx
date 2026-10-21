@@ -79,6 +79,8 @@ export interface AssistantProps extends PanelProps {
  * The helper robot: shows one suggestion at a time in a speech bubble (Show me / Not now), or a short tip when clicked.
  * Quiet while the tutorial coach marks run; pacing and cooldowns are in `pace.ts`.
  */
+const PRIMER_NUDGE = false;
+
 export function Assistant(props: AssistantProps) {
 	const { store, state, candidates } = props;
 	const tick = state.view.tick;
@@ -94,10 +96,10 @@ export function Assistant(props: AssistantProps) {
 		return () => clearInterval(iv);
 	}, []);
 
-	// One time, after the coach marks: point at the Primer.
+	// The one-time "read the Primer" nudge is off: owner playtest found it too hand-holding. UNIT-7 speaks only about problems.
 	const [nudge, setNudge] = useState(false);
 	useEffect(() => {
-		if (nudge || quiet || !shouldNudge(tutorialDone(), loadProgress())) return;
+		if (!PRIMER_NUDGE || nudge || quiet || !shouldNudge(tutorialDone(), loadProgress())) return;
 		setNudge(true);
 		primerUpdate({ nudged: true });
 	}, [nudge, quiet]);

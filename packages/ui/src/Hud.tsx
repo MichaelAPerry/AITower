@@ -27,7 +27,7 @@ import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
 import { Assistant } from "./assistant/Assistant";
 import { PrimerPrompt } from "./primer/PrimerPrompt";
-import { recommendedIds, suggestions } from "./assistant/suggest";
+import { suggestions } from "./assistant/suggest";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
@@ -173,10 +173,9 @@ export function Hud({ store, content, title }: HudProps) {
 		if (ascensionStale) ascension.close();
 	}, [ascensionStale, ascension]);
 
-	// UNIT-7: candidates come from the pure helper; the same list feeds the catalog's Recommended row.
+	// UNIT-7: candidates come from the pure helper. (No Recommended row in the catalog: it repeated items across categories.)
 	const assistantOn = settings.assistant !== false;
 	const candidates = useMemo(() => (assistantOn ? suggestions(state.view, content) : []), [assistantOn, state.view, content]);
-	const recommended = useMemo(() => recommendedIds(candidates), [candidates]);
 	const openResearch = useCallback(
 		(techId?: string) => {
 			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
@@ -200,7 +199,7 @@ export function Hud({ store, content, title }: HudProps) {
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				{state.tool.kind !== "select" && <ToolHint {...props} />}
 				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
-				<PalettePopover {...props} recommended={recommended} />
+				<PalettePopover {...props} />
 				<BuildBar ui={ui} setUi={setUi} />
 				<Ticker {...props} />
 				<div className="ui-right">
