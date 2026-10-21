@@ -6,7 +6,12 @@
   "speed": 0.25,
   "batteryTicks": 600,
   "repairTicks": 30,
-  "color": "#8a8f8c"
+  "color": "#8a8f8c",
+  "flavor": {
+   "quote": "Responsibility is broad and continuous. None of us are ever free of it, even if our work is unsuccessful.",
+   "author": "Admiral Hyman Rickover",
+   "source": "Thoughts on Man's Purpose in Life, 1974"
+  }
  },
  "drone": {
   "id": "drone",
@@ -17,7 +22,12 @@
   "repairTicks": 40,
   "color": "#c4ae72",
   "tech": "logistics_drone",
-  "flying": true
+  "flying": true,
+  "flavor": {
+   "quote": "The only way of discovering the limits of the possible is to venture a little way past them into the impossible.",
+   "author": "Arthur C. Clarke",
+   "source": "Hazards of Prophecy, in Profiles of the Future, 1962"
+  }
  },
  "lifter": {
   "id": "lifter",
@@ -28,7 +38,12 @@
   "repairTicks": 24,
   "color": "#6d7a58",
   "tech": "logistics_lifter",
-  "carry": 3
+  "carry": 3,
+  "flavor": {
+   "quote": "Give me the place to stand, and I shall move the earth.",
+   "author": "Archimedes",
+   "source": "Pappus of Alexandria, Synagoge VIII (c. AD 340), in translation"
+  }
  },
  "fleet": {
   "id": "fleet",
@@ -39,6 +54,11 @@
   "repairTicks": 14,
   "color": "#7a8c6d",
   "tech": "fleet_command",
-  "carry": 5
+  "carry": 5,
+  "flavor": {
+   "quote": "The servant glides by imperceptible approaches into the master",
+   "author": "Samuel Butler",
+   "source": "Erewhon, 1872, The Book of the Machines"
+  }
  }
 }

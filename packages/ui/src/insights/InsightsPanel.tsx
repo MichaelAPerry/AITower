@@ -1,3 +1,4 @@
+import { Jargon, Term, TermScope } from "../glossary/Term";
 import { AffinityBars } from "../components/AffinityBars";
 import { Meter } from "../components/common";
 import type { PanelProps } from "../components/context";
@@ -36,6 +37,7 @@ export function InsightsPanel(props: PanelProps) {
 			/>
 			{tab === "money" && <FinanceTab {...props} />}
 			{tab === "overview" && (
+				<TermScope key={tab}>
 				<div className="ins">
 					<section className="ins-card" aria-label="Look at the tower with an overlay">
 						<h3 className="ins-h">See it on the map</h3>
@@ -63,7 +65,7 @@ export function InsightsPanel(props: PanelProps) {
 						<h3 className="ins-h">Uptime</h3>
 						<p className={`ins-big tone-${up.tone}`}>{up.headline}</p>
 						<Meter value={view.uptime} tone={up.tone === "bad" ? "error" : up.tone} height={8} />
-						<p className="ins-p">{up.sub} Uptime is how much of the last day your racks were up and working.</p>
+						<p className="ins-p">{up.sub} <Term id="uptime">Uptime</Term> is how much of the last day your racks were up and working. Customers hold you to it through an <Term id="sla">SLA</Term>.</p>
 					</section>
 
 					<section className="ins-card" aria-label="Reputation">
@@ -99,17 +101,17 @@ export function InsightsPanel(props: PanelProps) {
 						<summary>Details for the curious</summary>
 						<dl className="ins-dl">
 							<dt>
-								Cooling cost (PUE) <b>{fmtPue(view.pue)}</b>
+								<span>Cooling cost (<Term id="pue">PUE</Term>)</span> <b>{fmtPue(view.pue)}</b>
 							</dt>
-							<dd>{pueExplain(view.pue)}</dd>
+							<dd><Jargon text={pueExplain(view.pue)} /></dd>
 							<dt>
-								Computer power (IT load) <b className={supply > 0 && view.totalKw > supply ? "is-down" : ""}>{fmtPower(view.itKw)}</b>
+								<span>Computer power (<Term id="it-load">IT load</Term>)</span> <b className={supply > 0 && view.totalKw > supply ? "is-down" : ""}>{fmtPower(view.itKw)}</b>
 							</dt>
-							<dd>How much electricity your racks use right now. If the whole tower needs more than your supply, things brown out.</dd>
+							<dd>How much electricity your racks use right now, in <Term id="kw">kW</Term>. If the whole tower needs more than your supply, things brown out.</dd>
 							<dt>
 								Computing speed <b>{Math.round(view.pflops)} PF</b>
 							</dt>
-							<dd>PF (petaflops) is how fast your racks calculate. More PF means you can take bigger jobs.</dd>
+							<dd><Term id="pflops">PF</Term> (petaflops) is how fast your racks calculate. More PF means you can take bigger jobs.</dd>
 							<dt>
 								Outside air <b>{fmtTemp(view.ambientC, 0)}</b>
 							</dt>
@@ -126,6 +128,7 @@ export function InsightsPanel(props: PanelProps) {
 						<Telemetry {...props} />
 					</details>
 				</div>
+				</TermScope>
 			)}
 		</>
 	);

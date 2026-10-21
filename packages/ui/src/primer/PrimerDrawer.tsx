@@ -1,7 +1,9 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { ContentDB } from "@aitower/content";
 import type { PanelProps } from "../components/context";
+import { FlavorLine } from "../components/FlavorLine";
 import { type Entry, buildEntries, lockFor, SECTIONS, type Section, searchEntries, sectionOf } from "../encyclopedia/entries";
+import { termById } from "../glossary/terms";
 import { PanelHead, SplitPane } from "../panel/PanelShell";
 import { type Chapter, buildChapters, isUnlocked, lockText, primerTarget, type TryId } from "./chapters";
 import { Diagram } from "./diagrams";
@@ -44,6 +46,8 @@ export function PrimerDrawer(props: PanelProps) {
 	const [query, setQuery] = useState("");
 	const [sel, setSel] = useState("ch:what");
 	const [tab, setTab] = useState<Section | null>(null);
+	/** A glossary word to scroll to and highlight in its chapter. */
+	const [focus, setFocus] = useState<string | null>(null);
 
 	useEffect(() => {
 		update({ opened: true });
@@ -53,9 +57,11 @@ export function PrimerDrawer(props: PanelProps) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: react to a new request only
 	useEffect(() => {
 		if (!wanted) return;
-		const id = primerTarget(wanted);
+		const [page, word] = wanted.split("#");
+		const id = primerTarget(page);
 		setQuery("");
 		setSel(id);
+		setFocus(word ?? null);
 		const s = sectionOf(id);
 		setTab(s && s !== "basics" ? s : null);
 		setUi({ encyId: null });
@@ -78,7 +84,7 @@ export function PrimerDrawer(props: PanelProps) {
 		const lock = lockText(c.unlock, view);
 		const unread = !lock && !progress.read.includes(c.id);
 		return (
-			<button key={c.id} type="button" role="option" aria-selected={shown === c.id} data-chapter={c.id} className={`pr-row ${shown === c.id ? "is-sel" : ""} ${lock ? "is-locked" : ""}`} onClick={() => setSel(c.id)}>
+			<button key={c.id} type="button" role="option" aria-selected={shown === c.id} data-chapter={c.id} className={`pr-row ${shown === c.id ? "is-sel" : ""} ${lock ? "is-locked" : ""}`} onClick={() => { setSel(c.id); setFocus(null); }}>
 				<span className="pr-row-t">
 					{i !== undefined ? `${i + 1} · ` : ""}
 					{c.title}
@@ -138,7 +144,7 @@ export function PrimerDrawer(props: PanelProps) {
 			<input
 				type="search"
 				className="ui-ency-search"
-				placeholder="Search: chiller, uptime, rack..."
+				placeholder="Search: PUE, CRAH, N+1, chiller..."
 				aria-label="Search the Primer"
 				value={query}
 				onChange={(e) => setQuery(e.target.value)}
@@ -150,14 +156,19 @@ export function PrimerDrawer(props: PanelProps) {
 					}
 				}}
 			/>
-			<SplitPane list={list} inspector={chapter ? <ChapterView c={chapter} n={chapters.filter((x) => x.group === "core").indexOf(chapter) + 1} next={chapters[chapters.indexOf(chapter) + 1]} {...props} onGo={setSel} /> : entry ? <EntryView e={entry} {...props} /> : <p className="pnl-empty">Pick a page on the left.</p>} />
+			<SplitPane list={list} inspector={chapter ? <ChapterView c={chapter} n={chapters.filter((x) => x.group === "core").indexOf(chapter) + 1} next={chapters[chapters.indexOf(chapter) + 1]} {...props} onGo={(id) => { setSel(id); setFocus(null); }} focus={focus} /> : entry ? <EntryView e={entry} {...props} onGo={(id) => { setSel(id); setFocus(entry.id.slice(9)); }} /> : <p className="pnl-empty">Pick a page on the left.</p>} />
 		</>
 	);
 }
 
-function ChapterView({ c, n, next, onGo, ...p }: { c: Chapter; n: number; next?: Chapter; onGo: (id: string) => void } & PanelProps) {
+function ChapterView({ c, n, next, onGo, focus, ...p }: { c: Chapter; n: number; next?: Chapter; onGo: (id: string) => void; focus: string | null } & PanelProps) {
+	const root = useRef<HTMLElement>(null);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: scroll when the chapter or the asked-for word changes
+	useEffect(() => {
+		if (focus) root.current?.querySelector(`[data-term-row="${focus}"]`)?.scrollIntoView({ block: "center" });
+	}, [c.id, focus]);
 	const lock = lockText(c.unlock, p.state.view);
-	const kicker = c.group === "core" ? `CHAPTER ${n} OF 6 · 1 MIN` : c.group === "level" ? "LEVEL GUIDE" : "PATH GUIDE";
+	const kicker = c.group === "core" ? `CHAPTER ${n} OF 6 · 2 MIN` : c.group === "level" ? "LEVEL GUIDE" : "PATH GUIDE";
 	if (lock)
 		return (
 			<article className="pr-chap" data-chapter-view={c.id}>
@@ -168,9 +179,10 @@ function ChapterView({ c, n, next, onGo, ...p }: { c: Chapter; n: number; next?:
 			</article>
 		);
 	return (
-		<article className="pr-chap" data-chapter-view={c.id}>
+		<article className="pr-chap" data-chapter-view={c.id} ref={root}>
 			<div className="pr-kicker">{kicker}</div>
 			<h2 className="pr-h">{c.title}</h2>
+			<FlavorLine flavor={c.flavor} className="is-epigraph" />
 			{c.blocks.map((b, i) => (
 				<div key={b.h ?? i}>
 					{b.h && <h3 className="pr-sub">{b.h}</h3>}
@@ -178,6 +190,24 @@ function ChapterView({ c, n, next, onGo, ...p }: { c: Chapter; n: number; next?:
 					{i === 0 && c.diagram && <Diagram id={c.diagram} />}
 				</div>
 			))}
+			{c.terms && c.terms.length > 0 && (
+				<>
+					<h3 className="pr-sub">Speak the language</h3>
+					<dl className="pr-terms">
+						{c.terms.map((id) => {
+							const t = termById(id);
+							return t ? (
+								<div key={id} data-term-row={id} className={`pr-term ${focus === id ? "is-focus" : ""}`}>
+									<dt>{t.name}</dt>
+									<dd>
+										{t.def} <span className="pr-game">In AItower: {t.game}</span>
+									</dd>
+								</div>
+							) : null;
+						})}
+					</dl>
+				</>
+			)}
 			<div className="pr-act">
 				<button type="button" className="ui-btn pnl-primary is-go pr-try" onClick={() => runTry(c.tryIt.id, p)}>
 					Try it: {c.tryIt.label}
@@ -192,7 +222,7 @@ function ChapterView({ c, n, next, onGo, ...p }: { c: Chapter; n: number; next?:
 	);
 }
 
-function EntryView({ e, content, state, openResearch }: { e: Entry } & PanelProps) {
+function EntryView({ e, content, state, openResearch, onGo }: { e: Entry; onGo: (id: string) => void } & PanelProps) {
 	const lock = lockFor(e, state.view, content);
 	const hidden = e.spoiler && lock !== null;
 	return (
@@ -201,11 +231,17 @@ function EntryView({ e, content, state, openResearch }: { e: Entry } & PanelProp
 			<h2 className="pr-h">{e.title}</h2>
 			{lock && <p className="ui-ency-locktext">{lock}</p>}
 			{!hidden && e.lines.map((l) => <p key={l} className="pr-p">{l}</p>)}
+			{e.at && (
+				<button type="button" className="ui-btn ui-mini" onClick={() => e.at && onGo(e.at)}>
+					Read the chapter
+				</button>
+			)}
 			{e.ref?.kind === "tech" && (
 				<button type="button" className="ui-btn ui-mini" onClick={() => e.ref && openResearch(e.ref.id)}>
 					Open in Research
 				</button>
 			)}
+			{!hidden && <FlavorLine flavor={e.flavor} />}
 			{!hidden && e.needs.length > 0 && <p className="ui-ency-needs">Needs: {e.needs.join(" / ")}</p>}
 			{!hidden && e.stats.length > 0 && (
 				<dl className="ui-ency-stats">

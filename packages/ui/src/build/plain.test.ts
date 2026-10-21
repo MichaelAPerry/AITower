@@ -23,8 +23,8 @@ describe("plain build copy", () => {
 	it("the air rack says what power, heat and earnings mean, with numbers from content", () => {
 		const d = content.facilities.rack_air_gpu;
 		const s = plainStats(d);
-		expect(s.find((x) => x.label === "Power")).toMatchObject({ sub: "Electricity it uses" });
-		expect(s.find((x) => x.label === "Heat")?.sub).toBe("Needs an air handler nearby");
+		expect(s.find((x) => x.label === "Power")).toMatchObject({ sub: "Electricity it uses (rack density)" });
+		expect(s.find((x) => x.label === "Heat")?.sub).toBe("Needs an air handler (CRAH) nearby");
 		expect(s.find((x) => x.label === "Earns")?.value).toMatch(/PF/);
 	});
 	it("folds locked items into level and research lines", () => {

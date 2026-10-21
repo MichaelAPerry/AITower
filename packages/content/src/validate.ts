@@ -76,6 +76,20 @@ function str(p: Problems, where: string, v: unknown): void {
 	if (typeof v !== "string" || v.trim() === "") p.push(`${where}: expected a non-empty string`);
 }
 
+/** Optional flavour quote: a non-empty quote of at most 200 characters, a non-empty author, an optional source string. */
+export function validateFlavor(p: Problems, w: string, f: unknown): void {
+	if (f === undefined) return;
+	const o = f as { quote?: unknown; author?: unknown; source?: unknown } | null;
+	if (typeof o !== "object" || o === null) {
+		p.push(`${w}.flavor: expected an object`);
+		return;
+	}
+	if (typeof o.quote !== "string" || o.quote.trim() === "") p.push(`${w}.flavor.quote: expected a non-empty string`);
+	else if (o.quote.length > 200) p.push(`${w}.flavor.quote: at most 200 characters`);
+	if (typeof o.author !== "string" || o.author.trim() === "") p.push(`${w}.flavor.author: expected a non-empty string`);
+	if (o.source !== undefined && (typeof o.source !== "string" || o.source.trim() === "")) p.push(`${w}.flavor.source: expected a non-empty string`);
+}
+
 /** Does this facility need a power conduit under it (mirrors the sim's `needsPower` default)? */
 export function facilityNeedsPower(def: FacilityDef): boolean {
 	if (def.placement?.needsPower !== undefined) return def.placement.needsPower;
@@ -131,6 +145,7 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	if (d.id !== key) p.push(`${w}: id "${d.id}" does not match key`);
 	str(p, `${w}.name`, d.name);
 	str(p, `${w}.description`, d.description);
+	validateFlavor(p, w, d.flavor);
 	if (!(d.kind in KIND_CATEGORY)) {
 		p.push(`${w}.kind: unknown kind "${d.kind}"`);
 		return;
@@ -684,6 +699,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 		byId.set(n.id, n);
 		str(p, `${w}.name`, n.name);
 		str(p, `${w}.description`, n.description);
+		validateFlavor(p, w, n.flavor);
 		if (!TECH_BRANCHES.includes(n.branch)) p.push(`${w}.branch: unknown "${n.branch}"`);
 		num(p, `${w}.minTier`, n.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
 		num(p, `${w}.cost`, n.cost, { gt: 0 });
@@ -760,6 +776,7 @@ export function validateContent(db: ContentDB): string[] {
 		const w = `bots.${key}`;
 		if (b.id !== key) p.push(`${w}: id "${b.id}" does not match key`);
 		str(p, `${w}.name`, b.name);
+		validateFlavor(p, w, b.flavor);
 		num(p, `${w}.cost`, b.cost, { min: 0 });
 		num(p, `${w}.speed`, b.speed, { gt: 0 });
 		num(p, `${w}.batteryTicks`, b.batteryTicks, { gt: 0, int: true });

@@ -6,6 +6,7 @@ import { Meter } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { fmtDuration, fmtMoney } from "../format";
 import { pushNotice } from "../notices";
+import { Jargon, TermScope } from "../glossary/Term";
 import { FactRow, ListHeading, PanelHead, PrimaryAction, SplitPane } from "../panel/PanelShell";
 import { clockText, fitText, jobStatus, KIND_BLURB, KIND_NAME, needLine, offerFacts, payLine, pickSelection, type Selection } from "./contractText";
 
@@ -100,7 +101,9 @@ export function ContractsDrawer(props: PanelProps) {
 			<>
 				<div className="bld-kicker">Job offer · {KIND_NAME[offer.kind]}</div>
 				<h3 className="bld-h">{offer.clientName}</h3>
-				<p className="bld-blurb">{KIND_BLURB[offer.kind]}</p>
+				<p className="bld-blurb">
+					<Jargon text={KIND_BLURB[offer.kind]} />
+				</p>
 				<div className="bld-stats">
 					{offerFacts(offer, content).map((x) => (
 						<FactRow key={x.label} f={x} />
@@ -132,7 +135,7 @@ export function ContractsDrawer(props: PanelProps) {
 					<span>{(p * 100).toFixed(0)}% done</span>
 				</div>
 				<div className="bld-stats">
-					<FactRow f={{ icon: "$", label: `Pays ${fmtMoney(job.payout)}`, sub: "Paid as work is saved and when the job finishes.", value: fmtMoney(job.payout), tone: "money" }} />
+					<FactRow f={{ icon: "$", label: `Pays ${fmtMoney(job.payout)}`, sub: "Paid at each checkpoint (work saved) and when the job finishes.", value: fmtMoney(job.payout), tone: "money" }} />
 					<FactRow f={{ icon: "⏱", label: `Deadline ${clockText(job.deadline)}`, sub: `${fmtDuration(Math.max(0, job.deadline - view.tick))} from now.`, value: fmtDuration(Math.max(0, job.deadline - view.tick)) }} />
 					<FactRow f={{ icon: "PF", label: `${job.rackIds.length} rack${job.rackIds.length === 1 ? "" : "s"} working on it`, sub: "More free racks speed up training and finetune jobs.", value: `${Math.round(job.pflops * 10) / 10} PF` }} />
 				</div>
@@ -157,7 +160,7 @@ export function ContractsDrawer(props: PanelProps) {
 	return (
 		<>
 			<PanelHead kicker="Earn money" title="Contracts" />
-			<SplitPane list={list} inspector={inspector} />
+			<SplitPane list={list} inspector={<TermScope key={offer ? `o${offer.id}` : job ? `j${job.id}` : "none"}>{inspector}</TermScope>} />
 		</>
 	);
 }

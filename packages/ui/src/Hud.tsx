@@ -44,6 +44,7 @@ import "./research/research.css";
 import "./bio/bio.css";
 import "./calm/calm.css";
 import "./calm/theme.css";
+import { TermProvider } from "./glossary/Term";
 import "./build/build.css";
 import "./panel/panel.css";
 import "./help/help.css";
@@ -183,8 +184,10 @@ export function Hud({ store, content, title }: HudProps) {
 		},
 		[content],
 	);
+	const openPrimerAt = useCallback((target: string) => setUiState((u) => ({ ...u, drawer: "primer", encyId: target, paletteOpen: false, buildHover: null })), []);
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch, openAscension: ascension.open, openAudit: setAudit };
 	return (
+		<TermProvider open={openPrimerAt}>
 		<div
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
@@ -259,6 +262,7 @@ export function Hud({ store, content, title }: HudProps) {
 			)}
 			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "primer", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
+		</TermProvider>
 	);
 }
 

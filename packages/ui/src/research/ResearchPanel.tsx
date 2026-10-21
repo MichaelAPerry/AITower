@@ -1,9 +1,11 @@
 import type { TechBranch, TechNode } from "@aitower/content";
 import { Meter } from "../components/common";
+import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
 import { PATH_COLOR } from "../ascension/ascension";
 import { pushNotice } from "../notices";
 import { ListHeading, PanelHead, PanelTabs, PrimaryAction, SplitPane } from "../panel/PanelShell";
+import { Jargon, TermScope } from "../glossary/Term";
 import { branchView, chain, defaultBranch, defaultPick, etaText, getLines, groupOf, isSpoilerTech, PATH_NOTE, plainName, rpPerHour, tabsFor, whyText } from "./researchText";
 import { fmtRp, nodeState, techList } from "./tech";
 
@@ -67,7 +69,9 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 					<p className="bld-blurb">Details stay sealed until you can start this one.</p>
 				) : (
 					<>
-						<p className="bld-blurb">{plainName(sel, content)}.</p>
+						<p className="bld-blurb">
+							<Jargon text={`${plainName(sel, content)}.`} />
+						</p>
 						{sel.path && (
 							<p className="res-path">
 								<span className="ui-pathchip" data-path={sel.path} style={{ color: PATH_COLOR[sel.path] }}>
@@ -81,7 +85,9 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 							{getLines(sel, content).map((l) => (
 								<li key={l.title}>
 									<b>{l.title}</b>
-									<span>{l.sub}</span>
+									<span>
+										<Jargon text={l.sub} />
+									</span>
 								</li>
 							))}
 							{getLines(sel, content).length === 0 && (
@@ -92,7 +98,9 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 							)}
 						</ul>
 						<h4 className="res-h">Why it helps</h4>
-						<p className="bld-blurb">{whyText(sel, content)}</p>
+						<p className="bld-blurb">
+							<Jargon text={whyText(sel, content)} />
+						</p>
 					</>
 				)}
 				{steps.length > 0 && (
@@ -129,6 +137,7 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 						onClick={() => start(sel)}
 					/>
 				)}
+				{!masked && <FlavorLine flavor={sel.flavor} />}
 			</>
 		);
 	} else {
@@ -167,7 +176,7 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 				</div>
 			)}
 			<PanelTabs label="Research branch" value={tab} onPick={(id) => setUi({ researchTab: id, researchSel: null })} tabs={tabs.map((t) => ({ id: t.id, label: t.ready > 0 ? `${t.label} · ${t.ready}` : t.label, title: t.ready > 0 ? `${t.ready} ready to start` : undefined }))} />
-			<SplitPane list={list} inspector={inspector} />
+			<SplitPane list={list} inspector={<TermScope key={sel?.id ?? "none"}>{inspector}</TermScope>} />
 		</>
 	);
 }

@@ -1,6 +1,7 @@
 import { loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimView } from "@aitower/sim";
+import { TERMS } from "../glossary/terms";
 import { buildEntries, facilityNeeds, lockFor, searchEntries, sectionOf } from "./entries";
 
 const content = loadContent();
@@ -34,7 +35,8 @@ describe("buildEntries", () => {
 	});
 	it("glossary has the jargon", () => {
 		const g = entries.filter((e) => e.section === "glossary").map((e) => e.title);
-		for (const t of ["PF", "PFLOPS", "kW", "MW", "CDU", "CRAH", "PUE", "Uptime"]) expect(g).toContain(t);
+		for (const t of ["PFLOPS (PF)", "kW", "MW", "CDU", "CRAH", "PUE", "Uptime", "SLA", "N+1 (redundancy)"]) expect(g).toContain(t);
+		expect(g).toHaveLength(TERMS.length);
 	});
 	it("horror entries keep their text out of search", () => {
 		const spoilers = entries.filter((e) => e.spoiler);
@@ -52,6 +54,9 @@ describe("searchEntries", () => {
 		expect(r[0].title).toBe("PUE");
 		expect(searchEntries(entries, "zzzz-nothing")).toEqual([]);
 		expect(searchEntries(entries, "heat cooling").every((e) => e.keywords.includes("heat") && e.keywords.includes("cooling"))).toBe(true);
+	});
+	it("finds the jargon in the Words list", () => {
+		for (const [q, id] of [["PUE", "glossary:pue"], ["CRAH", "glossary:crah"], ["N+1", "glossary:redundancy"], ["immersion", "glossary:immersion"], ["redundancy", "glossary:redundancy"], ["power usage", "glossary:pue"]]) expect(searchEntries(entries, q).map((e) => e.id), q).toContain(id);
 	});
 	it("is case-insensitive", () => {
 		expect(searchEntries(entries, "CRAH").map((e) => e.id)).toEqual(searchEntries(entries, "crah").map((e) => e.id));
