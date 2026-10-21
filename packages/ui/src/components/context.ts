@@ -21,6 +21,8 @@ export interface UiState {
 	/** Research panel: the node picked and the branch tab shown (null/absent = the best one to start). */
 	researchSel?: string | null;
 	researchTab?: TechBranch | null;
+	/** Research panel: the tree (default) or the plain list kept for keyboard and screen-reader use. */
+	researchView?: "tree" | "list";
 	/** Section of the Insights panel. */
 	insightsTab?: "overview" | "money";
 	/** Job highlighted in the Contracts drawer (set by the inspector's job link). */

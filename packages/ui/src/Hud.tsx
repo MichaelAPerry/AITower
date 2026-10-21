@@ -195,7 +195,7 @@ export function Hud({ store, content, title }: HudProps) {
 	return (
 		<TermProvider open={openPrimerAt}>
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" && ui.researchView !== "list" ? "has-tree" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<TopStrip {...props} />

@@ -1,0 +1,85 @@
+[
+ {
+  "id": "adm",
+  "name": "Administration",
+  "short": "Admin",
+  "color": "#c9b98f",
+  "advisor": "Lucien Ferro",
+  "identity": "Money and automation",
+  "signature": "Contract Automation, Works Foreman, payout +5% to +10% steps.",
+  "pitch": "The Foreman costs less than your attention."
+ },
+ {
+  "id": "log",
+  "name": "Logistics",
+  "short": "Logistics",
+  "color": "#e8955a",
+  "advisor": "Cass Parr",
+  "identity": "Fix things faster than they break",
+  "signature": "Bot speed, repair speed, parts warehouses, Fleet Command.",
+  "pitch": "Failures are scheduled. Repair time is the only variable."
+ },
+ {
+  "id": "pow",
+  "name": "Power",
+  "short": "Power",
+  "color": "#f0d24a",
+  "advisor": "Bea Altasar",
+  "identity": "Never go dark",
+  "signature": "Grid 1.5 MW, then 3.5, 9, 20. Every rack needs it first.",
+  "pitch": "Every rack is a promise in kilowatts."
+ },
+ {
+  "id": "cool",
+  "name": "Cooling",
+  "short": "Cooling",
+  "color": "#5fb6ff",
+  "advisor": "Cass Parr",
+  "identity": "Move heat out, in three lines: Air, Liquid and Immersion",
+  "signature": "Air tops out near 40 kW a cabinet. Liquid reaches 420 PF per cabinet. Immersion IM-3 reaches 800 PF.",
+  "pitch": "Air is cheap. Water is dense. Immersion is both a solution and a plumbing problem."
+ },
+ {
+  "id": "comp",
+  "name": "Compute",
+  "short": "Compute",
+  "color": "#8fd1b0",
+  "advisor": "Dr. Mel Kiorre",
+  "identity": "The racks themselves",
+  "signature": "Rear-door, cold-plate, blade, specialist cards (IA-1: 2.64 PF/kW).",
+  "pitch": "Same floor, more output."
+ },
+ {
+  "id": "wet",
+  "name": "Wetware",
+  "short": "Wetware",
+  "path": "biotech",
+  "color": "#ff7aa8",
+  "advisor": "Dr. Mel Kiorre",
+  "identity": "Efficiency, at a cost",
+  "signature": "OC-1: 135 PF at 24 kW = 5.6 PF/kW, over ten times AC-1. Brings contamination and mutations.",
+  "pitch": "Eleven times the output per kilowatt. The tissue is fully under control."
+ },
+ {
+  "id": "green",
+  "name": "Green",
+  "short": "Green",
+  "path": "greentech",
+  "color": "#9be564",
+  "advisor": "Bea Altasar",
+  "identity": "Cheap power and a score",
+  "signature": "Solar, wind, heat export, algae. Green Score rises with weather power share.",
+  "pitch": "Free energy, until sundown. Keep a generator warm."
+ },
+ {
+  "id": "syn",
+  "name": "Synthetic",
+  "short": "Synthetic",
+  "path": "synthetic",
+  "color": "#a99cff",
+  "advisor": "Dr. Mel Kiorre",
+  "identity": "Raw speed",
+  "signature": "PH-1 Photonic: 480 PF at 40 kW = 12 PF/kW. ML-1 Mind Lattice: 700 PF.",
+  "pitch": "The fastest racks in the building. They have opinions about uptime."
+ }
+]

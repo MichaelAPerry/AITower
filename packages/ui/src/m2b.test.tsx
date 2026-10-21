@@ -101,9 +101,23 @@ describe("Contract Automation panel", () => {
 
 describe("Research panel", () => {
 	const panel = (store: ReturnType<typeof setup>["store"], content: ReturnType<typeof setup>["content"], ui = {}) => renderToString(<ResearchPanel {...panelProps(store, content, { ui })} />);
-	it("shows the points, branch tabs, what is ready and what comes next, in plain words", () => {
+	it("opens on the tree: lanes, Level columns, node states, the Level requirement and the Inspector beside it", () => {
 		const { content, store } = setup();
 		const html = panel(store, content);
+		expect(html).toContain('class="rt-svg"');
+		for (const t of ["LEVEL 1", "LEVEL 2", "LEVEL 3", "ADMINISTRATION", "COMPUTE"]) expect(html).toContain(t);
+		for (const c of ["s-avail", "s-locked", "s-lvl"]) expect(html).toContain(c);
+		expect(html).toContain('data-tech="cmp_burnin"');
+		expect(html).toContain("Level 2 needs 2 technologies researched");
+		expect(html).toContain("Start research");
+		expect(html).toContain("What you get");
+		expect(html).toContain("42 RP");
+		// The plain list stays one click away for keyboard and screen-reader use.
+		expect(html).toContain(">List</button>");
+	});
+	it("the List view keeps the points, branch tabs, what is ready and what comes next, in plain words", () => {
+		const { content, store } = setup();
+		const html = panel(store, content, { researchView: "list" });
 		expect(html).toContain("Research");
 		for (const b of ["Compute", "Cooling", "Power", "Logistics", "Admin"]) expect(html).toContain(b);
 		expect(html).toContain("Available now");
@@ -114,7 +128,7 @@ describe("Research panel", () => {
 	});
 	it("Start research on the picked node dispatches {type:'research'} and spends the points", () => {
 		const { content, store, sent } = setup();
-		const tree = ResearchPanel(panelProps(store, content, { ui: { researchSel: "cmp_burnin", researchTab: "compute" } }));
+		const tree = ResearchPanel(panelProps(store, content, { ui: { researchSel: "cmp_burnin", researchTab: "compute", researchView: "list" } }));
 		const split = findAll(tree, (el) => "inspector" in el.props)[0];
 		click(findButton(split.props.inspector as never, /Start research/));
 		expect(sent).toEqual([{ type: "research", techId: "cmp_burnin" }]);
@@ -123,7 +137,7 @@ describe("Research panel", () => {
 	});
 	it("too expensive: the button is off and says how many points are missing", () => {
 		const { content, store } = setup();
-		const html = panel(store, content, { researchSel: "cmp_binning", researchTab: "compute" });
+		const html = panel(store, content, { researchSel: "cmp_binning", researchTab: "compute", researchView: "list" });
 		expect(html).toContain("disabled");
 		expect(html).toContain("You need first");
 		expect(html).toContain("Burn-in Protocol");

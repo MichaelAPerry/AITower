@@ -2,7 +2,7 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { AscensionPath, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechNode } from "./schema";
+import type { AscensionPath, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -51,6 +51,8 @@ const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
 const HEX = /^#[0-9a-fA-F]{6}$/;
+const TECH_LANES: TechLane[] = ["adm", "log", "pow", "cool", "comp", "wet", "green", "syn"];
+const TECH_LINES: TechLine[] = ["air", "liquid", "immersion"];
 const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
 const FEATURES = ["contractsClerk", "foreman", "foremanPace"];
@@ -698,6 +700,24 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 	}
 }
 
+function validateLanes(p: Problems, db: ContentDB): void {
+	if (!Array.isArray(db.lanes)) {
+		p.push("lanes: expected an array");
+		return;
+	}
+	const seen = new Set<string>();
+	db.lanes.forEach((l, i) => {
+		const w = `lanes[${i}] (${l?.id})`;
+		if (!TECH_LANES.includes(l.id)) p.push(`${w}.id: unknown lane "${l.id}"`);
+		if (seen.has(l.id)) p.push(`${w}: duplicate id`);
+		seen.add(l.id);
+		for (const k of ["name", "short", "advisor", "identity", "signature", "pitch"] as const) str(p, `${w}.${k}`, l[k]);
+		if (typeof l.color !== "string" || !/^#[0-9a-fA-F]{6}$/.test(l.color)) p.push(`${w}.color: expected #rrggbb`);
+		if (l.path !== undefined && !PATHS.includes(l.path)) p.push(`${w}.path: unknown path "${l.path}"`);
+	});
+	for (const id of TECH_LANES) if (!seen.has(id)) p.push(`lanes: missing "${id}"`);
+}
+
 function validateTech(p: Problems, db: ContentDB): void {
 	if (!Array.isArray(db.tech)) {
 		p.push("tech: expected an array");
@@ -715,6 +735,10 @@ function validateTech(p: Problems, db: ContentDB): void {
 		str(p, `${w}.description`, n.description);
 		validateFlavor(p, w, n.flavor);
 		if (!TECH_BRANCHES.includes(n.branch)) p.push(`${w}.branch: unknown "${n.branch}"`);
+		if (n.lane === undefined || !TECH_LANES.includes(n.lane)) p.push(`${w}.lane: unknown "${n.lane}"`);
+		else if (!(db.lanes ?? []).some((l) => l.id === n.lane)) p.push(`${w}.lane: "${n.lane}" has no entry in lanes`);
+		if (n.line !== undefined && !TECH_LINES.includes(n.line)) p.push(`${w}.line: unknown "${n.line}"`);
+		if (n.line !== undefined && n.lane !== "cool" && n.lane !== "comp") p.push(`${w}.line: only the cool and comp lanes have equipment lines`);
 		num(p, `${w}.minTier`, n.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
 		num(p, `${w}.cost`, n.cost, { gt: 0 });
 		if (!Array.isArray(n.effects)) p.push(`${w}.effects: expected an array`);
@@ -852,6 +876,7 @@ export function validateContent(db: ContentDB): string[] {
 	validateBalance(p, db);
 	validateEvents(p, db);
 	validateResearchBalance(p, db);
+	validateLanes(p, db);
 	validateTech(p, db);
 	validateBioBalance(p, db);
 	validatePathsAndEndings(p, db);

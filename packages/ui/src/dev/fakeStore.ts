@@ -50,7 +50,8 @@ const FAKE_EVENTS: EventDef[] = [
 	},
 ];
 
-const tn = (t: Partial<TechNode> & Pick<TechNode, "id" | "name" | "branch" | "cost">): TechNode => ({ description: "Filed in triplicate.", minTier: 1, requires: [], effects: [], ...t });
+const BRANCH_LANE = { compute: "comp", cooling: "cool", power: "pow", logistics: "log", administration: "adm", wetware: "wet" } as const;
+const tn = (t: Partial<TechNode> & Pick<TechNode, "id" | "name" | "branch" | "cost">): TechNode => ({ description: "Filed in triplicate.", minTier: 1, requires: [], effects: [], lane: BRANCH_LANE[t.branch], ...t });
 
 /** A small tree for the dev harness and tests: two or three nodes per branch, the clerk first. */
 export const FAKE_TECH: TechNode[] = [

@@ -4,6 +4,7 @@
   "name": "Contract Automation",
   "description": "An automated bid desk that never sleeps. Switches on the Contracts Clerk: it accepts fitting offers for you and keeps 6% of what those jobs earn.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 1,
   "cost": 180,
   "requires": [],
@@ -24,6 +25,7 @@
   "name": "Research Library Access",
   "description": "Licensed journal access for the research team. Research points earned +10%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 1,
   "cost": 330,
   "requires": [
@@ -47,6 +49,7 @@
   "name": "Preferred Vendor Status",
   "description": "Your invoices are paid ahead of the queue. Contract payouts +5%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 2,
   "cost": 1300,
   "requires": [
@@ -70,6 +73,7 @@
   "name": "Cost Accounting Reform",
   "description": "Costs are now allocated per rack. Facility upkeep -8%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 2,
   "cost": 1550,
   "requires": [
@@ -93,6 +97,7 @@
   "name": "Authority Liaison Desk",
   "description": "A named contact at the Compute Authority. Contract payouts +4%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 3,
   "cost": 3400,
   "requires": [
@@ -116,6 +121,7 @@
   "name": "Group Procurement",
   "description": "Bulk purchasing across every vendor. Facility upkeep -7%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 3,
   "cost": 3600,
   "requires": [
@@ -139,6 +145,7 @@
   "name": "Authority Framework Agreement",
   "description": "A multi-year agreement signed at director level. The pen is on a chain. Contract payouts +4%. Research points earned +15%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 4,
   "cost": 12000,
   "requires": [
@@ -168,6 +175,8 @@
   "name": "Batch Scheduler Upgrade",
   "description": "Better packing for the job queue. Contract payouts +3%.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "air",
   "minTier": 1,
   "cost": 450,
   "requires": [],
@@ -189,6 +198,8 @@
   "name": "Rear-Door Cabinet Design",
   "description": "A reference design for a heat exchanger on the cabinet door. Unlocks the AC-3 Rear-Door Rack: 42 PFLOPS at 55 kW.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "air",
   "minTier": 2,
   "cost": 1300,
   "requires": [
@@ -206,6 +217,8 @@
   "name": "Tape Library Engineering",
   "description": "Robotic retrieval for bulk datasets. Unlocks the Tape Library TL-8000: 8,000 TB at 30 kW.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "air",
   "minTier": 2,
   "cost": 1150,
   "requires": [
@@ -223,6 +236,8 @@
   "name": "Hot-Aisle Containment",
   "description": "Ducted exhaust and sealed aisle ends. CRAH, chiller and CDU capacity +5%. The AC-4 Hot-Aisle Rack it once unlocked is no longer built.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "air",
   "minTier": 3,
   "cost": 2600,
   "requires": [
@@ -246,6 +261,8 @@
   "name": "Cold-Plate Generation 3",
   "description": "Machined cold plates rated for 160 kW per cabinet. Unlocks the LC-3 Cold-Plate Rack: 230 PFLOPS at 160 kW.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "liquid",
   "minTier": 3,
   "cost": 4200,
   "requires": [
@@ -264,6 +281,8 @@
   "name": "Specialist Cards Programme",
   "description": "Fixed-function cards from a contract foundry, and event-driven silicon that idles when there is nothing to say. Unlocks the IA-1 Inference Accelerator (95 PFLOPS at 36 kW) and the NM-1 Neuromorphic Rack (50 PFLOPS at 12 kW).",
   "branch": "compute",
+  "lane": "comp",
+  "line": "air",
   "minTier": 3,
   "cost": 3600,
   "requires": [
@@ -281,6 +300,8 @@
   "name": "Blade Manifold Architecture",
   "description": "Rack-scale blades that blind-mate to the coolant manifold. Unlocks the LC-4 Blade Rack: 420 PFLOPS at 240 kW.",
   "branch": "compute",
+  "lane": "comp",
+  "line": "liquid",
   "minTier": 4,
   "cost": 15000,
   "requires": [
@@ -298,6 +319,8 @@
   "name": "Airflow Standardisation",
   "description": "One fan model, one mounting spec, fewer surprises. CRAH, chiller and CDU capacity +5%.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "air",
   "minTier": 1,
   "cost": 360,
   "requires": [],
@@ -319,6 +342,8 @@
   "name": "Rear-Door Exchanger Licence",
   "description": "A chilled-water coil on a hinge, under licence. Unlocks the Row Air Handler AH-320.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "air",
   "minTier": 2,
   "cost": 1450,
   "requires": [
@@ -336,6 +361,8 @@
   "name": "Chilled-Water Loop Design",
   "description": "Pump curves and loop balancing, done properly. CRAH, chiller and CDU capacity +5%. Unlocks the LC-2 Liquid-Cooled Rack, the Coolant Distribution Unit and the Chiller CH-600; without it a tower stays on air.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "liquid",
   "minTier": 2,
   "cost": 1700,
   "requires": [
@@ -359,6 +386,8 @@
   "name": "High-Capacity Air Handling",
   "description": "A fan wall sized for a whole hall. Unlocks the High-Capacity Air Handler AH-700.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "air",
   "minTier": 3,
   "cost": 3300,
   "requires": [
@@ -376,6 +405,8 @@
   "name": "Cooling Tower Hydraulics",
   "description": "A tower, a basin and a water-use permit. Unlocks the Cooling-Tower Chiller CH-2400. Unlocks the Row Coolant Distribution Unit.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "liquid",
   "minTier": 3,
   "cost": 3800,
   "requires": [
@@ -393,6 +424,8 @@
   "name": "Dielectric Fluid Handbook",
   "description": "Handling and disposal procedures for immersion fluid. Unlocks the IM-1 Immersion Tank: 300 PFLOPS at 180 kW.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "immersion",
   "minTier": 3,
   "cost": 4200,
   "requires": [
@@ -411,6 +444,8 @@
   "name": "Adiabatic Free Cooling",
   "description": "Evaporate the loop in open air and let the sky take the heat. CRAH, chiller and CDU capacity +5%. Unlocks the Adiabatic Chiller CH-5000.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "liquid",
   "minTier": 4,
   "cost": 13000,
   "requires": [
@@ -434,6 +469,8 @@
   "name": "Two-Phase Immersion",
   "description": "Boiling fluid and a condenser coil. Not a spectator sport. Rack failure rate -5%. Unlocks the IM-2 Two-Phase Immersion Tank: 560 PFLOPS at 300 kW.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "immersion",
   "minTier": 4,
   "cost": 15000,
   "requires": [
@@ -458,6 +495,7 @@
   "name": "Surge Protection Standard",
   "description": "Fuses on every circuit, in writing. Rack failure rate -5%.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 1,
   "cost": 300,
   "requires": [],
@@ -479,6 +517,7 @@
   "name": "Off-Peak Tariff Agreement",
   "description": "A negotiated night rate with the utility. Grid energy price -5%.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 1,
   "cost": 420,
   "requires": [],
@@ -500,6 +539,7 @@
   "name": "Substation Licence",
   "description": "Permission to connect a dedicated 11 kV feeder. Unlocks the Grid Intake 3.5 MW.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 2,
   "cost": 1450,
   "requires": [
@@ -517,6 +557,7 @@
   "name": "Flywheel Licence",
   "description": "Rotor storage that bridges a minute of load in a second. Unlocks the Flywheel UPS 60 kWh.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 2,
   "cost": 1550,
   "requires": [
@@ -534,6 +575,7 @@
   "name": "Gas Turbine Concession",
   "description": "A pipeline tap and a turbine to go with it. Grid energy price -3%. Unlocks the Gas Turbine 3 MW.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 3,
   "cost": 3600,
   "requires": [
@@ -557,6 +599,7 @@
   "name": "Battery Hall Permit",
   "description": "Fire-code sign-off for a thousand cells in one room. Unlocks the Battery Hall 2.4 MWh.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 3,
   "cost": 3300,
   "requires": [
@@ -574,6 +617,7 @@
   "name": "Transmission Feeder Agreement",
   "description": "A private line to the transmission grid. Grid energy price -5%. Unlocks the Grid Intake 9 MW.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 4,
   "cost": 14000,
   "requires": [
@@ -598,6 +642,7 @@
   "name": "Rapid Swap Procedures",
   "description": "GPU tray swaps timed to the minute. Bot repairs 15% faster.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 1,
   "cost": 340,
   "requires": [],
@@ -619,6 +664,7 @@
   "name": "Bot Drivetrain Upgrade",
   "description": "Faster actuators and louder fans. Bot speed +10%.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 1,
   "cost": 390,
   "requires": [
@@ -642,6 +688,7 @@
   "name": "Aerial Survey Drones",
   "description": "Rotors that skip the lift entirely. Unlocks the Survey Drone (flies between floors, 0.5 tiles per tick).",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 2,
   "cost": 1450,
   "requires": [
@@ -659,6 +706,7 @@
   "name": "Central Warehousing",
   "description": "Bin locations, barcodes and a stock count. Unlocks the Central Parts Warehouse.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 2,
   "cost": 1300,
   "requires": [
@@ -676,6 +724,7 @@
   "name": "Fast Charging",
   "description": "Twenty-five kilowatts per berth. Unlocks the Fast-Charge Bay.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 3,
   "cost": 3000,
   "requires": [
@@ -693,6 +742,7 @@
   "name": "Heavy Lifter Chassis",
   "description": "A reinforced bot with room for three spare parts. Unlocks the Heavy Lifter Bot (carries 3 spare parts per trip).",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 3,
   "cost": 3500,
   "requires": [
@@ -711,6 +761,7 @@
   "name": "Autonomous Maintenance Corps",
   "description": "A coordinated fleet instead of a loose group. Bot repairs 10% faster. Bot speed +5%.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 4,
   "cost": 10000,
   "requires": [
@@ -740,6 +791,7 @@
   "name": "Wetware Annex Programme",
   "description": "A new annex off the plant room, with a floor drain and a risk assessment. Unlocks the OC-1 Organoid Cabinet and the Nutrient Medium Plant, and lets you lay nutrient pipe like coolant.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 3,
   "cost": 4200,
   "requires": [
@@ -757,6 +809,7 @@
   "name": "Sterile Protocols",
   "description": "Gowning, wash-down and a laminated chart. Unlocks the Sterile Bay.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 4,
   "cost": 12000,
   "requires": [
@@ -774,6 +827,7 @@
   "name": "Quarantine Procedure",
   "description": "Doors that interlock before you finish the sentence. Unlocks the Quarantine Lock.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 4,
   "cost": 12500,
   "requires": [
@@ -791,6 +845,7 @@
   "name": "Disposal Licence",
   "description": "A permit with a very short distribution list. Unlocks the Biomass Disposal Suite.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 4,
   "cost": 13000,
   "requires": [
@@ -808,6 +863,7 @@
   "name": "DNA Archive Licence",
   "description": "Storage that grows its own shelves. Unlocks the DNA Storage Vault: 16,000 TB per cabinet.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 4,
   "cost": 13000,
   "requires": [
@@ -825,6 +881,7 @@
   "name": "Bio-Reactor Permit",
   "description": "Power from fermentation, under licence 41-C. Unlocks the Bio-Reactor BR-500: 500 kW for 14 units of nutrient medium a tick.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 4,
   "cost": 14000,
   "requires": [
@@ -843,6 +900,7 @@
   "name": "Neural Vat Dossier",
   "description": "Forty pages, none of them dated. Unlocks the OC-4 Neural Vat: 460 PFLOPS per vat.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 5,
   "cost": 42000,
   "requires": [
@@ -862,6 +920,7 @@
   "name": "Tissue Scaffolds",
   "description": "Lattices that keep the tissue where it was put. Rack failure rate -7%.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 5,
   "cost": 20000,
   "requires": [
@@ -886,6 +945,7 @@
   "name": "Asset Register",
   "description": "Everything the Authority now considers yours, indexed. Research points earned +10%.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 5,
   "cost": 22000,
   "requires": [
@@ -910,6 +970,7 @@
   "name": "Works Foreman",
   "description": "An automated build planner. Switches on the Works Foreman: once ordered, it builds racks, cooling and spare power where the capacity model says you are short, at most 1 facility per game-hour.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 1,
   "cost": 1200,
   "requires": [
@@ -932,6 +993,7 @@
   "name": "Fleet Policy Update",
   "description": "A policy document the bots have, against expectations, begun to read. Bot walking and flying speed +8%. The Works Foreman places 2 facilities per game-hour instead of 1.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 3,
   "cost": 3600,
   "requires": [
@@ -959,6 +1021,7 @@
   "name": "Solar Charter",
   "description": "Roof and wall rights for photovoltaics. Unlocks the PV Wall Panels 150 kW: 150 kW at noon on a clear day, nothing at night.",
   "branch": "power",
+  "lane": "green",
   "minTier": 3,
   "cost": 3400,
   "requires": [
@@ -976,6 +1039,7 @@
   "name": "Wind Mast Permit",
   "description": "Planning consent for a mast on an upper floor. Unlocks the Wind Mast WM-300: up to 300 kW, on the third floor or above.",
   "branch": "power",
+  "lane": "green",
   "minTier": 3,
   "cost": 3600,
   "requires": [
@@ -993,6 +1057,7 @@
   "name": "District Heat Agreement",
   "description": "Your waste heat is formally recognised as saleable. Unlocks the Heat Recovery Unit 400 kW: 400 kW of heat sold at $3 a kWh.",
   "branch": "power",
+  "lane": "green",
   "minTier": 3,
   "cost": 3800,
   "requires": [
@@ -1010,6 +1075,7 @@
   "name": "Algae Cultivation Licence",
   "description": "Permission to grow algae on the building envelope. Unlocks the Algae Bioreactor Facade: 160 carbon credits a day.",
   "branch": "power",
+  "lane": "green",
   "minTier": 3,
   "cost": 3500,
   "requires": [
@@ -1027,6 +1093,7 @@
   "name": "Canopy Array Study",
   "description": "Load calculations for a roof-mounted panel field. Unlocks the PV Roof Canopy 420 kW: 420 kW at noon on a clear day.",
   "branch": "power",
+  "lane": "green",
   "minTier": 5,
   "cost": 32000,
   "requires": [
@@ -1046,6 +1113,7 @@
   "name": "Heat Link Franchise",
   "description": "An exclusive right to supply the district network. Unlocks the District Heat Link 1.6 MW: 1,600 kW of heat sold at $3 a kWh.",
   "branch": "power",
+  "lane": "green",
   "minTier": 5,
   "cost": 36000,
   "requires": [
@@ -1064,6 +1132,7 @@
   "name": "Carbon Capture Study",
   "description": "Proof that the carbon removed was carbon that was there. Unlocks the Carbon Capture Stack: 1,100 carbon credits a day.",
   "branch": "power",
+  "lane": "green",
   "minTier": 5,
   "cost": 34000,
   "requires": [
@@ -1082,6 +1151,7 @@
   "name": "Green Tariff",
   "description": "Every kilowatt-hour tracked by source and priced accordingly. Grid energy price -8%.",
   "branch": "power",
+  "lane": "green",
   "minTier": 5,
   "cost": 22000,
   "requires": [
@@ -1107,6 +1177,7 @@
   "name": "Photonic Bench Study",
   "description": "An optical bench and a long qualification run. Unlocks the PH-1 Photonic Rack: 480 PFLOPS from 40 kW.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 42000,
   "requires": [
@@ -1126,6 +1197,7 @@
   "name": "Cryo Chiller Study",
   "description": "A refrigeration schematic with a margin note reading \"colder\". Unlocks the Cryo Chiller CC-3000: 3,000 kW of heat removed at a COP of 16.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 36000,
   "requires": [
@@ -1144,6 +1216,7 @@
   "name": "Continuity of Service Spec",
   "description": "Certifies that the process which began is the process which ends. Unlocks the Continuity Monitor: 800 kW and 400 kWh of ride-through.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 30000,
   "requires": [
@@ -1162,6 +1235,7 @@
   "name": "Backup Vault Charter",
   "description": "Cold storage for everything that should not be lost, and some things that should. Unlocks the Process Backup Vault: 20,000 TB.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 30000,
   "requires": [
@@ -1180,6 +1254,7 @@
   "name": "Mind Lattice Dossier",
   "description": "A specification for a rack that would prefer to be called a resident. Unlocks the ML-1 Mind Lattice Rack: 700 PFLOPS from 220 kW. Research points earned +10%, from the register of every hosted process.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 44000,
   "requires": [
@@ -1205,6 +1280,7 @@
   "name": "Continuity Policy",
   "description": "No process is ever finished, only archived. Rack failure rate -8%.",
   "branch": "compute",
+  "lane": "syn",
   "minTier": 5,
   "cost": 24000,
   "requires": [
@@ -1230,6 +1306,7 @@
   "name": "Culture Media Procurement",
   "description": "A standing order for broth, agar and a lockable fridge. Rack failure rate -3%. Required before the Wetware Annex.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 2,
   "cost": 1150,
   "requires": [
@@ -1253,6 +1330,7 @@
   "name": "Fleet Command Desk",
   "description": "A rota, a radio and a whiteboard for the bots. Unlocks the Fleet Coordinator Bot: carries 5 spare parts a trip and works a repair in 14 ticks.",
   "branch": "logistics",
+  "lane": "log",
   "minTier": 4,
   "cost": 12000,
   "requires": [
@@ -1271,6 +1349,7 @@
   "name": "Grid Autonomy Charter",
   "description": "Permission to disagree with the utility in writing. Unlocks the Grid Intake 20 MW.",
   "branch": "power",
+  "lane": "pow",
   "minTier": 5,
   "cost": 28000,
   "requires": [
@@ -1288,6 +1367,8 @@
   "name": "Immersion Vault Study",
   "description": "A sealed hall, a very large tank and an insurer who asked to be removed from the thread. Unlocks the IM-3 Vault Immersion Tank: 800 PFLOPS at 380 kW.",
   "branch": "cooling",
+  "lane": "cool",
+  "line": "immersion",
   "minTier": 5,
   "cost": 30000,
   "requires": [
@@ -1305,6 +1386,7 @@
   "name": "Authority Charter",
   "description": "The Compute Authority formally recognises research as an activity of the tower. Research points earned +20%.",
   "branch": "administration",
+  "lane": "adm",
   "minTier": 5,
   "cost": 26000,
   "requires": [
@@ -1328,6 +1410,7 @@
   "name": "Organoid Vat Programme",
   "description": "Cabinets scaled up to vats, with the same drain. Unlocks the OC-2 Organoid Vat Bank: 300 PFLOPS from 45 kW.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 5,
   "cost": 36000,
   "requires": [
@@ -1346,6 +1429,7 @@
   "name": "Synaptic Mesh",
   "description": "A grid of fine wire through the tissue, so that failures are noticed earlier than they happen. Rack failure rate -10%.",
   "branch": "wetware",
+  "lane": "wet",
   "minTier": 5,
   "cost": 32000,
   "requires": [
