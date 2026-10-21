@@ -1,5 +1,5 @@
 /**
- * The Datacenter Primer as data. Pure: chapters come from content, and unlocking is a function of the view.
+ * The Handbook chapters as data. Pure: chapters come from content, and unlocking is a function of the view.
  * Six core chapters (compact, under 170 words each, each ending in a "Speak the language" block), one "Making the most of Level N" per Level, one per path.
  */
 import type { AscensionPath, ContentDB, FacilityDef, Flavor } from "@aitower/content";
@@ -210,9 +210,9 @@ export function buildChapters(c: ContentDB): Chapter[] {
 	return [...core(c), ...levels, ...(["biotech", "greentech", "synthetic"] as const).map((p) => pathChapter(p, c))].map((ch) => (CHAPTER_FLAVOR[ch.id] ? { ...ch, flavor: CHAPTER_FLAVOR[ch.id] } : ch));
 }
 
-/** Old "More..." targets that now have a Primer chapter. */
+/** Old "More..." targets that now have a Handbook chapter. */
 const CHAPTER_OF: Record<string, string> = { "basics:power": "ch:power", "basics:cooling": "ch:heat", "basics:loops": "ch:heat", "basics:parts": "ch:break", "basics:reputation": "ch:uptime", "basics:money": "ch:money", "basics:level": "ch:uptime" };
-/** The Primer page that an encyclopedia-style id should open: a chapter if there is one, else the id itself. */
+/** The Handbook page that an encyclopedia-style id should open: a chapter if there is one, else the id itself. */
 export const primerTarget = (id: string): string => CHAPTER_OF[id] ?? id;
 
 /**

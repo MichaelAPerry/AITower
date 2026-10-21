@@ -505,7 +505,9 @@ export type LessonEffect =
 	/** A client job starts at once (inference; needs `pflops` sustained). */
 	| { type: "job"; pflops: number; durationTicks: number; payout: number }
 	/** The grid import is scaled by `factor` for `durationTicks` (0 = a tripped feeder). */
-	| { type: "gridCap"; factor: number; durationTicks: number; label: string };
+	| { type: "gridCap"; factor: number; durationTicks: number; label: string }
+	/** Component failures are scaled by `factor` for `durationTicks` (0 = nothing breaks). */
+	| { type: "failureRate"; factor: number; durationTicks: number; label: string };
 /** A scripted moment: fires once, the first tick every `when` holds. */
 export interface LessonBeat {
 	id: string;
@@ -554,7 +556,7 @@ export interface LessonDef {
 	scenario: string;
 	/** Speed the game runs at (the lesson sets it; the player may change it). */
 	speed: 1 | 3 | 10;
-	/** Effects applied when the lesson starts, before tick 0 (a permanent feeder limit, say). Only `gridCap` is supported. */
+	/** Effects applied when the lesson starts, before tick 0 (a permanent feeder limit, say). Only `gridCap` and `failureRate` are supported. */
 	setup?: LessonEffect[];
 	/** Command types the player may issue; any other is refused ("Not part of this lesson"). */
 	commands: string[];

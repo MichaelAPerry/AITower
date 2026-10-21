@@ -43,7 +43,7 @@ export interface CatalogItem {
 	costText: string;
 	blurb: string;
 	stats: Stat[];
-	/** Primer page for the "?" link. */
+	/** Handbook page for the "?" link. */
 	entry?: string;
 	def?: FacilityDef;
 	/** Tier, frame class, output bar and note (facilities only). */

@@ -21,7 +21,7 @@ export function lessonDef(state: SimState, content: ContentDB): LessonDef | unde
 /** Start a lesson on a fresh site: its setup effects (a feeder limit, say) apply from tick 0, before anything is drawn. */
 export function startLesson(state: SimState, def: LessonDef): void {
 	state.lesson = newLessonState(def, state.tick);
-	for (const e of def.setup ?? []) if (e.type === "gridCap") state.modifiers.push({ kind: "gridCap", value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
+	for (const e of def.setup ?? []) if (e.type === "gridCap" || e.type === "failureRate") state.modifiers.push({ kind: e.type, value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
 }
 
 export function newLessonState(def: LessonDef, tick: number): LessonState {
@@ -115,8 +115,8 @@ export function lessonBlocksCommand(state: SimState, content: ContentDB, type: s
 
 function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	const { state } = ctx;
-	if (e.type === "gridCap") {
-		state.modifiers.push({ kind: "gridCap", value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
+	if (e.type === "gridCap" || e.type === "failureRate") {
+		state.modifiers.push({ kind: e.type, value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
 		return;
 	}
 	const job: Job = {

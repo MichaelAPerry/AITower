@@ -12,7 +12,7 @@ import type { AdvisorAction, HandbookLink } from "./suggest";
 import { type Line, TIP_GAP_MS, TIP_SHOW_MS, answerFor, nextTip, tipCandidates } from "./talk";
 import "./advisors.css";
 
-/** Text with {{term|label}} markers: Terms are underlined and link to the Primer. */
+/** Text with {{term|label}} markers: Terms are underlined and link to the Handbook. */
 export function Say({ text }: { text: string }): ReactNode {
 	return (
 		<>

@@ -14,7 +14,7 @@ import "./handbook.css";
 
 const REF_TABS = SECTIONS.filter((s) => s.id !== "basics");
 
-/** Primer chapters, memoised per content. */
+/** Handbook chapters, memoised per content. */
 export const useChapters = (content: ContentDB): Chapter[] => useMemo(() => buildChapters(content), [content]);
 
 /** Live reading progress (shared with the unread dot and the prompt). */

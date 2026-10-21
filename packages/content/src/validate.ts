@@ -365,7 +365,7 @@ function validateLessons(p: Problems, db: ContentDB): void {
 				num(p, `${w}[${i}].pflops`, (e as { pflops?: unknown }).pflops, { gt: 0 });
 				num(p, `${w}[${i}].durationTicks`, (e as { durationTicks?: unknown }).durationTicks, { min: 1, int: true });
 				num(p, `${w}[${i}].payout`, (e as { payout?: unknown }).payout, { min: 0 });
-			} else if (t === "gridCap") {
+			} else if (t === "gridCap" || t === "failureRate") {
 				num(p, `${w}[${i}].factor`, (e as { factor?: unknown }).factor, { min: 0 });
 				num(p, `${w}[${i}].durationTicks`, (e as { durationTicks?: unknown }).durationTicks, { min: 1, int: true });
 				str(p, `${w}[${i}].label`, (e as { label?: unknown }).label);

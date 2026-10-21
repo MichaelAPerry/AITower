@@ -105,6 +105,14 @@ describe("lesson engine", () => {
 		expect(sim.view().lesson?.allowed).toEqual([]);
 	});
 
+	it("nothing breaks in the lesson hall: every seed finishes (a failed rack with no bots would end it)", () => {
+		for (let seed = 1; seed <= 24; seed++) {
+			const sim = createSim(content, "lesson_first_watt", seed);
+			play(sim, { wait: 2200 });
+			expect(lesson(sim).status, `seed ${seed}`).toBe("won");
+		}
+	});
+
 	it("does not pass without the generator, and never wins on a brownout", () => {
 		const sim = fresh();
 		play(sim, { genset: false, wait: 2000 });

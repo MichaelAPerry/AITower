@@ -11,6 +11,12 @@
 			"speed": 3,
 			"setup": [
 				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				},
+				{
 					"type": "gridCap",
 					"factor": 0.08,
 					"durationTicks": 100000000,
