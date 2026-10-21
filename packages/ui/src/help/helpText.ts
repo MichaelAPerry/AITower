@@ -18,6 +18,7 @@ export const HELP = {
 	inbox: { title: "Inbox", text: "Memos from the Compute Authority. Most are choices with a price. They never expire in a hurry, so read them when you are ready.", entry: "basics:memos" },
 	help: { title: "Help", text: "Turn help mode on or off. While it is on, hover any outlined part of the screen to see what it does. Press ? or F1.", entry: "basics:money" },
 	build: { title: "Build bar", text: "Pick a kind of thing to build: racks, power, cooling and more. One click opens its catalog. B opens the last one.", entry: "basics:power" },
+	maintenance: { title: "Upkeep", text: "Spare parts, bots busy out of total, broken racks waiting. Amber when parts run out or repairs queue; red when no bot can reach a broken rack. Click for Supplies.", entry: "basics:parts" },
 	catalog: { title: "Catalog", text: "Point at a card to read about it. Click a card to pick it, then click the tower to build. Esc puts the tool down.", entry: "basics:power" },
 	"build-inspector": { title: "Build inspector", text: "What the card under your pointer does, in plain words, with its real numbers. The ? button opens the Primer.", entry: "basics:power" },
 	goals: { title: "Goals", text: "The next one to three things to do, with progress. Do the top one and the card moves on.", entry: "basics:contracts" },

@@ -17,6 +17,9 @@ import { changeStanding } from "./standing";
 
 export const MEMO_HISTORY_LENGTH = 20;
 
+/** Does an unanswered memo that resolves to its default change reputation? Off while memos are being redesigned. */
+export const MEMO_TIMEOUT_COSTS_STANDING = false;
+
 export function eventDef(content: ContentDB, eventId: string): EventDef | undefined {
 	return content.events.find((e) => e.id === eventId);
 }
@@ -155,7 +158,9 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 function resolveNow(state: SimState, content: ContentDB, memo: Memo, def: EventDef, choice: EventChoice, auto: boolean, events: SimEvent[]): void {
 	state.memos = state.memos.filter((m) => m.id !== memo.id);
 	if (!auto) state.stats.memosAnswered++;
-	for (const e of choice.effects) applyEffect(state, content, e, events, def.title);
+	// Interim rule (until the advisor redesign): a memo that times out is filed under its default stamp without touching
+	// reputation, so a player at high speed is not punished for a memo they never saw. Money and modifiers still apply.
+	for (const e of choice.effects) if (!(auto && e.type === "standing" && !MEMO_TIMEOUT_COSTS_STANDING)) applyEffect(state, content, e, events, def.title);
 	state.memoHistory.push({ memoId: memo.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick, auto });
 	if (state.memoHistory.length > MEMO_HISTORY_LENGTH) state.memoHistory.splice(0, state.memoHistory.length - MEMO_HISTORY_LENGTH);
 	events.push({ type: "memoResolved", memoId: memo.id, eventId: def.id, choiceId: choice.id, auto });

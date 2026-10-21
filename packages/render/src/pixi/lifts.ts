@@ -141,6 +141,11 @@ export class Lifts {
 			// Direction lamp on the crosshead.
 			const on = moving && (opt.reducedMotion || Math.floor(t * 3) % 2 === 0);
 			lamp(g, x + 11, y - 5, l.dir === 0 ? T.amberDim : T.amber, on || l.dir === 0, 0.3);
+			// No power: the car is dark and its lamp blinks red (bots will not plan a trip through it).
+			if (l.powered === false) {
+				px(g, x + 2, y - 2, TILE - 4, h, T.ink, 0.5);
+				lamp(g, x + 11, y - 5, T.red, opt.reducedMotion || Math.floor(t * 2) % 2 === 0, 0.35);
+			}
 		}
 	}
 }

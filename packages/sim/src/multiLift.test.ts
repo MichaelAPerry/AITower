@@ -85,7 +85,7 @@ describe("multiple lifts", () => {
 		const n = failAll(sim);
 		expect(n).toBeGreaterThan(30);
 		settle(sim);
-		if (process.env.DBG) console.log(JSON.stringify({ lifts: sim.state.lifts.map((l) => ({ id: l.id, x: l.x, min: l.floorMin, max: l.floorMax, net: l.powerNet, sat: l.sat, car: l.carFloor, riders: l.riders })), bots: sim.state.bots.map((b) => ({ id: b.id, task: b.task, leg: b.leg, f: b.floor, x: b.x, lift: b.liftId, exit: b.exitFloor, gf: b.goalFloor, fails: b.fails, retryAt: b.retryAt, bat: b.battery })), tick: sim.state.tick, wo: sim.state.workOrders.length, parts: sim.state.spareParts }));
+		if (process.env.DBG) console.log(JSON.stringify({ lifts: sim.state.lifts.map((l) => ({ id: l.id, x: l.x, min: l.floorMin, max: l.floorMax, net: l.powerNet, sat: l.sat, car: l.carFloor, riders: l.riders })), bots: sim.state.bots.map((b) => ({ id: b.id, task: b.task, leg: b.leg, f: b.floor, x: b.x, lift: b.liftId, exit: b.exitFloor, gf: b.goalFloor, fails: b.fails, retryAt: b.retryAt, bat: b.battery })), tick: sim.state.tick, wo: sim.state.workOrders.length }));
 		expect(broken(sim)).toBe(0);
 	});
 
@@ -101,6 +101,15 @@ describe("multiple lifts", () => {
 		failAll(sim);
 		settle(sim, 3000);
 		expect(broken(sim)).toBeGreaterThan(0); // upper floors unreachable so far
+		// ... and the view says so: orders on floors above the shaft are "noRoute", the rest are served.
+		const v = sim.view();
+		const above = (id: number) => (sim.state.facilities.find((f) => f.id === id)?.floor ?? 0) > 3;
+		expect(v.workOrders.length).toBeGreaterThan(0);
+		for (const w of v.workOrders) expect(w.route, `order on F${sim.state.facilities.find((f) => f.id === w.facilityId)?.floor}`).toBe(above(w.facilityId) ? "noRoute" : "ok");
+		expect(v.maintenance.noRoute).toBe(v.workOrders.filter((w) => above(w.facilityId)).length);
+		expect(v.maintenance.noRoute).toBeGreaterThan(0);
+		expect(v.workOrders.filter((w) => w.queuePos !== null).map((w) => w.queuePos)).toEqual(v.workOrders.filter((w) => w.queuePos !== null).map((_, i) => i + 1));
+		expect(v.lifts.every((l) => l.powered)).toBe(true);
 		const r = sim.submit({ type: "buildLift", x: 24, floorMin: 3, floorMax: 8 });
 		expect(r.ok).toBe(true);
 		settle(sim);

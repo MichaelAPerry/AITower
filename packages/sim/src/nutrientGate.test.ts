@@ -19,7 +19,7 @@ describe("nutrient piping is gated by the research that unlocks the nutrient pla
 		sim.invalidateProjection();
 		expect(sim.canBuild(cmd).ok).toBe(true);
 		// Power piping is never gated.
-		expect(sim.canBuild({ type: "buildConduit", layer: "power", cells: [{ x: 12, floor: 0 }] }).ok).toBe(true);
+		expect(sim.canBuild({ type: "buildConduit", layer: "power", cells: [{ x: 2, floor: 0 }] }).ok).toBe(true);
 	});
 
 	it("coolant piping needs the research that unlocks liquid cooling, and placed pipe stays", () => {

@@ -3,7 +3,10 @@
  * entity arrays are rebuilt small each call.
  */
 import type { BotDef, ContentDB } from "@aitower/content";
-import type { BotState, BotView, FacilityView, JobView, MemoView, SimView } from "../api";
+import type { BotState, BotView, FacilityView, JobView, MaintenanceView, MemoView, SimView, WorkOrderView } from "../api";
+import { MIN_POWERED_SATISFACTION } from "../core/constants";
+import { cellCount, findById } from "../core/grid";
+import { createNav, type Nav, reachableRuns, runAtTile } from "../logistics/routing";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
@@ -12,7 +15,7 @@ import { facilityContamination } from "../bio/index";
 import { leadingEnding } from "../bio/path";
 import { eventDef } from "../ministry/memos";
 import { modFactor } from "../ministry/modifiers";
-import { getDef } from "../world/defs";
+import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
 import { clerkUnlocked, foremanPerHour, foremanUnlocked, perk, researchedCount } from "../research/research";
 import { cloneAutomation } from "../automation/policy";
@@ -66,7 +69,37 @@ function tierNeed(state: SimState, content: ContentDB): SimView["tierNeed"] {
 	return { tier: i + 1, pflops: t.pflops[i], uptime: t.uptime[i], techs: t.techs?.[i] ?? 0, techsDone: researchedCount(state, content) };
 }
 
-export function buildView(state: SimState, content: ContentDB): SimView {
+/** Where the maintenance view caches its reach search (one per tick; owned by the sim). */
+export interface ReachCache {
+	tick: number;
+	rev: number;
+	runs: Set<number> | null;
+}
+
+function maintenanceViews(state: SimState, content: ContentDB, nav: Nav, cache: ReachCache, spareParts: number): { orders: WorkOrderView[]; summary: MaintenanceView } {
+	let partsCapacity = 0;
+	for (const f of state.facilities) if (getDef(content, f.defId).kind === "depot") partsCapacity += getDef(content, f.defId).logistics?.capacity ?? 0;
+	if (state.workOrders.length > 0 && (cache.tick !== state.tick || cache.rev !== state.topologyRev)) {
+		cache.runs = reachableRuns(state, content, nav);
+		cache.tick = state.tick;
+		cache.rev = state.topologyRev;
+	}
+	let queue = 0;
+	let noRoute = 0;
+	const orders = state.workOrders.map((w): WorkOrderView => {
+		const rack = findById(state.facilities, w.facilityId);
+		let route: WorkOrderView["route"] = "ok";
+		if (state.bots.length === 0) route = "noBots";
+		else if (rack && cache.runs !== null && !cache.runs.has(runAtTile(nav, state, rack.floor, serviceTile(rack)))) route = "noRoute";
+		if (route === "noRoute") noRoute++;
+		return { id: w.id, facilityId: w.facilityId, botId: w.botId >= 0 ? w.botId : null, createdAt: w.createdAt, queuePos: w.botId >= 0 ? null : ++queue, route };
+	});
+	let busy = 0;
+	for (const b of state.bots) if (b.workOrderId >= 0 || b.task === "depot" || b.task === "target" || b.task === "repair") busy++;
+	return { orders, summary: { parts: spareParts, partsCapacity, botsTotal: state.bots.length, botsBusy: busy, botsIdle: state.bots.length - busy, waiting: queue, noRoute } };
+}
+
+export function buildView(state: SimState, content: ContentDB, nav: Nav = createNav(cellCount(state)), cache: ReachCache = { tick: -1, rev: -1, runs: null }): SimView {
 	const m = state.metrics;
 	const facilities: FacilityView[] = state.facilities.map((f) => {
 		const d = getDef(content, f.defId);
@@ -105,6 +138,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		carrying: b.carrying,
 		workOrderId: b.workOrderId >= 0 ? b.workOrderId : null,
 		trait: b.trait,
+		parts: b.carrying ? Math.max(1, b.parts) : 0,
 	}));
 	const jobs: JobView[] = state.jobs.map((j) => ({
 		id: j.id,
@@ -122,6 +156,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 	}));
 	let spareParts = 0;
 	for (const f of state.facilities) spareParts += f.stored;
+	const upkeep = maintenanceViews(state, content, nav, cache, spareParts);
 	return {
 		tick: state.tick,
 		day: dayOf(state.tick),
@@ -163,6 +198,7 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 			dir: l.dir,
 			doorsOpen: l.doorsOpen,
 			riders: l.riders.length,
+			powered: l.powerNet >= 0 && l.sat >= MIN_POWERED_SATISFACTION,
 		})),
 		bots,
 		powerNets: state.powerNets.map((n) => ({
@@ -177,12 +213,8 @@ export function buildView(state: SimState, content: ContentDB): SimView {
 		coolantNets: state.coolantNets.map((n) => ({ ...n })),
 		offers: state.offers.map((o) => ({ ...o.spec, id: o.id, expiresAt: o.expiresAt })),
 		jobs,
-		workOrders: state.workOrders.map((w) => ({
-			id: w.id,
-			facilityId: w.facilityId,
-			botId: w.botId >= 0 ? w.botId : null,
-			createdAt: w.createdAt,
-		})),
+		workOrders: upkeep.orders,
+		maintenance: upkeep.summary,
 		cash: state.cash,
 		spareParts,
 		tier: state.tier,

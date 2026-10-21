@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoTicksLeft, memoToPop, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
+import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoNeedsPause, memoTicksLeft, memoToPop, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
 
 const content = createFakeContent();
 
@@ -101,5 +101,17 @@ describe("memo flow on the fake store (mirrors the sim)", () => {
 		store.dispatch({ type: "resolveMemo", memoId: b, choiceId: "comply" });
 		store.advance(1);
 		expect(historyRows(store.get().view, content).map((r) => r.memoId)).toEqual([b, a]);
+	});
+});
+
+describe("memo auto-pause", () => {
+	it("pauses only for a memo not seen before, and only above 3x", () => {
+		const memos = [{ id: 1 }, { id: 2 }];
+		expect(memoNeedsPause(new Set([1]), memos, 10)).toBe(true);
+		expect(memoNeedsPause(new Set([1]), memos, 30)).toBe(true);
+		expect(memoNeedsPause(new Set([1]), memos, 3)).toBe(false);
+		expect(memoNeedsPause(new Set([1]), memos, 1)).toBe(false);
+		expect(memoNeedsPause(new Set([1, 2]), memos, 30)).toBe(false);
+		expect(memoNeedsPause(new Set(), [], 30)).toBe(false);
 	});
 });

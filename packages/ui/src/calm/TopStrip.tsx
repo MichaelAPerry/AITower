@@ -9,7 +9,7 @@ import { saveLamp } from "../menu/slots";
 import { PathGauge } from "../paths/PathGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
 import { currentObjective, isProblem } from "../objective/objective";
-import { clearanceProgress, fmtRateHour, nextDrawer, perHour } from "./calm";
+import { clearanceProgress, fmtRateHour, maintenanceReadout, nextDrawer, perHour } from "./calm";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
@@ -27,6 +27,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	// Before the first contract the red figure is only upkeep: say so, in words.
 	// ...and the hint yields the top centre to a NEXT alert.
 	const nextShown = isProblem(currentObjective(view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null));
+	const maint = maintenanceReadout(view);
 	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running") && !nextShown;
 	return (
 		<header className="ui-strip">
@@ -51,6 +52,20 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				<span className="ui-big">{fmtRateHour(rate)}</span>
 				{idleCost && <span className="ui-hint">Upkeep. Accept a contract to earn.</span>}
 			</div>
+			{maint && (
+				<button
+					type="button"
+					className={`ui-chip ui-maint ${maint.tone === "red" ? "is-bad" : maint.tone === "amber" ? "is-warn" : ""}`}
+					data-help="maintenance"
+					title={maint.title}
+					onClick={() => setUi({ paletteOpen: true, paletteTab: "supplies" })}
+				>
+					<span className="ui-label">UPKEEP</span>
+					<span className="ui-big">
+						{maint.parts} parts · {maint.bots} bots · {maint.repairs} to fix
+					</span>
+				</button>
+			)}
 			<div className="ui-clearance" data-tut="clearance" data-help="level" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)${cl.techs > 0 ? `; ${cl.techsDone} of ${cl.techs} research nodes done` : ""}` : "Top level reached"}>
 				<span className="ui-label">
 					<span>LEVEL {cl.tier}</span>

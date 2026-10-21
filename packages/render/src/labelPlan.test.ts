@@ -23,6 +23,24 @@ describe("statusWord", () => {
 	});
 });
 
+describe("broken racks say where they stand in the repair queue", () => {
+	it("queue place, a bot on the way, and above all no route", () => {
+		expect(statusWord("failed", true, { queuePos: 2, route: "ok" })?.word).toBe("BROKEN #2");
+		expect(statusWord("failed", true, { queuePos: null, route: "ok" })).toMatchObject({ word: "FIXING", tone: "warn" });
+		expect(statusWord("failed", true, { queuePos: 1, route: "noRoute" })).toMatchObject({ word: "NO ROUTE", tone: "fault" });
+		expect(statusWord("failed", true, { queuePos: 1, route: "noBots" })?.word).toBe("NO BOTS");
+		expect(statusWord("failed")?.word).toBe("BROKEN"); // no work order known
+		expect(statusWord("ok", true, { queuePos: 1, route: "noRoute" })).toBeNull(); // only broken racks
+	});
+	it("planTags uses the repair info per rack, so a row does not collapse into one word", () => {
+		const repair = (id: number) => (id === 1 ? { queuePos: 1, route: "ok" as const } : { queuePos: 2, route: "ok" as const });
+		const t = planTags([fac(1, 0, { status: "failed" }), fac(2, 2, { status: "failed" })], name, repair);
+		expect(t.map((x) => x.text)).toEqual(["BROKEN #1", "BROKEN #2"]);
+		const nr = planTags([fac(1, 0, { status: "failed" }), fac(2, 2, { status: "failed" })], name, () => ({ queuePos: 1, route: "noRoute" }));
+		expect(nr).toEqual([{ text: "NO ROUTE", tone: "fault", cx: 2, floor: 0 }]);
+	});
+});
+
 describe("planTags", () => {
 	it("one name tag per run of the same type, centred on the run", () => {
 		const t = planTags([fac(1, 0), fac(2, 2), fac(3, 4)], name);

@@ -21,9 +21,9 @@ import { cellCount, cellIdx } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
 import { dayCosts } from "../economy/ledger";
-import { beginSearch, createNav, ensureNav, type Nav, routeTo } from "../logistics/routing";
+import { createNav, type Nav, reachableRuns } from "../logistics/routing";
 import { findChargerWithSpace } from "../world/entities";
-import { getDef, isComputeRack, serviceTile } from "../world/defs";
+import { getDef, isComputeRack } from "../world/defs";
 import { planNormalized } from "../commands/apply";
 import { buildable, runCommand } from "./run";
 import { foremanPerHour } from "../research/research";
@@ -46,39 +46,6 @@ interface Run {
 	addedPflops: number;
 	/** Slab runs bots can reach (computed on first use; the Foreman builds no lifts or slab, so it holds for the run). */
 	reach?: Set<number> | null;
-}
-
-/**
- * Slab runs (ids from the nav graph) a ground bot can actually path to: searched from every distinct run a bot stands
- * on (from the chargers when there are no bots yet), through the real lift graph (powered lifts only, shaft to shaft only
- * where the slab connects them). `null` means every run (a flying bot exists).
- */
-export function reachableRuns(state: SimState, content: ContentDB, nav: Nav): Set<number> | null {
-	if (state.bots.some((b) => content.bots[b.defId]?.flying)) return null;
-	ensureNav(nav, state, content);
-	const sources: { floor: number; x: number }[] = [];
-	const seen = new Set<number>();
-	const add = (floor: number, x: number): void => {
-		if (!Number.isInteger(floor) || floor < state.floorMin || floor > state.floorMax) return;
-		const run = nav.run[cellIdx(state, Math.round(x), floor)];
-		if (run < 0 || seen.has(run)) return;
-		seen.add(run);
-		sources.push({ floor, x });
-	};
-	for (const b of state.bots) if (b.leg !== "ride") add(Math.round(b.floor), b.x);
-	if (sources.length === 0) for (const c of nav.chargers) add(c.floor, serviceTile(c));
-	const out = new Set<number>();
-	for (const s of sources) {
-		beginSearch(nav, state, content, 1, s.floor, s.x);
-		for (let fl = state.floorMin; fl <= state.floorMax; fl++) {
-			for (let x = 0; x < state.width; x++) {
-				const run = nav.run[cellIdx(state, x, fl)];
-				if (run < 0 || out.has(run)) continue;
-				if (routeTo(nav, state, fl, x)) out.add(run);
-			}
-		}
-	}
-	return out;
 }
 
 /** Floors with at least one slab run a ground bot can path to (every floor when a flying bot exists). */

@@ -2,7 +2,7 @@
  * Plain-language copy and numbers for the Build catalog and its Inspector. Pure: no React, so it is unit-tested.
  * Every number comes from content; only the wording is written here.
  */
-import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
+import { conduitTech, type BuildCategory, type ContentDB, type FacilityDef } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
 import { bandText } from "../bio/bio";
@@ -164,6 +164,13 @@ export function facilityItem(def: FacilityDef): CatalogItem {
 		entry: `fac:${def.id}`,
 		def,
 	};
+}
+
+/** The research a structure tool still waits for (coolant and nutrient piping), or undefined when it is open. */
+export function structureGate(item: CatalogItem, view: SimView, content: ContentDB): string | undefined {
+	if (item.tool.kind !== "conduit") return undefined;
+	const tech = conduitTech(content, item.tool.layer);
+	return tech && techGate(tech, view, content) ? tech : undefined;
 }
 
 /** The tech/level reason a facility cannot be built yet, or null. */

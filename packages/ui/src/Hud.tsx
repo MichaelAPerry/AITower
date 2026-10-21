@@ -3,6 +3,7 @@ import type { GameStore } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PanelProps, UiState } from "./components/context";
+import { CursorHint } from "./components/CursorHint";
 import { DesktopNotice } from "./components/DesktopNotice";
 import { Inspector } from "./components/Inspector";
 import { Toasts } from "./components/Toasts";
@@ -28,13 +29,13 @@ import { Tutorial } from "./tutorial/Tutorial";
 import { Assistant } from "./assistant/Assistant";
 import { PrimerPrompt } from "./primer/PrimerPrompt";
 import { suggestions } from "./assistant/suggest";
+import { initialHeatWatch, watchHeat, type HeatWatch } from "./objective/heat";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
 import { newSaveError } from "./menu/slots";
 import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
-import { conduitName } from "./tools/controller";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
 // After ui.css, so these can refine its base rules.
@@ -176,7 +177,12 @@ export function Hud({ store, content, title }: HudProps) {
 
 	// UNIT-7: candidates come from the pure helper. (No Recommended row in the catalog: it repeated items across categories.)
 	const assistantOn = settings.assistant !== false;
-	const candidates = useMemo(() => (assistantOn ? suggestions(state.view, content) : []), [assistantOn, state.view, content]);
+	// Heat tips wait for the heat to last (HeatWatch), so a momentary blip over the line stays quiet.
+	const heat = useRef<HeatWatch>(initialHeatWatch());
+	const candidates = useMemo(() => {
+		heat.current = watchHeat(heat.current, state.view, content);
+		return assistantOn ? suggestions(state.view, content, heat.current.confirmed) : [];
+	}, [assistantOn, state.view, content]);
 	const openResearch = useCallback(
 		(techId?: string) => {
 			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
@@ -200,7 +206,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<Toasts content={content} state={state} />
 				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
-				{state.tool.kind !== "select" && <ToolHint {...props} />}
+				<CursorHint state={state} />
 				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<PalettePopover {...props} />
 				<BuildBar ui={ui} setUi={setUi} />
@@ -263,29 +269,5 @@ export function Hud({ store, content, title }: HudProps) {
 			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "primer", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 		</TermProvider>
-	);
-}
-
-function ToolHint({ content, state }: PanelProps) {
-	const t = state.tool;
-	const what =
-		t.kind === "place"
-			? `Placing ${content.facilities[t.defId]?.name ?? t.defId} — click to build`
-			: t.kind === "slab"
-				? "Slab — drag along a floor"
-				: t.kind === "conduit"
-					? `${conduitName(t.layer)} — drag across, then up/down`
-					: t.kind === "lift"
-						? "Lift — drag vertically on a column"
-						: t.kind === "demolish"
-							? "Demolish — click or drag over cells"
-							: "";
-	return (
-		<div className="ui-toolhint ui-panel">
-			<span className="ui-lamp lamp-red is-lit is-blink" />
-			<span className="ui-dymo">TOOL ARMED</span>
-			{what}
-			<span className="ui-dim"> · Esc / right-click to exit</span>
-		</div>
 	);
 }

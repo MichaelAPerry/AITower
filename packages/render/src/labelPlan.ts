@@ -12,8 +12,15 @@ export interface StatusWord {
 	tone: Exclude<TagTone, "name">;
 }
 
+/** Where a broken rack stands in the repair queue (from the sim's work order for it). */
+export interface RepairInfo {
+	/** 1-based place among orders no bot has taken, or null once a bot has one. */
+	queuePos: number | null;
+	route: "ok" | "noRoute" | "noBots";
+}
+
 /** The plain word for a facility that is not ok, or null when it is fine. NEXT explains why; this shows where. */
-export function statusWord(status: FacilityStatus, enabled = true): StatusWord | null {
+export function statusWord(status: FacilityStatus, enabled = true, repair?: RepairInfo): StatusWord | null {
 	if (!enabled || status === "disabled") return { word: "OFF", tone: "dim" };
 	switch (status) {
 		case "ok":
@@ -35,6 +42,10 @@ export function statusWord(status: FacilityStatus, enabled = true): StatusWord |
 		case "tripped":
 			return { word: "TRIPPED", tone: "fault" };
 		case "failed":
+			if (repair?.route === "noRoute") return { word: "NO ROUTE", tone: "fault" }; // no bot can get there: a lift is missing, unpowered or not joined
+			if (repair?.route === "noBots") return { word: "NO BOTS", tone: "fault" };
+			if (repair && repair.queuePos !== null) return { word: `BROKEN #${repair.queuePos}`, tone: "fault" };
+			if (repair) return { word: "FIXING", tone: "warn" }; // a bot has the order
 			return { word: "BROKEN", tone: "fault" };
 	}
 }
@@ -71,7 +82,7 @@ export function fitName(name: string, tiles: number): string {
  * facilities of the same type. A run with an amber or red word in it gets no name tag (the word takes the line).
  * Quiet words (IDLE, OFF) are never shown in the world. Name tags are only drawn on hover and in help mode (the renderer decides).
  */
-export function planTags(facilities: readonly TagFacility[], nameOf: (defId: string) => string | undefined): Tag[] {
+export function planTags(facilities: readonly TagFacility[], nameOf: (defId: string) => string | undefined, repairOf?: (facilityId: number) => RepairInfo | undefined): Tag[] {
 	const out: Tag[] = [];
 	const sorted = facilities.slice().sort((a, b) => a.floor - b.floor || a.x - b.x);
 	let run: TagFacility[] = [];
@@ -80,7 +91,7 @@ export function planTags(facilities: readonly TagFacility[], nameOf: (defId: str
 		const first = run[0];
 		const last = run[run.length - 1];
 		const name = nameOf(first.defId);
-		const words = run.map((f) => statusWord(f.status, f.enabled));
+		const words = run.map((f) => statusWord(f.status, f.enabled, f.status === "failed" ? repairOf?.(f.id) : undefined));
 		// One word for the whole run when every member shares it (a row of racks all without power reads as one fact).
 		const w0 = words[0];
 		if (w0 && w0.tone !== "dim" && run.length > 1 && words.every((w) => w?.word === w0.word)) {

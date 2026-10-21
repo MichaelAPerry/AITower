@@ -3,7 +3,7 @@ import type { GameState } from "@aitower/shared";
 import { describe, expect, it } from "vitest";
 import { activeHint, buildPhase, HINTS, TUTORIAL_STEPS, type TutorialUi, baselineOf } from "./steps";
 
-const content = { facilities: { rack_air_gpu: { kind: "rack" }, crah_unit: { kind: "crah" } } } as unknown as ContentDB;
+const content = { facilities: { rack_air_gpu: { kind: "rack", rack: { pflops: 20, cooling: "air" } }, crah_unit: { kind: "crah" } }, balance: { thermal: { okC: 80 } } } as unknown as ContentDB;
 const ctx = { content };
 
 function state(p: { offers?: number; speed?: number; overlay?: string; racks?: number; jobs?: number[]; pflops?: number; slabF2?: boolean; powerF2?: boolean; select?: number | null; ledger?: { revenue: number; costs: number }; status?: string; memos?: number }): GameState {
@@ -16,7 +16,7 @@ function state(p: { offers?: number; speed?: number; overlay?: string; racks?: n
 	if (p.powerF2) power[(2 - floorMin) * width + 1] = 1;
 	const facilities = [
 		{ id: 100, defId: "crah_unit" },
-		...Array.from({ length: p.racks ?? 4 }, (_, i) => ({ id: i + 1, defId: "rack_air_gpu", enabled: true, status: p.status ?? "ok", x: 12, floor: 1 })),
+		...Array.from({ length: p.racks ?? 4 }, (_, i) => ({ id: i + 1, defId: "rack_air_gpu", enabled: true, status: p.status ?? "ok", tempC: p.status === "throttled" ? 90 : 40, x: 12, floor: 1 })),
 	];
 	return {
 		speed: p.speed ?? 1,

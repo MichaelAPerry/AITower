@@ -38,7 +38,7 @@ import { SNAPSHOT_VERSION } from "./snapshot/migrate";
 import { hashValue } from "./snapshot/hash";
 import { airFieldStep } from "./thermal/airField";
 import { rackThermalStep } from "./thermal/rackThermal";
-import { buildView } from "./view/view";
+import { buildView, type ReachCache } from "./view/view";
 import { createState } from "./world/init";
 
 export { SNAPSHOT_VERSION };
@@ -150,8 +150,10 @@ export class SimImpl implements Sim {
 		return events;
 	}
 
+	private readonly reachCache: ReachCache = { tick: -1, rev: -1, runs: null };
+
 	view(): SimView {
-		return buildView(this.state, this.content);
+		return buildView(this.state, this.content, this.scratch.nav, this.reachCache);
 	}
 
 	snapshot(): SimSnapshot {

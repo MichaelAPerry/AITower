@@ -206,6 +206,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		offers: [],
 		jobs: [],
 		workOrders: [],
+		maintenance: { parts: 0, partsCapacity: 0, botsTotal: 0, botsBusy: 0, botsIdle: 0, waiting: 0, noRoute: 0 },
 		cash: 3_000_000,
 		spareParts: 4,
 		tier: 1,
