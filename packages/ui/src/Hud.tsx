@@ -6,6 +6,7 @@ import type { PanelProps, UiState } from "./components/context";
 import { CursorHint } from "./components/CursorHint";
 import { DesktopNotice } from "./components/DesktopNotice";
 import { Inspector } from "./components/Inspector";
+import { LevelUpCard } from "./levelup/LevelUpCard";
 import { Toasts } from "./components/Toasts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
@@ -47,6 +48,7 @@ import "./calm/calm.css";
 import "./calm/theme.css";
 import { TermProvider } from "./glossary/Term";
 import "./build/build.css";
+import "./build/tier.css";
 import "./panel/panel.css";
 import "./help/help.css";
 
@@ -204,6 +206,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<GoalsCard state={state} content={content} />
 				<NextChip {...props} />
 				<Toasts content={content} state={state} />
+				<LevelUpCard content={content} state={state} />
 				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
 				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<CursorHint state={state} />

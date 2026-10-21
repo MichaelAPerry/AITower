@@ -2,6 +2,7 @@
  * Plain-language copy and grouping for the Research panel. Pure: no React, so it is unit-tested.
  * Every number comes from content or the view; only the wording is written here.
  */
+import { type TierView, tierView } from "../build/tier";
 import type { AscensionPath, ContentDB, TechBranch, TechNode } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { plainBlurb, plainStats } from "../build/plain";
@@ -162,12 +163,12 @@ export function whyText(node: TechNode, content: ContentDB): string {
 }
 
 /** The "What you get" lines: each unlocked machine or bot with its real numbers, then the perks. */
-export function getLines(node: TechNode, content: ContentDB): { title: string; sub: string }[] {
-	const out: { title: string; sub: string }[] = [];
+export function getLines(node: TechNode, content: ContentDB): { title: string; sub: string; tier?: TierView }[] {
+	const out: { title: string; sub: string; tier?: TierView }[] = [];
 	for (const f of Object.values(content.facilities)) {
 		if (f.tech !== node.id) continue;
 		const key = plainStats(f).filter((s) => s.label !== "Size" && s.label !== "Costs").slice(0, 2);
-		out.push({ title: `Build: ${f.name}`, sub: [plainBlurb(f), ...key.map((s) => `${s.label} ${s.value}.`)].join(" ") });
+		out.push({ title: `Build: ${f.name}`, tier: tierView(f, content), sub: [plainBlurb(f), ...key.map((s) => `${s.label} ${s.value}.`)].join(" ") });
 	}
 	for (const b of Object.values(content.bots)) {
 		if (b.tech !== node.id) continue;

@@ -94,7 +94,7 @@ describe("perf", () => {
 			research: { enabled: true, branches: [] },
 			parts: { enabled: true, keep: 10 },
 			bots: { enabled: true, racksPerBot: 12, maxBots: 40 },
-			foreman: { enabled: true, reserve: 0, racks: true, cooling: true, power: true },
+			foreman: { enabled: true, reserve: 0, racks: true, cooling: true, power: true, rackLine: "auto", rackCap: "auto", coolingCap: "auto", powerCap: "auto" },
 		};
 		sim.state.cash = 1e12; // the Foreman has something to spend, so its placement path really runs
 		const before = sim.state.facilities.length;

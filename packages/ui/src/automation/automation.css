@@ -108,3 +108,28 @@
 	align-self: center;
 	min-height: 0;
 }
+
+.aitower-hud .ui-auto-spec {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	width: 100%;
+}
+.aitower-hud .ui-auto-cap {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.aitower-hud .ui-auto-status {
+	list-style: none;
+	margin: 4px 0 0;
+	padding: 6px 8px;
+	width: 100%;
+	border-left: 2px solid var(--accent);
+	background: color-mix(in srgb, var(--accent) 6%, transparent);
+	font: 400 12px/1.4 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .ui-auto-status li + li {
+	margin-top: 3px;
+}

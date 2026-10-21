@@ -78,3 +78,10 @@ export function rackLine(def: FacilityDef): RackLine | null {
 	if (!c || def.rack!.pflops <= 0) return null;
 	return c === "air" ? "air" : c === "dlc" ? "liquid" : c === "immersion" ? "immersion" : null;
 }
+
+/** What a Level opens: the buildable facilities whose `unlockTier` is exactly `level` (cheapest first), for the level-up card. */
+export function levelUnlocks(content: Pick<ContentDB, "facilities">, level: number): FacilityDef[] {
+	return Object.values(content.facilities)
+		.filter((d) => d.unlockTier === level && !d.growth && !d.retired)
+		.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id));
+}

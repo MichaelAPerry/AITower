@@ -1,0 +1,45 @@
+.aitower-hud .lvl-card {
+	position: absolute;
+	top: 64px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: min(420px, calc(100% - 32px));
+	padding: 12px 14px;
+	z-index: 30;
+	pointer-events: auto;
+}
+.aitower-hud .lvl-head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.aitower-hud .lvl-kicker {
+	font: 500 10px/1 var(--f-num);
+	letter-spacing: 0.12em;
+	text-transform: uppercase;
+	color: var(--accent);
+}
+.aitower-hud .lvl-h {
+	font: 600 16px/1.2 var(--f-display);
+	margin: 6px 0 8px;
+}
+.aitower-hud .lvl-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 5px;
+	font: 400 13px/1.3 var(--f-body);
+	max-height: 220px;
+	overflow: auto;
+}
+.aitower-hud .lvl-list .tier-chip {
+	min-width: 62px;
+	text-align: center;
+	margin: 0 6px 0 0;
+}
+.aitower-hud .lvl-p {
+	margin: 8px 0 0;
+	font: 400 12px/1.4 var(--f-body);
+	color: var(--text-dim);
+}

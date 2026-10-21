@@ -19,6 +19,7 @@ import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
 import { clerkUnlocked, foremanPerHour, foremanUnlocked, perk, researchedCount } from "../research/research";
 import { cloneAutomation } from "../automation/policy";
+import { foremanStatusOf } from "../automation/status";
 import { isDrought } from "../green/weather";
 import { affinityShares } from "../progression/affinity";
 
@@ -186,7 +187,7 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		refinement: state.refinement,
 		drought: isDrought(state),
 		sandbox: state.sandbox,
-		automation: { policy: cloneAutomation(state.automation), foremanUnlocked: foremanUnlocked(state, content), foremanPerHour: foremanPerHour(state, content) },
+		automation: { policy: cloneAutomation(state.automation), foremanUnlocked: foremanUnlocked(state, content), foremanStatus: foremanStatusOf(state), foremanPerHour: foremanPerHour(state, content) },
 		ambientC: state.ambientC,
 		facilities,
 		lifts: state.lifts.map((l) => ({

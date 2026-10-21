@@ -93,7 +93,10 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 						<ul className="res-get">
 							{getLines(sel, content).map((l) => (
 								<li key={l.title}>
-									<b>{l.title}</b>
+									<b>
+										{l.title}
+										{l.tier && <span className={`tier-chip ${l.tier.className}`}>{l.tier.label}</span>}
+									</b>
 									<span>
 										<Jargon text={l.sub} />
 									</span>

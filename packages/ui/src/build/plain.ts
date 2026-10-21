@@ -5,6 +5,7 @@
 import { conduitTech, type BuildCategory, type ContentDB, type FacilityDef } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
+import { tierView, type TierView } from "./tier";
 import { bandText } from "../bio/bio";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { techGate, techName } from "../research/tech";
@@ -45,6 +46,8 @@ export interface CatalogItem {
 	/** Primer page for the "?" link. */
 	entry?: string;
 	def?: FacilityDef;
+	/** Tier, frame class, output bar and note (facilities only). */
+	tier?: TierView;
 	icon?: StatIcon;
 	danger?: boolean;
 }
@@ -151,7 +154,7 @@ export function structureItems(content: ContentDB, nutrientTile: number): Catalo
 	];
 }
 
-export function facilityItem(def: FacilityDef): CatalogItem {
+export function facilityItem(def: FacilityDef, content: ContentDB): CatalogItem {
 	return {
 		key: def.id,
 		name: def.name,
@@ -163,6 +166,7 @@ export function facilityItem(def: FacilityDef): CatalogItem {
 		stats: plainStats(def),
 		entry: `fac:${def.id}`,
 		def,
+		tier: tierView(def, content),
 	};
 }
 

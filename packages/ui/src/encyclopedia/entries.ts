@@ -4,6 +4,7 @@
  */
 import type { ContentDB, FacilityDef, Flavor, TechNode } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
+import { type TierView, tierView } from "../build/tier";
 import { defSpecs, lockText } from "../components/BuildPalette";
 import { fmtMoney } from "../format";
 import { TERMS } from "../glossary/terms";
@@ -32,6 +33,8 @@ export interface Entry {
 	ref?: { kind: "facility" | "bot" | "tech"; id: string };
 	/** A real quotation for facility, bot and research pages. */
 	flavor?: Flavor;
+	/** Facilities: tier, frame class and note. */
+	tier?: TierView;
 	/** Glossary words: the Primer chapter that teaches it. */
 	at?: string;
 	/** Lower-case search text. */
@@ -102,7 +105,8 @@ export function buildEntries(c: ContentDB): Entry[] {
 					id: `fac:${d.id}`,
 					section: "facilities",
 					title: d.name,
-					lines: [d.description],
+					lines: [d.description, ...(tierView(d, c).note ? [`${tierView(d, c).note}.`] : [])],
+					tier: tierView(d, c),
 					stats: defSpecs(d).filter(([k]) => k !== "Needs"),
 					needs: facilityNeeds(d),
 					spoiler: isBioFacility(d),
