@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // End-to-end smoke test: boots the built app under `vite preview` in headless Chromium and plays a short path
-// (coach marks, contract, build a rack, Esc menu, save, reload, load, assert state survived, no page errors).
+// (new player: Lesson 1 start to result; Free Build: contract, build a rack, Esc menu, save, reload, load, assert state survived, no page errors).
 //
 // Usage: npm run build && npm run e2e
 // Env:   E2E_URL        use an already-running server instead of starting `vite preview`
@@ -101,6 +101,73 @@ async function run(url) {
 		const racks = () => game(() => window.aitower.store.get().view.facilities.filter((f) => f.defId === "rack_air_gpu").length);
 		const ready = () => page.waitForFunction(() => !!window.aitower?.store && !document.getElementById("boot") && !!document.querySelector(".aitower-hud"));
 
+		stage("0. a new player lands on the title screen, starts Lesson 1, and plays it through to the result screen");
+		await page.goto(url, { waitUntil: "load" });
+		await ready();
+		await page.getByRole("button", { name: /START LESSON 1/ }).waitFor();
+		assert((await page.getByRole("button", { name: /FREE BUILD/ }).count()) === 1, "the title offers Free Build next to the lesson");
+		assert((await page.getByText("Restart tutorial").count()) === 0 && (await page.locator(".ui-coach").count()) === 0, "the old tutorial is gone");
+		await page.getByRole("button", { name: /START LESSON 1/ }).click();
+		await page.locator("[data-lesson-goal]").waitFor();
+		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });
+		const ls = await lessonState();
+		assert(ls && ls.status === "active" && ls.speed === 0, `the lesson starts paused: ${JSON.stringify(ls)}`);
+		assert(ls.cap === 120 && ls.load === 53, `the goal bar reads load 53 of capacity 120 kW: ${JSON.stringify(ls)}`);
+		assert((await page.locator("[data-lesson-steps] li").count()) === 4, "four checklist steps");
+		assert((await page.locator(".ui-goals, .ui-next-btn").count()) === 0, "no Goals card or NEXT chip during a lesson (calm)");
+		assert((await page.locator(".ui-dtab").count()) === 1, "only the Handbook tab is shown during the lesson");
+		const talk = async () => { // Bea's lines: press Next / Got it until she has nothing left to say
+			for (let i = 0; i < 6 && (await page.locator("[data-lesson-continue]").count()) > 0; i++) {
+				await page.locator("[data-lesson-continue]").click();
+				await page.waitForTimeout(150);
+			}
+		};
+		await talk();
+		assert((await lessonState()).speed === 3, "the clock starts when Bea has finished her first lines");
+		// Nothing else is selectable: one category, one card, and the sim refuses the rest.
+		assert((await page.locator(".bld-bar .bld-cat").count()) === 1, "only the Racks category is shown at first");
+		await page.locator('[data-tut="cat-rack"]').click();
+		assert((await page.locator(".bld-catalog .bld-card, .bld-catalog [data-tut^=card-]").count()) === 1, "one rack card in the catalog");
+		const refused = await game(() => window.aitower.store.dispatch({ type: "place", defId: "genset", floor: -1, x: 12 }));
+		assert(!refused.ok, "the generator is refused before its step");
+		await page.keyboard.press("Escape");
+		const place = (defId, floor, x) => game((c) => window.aitower.store.dispatch(c), { type: "place", defId, floor, x });
+		const waitStep = (id) => page.waitForFunction((i) => window.aitower.store.get().view.lesson.stepsDone.includes(i), id, { timeout: 30_000 });
+		assert((await place("rack_air_gpu", 1, 11)).ok, "first rack on the glowing slot");
+		await waitStep("rack1");
+		await page.locator("[data-lesson-continue]").waitFor();
+		assert((await lessonState()).speed === 0, "the clock stops while Bea explains kW");
+		await talk();
+		assert((await place("rack_air_gpu", 1, 15)).ok, "second rack");
+		await waitStep("rack2");
+		await page.waitForFunction(() => window.aitower.store.get().view.lesson.beatsFired.includes("trip"), null, { timeout: 30_000 });
+		await page.locator("[data-lesson-continue]").waitFor();
+		await talk();
+		await page.waitForFunction(() => window.aitower.store.get().overlay === "power"); // the power overlay lights up for the generator step
+		assert((await place("genset", -1, 12)).ok, "the generator, now allowed");
+		await waitStep("genset");
+		await talk();
+		await game(() => window.aitower.store.setSpeed(30));
+		await page.locator("[data-lesson-result]").waitFor({ timeout: 90_000 });
+		const won = await lessonState();
+		assert(won.status === "won", `the lesson is won: ${JSON.stringify(won)}`);
+		const stars = await game(() => window.aitower.store.get().view.lesson.stars);
+		assert(stars >= 1 && (await page.locator(".les-stars b.is-on").count()) === stars, "the result screen shows the stars the sim awarded");
+		assert(/learned/i.test(await page.locator("[data-lesson-result]").innerText()), "the result has a one-line 'what you learned'");
+		const progress = await game(() => JSON.parse(localStorage.getItem("aitower.lessons.v1") ?? "{}"));
+		assert(progress.done?.first_watt >= 1, `completion is persisted: ${JSON.stringify(progress)}`);
+		await page.locator("[data-lesson-result] .adv-link").first().click();
+		await page.locator('[data-drawer="handbook"]').waitFor();
+		await page.locator('[data-chapter-view="ch:power"]').waitFor();
+		await page.keyboard.press("Escape");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		log(`lesson 1 won with ${stars} stars; Handbook opened on the Power chapter from the result; progress saved`);
+		await page.locator("[data-lesson-freebuild]").click();
+		await page.waitForFunction(() => window.aitower.store.get().view.lesson === null);
+		const bonus = await game(() => window.aitower.store.get().view.cash);
+		assert(bonus > 3_040_000 && bonus <= 3_050_000, `Free Build starts with the lesson bonus (+$50k): $${bonus}`);
+		log("Free Build after the lesson starts with $3.05M");
+
 		stage("1. boot with ?new&seed=7 and wait for the HUD");
 		await page.goto(`${url}?new&seed=${SEED}`, { waitUntil: "load" });
 		await ready();
@@ -108,26 +175,19 @@ async function run(url) {
 		const start = await game(() => ({ day: window.aitower.store.get().view.day, tick: window.aitower.store.get().view.tick }));
 		log(`HUD up, day ${start.day}`);
 
-		stage("2. follow the coach marks: the offer is ready, accept it, press play, watch PER HOUR, then skip");
-		const coach = page.locator(".ui-coach");
-		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
-		await coach.waitFor();
-		assert((await page.locator(".adv-tip").count()) === 0, "the advisors must stay quiet while the coach marks run");
-		// The sim posts an offer at tick 0 and the tutorial opens the Contracts panel itself: no waiting, no hunting for the tab.
-		await coachAt("Take job");
-		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
+		stage("2. Free Build: the Goals card is there, take the waiting offer through the Contracts drawer");
+		await page.waitForSelector('[data-goal="earn-first"]');
+		assert((await page.locator("[data-lesson-goal]").count()) === 0, "no lesson UI in Free Build");
+		await page.keyboard.press("c");
 		const acceptBtn = page.locator('[data-tut="take"]');
 		await acceptBtn.waitFor({ timeout: 5_000 });
-		assert(await acceptBtn.isEnabled(), "the highlighted offer must fit the idle racks");
+		assert(await acceptBtn.isEnabled(), "the opening offer must fit the idle racks");
 		await acceptBtn.click({ force: true }); // hover tilts the button, which Playwright reads as "unstable"
-		await coachAt("Press play");
-		await page.locator('[data-tut="speed-1"]').click();
-		await coachAt("PER HOUR"); // step 3: it turns green on its own once income is positive
-		await coachAt("Click Racks"); // step 4 follows by itself, and points at the always-visible category bar
-		await page.getByRole("button", { name: "Skip tutorial" }).click();
-		await coach.waitFor({ state: "detached" });
-		await page.waitForSelector('[data-goal="earn-first"]');
-		log("offer accepted through the coach marks, income turned green, tutorial skipped at step 4, Goals card shown");
+		await page.keyboard.press("Escape");
+		await game(() => window.aitower.store.setSpeed(1));
+		await page.waitForFunction(() => window.aitower.store.get().view.pflops > 0, null, { timeout: 30_000 });
+		await game(() => window.aitower.store.setSpeed(0));
+		log("offer accepted in the Contracts drawer, job running");
 
 		stage("3. the accepted contract is running and the Goals card is shown");
 		const running = await game(() => ({ jobs: window.aitower.store.get().view.jobs.length, pflops: window.aitower.store.get().view.pflops }));
@@ -223,23 +283,36 @@ async function run(url) {
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		log("Contracts (C), Insights (F and I), one panel at a time");
 
-		stage("5d. help mode: ? shows a tooltip with More..., which opens the Primer on a chapter; K, a chapter and search work");
+		stage("5d. help mode: ? shows a tooltip with More..., which opens the Handbook on a chapter; H (and K), a chapter, / and search work");
 		await page.keyboard.press("?");
 		await page.waitForSelector(".aitower-hud.is-help");
 		assert((await page.locator("[data-help]").count()) >= 10, "help regions missing");
 		await page.locator('[data-help="treasury"]').hover();
 		await page.locator(".ui-helpcard").waitFor();
 		await page.getByRole("button", { name: "More…" }).click();
-		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.locator('[data-drawer="handbook"]').waitFor();
 		await page.locator('[data-chapter-view="ch:money"] svg').waitFor();
 		await page.keyboard.press("Escape"); // closes the drawer and leaves help mode in one go
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await page.waitForFunction(() => !document.querySelector(".aitower-hud.is-help"));
-		await page.keyboard.press("k");
-		await page.locator('[data-drawer="primer"]').waitFor();
+		await page.keyboard.press("h");
+		await page.locator('[data-drawer="handbook"]').waitFor();
+		assert((await page.locator(".pr-new, [data-primer-new]").count()) === 0, "no floating new-chapter pill: unread chapters show a dot on the tab only");
+		assert((await page.locator(".ui-dtab .pr-dot").count()) === 1, "unread chapters show a quiet dot on the Handbook tab");
+		await page.keyboard.press("h");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await page.keyboard.press("k"); // the old key still opens it
+		await page.locator('[data-drawer="handbook"]').waitFor();
+		await page.keyboard.press("Escape");
+		await page.locator("[data-drawer]").waitFor({ state: "detached" });
+		await page.keyboard.press("/");
+		await page.locator('[data-drawer="handbook"]').waitFor();
+		assert(await page.getByRole("searchbox", { name: "Search the Handbook" }).evaluate((el) => el === document.activeElement), "/ focuses the Handbook search");
+		await page.getByRole("searchbox").fill("");
+		await page.evaluate(() => document.activeElement?.blur());
 		await page.locator('[data-chapter="ch:heat"]').click();
 		await page.locator('[data-chapter-view="ch:heat"] svg').waitFor();
-		await page.getByRole("searchbox", { name: "Search the Primer" }).fill("chiller");
+		await page.getByRole("searchbox", { name: "Search the Handbook" }).fill("chiller");
 		await page.locator('[data-entry="fac:chiller"]').waitFor();
 		await page.getByRole("searchbox").fill("uptime");
 		await page.locator('[data-chapter="ch:uptime"]').waitFor();
@@ -250,7 +323,7 @@ async function run(url) {
 		await page.keyboard.press("Escape");
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
-		log("help mode, More... link, Primer search");
+		log("help mode, More... link, Handbook (H, K, /) and search");
 
 		stage("5e. advisors: four portraits are docked, a click asks (ranked live numbers), Settings turns tips off and on");
 		await page.locator(".adv-strip .adv-face").first().waitFor();
@@ -268,8 +341,11 @@ async function run(url) {
 
 		stage("5f. a decision pauses the game at 30x, waiting costs nothing, and answering it is a click");
 		const rep0 = await game(() => window.aitower.store.get().view.standing);
+		await page.keyboard.press("i"); // a drawer is open when the decision arrives: it must close (calm)
+		await page.locator('[data-drawer="insights"]').waitFor();
 		await game(() => window.aitower.store.setSpeed(30));
 		await page.locator(".adv-card").waitFor({ timeout: 120_000 });
+		assert((await page.locator("[data-drawer]").count()) === 0, "a decision closes any open drawer");
 		const held = await game(() => ({ speed: window.aitower.store.get().speed, tick: window.aitower.store.get().view.tick }));
 		assert(held.speed === 0, "a decision must stop the clock even at 30x");
 		await page.waitForTimeout(1200);

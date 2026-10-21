@@ -427,10 +427,10 @@
 	"lesson_first_watt": {
 		"id": "lesson_first_watt",
 		"name": "Lesson 1: First Watt",
-		"description": "A bare hall, a lift, a floor and one grid feeder. Bea teaches you what kW and capacity mean.",
+		"description": "A bare hall, a lift, a floor, an air handler and one grid feeder. Bea teaches you what kW and capacity mean.",
 		"width": 48,
-		"floorMin": -3,
-		"floorMax": 4,
+		"floorMin": -5,
+		"floorMax": 40,
 		"startingCash": 1500000,
 		"sandbox": true,
 		"lesson": "first_watt",
@@ -456,6 +456,11 @@
 				"defId": "grid_tie",
 				"floor": -1,
 				"x": 6
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 8
 			}
 		],
 		"conduits": [

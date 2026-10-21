@@ -162,35 +162,6 @@
 	flex: 1 1 auto;
 }
 
-/* "New chapter" note: calm, top centre, never steals focus */
-.aitower-hud .pr-new {
-	position: absolute;
-	top: 56px;
-	left: 50%;
-	transform: translateX(-50%);
-	z-index: 11;
-	display: flex;
-	align-items: center;
-	gap: 10px;
-	max-width: min(560px, 90%);
-	padding: 8px 8px 8px 14px;
-	font: 14px/1.3 var(--f-body);
-	color: var(--text);
-	background: color-mix(in srgb, var(--panel) 96%, #000);
-	border: 1px solid var(--accent);
-	border-radius: 99px;
-	pointer-events: auto;
-}
-.aitower-hud .pr-new b {
-	color: var(--accent);
-}
-
-.aitower-hud.has-drawer .pr-new {
-	top: auto;
-	bottom: 56px;
-	left: 30%;
-}
-
 /* "Speak the language": term, definition, and how AItower shows it. */
 .aitower-hud .pr-terms {
 	display: flex;

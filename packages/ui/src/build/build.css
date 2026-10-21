@@ -41,9 +41,10 @@
 .aitower-hud .ui-center > .bld-catalog {
 	position: absolute;
 	left: calc(76px + var(--gap) * 2);
-	bottom: calc(var(--gap) * 5);
+	/* Above the advisor strip (30px ticker + gaps + the strip's height): the two never overlap. */
+	bottom: calc(var(--gap) * 3 + 30px + var(--adv-h, 66px));
 	width: 304px;
-	max-height: calc(100% - var(--gap) * 7);
+	max-height: calc(100% - var(--gap) * 5 - 30px - var(--adv-h, 66px));
 	display: flex;
 	flex-direction: column;
 	z-index: 6;
@@ -293,10 +294,6 @@
 /* The ticker and tool hint make room for the bar instead of the old 224px dock. */
 .aitower-hud .ui-ticker {
 	left: calc(76px + var(--gap) * 2);
-}
-/* While a coach mark points at the drawer tabs, the Inspector slides down so the bubble does not cover it. */
-.aitower-hud .ui-right > .bld-insp {
-	margin-top: var(--coach-push, 0px);
 }
 /* Flavour quotes: a quiet italic line with the author, source on hover. */
 .aitower-hud .ui-flavor {

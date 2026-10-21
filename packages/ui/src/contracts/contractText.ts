@@ -135,7 +135,7 @@ export type Selection = { kind: "offer" | "job"; id: number };
 
 /**
  * What the Inspector shows: the player's pick if it still exists, else the job they were sent to, else the offer that fits
- * (the one the tutorial points at), else any offer, else a running job.
+ * (the one the Goals card points at), else any offer, else a running job.
  */
 export function pickSelection(
 	sel: Selection | null | undefined,

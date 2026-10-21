@@ -231,3 +231,53 @@ export const inBounds = (view: Pick<SimView, "width" | "floorMin" | "floorMax">,
 /** Format minuteOfDay as HH:MM. */
 export const clock = (minuteOfDay: number): string =>
 	`${String(Math.floor(minuteOfDay / 60)).padStart(2, "0")}:${String(minuteOfDay % 60).padStart(2, "0")}`;
+
+// ─── Lesson progress (M6.4) ───────────────────────────────────────────
+
+/** Where the campaign progress lives (best effort; the game works without it). */
+export const LESSON_PROGRESS_KEY = "aitower.lessons.v1";
+
+/** Best stars per completed lesson id. */
+export interface LessonProgress {
+	done: Record<string, number>;
+}
+type LessonStorage = Pick<Storage, "getItem" | "setItem">;
+const defaultLessonStorage = (): LessonStorage | null => {
+	try {
+		return typeof localStorage === "undefined" ? null : localStorage;
+	} catch {
+		return null;
+	}
+};
+
+export function loadLessonProgress(storage: LessonStorage | null = defaultLessonStorage()): LessonProgress {
+	try {
+		const raw = storage?.getItem(LESSON_PROGRESS_KEY);
+		if (raw) {
+			const p = JSON.parse(raw) as Partial<LessonProgress>;
+			const done: Record<string, number> = {};
+			if (p.done && typeof p.done === "object") for (const [k, v] of Object.entries(p.done)) if (typeof v === "number" && v >= 1 && v <= 3) done[k] = Math.floor(v);
+			return { done };
+		}
+	} catch {
+		/* unreadable: no progress */
+	}
+	return { done: {} };
+}
+
+/** Record a finished lesson (keeps the best stars). Returns the new progress and whether it was the first completion. */
+export function recordLesson(id: string, stars: number, storage: LessonStorage | null = defaultLessonStorage()): { progress: LessonProgress; first: boolean } {
+	const progress = loadLessonProgress(storage);
+	const first = progress.done[id] === undefined;
+	progress.done[id] = Math.max(progress.done[id] ?? 0, Math.min(3, Math.max(1, Math.floor(stars))));
+	try {
+		storage?.setItem(LESSON_PROGRESS_KEY, JSON.stringify(progress));
+	} catch {
+		/* best effort */
+	}
+	return { progress, first };
+}
+
+/** The Free Build starting-cash bonus: each lesson's `bonus`, once, for every lesson completed. */
+export const freeBuildBonus = (lessons: readonly { id: string; bonus: number }[], progress: LessonProgress): number =>
+	lessons.reduce((sum, l) => sum + (progress.done[l.id] !== undefined ? l.bonus : 0), 0);

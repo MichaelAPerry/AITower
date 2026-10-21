@@ -6,11 +6,11 @@ import { FlavorLine } from "../components/FlavorLine";
 import { type Entry, buildEntries, lockFor, SECTIONS, type Section, searchEntries, sectionOf } from "../encyclopedia/entries";
 import { termById } from "../glossary/terms";
 import { PanelHead, SplitPane } from "../panel/PanelShell";
-import { type Chapter, buildChapters, isUnlocked, lockText, primerTarget, type TryId } from "./chapters";
+import { type Chapter, buildChapters, isUnlocked, lockText, primerTarget, searchChapters, type TryId } from "./chapters";
 import { Diagram } from "./diagrams";
-import { loadProgress, markRead, onProgress, type PrimerProgress, update } from "./progress";
+import { loadProgress, markRead, onProgress, type HandbookProgress, update } from "./progress";
 import "../encyclopedia/encyclopedia.css";
-import "./primer.css";
+import "./handbook.css";
 
 const REF_TABS = SECTIONS.filter((s) => s.id !== "basics");
 
@@ -18,7 +18,7 @@ const REF_TABS = SECTIONS.filter((s) => s.id !== "basics");
 export const useChapters = (content: ContentDB): Chapter[] => useMemo(() => buildChapters(content), [content]);
 
 /** Live reading progress (shared with the unread dot and the prompt). */
-export function useProgress(): PrimerProgress {
+export function useProgress(): HandbookProgress {
 	const [p, setP] = useState(loadProgress);
 	useEffect(() => onProgress(setP), []);
 	return p;
@@ -37,8 +37,8 @@ export function runTry(id: TryId, p: Pick<PanelProps, "store" | "setUi" | "openR
 	else p.openResearch();
 }
 
-/** The Datacenter Primer (K): chapters to read, then the reference lists (facilities, bots, research, words). */
-export function PrimerDrawer(props: PanelProps) {
+/** The Handbook (H): chapters to read, then the reference lists (facilities, bots, research, words). */
+export function HandbookDrawer(props: PanelProps) {
 	const { content, state, ui, setUi } = props;
 	const view = state.view;
 	const chapters = useChapters(content);
@@ -49,6 +49,11 @@ export function PrimerDrawer(props: PanelProps) {
 	const [tab, setTab] = useState<Section | null>(null);
 	/** A glossary word to scroll to and highlight in its chapter. */
 	const [focus, setFocus] = useState<string | null>(null);
+	const searchRef = useRef<HTMLInputElement>(null);
+	// "/" focuses the search box (the HUD bumps `searchFocus`; opening the drawer with it set focuses on mount).
+	useEffect(() => {
+		if (ui.searchFocus) searchRef.current?.focus();
+	}, [ui.searchFocus]);
 
 	useEffect(() => {
 		update({ opened: true });
@@ -69,8 +74,7 @@ export function PrimerDrawer(props: PanelProps) {
 	}, [wanted]);
 
 	const q = query.trim();
-	const words = q.toLowerCase().split(/\s+/).filter(Boolean);
-	const hitChapters = q ? chapters.filter((c) => words.every((w) => (isUnlocked(c.unlock, view) ? c.keywords : c.title.toLowerCase()).includes(w))) : [];
+	const hitChapters = q ? searchChapters(chapters, q, view) : [];
 	const hitEntries = q ? searchEntries(entries, q).slice(0, 40) : [];
 	// While searching, the pane shows the top hit unless the reader picked one of the results.
 	const shown = q && ![...hitChapters, ...hitEntries].some((x) => x.id === sel) ? (hitChapters[0] ?? hitEntries[0])?.id ?? sel : sel;
@@ -141,12 +145,13 @@ export function PrimerDrawer(props: PanelProps) {
 
 	return (
 		<>
-			<PanelHead kicker="Never built a datacenter? Start here." title="Datacenter Primer" />
+			<PanelHead kicker="Never built a datacenter? Start here. Press / to search." title="Handbook" />
 			<input
+				ref={searchRef}
 				type="search"
 				className="ui-ency-search"
 				placeholder="Search: PUE, CRAH, N+1, chiller..."
-				aria-label="Search the Primer"
+				aria-label="Search the Handbook"
 				value={query}
 				onChange={(e) => setQuery(e.target.value)}
 				onKeyDown={(e) => {

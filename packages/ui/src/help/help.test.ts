@@ -42,6 +42,9 @@ describe("keys", () => {
 		const { keyAction } = await import("../keyboard");
 		expect(keyAction("?")).toEqual({ type: "help" });
 		expect(keyAction("F1")).toEqual({ type: "help" });
-		expect(keyAction("k")).toEqual({ type: "drawer", id: "primer" });
+		expect(keyAction("h")).toEqual({ type: "drawer", id: "handbook" });
+		expect(keyAction("k")).toEqual({ type: "drawer", id: "handbook" }); // the old key still works
+		expect(keyAction("/")).toEqual({ type: "search" });
+		expect(keyAction("e")).toEqual({ type: "overlay", mode: "heat" }); // H moved to the Handbook
 	});
 });

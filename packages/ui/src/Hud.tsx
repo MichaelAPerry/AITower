@@ -26,9 +26,9 @@ import { TitleScreen } from "./title/TitleScreen";
 import { showTitleAtBoot } from "./title/titleState";
 import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
-import { Tutorial } from "./tutorial/Tutorial";
+import { useLesson } from "./lessons/LessonLayer";
+import { lessonActive, lessonTabs } from "./lessons/lessons";
 import { AdvisorStrip } from "./advisors/AdvisorStrip";
-import { PrimerPrompt } from "./primer/PrimerPrompt";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
@@ -79,7 +79,7 @@ export function Hud({ store, content, title }: HudProps) {
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
-	// The opening crawl plays once over every new game (the game stays paused); `run` = resume at 1× afterwards (no induction).
+	// The opening crawl plays once over every new game (the game stays paused); `run` = resume at 1× afterwards (no lesson).
 	const [crawl, setCrawl] = useState<{ run: boolean } | null>(null);
 	const crawlRef = useRef(crawl);
 	crawlRef.current = crawl;
@@ -90,6 +90,7 @@ export function Hud({ store, content, title }: HudProps) {
 		setCrawl(null);
 		if (c.run) store.setSpeed(1);
 	}, [store]);
+	const lessonRef = useRef(false);
 	const titleOpenRef = useRef(titleOpen);
 	titleOpenRef.current = titleOpen;
 	const overRef = useRef(false);
@@ -105,11 +106,26 @@ export function Hud({ store, content, title }: HudProps) {
 	}, [menuOpen]);
 	// Unmounting (or swapping the store) with the menu open must not leave the game paused.
 	useEffect(() => () => menu.close(), [menu]);
+	// The coach-mark tutorial is gone (Lesson 1 replaced it): forget what it kept.
+	useEffect(() => {
+		try {
+			localStorage.removeItem("aitower.induction.v2");
+			localStorage.removeItem("aitower.induction.v1");
+			localStorage.removeItem("aitower.hints.v1");
+		} catch {
+			/* storage blocked */
+		}
+	}, []);
 	useEffect(() => () => ascension.close(), [ascension]);
 	useHudKeyboard(
 		store,
 		{
-			toggleDrawer: useCallback((id) => setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false })), []),
+			toggleDrawer: useCallback((id) => {
+				// A lesson keeps the screen quiet: only the Handbook opens.
+				if (lessonRef.current && id !== "handbook") return;
+				setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false }));
+			}, []),
+			openSearch: useCallback(() => setUiState((u) => ({ ...u, drawer: "handbook", paletteOpen: false, buildHover: null, searchFocus: (u.searchFocus ?? 0) + 1 })), []),
 			togglePalette: useCallback(() => setUiState((u) => ({ ...u, paletteOpen: !u.paletteOpen, drawer: null, buildHover: null })), []),
 			toggleHelp: useCallback(() => setUiState((u) => ({ ...u, help: !u.help })), []),
 		},
@@ -122,6 +138,28 @@ export function Hud({ store, content, title }: HudProps) {
 	const gameOver = state.view.gameOver;
 	const over = titleOpen ? null : gameOverToShow(gameOver, dismissedOver);
 	overRef.current = !!over;
+	const startFreeBuild = useCallback(() => {
+		store.newGame();
+		store.setSpeed(0);
+		setUiState((u) => ({ ...u, drawer: null, paletteOpen: false }));
+		setCrawl({ run: true });
+	}, [store]);
+	const lesson = useLesson({
+		store,
+		content,
+		state,
+		ui,
+		setUi,
+		enabled: !titleOpen && !crawl && !over,
+		onFreeBuild: startFreeBuild,
+		onReplay: (scenario) => {
+			store.newGame(undefined, scenario);
+			store.setSpeed(0);
+			setUiState((u) => ({ ...u, drawer: null, paletteOpen: false }));
+		},
+	});
+	const inLesson = lesson.active && lessonActive(state.view);
+	lessonRef.current = inLesson;
 	useEffect(() => {
 		setDismissedOver((k) => keepDismissed(gameOver, k));
 	}, [gameOver]);
@@ -182,33 +220,37 @@ export function Hud({ store, content, title }: HudProps) {
 		},
 		[content],
 	);
-	const openPrimerAt = useCallback((target: string) => setUiState((u) => ({ ...u, drawer: "primer", encyId: target, paletteOpen: false, buildHover: null })), []);
+	const openHandbookAt = useCallback((target: string) => setUiState((u) => ({ ...u, drawer: "handbook", encyId: target, paletteOpen: false, buildHover: null })), []);
+	// Calm: a decision opens alone. Whatever drawer or catalog was open closes, so the card has the screen to itself.
+	const decisionId = state.view.decision?.id ?? null;
+	useEffect(() => {
+		if (decisionId !== null) setUiState((u) => (u.drawer || u.paletteOpen ? { ...u, drawer: null, paletteOpen: false, buildHover: null } : u));
+	}, [decisionId]);
 	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch, openAscension: ascension.open, openAudit: setAudit };
 	return (
-		<TermProvider open={openPrimerAt}>
+		<TermProvider open={openHandbookAt}>
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" && ui.researchView !== "list" ? "has-tree" : "", ui.help ? "is-help" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" && ui.researchView !== "list" ? "has-tree" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<TopStrip {...props} />
 			<HelpLayer ui={ui} setUi={setUi} scale={scale} />
 			<div className="ui-center">
-				<GoalsCard state={state} content={content} />
-				<NextChip {...props} />
+				{!lesson.active && <GoalsCard state={state} content={content} />}
+				{!lesson.active && <NextChip {...props} />}
+				{lesson.layer}
 				<Toasts content={content} state={state} />
 				<LevelUpCard content={content} state={state} />
-				{!titleOpen && !over && <DecisionCard store={store} content={content} state={state} />}
+				{!titleOpen && !over && <DecisionCard store={store} content={content} state={state} onHandbook={(id) => setUi({ drawer: "handbook", encyId: id, paletteOpen: false, buildHover: null })} />}
 				<CursorHint state={state} />
-				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<PalettePopover {...props} />
-				<BuildBar ui={ui} setUi={setUi} />
+				<BuildBar ui={ui} setUi={setUi} tabs={lessonTabs(content, state.view)} />
 				<Ticker {...props} />
 				<div className="ui-right">
-					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
+					{ui.paletteOpen && (!inLesson || ui.buildHover) ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
-				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} />}
-				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} />
-				{!titleOpen && !crawl && !over && <PrimerPrompt content={content} state={state} setUi={setUi} />}
+				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} teacher={lesson.teacher} teacherAdvisor={lesson.advisor} />}
+				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />
 				<Drawer {...props} />
 			</div>
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
@@ -234,7 +276,7 @@ export function Hud({ store, content, title }: HudProps) {
 					openMenu={openMenuAt}
 					onStart={(how) => {
 						setTitleOpen(false);
-						if (how?.newGame) setCrawl({ run: how.run });
+						if (how && "newGame" in how) setCrawl({ run: how.run });
 					}}
 				/>
 			)}
@@ -258,7 +300,7 @@ export function Hud({ store, content, title }: HudProps) {
 					}}
 				/>
 			)}
-			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} menu={menu} onEncyclopedia={() => setUi({ drawer: "primer", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
+			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} content={content} menu={menu} onEncyclopedia={() => setUi({ drawer: "handbook", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 		</TermProvider>
 	);

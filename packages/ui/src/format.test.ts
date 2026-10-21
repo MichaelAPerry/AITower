@@ -40,7 +40,7 @@ describe("keyboard map", () => {
 		expect(keyAction(" ")).toEqual({ type: "togglePause" });
 		expect(keyAction("1")).toEqual({ type: "speed", speed: 0 });
 		expect(keyAction("5")).toEqual({ type: "speed", speed: 30 });
-		expect(keyAction("H")).toEqual({ type: "overlay", mode: "heat" });
+		expect(keyAction("E")).toEqual({ type: "overlay", mode: "heat" });
 		expect(keyAction("o")).toEqual({ type: "overlay", mode: "coolant" });
 		expect(keyAction("u")).toEqual({ type: "overlay", mode: "nutrient" });
 		expect(keyAction("g")).toEqual({ type: "overlay", mode: "contamination" });

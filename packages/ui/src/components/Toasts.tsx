@@ -3,17 +3,9 @@ import type { GameState } from "@aitower/shared";
 import { useEffect, useRef, useState } from "react";
 import { describeEvent, eventKey } from "../events";
 import { type Notice, onNotice, type Severity } from "../notices";
+import { addToast, showCount, type Toast } from "./toastList";
 
 const GLYPH: Record<Severity, string> = { error: "✕", warn: "▲", good: "✓", info: "·" };
-
-interface Toast extends Notice {
-	id: number;
-	count: number;
-	until: number;
-}
-
-const TTL = 5000;
-const MAX = 5;
 
 /** Toast stack: important sim events from `state.log` plus notices (command rejections). */
 export function Toasts({ content, state }: { content: ContentDB; state: GameState }) {
@@ -23,12 +15,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 
 	const add = (n: Notice): void => {
 		const now = Date.now();
-		setToasts((list) => {
-			const key = n.key ?? n.text;
-			const hit = list.find((t) => (t.key ?? t.text) === key);
-			if (hit) return list.map((t) => (t === hit ? { ...t, text: n.text, count: t.count + 1, until: now + TTL } : t));
-			return [...list, { ...n, key, id: nextId.current++, count: 1, until: now + (n.severity === "error" ? TTL * 1.6 : TTL) }].slice(-MAX);
-		});
+		setToasts((list) => addToast(list, n, now, () => nextId.current++));
 	};
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: subscribe once on mount; `add` only touches refs and functional setState, so a stale closure is harmless
@@ -51,7 +38,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 			if (e.tick < c.tick) continue;
 			if (e.tick === c.tick && ++atTick <= c.n) continue;
 			const d = describeEvent(e.event, state.view, content, state.settings.horrorIntensity);
-			if (d.toast) add({ text: d.text, severity: d.severity, key: eventKey(e.event) });
+			if (d.toast) add({ text: d.text, severity: d.severity, key: eventKey(e.event), group: d.group });
 		}
 		cursor.current = { tick: last.tick, n: countAt(last.tick) };
 	}, [state.log]);
@@ -74,7 +61,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 							{GLYPH[t.severity]}
 						</span>
 						<span className="ui-toast-text">{t.text}</span>
-						{t.count > 1 && <span className="ui-toast-count">×{t.count}</span>}
+						{showCount(t) && <span className="ui-toast-count">×{t.count}</span>}
 					</div>
 				);
 			})}

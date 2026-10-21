@@ -1,5 +1,5 @@
 /**
- * One definition of "too hot" for every warning the player sees (advisor tips, the tutorial hint, the build dock, the
+ * One definition of "too hot" for every warning the player sees (advisor tips, the build dock, the
  * dossier text), matching the sim: a rack throttles when its die is above `thermal.okC` and trips at `tripC` (a trip stays
  * latched until it has cooled and sat out its cooldown, so a tripped rack can already be cool). Organoid racks throttle
  * when the tissue leaves its temperature band, which the sim reports as the same `throttled` status.

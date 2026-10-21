@@ -6,8 +6,8 @@ import type { PanelProps } from "../components/context";
 import { AutomationDrawer } from "../automation/AutomationDrawer";
 import { currentObjective, endingLine, isProblem } from "../objective/objective";
 import { BuildPalette } from "../components/BuildPalette";
-import { PrimerDrawer } from "../primer/PrimerDrawer";
-import { useUnreadPrimer } from "../primer/PrimerPrompt";
+import { HandbookDrawer } from "../handbook/HandbookDrawer";
+import { useUnreadHandbook } from "../handbook/unread";
 import { DRAWER_TABS, type DrawerId, feedLines, isRoutine, nextDrawer } from "./calm";
 import { Icon } from "../components/common";
 
@@ -61,14 +61,14 @@ export function Ticker({ content, state, ui, setUi }: PanelProps) {
 }
 
 /** The edge tabs: one drawer at a time, each on a hotkey. */
-export function DrawerTabs({ ui, setUi, content, state }: Pick<PanelProps, "ui" | "setUi" | "content" | "state">) {
-	const unreadPrimer = useUnreadPrimer(content, state.view);
+export function DrawerTabs({ ui, setUi, content, state, only }: Pick<PanelProps, "ui" | "setUi" | "content" | "state"> & { only?: readonly DrawerId[] }) {
+	const unreadHandbook = useUnreadHandbook(content, state.view);
 	return (
 		<div className="ui-dtabs" role="tablist" aria-label="Drawers">
-			{DRAWER_TABS.map((d) => (
+			{DRAWER_TABS.filter((d) => !only || only.includes(d.id)).map((d) => (
 				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} data-help={`tab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} aria-label={`${d.label} (${d.key})`}>
 					<span className="ui-dtab-name">{d.label}</span>
-					{d.id === "primer" && unreadPrimer && <span className="pr-dot" role="img" aria-label="New chapter" />}
+					{d.id === "handbook" && unreadHandbook && <span className="pr-dot" role="img" aria-label="New chapter" />}
 					<kbd>{d.key}</kbd>
 				</button>
 			))}
@@ -77,7 +77,7 @@ export function DrawerTabs({ ui, setUi, content, state }: Pick<PanelProps, "ui" 
 }
 
 /** Panels built on the shared shell (list + Inspector) get the wide frame. */
-export const WIDE: ReadonlySet<DrawerId> = new Set<DrawerId>(["contracts", "insights", "research", "primer"]);
+export const WIDE: ReadonlySet<DrawerId> = new Set<DrawerId>(["contracts", "insights", "research", "handbook"]);
 
 /** The open drawer, if any. */
 export function Drawer(props: PanelProps) {
@@ -93,7 +93,7 @@ export function Drawer(props: PanelProps) {
 			{d === "research" && <ResearchPanel {...props} />}
 			{d === "automation" && <AutomationDrawer {...props} />}
 			{d === "insights" && <InsightsPanel {...props} />}
-			{d === "primer" && <PrimerDrawer {...props} />}
+			{d === "handbook" && <HandbookDrawer {...props} />}
 			{d === "log" && <AlertsLog {...props} />}
 		</section>
 	);

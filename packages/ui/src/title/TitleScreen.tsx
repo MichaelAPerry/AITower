@@ -1,12 +1,12 @@
 import type { ContentDB } from "@aitower/content";
-import type { GameState, GameStore } from "@aitower/shared";
+import { type GameState, type GameStore, freeBuildBonus, loadLessonProgress } from "@aitower/shared";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { fmtMoney } from "../format";
 import { focusables, nextFocusIndex } from "../menu/focus";
 import type { MenuSection } from "../menu/SystemMenu";
 import { useSaves } from "../menu/useSaves";
-import { closeInduction, restartInduction } from "../tutorial/Tutorial";
 import { scenarioCards, showPicker, validScenario } from "./scenarios";
-import { backdropCaption, continueSummary, inductionDefault, startGame, type TitleItem, titleBackdrop, titleItems } from "./titleState";
+import { backdropCaption, continueSummary, startGame, type TitleItem, titleBackdrop, titleItems } from "./titleState";
 import "./title.css";
 
 export interface TitleScreenProps {
@@ -15,13 +15,13 @@ export interface TitleScreenProps {
 	/** True while the system menu is open over the title (the title stops grabbing focus). */
 	menuOpen: boolean;
 	openMenu: (section: MenuSection) => void;
-	/** The player picked a game; remove the title. A new game says so (and whether the clock should run once the crawl ends), so the HUD can play the opening crawl. */
-	onStart: (how?: { newGame: true; run: boolean }) => void;
+	/** The player picked a game; remove the title. A Free Build game says so, so the HUD can play the opening crawl; a lesson starts straight away with its teacher. */
+	onStart: (how?: { newGame: true; run: boolean } | { lesson: true }) => void;
 	/** Scenarios for the picker. Without content there is no picker. */
 	content?: ContentDB;
 }
 
-const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", new: "NEW GAME", load: "LOAD GAME", settings: "SETTINGS", controls: "CONTROLS" };
+const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", lesson: "START LESSON 1", new: "FREE BUILD", load: "LOAD GAME", settings: "SETTINGS", controls: "CONTROLS" };
 
 /**
  * The title screen: the AITOWER nameplate and the menu. The game stays paused
@@ -30,11 +30,13 @@ const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", new: "NEW GAME"
 export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content }: TitleScreenProps) {
 	const root = useRef<HTMLDivElement>(null);
 	const { saves } = useSaves(store, state.saveStatus.lastSavedAt);
-	const [induction, setInduction] = useState<boolean | null>(null);
 	const cards = content ? scenarioCards(content) : [];
 	const [picked, setPicked] = useState<string | null>(null);
 	const scenarioId = content ? validScenario(content, picked) : undefined;
-	const ticked = induction ?? (saves ? inductionDefault(saves, scenarioId) : true);
+	const lessonOne = content?.lessons?.[0];
+	const lessonProgress = loadLessonProgress();
+	const lessonDone = lessonOne ? lessonProgress.done[lessonOne.id] !== undefined : false;
+	const bonus = content ? freeBuildBonus(content.lessons, lessonProgress) : 0;
 	const now = Date.now();
 
 	// Hold the game paused behind the title.
@@ -57,15 +59,19 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 
 	const items = saves ? titleItems(saves) : [];
 	const auto = saves?.find((s) => s.id === "auto");
-	const hooks = { restartInduction, closeInduction };
 
 	const pick = (item: TitleItem): void => {
 		if (item === "continue") {
-			startGame(store, { kind: "continue" }, hooks);
+			startGame(store, { kind: "continue" });
 			onStart();
+		} else if (item === "lesson") {
+			if (lessonOne && !lessonDone) {
+				startGame(store, { kind: "lesson", scenarioId: lessonOne.scenario });
+				onStart({ lesson: true });
+			} else openMenu("lessons");
 		} else if (item === "new") {
-			startGame(store, { kind: "new", induction: ticked, scenarioId, crawl: true }, hooks);
-			onStart({ newGame: true, run: !ticked });
+			startGame(store, { kind: "new", scenarioId, crawl: true });
+			onStart({ newGame: true, run: true });
 		} else openMenu(item);
 	};
 
@@ -107,26 +113,12 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 										<span className="ui-title-cursor" aria-hidden="true">
 											▶
 										</span>
-										<span className="ui-title-label">{LABEL[item]}</span>
+										<span className="ui-title-label">{item === "lesson" && lessonDone ? "LESSONS" : LABEL[item]}</span>
 										{item === "continue" && auto && <span className="ui-title-detail">{continueSummary(auto, now)}</span>}
 										{item === "load" && <span className="ui-title-detail">{saves.length} saved</span>}
+										{item === "lesson" && <span className="ui-title-detail">{lessonDone ? "replay or pick one" : "Bea · power · 5 min · recommended"}</span>}
+										{item === "new" && <span className="ui-title-detail">{bonus > 0 ? `sandbox sites · +${fmtMoney(bonus)} head start` : "sandbox sites, no teacher"}</span>}
 									</button>
-									{item === "new" && (
-										<label className="ui-title-check">
-											<input
-												type="checkbox"
-												checked={ticked}
-												onChange={(e) => setInduction(e.currentTarget.checked)}
-												onKeyDown={(e) => {
-													if (e.key === "Enter") {
-														e.preventDefault();
-														setInduction(!ticked);
-													}
-												}}
-											/>
-											<span>Tutorial</span>
-										</label>
-									)}
 								</li>
 							))}
 						</ul>
@@ -134,7 +126,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 				</div>
 				{showPicker(cards) && (
 					<fieldset className="ui-title-sites">
-						<legend className="ui-dymo">CHOOSE A SITE</legend>
+						<legend className="ui-dymo">FREE BUILD SITE</legend>
 						<div className="ui-title-cards" role="radiogroup" aria-label="Scenario">
 							{cards.map((c) => (
 								// biome-ignore lint/a11y/useSemanticElements: card-styled radio
@@ -152,19 +144,6 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 				)}
 				<div className="ui-title-foot">
 					<span className="ui-dymo">ENTER OR CLICK TO PROCEED</span>
-					{saves && saves.length > 0 && (
-						<button
-							type="button"
-							className="ui-btn"
-							onClick={() => {
-								startGame(store, { kind: "new", induction: true, crawl: true }, hooks);
-								onStart({ newGame: true, run: false });
-							}}
-							title="Start a fresh site with the tutorial"
-						>
-							Restart tutorial
-						</button>
-					)}
 				</div>
 			</div>
 		</div>

@@ -554,7 +554,7 @@ export interface LessonDef {
 	scenario: string;
 	/** Speed the game runs at (the lesson sets it; the player may change it). */
 	speed: 1 | 3 | 10;
-	/** Effects applied once when the lesson starts (a permanent feeder limit, say). */
+	/** Effects applied when the lesson starts, before tick 0 (a permanent feeder limit, say). Only `gridCap` is supported. */
 	setup?: LessonEffect[];
 	/** Command types the player may issue; any other is refused ("Not part of this lesson"). */
 	commands: string[];

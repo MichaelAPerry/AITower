@@ -18,8 +18,14 @@ export function lessonDef(state: SimState, content: ContentDB): LessonDef | unde
 	return id ? content.lessons.find((l) => l.id === id) : undefined;
 }
 
+/** Start a lesson on a fresh site: its setup effects (a feeder limit, say) apply from tick 0, before anything is drawn. */
+export function startLesson(state: SimState, def: LessonDef): void {
+	state.lesson = newLessonState(def, state.tick);
+	for (const e of def.setup ?? []) if (e.type === "gridCap") state.modifiers.push({ kind: "gridCap", value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
+}
+
 export function newLessonState(def: LessonDef, tick: number): LessonState {
-	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, setupDone: false };
+	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, setupDone: true };
 }
 
 export type LessonMetrics = Record<LessonMetric, number>;
@@ -157,13 +163,9 @@ export function lessonStars(def: LessonDef, ls: Pick<LessonState, "minHeadroom" 
 export function lessonStep(ctx: TickCtx): void {
 	const { state, content } = ctx;
 	const ls = state.lesson;
-	if (!ls || ls.status !== "active") return;
+	if (ls?.status !== "active") return;
 	const def = lessonDef(state, content);
 	if (!def) return;
-	if (!ls.setupDone) {
-		ls.setupDone = true;
-		for (const e of def.setup ?? []) applyEffect(ctx, e, def);
-	}
 	const m = lessonMetrics(state, content);
 	for (const b of def.beats) {
 		if (ls.beatsFired.includes(b.id) || !allHold(b.when, m)) continue;

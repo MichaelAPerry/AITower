@@ -65,14 +65,12 @@ export function runAction(a: AdvisorAction, p: Pick<PanelProps, "store" | "conte
 /** Ticks of the first game day, in which only urgent problems may speak. */
 const FIRST_DAY = 1440;
 
-/** True while a coach mark (the first-session tutorial or a just-in-time hint) is on screen: the advisors stay quiet. */
-const coachShowing = (): boolean => typeof document !== "undefined" && !!document.querySelector(".aitower-hud .ui-coach");
 
 function HandbookChips({ links, setUi }: { links: HandbookLink[]; setUi: PanelProps["setUi"] }) {
 	return (
 		<>
 			{links.map((l) => (
-				<button key={l.entry} type="button" className="adv-link" onClick={() => setUi({ drawer: "primer", encyId: l.entry, paletteOpen: false, buildHover: null })}>
+				<button key={l.entry} type="button" className="adv-link" onClick={() => setUi({ drawer: "handbook", encyId: l.entry, paletteOpen: false, buildHover: null })}>
 					Handbook: {l.label}
 				</button>
 			))}
@@ -113,10 +111,10 @@ function LineBody({ line, props, onDone }: { line: Line; props: PanelProps; onDo
  *  - Ask: clicking a portrait answers from that advisor's area with live numbers (ranked), with Handbook links.
  * Decisions are not here: they open a card of their own and pause the game.
  */
-export function AdvisorStrip(props: PanelProps) {
-	const { store, content, state } = props;
+export function AdvisorStrip(props: PanelProps & { /** A lesson's teacher speaks in the strip instead of the tips. */ teacher?: ReactNode; teacherAdvisor?: AdvisorId }) {
+	const { store, content, state, teacher, teacherAdvisor } = props;
 	const view = state.view;
-	const tipsOn = state.settings.advisorTips !== false;
+	const tipsOn = state.settings.advisorTips !== false && !teacher;
 	const [shown, setShown] = useState<Line | null>(null);
 	const [chips, setChips] = useState<Partial<Record<AdvisorId, Line>>>({});
 	const [asking, setAsking] = useState<AdvisorId | null>(null);
@@ -128,7 +126,7 @@ export function AdvisorStrip(props: PanelProps) {
 	const heat = useRef<HeatWatch>(initialHeatWatch());
 	const candidates = useMemo(() => {
 		heat.current = watchHeat(heat.current, view, content);
-		// The first game day belongs to the tutorial: only real problems may interrupt it.
+		// The first game day stays quiet: only real problems may interrupt it.
 		return tipCandidates(view, content, heat.current.confirmed).filter((l) => l.urgent || view.tick >= FIRST_DAY);
 	}, [view, content]);
 
@@ -144,11 +142,10 @@ export function AdvisorStrip(props: PanelProps) {
 		if (keepChip) setChips((c) => ({ ...c, [line.advisor]: line }));
 	}, []);
 
-	// Show the next tip when it is quiet: no decision, no coach mark, nothing on screen, not asking, and a gap since the last one.
+	// Show the next tip when it is quiet: no decision, no lesson, nothing on screen, not asking, and a gap since the last one.
 	useEffect(() => {
 		if (!tipsOn || decisionOpen || asking || shown) return;
 		if (Date.now() - lastEnd.current < TIP_GAP_MS) return;
-		if (coachShowing()) return;
 		const next = nextTip(candidates, fired, null);
 		if (!next) return;
 		firedLocal.current.add(next.id);
@@ -204,7 +201,7 @@ export function AdvisorStrip(props: PanelProps) {
 	}, [asking]);
 
 	const answer = asking ? answerFor(asking, view, content, heat.current.confirmed) : null;
-	const speaking = shown?.advisor ?? null;
+	const speaking = teacherAdvisor ?? shown?.advisor ?? null;
 
 	return (
 		<aside className="adv-strip" data-help="advisors" aria-label="Advisors">
@@ -249,7 +246,9 @@ export function AdvisorStrip(props: PanelProps) {
 					))}
 				</div>
 				<div className="adv-line" role="status" aria-live="polite">
-					{shown ? (
+					{teacher ? (
+						teacher
+					) : shown ? (
 						<div className="adv-tip" style={{ ["--adv" as string]: ADVISORS[shown.advisor].color }}>
 							<b className="adv-who">{ADVISORS[shown.advisor].first}</b>
 							<LineBody line={shown} props={props} onDone={() => collapse(shown, false)} />

@@ -78,14 +78,14 @@ describe("Hud (server render smoke test)", () => {
 });
 
 describe("SystemMenu (server render)", () => {
-	it("renders the cabinet: resume, every drawer, restart induction, and a dialog role", () => {
+	it("renders the cabinet: resume, every drawer (Lessons included), and a dialog role", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
 		const menu = createMenuController(store);
 		const html = renderToString(<SystemMenu store={store} state={store.get()} menu={menu} />);
 		expect(html).toContain('role="dialog"');
 		expect(html).toContain('aria-modal="true"');
-		for (const t of ["Resume", "Save game", "Load game", "Settings", "Controls", "New game", "Restart tutorial", "GAME PAUSED"]) expect(html).toContain(t);
+		for (const t of ["Resume", "Save game", "Load game", "Settings", "Controls", "New game", "Lessons", "GAME PAUSED"]) expect(html).toContain(t);
 	});
 	it("shows the settings drawer with every Settings field", () => {
 		const content = createFakeContent();
@@ -112,8 +112,8 @@ describe("SystemMenu (server render)", () => {
 		expect(html).toContain("ui-title-cabinet");
 		expect(html).toContain("AI<b>TOWER</b>");
 		expect(html).not.toContain("ui-induction");
-		// the tutorial must not run behind the title screen
-		expect(html).not.toContain("ui-tutorial");
+		// no lesson UI runs behind the title screen
+		expect(html).not.toContain("les-goal");
 	});
 
 	it("opens an advisor decision card with the recommended choice, effect chips and a defer button; the top bar shows standing", () => {
@@ -181,7 +181,7 @@ describe("SystemMenu (server render)", () => {
 		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");
 	});
 
-	it("the induction points at an offer the starter site can serve (no liquid cooling, no stored data first)", () => {
+	it("the Goals card points at an offer the starter site can serve (no liquid cooling, no stored data first)", () => {
 		const offers = [
 			{ id: 1, needsLiquid: true, storageTB: 0 },
 			{ id: 2, needsLiquid: false, storageTB: 120 },

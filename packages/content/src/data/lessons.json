@@ -12,9 +12,9 @@
 			"setup": [
 				{
 					"type": "gridCap",
-					"factor": 0.06,
+					"factor": 0.08,
 					"durationTicks": 100000000,
-					"label": "Utility feeder limit 90 kW"
+					"label": "Utility feeder limit 120 kW"
 				}
 			],
 			"commands": [
@@ -44,7 +44,7 @@
 					],
 					"slot": {
 						"floor": 1,
-						"x": 8,
+						"x": 11,
 						"defId": "rack_air_gpu"
 					},
 					"handbook": "ch:power",
@@ -53,7 +53,7 @@
 						"Start with one. Open Racks in the build bar, pick the AC-1 rack and click the glowing slot. Everything else is locked until it's down."
 					],
 					"after": [
-						"That rack is working flat out, pulling 40 kW. A {{kw|kW}} is a rate: how hard something pulls right now. Look at the goal bar: it shows the load against the feeder's capacity."
+						"That rack is working flat out, pulling 40 kW. A {{kw|kW}} is a rate: how hard something pulls right now. The goal bar shows the whole hall's load, 93 kW, against the feeder's capacity of 120 kW."
 					],
 					"pause": true
 				},
@@ -75,16 +75,16 @@
 					],
 					"slot": {
 						"floor": 1,
-						"x": 12,
+						"x": 15,
 						"defId": "rack_air_gpu"
 					},
 					"handbook": "ch:power",
 					"say": [
-						"Capacity is the most the supply can give. This feeder has a limit of 90 kW. One rack uses about half of that. Add the second and watch the load bar."
+						"{{capacity|Capacity}} is the most the supply can give. This feeder is limited to 120 kW. The hall already pulls 53 kW before any rack works (the air handler, the lift and the intake itself), and one working rack brings it to 93. Add the second and watch the load bar."
 					],
 					"afterBeat": "trip",
 					"after": [
-						"There. The breaker tripped. Two racks flat out want 93 kW and this feeder only gives 90. Load above capacity and the lights go out. That is the whole job: keep capacity above load, with some room to spare.",
+						"There. The breaker tripped. Two racks flat out want 133 kW and this feeder only gives 120. Load above capacity and the lights go out. That is the whole job: keep capacity above load, with some {{headroom|headroom}} to spare.",
 						"The Power overlay is on so you can see the net. Next, a generator: it covers what the feeder can't."
 					],
 					"pause": true
@@ -114,10 +114,10 @@
 					"handbook": "ch:power",
 					"say": [
 						"Open Power in the build bar, pick the Diesel Genset and click the glowing slot. It starts itself when the grid runs short.",
-						"A {{genset|generator}} adds capacity: the feeder's 90 kW plus the generator's 800 kW. Headroom is the gap between capacity and load."
+						"A {{genset|generator}} adds capacity: the feeder's 120 kW plus the generator's 800 kW. Headroom is the gap between capacity and load."
 					],
 					"after": [
-						"That's headroom: a lot of capacity above a small load. Hold both racks at full load for one game day and you've passed."
+						"That's {{headroom|headroom}}: a lot of capacity above a small load. Hold both racks at full load for one game day and you've passed."
 					],
 					"pause": false
 				},
@@ -231,12 +231,12 @@
 			],
 			"stars": {
 				"headroomPct": 50,
-				"maxDarkTicks": 120
+				"maxDarkTicks": 600
 			},
-			"learned": "kW is how hard equipment pulls right now; capacity is the most the supply can give. Keep capacity above load, with headroom to spare.",
+			"learned": "{{kw|kW}} is how hard equipment pulls right now; {{capacity|capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.",
 			"handbook": [
 				"ch:power",
-				"word#kw"
+				"ch:power#kw"
 			],
 			"next": "Where the Heat Goes",
 			"bonus": 50000,

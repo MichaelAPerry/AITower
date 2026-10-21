@@ -127,6 +127,9 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 								<p className="bld-blurb">{leads.map((c) => c.name).join(", ")}</p>
 							</>
 						)}
+						<button type="button" className="ui-btn pnl-secondary res-read" data-read={sel.id} onClick={() => setUi({ drawer: "handbook", encyId: `tech:${sel.id}`, paletteOpen: false, buildHover: null })}>
+							Read: {sel.name}
+						</button>
 					</>
 				)}
 				{steps.length > 0 && (

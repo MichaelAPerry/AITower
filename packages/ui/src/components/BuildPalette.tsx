@@ -8,6 +8,7 @@ import { Icon, Swatch } from "./common";
 import { findItem, structure } from "../build/catalog";
 import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { OutputBar, TierMark } from "../build/TierMark";
+import { allowedIds } from "../lessons/lessons";
 import { toolKey } from "../tools/controller";
 import type { PanelProps } from "./context";
 
@@ -126,7 +127,7 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
-	if (tab === "structure") {
+	if (tab === "structure" && !allowedIds(view)) {
 		// Coolant and nutrient piping wait for the research that brings liquid cooling / wetware: a "Coming at" row instead of a card.
 		const all = structure(content);
 		cards = all.filter((i) => !structureGate(i, view, content));
@@ -138,8 +139,10 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		const defs = Object.values(content.facilities)
 			.filter((d) => d.category === tab && !d.growth && !d.retired)
 			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
-		cards = defs.filter((d) => !lockReason(d, view, content)).map((d) => findItem(d.id, content) as CatalogItem);
-		lockedLines = lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
+		// A lesson shows only what it teaches: the rest is not even listed.
+		const lesson = allowedIds(view);
+		cards = defs.filter((d) => !lockReason(d, view, content) && (!lesson || lesson.has(d.id))).map((d) => findItem(d.id, content) as CatalogItem);
+		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
 	}
 	const rec = (recommended ?? []).map((id) => findItem(id, content)).filter((i): i is CatalogItem => !!i?.def && !lockReason(i.def, view, content));
 

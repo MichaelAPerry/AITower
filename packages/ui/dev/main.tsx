@@ -3,7 +3,6 @@ import "@fontsource/special-elite";
 import "@fontsource/silkscreen";
 import { createRoot } from "react-dom/client";
 import { Hud } from "../src/Hud";
-import { TUTORIAL_STEPS } from "../src/tutorial/steps";
 import { createFakeContent, createFakeStore, type FakeStoreWithEmit } from "../src/dev/fakeStore";
 
 const content = createFakeContent();
@@ -74,15 +73,6 @@ const path = q.get("path");
 if (path === "greentech" || path === "synthetic") store.patchView({ path, ...(path === "greentech" ? { greenScore: num("score") ?? 0.62 } : { refinement: num("score") ?? 0.4 }) });
 if (q.get("drought") === "1") store.patchView({ drought: true });
 if (q.get("sandbox") === "1") store.patchView({ sandbox: true });
-// Induction: ?tut=<step id> jumps to that step, ?tut=none closes it (default: step 1, as on a first visit).
-try {
-	const tut = q.get("tut");
-	if (tut === "none") localStorage.setItem("aitower.induction.v1", JSON.stringify({ step: 0, done: true }));
-	else if (tut) localStorage.setItem("aitower.induction.v1", JSON.stringify({ step: Math.max(0, TUTORIAL_STEPS.findIndex((t) => t.id === tut)), done: false }));
-	else if (!q.has("keeptut")) localStorage.removeItem("aitower.induction.v1");
-} catch {
-	/* storage blocked */
-}
 // ?title=1 shows the title screen; ?saves=0 removes the seeded saves (first-visit title).
 createRoot(document.getElementById("hud") as HTMLElement).render(<Hud store={store} content={content} title={q.get("title") === "1"} />);
 

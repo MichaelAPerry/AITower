@@ -3,6 +3,8 @@ import { useRef, useState } from "react";
 import { fmtMoney } from "../format";
 import { pushNotice } from "../notices";
 import { Toggle, Kbd } from "../components/common";
+import type { ContentDB } from "@aitower/content";
+import { LessonList } from "../lessons/LessonList";
 import { TEXT_SCALE_MAX, TEXT_SCALE_MIN } from "../settings";
 import { CONTROLS } from "./controls";
 import { exportSave, importSaveFile } from "./fileIO";
@@ -22,6 +24,8 @@ interface PaneProps {
 	flash: (f: Flash | null) => void;
 	/** Called after a load or import replaced the running game. */
 	onReplaced?: () => void;
+	/** For the Lessons section. */
+	content?: ContentDB;
 }
 
 interface SlotPaneProps extends PaneProps {
@@ -300,6 +304,27 @@ export function NewGamePane({ store, menu, onReplaced }: PaneProps) {
 				<div className="ui-newgame-acts">
 					<StampBtn tone="red" rest="New game" hot="Condemned" onClick={() => setArmed(true)} />
 				</div>
+			)}
+		</div>
+	);
+}
+
+/** The Lessons section: the campaign list. Starting one replaces the running game (after a confirmation when there is one). */
+export function LessonsPane({ store, menu, onReplaced, fromTitle, content }: PaneProps & { fromTitle?: boolean }) {
+	const [armed, setArmed] = useState<string | null>(null);
+	const start = (scenario: string): void => {
+		store.newGame(undefined, scenario);
+		onReplaced?.();
+		menu.close();
+	};
+	if (!content) return <p>Lessons are not available here.</p>;
+	return (
+		<div className="ui-newgame" data-pane="lessons">
+			<p>Short guided scenarios, one real datacenter idea each. Finishing one adds starting cash to every Free Build game.{!fromTitle && <> Starting one replaces the running datacenter, so <b>save first</b> if you want it back.</>}</p>
+			{armed ? (
+				<ConfirmBar question="Leave this datacenter and start the lesson?" yes="Start lesson" onYes={() => start(armed)} onNo={() => setArmed(null)} />
+			) : (
+				<LessonList content={content} onStart={(sc) => (fromTitle ? start(sc) : setArmed(sc))} />
 			)}
 		</div>
 	);

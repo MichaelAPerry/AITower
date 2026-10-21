@@ -27,7 +27,7 @@ export interface UiState {
 	focusJobId: number | null;
 	/** Serious alerts after this tick count toward the Alerts badge. */
 	alertsSeenTick: number;
-	/** Build palette tab (lifted so the induction can point at the right one). */
+	/** Build palette tab (lifted so a lesson can point at the right one). */
 	paletteTab: string;
 	/** Catalog item key under the pointer (the build Inspector previews it); null/absent = show the picked item. */
 	buildHover?: string | null;
@@ -37,6 +37,8 @@ export interface UiState {
 	help?: boolean;
 	/** Encyclopedia entry to open (set by "More..." links; the drawer consumes it). */
 	encyId?: string | null;
+	/** Bumped by "/" to focus the Handbook search box. */
+	searchFocus?: number;
 	/** The ascension path just filed (the sim applies it on the next tick), so CURRENT ORDERS stops offering FORM A-5 meanwhile. */
 	pathFiled?: PathFiled | null;
 }

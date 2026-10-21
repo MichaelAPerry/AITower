@@ -1,7 +1,7 @@
 import type { SaveSlotInfo } from "@aitower/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { agoText, backdropCaption, continueSummary, inductionDefault, showTitleAtBoot, startGame, titleBackdrop, titleItems } from "./titleState";
+import { agoText, backdropCaption, continueSummary, showTitleAtBoot, startGame, titleBackdrop, titleItems } from "./titleState";
 
 const info = (id: SaveSlotInfo["id"], savedAt = 0): SaveSlotInfo => ({ id, name: id, savedAt, day: 11, cash: 1_103_200, tier: 2 });
 
@@ -14,19 +14,16 @@ describe("title screen state", () => {
 		expect(showTitleAtBoot("?seed=7&new=1")).toBe(false);
 	});
 
-	it("first visit with no saves offers only New game, Settings and Controls, induction on", () => {
-		expect(titleItems([])).toEqual(["new", "settings", "controls"]);
-		expect(inductionDefault([])).toBe(true);
+	it("first visit with no saves offers Start Lesson 1 first, then Free Build, Settings and Controls", () => {
+		expect(titleItems([])).toEqual(["lesson", "new", "settings", "controls"]);
 	});
 
-	it("with an autosave it offers Continue first, then New, Load, Settings, Controls; induction off by default", () => {
-		const saves = [info("auto"), info("slot1")];
-		expect(titleItems(saves)).toEqual(["continue", "new", "load", "settings", "controls"]);
-		expect(inductionDefault(saves)).toBe(false);
+	it("with an autosave it offers Continue first, then the lesson, Free Build, Load, Settings, Controls", () => {
+		expect(titleItems([info("auto"), info("slot1")])).toEqual(["continue", "lesson", "new", "load", "settings", "controls"]);
 	});
 
 	it("manual saves alone give Load but no Continue", () => {
-		expect(titleItems([info("slot2")])).toEqual(["new", "load", "settings", "controls"]);
+		expect(titleItems([info("slot2")])).toEqual(["lesson", "new", "load", "settings", "controls"]);
 	});
 
 	it("describes how long ago the autosave was written", () => {
@@ -41,32 +38,25 @@ describe("title screen state", () => {
 	it("the game is held paused until the player picks; Continue resumes at 1x", () => {
 		const store = createFakeStore(createFakeContent());
 		store.setSpeed(0);
-		const hooks = { restartInduction: vi.fn(), closeInduction: vi.fn() };
-		startGame(store, { kind: "continue" }, hooks);
+		startGame(store, { kind: "continue" });
 		expect(store.get().speed).toBe(1);
-		expect(hooks.restartInduction).not.toHaveBeenCalled();
-		expect(hooks.closeInduction).not.toHaveBeenCalled();
 	});
 
-	it("New game with the induction ticked starts a fresh site, restarts the induction and leaves the clock stopped for its first memo", () => {
+	it("Start Lesson begins the lesson's site and leaves the clock stopped for the teacher", () => {
 		const store = createFakeStore(createFakeContent());
 		const newGame = vi.spyOn(store, "newGame");
-		store.setSpeed(0);
-		const hooks = { restartInduction: vi.fn(), closeInduction: vi.fn() };
-		startGame(store, { kind: "new", induction: true }, hooks);
-		expect(newGame).toHaveBeenCalledTimes(1);
-		expect(hooks.restartInduction).toHaveBeenCalledTimes(1);
-		expect(hooks.closeInduction).not.toHaveBeenCalled();
+		startGame(store, { kind: "lesson", scenarioId: "lesson_first_watt" });
+		expect(newGame).toHaveBeenCalledWith(undefined, "lesson_first_watt");
 		expect(store.get().speed).toBe(0);
 	});
 
-	it("New game with the induction unticked closes the induction and runs at 1x", () => {
+	it("Free Build starts a fresh site: stopped for the crawl, else at 1x", () => {
 		const store = createFakeStore(createFakeContent());
-		store.setSpeed(0);
-		const hooks = { restartInduction: vi.fn(), closeInduction: vi.fn() };
-		startGame(store, { kind: "new", induction: false }, hooks);
-		expect(hooks.closeInduction).toHaveBeenCalledTimes(1);
-		expect(hooks.restartInduction).not.toHaveBeenCalled();
+		const newGame = vi.spyOn(store, "newGame");
+		startGame(store, { kind: "new", crawl: true });
+		expect(newGame).toHaveBeenCalledTimes(1);
+		expect(store.get().speed).toBe(0);
+		startGame(store, { kind: "new", scenarioId: "brownfield" });
 		expect(store.get().speed).toBe(1);
 	});
 });

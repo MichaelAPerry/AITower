@@ -31,10 +31,10 @@ const ICONS: Record<Tab, ReactNode> = {
 export const BAR_TABS: Tab[] = ["structure", "rack", "power", "cooling", "logistics", "bio", "supplies"];
 
 /** The always-visible category bar. One click on a category opens its catalog; clicking it again closes it. */
-export function BuildBar({ ui, setUi }: Pick<PanelProps, "ui" | "setUi">) {
+export function BuildBar({ ui, setUi, tabs }: Pick<PanelProps, "ui" | "setUi"> & { /** A lesson shows only these categories. */ tabs?: readonly Tab[] | null }) {
 	return (
 		<nav className="bld-bar" aria-label="Build categories" data-help="build">
-			{BAR_TABS.map((id) => {
+			{BAR_TABS.filter((t) => !tabs || tabs.includes(t)).map((id) => {
 				const on = ui.paletteOpen && ui.paletteTab === id;
 				return (
 					<button

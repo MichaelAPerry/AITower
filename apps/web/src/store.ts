@@ -8,6 +8,8 @@ import {
 	type OverlayMode,
 	type Renderer,
 	SAVE_SLOTS,
+	freeBuildBonus,
+	loadLessonProgress,
 	type SaveSlotId,
 	type SaveSlotInfo,
 	type Selection,
@@ -92,7 +94,8 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 	 */
 	const freshSim = (seed: number, scenarioId: string = SCENARIO): Sim => {
 		// Unknown ids fall back to the default scenario rather than throwing from a UI click.
-		const next = createSim(content, Object.hasOwn(content.scenarios, scenarioId) ? scenarioId : SCENARIO, seed);
+		const bonusCash = freeBuildBonus(content.lessons, loadLessonProgress(storage));
+		const next = createSim(content, Object.hasOwn(content.scenarios, scenarioId) ? scenarioId : SCENARIO, seed, { bonusCash });
 		next.step();
 		return next;
 	};

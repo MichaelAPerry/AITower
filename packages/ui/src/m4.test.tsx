@@ -18,7 +18,7 @@ import { droughtChip, pathGauge } from "./paths/paths";
 import { CRAWL_LINES, crawlSeconds, isSkipKey, lineDelay, reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { scenarioCards, showPicker, validScenario } from "./title/scenarios";
-import { inductionDefault, startGame } from "./title/titleState";
+import { startGame } from "./title/titleState";
 import { Hud } from "./Hud";
 
 const FOREMAN: TechNode = { id: "works_foreman", name: "Works Foreman", branch: "administration", minTier: 1, cost: 10, requires: [], description: "x", effects: [{ type: "feature", feature: "foreman" }] };
@@ -298,26 +298,20 @@ describe("scenario picker", () => {
 	it("New game starts the chosen scenario; Continue and the default start are unchanged", () => {
 		const { store } = setup();
 		const newGame = vi.spyOn(store, "newGame");
-		const hooks = { restartInduction: vi.fn(), closeInduction: vi.fn() };
-		startGame(store, { kind: "new", induction: false, scenarioId: "brownfield" }, hooks);
+		startGame(store, { kind: "new", scenarioId: "brownfield" });
 		expect(newGame).toHaveBeenLastCalledWith(undefined, "brownfield");
 		expect(store.get().view.cash).toBe(350_000);
 		expect(store.get().speed).toBe(1);
-		startGame(store, { kind: "new", induction: false }, hooks);
+		startGame(store, { kind: "new" });
 		expect(newGame).toHaveBeenLastCalledWith();
 	});
-	it("with the crawl the clock stays stopped; the induction stays in charge of it", () => {
+	it("with the crawl the clock stays stopped until the crawl ends", () => {
 		const { store } = setup();
-		const hooks = { restartInduction: vi.fn(), closeInduction: vi.fn() };
 		store.setSpeed(3);
-		startGame(store, { kind: "new", induction: false, crawl: true }, hooks);
+		startGame(store, { kind: "new", crawl: true });
 		expect(store.get().speed).toBe(0);
 	});
-	it("the induction is ticked by default only for the standard start on a first visit", () => {
-		expect(inductionDefault([])).toBe(true);
-		expect(inductionDefault([], "starter")).toBe(true);
-		expect(inductionDefault([], "brownfield")).toBe(false);
-	});
+
 });
 
 describe("opening crawl", () => {
@@ -370,7 +364,7 @@ describe("Hud", () => {
 		const { store, content } = setup();
 		const html = render(<Hud store={store} content={content} title />);
 		// The title waits for the saves list before drawing its menu, but the picker needs only the content.
-		expect(html).toContain("CHOOSE A SITE");
+		expect(html).toContain("FREE BUILD SITE");
 		expect(html).toContain("Auction Lot");
 	});
 });

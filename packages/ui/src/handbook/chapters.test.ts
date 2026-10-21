@@ -5,7 +5,6 @@ import { buildEntries, searchEntries } from "../encyclopedia/entries";
 import { HELP, HELP_KEYS } from "../help/helpText";
 import { buildChapters, isUnlocked, lockText, newlyOpen, primerTarget, unlockedIds, wordCount } from "./chapters";
 import { TERMS, termById } from "../glossary/terms";
-import { shouldNudge } from "./progress";
 
 const content = loadContent();
 const chapters = buildChapters(content);
@@ -57,12 +56,6 @@ describe("unlock rules", () => {
 	it("newlyOpen reports only what was not announced", () => {
 		expect(newlyOpen(["a", "b", "c"], ["a", "c"])).toEqual(["b"]);
 	});
-	it("the Primer is offered once, after the tutorial, and never if it was opened", () => {
-		expect(shouldNudge(false, { opened: false, nudged: false })).toBe(false);
-		expect(shouldNudge(true, { opened: false, nudged: false })).toBe(true);
-		expect(shouldNudge(true, { opened: true, nudged: false })).toBe(false);
-		expect(shouldNudge(true, { opened: false, nudged: true })).toBe(false);
-	});
 });
 
 describe("links and search", () => {
@@ -83,7 +76,7 @@ describe("links and search", () => {
 describe("jargon", () => {
 	const gloss = new Set(TERMS.flatMap((t) => [t.id, t.name.toLowerCase(), ...(t.aka ?? "").split(/\s+/)]));
 	const copy = [...chapters.flatMap((c) => c.blocks.map((b) => b.p)), ...HELP_KEYS.map((k) => HELP[k].text)].join(" ");
-	it("every technical term used in Primer and help copy has a glossary entry", () => {
+	it("every technical term used in Handbook and help copy has a glossary entry", () => {
 		const terms = ["PUE", "CDU", "CRAH", "UPS", "COP", "DLC", "RP", "PF", "PFLOPS", "kW", "MW", "kWh", "Chiller", "Genset", "Throttle", "Brownout", "Uptime", "Rack", "Reputation", "Overlay", "PDU", "SLA", "SLO", "MTBF", "TDP", "PPA", "WUE"];
 		for (const t of terms) if (new RegExp(`\\b${t}\\b`, "i").test(copy)) expect(gloss.has(t.toLowerCase()), t).toBe(true);
 	});
