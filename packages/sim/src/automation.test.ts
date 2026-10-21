@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import type { AutomationPolicy, SimEvent } from "./api";
 import { type SimImpl, simFromSnapshot } from "./sim";
 import { addBot } from "./world/entities";
-import { exec, facilityOf, makeContent, newSim, run, scenario } from "./test/fixture";
+import { exec, facilityOf, makeContent, newSim, rowCells, run, scenario } from "./test/fixture";
 import { giveRp, grant, NO_OFFERS, pushOffer, QUIET_EVENTS, training } from "./test/m2b";
 
 const BAL: Partial<Balance> = { ...QUIET_EVENTS, ...NO_OFFERS };
@@ -584,6 +584,51 @@ describe("the Foreman", () => {
 			foreman(tiny, { power: false, cooling: false });
 			expect(placed(tiny, "rack_dlc_gpu")).toHaveLength(0);
 			expect(placed(tiny, "rack_air_gpu")).toHaveLength(1);
+		});
+
+		it("builds the best-value rack it can support, not just the first-level one", () => {
+			const lot = scenario("valuelot", {
+				slabs: [[0, 0, 47]],
+				conduits: [["power", 0, 0, 47]],
+				facilities: [{ defId: "grid_tie", floor: 0, x: 0 }],
+			});
+			const mid = (x: ContentDB): void => {
+				const air = x.facilities.rack_air_gpu;
+				x.facilities.rack_air_mid = { ...air, id: "rack_air_mid", cost: 800_000, rack: { ...(air.rack as NonNullable<typeof air.rack>), pflops: 100, powerKw: 60 } }; // 1.25e-4 PF/$
+				x.facilities.rack_air_huge = { ...air, id: "rack_air_huge", cost: 2_000_000, rack: { ...(air.rack as NonNullable<typeof air.rack>), pflops: 150, powerKw: 90 } }; // more PF, worse value (7.5e-5)
+				x.facilities.rack_air_fancy = { ...air, id: "rack_air_fancy", cost: 400_000, unlockTier: 4, rack: { ...(air.rack as NonNullable<typeof air.rack>), pflops: 400 } }; // locked
+			};
+			const sim = newSim(content([lot], perHour(1), mid), "valuelot");
+			foreman(sim, { power: false, cooling: false });
+			expect(placed(sim, "rack_air_mid")).toHaveLength(1);
+			expect(placed(sim, "rack_air_huge")).toHaveLength(0);
+			expect(placed(sim, "rack_air_gpu")).toHaveLength(0);
+			expect(placed(sim, "rack_air_fancy")).toHaveLength(0);
+			// Too dear for the budget: the next best it can pay for.
+			const poor = newSim(content([lot], perHour(1), mid), "valuelot");
+			poor.state.cash = 1_000_000;
+			foreman(poor, { power: false, cooling: false, reserve: 300_000 });
+			expect(placed(poor, "rack_air_mid")).toHaveLength(0);
+			expect(placed(poor, "rack_air_gpu")).toHaveLength(1);
+		});
+
+		it("builds an organoid rack only where a nutrient line has spare supply", () => {
+			const dry = scenario("drylot", { slabs: [[0, 0, 47]], conduits: [["power", 0, 0, 47]], facilities: [{ defId: "grid_tie", floor: 0, x: 0 }] });
+			const cheapBio = (x: ContentDB): void => {
+				const o = x.facilities.organoid_rack;
+				x.facilities.organoid_rack = { ...o, cost: 300_000 }; // 1e-4 PF/$: the best value on the menu
+			};
+			const sim = newSim(content([dry], perHour(1), cheapBio), "drylot");
+			exec(sim, { type: "buildConduit", layer: "nutrient", cells: rowCells(0, 20, 40) });
+			exec(sim, { type: "place", defId: "nutrient_plant", floor: 0, x: 22 });
+			run(sim, 2); // the plant's supply is solved from the next tick on
+			foreman(sim, { power: false, cooling: false });
+
+			expect(placed(sim, "organoid_rack")).toHaveLength(1);
+			const none = newSim(content([dry], perHour(1), cheapBio), "drylot");
+			foreman(none, { power: false, cooling: false });
+			expect(placed(none, "organoid_rack")).toHaveLength(0);
+			expect(placed(none, "rack_air_gpu")).toHaveLength(1);
 		});
 
 		it("picks the floor nearest the existing racks", () => {

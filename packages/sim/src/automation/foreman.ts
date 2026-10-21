@@ -1,27 +1,29 @@
 /**
  * The Foreman: at most `balance.automation.foremanPerHour` placements per game-hour, never spending below `reserve`, and only on
  * built slab whose cells all carry a power conduit (it never builds slab, floors or conduits). Priority per placement:
- *   1. power   — a grid tie or genset (highest capacity first) on a net whose satisfaction is below 1;
+ *   1. power   — a grid tie or genset (the cheapest unit that covers the shortfall, else the biggest) on a net whose satisfaction is below 1;
  *   2. cooling — the best CRAH within reach of the hottest rack above `thermal.okC`;
- *   3. racks   — the best air rack (a DLC rack when a coolant loop with spare capacity is reachable) when no offer fits the
+ *   3. racks   — the best-value rack (PFLOPS per $) that is unlocked, affordable and supported: air anywhere, liquid/immersion
+ *                where a coolant loop has spare capacity for its liquid share, organoid where a nutrient line has spare supply; when no offer fits the
  *                idle compute, or less than FOREMAN_IDLE_SHARE of the installed compute is idle.
  * Maintenance comes before growth (and rides on the `racks` toggle): between cooling and racks the Foreman adds a charger when the bots order wants more bots than
  * the docks hold, and a depot when the spare-parts stock is below its target and every depot is full. Racks wait while open work
  * orders outnumber the bots, the rolling uptime is under the current tier's target, standing is under FOREMAN_MIN_STANDING, the last closed day lost money, a rack runs above `okC` (cooling on) or a
  * power net is short (power on).
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
- * Reach: only on floors a bot can get to (see `reachableFloors`); with none reachable nothing is placed.
+ * Reach: only on slab a ground bot can path to by the real nav graph (see `reachableRuns`); with none reachable nothing is placed.
  */
 import type { ContentDB, FacilityDef } from "@aitower/content";
 import { acceptCheck, installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
 import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING, FOREMAN_RUNWAY_DAYS } from "../core/constants";
-import { cellIdx } from "../core/grid";
+import { cellCount, cellIdx } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
 import { dayCosts } from "../economy/ledger";
+import { beginSearch, createNav, ensureNav, type Nav, routeTo } from "../logistics/routing";
 import { findChargerWithSpace } from "../world/entities";
-import { getDef, isComputeRack } from "../world/defs";
+import { getDef, isComputeRack, serviceTile } from "../world/defs";
 import { planNormalized } from "../commands/apply";
 import { buildable, runCommand } from "./run";
 import { foremanPerHour } from "../research/research";
@@ -37,35 +39,57 @@ interface Run {
 	coolDone: Set<number>;
 	/** Spare coolant capacity already promised to racks placed this run, by net. */
 	coolUsed: Map<number, number>;
+	/** Spare nutrient supply already promised to organoid racks placed this run, by net. */
+	nutrientUsed: Map<number, number>;
 	racksPlaced: number;
 	/** PFLOPS placed this run (idle until jobs take them). */
 	addedPflops: number;
-	/** Floors bots can reach (computed on first use; the Foreman builds no lifts, so it holds for the run). */
-	reach?: Set<number>;
+	/** Slab runs bots can reach (computed on first use; the Foreman builds no lifts or slab, so it holds for the run). */
+	reach?: Set<number> | null;
 }
 
 /**
- * Floors a bot can work on: every floor if a flying bot exists; otherwise the floors of the bots and chargers (a bot lives
- * at its charger), widened through any chain of lifts (a lift serving a reachable floor makes all its floors reachable).
+ * Slab runs (ids from the nav graph) a ground bot can actually path to: searched from every distinct run a bot stands
+ * on (from the chargers when there are no bots yet), through the real lift graph (powered lifts only, shaft to shaft only
+ * where the slab connects them). `null` means every run (a flying bot exists).
  */
-export function reachableFloors(state: SimState, content: ContentDB): Set<number> {
+export function reachableRuns(state: SimState, content: ContentDB, nav: Nav): Set<number> | null {
+	if (state.bots.some((b) => content.bots[b.defId]?.flying)) return null;
+	ensureNav(nav, state, content);
+	const sources: { floor: number; x: number }[] = [];
+	const seen = new Set<number>();
+	const add = (floor: number, x: number): void => {
+		if (!Number.isInteger(floor) || floor < state.floorMin || floor > state.floorMax) return;
+		const run = nav.run[cellIdx(state, Math.round(x), floor)];
+		if (run < 0 || seen.has(run)) return;
+		seen.add(run);
+		sources.push({ floor, x });
+	};
+	for (const b of state.bots) if (b.leg !== "ride") add(Math.round(b.floor), b.x);
+	if (sources.length === 0) for (const c of nav.chargers) add(c.floor, serviceTile(c));
 	const out = new Set<number>();
-	if (state.bots.some((b) => content.bots[b.defId]?.flying)) {
-		for (let f = state.floorMin; f <= state.floorMax; f++) out.add(f);
-		return out;
-	}
-	for (const b of state.bots) out.add(Math.round(b.floor));
-	for (const f of state.facilities) if (getDef(content, f.defId).kind === "charger") out.add(f.floor);
-	for (let grew = true; grew; ) {
-		grew = false;
-		for (const l of state.lifts) {
-			let serves = false;
-			for (let f = l.floorMin; f <= l.floorMax && !serves; f++) serves = out.has(f);
-			if (!serves) continue;
-			for (let f = l.floorMin; f <= l.floorMax; f++) if (!out.has(f)) {
-				out.add(f);
-				grew = true;
+	for (const s of sources) {
+		beginSearch(nav, state, content, 1, s.floor, s.x);
+		for (let fl = state.floorMin; fl <= state.floorMax; fl++) {
+			for (let x = 0; x < state.width; x++) {
+				const run = nav.run[cellIdx(state, x, fl)];
+				if (run < 0 || out.has(run)) continue;
+				if (routeTo(nav, state, fl, x)) out.add(run);
 			}
+		}
+	}
+	return out;
+}
+
+/** Floors with at least one slab run a ground bot can path to (every floor when a flying bot exists). */
+export function reachableFloors(state: SimState, content: ContentDB, nav: Nav = createNav(cellCount(state))): Set<number> {
+	const out = new Set<number>();
+	const runs = reachableRuns(state, content, nav);
+	for (let fl = state.floorMin; fl <= state.floorMax; fl++) {
+		if (runs === null) out.add(fl);
+		else for (let x = 0; x < state.width; x++) if (runs.has(nav.run[cellIdx(state, x, fl)])) {
+			out.add(fl);
+			break;
 		}
 	}
 	return out;
@@ -90,9 +114,10 @@ function findSpot(r: Run, d: FacilityDef, floors: number[], spotOk: (floor: numb
 	const { state } = r.ctx;
 	const rackFloors = [...new Set(realRacks(r).map((k) => k.floor))];
 	const near = (floor: number): number => (rackFloors.length === 0 ? Math.abs(floor) : Math.min(...rackFloors.map((k) => Math.abs(k - floor))));
-	if (!r.reach) r.reach = reachableFloors(state, r.ctx.content);
+	if (r.reach === undefined) r.reach = reachableRuns(state, r.ctx.content, r.ctx.scratch.nav);
 	const reach = r.reach;
-	const order = floors.filter((f) => reach.has(f)).sort((a, b) => near(a) - near(b) || a - b);
+	const nav = r.ctx.scratch.nav;
+	const order = [...floors].sort((a, b) => near(a) - near(b) || a - b);
 	for (const floor of order) {
 		for (let x = 0; x + d.width <= state.width; x++) {
 			let ok = true;
@@ -100,7 +125,10 @@ function findSpot(r: Run, d: FacilityDef, floors: number[], spotOk: (floor: numb
 				const i = cellIdx(state, x + k, floor);
 				ok = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0;
 			}
-			if (!ok || !spotOk(floor, x)) continue;
+			if (!ok) continue;
+			// Only where a bot can walk (and ride) to: the slab run under the spot must be one a bot can path to.
+			if (reach !== null && !reach.has(nav.run[cellIdx(state, x + (d.width >> 1), floor)])) continue;
+			if (!spotOk(floor, x)) continue;
 			if (planNormalized(r.ctx, { type: "place", defId: d.id, floor, x }).ok) return { floor, x };
 		}
 	}
@@ -136,7 +164,11 @@ function tryPower(r: Run): boolean {
 		.filter((d) => (d.kind === "grid_tie" || d.kind === "genset") && buildable(r.ctx, d))
 		.sort((a, b) => (b.power?.capacityKw ?? 0) - (a.power?.capacityKw ?? 0) || (a.kind === b.kind ? 0 : a.kind === "grid_tie" ? -1 : 1) || byId(a, b));
 	for (const net of short) {
-		for (const d of defs) {
+		// Right-sized: the cheapest unit that covers the shortfall; when none does, the biggest ones first.
+		const need = Math.max(0, net.demandKw - net.supplyKw);
+		const enough = defs.filter((d) => (d.power?.capacityKw ?? 0) >= need).sort((a, b) => a.cost - b.cost || byId(a, b));
+		const fallback = defs.filter((d) => (d.power?.capacityKw ?? 0) < need);
+		for (const d of [...enough, ...fallback]) {
 			if (!affordable(r, d)) continue;
 			const spot = findSpot(r, d, allFloors(r), (floor, x) => allCellsOn(r, state.powerNetOf, floor, x, d.width, net.id));
 			if (!spot || !place(r, d, spot)) continue;
@@ -262,34 +294,51 @@ function leavesRoom(r: Run, floor: number, x: number): boolean {
 	return false;
 }
 
+/**
+ * Compute value of a rack: PFLOPS per dollar of purchase price (ties: more PFLOPS, then id). The Foreman buys the
+ * best-value rack it can both afford and support, not the first or the cheapest.
+ */
+const rackValue = (d: FacilityDef): number => (d.rack?.pflops ?? 0) / Math.max(1, d.cost);
+
 function tryRacks(r: Run): boolean {
 	const { state, content } = r.ctx;
 	if (!wantsRacks(r)) return false;
-	const racks = Object.values(content.facilities).filter((d) => isComputeRack(d) && buildable(r.ctx, d));
-	const best = (pred: (d: FacilityDef) => boolean): FacilityDef[] => racks.filter(pred).sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0) || byId(a, b));
+	const candidates = Object.values(content.facilities)
+		.filter((d) => isComputeRack(d) && buildable(r.ctx, d))
+		.sort((a, b) => rackValue(b) - rackValue(a) || (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0) || byId(a, b));
 	let placed: FacilityDef | null = null;
-	// A DLC rack when a coolant loop with room for it is reachable.
-	for (const net of state.coolantNets) {
-		const spare = net.capacityKw - net.loadKw - (r.coolUsed.get(net.id) ?? 0);
-		for (const d of best((x) => x.rack?.cooling === "dlc")) {
-			const load = (d.rack?.powerKw ?? 0) * (d.rack?.liquidFraction ?? 0);
-			if (load > spare || !affordable(r, d)) continue;
-			const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, floor, x, d.width) === net.id && leavesRoom(r, floor, x));
-			if (!spot || !place(r, d, spot)) continue;
-			r.coolUsed.set(net.id, (r.coolUsed.get(net.id) ?? 0) + load);
-			placed = d;
-			break;
+	for (const d of candidates) {
+		if (!affordable(r, d)) continue;
+		const rk = d.rack;
+		const liquid = (rk?.powerKw ?? 0) * (rk?.liquidFraction ?? 0);
+		if (liquid > 0) {
+			// Liquid-cooled: needs a coolant loop (chiller + CDU capacity) with room for its liquid share.
+			for (const net of state.coolantNets) {
+				const spare = net.capacityKw - net.loadKw - (r.coolUsed.get(net.id) ?? 0);
+				if (liquid > spare) continue;
+				const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, state.coolantNetOf, floor, x, d.width) === net.id && leavesRoom(r, floor, x));
+				if (!spot || !place(r, d, spot)) continue;
+				r.coolUsed.set(net.id, (r.coolUsed.get(net.id) ?? 0) + liquid);
+				placed = d;
+				break;
+			}
+		} else if (rk?.cooling === "bio") {
+			// Organoid: needs a nutrient line with spare supply.
+			const use = rk.bio?.nutrientUse ?? 0;
+			for (const net of state.nutrientNets) {
+				const spare = net.supply - net.demand - (r.nutrientUsed.get(net.id) ?? 0);
+				if (use > spare) continue;
+				const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, state.nutrientNetOf, floor, x, d.width) === net.id && leavesRoom(r, floor, x));
+				if (!spot || !place(r, d, spot)) continue;
+				r.nutrientUsed.set(net.id, (r.nutrientUsed.get(net.id) ?? 0) + use);
+				placed = d;
+				break;
+			}
+		} else {
+			const spot = findSpot(r, d, allFloors(r), (floor, x) => leavesRoom(r, floor, x));
+			if (spot && place(r, d, spot)) placed = d;
 		}
 		if (placed) break;
-	}
-	if (!placed) {
-		for (const d of best((x) => x.rack?.cooling === "air")) {
-			if (!affordable(r, d)) continue;
-			const spot = findSpot(r, d, allFloors(r), (floor, x) => leavesRoom(r, floor, x));
-			if (!spot || !place(r, d, spot)) continue;
-			placed = d;
-			break;
-		}
 	}
 	if (!placed) return false;
 	r.racksPlaced++;
@@ -297,12 +346,12 @@ function tryRacks(r: Run): boolean {
 	return true;
 }
 
-/** Coolant net a footprint would attach to (lowest id under its cells), or -1. */
-function lowestNet(r: Run, floor: number, x: number, w: number): number {
+/** Net of a layer a footprint would attach to (lowest id under its cells), or -1. */
+function lowestNet(r: Run, layer: Int32Array, floor: number, x: number, w: number): number {
 	const { state } = r.ctx;
 	let best = -1;
 	for (let k = 0; k < w; k++) {
-		const n = state.coolantNetOf[cellIdx(state, x + k, floor)];
+		const n = layer[cellIdx(state, x + k, floor)];
 		if (n >= 0 && (best < 0 || n < best)) best = n;
 	}
 	return best;
@@ -313,7 +362,7 @@ export function foremanStep(ctx: TickCtx): void {
 	const p = state.automation.foreman;
 	const lastDay = state.ledger[state.ledger.length - 1];
 	const runway = lastDay ? FOREMAN_RUNWAY_DAYS * (lastDay.energy + lastDay.upkeep + lastDay.fees) : 0;
-	const r: Run = { ctx, reserve: Math.max(p.reserve, runway), powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
+	const r: Run = { ctx, reserve: Math.max(p.reserve, runway), powerDone: new Set(), coolDone: new Set(), coolUsed: new Map(), nutrientUsed: new Map(), racksPlaced: 0, addedPflops: 0 };
 	for (let placed = 0; placed < foremanPerHour(state, content); placed++) {
 		if (state.netsDirty) rebuildNetworks(ctx);
 		const did = (p.power && tryPower(r)) || (p.cooling && tryCooling(r)) || (p.racks && (tryLogistics(r) || tryRacks(r)));

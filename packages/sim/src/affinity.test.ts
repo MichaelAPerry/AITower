@@ -151,9 +151,12 @@ describe("Foreman reach", () => {
 			lifts,
 		});
 	const reach = (lifts: { x: number; floorMin: number; floorMax: number }[], bots = false) => {
-		const c = makeContent([tower(lifts)], { ...QUIET_EVENTS, ...NO_OFFERS });
+		const sc = tower(lifts);
+		sc.facilities.push({ defId: "grid_tie", floor: 0, x: 8 }); // powers the lifts
+		const c = makeContent([sc], { ...QUIET_EVENTS, ...NO_OFFERS });
 		const sim = newSim(c, "reach");
 		if (bots) addBot(sim.state, "drone", 0, 0, -1);
+		sim.step(); // the first tick solves power: an unpowered lift is not a way up
 		return [...reachableFloors(sim.state, sim.content)].sort((a, b) => a - b);
 	};
 
@@ -184,6 +187,34 @@ describe("Foreman reach", () => {
 		const sim = foremanRun([{ x: 40, floorMin: 0, floorMax: 1 }]);
 		expect(racks(sim).length).toBeGreaterThan(0);
 		for (const f of racks(sim)) expect([0, 1]).toContain(f.floor);
+	});
+
+	it("a prepared floor with its own charger but no lift to it is not built on", () => {
+		const sc = tower([{ x: 40, floorMin: 0, floorMax: 1 }]);
+		sc.facilities.push({ defId: "grid_tie", floor: 0, x: 0 }, { defId: "bot_charger", floor: 2, x: 30 });
+		const c = makeContent([sc], { ...QUIET_EVENTS, ...NO_OFFERS, automation: { partsBatch: 5, foremanPerHour: 6 } });
+		const sim = newSim(c, "reach");
+		addBot(sim.state, "rover", 0, 30, -1);
+		grant(sim, "t_foreman");
+		const p = structuredClone(sim.view().automation.policy);
+		p.bots.maxBots = 0;
+		p.foreman = { ...p.foreman, enabled: true, reserve: 0, cooling: false, power: false };
+		exec(sim, { type: "setAutomation", policy: p });
+		run(sim, 900);
+		expect(racks(sim).length).toBeGreaterThan(0);
+		for (const f of racks(sim)) expect([0, 1]).toContain(f.floor);
+		expect([...reachableFloors(sim.state, sim.content)].sort((a, b) => a - b)).toEqual([0, 1]);
+	});
+
+	it("a second shaft on the far side of a slab gap does not extend the reach", () => {
+		const sc = tower([{ x: 2, floorMin: 0, floorMax: 1 }, { x: 44, floorMin: 1, floorMax: 3 }]);
+		sc.slabs = [[0, 0, 47], [1, 0, 19], [1, 21, 47], [2, 0, 47], [3, 0, 47]];
+		sc.facilities.push({ defId: "grid_tie", floor: 0, x: 8 });
+		const c = makeContent([sc], { ...QUIET_EVENTS, ...NO_OFFERS });
+		const sim = newSim(c, "reach");
+		sim.step();
+		const f = [...reachableFloors(sim.state, sim.content)].sort((a, b) => a - b);
+		expect(f).toEqual([0, 1]); // floor 1 is reached on its left run only; floors 2-3 only hang off the right run
 	});
 
 	it("places nothing when no floor is reachable, and does not loop", () => {

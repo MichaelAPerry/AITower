@@ -24,7 +24,10 @@ export function attachToNets(state: SimState): void {
 	}
 	for (const lift of state.lifts) {
 		const cells: number[] = [];
-		for (let fl = lift.floorMin; fl <= lift.floorMax; fl++) cells.push(cellIdx(state, lift.x, fl));
+		// The car is wired into conduit running under its shaft or alongside it (one tile either side).
+		for (let fl = lift.floorMin; fl <= lift.floorMax; fl++) {
+			for (let dx = -1; dx <= 1; dx++) if (lift.x + dx >= 0 && lift.x + dx < state.width) cells.push(cellIdx(state, lift.x + dx, fl));
+		}
 		lift.powerNet = lowestNet(state.powerNetOf, cells);
 	}
 }

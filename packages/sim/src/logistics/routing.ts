@@ -13,6 +13,7 @@
  * results are deterministic. Positions are tile indices (x = 3 ⇒ centred on tile 3).
  */
 import type { ContentDB } from "@aitower/content";
+import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellIdx, inBounds } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { getDef } from "../world/defs";
@@ -50,6 +51,8 @@ export interface Nav {
 	/** Bots currently waiting for / riding each lift (refreshed by every search). */
 	liftLoad: number[];
 	liftOffset: number[];
+	/** Per lift: false while it has no power (refreshed by every search), so routes never rely on a frozen car. */
+	liftUp: boolean[];
 	n: number;
 	nodeLift: number[]; // index into liftIds
 	nodeFloor: number[];
@@ -79,6 +82,7 @@ export function createNav(cells: number): Nav {
 		liftWait: [],
 		liftLoad: [],
 		liftOffset: [],
+		liftUp: [],
 		n: 0,
 		nodeLift: [],
 		nodeFloor: [],
@@ -230,6 +234,13 @@ export function beginSearch(nav: Nav, state: SimState, content: ContentDB, botSp
 	const capacity = Math.max(1, content.lift.capacity);
 	nav.liftLoad.length = nav.liftIds.length;
 	nav.liftLoad.fill(0);
+	// An unpowered shaft (no conduit under it, or a dead net) never moves: do not plan through it. Before the first
+	// network rebuild nothing is known yet, so every lift counts as up.
+	nav.liftUp.length = nav.liftIds.length;
+	for (let li = 0; li < nav.liftIds.length; li++) {
+		const lift = state.lifts[li];
+		nav.liftUp[li] = state.netsDirty || (lift.powerNet >= 0 && lift.sat >= MIN_POWERED_SATISFACTION);
+	}
 	if (nav.liftIds.length > 0) {
 		for (const b of state.bots) {
 			if (b.liftId < 0 || b.leg === "walk") continue;
@@ -268,7 +279,7 @@ export function beginSearch(nav: Nav, state: SimState, content: ContentDB, botSp
 		if (u < n) {
 			// Landing: board, or walk to another lift's landing on this floor.
 			const li = nav.nodeLift[u];
-			relax(u, n + u, nav.liftWait[li] * (1 + nav.liftLoad[li] / capacity));
+			if (nav.liftUp[li]) relax(u, n + u, nav.liftWait[li] * (1 + nav.liftLoad[li] / capacity));
 			for (const e of nav.walkEdges[u]) relax(u, e.to, e.tiles / speed);
 		} else {
 			const land = u - n;
