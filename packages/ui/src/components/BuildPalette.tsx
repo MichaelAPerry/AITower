@@ -2,11 +2,11 @@ import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
 import type { SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
-import { techGate } from "../research/tech";
+import { techGate, techName } from "../research/tech";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
 import { findItem, structure } from "../build/catalog";
-import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary } from "../build/plain";
+import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { toolKey } from "../tools/controller";
 import type { PanelProps } from "./context";
 
@@ -122,7 +122,14 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
-	if (tab === "structure") cards = structure(content);
+	if (tab === "structure") {
+		// Coolant and nutrient piping wait for the research that brings liquid cooling / wetware: a "Coming at" row instead of a card.
+		const all = structure(content);
+		cards = all.filter((i) => !structureGate(i, view, content));
+		lockedLines = all
+			.filter((i) => structureGate(i, view, content))
+			.map((i) => `Research "${techName(content, structureGate(i, view, content) as string)}" to unlock ${i.name}`);
+	}
 	else if (tab !== "supplies") {
 		const defs = Object.values(content.facilities)
 			.filter((d) => d.category === tab && !d.growth && !d.retired)
@@ -143,11 +150,6 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		<aside className="bld-catalog ui-panel" data-help="catalog" aria-label={`${CATEGORY_LABEL[tab]} catalog`}>
 			<div className="bld-head">
 				<span className="bld-title">{CATEGORY_LABEL[tab]}</span>
-				{tool.kind !== "select" && (
-					<button type="button" className="ui-btn bld-drop" onClick={() => { store.setGhost(null); store.setTool({ kind: "select" }); }} title="Put the tool down (Esc)">
-						Put tool down
-					</button>
-				)}
 				<button type="button" className="ui-btn ui-icon-btn" aria-label="Close catalog" title="Close (B)" onClick={() => setUi({ paletteOpen: false, buildHover: null })}>
 					<Icon name="close" size={11} />
 				</button>

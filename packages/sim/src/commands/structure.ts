@@ -1,4 +1,5 @@
 /** buildSlab, buildConduit, buildLift. */
+import { conduitTech } from "@aitower/content";
 import type { CellRef, ConduitLayer } from "../api";
 import { cellIdx, inBounds } from "../core/grid";
 import { techGate } from "../research/research";
@@ -41,12 +42,10 @@ export function planConduit(ctx: PlanCtx, layer: ConduitLayer, cells: CellRef[])
 	const s = ctx.state;
 	if (layer !== "power" && layer !== "coolant" && layer !== "nutrient") return reject("unknown conduit layer");
 	if (!Array.isArray(cells) || cells.length === 0) return reject("no cells");
-	if (layer === "nutrient") {
-		// Nutrient piping arrives with the research that unlocks the nutrient plant (data-driven, no hard-coded id).
-		const plant = Object.values(ctx.content.facilities).find((d) => d.kind === "nutrient" && d.tech);
-		const gate = techGate(s, ctx.content, plant?.tech);
-		if (gate) return reject(gate);
-	}
+	// Coolant piping arrives with liquid cooling, nutrient piping with the nutrient plant (data-driven, no hard-coded ids).
+	// Conduit already in the ground (older saves, scenarios) stays; only new runs are gated.
+	const gate = techGate(s, ctx.content, conduitTech(ctx.content, layer));
+	if (gate) return reject(gate);
 	const grid = layerGrid(s, layer);
 	// Unique new cells in input order.
 	const wanted = new Set<number>();

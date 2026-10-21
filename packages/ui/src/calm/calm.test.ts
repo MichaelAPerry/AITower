@@ -1,8 +1,8 @@
 import type { EventEffect } from "@aitower/content";
-import type { LedgerDay, MemoView, SimEvent } from "@aitower/sim";
+import type { LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { choiceChips, clearanceProgress, dockPicks, drawerForKey, effectChip, fmtRateHour, isRoutine, isUrgentMemo, nextDrawer, operatingNet, perHour } from "./calm";
+import { choiceChips, clearanceProgress, dockPicks, drawerForKey, effectChip, fmtRateHour, isRoutine, isUrgentMemo, maintenanceReadout, nextDrawer, operatingNet, perHour } from "./calm";
 
 const day = (d: number, p: Partial<LedgerDay> = {}): LedgerDay => ({ day: d, revenue: 0, energy: 0, upkeep: 0, construction: 0, penalties: 0, taxes: 0, interest: 0, fees: 0, ...p });
 const rate = (tick: number, ledger: LedgerDay[]) => perHour({ tick, day: Math.floor(tick / 1440), ledger });
@@ -147,5 +147,22 @@ describe("ticker filtering", () => {
 	it("keeps the real problems", () => {
 		for (const e of [ev({ type: "jobFailed", jobId: 1, penalty: 1 }), ev({ type: "powerShortfall", netId: 1, satisfaction: 0.5 }), ev({ type: "bankrupt" }), ev({ type: "rackTripped", facilityId: 1 })]) expect(isRoutine(e, v)).toBe(false);
 		expect(isRoutine({ type: "memoIssued", memoId: 1, eventId: "x" }, v)).toBe(true); // the inbox count and the slip announce memos
+	});
+});
+
+describe("maintenance readout", () => {
+	const v = (m: Partial<SimView["maintenance"]>, workOrders: unknown[] = []): SimView =>
+		({ maintenance: { parts: 4, partsCapacity: 20, botsTotal: 3, botsBusy: 1, botsIdle: 2, waiting: 0, noRoute: 0, ...m }, workOrders }) as unknown as SimView;
+	it("is calm when stocked with nothing broken, amber when parts are out or repairs wait, red when a rack is out of reach", () => {
+		expect(maintenanceReadout(v({}))).toMatchObject({ tone: "ok", parts: "4", bots: "1/3", repairs: "0" });
+		expect(maintenanceReadout(v({ parts: 0 }))?.tone).toBe("amber");
+		expect(maintenanceReadout(v({ waiting: 2 }, [{}, {}]))?.tone).toBe("amber");
+		expect(maintenanceReadout(v({ parts: 0 }, [{}]))?.tone).toBe("red");
+		const nr = maintenanceReadout(v({ noRoute: 2, waiting: 2 }, [{}, {}]));
+		expect(nr?.tone).toBe("red");
+		expect(nr?.title).toMatch(/out of reach of every bot/);
+	});
+	it("shows nothing before maintenance is part of the game", () => {
+		expect(maintenanceReadout(v({ parts: 0, partsCapacity: 0, botsTotal: 0, botsBusy: 0, botsIdle: 0 }))).toBeNull();
 	});
 });

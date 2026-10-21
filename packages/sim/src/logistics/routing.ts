@@ -13,9 +13,10 @@
  * results are deterministic. Positions are tile indices (x = 3 ⇒ centred on tile 3).
  */
 import type { ContentDB } from "@aitower/content";
+import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellIdx, inBounds } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
-import { getDef } from "../world/defs";
+import { getDef, serviceTile } from "../world/defs";
 
 /** `Hop.lift` value for "walk straight to the goal". */
 export const WALK_DIRECT = -1;
@@ -50,6 +51,8 @@ export interface Nav {
 	/** Bots currently waiting for / riding each lift (refreshed by every search). */
 	liftLoad: number[];
 	liftOffset: number[];
+	/** Per lift: false while it has no power (refreshed by every search), so routes never rely on a frozen car. */
+	liftUp: boolean[];
 	n: number;
 	nodeLift: number[]; // index into liftIds
 	nodeFloor: number[];
@@ -79,6 +82,7 @@ export function createNav(cells: number): Nav {
 		liftWait: [],
 		liftLoad: [],
 		liftOffset: [],
+		liftUp: [],
 		n: 0,
 		nodeLift: [],
 		nodeFloor: [],
@@ -230,6 +234,13 @@ export function beginSearch(nav: Nav, state: SimState, content: ContentDB, botSp
 	const capacity = Math.max(1, content.lift.capacity);
 	nav.liftLoad.length = nav.liftIds.length;
 	nav.liftLoad.fill(0);
+	// An unpowered shaft (no conduit under it, or a dead net) never moves: do not plan through it. Before the first tick (or network rebuild)
+	// nothing is known yet, so every lift counts as up.
+	nav.liftUp.length = nav.liftIds.length;
+	for (let li = 0; li < nav.liftIds.length; li++) {
+		const lift = state.lifts[li];
+		nav.liftUp[li] = state.netsDirty || state.tick === 0 || (lift.powerNet >= 0 && lift.sat >= MIN_POWERED_SATISFACTION);
+	}
 	if (nav.liftIds.length > 0) {
 		for (const b of state.bots) {
 			if (b.liftId < 0 || b.leg === "walk") continue;
@@ -268,7 +279,7 @@ export function beginSearch(nav: Nav, state: SimState, content: ContentDB, botSp
 		if (u < n) {
 			// Landing: board, or walk to another lift's landing on this floor.
 			const li = nav.nodeLift[u];
-			relax(u, n + u, nav.liftWait[li] * (1 + nav.liftLoad[li] / capacity));
+			if (nav.liftUp[li]) relax(u, n + u, nav.liftWait[li] * (1 + nav.liftLoad[li] / capacity));
 			for (const e of nav.walkEdges[u]) relax(u, e.to, e.tiles / speed);
 		} else {
 			const land = u - n;
@@ -317,4 +328,43 @@ export function routeTo(nav: Nav, state: SimState, toFloor: number, toX: number)
 	}
 	if (node >= n || Number.isNaN(exit)) return null;
 	return { lift: nav.liftIds[nav.nodeLift[node]], exit, cost: bestCost };
+}
+
+/**
+ * Slab runs (ids from the nav graph) a ground bot can actually path to: searched from every distinct run a bot stands
+ * on (from the chargers when there are no bots yet), through the real lift graph (powered lifts only, shaft to shaft only
+ * where the slab connects them). `null` means every run (a flying bot exists).
+ */
+export function reachableRuns(state: SimState, content: ContentDB, nav: Nav): Set<number> | null {
+	if (state.bots.some((b) => content.bots[b.defId]?.flying)) return null;
+	ensureNav(nav, state, content);
+	const sources: { floor: number; x: number }[] = [];
+	const seen = new Set<number>();
+	const add = (floor: number, x: number): void => {
+		if (!Number.isInteger(floor) || floor < state.floorMin || floor > state.floorMax) return;
+		const run = nav.run[cellIdx(state, Math.round(x), floor)];
+		if (run < 0 || seen.has(run)) return;
+		seen.add(run);
+		sources.push({ floor, x });
+	};
+	for (const b of state.bots) if (b.leg !== "ride") add(Math.round(b.floor), b.x);
+	if (sources.length === 0) for (const c of nav.chargers) add(c.floor, serviceTile(c));
+	const out = new Set<number>();
+	for (const s of sources) {
+		beginSearch(nav, state, content, 1, s.floor, s.x);
+		for (let fl = state.floorMin; fl <= state.floorMax; fl++) {
+			for (let x = 0; x < state.width; x++) {
+				const run = nav.run[cellIdx(state, x, fl)];
+				if (run < 0 || out.has(run)) continue;
+				if (routeTo(nav, state, fl, x)) out.add(run);
+			}
+		}
+	}
+	return out;
+}
+
+
+/** Slab run under a tile (the same ids `reachableRuns` returns), or -1 for none. Call after `ensureNav`. */
+export function runAtTile(nav: Nav, state: SimState, floor: number, x: number): number {
+	return runAt(nav, state, floor, x);
 }

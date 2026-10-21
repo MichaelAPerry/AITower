@@ -324,7 +324,15 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				drawBody(facBodies, def, f.x * TILE, floorTop(view, f.floor), { grown: f.grown, plain, skin });
 			}
 		}
-		tags = planTags(view.facilities, (id) => content.facilities[id]?.name);
+		const orders = new Map(view.workOrders.map((w) => [w.facilityId, w]));
+		tags = planTags(
+			view.facilities,
+			(id) => content.facilities[id]?.name,
+			(id) => {
+				const w = orders.get(id);
+				return w ? { queuePos: w.queuePos ?? null, route: w.route ?? "ok" } : undefined;
+			},
+		);
 		feedback.onTick(view);
 		pneumatics.onTick(view, (now - t0) / 1000);
 		overlayDirty = true;

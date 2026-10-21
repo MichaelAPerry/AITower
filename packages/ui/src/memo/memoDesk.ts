@@ -79,3 +79,10 @@ export function historyRows(view: Pick<SimView, "memoHistory">, content: Pick<Co
 		return { memoId: h.memoId, title: h.title, stamp: label ?? h.choiceId.toUpperCase(), outcome: h.outcome, auto: h.auto, tick: h.tick };
 	});
 }
+
+/** Above this speed a memo that needs an answer stops the clock (interim, until the advisor redesign). */
+export const MEMO_PAUSE_ABOVE_SPEED = 3;
+
+/** Should the game pause: a memo the player has not been shown yet has arrived while the clock runs faster than 3x. */
+export const memoNeedsPause = (seen: ReadonlySet<number>, memos: readonly Pick<MemoView, "id">[], speed: number): boolean =>
+	speed > MEMO_PAUSE_ABOVE_SPEED && memos.some((m) => !seen.has(m.id));

@@ -8,11 +8,57 @@ import { bandText, organoidBand } from "../bio/bio";
 import { fmtPower, fmtTemp } from "../format";
 
 /**
- * Floors with facilities that bots cannot get to: the floors of the bots and chargers, widened through any chain of lifts
- * (mirrors the sim's reachableFloors, from the view). Empty when a flying bot exists or nothing anchors the reach.
+ * Floors with facilities that bots cannot get to, mirroring the sim's nav graph from the view: walk along one slab run,
+ * ride a powered lift, and step between two shafts only where one run of slab joins them. Sources are the bots' own
+ * positions (the chargers when there are none). Empty when a flying bot exists or nothing anchors the reach.
  */
 export function unreachedFloors(view: SimView, content: ContentDB): number[] {
 	if ((view.bots ?? []).some((b) => content.bots?.[b.defId]?.flying)) return [];
+	const { width, floorMin, floorMax, slab } = view;
+	if (!slab || !width) return unreachedByFloor(view, content); // a view without a grid (tests, fixtures): floors only
+	// Slab run id per cell, as the sim labels them.
+	const run = new Int32Array(slab.length).fill(-1);
+	let next = 0;
+	for (let fl = floorMin; fl <= floorMax; fl++) {
+		let cur = -1;
+		for (let x = 0; x < width; x++) {
+			const i = (fl - floorMin) * width + x;
+			if (slab[i]) {
+				if (cur < 0) cur = next++;
+				run[i] = cur;
+			} else cur = -1;
+		}
+	}
+	const runAt = (fl: number, x: number): number => (fl < floorMin || fl > floorMax || x < 0 || x >= width ? -1 : run[(fl - floorMin) * width + Math.round(x)]);
+	const reach = new Set<number>();
+	const add = (fl: number, x: number): void => {
+		const r = runAt(fl, x);
+		if (r >= 0) reach.add(r);
+	};
+	for (const b of view.bots ?? []) if (Number.isInteger(b.floor)) add(b.floor, b.x);
+	if (reach.size === 0) for (const f of view.facilities) if (kindOf(content, f) === "charger") add(f.floor, f.x + (f.width >> 1));
+	if (reach.size === 0) return [];
+	const lifts = (view.lifts ?? []).filter((l) => l.powered !== false);
+	for (let grew = true; grew; ) {
+		grew = false;
+		for (const l of lifts) {
+			let served = false;
+			for (let fl = l.floorMin; fl <= l.floorMax && !served; fl++) served = reach.has(runAt(fl, l.x));
+			if (!served) continue;
+			for (let fl = l.floorMin; fl <= l.floorMax; fl++) {
+				const r = runAt(fl, l.x);
+				if (r >= 0 && !reach.has(r)) {
+					reach.add(r);
+					grew = true;
+				}
+			}
+		}
+	}
+	return [...new Set(view.facilities.filter((f) => !reach.has(runAt(f.floor, f.x + (f.width >> 1)))).map((f) => f.floor))].sort((a, b) => a - b);
+}
+
+/** Floor-level fallback of `unreachedFloors`: a lift serving a reached floor reaches all its floors. */
+function unreachedByFloor(view: SimView, content: ContentDB): number[] {
 	const bots = view.bots ?? [];
 	const reach = new Set<number>(bots.map((b) => Math.round(b.floor)));
 	for (const f of view.facilities) if (kindOf(content, f) === "charger") reach.add(f.floor);
@@ -77,6 +123,8 @@ export function rackProblem(view: SimView, content: ContentDB, f: FacilityView):
 				? "Broken. A maintenance bot is bringing a spare part to repair it."
 				: "Broken, and the spare-parts stock is empty. Buy spare parts so a bot can repair it.";
 		case "tripped":
+			// The trip latches until the rack has cooled and sat out its cooldown: it can already be cool.
+			if (f.tempC <= content.balance.thermal.okC) return "Tripped on over-temperature earlier and has cooled down; it restarts in a moment. If it happens again, add cooling near it.";
 			return def.rack.liquidFraction > 0
 				? "Overheated and tripped; it restarts once it cools. Give its coolant loop more capacity (another chiller or CDU), and an air handler for the rest of its heat."
 				: "Overheated and tripped; it restarts once it cools. Build an air handler (CRAH) within reach of it.";

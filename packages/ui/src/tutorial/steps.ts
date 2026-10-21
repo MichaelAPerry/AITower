@@ -10,6 +10,7 @@ import type { ContentDB } from "@aitower/content";
 import type { CellRef } from "@aitower/sim";
 import type { GameState, GameStore, Ghost, Tool } from "@aitower/shared";
 import { perHour } from "../calm/calm";
+import { rackIsHot } from "../objective/heat";
 import type { UiState } from "../components/context";
 import type { Side } from "./placement";
 
@@ -152,7 +153,7 @@ export const HINTS: Record<HintId, Hint> = {
 
 /** The rack that is running hot (slowed down), if any. */
 export const hotRack = (s: GameState, ctx: TutorialCtx): GameState["view"]["facilities"][number] | undefined =>
-	s.view.facilities.find((f) => f.enabled && f.status === "throttled" && ctx.content.facilities[f.defId]?.kind === "rack");
+	s.view.facilities.find((f) => ctx.content.facilities[f.defId]?.kind === "rack" && rackIsHot(f, ctx.content));
 
 /** The hint to show now: the first one whose moment has come and that the player has not seen. */
 export function activeHint(s: GameState, seen: HintsSeen, ctx: TutorialCtx): HintId | null {

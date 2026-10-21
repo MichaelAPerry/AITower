@@ -4,12 +4,12 @@ import { memoStain } from "../bio/bio";
 import { PATH_COLOR } from "../ascension/ascension";
 import { chipParts, effectsOf, isUrgentMemo } from "../calm/calm";
 import type { GameState, GameStore } from "@aitower/shared";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { Icon, Lamp, Stamp } from "../components/common";
 import type { UiState } from "../components/context";
 import { fmtDuration } from "../format";
 import { pushNotice } from "../notices";
-import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
+import { clampStanding, defaultChoiceLabel, historyRows, memoCountdown, memoFraction, memoNeedsPause, memoUrgent, modifierChip, modifierHurts, openMemos, pruneIds, standingTone } from "./memoDesk";
 import "./memo.css";
 
 type SetUi = (patch: Partial<UiState>) => void;
@@ -152,6 +152,19 @@ export function MemoPop({ store, content, state, ui, setUi }: { store: GameStore
 	useEffect(() => {
 		if (stale) setUi({ stamped: pruneIds(ui.stamped, memos), aside: pruneIds(ui.aside, memos) });
 	}, [stale, memos, ui.stamped, ui.aside, setUi]);
+	// A new memo at 10x/30x would auto-file before anyone read it: stop the clock and let the slip pop up.
+	const seen = useRef<Set<number> | null>(null);
+	const speed = state.speed;
+	useEffect(() => {
+		const known = seen.current;
+		seen.current = new Set(memos.map((m) => m.id));
+		if (known === null) return; // memos already open when the HUD mounted (a loaded save) are not "new"
+		if (memoNeedsPause(known, memos, speed)) {
+			store.setSpeed(0);
+			pushNotice({ text: "Paused: an Authority memo needs an answer.", severity: "info", key: "memo-pause" });
+			setUi({ inboxOpen: true });
+		}
+	}, [memos, speed, store, setUi]);
 	const memo = ui.inboxOpen ? null : urgentToPop(state.view, content, ui.stamped, ui.aside);
 	if (!memo) return null;
 	const stain = memoStain(state.view.corruption ?? 0, state.settings.horrorIntensity);

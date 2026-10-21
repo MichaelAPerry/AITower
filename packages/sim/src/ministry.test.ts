@@ -276,6 +276,22 @@ describe("resolveMemo", () => {
 		expect(sim.view().memoHistory[0]).toMatchObject({ memoId: id, choiceId: "b", auto: true });
 	});
 
+	it("an unanswered memo costs no reputation, but the same stamp by the player does", () => {
+		const c = contentWith([ev("audit", { defaultChoice: "a", choices: [choice("a", [{ type: "standing", amount: -6 }, { type: "cash", amount: -500 }]), choice("b")] })]);
+		const idle = newSim(c, "empty", 1);
+		inject(idle, "audit", 5);
+		const standing0 = idle.state.standing;
+		const cash0 = idle.state.cash;
+		run(idle, 8);
+		expect(idle.state.memos).toHaveLength(0);
+		expect(idle.state.standing).toBe(standing0); // timed out: no reputation change
+		expect(idle.state.cash).toBe(cash0 - 500); // the money side still applies
+		const answered = newSim(c, "empty", 1);
+		const id = inject(answered, "audit", 50);
+		resolve(answered, id, "a");
+		expect(answered.state.standing).toBe(standing0 - 6);
+	});
+
 	it("keeps only the last 20 resolved memos, newest last", () => {
 		const sim = newSim(fxContent(), "empty", 1);
 		const ids = Array.from({ length: 25 }, () => inject(sim, "fx"));

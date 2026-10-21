@@ -8,6 +8,7 @@ import type { CellRef, LedgerDay, MemoView, SimEvent, SimView } from "@aitower/s
 import { describeEvent, isNoise } from "../events";
 import type { Severity } from "../notices";
 import { fmtMoney } from "../format";
+import { rackIsHot } from "../objective/heat";
 import { installedPflops } from "../objective/objective";
 
 // ─── Drawers ──────────────────────────────────────────────────────────────
@@ -108,7 +109,7 @@ export function dockPicks(view: SimView, content: ContentDB): DockPick[] {
 	const byKind = (kind: string, cheapest = true): FacilityDef | undefined => defs.filter((d) => d.kind === kind).sort((a, b) => (cheapest ? a.cost - b.cost : b.cost - a.cost))[0];
 	const rackDef = defs.filter((d) => d.rack && d.rack.pflops > 0 && d.rack.cooling === "air").sort((a, b) => a.cost - b.cost)[0] ?? defs.filter((d) => d.rack && d.rack.pflops > 0 && !d.rack.bio).sort((a, b) => a.cost - b.cost)[0];
 	const racks = view.facilities.filter((f) => content.facilities[f.defId]?.rack);
-	const hot = racks.some((f) => f.status === "throttled" || f.status === "tripped" || f.tempC >= content.balance.thermal.okC);
+	const hot = racks.some((f) => rackIsHot(f, content));
 	const broken = view.facilities.some((f) => f.status === "failed");
 	const idle = racks.filter((f) => f.status === "idle" && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0).length;
 	const starving = racks.some((f) => f.status === "noNutrient");
@@ -273,4 +274,42 @@ export function feedLines(log: readonly { tick: number; event: SimEvent }[], vie
 		put(`e${i}`, { key: `e${i}`, tick: e.tick, text: own.text, severity: own.severity, cell: own.cell });
 	});
 	return [...out.values()];
+}
+
+export type MaintTone = "ok" | "amber" | "red";
+
+export interface MaintenanceReadout {
+	parts: string;
+	bots: string;
+	repairs: string;
+	tone: MaintTone;
+	title: string;
+}
+
+/**
+ * The top-strip maintenance readout: spare parts in stock, bots busy of total, racks waiting for repair. Amber when parts are
+ * out or repairs are queued; red when a broken rack cannot be reached at all, or repairs wait on an empty cage.
+ */
+export function maintenanceReadout(view: SimView): MaintenanceReadout | null {
+	const m = view.maintenance;
+	if (!m) return null;
+	const open = view.workOrders?.length ?? 0;
+	// No bots, no depot and nothing broken: maintenance is not part of the game yet, so show nothing.
+	if (m.botsTotal === 0 && m.partsCapacity === 0 && m.parts === 0 && open === 0) return null;
+	const out = m.parts === 0;
+	let tone: MaintTone = "ok";
+	if (out || m.waiting > 0 || m.noRoute > 0) tone = "amber";
+	if (m.noRoute > 0 || (out && open > 0) || (open > 0 && m.botsTotal === 0)) tone = "red";
+	const why: string[] = [];
+	if (m.noRoute > 0) why.push(`${m.noRoute} broken rack${m.noRoute === 1 ? " is" : "s are"} out of reach of every bot: extend or power a lift to ${m.noRoute === 1 ? "it" : "them"}.`);
+	if (out) why.push(open > 0 ? "No spare parts: repairs cannot finish. Buy parts." : "No spare parts in stock.");
+	if (m.botsTotal === 0 && open > 0) why.push("There are no repair bots.");
+	if (m.waiting > 0 && !out && m.noRoute === 0) why.push(`${m.waiting} repair${m.waiting === 1 ? " is" : "s are"} waiting for a free bot.`);
+	return {
+		parts: `${m.parts}`,
+		bots: `${m.botsBusy}/${m.botsTotal}`,
+		repairs: `${open}`,
+		tone,
+		title: [`Spare parts in stock: ${m.parts}${m.partsCapacity > 0 ? ` of ${m.partsCapacity}` : ""}`, `Repair bots busy: ${m.botsBusy} of ${m.botsTotal}`, `Broken racks waiting: ${open}`, ...why].join("\n"),
+	};
 }

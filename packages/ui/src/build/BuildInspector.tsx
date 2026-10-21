@@ -31,7 +31,7 @@ function StatRow({ s }: { s: Stat }) {
  * The persistent Inspector beside the catalog. Hovering a card previews it; the picked item shows when nothing is hovered
  * and stays while the player places it. Replaces the old floating spec card.
  */
-export function BuildInspector({ store, content, state, ui, setUi }: PanelProps) {
+export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 	const { view, tool } = state;
 	const picked = itemForTool(tool, content);
 	const hovered = findItem(ui.buildHover, content);
@@ -64,16 +64,13 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 				</div>
 			)}
 			<div className="bld-act">
-				{isPicked ? (
-					<>
-						<p className="bld-placing">{tool.kind === "demolish" ? "Click or drag over the tower to remove things." : "Now click the tower to put it down. Keep clicking to place more."}</p>
-						<button type="button" className="ui-btn bld-btn" onClick={() => { store.setGhost(null); store.setTool({ kind: "select" }); }}>
-							Put tool down · Esc
-						</button>
-					</>
-				) : (
-					<p className="bld-placing">Click the card to pick it.</p>
-				)}
+				<p className="bld-placing">
+					{isPicked
+						? tool.kind === "demolish"
+							? "Click or drag over the tower to remove things. Esc to stop."
+							: "Click the tower to put it down. Keep clicking to place more. Esc to stop."
+						: "Click the card to pick it."}
+				</p>
 			</div>
 			<FlavorLine flavor={item.def?.flavor} />
 		</aside>

@@ -219,6 +219,8 @@ export interface LiftView {
 	dir: -1 | 0 | 1;
 	doorsOpen: boolean;
 	riders: number;
+	/** False while the shaft has no power (no conduit under or beside it, or a dead net): the car cannot move and bots do not route through it. */
+	powered?: boolean;
 }
 
 /** `flying`: a flying bot moving between floors (its `floor` is fractional meanwhile). */
@@ -238,6 +240,8 @@ export interface BotView {
 	workOrderId: number | null;
 	/** Mutation from contamination exposure, or null. */
 	trait: BotTrait | null;
+	/** Spare parts it is carrying (0 or absent when none). */
+	parts?: number;
 }
 
 /** fleshed: repairs faster but contaminates where it works. tendriled: carries more parts but never rides lifts. */
@@ -300,6 +304,25 @@ export interface WorkOrderView {
 	facilityId: number;
 	botId: number | null;
 	createdAt: number;
+	/** 1-based place in the queue of unassigned orders (oldest first), or null once a bot has taken it. */
+	queuePos?: number | null;
+	/** ok: a bot can path to the rack; noRoute: no ground bot can reach its slab (missing, unpowered or unconnected lift); noBots: there are no bots at all. */
+	route?: "ok" | "noRoute" | "noBots";
+}
+
+/** At-a-glance upkeep: spare parts, the bot fleet and the repair queue. */
+export interface MaintenanceView {
+	parts: number;
+	/** Room for parts across all depots. */
+	partsCapacity: number;
+	botsTotal: number;
+	/** Bots on a job (fetching a part, travelling to or repairing a rack). */
+	botsBusy: number;
+	botsIdle: number;
+	/** Open work orders no bot has taken. */
+	waiting: number;
+	/** Open work orders (any state) whose rack no bot can reach. */
+	noRoute: number;
 }
 
 export interface LedgerDay {
@@ -435,6 +458,7 @@ export interface SimView {
 	offers: ContractView[];
 	jobs: JobView[];
 	workOrders: WorkOrderView[];
+	maintenance: MaintenanceView;
 	cash: number;
 	spareParts: number;
 	tier: number;

@@ -800,6 +800,13 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 				crate(g, bx, by);
 			}
 			labels?.put(String(n).padStart(2, "0"), x + W - 9, y + 5.5, T.ink);
+			// Fill gauge along the top edge: green when stocked, amber when low, red when empty.
+			const cap = Math.max(1, def.logistics?.capacity ?? 1);
+			const frac = Math.min(1, n / cap);
+			const gw = W - 14;
+			px(g, x + 3, y + 1, gw, 3, T.ink, 0.7);
+			if (frac > 0) px(g, x + 4, y + 2, Math.max(1, Math.round((gw - 2) * frac)), 1, frac > 0.3 ? T.green : T.amber);
+			else px(g, x + 4, y + 2, gw - 2, 1, alertColor(opt.colorBlind), 0.8);
 			break;
 		}
 		case "charger": {

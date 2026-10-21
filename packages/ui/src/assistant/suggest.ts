@@ -10,6 +10,7 @@ import type { DrawerId } from "../calm/calm";
 import { clearanceProgress } from "../calm/calm";
 import { fmtMoney } from "../format";
 import { unreachedFloors } from "../objective/diagnose";
+import { rackIsHot } from "../objective/heat";
 import { ascensionDue } from "../ascension/ascension";
 import { cheapestAvailable } from "../research/tech";
 
@@ -43,7 +44,6 @@ export interface Suggestion {
 	recommend: string[];
 }
 
-const RACK_PROBLEM = new Set(["throttled", "tripped"]);
 const cell = (f: FacilityView): CellRef => ({ x: f.x, floor: f.floor });
 
 const isRack = (f: FacilityView, content: ContentDB): boolean => !!content.facilities[f.defId]?.rack && (content.facilities[f.defId]?.rack?.pflops ?? 0) > 0;
@@ -55,9 +55,12 @@ export function cheapestOf(kind: string, view: SimView, content: ContentDB): Fac
 		.sort((a, b) => a.cost - b.cost || a.id.localeCompare(b.id))[0];
 }
 
-/** Racks running hot: throttled/tripped, or die temperature at or above the "ok" line (same test as the build dock). */
-export function hotRacks(view: SimView, content: ContentDB): FacilityView[] {
-	return view.facilities.filter((f) => f.enabled && isRack(f, content) && (RACK_PROBLEM.has(f.status) || f.tempC >= content.balance.thermal.okC));
+/**
+ * Racks running hot, by the sim's definition (`rackIsHot`). With `confirmed` (from `watchHeat`) only racks whose heat has
+ * lasted count, so a momentary blip never makes UNIT-7 speak.
+ */
+export function hotRacks(view: SimView, content: ContentDB, confirmed?: ReadonlySet<number>): FacilityView[] {
+	return view.facilities.filter((f) => rackIsHot(f, content) && (!confirmed || confirmed.has(f.id)));
 }
 
 /** The reputation drops of the last two game days, newest first. */
@@ -89,7 +92,7 @@ function reputation(view: SimView): Suggestion | null {
 const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 /** All suggestions that apply to this view, most important first. Empty when the tower is fine. */
-export function suggestions(view: SimView, content: ContentDB): Suggestion[] {
+export function suggestions(view: SimView, content: ContentDB, confirmedHot?: ReadonlySet<number>): Suggestion[] {
 	const out: Suggestion[] = [];
 	const defs = content.facilities;
 	const racks = view.facilities.filter((f) => isRack(f, content));
@@ -126,7 +129,7 @@ export function suggestions(view: SimView, content: ContentDB): Suggestion[] {
 	}
 
 	// Hot racks → air handler.
-	const hot = hotRacks(view, content);
+	const hot = hotRacks(view, content, confirmedHot);
 	const crah = cheapestOf("crah", view, content);
 	if (hot.length > 0 && crah) {
 		out.push({

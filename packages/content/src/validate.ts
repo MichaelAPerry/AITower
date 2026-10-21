@@ -90,6 +90,20 @@ export function validateFlavor(p: Problems, w: string, f: unknown): void {
 	if (o.source !== undefined && (typeof o.source !== "string" || o.source.trim() === "")) p.push(`${w}.flavor.source: expected a non-empty string`);
 }
 
+/**
+ * The research that unlocks a conduit layer, derived from the content (no hard-coded ids): coolant piping comes with the
+ * earliest chiller / CDU, nutrient piping with the earliest nutrient plant. Undefined = never gated (power, or content
+ * whose first such facility needs no research).
+ */
+export function conduitTech(db: ContentDB, layer: "power" | "coolant" | "nutrient"): string | undefined {
+	if (layer === "power") return undefined;
+	const kinds = layer === "coolant" ? ["chiller", "cdu"] : ["nutrient"];
+	const defs = Object.values(db.facilities)
+		.filter((d) => kinds.includes(d.kind) && !d.retired)
+		.sort((a, b) => a.unlockTier - b.unlockTier || (a.id < b.id ? -1 : 1));
+	return defs[0]?.tech;
+}
+
 /** Does this facility need a power conduit under it (mirrors the sim's `needsPower` default)? */
 export function facilityNeedsPower(def: FacilityDef): boolean {
 	if (def.placement?.needsPower !== undefined) return def.placement.needsPower;

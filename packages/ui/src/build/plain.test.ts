@@ -4,10 +4,11 @@ import { renderToString } from "react-dom/server";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { BuildPalette } from "../components/BuildPalette";
+import { CURSOR_HINT_PLACEMENTS, cursorHintVisible } from "../components/CursorHint";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
 import { panelProps } from "../dev/walk";
 import { findItem, itemForTool } from "./catalog";
-import { lockedSummary, plainBlurb, plainStats } from "./plain";
+import { lockedSummary, plainBlurb, plainStats, structureGate } from "./plain";
 
 const content = loadContent();
 const view = { tier: 1, techResearched: [] } as unknown as SimView;
@@ -43,6 +44,31 @@ describe("plain build copy", () => {
 	});
 });
 
+describe("structure tools behind research", () => {
+	it("coolant and nutrient pipes wait for their research, power pipe and lifts never do", () => {
+		const coolant = findItem("conduit-coolant", content);
+		const nutrient = findItem("conduit-nutrient", content);
+		expect(coolant && structureGate(coolant, view, content)).toBe("chilled_loop");
+		expect(nutrient && structureGate(nutrient, view, content)).toBeTruthy();
+		const done = { tier: 3, techResearched: ["chilled_loop", nutrient ? structureGate(nutrient, view, content) : ""] } as unknown as SimView;
+		expect(coolant && structureGate(coolant, done, content)).toBeUndefined();
+		expect(nutrient && structureGate(nutrient, done, content)).toBeUndefined();
+		for (const k of ["conduit-power", "lift", "slab", "demolish"]) {
+			const it = findItem(k, content);
+			expect(it && structureGate(it, view, content), k).toBeUndefined();
+		}
+	});
+	it("the Structure catalog shows a Research row instead of the coolant card", () => {
+		const fc = createFakeContent();
+		for (const d of Object.values(fc.facilities)) if (d.kind === "chiller" || d.kind === "cdu") d.tech = fc.tech[0].id;
+		const store = createFakeStore(fc);
+		const html = renderToString(createElement(BuildPalette, panelProps(store, fc, { ui: { paletteTab: "structure", paletteOpen: true } })));
+		expect(html).toContain("Power pipe");
+		expect(html.split("Coolant pipe").length - 1).toBe(1); // only in the Research row, no card
+		expect(html).toMatch(/Research &quot;[^&]+&quot; to unlock Coolant pipe/);
+	});
+});
+
 describe("Recommended row hook", () => {
 	const fc = createFakeContent();
 	const store = createFakeStore(fc);
@@ -51,5 +77,21 @@ describe("Recommended row hook", () => {
 		expect(renderToString(createElement(BuildPalette, props))).not.toContain("Recommended");
 		const id = Object.values(fc.facilities).find((d) => d.category === "cooling" && d.unlockTier <= store.get().view.tier && !d.tech)?.id;
 		if (id) expect(renderToString(createElement(BuildPalette, { ...props, recommended: [id, "nope"] }))).toContain("Recommended");
+	});
+});
+
+describe("putting the tool down", () => {
+	it("has no Put-tool-down button, and the picked card stays highlighted", () => {
+		const fc = createFakeContent();
+		const store = createFakeStore(fc);
+		store.setTool({ kind: "slab" });
+		const html = renderToString(createElement(BuildPalette, panelProps(store, fc, { ui: { paletteTab: "structure", paletteOpen: true } })));
+		expect(html).not.toMatch(/Put tool down/i);
+		expect(html).toMatch(/class="bld-card is-on[^"]*"[^>]*aria-pressed="true"|aria-pressed="true"[^>]*class="bld-card is-on/);
+	});
+	it("the cursor tip shows for the first few placements only", () => {
+		expect(cursorHintVisible(0)).toBe(true);
+		expect(cursorHintVisible(CURSOR_HINT_PLACEMENTS - 1)).toBe(true);
+		expect(cursorHintVisible(CURSOR_HINT_PLACEMENTS)).toBe(false);
 	});
 });

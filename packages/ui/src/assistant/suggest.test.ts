@@ -35,7 +35,7 @@ describe("suggestions", () => {
 		expect(ids(view({ facilities: [rack(1, "idle")] }))).toEqual([]);
 	});
 	it("hot racks → air handler, focused on the rack", () => {
-		const s = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 60 })] }), content)[0];
+		const s = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 })] }), content)[0];
 		expect(s.id).toBe("hot");
 		expect(s.action).toMatchObject({ kind: "build", defId: "crah_unit", focus: { x: 3, floor: 1 } });
 		expect(s.recommend).toEqual(["crah_unit"]);
@@ -90,7 +90,7 @@ describe("suggestions", () => {
 		expect(s?.action).toMatchObject({ kind: "build" });
 	});
 	it("problems rank before nice-to-haves, and recommendations follow the ranking", () => {
-		const list = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 60 }), rack(2, "idle")], offers: [{ id: 1 }], uptime: 0.5 }), content);
+		const list = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 }), rack(2, "idle")], offers: [{ id: 1 }], uptime: 0.5 }), content);
 		expect(list[0].id).toBe("hot");
 		expect(recommendedIds(list)).toEqual(["crah_unit", "ups_battery"]);
 	});
@@ -100,7 +100,7 @@ describe("suggestions", () => {
 });
 
 describe("pacing", () => {
-	const hot = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 60 })] }), content);
+	const hot = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 })] }), content);
 	const idle = suggestions(view({ facilities: [rack(1, "idle")], offers: [{ id: 1 }] }), content);
 	it("shows the first suggestion, keeps it, and says nothing when quiet", () => {
 		expect(pace(initialPace(), hot, 0, true).current).toBeNull();

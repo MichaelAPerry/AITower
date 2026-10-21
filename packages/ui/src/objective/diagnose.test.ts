@@ -1,7 +1,7 @@
 import type { ContentDB } from "@aitower/content";
 import type { FacilityView, SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { coolantLoopProblem, rackProblem } from "./diagnose";
+import { coolantLoopProblem, rackProblem, unreachedFloors } from "./diagnose";
 
 const content = {
 	facilities: {
@@ -60,5 +60,26 @@ describe("rack diagnosis", () => {
 	it("healthy racks and non-racks have no problem", () => {
 		expect(rackProblem(view([]), content, fac("rack_air_gpu"))).toBeNull();
 		expect(rackProblem(view([]), content, fac("chiller", { status: "unpowered" }))).toBeNull();
+	});
+});
+
+describe("unreached floors follow the real nav (slab runs, powered lifts)", () => {
+	// 3 floors 0..2, width 20. Floor 1 has a gap at x=10, so a lift on the left (x=2) and one on the right (x=15) do not join there.
+	const width = 20;
+	const slab = new Uint8Array(3 * width).fill(1);
+	slab[1 * width + 10] = 0;
+	const base = { width, floorMin: 0, floorMax: 2, slab, bots: [{ id: 1, defId: "rover", floor: 0, x: 2 }] };
+	const c = { ...content, bots: { rover: {} } } as unknown as ContentDB;
+	const rackOn = (floor: number, x: number) => fac("rack_air_gpu", { floor, x, width: 2 });
+	it("a second shaft across a slab gap does not make its floors reachable", () => {
+		const v = view([rackOn(2, 15)], { ...base, lifts: [{ id: 1, x: 2, floorMin: 0, floorMax: 1 }, { id: 2, x: 15, floorMin: 1, floorMax: 2 }] } as unknown as Partial<SimView>);
+		expect(unreachedFloors(v, c)).toEqual([2]);
+	});
+	it("joined by slab it is reachable, and an unpowered shaft is not a way up", () => {
+		const joined = new Uint8Array(3 * width).fill(1);
+		const lifts = [{ id: 1, x: 2, floorMin: 0, floorMax: 1 }, { id: 2, x: 15, floorMin: 1, floorMax: 2 }];
+		expect(unreachedFloors(view([rackOn(2, 15)], { ...base, slab: joined, lifts } as unknown as Partial<SimView>), c)).toEqual([]);
+		const dark = [{ ...lifts[0], powered: false }, lifts[1]];
+		expect(unreachedFloors(view([rackOn(2, 15)], { ...base, slab: joined, lifts: dark } as unknown as Partial<SimView>), c)).toEqual([1, 2].filter((f) => f === 2));
 	});
 });
