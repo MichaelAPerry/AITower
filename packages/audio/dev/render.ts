@@ -13,7 +13,7 @@ async function render(seconds: number): Promise<{ sr: number; left: number[]; ri
 	let prev: ReturnType<typeof musicParams> | undefined;
 	// Timeline: load/night/stingers/duck driven from suspend points.
 	const view = (t: number) => ({ itKw: t < 6 ? 0 : t < 10 ? 60 : 200, minuteOfDay: t < 14 ? 720 : 1320, gameOver: null });
-	const events = (t: number) => (Math.abs(t - 10) < 0.01 ? [{ type: "memoIssued", memoId: 1, eventId: "x" }] : Math.abs(t - 15) < 0.01 ? [{ type: "tierUp", tier: 2, reward: 1 }] : []);
+	const events = (t: number) => (Math.abs(t - 10) < 0.01 ? [{ type: "decisionIssued", decisionId: 1, eventId: "x" }] : Math.abs(t - 15) < 0.01 ? [{ type: "tierUp", tier: 2, reward: 1 }] : []);
 	const step = 0.05;
 	const jobs: Promise<void>[] = [];
 	for (let t = 0; t < seconds; t += step) {

@@ -19,7 +19,7 @@ import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
-import { MemoDrawer, MemoPop } from "./memo/MemoDesk";
+import { DecisionCard } from "./advisors/DecisionCard";
 import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
@@ -27,10 +27,8 @@ import { showTitleAtBoot } from "./title/titleState";
 import { HelpLayer } from "./help/HelpLayer";
 import { GoalsCard } from "./goals/GoalsCard";
 import { Tutorial } from "./tutorial/Tutorial";
-import { Assistant } from "./assistant/Assistant";
+import { AdvisorStrip } from "./advisors/AdvisorStrip";
 import { PrimerPrompt } from "./primer/PrimerPrompt";
-import { suggestions } from "./assistant/suggest";
-import { initialHeatWatch, watchHeat, type HeatWatch } from "./objective/heat";
 import { useGameState, useViewport } from "./hooks";
 import { useHudKeyboard } from "./keyboard";
 import { createMenuController } from "./menu/menuController";
@@ -62,7 +60,7 @@ export interface HudProps {
 /** The whole HUD, absolutely positioned over the world canvas; empty areas let pointer events through. */
 export function Hud({ store, content, title }: HudProps) {
 	const state = useGameState(store);
-	const [ui, setUiState] = useState<UiState>({ drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "rack", inboxOpen: false, financeTab: "ledger", stamped: [], aside: [] });
+	const [ui, setUiState] = useState<UiState>({ drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "rack", financeTab: "ledger" });
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
@@ -177,14 +175,6 @@ export function Hud({ store, content, title }: HudProps) {
 		if (ascensionStale) ascension.close();
 	}, [ascensionStale, ascension]);
 
-	// UNIT-7: candidates come from the pure helper. (No Recommended row in the catalog: it repeated items across categories.)
-	const assistantOn = settings.assistant !== false;
-	// Heat tips wait for the heat to last (HeatWatch), so a momentary blip over the line stays quiet.
-	const heat = useRef<HeatWatch>(initialHeatWatch());
-	const candidates = useMemo(() => {
-		heat.current = watchHeat(heat.current, state.view, content);
-		return assistantOn ? suggestions(state.view, content, heat.current.confirmed) : [];
-	}, [assistantOn, state.view, content]);
 	const openResearch = useCallback(
 		(techId?: string) => {
 			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
@@ -207,8 +197,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<NextChip {...props} />
 				<Toasts content={content} state={state} />
 				<LevelUpCard content={content} state={state} />
-				<MemoPop store={store} content={content} state={state} ui={ui} setUi={setUi} />
-				{ui.inboxOpen && <MemoDrawer store={store} content={content} state={state} ui={ui} setUi={setUi} />}
+				{!titleOpen && !over && <DecisionCard store={store} content={content} state={state} />}
 				<CursorHint state={state} />
 				{!titleOpen && !crawl && !over && <Tutorial store={store} content={content} state={state} ui={ui} setUi={setUi} />}
 				<PalettePopover {...props} />
@@ -217,7 +206,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<div className="ui-right">
 					{ui.paletteOpen ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
-				{assistantOn && !titleOpen && !crawl && !over && <Assistant {...props} candidates={candidates} />}
+				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} />}
 				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} />
 				{!titleOpen && !crawl && !over && <PrimerPrompt content={content} state={state} setUi={setUi} />}
 				<Drawer {...props} />

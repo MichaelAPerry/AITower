@@ -1,8 +1,8 @@
 import type { EventEffect } from "@aitower/content";
-import type { LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
+import type { LedgerDay, SimEvent, SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { choiceChips, clearanceProgress, dockPicks, drawerForKey, effectChip, fmtRateHour, isRoutine, isUrgentMemo, maintenanceReadout, nextDrawer, operatingNet, perHour } from "./calm";
+import { choiceChips, clearanceProgress, dockPicks, drawerForKey, effectChip, fmtRateHour, isRoutine, maintenanceReadout, nextDrawer, operatingNet, perHour } from "./calm";
 
 const day = (d: number, p: Partial<LedgerDay> = {}): LedgerDay => ({ day: d, revenue: 0, energy: 0, upkeep: 0, construction: 0, penalties: 0, taxes: 0, interest: 0, fees: 0, ...p });
 const rate = (tick: number, ledger: LedgerDay[]) => perHour({ tick, day: Math.floor(tick / 1440), ledger });
@@ -117,21 +117,6 @@ describe("memo chips and urgency", () => {
 		expect(choiceChips([{ type: "cash", amount: -160_000 }, { type: "standing", amount: -4 }])).toBe("−$160k · ★−4");
 		expect(choiceChips([])).toBe("no effect");
 	});
-	const content = createFakeContent();
-	const ev = content.events[0];
-	const memo = (p: Partial<MemoView> = {}): MemoView => ({ id: 1, eventId: ev.id, category: ev.category, title: ev.title, body: ev.body, choices: ev.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })), defaultChoice: ev.defaultChoice, issuedAt: 0, expiresAt: 5000, ...p });
-	it("pops up only memos that expire within 12 h", () => {
-		expect(isUrgentMemo(memo({ expiresAt: 600 }), { tick: 0, cash: 1e6 }, content)).toBe(true);
-		expect(isUrgentMemo(memo({ expiresAt: 721 }), { tick: 0, cash: 1e6 }, content)).toBe(false);
-	});
-	it("pops up memos whose default choice fails racks or costs over 10 % of cash", () => {
-		const mk = (effects: EventEffect[]) => ({ ...content, events: [{ ...ev, choices: ev.choices.map((c) => ({ ...c, effects: c.id === ev.defaultChoice ? effects : [] })) }] });
-		const view = { tick: 0, cash: 1_000_000 };
-		expect(isUrgentMemo(memo(), view, mk([{ type: "failRacks", count: 2 }]))).toBe(true);
-		expect(isUrgentMemo(memo(), view, mk([{ type: "cash", amount: -150_000 }]))).toBe(true);
-		expect(isUrgentMemo(memo(), view, mk([{ type: "cash", amount: -50_000 }]))).toBe(false);
-		expect(isUrgentMemo(memo(), view, mk([{ type: "standing", amount: -9 }]))).toBe(false);
-	});
 });
 
 describe("ticker filtering", () => {
@@ -146,7 +131,7 @@ describe("ticker filtering", () => {
 	});
 	it("keeps the real problems", () => {
 		for (const e of [ev({ type: "jobFailed", jobId: 1, penalty: 1 }), ev({ type: "powerShortfall", netId: 1, satisfaction: 0.5 }), ev({ type: "bankrupt" }), ev({ type: "rackTripped", facilityId: 1 })]) expect(isRoutine(e, v)).toBe(false);
-		expect(isRoutine({ type: "memoIssued", memoId: 1, eventId: "x" }, v)).toBe(true); // the inbox count and the slip announce memos
+		expect(isRoutine({ type: "decisionIssued", decisionId: 1, eventId: "x" }, v)).toBe(true); // the decision card announces itself
 	});
 });
 

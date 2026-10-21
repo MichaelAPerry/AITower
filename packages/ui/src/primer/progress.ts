@@ -8,7 +8,7 @@ export interface PrimerProgress {
 	known: string[] | null;
 	/** The Primer drawer has been opened at least once. */
 	opened: boolean;
-	/** UNIT-7 has already offered the Primer. */
+	/** An advisor has already offered the Primer. */
 	nudged: boolean;
 }
 
@@ -55,7 +55,7 @@ export const markRead = (id: string): void => {
 	if (!p.read.includes(id)) saveProgress({ ...p, read: [...p.read, id] });
 };
 
-/** Pure: should UNIT-7 offer the Primer? After the coach marks are done, once, and only if it was never opened. */
+/** Pure: should the Primer be offered? After the coach marks are done, once, and only if it was never opened. */
 export const shouldNudge = (tutorialDone: boolean, p: Pick<PrimerProgress, "opened" | "nudged">): boolean => tutorialDone && !p.opened && !p.nudged;
 
 /** True once the first-session coach marks are finished (or skipped). */

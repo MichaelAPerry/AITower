@@ -1,12 +1,12 @@
 /**
- * One definition of "too hot" for every warning the player sees (UNIT-7 tips, the tutorial hint, the build dock, the
+ * One definition of "too hot" for every warning the player sees (advisor tips, the tutorial hint, the build dock, the
  * dossier text), matching the sim: a rack throttles when its die is above `thermal.okC` and trips at `tripC` (a trip stays
  * latched until it has cooled and sat out its cooldown, so a tripped rack can already be cool). Organoid racks throttle
  * when the tissue leaves its temperature band, which the sim reports as the same `throttled` status.
  *
  * A reading a hair above `okC` slows a rack by a fraction of a percent, so it is not "hot" yet: HOT_MARGIN_C of headroom.
  * Tips additionally wait for the heat to last (`watchHeat`), and let go only after it has stayed gone, so a blip does
- * not make UNIT-7 cry wolf.
+ * not make an advisor cry wolf.
  */
 import type { ContentDB } from "@aitower/content";
 import type { FacilityView, SimView } from "@aitower/sim";

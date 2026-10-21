@@ -24,8 +24,8 @@ export type AdvisorAction =
 	/** Open the Supplies tab of the catalog (spare parts). */
 	| { kind: "supplies"; focus?: CellRef }
 	| { kind: "drawer"; drawer: DrawerId; focus?: CellRef }
-	/** Open the Department of Research. */
-	| { kind: "research" }
+	/** Open the Department of Research, on one node when `techId` is given. */
+	| { kind: "research"; techId?: string }
 	/** Open FORM A-5. */
 	| { kind: "ascension" };
 
@@ -66,7 +66,7 @@ export function cheapestOf(kind: string, view: SimView, content: ContentDB): Fac
 
 /**
  * Racks running hot, by the sim's definition (`rackIsHot`). With `confirmed` (from `watchHeat`) only racks whose heat has
- * lasted count, so a momentary blip never makes UNIT-7 speak.
+ * lasted count, so a momentary blip never makes an advisor speak.
  */
 export function hotRacks(view: SimView, content: ContentDB, confirmed?: ReadonlySet<number>): FacilityView[] {
 	return view.facilities.filter((f) => rackIsHot(f, content) && (!confirmed || confirmed.has(f.id)));

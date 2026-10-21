@@ -57,7 +57,7 @@ describe("unlock rules", () => {
 	it("newlyOpen reports only what was not announced", () => {
 		expect(newlyOpen(["a", "b", "c"], ["a", "c"])).toEqual(["b"]);
 	});
-	it("UNIT-7 offers the Primer once, after the tutorial, and never if it was opened", () => {
+	it("the Primer is offered once, after the tutorial, and never if it was opened", () => {
 		expect(shouldNudge(false, { opened: false, nudged: false })).toBe(false);
 		expect(shouldNudge(true, { opened: false, nudged: false })).toBe(true);
 		expect(shouldNudge(true, { opened: true, nudged: false })).toBe(false);

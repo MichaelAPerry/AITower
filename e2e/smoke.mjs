@@ -112,7 +112,7 @@ async function run(url) {
 		const coach = page.locator(".ui-coach");
 		const coachAt = (re) => page.waitForFunction((src) => new RegExp(src, "i").test(document.querySelector(".ui-coach")?.textContent ?? ""), re, { timeout: 60_000 });
 		await coach.waitFor();
-		assert((await page.locator(".ast-bubble").count()) === 0, "the assistant must stay quiet while the coach marks run");
+		assert((await page.locator(".adv-tip").count()) === 0, "the advisors must stay quiet while the coach marks run");
 		// The sim posts an offer at tick 0 and the tutorial opens the Contracts panel itself: no waiting, no hunting for the tab.
 		await coachAt("Take job");
 		assert((await page.locator("[data-tut-target]").count()) > 0, "the coach mark must pulse its target");
@@ -252,18 +252,35 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("help mode, More... link, Primer search");
 
-		stage("5e. assistant: UNIT-7 is docked, a click gives a tip, the x turns it off (and Settings turns it back on)");
-		await page.locator(".ast-bot").waitFor();
-		await page.locator(".ast-bot").click({ force: true });
-		await page.locator(".ast-bubble").waitFor();
-		// With nothing to suggest the click gives a tip (Thanks); a real suggestion (Not now) or the one-time Primer tip (Later) is answered instead.
-		await page.locator(".ast-btns button", { hasText: /^(Thanks|Not now|Later)$/ }).click();
-		await page.locator(".ast-off").click({ force: true });
-		await page.locator(".ast").waitFor({ state: "detached" });
-		assert((await game(() => window.aitower.store.get().settings.assistant)) === false, "turning the assistant off must persist in settings");
-		await game(() => window.aitower.store.setSettings({ assistant: true }));
-		await page.locator(".ast-bot").waitFor();
-		log("robot docked, tip, off and on");
+		stage("5e. advisors: four portraits are docked, a click asks (ranked live numbers), Settings turns tips off and on");
+		await page.locator(".adv-strip .adv-face").first().waitFor();
+		assert((await page.locator(".adv-strip .adv-face").count()) === 4, "the advisor strip must hold four portrait buttons");
+		assert((await page.locator(".ast, .ui-inbox, .ui-memo-pop").count()) === 0, "UNIT-7 and the memo inbox are gone");
+		await page.getByRole("button", { name: /Ask Cass Parr/ }).click({ force: true });
+		await page.locator(".adv-ask").waitFor();
+		assert(/\d/.test(await page.locator(".adv-ask .adv-ranked").innerText()), "an Ask answer must quote live numbers");
+		await page.keyboard.press("Escape");
+		await page.locator(".adv-ask").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSettings({ advisorTips: false }));
+		assert((await game(() => window.aitower.store.get().settings.advisorTips)) === false, "turning advisor tips off must persist in settings");
+		await game(() => window.aitower.store.setSettings({ advisorTips: true }));
+		log("four advisors, Ask answer, tips off and on");
+
+		stage("5f. a decision pauses the game at 30x, waiting costs nothing, and answering it is a click");
+		const rep0 = await game(() => window.aitower.store.get().view.standing);
+		await game(() => window.aitower.store.setSpeed(30));
+		await page.locator(".adv-card").waitFor({ timeout: 120_000 });
+		const held = await game(() => ({ speed: window.aitower.store.get().speed, tick: window.aitower.store.get().view.tick }));
+		assert(held.speed === 0, "a decision must stop the clock even at 30x");
+		await page.waitForTimeout(1200);
+		assert((await game(() => window.aitower.store.get().view.tick)) === held.tick, "the clock must not run while a decision is open");
+		assert((await page.locator(".adv-opt.is-rec").count()) === 1, "exactly one option is marked as recommended");
+		assert(/defer one day/i.test(await page.locator(".adv-card").innerText()), "the card offers Defer one day");
+		await page.locator(".adv-opt.is-rec").click();
+		await page.locator(".adv-card").waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		assert((await game(() => window.aitower.store.get().view.decision)) === null, "answering must clear the decision");
+		log(`decision answered; reputation ${rep0} -> ${await game(() => window.aitower.store.get().view.standing)} (daily uptime moves it, waiting does not)`);
 
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());

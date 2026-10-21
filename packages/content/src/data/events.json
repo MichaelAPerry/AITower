@@ -4,7 +4,7 @@
   "category": "operational",
   "advisor": "cass",
   "title": "Thermal Advisory: Afternoon Peak",
-  "body": "A hot front hits this afternoon: ambient +12 C at peak, with the AC-1 racks at full load. Rented chillers cut the spike to +5 C for $60k. A second air handler would cut it for good.",
+  "body": "A hot front hits this afternoon: ambient +12 °C at peak, with the AC-1 racks at full load. Rented chillers cut the spike to +5 °C for $60k. A second air handler would cut it for good.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -48,7 +48,7 @@
   "category": "environmental",
   "advisor": "cass",
   "title": "Weather Advisory: Heatwave",
-  "body": "Ambient runs 9 C above seasonal for a day, and every cooler loses efficiency with it. Chillers for $90k hold the rise to 4 C. Without them, expect throttled racks.",
+  "body": "Ambient runs 9 °C above seasonal for a day, and every cooler loses efficiency with it. Chillers for $90k hold the rise to 4 °C. Without them, expect throttled racks.",
   "weight": 7,
   "minTier": 1,
   "cooldownDays": 8,
@@ -57,7 +57,7 @@
    {
     "advisor": "cass",
     "approve": true,
-    "line": "Chillers. A 5 C difference is a day of full-speed racks."
+    "line": "Chillers. A 5 °C difference is a day of full-speed racks."
    },
    {
     "advisor": "bea",

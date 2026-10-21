@@ -33,12 +33,14 @@ if (q.get("saves") !== "0") {
 	store.seedSlot("auto", { name: "Autosave", savedAt: Date.now() - 3 * 3600_000, day: 11, cash: 1_103_200, tier: 2 });
 	store.seedSlot("slot1", { name: "Before the chiller", savedAt: Date.now() - 26 * 3600_000, day: 9, cash: 640_000, tier: 1 });
 }
-// Memo desk and game-over states: ?memo=2 (open memos) &standing=18 &mod=1 &over=bankrupt|shutdown|victory &inbox=1
-for (let i = 0; i < Number(q.get("memo") ?? 0); i++) store.issueMemo(i % 2 ? "audit" : "heatwave", 840 - i * 300);
-if (q.get("memo") && q.get("hist") === "1") {
-	const id = store.issueMemo("audit");
-	store.dispatch({ type: "resolveMemo", memoId: id, choiceId: "bribe" });
-	store.advance(1);
+// Decision card and game-over states: ?decision=heatwave|audit (open decision) &hist=1 &standing=18 &mod=1 &over=bankrupt|shutdown|victory
+if (q.get("decision")) {
+	if (q.get("hist") === "1") {
+		const id = store.issueDecision("audit");
+		store.dispatch({ type: "resolveDecision", decisionId: id, choiceId: "bribe" });
+		store.advance(1);
+	}
+	store.issueDecision(q.get("decision") === "audit" ? "audit" : "heatwave");
 }
 if (num("standing") !== null) store.setStanding(num("standing") as number);
 if (q.get("mod") === "1") {

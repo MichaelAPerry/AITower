@@ -54,7 +54,7 @@ export function filePath(store: GameStore, content: ContentDB, id: AscensionPath
 	return { path: id, tick: store.get().view.tick };
 }
 
-/** Path order and colours (one hue per path; used by the bars, the memo chips and the sheet). */
+/** Path order and colours (one hue per path; used by the bars, the decision chips and the sheet). */
 export const PATH_ORDER: readonly AscensionPath[] = ["biotech", "greentech", "synthetic"];
 export const PATH_COLOR: Record<AscensionPath, string> = { biotech: "#d9669c", greentech: "#4ee08a", synthetic: "#9b8cff" };
 

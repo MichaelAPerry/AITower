@@ -27,15 +27,20 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   Shown at boot over a paused game unless the URL has `?new` (the e2e smoke test needs that). `<Hud title>` overrides it (the dev
   harness uses `?title=1`; SSR tests have no `location`, so no title). Only Continue, New game and Load leave it; Esc does nothing.
   The system menu opened from it has only Load, Settings and Controls (`SystemMenu fromTitle`) and calls `onReplaced` after a load.
-- `memo/`: the Ministry memo desk. `memoDesk.ts` (pure: countdown, default stamp, standing tone, modifier chips, history rows),
-  `MemoDesk.tsx` (`MemoCard`, `MemoPop` slip, `MemoDrawer` inbox + history, `InboxButton`, `StandingMeter`, `ModifierChips`), `memo.css`.
-  `resolveMemo` is queued by the sim until the next tick, so a stamped memo is hidden at once (`ui.stamped`) and the player is told
-  it is filed when the clock runs. Outcome toasts come from the `memoResolved` event (`events.ts` reads `memoHistory`).
+- `advisors/` (M6.3, replaces UNIT-7 and the memo desk): four advisors (Cass Parr, Bea Altasar, Dr. Mel Kiorre, Lucien Ferro). Pure: `advisors.ts`
+  (metadata, `{{term|label}}` markup, effect chips, `priceLine`, `tally`), `suggest.ts` (problem detection: the old UNIT-7 rules, each with an owner
+  advisor and Handbook link), `talk.ts` (`tipCandidates`, `pitches` = "when a better rack is available and affordable its advisor compares the slot",
+  `answerFor` = the ranked Ask answer, `nextTip`). React: `AdvisorStrip.tsx` (docked strip bottom-left of the world, four portrait buttons, one
+  line at a time; a tip shows `TIP_SHOW_MS` (20 s) then collapses to a dot on the portrait; each concept fires once per game via `markTip`, saved in
+  the snapshot as `advisorTips`; quiet during coach marks and the first game day except urgent problems; Esc closes Ask without opening the menu),
+  `DecisionCard.tsx` (the decision card with the MAGI vote), `Portrait.tsx` (inline SVG busts), `advisors.css`. The Settings toggle is `advisorTips`
+  (tips only; decisions always appear; Ask always works).
+- `status/`: the reputation meter and active-effect chips (`Status.tsx`, `status.ts`, `status.css`), kept from the old memo desk.
 - `gameover/`: `gameOver.ts` (pure: `gameOverToShow`/`keepDismissed` give once-only, stats, copy), `GameOverScreen.tsx`. Bankrupt and
   shutdown are final (Load game / New game); victory has Continue in sandbox. Pauses once when it appears.
 - `tutorial/`: `steps.ts` (data + predicates), `Tutorial.tsx`, `clock.ts` (`applyClock`: pause on entry, run at 3x only for steps
   with `clock: "run"`, applied on mode change only), `placement.ts` (`pickCorner`: the memo moves away from the highlighted element).
-  Highlights use `data-tut` hooks (`speed-3`, `tab-rack`, `card-<defId>`, `btab-contracts`, `accept`, `overlay-heat`, `inbox`, `standing`)
+  Highlights use `data-tut` hooks (`speed-3`, `tab-rack`, `card-<defId>`, `btab-contracts`, `accept`, `overlay-heat`, `standing`)
   and the attribute `data-tut-target` (never a class: React rewrites className). Closing the induction restarts a stopped clock at 1x.
 - `research/`: the Department of Research. `tech.ts` (pure: `nodeState` researched/available/poor/locked with reason, `effectText` perks as "−10 % failure rate",
   `unlocksFor` scans `content.facilities`/`bots` for `tech`, `cheapestAvailable`, `techGate` = "Requires research: <name>" for the build palette and bot shop),

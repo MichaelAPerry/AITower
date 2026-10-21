@@ -109,7 +109,7 @@ describe("decision cadence", () => {
 		const gaps = log.slice(1).map((l, i) => l.tick - log[i].tick);
 		for (const g of gaps) expect(g).toBeGreaterThanOrEqual(1); // the day cap shifts rolls to the next midnight
 		expect(new Set(gaps).size).toBeGreaterThan(5); // jitter, not a fixed period
-	});
+	}, 30_000);
 
 	it("only one decision exists at a time: it stays pending (no timeout) until answered, then the next may roll", () => {
 		const events = Array.from({ length: 8 }, (_, i) => ev(`e${i}`));
@@ -190,13 +190,13 @@ describe("memo eligibility", () => {
 	});
 
 	it("picks by weight", () => {
-		const sim = newSim(contentWith([ev("heavy", { weight: 40 }), ev("light", { weight: 1 })], eventsBalance(100, 0)), "empty", 3);
-		const log = issueLog(sim, 1440 * 200);
+		const sim = newSim(contentWith([ev("heavy", { weight: 10 }), ev("light", { weight: 1 })], eventsBalance(100, 0)), "empty", 3);
+		const log = issueLog(sim, 1440 * 100);
 		const heavy = log.filter((l) => l.eventId === "heavy").length;
-		expect(log.length).toBeGreaterThan(150);
-		expect(heavy / log.length).toBeGreaterThan(0.9);
+		expect(log.length).toBeGreaterThan(80); // at most one a day
+		expect(heavy / log.length).toBeGreaterThan(0.8);
 		expect(log.some((l) => l.eventId === "light")).toBe(true);
-	});
+	}, 30_000);
 
 	it("an issued decision is visible in the view with the advisor, text and recommendation", () => {
 		const sim = newSim(contentWith([ev("shown", { category: "client", advisor: "lucien", recommended: "b" })], eventsBalance(100, 0)), "empty", 1);

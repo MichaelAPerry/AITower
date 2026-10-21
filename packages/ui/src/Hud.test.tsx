@@ -112,37 +112,38 @@ describe("SystemMenu (server render)", () => {
 		expect(html).toContain("ui-title-cabinet");
 		expect(html).toContain("AI<b>TOWER</b>");
 		expect(html).not.toContain("ui-induction");
-		// the tutorial memo must not run behind the title screen
+		// the tutorial must not run behind the title screen
 		expect(html).not.toContain("ui-tutorial");
 	});
 
-	it("pops the newest memo with its stamps, hints, countdown and default; the top bar shows the inbox count and standing", () => {
+	it("opens an advisor decision card with the recommended choice, effect chips and a defer button; the top bar shows standing", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
-		store.issueMemo("heatwave", 600);
+		store.issueDecision("heatwave");
 		store.setStanding(18);
 		store.addModifier({ label: "Heatwave", kind: "ambient", value: 8, endsAt: store.get().view.tick + 840 });
 		const html = renderToString(<Hud store={store} content={content} />);
-		expect(html).toContain("ui-memo-pop");
+		expect(html).toContain("adv-card");
 		expect(html).toContain("Notice of Unseasonable Warmth");
+		expect(html).toContain("Cass Parr");
+		expect(html).toContain("Recommended by Cass");
 		expect(html).toContain("BUY CREDITS");
-		expect(html).toContain("−$12k"); // the stamp shows its effect as a number
+		expect(html).toContain("−$12k"); // the choice shows its effect as a number
 		expect(html).toContain("no effect");
-		expect(html).toContain("AUTO-RESOLVES IN 10h");
-		expect(html).toContain("read memo");
-		expect(html).not.toContain("Weather Bureau advises"); // the prose is behind "read memo"
-		expect(html).toMatch(/ui-inbox-count has[^>]*>1</);
+		expect(html).toContain("Defer one day");
+		expect(html).toContain("game paused");
+		expect(html).not.toContain("AUTO-RESOLVES"); // decisions never expire
 		expect(html).toContain("tone-red"); // standing 18 is below 25
-		expect(html).not.toContain("ui-memo-drawer");
 		expect(renderToString(<Drawer {...panelProps(store, content, { ui: { drawer: "insights" } })} />)).toContain("HEATWAVE +8 °C · 14h");
 	});
-	it("a memo that is not urgent only raises the inbox count (no slip)", () => {
+	it("shows the advisor strip with four portraits and no decision card when nothing is pending", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
-		store.issueMemo("heatwave", 2000);
 		const html = renderToString(<Hud store={store} content={content} />);
-		expect(html).not.toContain("ui-memo-pop");
-		expect(html).toMatch(/ui-inbox-count has[^>]*>1</);
+		expect(html).not.toContain("adv-card");
+		for (const n of ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Lucien Ferro"]) expect(html).toContain(`Ask ${n}`);
+		expect(html).not.toContain("UNIT-7");
+		expect(html).not.toContain("ui-inbox");
 	});
 
 	it("renders each game-over notice once the sim reports it", () => {
@@ -164,17 +165,16 @@ describe("SystemMenu (server render)", () => {
 		expect(clean).not.toContain("ui-over-memo");
 	});
 
-	it("uses Compute Authority wording for memo, standing and game-over events", () => {
+	it("uses Compute Authority wording for decision, standing and game-over events", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
-		const id = store.issueMemo("audit");
-		store.dispatch({ type: "resolveMemo", memoId: id, choiceId: "comply" });
+		const id = store.issueDecision("audit");
+		store.dispatch({ type: "resolveDecision", decisionId: id, choiceId: "comply" });
 		store.advance(1);
 		const v = store.get().view;
-		const resolved = describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: false }, v, content);
+		const resolved = describeEvent({ type: "decisionResolved", decisionId: id, eventId: "audit", choiceId: "comply" }, v, content);
 		expect(resolved).toMatchObject({ toast: true });
-		expect(resolved.text).toBe("Memo answered: COMPLY. The Inspector counted 4,112 cables and left.");
-		expect(describeEvent({ type: "memoResolved", memoId: id, eventId: "audit", choiceId: "comply", auto: true }, v, content).text).toContain("unanswered, resolved as COMPLY");
+		expect(resolved.text).toBe("Decided: COMPLY. The Inspector counted 4,112 cables and left.");
 		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Reputation falls by 8 to 42", severity: "warn", toast: true });
 		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
 		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");

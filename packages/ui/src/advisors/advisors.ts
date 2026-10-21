@@ -82,6 +82,14 @@ export function tally(votes: readonly { approve: boolean }[]): { yes: number; no
 	return { yes, no, text: yes >= no ? `${yes} to ${no} for` : `${yes} to ${no} against` };
 }
 
-/** Chips for one choice, in order: money, reputation, modifiers, with affinity effects flagged for a path-coloured pill. */
+const span = (ticks: number): string => (ticks % 1440 === 0 ? `${ticks / 1440}d` : ticks >= 120 ? `${Math.round(ticks / 60)}h` : `${ticks}m`);
+
+/** One effect as a plain chip, timed effects carrying their duration ("ambient +4°C · 1d"). */
+export function effectText(e: EventEffect): string {
+	const base = effectChip(e);
+	return "durationTicks" in e ? `${base} · ${span(e.durationTicks)}` : base;
+}
+
+/** Chips for one choice, in order, with affinity effects flagged for a path-coloured pill. */
 export const choiceChipList = (effects: readonly EventEffect[]): { text: string; path?: "biotech" | "greentech" | "synthetic" }[] =>
-	effects.map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectChip(e) }));
+	effects.map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectText(e) }));
