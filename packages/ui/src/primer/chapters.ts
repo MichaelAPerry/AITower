@@ -1,10 +1,11 @@
 /**
  * The Datacenter Primer as data. Pure: chapters come from content, and unlocking is a function of the view.
- * Six core chapters (plain, under 120 words each), one "Making the most of Level N" per Level, one per path.
+ * Six core chapters (compact, under 170 words each, each ending in a "Speak the language" block), one "Making the most of Level N" per Level, one per path.
  */
 import type { AscensionPath, ContentDB, FacilityDef, Flavor } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
+import { termById } from "../glossary/terms";
 
 export type DiagramId = "center" | "power" | "heat" | "break" | "uptime" | "money";
 /** What a chapter's "Try it" button does in the game. */
@@ -20,6 +21,8 @@ export interface Chapter {
 	group: "core" | "level" | "path";
 	title: string;
 	blocks: Block[];
+	/** "Speak the language": ids of glossary terms this chapter teaches (see glossary/terms.ts). */
+	terms?: string[];
 	diagram?: DiagramId;
 	tryIt: { label: string; id: TryId };
 	unlock: Unlock;
@@ -58,6 +61,7 @@ export const unlockedIds = (chapters: readonly Chapter[], v: Slice): string[] =>
 /** Chapters in `open` the reader has not been told about yet. */
 export const newlyOpen = (open: readonly string[], known: readonly string[]): string[] => open.filter((id) => !known.includes(id));
 
+/** Words in the chapter body (the "Speak the language" block is reference, not reading, and is not counted). */
 export const wordCount = (c: Chapter): number => c.blocks.reduce((n, b) => n + b.p.split(/\s+/).filter(Boolean).length, 0);
 
 const pct = (n: number): string => `${Math.round(n * 100)}%`;
@@ -70,23 +74,24 @@ function core(c: ContentDB): Chapter[] {
 	const up = b.tiers.uptime;
 	const grid = c.facilities.grid_tie?.power?.capacityKw ?? 1500;
 	const rack = c.facilities.rack_air_gpu?.rack;
-	const k = (id: string, title: string, blocks: string[], diagram: DiagramId, tryIt: Chapter["tryIt"]): Chapter => ({
+	const k = (id: string, title: string, blocks: string[], diagram: DiagramId, tryIt: Chapter["tryIt"], terms: string[]): Chapter => ({
 		id: `ch:${id}`,
 		group: "core",
 		title,
 		blocks: blocks.map((p) => ({ p })),
+		terms,
 		diagram,
 		tryIt,
 		unlock: { kind: "always" },
-		keywords: `${title} ${blocks.join(" ")}`.toLowerCase(),
+		keywords: `${title} ${blocks.join(" ")} ${terms.map((x) => { const d = termById(x); return d ? `${d.name} ${d.aka ?? ""} ${d.def}` : ""; }).join(" ")}`.toLowerCase(),
 	});
 	return [
-		k("what", "What is a datacenter?", ["A datacenter is a big building full of computers. Companies pay you to use them for giant jobs, like teaching an AI.", "The computers live in tall cabinets called racks. Every rack needs three helpers: power to run, cooling so it stays cool, and a bot to fix it when it breaks.", "You earn money when racks finish jobs. Your goal is to grow the tower and keep it running."], "center", { label: "Open the Racks catalog", id: "catalog" }),
-		k("power", "Power", [`Computers eat electricity. It comes in from the city through a grid intake. Yours gives up to ${grid / 1000} MW. One air-cooled rack uses ${rack?.powerKw ?? 40} kW, so the lines fill up fast.`, "Wires under the floor carry power to each machine. If there is not enough, machines slow down. That is a brownout. If there is none, they stop.", "A battery keeps things going for a short gap. A generator keeps them going longer."], "power", { label: "Show me the Power map", id: "power" }),
-		k("heat", "Heat & cooling", ["Computers turn electricity into thinking, and also into heat. A lot of heat.", `Up to ${t.okC} °C a rack is happy. Past that it slows down. At ${t.tripC} °C it switches itself off to stay safe.`, "An air handler blows cool air over the racks around it. A chiller is like a fridge for water. The cold water cools racks that are too hot for air. Put an air handler close to every rack."], "heat", { label: "Show me the heat", id: "heat" }),
-		k("break", "Why racks break", ["Computers wear out. Hot racks wear out faster.", `When a part breaks, the rack shows BROKEN and stops earning. A maintenance bot walks over to fix it, but it needs a spare part first. A part costs ${fmtMoney(c.structure.sparePart)}.`, "No parts means no repair. Keep a few in the depot. Keep racks cool, too, and fewer things will break."], "break", { label: "Open the Supplies tab", id: "parts" }),
-		k("uptime", "Uptime & reputation", [`Uptime is how much of the time your racks are up and working. Clients need to count on you. Level 2 needs ${pct(up[1] ?? 0)}. Level 5 needs ${pct(up[4] ?? 0)}.`, `Reputation is the trust score, from 0 to 100. A day at or over the target adds ${b.standing.dailyGood}. A day under takes points away. A failed job costs ${Math.abs(b.standing.jobFailed)}. At 0 you are shut down.`], "uptime", { label: "Open Insights", id: "insights" }),
-		k("money", "Money", [`You started with ${fmtMoney(b.startingCash)}. Money comes in when a job finishes. It goes out for power, upkeep, repairs and late fines.`, `At midnight the Ministry takes ${Math.round(b.tax.profitShare * 100)}% of the day's profit as tax.`, "PER HOUR at the top shows if you are ahead right now. Red with no job running is only upkeep. Take a job and it turns green."], "money", { label: "Open Contracts", id: "contracts" }),
+		k("what", "What is a datacenter?", ["A datacenter turns electricity into compute and sells the compute. The product is capacity: operations delivered on schedule, billed by the job or by the hour.", "The unit you build around is the rack, a cabinet of servers. It draws power, gives off the same power as heat, and fails at a predictable rate. Everything else in the building exists to feed racks, cool them and replace them.", "The compute is sold two ways. Training is a big one-off job with a deadline. Inference is a standing service that has to answer whenever users ask.", "AItower is that loop: racks earn from contracts, power, cooling and repairs eat the margin, and uptime decides how far you grow."], "center", { label: "Open the Racks catalog", id: "catalog" }, ["it-load", "rack", "pflops", "training", "inference"]),
+		k("power", "Power", [`Power arrives through a grid intake. Yours supplies up to ${grid / 1000} MW, and one air-cooled rack draws ${rack?.powerKw ?? 40} kW, so a few dozen racks fill it. Power per rack (density) is the number that drives every other decision.`, "Inside, a PDU steps power down and feeds each rack. A UPS bridges the seconds between a grid failure and a generator taking over. Operators size this chain with redundancy: N+1 means one spare unit beyond what the load needs, so a single failure is not an outage.", "Demand above supply is a brownout: machines slow down. No supply and they stop. The Power overlay shows where it runs short."], "power", { label: "Show me the Power map", id: "power" }, ["kw", "mw", "kwh", "rack-density", "pdu", "ups", "genset", "redundancy", "brownout"]),
+		k("heat", "Heat & cooling", [`Every watt a rack draws leaves as heat, so cooling load equals IT load. Racks run normally up to ${t.okC} °C, throttle as they approach ${t.throttleC} °C, and trip offline at ${t.tripC} °C.`, "Air cooling moves heat with fans. A CRAH blows room air over chilled-water coils, and containment keeps hot exhaust from mixing with cold supply. Air gives out at a few tens of kW per rack. Denser racks use direct-to-chip liquid cooling or sit in immersion tanks, on a loop where a chiller makes cold water and a CDU hands it to the racks.", "The scorecard is PUE: total facility power divided by IT power. Everything above 1.0 is overhead, mostly cooling."], "heat", { label: "Show me the heat", id: "heat" }, ["crah", "crac", "aisle", "chiller", "cdu", "dlc", "immersion", "pue", "wue", "heat-reuse", "tdp", "throttle", "cop"]),
+		k("break", "Why racks break", ["Hardware fails at a steady rate, and heat raises it. At fleet scale something is always broken, so operators plan around failure rather than against it.", `A failed part leaves the rack BROKEN and earning nothing. A maintenance bot repairs it, but needs a spare from a depot (${fmtMoney(c.structure.sparePart)} each). Reliability is MTBF, the mean time between failures. Repair speed is MTTR. Availability is roughly MTBF ÷ (MTBF + MTTR), so spares and bots shrink the half you control.`, "Training jobs survive failures by checkpointing: they save progress at intervals, so a dead rack costs the work since the last save, not the whole job."], "break", { label: "Open the Supplies tab", id: "parts" }, ["mtbf", "mttr", "checkpointing"]),
+		k("uptime", "Uptime & reputation", [`Uptime is the share of time capacity was available, and the industry counts it in nines: 99.9% allows about 8.8 hours of downtime a year, 99.99% about 53 minutes. Your Level targets run from ${pct(up[1] ?? 0)} at Level 2 to ${pct(up[4] ?? 0)} at Level 5.`, "Customers buy availability through an SLA, a contract with penalties. Inside the company the working target is the SLO, set tighter than the SLA so you breach the contract only after missing your own goal.", `Reputation, 0 to 100, tracks it. A day on target adds ${b.standing.dailyGood}, a missed day subtracts, a failed job costs ${Math.abs(b.standing.jobFailed)}, and at 0 you are shut down.`], "uptime", { label: "Open Insights", id: "insights" }, ["uptime", "nines", "sla", "slo", "reputation"]),
+		k("money", "Money", [`You start with ${fmtMoney(b.startingCash)}. Building is capex, a one-time cost. Power, upkeep and repairs are opex, paid continuously. Every rack has to earn back its capex while covering its opex.`, "Utilisation is the lever: a rack with no job still costs opex. That is why PER HOUR at the top turns red when nothing is running and green once a contract is.", `Electricity is the biggest running cost. Large operators lock its price with a PPA, a long-term power purchase agreement, instead of paying the spot rate. At midnight the Ministry takes ${Math.round(b.tax.profitShare * 100)}% of the day's profit.`], "money", { label: "Open Contracts", id: "contracts" }, ["capex", "utilisation", "ppa"]),
 	];
 }
 
@@ -97,27 +102,27 @@ function levelAdvice(n: number, c: ContentDB): { next: string; mistakes: string 
 		case 1:
 			return {
 				next: `Place two or three ${N("rack_air_gpu")}s, an ${N("crah_unit")} beside them, and a ${N("grid_tie")}. Add a ${N("parts_depot")} and a ${N("bot_charger")}. Then take a Training job in Contracts.`,
-				mistakes: "Racks with no air handler close by get hot. No depot means broken racks wait for ever. Idle racks earn nothing, so always have a job running.",
+				mistakes: "A rack with no air handler in reach throttles. No depot means broken racks stay broken. Idle racks earn nothing and still cost upkeep, so keep utilisation up with a contract running.",
 			};
 		case 2:
 			return {
 				next: `Lay a coolant pipe, add a ${N("chiller")} and a ${N("cdu")}, then a ${N("rack_dlc_gpu")}. Research opens the stronger air and power gear.`,
-				mistakes: "A liquid rack with no coolant shows NO COOLANT and does nothing. A chiller needs a CDU to share its cold. Do not let power run short as racks pile up.",
+				mistakes: "A liquid rack with no coolant shows NO COOLANT and does nothing. A chiller needs a CDU to distribute its cold water. Watch the power budget as density climbs: kW per rack adds up fast.",
 			};
 		case 3:
 			return {
-				next: "Spend research on cooling and power first. Add a bigger battery or turbine, then denser racks. Read the Primer chapter for the path that fits your plans.",
-				mistakes: "Adding racks faster than power and cooling is the big one. Another is spreading research thin. Pick a direction and follow it.",
+				next: "Research cooling and power before density. Add a bigger UPS or turbine, then denser racks. Read the chapter for the path you are leaning toward.",
+				mistakes: "Adding racks faster than power and cooling is the classic one. Spreading research thin is the other. Pick a direction and follow it.",
 			};
 		case 4:
 			return {
 				next: `Grow the grid (${N("grid_tie")} upgrades), then cooling that keeps up: free-air chillers and blade racks. Start building toward the path you like best.`,
-				mistakes: "Racks outgrow the grid. Uptime slips because nobody watched it while the tower got big. A big tower makes a big mess when it fails.",
+				mistakes: "Racks outgrow the grid. Uptime slips because nobody watched it while the tower grew. The blast radius of a failure scales with the size of the tower.",
 			};
 		default:
 			return {
 				next: "Open FORM A-5 and choose a path when you are ready. Read that path's chapter first. Keep uptime high while you build toward it.",
-				mistakes: "Signing the form without reading it. The choice cannot be undone. Letting uptime slip while you decide.",
+				mistakes: "Signing the form unread. The choice is permanent. Letting uptime slip while you decide.",
 			};
 	}
 }
@@ -157,17 +162,17 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 		biotech: {
 			earn: "Leanings grow when you pick Biotech answers in memos, research the Wetware steps, and keep nutrient plants and organoid cabinets running.",
 			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. A Living Tower needs ${e.livingTower.pflops} PF with lots of growth. A Clean Tower needs ${e.cleanTower.pflops} PF with very little. Choose one and stay with it.`,
-			risk: "Growth spreads if you do not keep it in check. Sterile bays and quarantine locks cost money but keep it tidy. The Ministry will say it is all under control.",
+			risk: "Growth spreads if you do not contain it. Sterile bays and quarantine locks cost money and keep it tidy. The Ministry will say it is under control.",
 		},
 		greentech: {
 			earn: "Leanings grow when you pick Greentech answers in memos, research the sun, wind and heat steps, and keep panels, masts and heat links running.",
-			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Reach ${pct(gx.minScore)} with ${gx.pflops} PF to be an exemplar. Sell waste heat. Grow algae for carbon credits.`,
-			risk: `Some days are dark and still. The weather power drops to ${pct(c.balance.green.droughtFactor)} for ${c.balance.green.droughtHours} hours. Keep a generator warm and a battery full.`,
+			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Reach ${pct(gx.minScore)} with ${gx.pflops} PF to be an exemplar. Sell waste heat (heat reuse) and grow algae for carbon credits.`,
+			risk: `Some days are dark and still. Weather-dependent supply drops to ${pct(c.balance.green.droughtFactor)} for ${c.balance.green.droughtHours} hours. Keep a genset ready and a UPS charged.`,
 		},
 		synthetic: {
 			earn: "Leanings grow when you pick Synthetic answers in memos, research the Continuity steps, and run the newest top-tier racks.",
 			win: `Your Refinement is uptime multiplied by the share of compute on top-tier racks. Reach ${pct(mm.minScore)} with ${mm.pflops} PF. Cool lattice racks on a cryo loop. Keep everything running behind monitors and a backup vault.`,
-			risk: "One long outage hurts twice, because Refinement counts uptime. The minds are polite, but they do not like being switched off.",
+			risk: "One long outage hurts twice, because Refinement counts uptime. The minds are polite and dislike being switched off.",
 		},
 	};
 	const t = text[p];
@@ -178,7 +183,7 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 		{ h: "Risks", p: t.risk },
 	];
 	const name = PATH_NAME[p];
-	return { id: `ch:path-${p}`, group: "path", title: `Making the most of the ${name} path`, blocks, tryIt: { label: "Open Research", id: "research" }, unlock: { kind: "path", path: p }, keywords: `${name} path ascension ${blocks.map((x) => x.p).join(" ")}`.toLowerCase() };
+	return { id: `ch:path-${p}`, group: "path", title: `Making the most of the ${name} path`, blocks, ...(p === "greentech" ? { terms: ["heat-reuse", "ppa", "pue"] } : {}), tryIt: { label: "Open Research", id: "research" }, unlock: { kind: "path", path: p }, keywords: `${name} path ascension ${blocks.map((x) => x.p).join(" ")}`.toLowerCase() };
 }
 
 /** Chapter epigraphs. Each is a real quotation, verified in docs/QUOTES.md. */

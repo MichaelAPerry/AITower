@@ -28,9 +28,9 @@ export const KIND_NAME: Record<JobKind, string> = {
 };
 
 export const KIND_BLURB: Record<JobKind, string> = {
-	training: "A big one-off calculation. Your racks crunch numbers until the work is done, and you get paid for it.",
+	training: "A big one-off calculation: training an AI model. Your racks crunch numbers until the work is done. Progress is saved at checkpoints, so a failed rack costs only the work since the last one.",
 	finetune: "A smaller one-off calculation that tunes an existing AI model. Same idea as training, just shorter.",
-	inference: "A customer's AI app needs computing power available the whole time. You are paid for every minute you keep up.",
+	inference: "Inference: serving a trained model to a customer's app, which needs computing power available the whole time. You are paid for every minute you keep up, and the SLA fines you when you fall short.",
 };
 
 const pf = (n: number): string => `${Math.round(n * 10) / 10} PF`;
@@ -52,7 +52,7 @@ export function offerFacts(spec: ContractSpec, content: ContentDB): Fact[] {
 	out.push({
 		icon: "$",
 		label: `Pays ${fmtMoney(spec.payout)} total`,
-		sub: inf ? "Paid a little every minute while you keep the service up." : "Part is paid as work gets saved, the rest when the job finishes.",
+		sub: inf ? "Paid a little every minute while you keep the service up." : "Part is paid at each checkpoint (work saved), the rest when the job finishes.",
 		value: fmtMoney(spec.payout),
 		tone: "money",
 	});
@@ -82,7 +82,7 @@ export function offerFacts(spec: ContractSpec, content: ContentDB): Fact[] {
 	if (!inf && spec.penalty > 0) out.push({ icon: "!", label: `Fine if late: ${fmtMoney(spec.penalty)}`, sub: "Charged once, if the deadline passes before the work is done.", value: fmtMoney(spec.penalty), tone: "warn" });
 	if (inf) {
 		const perHour = content.balance.economy.slaPenaltyFactor * (spec.payout / Math.max(1, spec.durationTicks)) * HOUR;
-		if (perHour > 0) out.push({ icon: "!", label: "Fine if you fall short", sub: "Only while the service is running and your racks cannot keep up.", value: `about ${fmtMoney(perHour)}/h`, tone: "warn" });
+		if (perHour > 0) out.push({ icon: "!", label: "Fine if you fall short", sub: "An SLA penalty: only while the service is running and your racks cannot keep up.", value: `about ${fmtMoney(perHour)}/h`, tone: "warn" });
 	}
 	if (spec.needsLiquid) out.push({ icon: "~", label: "Needs liquid-cooled racks", sub: "Air-cooled racks cannot take this job.", value: "liquid" });
 	if (spec.needsBio) out.push({ icon: "~", label: "Needs organoid racks", sub: "Only living-tissue racks can take this job.", value: "organoid" });

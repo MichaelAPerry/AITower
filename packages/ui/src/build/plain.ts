@@ -52,13 +52,13 @@ export interface CatalogItem {
 const KIND_BLURB: Partial<Record<FacilityDef["kind"], string>> = {
 	grid_tie: "Your connection to the city's power. Reliable, and you pay for what you use.",
 	genset: "A backup generator. It starts when power runs short, but the fuel is pricey.",
-	ups: "A battery. It keeps everything running during an outage until a generator starts.",
+	ups: "A UPS: batteries that keep everything running during an outage until a generator starts.",
 	solar: "Panels that make free power in daylight and nothing at night.",
 	wind: "A wind turbine. Free power while the wind blows.",
 	bioreactor: "Burns nutrient liquid to make power. Strong, but it leaks contamination.",
-	crah: "An air handler. It cools the air around the racks close to it.",
-	chiller: "Chills the water in your coolant pipes. Liquid-cooled racks need one.",
-	cdu: "Passes cold water on to liquid racks, so several racks can share one loop.",
+	crah: "A CRAH (computer room air handler). It cools the air around the racks close to it.",
+	chiller: "A chiller: it chills the water in your coolant pipes. Liquid-cooled racks need one.",
+	cdu: "A CDU (coolant distribution unit): it passes cold water on to liquid racks, so several can share one loop.",
 	heat_export: "Takes heat out of the air and sells it to the neighbourhood heating.",
 	carbon: "Soaks up carbon and earns carbon credits every day.",
 	depot: "A shelf of spare parts. Repair bots fetch from here when a rack breaks.",
@@ -75,8 +75,8 @@ export function plainBlurb(def: FacilityDef): string {
 		if (c === "bio") return "Living tissue that does computing. It likes a steady 37 °C and needs nutrient pipes.";
 		if (def.rack.pflops <= 0) return "Shelves of disks that hold the data your jobs need. No storage, no big jobs.";
 		if (c === "air") return "A cabinet full of computers that run your customers' jobs. They get hot, so keep an air handler close.";
-		if (c === "dlc") return "A powerful cabinet cooled by liquid pipes. It does more work, but needs a coolant loop.";
-		return "Computers sunk in a bath of special liquid. Very strong, and it needs a coolant loop.";
+		if (c === "dlc") return "A powerful cabinet with direct-to-chip liquid cooling (DLC). It does more work, but needs a coolant loop.";
+		return "Computers sunk in a bath of special liquid (immersion cooling). Very strong, and it needs a coolant loop.";
 	}
 	return KIND_BLURB[def.kind] ?? "Part of your datacenter.";
 }
@@ -88,8 +88,8 @@ export function plainStats(def: FacilityDef): Stat[] {
 	const s: Stat[] = [];
 	const r = def.rack;
 	if (r) {
-		s.push({ icon: "bolt", label: "Power", sub: "Electricity it uses", value: fmtPower(r.powerKw + def.facilityKw) });
-		if (r.cooling === "air") s.push({ icon: "drop", label: "Heat", sub: "Needs an air handler nearby", value: "Air", tone: "warn" });
+		s.push({ icon: "bolt", label: "Power", sub: "Electricity it uses (rack density)", value: fmtPower(r.powerKw + def.facilityKw) });
+		if (r.cooling === "air") s.push({ icon: "drop", label: "Heat", sub: "Needs an air handler (CRAH) nearby", value: "Air", tone: "warn" });
 		else if (r.cooling === "bio") s.push({ icon: "drop", label: "Heat", sub: "Must stay in a narrow warm band", value: r.bio ? bandText(r.bio) : "37 °C" });
 		else s.push({ icon: "drop", label: "Heat", sub: "Needs a coolant pipe, a chiller and a CDU", value: r.cooling === "dlc" ? "Liquid" : "Bath" });
 		if (r.pflops > 0) s.push({ icon: "star", label: "Earns", sub: "Compute for your jobs", value: fmtPflops(r.pflops), tone: "money" });

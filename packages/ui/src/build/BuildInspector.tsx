@@ -2,6 +2,7 @@ import { fmtMoney } from "../format";
 import { Icon } from "../components/common";
 import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
+import { Jargon, TermScope } from "../glossary/Term";
 import { findItem, itemForTool } from "./catalog";
 import { CATEGORY_LABEL, type Stat } from "./plain";
 
@@ -12,10 +13,16 @@ function StatRow({ s }: { s: Stat }) {
 				{s.icon === "$" ? "$" : <Icon name={s.icon} size={12} />}
 			</span>
 			<span className="bld-stat-text">
-				<span className="bld-stat-label">{s.label}</span>
-				<span className="bld-stat-sub">{s.sub}</span>
+				<span className="bld-stat-label">
+					<Jargon text={s.label} />
+				</span>
+				<span className="bld-stat-sub">
+					<Jargon text={s.sub} />
+				</span>
 			</span>
-			<span className={`bld-stat-val ${s.tone ? `is-${s.tone}` : ""}`}>{s.value}</span>
+			<span className={`bld-stat-val ${s.tone ? `is-${s.tone}` : ""}`}>
+				<Jargon text={s.value} />
+			</span>
 		</div>
 	);
 }
@@ -34,12 +41,15 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 	const missing = item.def ? item.cost - view.cash : 0;
 	const openEntry = (): void => setUi({ drawer: "primer", encyId: item.entry, paletteOpen: false, buildHover: null });
 	return (
+		<TermScope key={item.key}>
 		<aside className="bld-insp ui-panel" aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
 			<div className="bld-kicker">
 				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
 			</div>
 			<h2 className="bld-h">{item.name}</h2>
-			<p className="bld-blurb">{item.blurb}</p>
+			<p className="bld-blurb">
+				<Jargon text={item.blurb} />
+			</p>
 			<div className="bld-stats">
 				{item.stats.map((s) => (
 					<StatRow key={`${s.label}${s.sub}`} s={s} />
@@ -67,5 +77,6 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 			</div>
 			<FlavorLine flavor={item.def?.flavor} />
 		</aside>
+		</TermScope>
 	);
 }

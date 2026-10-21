@@ -1,0 +1,67 @@
+/* <Term>: a quiet dotted underline; the card appears on hover or focus. */
+.aitower-hud .ui-term {
+	position: relative;
+	cursor: help;
+	text-decoration: underline dotted;
+	text-decoration-color: color-mix(in srgb, var(--accent) 70%, transparent);
+	text-underline-offset: 3px;
+	text-decoration-thickness: 1px;
+}
+.aitower-hud .ui-term:hover,
+.aitower-hud .ui-term:focus-visible {
+	text-decoration-color: var(--accent);
+	outline: none;
+}
+.aitower-hud .ui-term-tip {
+	position: absolute;
+	left: 0;
+	top: 100%;
+	z-index: 60;
+	width: 270px;
+	max-width: 72vw;
+	padding-top: 6px;
+	font-weight: 400;
+	letter-spacing: normal;
+	text-transform: none;
+	text-align: left;
+	cursor: default;
+	white-space: normal;
+}
+.aitower-hud .ui-term-tip.is-right {
+	left: auto;
+	right: 0;
+}
+.aitower-hud .ui-term-tip.is-above {
+	top: auto;
+	bottom: 100%;
+	padding-top: 0;
+	padding-bottom: 6px;
+}
+.aitower-hud .ui-term-card {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 10px 12px;
+	color: #eef5f8;
+	background: #0b1218;
+	border: 1px solid var(--accent);
+	border-radius: var(--radius);
+	box-shadow: 0 8px 28px rgba(0, 0, 0, 0.7);
+	font: 12.5px/1.4 var(--f-body);
+}
+.aitower-hud .ui-term-name {
+	font: 600 12px/1.2 var(--f-display);
+	letter-spacing: 0.08em;
+	color: var(--accent);
+}
+.aitower-hud .ui-term-more {
+	align-self: flex-start;
+	margin-top: 2px;
+	padding: 0;
+	font: 600 12px/1.3 var(--f-body);
+	color: var(--accent);
+	background: none;
+	border: 0;
+	border-bottom: 1px solid currentColor;
+	cursor: pointer;
+}

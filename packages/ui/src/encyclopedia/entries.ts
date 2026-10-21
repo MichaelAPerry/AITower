@@ -6,6 +6,7 @@ import type { ContentDB, FacilityDef, Flavor, TechNode } from "@aitower/content"
 import type { SimView } from "@aitower/sim";
 import { defSpecs, lockText } from "../components/BuildPalette";
 import { fmtMoney } from "../format";
+import { TERMS } from "../glossary/terms";
 import { effectText, nodeState, techGate, techList, unlocksFor } from "../research/tech";
 
 export type Section = "basics" | "facilities" | "bots" | "research" | "glossary";
@@ -31,6 +32,8 @@ export interface Entry {
 	ref?: { kind: "facility" | "bot" | "tech"; id: string };
 	/** A real quotation for facility, bot and research pages. */
 	flavor?: Flavor;
+	/** Glossary words: the Primer chapter that teaches it. */
+	at?: string;
 	/** Lower-case search text. */
 	keywords: string;
 }
@@ -81,31 +84,9 @@ function basics(c: ContentDB): Entry[] {
 	];
 }
 
+/** The Words list: one entry per term in glossary/terms.ts (the single source of truth). */
 function glossary(): Entry[] {
-	const G = (term: string, ...lines: string[]): Entry => mk({ id: `glossary:${term.toLowerCase().replace(/[^a-z0-9]+/g, "-")}`, section: "glossary", title: term, lines });
-	return [
-		G("Rack", "A tall cabinet of computers. It needs power, cooling and a bot to repair it. Racks earn money by running jobs."),
-		G("Reputation", "Your trust score, from 0 to 100. Good days raise it, failed jobs and missed uptime lower it. At 0 you are shut down."),
-		G("Overlay", "A colour view over the floor, such as Heat or Power, that shows what is hot or short of power."),
-		G("PF", "Petaflop: a quadrillion calculations per second. The game's unit of compute, shown like \"80 PF compute\"."),
-		G("PFLOPS", "Petaflops per second of computing power. Same unit as PF; this is what contracts are measured in."),
-		G("kW", "Kilowatt: 1,000 watts of power. A rack might draw tens of kW."),
-		G("MW", "Megawatt: 1,000 kW. Big towers draw several."),
-		G("kWh", "Kilowatt-hour: energy. Running 1 kW for one hour. This is what the power bill charges for."),
-		G("CDU", "Coolant distribution unit. Shares a chiller's cold liquid between liquid-cooled racks on the same loop."),
-		G("CRAH", "Computer room air handler. A fan-and-coil unit that cools the air around nearby racks."),
-		G("Chiller", "Makes the cold liquid for a coolant loop. It uses electricity, more when it is hot outside."),
-		G("COP", "Coefficient of performance: heat moved per unit of electricity. Higher is cheaper to run."),
-		G("PUE", "Power usage effectiveness: total power divided by IT power. 1.0 is perfect; the closer, the less you waste on cooling."),
-		G("Uptime", "The share of time your compute is available. Contracts, Level and Reputation all depend on it."),
-		G("UPS", "Uninterruptible power supply: a battery that carries the tower through short power gaps."),
-		G("Genset", "A backup generator. Starts after a short delay when power runs short, and burns fuel."),
-		G("Throttle", "A hot rack slows itself to stay safe. Less compute, same power bill."),
-		G("Brownout", "Not enough power for everything on the line, so machines run slow."),
-		G("DLC", "Direct liquid cooling: coolant piped to the chips. Moves more heat than air."),
-		G("RP", "Research points. Earned from delivered compute and finished jobs; spent on research."),
-		G("Tick", "One game minute. The simulation advances one tick at a time."),
-	];
+	return TERMS.map((t) => mk({ id: `glossary:${t.id}`, section: "glossary", title: t.name, lines: [t.def, `In AItower: ${t.game}`], at: t.at === "words" ? undefined : t.at }, t.aka ?? "")).sort((x, y) => x.title.localeCompare(y.title, "en", { sensitivity: "base" }));
 }
 
 /** Every entry, in display order. Pure. */

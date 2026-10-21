@@ -3,6 +3,7 @@
  * a header, an optional tab row, then a list of cards on one side and an Inspector for the selected card on the other,
  * with ONE big primary button at the bottom of the Inspector. It borrows the Build catalog's look (`bld-*` classes).
  */
+import { Jargon } from "../glossary/Term";
 import type { ReactNode } from "react";
 import type { Fact } from "../contracts/contractText";
 
@@ -60,8 +61,12 @@ export function FactRow({ f }: { f: Fact }) {
 				{f.icon}
 			</span>
 			<span className="bld-stat-text">
-				<span className="bld-stat-label">{f.label}</span>
-				<span className="bld-stat-sub">{f.sub}</span>
+				<span className="bld-stat-label">
+					<Jargon text={f.label} />
+				</span>
+				<span className="bld-stat-sub">
+					<Jargon text={f.sub} />
+				</span>
 			</span>
 			<span className={`bld-stat-val ${f.tone ? `is-${f.tone}` : ""}`}>{f.value}</span>
 		</div>

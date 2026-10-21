@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildEntries, searchEntries } from "../encyclopedia/entries";
 import { HELP, HELP_KEYS } from "../help/helpText";
 import { buildChapters, isUnlocked, lockText, newlyOpen, primerTarget, unlockedIds, wordCount } from "./chapters";
+import { TERMS, termById } from "../glossary/terms";
 import { shouldNudge } from "./progress";
 
 const content = loadContent();
@@ -20,8 +21,8 @@ describe("chapters", () => {
 		expect(new Set(chapters.map((c) => c.id)).size).toBe(chapters.length);
 		for (const c of core) expect(c.diagram, c.id).toBeTruthy();
 	});
-	it("keeps every core chapter at 120 words or fewer, and the others short", () => {
-		for (const c of core) expect(wordCount(c), c.id).toBeLessThanOrEqual(120);
+	it("keeps every core chapter at 170 words or fewer, and the others short", () => {
+		for (const c of core) expect(wordCount(c), c.id).toBeLessThanOrEqual(170);
 		for (const c of chapters) expect(wordCount(c), c.id).toBeLessThanOrEqual(190);
 	});
 	it("uses real numbers from content", () => {
@@ -80,16 +81,38 @@ describe("links and search", () => {
 });
 
 describe("jargon", () => {
-	const gloss = new Set(entries.filter((e) => e.section === "glossary").map((e) => e.title.toLowerCase()));
+	const gloss = new Set(TERMS.flatMap((t) => [t.id, t.name.toLowerCase(), ...(t.aka ?? "").split(/\s+/)]));
 	const copy = [...chapters.flatMap((c) => c.blocks.map((b) => b.p)), ...HELP_KEYS.map((k) => HELP[k].text)].join(" ");
 	it("every technical term used in Primer and help copy has a glossary entry", () => {
-		const terms = ["PUE", "CDU", "CRAH", "UPS", "COP", "DLC", "RP", "PF", "PFLOPS", "kW", "MW", "kWh", "Chiller", "Genset", "Throttle", "Brownout", "Uptime", "Rack", "Reputation", "Overlay"];
+		const terms = ["PUE", "CDU", "CRAH", "UPS", "COP", "DLC", "RP", "PF", "PFLOPS", "kW", "MW", "kWh", "Chiller", "Genset", "Throttle", "Brownout", "Uptime", "Rack", "Reputation", "Overlay", "PDU", "SLA", "SLO", "MTBF", "TDP", "PPA", "WUE"];
 		for (const t of terms) if (new RegExp(`\\b${t}\\b`, "i").test(copy)) expect(gloss.has(t.toLowerCase()), t).toBe(true);
 	});
 	it("any other ALL-CAPS word in chapter copy is a known label", () => {
 		const ok = new Set(["NO", "POWER", "BROKEN", "HOT", "COOLANT", "PER", "HOUR", "PF", "MW", "FORM", "A", "RP", "AI", "UNIT", "DLC", "CDU", "NEXT", "PV"]);
 		const caps = chapters.flatMap((c) => c.blocks.flatMap((b) => b.p.match(/\b[A-Z]{2,}\b(?!-)/g) ?? []));
 		for (const w of caps) expect(ok.has(w) || gloss.has(w.toLowerCase()), w).toBe(true);
+	});
+});
+
+describe("Speak the language", () => {
+	it("every core chapter has a block of at least three terms, and every term id resolves", () => {
+		for (const c of core) expect(c.terms?.length ?? 0, c.id).toBeGreaterThanOrEqual(3);
+		for (const c of chapters) for (const id of c.terms ?? []) expect(termById(id), `${c.id}:${id}`).toBeDefined();
+	});
+	it("covers the required vocabulary, each term taught in a chapter", () => {
+		const taught = new Set(core.flatMap((c) => c.terms ?? []));
+		for (const id of ["it-load", "rack-density", "pdu", "ups", "redundancy", "crah", "crac", "aisle", "chiller", "cdu", "dlc", "immersion", "pue", "wue", "tdp", "throttle", "mtbf", "uptime", "nines", "sla", "slo", "inference", "training", "checkpointing", "pflops", "utilisation", "capex", "ppa", "heat-reuse"]) expect(taught.has(id), id).toBe(true);
+	});
+	it("terms have unique ids, a definition and an AItower line, and point at a real chapter", () => {
+		expect(new Set(TERMS.map((t) => t.id)).size).toBe(TERMS.length);
+		for (const t of TERMS) {
+			expect(t.def.length, t.id).toBeGreaterThan(20);
+			expect(t.game.length, t.id).toBeGreaterThan(5);
+			expect(t.at === "words" || chapters.some((c) => c.id === t.at), t.id).toBe(true);
+		}
+	});
+	it("chapter search finds the jargon", () => {
+		for (const w of ["pue", "crah", "n+1", "immersion"]) expect(chapters.some((c) => c.keywords.includes(w)), w).toBe(true);
 	});
 });
 

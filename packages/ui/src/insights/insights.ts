@@ -94,5 +94,5 @@ export function reputationTrend(view: Pick<SimView, "standingLog" | "tick">): { 
 export function pueExplain(pue: number): string {
 	if (!(pue > 0)) return "How much extra electricity cooling and losses use on top of the computers. Not measured yet.";
 	const extra = Math.max(0, pue - 1);
-	return `For every $1 of power the computers use, cooling and losses add about $${extra.toFixed(2)} more. Lower is better; 1.00 would be perfect.`;
+	return `For every $1 of power the computers use, cooling and losses add about $${extra.toFixed(2)} more. Lower is better; 1.00 would be perfect, and efficient real-world sites run about 1.1 to 1.2.`;
 }
