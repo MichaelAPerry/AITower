@@ -171,10 +171,10 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 				else if (e.type === "componentFailed") failures++;
 				else if (e.type === "autoBuilt") totals.built++;
 				else if (e.type === "autoBought") totals[e.what === "parts" ? "parts" : "bots"] += e.count;
-				else if (e.type === "memoIssued") {
+				else if (e.type === "decisionIssued") {
 					memos++;
 					const choice = bestMemoChoice(content, e.eventId);
-					if (choice) sim.submit({ type: "resolveMemo", memoId: e.memoId, choiceId: choice });
+					if (choice) sim.submit({ type: "resolveDecision", decisionId: e.decisionId, choiceId: choice });
 				}
 			}
 			const v = sim.view();

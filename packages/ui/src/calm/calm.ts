@@ -1,10 +1,10 @@
 /**
- * Pure helpers for the Calm HUD: money per hour, Clearance progress, the build dock picks, memo effect chips and urgency,
+ * Pure helpers for the Calm HUD: money per hour, Clearance progress, the build dock picks, decision effect chips,
  * and which events are routine enough to stay out of the ticker.
  */
 import type { AscensionPath, ContentDB, EventEffect, FacilityDef } from "@aitower/content";
 import type { HorrorIntensity } from "@aitower/shared";
-import type { CellRef, LedgerDay, MemoView, SimEvent, SimView } from "@aitower/sim";
+import type { CellRef, LedgerDay, SimEvent, SimView } from "@aitower/sim";
 import { describeEvent, isNoise } from "../events";
 import type { Severity } from "../notices";
 import { fmtMoney } from "../format";
@@ -133,7 +133,7 @@ export function dockPicks(view: SimView, content: ContentDB): DockPick[] {
 	return out;
 }
 
-// ─── Memos ────────────────────────────────────────────────────────────────
+// ─── Decision effect chips ────────────────────────────────────────────────
 
 const pathLabel = (p: string): string => (p === "synthetic" ? "Synthetic" : p === "greentech" ? "Greentech" : p === "biotech" ? "Biotech" : p);
 
@@ -173,22 +173,6 @@ export function chipParts(effects: readonly EventEffect[]): { text: string; path
 /** The compact consequence of a choice: its effects joined with " · ", or "no effect". */
 export const choiceChips = (effects: readonly EventEffect[]): string => (effects.length ? effects.map(effectChip).join(" · ") : "no effect");
 
-/** Effects of one choice of a memo, from the event definition. */
-export const effectsOf = (content: ContentDB, memo: Pick<MemoView, "eventId">, choiceId: string): EventEffect[] =>
-	content.events.find((e) => e.id === memo.eventId)?.choices.find((c) => c.id === choiceId)?.effects ?? [];
-
-/** Memos expiring within this many ticks pop up (about 12 game-hours). */
-export const URGENT_MEMO_TICKS = 12 * HOUR;
-
-/**
- * A memo pops up only if it is urgent: it auto-files within about 12 game-hours, or what happens when it is ignored
- * (its default choice) fails racks or costs more than 10 % of the cash in hand. The rest only raise the inbox count.
- */
-export function isUrgentMemo(memo: MemoView, view: Pick<SimView, "tick" | "cash">, content: ContentDB): boolean {
-	if (memo.expiresAt - view.tick <= URGENT_MEMO_TICKS) return true;
-	return effectsOf(content, memo, memo.defaultChoice).some((e) => (e.type === "failRacks" && e.count > 0) || (e.type === "cash" && e.amount < 0 && -e.amount > 0.1 * Math.max(0, view.cash)));
-}
-
 // ─── Ticker ───────────────────────────────────────────────────────────────
 
 /**
@@ -210,7 +194,8 @@ export function isRoutine(ev: SimEvent, view: Pick<SimView, "spareParts">): bool
 		case "newDay":
 		case "liftArrived":
 		case "clerkAccepted":
-		case "memoIssued": // the inbox count and the slip announce it
+		case "decisionIssued": // the decision card announces itself
+		case "decisionDeferred":
 			return true;
 		case "componentFailed":
 			return view.spareParts > 0;

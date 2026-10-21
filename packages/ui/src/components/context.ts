@@ -14,8 +14,6 @@ export interface UiState {
 	paletteOpen: boolean;
 	/** The clerk's standing-order form is expanded in the Contracts drawer. */
 	clerkEdit?: boolean;
-	/** Memo whose prose is expanded on the slip ("read memo"). */
-	readMemo?: number | null;
 	/** The card picked in the Contracts panel (the Inspector shows it). Null/absent = the best offer that fits. */
 	contractSel?: { kind: "offer" | "job"; id: number } | null;
 	/** Research panel: the node picked and the branch tab shown (null/absent = the best one to start). */
@@ -33,14 +31,8 @@ export interface UiState {
 	paletteTab: string;
 	/** Catalog item key under the pointer (the build Inspector previews it); null/absent = show the picked item. */
 	buildHover?: string | null;
-	/** Compute Authority inbox drawer is open. */
-	inboxOpen: boolean;
-	/** Memos the player has stamped; the sim files them at the next tick, so they are hidden meanwhile. */
-	stamped: number[];
 	/** Section of the Finance tab. */
 	financeTab: FinanceTab;
-	/** Memos the player set aside (no slip pops up for them; they stay in the inbox). */
-	aside: number[];
 	/** Help mode: hover any outlined part of the HUD for a plain-language tooltip. */
 	help?: boolean;
 	/** Encyclopedia entry to open (set by "More..." links; the drawer consumes it). */

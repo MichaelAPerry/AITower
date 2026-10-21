@@ -28,7 +28,10 @@ const commandName: Record<SimCommand["type"], string> = {
 	cancelJob: "Cancel job",
 	buyParts: "Buy parts",
 	buyBot: "Buy bot",
-	resolveMemo: "Answer memo",
+	resolveDecision: "Answer decision",
+	deferDecision: "Defer decision",
+	decisionGate: "Pace decisions",
+	markTip: "Note advisor tip",
 	research: "Research",
 	setClerk: "Contract Automation orders",
 	takeLoan: "Take loan",
@@ -126,15 +129,16 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			return { text: `Day ${ev.day} begins`, severity: "info", toast: false };
 		case "bankrupt":
 			return { text: "WARNING: Treasury below zero for a full day (insolvency notice)", severity: "error", toast: true };
-		case "memoIssued": {
-			const m = view.memos.find((m) => m.eventId === ev.eventId);
-			return { text: m ? `Memo received: ${m.title}` : "A memo has arrived", severity: "info", toast: false };
+		case "decisionIssued": {
+			const d = view.decision;
+			return { text: d ? `${d.title}: decision needed` : "A decision needs you", severity: "info", toast: false };
 		}
-		case "memoResolved": {
-			const h = view.memoHistory.find((h) => h.memoId === ev.memoId);
+		case "decisionDeferred":
+			return { text: "Decision deferred one day", severity: "info", toast: false };
+		case "decisionResolved": {
+			const h = view.decisionHistory.find((h) => h.decisionId === ev.decisionId);
 			const label = h ? content.events.find((e) => e.id === h.eventId)?.choices.find((c) => c.id === h.choiceId)?.label : undefined;
-			const stamp = label ?? ev.choiceId.toUpperCase();
-			const head = ev.auto ? `Memo unanswered, resolved as ${stamp}` : `Memo answered: ${stamp}`;
+			const head = `Decided: ${label ?? ev.choiceId}`;
 			return { text: h ? `${head}. ${h.outcome}` : `${head}.`, severity: "info", toast: true };
 		}
 		case "standingChanged":

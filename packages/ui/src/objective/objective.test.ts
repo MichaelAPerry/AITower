@@ -31,11 +31,6 @@ describe("current orders", () => {
 	it("red treasury beats everything", () => {
 		expect(currentObjective(view({ cash: -5 }), content, yes).tone).toBe("alert");
 	});
-	it("a memo within two hours of auto-filing is flagged", () => {
-		const o = currentObjective(view({ memos: [{ id: 1, title: "Form 27B/6", expiresAt: 1100 }] }), content, yes);
-		expect(o.title).toMatch(/memo/);
-		expect(o.detail).toMatch(/Form 27B\/6/);
-	});
 	it("broken racks with no parts tell you to buy parts", () => {
 		const o = currentObjective(view({ spareParts: 0, facilities: [rack(1, "failed")] }), content, yes);
 		expect(o.detail).toMatch(/spare parts/);

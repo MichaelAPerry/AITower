@@ -14,7 +14,7 @@ describe("buildEntries", () => {
 	});
 	it("hand-written basics cover the topics, each 5 sentences or fewer lines", () => {
 		const ids = entries.filter((e) => e.section === "basics").map((e) => e.id.slice(7));
-		for (const t of ["money", "contracts", "power", "cooling", "loops", "lifts", "parts", "research", "level", "reputation", "memos", "paths", "automation"]) expect(ids).toContain(t);
+		for (const t of ["money", "contracts", "power", "cooling", "loops", "lifts", "parts", "research", "level", "reputation", "advisors", "paths", "automation"]) expect(ids).toContain(t);
 		for (const e of entries.filter((x) => x.section === "basics")) expect(e.lines.length).toBeLessThanOrEqual(3);
 	});
 	it("generates one entry per buildable facility, bot and tech node, with numbers from content", () => {

@@ -60,8 +60,8 @@ export interface Settings {
 	showDesktopNotice: boolean;
 	/** Music volume relative to master, 0..1. */
 	musicVolume: number;
-	/** The helper robot (UNIT-7) that suggests what to build next. */
-	assistant: boolean;
+	/** Advisor tips in the strip. Decisions always appear; this only silences the unprompted tips (Ask still works). */
+	advisorTips: boolean;
 }
 
 export const DEFAULT_SETTINGS: Settings = {
@@ -75,7 +75,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	autosave: true,
 	showDesktopNotice: true,
 	musicVolume: 0.6,
-	assistant: true,
+	advisorTips: true,
 };
 
 /** Clamp/repair a possibly partial or stale settings object (e.g. from storage). */
@@ -95,7 +95,8 @@ export function normalizeSettings(raw: unknown): Settings {
 		autosave: bool(r.autosave, d.autosave),
 		showDesktopNotice: bool(r.showDesktopNotice, d.showDesktopNotice),
 		musicVolume: num(r.musicVolume, d.musicVolume, 0, 1),
-		assistant: bool(r.assistant, d.assistant),
+		// `assistant` is the pre-advisor name of this switch: a player who turned UNIT-7 off keeps tips off.
+		advisorTips: bool(r.advisorTips, bool((r as Record<string, unknown>).assistant, d.advisorTips)),
 	};
 }
 

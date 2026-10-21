@@ -13,7 +13,7 @@ import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
 import { automationStep } from "./automation/automationStep";
 import { weatherStep } from "./green/weather";
-import { memoStep } from "./ministry/memos";
+import { decisionStep } from "./ministry/decisions";
 import { ambientOffset } from "./ministry/modifiers";
 import { jobStanding } from "./ministry/standing";
 import { contaminationStep } from "./bio/contamination";
@@ -141,7 +141,7 @@ export class SimImpl implements Sim {
 		growthStep(ctx); //  8d growth cull + sprouting
 		corruptionStep(ctx); //  8e
 		economyStep(ctx); //  9 (incl. contract offers)
-		memoStep(ctx); //  9b modifiers expire, memos time out / are issued
+		decisionStep(ctx); //  9b modifiers expire, a decision is issued / comes back from deferral
 		jobStanding(ctx); //  9c standing from this tick's job outcomes
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		affinityStep(ctx); //  9e hourly path affinity from running facilities

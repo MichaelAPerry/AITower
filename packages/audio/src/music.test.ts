@@ -101,9 +101,9 @@ describe("director", () => {
 	});
 
 	it("turns events into stingers", () => {
-		expect(musicParams(v(0), [ev({ type: "memoIssued", memoId: 1, eventId: "x" })], false).stingers).toEqual(["teletype"]);
+		expect(musicParams(v(0), [ev({ type: "decisionIssued", decisionId: 1, eventId: "x" })], false).stingers).toEqual(["teletype"]);
 		expect(musicParams(v(0), [ev({ type: "tierUp", tier: 2, reward: 1 })], false).stingers).toEqual(["fanfare"]);
-		const both = musicParams(v(0), [ev({ type: "memoIssued", memoId: 1, eventId: "x" }), ev({ type: "memoIssued", memoId: 2, eventId: "y" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
+		const both = musicParams(v(0), [ev({ type: "decisionIssued", decisionId: 1, eventId: "x" }), ev({ type: "decisionIssued", decisionId: 2, eventId: "y" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
 		expect(both.stingers).toEqual(["fanfare", "teletype"]);
 		const over = musicParams(v(0, 720, { kind: "shutdown", tick: 5 }), [ev({ type: "gameOver", kind: "shutdown" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
 		expect(over.stingers).toEqual(["tapeStop"]);
@@ -268,7 +268,7 @@ describe("mixer ducking", () => {
 		expect(shouldDuck([ev({ type: "rackTripped", facilityId: 1 })])).toBe(true);
 		expect(shouldDuck([ev({ type: "powerShortfall", netId: 1, satisfaction: 0.5 })])).toBe(true);
 		expect(shouldDuck([ev({ type: "gameOver", kind: "shutdown" })])).toBe(true);
-		expect(shouldDuck([ev({ type: "tierUp", tier: 2, reward: 1 }), ev({ type: "memoIssued", memoId: 1, eventId: "x" })])).toBe(false);
+		expect(shouldDuck([ev({ type: "tierUp", tier: 2, reward: 1 }), ev({ type: "decisionIssued", decisionId: 1, eventId: "x" })])).toBe(false);
 		expect(shouldDuck([])).toBe(false);
 	});
 });

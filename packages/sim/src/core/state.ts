@@ -175,27 +175,29 @@ export interface WorkOrder {
 	retryRev: number;
 }
 
-/** An open Ministry memo; the text lives in `ContentDB.events[eventId]`. */
-export interface Memo {
+/** The pending advisor decision; the text lives in `ContentDB.events[eventId]`. It never expires. */
+export interface Decision {
 	id: number;
 	eventId: string;
 	issuedAt: number;
-	expiresAt: number;
+	/** "Defer one day" was used. */
+	deferred: boolean;
+	/** Hidden (deferred) until this tick; 0 = open now. */
+	hiddenUntil: number;
 }
 
-export interface MemoRecord {
-	memoId: number;
+export interface DecisionRecord {
+	decisionId: number;
 	eventId: string;
 	title: string;
 	choiceId: string;
 	outcome: string;
 	tick: number;
-	auto: boolean;
 }
 
 export type ModifierKind = "ambient" | "gridCap" | "energyPrice" | "payout" | "failureRate";
 
-/** A timed effect from a resolved memo; active while `tick < endsAt`. ambient adds `value` °C, the others multiply by `value`. */
+/** A timed effect from a resolved decision; active while `tick < endsAt`. ambient adds `value` °C, the others multiply by `value`. */
 export interface Modifier {
 	kind: ModifierKind;
 	value: number;
@@ -314,7 +316,7 @@ export interface SimState {
 	offers: Offer[];
 	jobs: Job[];
 	workOrders: WorkOrder[];
-	nextId: { facility: number; lift: number; bot: number; contract: number; job: number; workOrder: number; memo: number };
+	nextId: { facility: number; lift: number; bot: number; contract: number; job: number; workOrder: number; decision: number };
 	powerNets: PowerNet[];
 	coolantNets: CoolantNet[];
 	nutrientNets: NutrientNet[];
@@ -333,12 +335,19 @@ export interface SimState {
 	ambientC: number;
 	rng: RngState;
 	// ── Ministry ──
-	memos: Memo[];
-	/** Last 20 resolved memos, oldest first. */
-	memoHistory: MemoRecord[];
+	/** The pending decision, or null. At most one exists at a time. */
+	decision: Decision | null;
+	/** Last 20 resolved decisions, oldest first. */
+	decisionHistory: DecisionRecord[];
 	modifiers: Modifier[];
-	/** Earliest tick for the next memo roll. */
-	nextMemoTick: number;
+	/** Earliest tick for the next decision roll. */
+	nextDecisionTick: number;
+	/** Game day the last decision was issued (-1 = none): at most one per day. */
+	lastDecisionDay: number;
+	/** Closed by the app for three real minutes after each decision (real-time pacing); open in headless play. */
+	decisionGate: boolean;
+	/** Advisor tip ids already shown this game (each concept tip fires once per game). */
+	advisorTips: string[];
 	/** Game day each event was last issued (cooldowns). */
 	lastIssuedDay: Record<string, number>;
 	/** 0..100; 0 ends the game ("shutdown"). */

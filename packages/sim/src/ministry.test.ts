@@ -18,19 +18,19 @@ const choice = (id: string, effects: EventEffect[] = []): EventChoice => ({ id, 
 const ev = (id: string, over: Partial<EventDef> = {}): EventDef => ({
 	id,
 	category: "ministry",
+	advisor: "cass",
+	recommended: "a",
 	title: `Title ${id}`,
 	body: `Body ${id}`,
 	weight: 1,
 	minTier: 1,
 	cooldownDays: 0,
-	timeoutTicks: 600,
-	defaultChoice: "a",
 	choices: [choice("a"), choice("b")],
 	...over,
 });
 
-const QUIET: Partial<Balance> = { events: { intervalTicks: 1_000_000_000, maxOpen: 3, graceTicks: 1_000_000_000 } };
-const eventsBalance = (intervalTicks: number, maxOpen: number, graceTicks: number): Partial<Balance> => ({ events: { intervalTicks, maxOpen, graceTicks } });
+const QUIET: Partial<Balance> = { events: { intervalTicks: 1_000_000_000, graceTicks: 1_000_000_000 } };
+const eventsBalance = (intervalTicks: number, graceTicks: number): Partial<Balance> => ({ events: { intervalTicks, graceTicks } });
 
 const farm = scenario("farm", {
 	slabs: [[0, 0, 47]],
@@ -55,15 +55,15 @@ function contentWith(events: EventDef[], bal: Partial<Balance> = QUIET, scenario
 	return c;
 }
 
-/** Put an open memo into the state (bypasses the roll) and return its id. */
-function inject(sim: SimImpl, eventId: string, expiresIn = 1_000_000): number {
-	const id = sim.state.nextId.memo++;
-	sim.state.memos.push({ id, eventId, issuedAt: sim.state.tick, expiresAt: sim.state.tick + expiresIn });
+/** Put an open decision into the state (bypasses the roll, replacing any pending one) and return its id. */
+function inject(sim: SimImpl, eventId: string): number {
+	const id = sim.state.nextId.decision++;
+	sim.state.decision = { id, eventId, issuedAt: sim.state.tick, deferred: false, hiddenUntil: 0 };
 	sim.invalidateProjection();
 	return id;
 }
 
-const resolve = (sim: SimImpl, memoId: number, choiceId: string): SimEvent[] => exec(sim, { type: "resolveMemo", memoId, choiceId });
+const resolve = (sim: SimImpl, decisionId: number, choiceId: string): SimEvent[] => exec(sim, { type: "resolveDecision", decisionId, choiceId });
 
 /** Inject + resolve one choice of a one-off event in the same tick; returns that tick's events. */
 function applyEffects(sim: SimImpl, effects: EventEffect[]): SimEvent[] {
@@ -82,15 +82,15 @@ function until(sim: SimImpl, pred: (e: SimEvent) => boolean, max = 20_000): SimE
 
 const count = (events: SimEvent[], type: SimEvent["type"]): number => events.filter((e) => e.type === type).length;
 
-/** Collect (tick, eventId) of every memo issued in `ticks` steps. */
-function issueLog(sim: SimImpl, ticks: number, onIssue?: (id: number) => void): { tick: number; eventId: string; memoId: number }[] {
-	const out: { tick: number; eventId: string; memoId: number }[] = [];
+/** Collect (tick, eventId) of every decision issued in `ticks` steps. */
+function issueLog(sim: SimImpl, ticks: number, onIssue: ((id: number) => void) | null = (id) => void sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })): { tick: number; eventId: string; decisionId: number }[] {
+	const out: { tick: number; eventId: string; decisionId: number }[] = [];
 	for (let i = 0; i < ticks; i++) {
 		const t = sim.state.tick;
 		for (const e of sim.step())
-			if (e.type === "memoIssued") {
-				out.push({ tick: t, eventId: e.eventId, memoId: e.memoId });
-				onIssue?.(e.memoId);
+			if (e.type === "decisionIssued") {
+				out.push({ tick: t, eventId: e.eventId, decisionId: e.decisionId });
+				onIssue?.(e.decisionId); // default: a quick player answers at once; null leaves it pending
 			}
 	}
 	return out;
@@ -98,51 +98,58 @@ function issueLog(sim: SimImpl, ticks: number, onIssue?: (id: number) => void): 
 
 // ── issuing ───────────────────────────────────────────────────────────────
 
-describe("memo cadence", () => {
-	it("never before graceTicks; about intervalTicks apart with ±50 % jitter", () => {
-		const sim = newSim(contentWith([ev("x", { timeoutTicks: 300 })], eventsBalance(720, 3, 1440)), "empty", 4);
-		const log = issueLog(sim, 1440 * 40);
-		expect(log.length).toBeGreaterThan(30);
+describe("decision cadence", () => {
+	it("never before graceTicks; at most one per game day; spaced by the jittered interval", () => {
+		const sim = newSim(contentWith([ev("x")], eventsBalance(3600, 1440)), "empty", 4);
+		const log = issueLog(sim, 1440 * 120);
+		expect(log.length).toBeGreaterThan(20);
 		expect(log[0].tick).toBeGreaterThanOrEqual(1440);
-		expect(log[0].tick).toBeLessThanOrEqual(1440 + 1080);
+		const days = log.map((l) => Math.floor(l.tick / 1440));
+		expect(new Set(days).size).toBe(days.length); // one per day, never two on the same day
 		const gaps = log.slice(1).map((l, i) => l.tick - log[i].tick);
-		for (const g of gaps) {
-			expect(g).toBeGreaterThanOrEqual(360);
-			expect(g).toBeLessThanOrEqual(1080);
-		}
-		const mean = gaps.reduce((a, b) => a + b, 0) / gaps.length;
-		expect(mean).toBeGreaterThan(600);
-		expect(mean).toBeLessThan(840);
-		expect(new Set(gaps).size).toBeGreaterThan(10); // jitter, not a fixed period
+		for (const g of gaps) expect(g).toBeGreaterThanOrEqual(1); // the day cap shifts rolls to the next midnight
+		expect(new Set(gaps).size).toBeGreaterThan(5); // jitter, not a fixed period
 	});
 
-	it("never exceeds maxOpen unresolved memos; resolving one lets the next roll issue again", () => {
-		const events = Array.from({ length: 8 }, (_, i) => ev(`e${i}`, { timeoutTicks: 10_000_000 }));
-		const sim = newSim(contentWith(events, eventsBalance(100, 2, 0)), "empty", 2);
-		const log = issueLog(sim, 3000);
-		expect(log).toHaveLength(2);
-		expect(sim.state.memos).toHaveLength(2);
-		resolve(sim, log[0].memoId, "a");
-		const more = issueLog(sim, 3000);
-		expect(more).toHaveLength(1);
-		expect(sim.state.memos).toHaveLength(2);
+	it("only one decision exists at a time: it stays pending (no timeout) until answered, then the next may roll", () => {
+		const events = Array.from({ length: 8 }, (_, i) => ev(`e${i}`));
+		const sim = newSim(contentWith(events, eventsBalance(100, 0)), "empty", 2);
+		const log = issueLog(sim, 1440 * 10, null);
+		expect(log).toHaveLength(1); // nothing else while the first waits, however long
+		expect(sim.state.decision?.id).toBe(log[0].decisionId);
+		resolve(sim, log[0].decisionId, "a");
+		run(sim, 1440 * 2);
+		expect(sim.state.decision).not.toBeNull(); // the next one rolled once the slot was free
+		expect(sim.state.decision?.id).not.toBe(log[0].decisionId);
+	});
+
+	it("a closed decisionGate holds new decisions without spending random draws; reopening lets one through", () => {
+		const sim = newSim(contentWith([ev("x")], eventsBalance(100, 0)), "empty", 3);
+		exec(sim, { type: "decisionGate", open: false });
+		expect(issueLog(sim, 1440 * 3)).toHaveLength(0);
+		const rngBefore = sim.state.rng.events;
+		run(sim, 100);
+		expect(sim.state.rng.events).toBe(rngBefore);
+		exec(sim, { type: "decisionGate", open: true });
+		run(sim, 1440 * 2);
+		expect(sim.state.decision).not.toBeNull();
 	});
 
 	it("does not issue an event that is already open", () => {
-		const sim = newSim(contentWith([ev("only", { timeoutTicks: 10_000_000 })], eventsBalance(100, 3, 0)), "empty", 2);
-		expect(issueLog(sim, 3000)).toHaveLength(1);
+		const sim = newSim(contentWith([ev("only")], eventsBalance(100, 0)), "empty", 2);
+		expect(issueLog(sim, 3000, null)).toHaveLength(1);
 	});
 
 	it("an empty event list issues nothing and never throws", () => {
-		const sim = newSim(contentWith([], eventsBalance(100, 3, 0)), "empty", 2);
+		const sim = newSim(contentWith([], eventsBalance(100, 0)), "empty", 2);
 		expect(issueLog(sim, 2000)).toHaveLength(0);
 	});
 
 	it("is a function of the seed only", () => {
-		const mk = (seed: number) => newSim(contentWith([ev("a1"), ev("a2"), ev("a3")], eventsBalance(300, 3, 0)), "empty", seed);
-		const a = issueLog(mk(5), 6000);
-		const b = issueLog(mk(5), 6000);
-		const c = issueLog(mk(6), 6000);
+		const mk = (seed: number) => newSim(contentWith([ev("a1"), ev("a2"), ev("a3")], eventsBalance(300, 0)), "empty", seed);
+		const a = issueLog(mk(5), 1440 * 30);
+		const b = issueLog(mk(5), 1440 * 30);
+		const c = issueLog(mk(6), 1440 * 30);
 		expect(a.length).toBeGreaterThan(5);
 		expect(a).toEqual(b);
 		expect(a).not.toEqual(c);
@@ -150,7 +157,7 @@ describe("memo cadence", () => {
 });
 
 describe("memo eligibility", () => {
-	const quick = eventsBalance(100, 3, 0);
+	const quick = eventsBalance(100, 0);
 
 	it("minTier / maxTier", () => {
 		const sim = newSim(contentWith([ev("t2", { minTier: 2 })], quick), "empty", 1);
@@ -165,60 +172,60 @@ describe("memo eligibility", () => {
 	});
 
 	it("minDay", () => {
-		const sim = newSim(contentWith([ev("late", { minDay: 3, timeoutTicks: 200 })], quick), "empty", 1);
-		const log = issueLog(sim, 1440 * 5);
+		const sim = newSim(contentWith([ev("late", { minDay: 3 })], quick), "empty", 1);
+		const log = issueLog(sim, 1440 * 12);
 		expect(log.length).toBeGreaterThan(5);
 		expect(log[0].tick).toBeGreaterThanOrEqual(3 * 1440);
 	});
 
 	it("cooldownDays spaces repeats of the same event by whole days", () => {
-		const sim = newSim(contentWith([ev("cool", { cooldownDays: 3, timeoutTicks: 200 })], quick), "empty", 1);
-		const log = issueLog(sim, 1440 * 20);
+		const sim = newSim(contentWith([ev("cool", { cooldownDays: 3 })], quick), "empty", 1);
+		const log = issueLog(sim, 1440 * 40);
 		expect(log.length).toBeGreaterThan(3);
 		const days = log.map((l) => Math.floor(l.tick / 1440));
 		for (let i = 1; i < days.length; i++) expect(days[i] - days[i - 1]).toBeGreaterThanOrEqual(3);
 		// Without a cooldown the same event comes back within a day.
-		const sim2 = newSim(contentWith([ev("hot", { cooldownDays: 0, timeoutTicks: 200 })], quick), "empty", 1);
-		expect(issueLog(sim2, 1440 * 3).length).toBeGreaterThan(days.length);
+		const sim2 = newSim(contentWith([ev("hot", { cooldownDays: 0 })], quick), "empty", 1);
+		expect(issueLog(sim2, 1440 * 40).length).toBeGreaterThan(days.length);
 	});
 
 	it("picks by weight", () => {
-		const sim = newSim(contentWith([ev("heavy", { weight: 40, timeoutTicks: 50 }), ev("light", { weight: 1, timeoutTicks: 50 })], eventsBalance(100, 5, 0)), "empty", 3);
-		const log = issueLog(sim, 40_000);
+		const sim = newSim(contentWith([ev("heavy", { weight: 40 }), ev("light", { weight: 1 })], eventsBalance(100, 0)), "empty", 3);
+		const log = issueLog(sim, 1440 * 200);
 		const heavy = log.filter((l) => l.eventId === "heavy").length;
-		expect(log.length).toBeGreaterThan(200);
+		expect(log.length).toBeGreaterThan(150);
 		expect(heavy / log.length).toBeGreaterThan(0.9);
 		expect(log.some((l) => l.eventId === "light")).toBe(true);
 	});
 
-	it("an issued memo is visible in the view with the event text", () => {
-		const sim = newSim(contentWith([ev("shown", { category: "client", timeoutTicks: 700 })], eventsBalance(100, 3, 0)), "empty", 1);
-		const issued = until(sim, (e) => e.type === "memoIssued");
+	it("an issued decision is visible in the view with the advisor, text and recommendation", () => {
+		const sim = newSim(contentWith([ev("shown", { category: "client", advisor: "lucien", recommended: "b" })], eventsBalance(100, 0)), "empty", 1);
+		const issued = until(sim, (e) => e.type === "decisionIssued");
 		const v = sim.view();
-		expect(v.memos).toHaveLength(1);
-		const m = v.memos[0];
-		expect(issued).toMatchObject({ memoId: m.id, eventId: "shown" });
-		expect(m).toMatchObject({ eventId: "shown", category: "client", title: "Title shown", body: "Body shown", defaultChoice: "a" });
-		expect(m.choices).toEqual([
+		const m = v.decision;
+		expect(m).not.toBeNull();
+		expect(issued).toMatchObject({ decisionId: m?.id, eventId: "shown" });
+		expect(m).toMatchObject({ eventId: "shown", advisor: "lucien", category: "client", title: "Title shown", body: "Body shown", recommended: "b", canDefer: true });
+		expect(m?.choices).toEqual([
 			{ id: "a", label: "A", hint: "hint a" },
 			{ id: "b", label: "B", hint: "hint b" },
 		]);
-		expect(m.expiresAt - m.issuedAt).toBe(700);
+		expect(m).not.toHaveProperty("expiresAt");
 	});
 });
 
 // ── resolving ─────────────────────────────────────────────────────────────
 
-describe("resolveMemo", () => {
-	it("applies the choice, emits memoResolved, records history and removes the memo", () => {
+describe("resolveDecision", () => {
+	it("applies the choice, emits decisionResolved, records history and clears the decision", () => {
 		const sim = newSim(fxContent(), "empty", 1);
 		const id = inject(sim, "fx");
 		const events = applyEffectsWith(sim, id, [{ type: "cash", amount: 1234 }]);
-		expect(events).toContainEqual({ type: "memoResolved", memoId: id, eventId: "fx", choiceId: "a", auto: false });
-		expect(sim.state.memos).toHaveLength(0);
+		expect(events).toContainEqual({ type: "decisionResolved", decisionId: id, eventId: "fx", choiceId: "a" });
+		expect(sim.state.decision).toBeNull();
 		const v = sim.view();
-		expect(v.memos).toHaveLength(0);
-		expect(v.memoHistory).toEqual([{ memoId: id, eventId: "fx", title: "Title fx", choiceId: "a", outcome: "outcome a", tick: 0, auto: false }]);
+		expect(v.decision).toBeNull();
+		expect(v.decisionHistory).toEqual([{ decisionId: id, eventId: "fx", title: "Title fx", choiceId: "a", outcome: "outcome a", tick: 0 }]);
 	});
 
 	function applyEffectsWith(sim: SimImpl, id: number, effects: EventEffect[]): SimEvent[] {
@@ -226,7 +233,7 @@ describe("resolveMemo", () => {
 		return resolve(sim, id, "a");
 	}
 
-	it("rejects unknown memos, unknown choices and malformed commands with a reason, never throwing", () => {
+	it("rejects unknown decisions, unknown choices and malformed commands with a reason, never throwing", () => {
 		const sim = newSim(fxContent(), "empty", 1);
 		const id = inject(sim, "fx");
 		const bad = (cmd: unknown, re: RegExp) => {
@@ -235,76 +242,109 @@ describe("resolveMemo", () => {
 			if (!r.ok) expect(r.reason).toMatch(re);
 			expect(sim.canBuild(cmd as never)).toEqual(r);
 		};
-		bad({ type: "resolveMemo", memoId: 999, choiceId: "a" }, /no such memo/);
-		bad({ type: "resolveMemo", memoId: id, choiceId: "zzz" }, /no such choice/);
-		bad({ type: "resolveMemo", memoId: id, choiceId: "__proto__" }, /no such choice/);
-		bad({ type: "resolveMemo", memoId: id }, /malformed/);
-		bad({ type: "resolveMemo", memoId: id, choiceId: 5 }, /malformed/);
-		bad({ type: "resolveMemo", memoId: Number.NaN, choiceId: "a" }, /malformed/);
-		bad({ type: "resolveMemo", choiceId: "a" }, /malformed/);
-		expect(sim.submit({ type: "resolveMemo", memoId: id, choiceId: "a" })).toEqual({ ok: true });
+		bad({ type: "resolveDecision", decisionId: 999, choiceId: "a" }, /no such decision/);
+		bad({ type: "resolveDecision", decisionId: id, choiceId: "zzz" }, /no such choice/);
+		bad({ type: "resolveDecision", decisionId: id, choiceId: "__proto__" }, /no such choice/);
+		bad({ type: "resolveDecision", decisionId: id }, /malformed/);
+		bad({ type: "resolveDecision", decisionId: id, choiceId: 5 }, /malformed/);
+		bad({ type: "resolveDecision", decisionId: Number.NaN, choiceId: "a" }, /malformed/);
+		bad({ type: "resolveDecision", choiceId: "a" }, /malformed/);
+		bad({ type: "markTip" }, /malformed/);
+		bad({ type: "decisionGate", open: "yes" }, /malformed/);
+		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: true });
 	});
 
-	it("validation is queue-aware: a memo can only be resolved once", () => {
+	it("validation is queue-aware: a decision can only be resolved once", () => {
 		const sim = newSim(fxContent(), "empty", 1);
 		const id = inject(sim, "fx");
-		expect(sim.submit({ type: "resolveMemo", memoId: id, choiceId: "a" })).toEqual({ ok: true });
-		const second = sim.submit({ type: "resolveMemo", memoId: id, choiceId: "b" });
-		expect(second).toEqual({ ok: false, reason: "no such memo" });
+		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: true });
+		const second = sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "b" });
+		expect(second).toEqual({ ok: false, reason: "no such decision" });
 		const events = sim.step();
-		expect(count(events, "memoResolved")).toBe(1);
+		expect(count(events, "decisionResolved")).toBe(1);
 		expect(count(events, "commandRejected")).toBe(0);
-		expect(sim.submit({ type: "resolveMemo", memoId: id, choiceId: "a" })).toEqual({ ok: false, reason: "no such memo" });
+		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: false, reason: "no such decision" });
 	});
 
-	it("auto-resolves with the default choice at expiresAt", () => {
-		const c = contentWith([ev("slow", { defaultChoice: "b", choices: [choice("a"), choice("b", [{ type: "cash", amount: 777 }])] })]);
+	it("waiting never changes anything: no timeout, no reputation change, however long it is open", () => {
+		const c = contentWith([ev("audit", { choices: [choice("a", [{ type: "standing", amount: -6 }, { type: "cash", amount: -500 }]), choice("b")] })]);
 		const sim = newSim(c, "empty", 1);
-		const id = inject(sim, "slow", 5);
-		const cash0 = sim.state.cash;
-		let resolvedAt = -1;
-		for (let i = 0; i < 20 && resolvedAt < 0; i++) {
-			const t = sim.state.tick;
-			for (const e of sim.step()) if (e.type === "memoResolved") {
-				resolvedAt = t;
-				expect(e).toEqual({ type: "memoResolved", memoId: id, eventId: "slow", choiceId: "b", auto: true });
-			}
-		}
-		expect(resolvedAt).toBe(5);
-		expect(sim.state.cash).toBe(cash0 + 777);
-		expect(sim.state.memos).toHaveLength(0);
-		expect(sim.view().memoHistory[0]).toMatchObject({ memoId: id, choiceId: "b", auto: true });
+		const id = inject(sim, "audit");
+		const events = run(sim, 1440 * 5);
+		expect(sim.state.decision?.id).toBe(id);
+		expect(count(events, "decisionResolved")).toBe(0);
+		expect(sim.view().standingLog.filter((e) => e.cause === "decision")).toEqual([]); // nothing about it ever touches reputation
+		expect(sim.view().decisionHistory).toHaveLength(0);
+		const before = sim.state.standing;
+		resolve(sim, id, "a");
+		expect(sim.state.standing).toBeCloseTo(before - 6, 0); // only the player's choice moves reputation (a tick of daily drift aside)
 	});
 
-	it("an unanswered memo costs no reputation, but the same stamp by the player does", () => {
-		const c = contentWith([ev("audit", { defaultChoice: "a", choices: [choice("a", [{ type: "standing", amount: -6 }, { type: "cash", amount: -500 }]), choice("b")] })]);
-		const idle = newSim(c, "empty", 1);
-		inject(idle, "audit", 5);
-		const standing0 = idle.state.standing;
-		const cash0 = idle.state.cash;
-		run(idle, 8);
-		expect(idle.state.memos).toHaveLength(0);
-		expect(idle.state.standing).toBe(standing0); // timed out: no reputation change
-		expect(idle.state.cash).toBe(cash0 - 500); // the money side still applies
-		const answered = newSim(c, "empty", 1);
-		const id = inject(answered, "audit", 50);
-		resolve(answered, id, "a");
-		expect(answered.state.standing).toBe(standing0 - 6);
-	});
-
-	it("keeps only the last 20 resolved memos, newest last", () => {
+	it("keeps only the last 20 resolved decisions, newest last", () => {
 		const sim = newSim(fxContent(), "empty", 1);
-		const ids = Array.from({ length: 25 }, () => inject(sim, "fx"));
-		for (const id of ids) resolve(sim, id, "a");
-		const h = sim.view().memoHistory;
+		const ids: number[] = [];
+		for (let i = 0; i < 25; i++) {
+			const id = inject(sim, "fx");
+			ids.push(id);
+			resolve(sim, id, "a");
+		}
+		const h = sim.view().decisionHistory;
 		expect(h).toHaveLength(20);
-		expect(h.map((x) => x.memoId)).toEqual(ids.slice(5));
+		expect(h.map((x) => x.decisionId)).toEqual(ids.slice(5));
+	});
+});
+
+describe("deferDecision", () => {
+	const mk = () => newSim(fxContent(), "empty", 1);
+
+	it("hides the decision for one game day, then brings it back (announced again), and only once", () => {
+		const sim = mk();
+		const id = inject(sim, "fx");
+		const events = exec(sim, { type: "deferDecision", decisionId: id });
+		const deferred = events.find((e) => e.type === "decisionDeferred");
+		expect(deferred).toMatchObject({ decisionId: id });
+		expect(sim.view().decision).toBeNull();
+		expect(sim.view().decisionReturnsAt).toBe((deferred as { until: number }).until);
+		expect((deferred as { until: number }).until - sim.state.tick).toBeGreaterThanOrEqual(1439);
+		const back = until(sim, (e) => e.type === "decisionIssued" && e.decisionId === id, 2000);
+		expect(back).toBeDefined();
+		const v = sim.view();
+		expect(v.decision).toMatchObject({ id, canDefer: false });
+		expect(v.decisionReturnsAt).toBeNull();
+		const again = sim.submit({ type: "deferDecision", decisionId: id });
+		expect(again).toEqual({ ok: false, reason: "already deferred once" });
+	});
+
+	it("deferring costs nothing, blocks new decisions while hidden, and a hidden decision cannot be answered", () => {
+		const c = contentWith([ev("fx"), ev("other")], eventsBalance(100, 0));
+		const sim = newSim(c, "empty", 1);
+		const id = inject(sim, "fx");
+		const rep = sim.state.standing;
+		const cash = sim.state.cash;
+		exec(sim, { type: "deferDecision", decisionId: id });
+		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: false, reason: "no such decision" });
+		const log = issueLog(sim, 1000, null);
+		expect(log).toHaveLength(0);
+		expect(sim.state.standing).toBe(rep);
+		expect(sim.state.cash).toBe(cash);
+	});
+});
+
+describe("advisor tips", () => {
+	it("markTip records each tip id once and survives a snapshot", () => {
+		const sim = newSim(fxContent(), "empty", 1);
+		exec(sim, { type: "markTip", tipId: "heat" });
+		exec(sim, { type: "markTip", tipId: "heat" });
+		exec(sim, { type: "markTip", tipId: "power" });
+		expect(sim.view().advisorTips).toEqual(["heat", "power"]);
+		const twin = simFromSnapshot(sim.content, JSON.parse(JSON.stringify(sim.snapshot()))) as SimImpl;
+		expect(twin.view().advisorTips).toEqual(["heat", "power"]);
 	});
 });
 
 // ── effects ───────────────────────────────────────────────────────────────
 
-describe("memo effects", () => {
+describe("decision effects", () => {
 	it("cash goes through the ledger: gains as revenue, losses as penalties", () => {
 		const sim = newSim(fxContent(), "empty", 1);
 		const cash0 = sim.state.cash;
@@ -687,25 +727,25 @@ describe("game over", () => {
 
 // ── determinism, streams, snapshots ──────────────────────────────────────
 
-/** A scripted player: resolves each memo with its second choice one tick after it appears. */
+/** A scripted player: resolves each decision one tick after it appears (even ids pick the second choice). */
 function playDays(sim: SimImpl, days: number, hook?: (tick: number) => void): void {
 	for (let i = 0; i < days * 1440; i++) {
 		for (const e of sim.step()) {
 			if (e.type === "contractOffered") sim.submit({ type: "acceptContract", contractId: e.contractId });
-			if (e.type === "memoIssued" && e.memoId % 2 === 0) sim.submit({ type: "resolveMemo", memoId: e.memoId, choiceId: "b" });
+			if (e.type === "decisionIssued") sim.submit({ type: "resolveDecision", decisionId: e.decisionId, choiceId: e.decisionId % 2 === 0 ? "b" : "a" });
 		}
 		hook?.(sim.state.tick);
 	}
 }
 
 const richEvents = (): EventDef[] => [
-	ev("r1", { timeoutTicks: 400, choices: [choice("a", [{ type: "cash", amount: -5000 }, { type: "standing", amount: 2 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
-	ev("r2", { timeoutTicks: 900, defaultChoice: "b", choices: [choice("a", [{ type: "failRacks", count: 1 }]), choice("b", [{ type: "energyPrice", factor: 1.5, durationTicks: 1200 }, { type: "spareParts", count: -1 }])] }),
-	ev("r3", { timeoutTicks: 2000, choices: [choice("a", [{ type: "payout", factor: 1.2, durationTicks: 3000 }]), choice("b", [{ type: "gridCap", factor: 0.9, durationTicks: 300 }, { type: "failureRate", factor: 1.4, durationTicks: 900 }])] }),
+	ev("r1", { choices: [choice("a", [{ type: "cash", amount: -5000 }, { type: "standing", amount: 2 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
+	ev("r2", { advisor: "cass", recommended: "b", choices: [choice("a", [{ type: "failRacks", count: 1 }]), choice("b", [{ type: "energyPrice", factor: 1.5, durationTicks: 1200 }, { type: "spareParts", count: -1 }])] }),
+	ev("r3", { choices: [choice("a", [{ type: "payout", factor: 1.2, durationTicks: 3000 }]), choice("b", [{ type: "gridCap", factor: 0.9, durationTicks: 300 }, { type: "failureRate", factor: 1.4, durationTicks: 900 }])] }),
 ];
 
 describe("determinism and snapshots", () => {
-	const mk = (seed: number) => newSim(contentWith(richEvents(), eventsBalance(500, 3, 600)), "farm", seed);
+	const mk = (seed: number) => newSim(contentWith(richEvents(), eventsBalance(500, 600)), "farm", seed);
 
 	it("same seed ⇒ same hash trace; snapshots mid-run reload to the same hash and continue identically", () => {
 		const a = mk(11);
@@ -724,16 +764,15 @@ describe("determinism and snapshots", () => {
 
 		const c = mk(11);
 		const snaps: { open: number; mods: number; hist: number }[] = [];
-		for (let day = 0; day < 6; day++) {
+		for (let day = 0; day < 9; day++) {
 			playDays(c, 1);
-			snaps.push({ open: c.state.memos.length, mods: c.state.modifiers.length, hist: c.state.memoHistory.length });
+			snaps.push({ open: c.state.decision ? 1 : 0, mods: c.state.modifiers.length, hist: c.state.decisionHistory.length });
 			const twin = simFromSnapshot(c.content, JSON.parse(JSON.stringify(c.snapshot()))) as SimImpl;
 			expect(twin.hash(), `day ${day}`).toBe(c.hash());
 		}
-		expect(snaps.some((s) => s.open > 0)).toBe(true);
 		expect(snaps.some((s) => s.mods > 0)).toBe(true);
 		expect(snaps.at(-1)?.hist).toBeGreaterThan(3);
-		// Mid-flight (open memos, live modifiers) continues identically after a reload.
+		// Mid-flight (live modifiers) continues identically after a reload.
 		const d = mk(21);
 		playDays(d, 2);
 		const twin = simFromSnapshot(d.content, JSON.parse(JSON.stringify(d.snapshot()))) as SimImpl;
@@ -742,18 +781,18 @@ describe("determinism and snapshots", () => {
 		expect(twin.hash()).toBe(d.hash());
 	});
 
-	it("memos never perturb the contract or reliability RNG streams", () => {
+	it("decisions never perturb the contract or reliability RNG streams", () => {
 		const hot = (events: EventDef[]) => {
-			const c = contentWith(events, eventsBalance(500, 3, 600));
+			const c = contentWith(events, eventsBalance(500, 600));
 			const r = c.facilities.rack_air_gpu.rack;
 			if (r) r.failurePerDay = 1;
 			return newSim(c, "farm", 9);
 		};
 		const a = hot([]);
-		const b = hot([ev("quiet", { timeoutTicks: 100, cooldownDays: 0 })]);
-		const ea = run(a, 5000);
-		const eb = run(b, 5000);
-		expect(count(eb, "memoIssued")).toBeGreaterThan(3);
+		const b = hot([ev("quiet", { cooldownDays: 0 })]);
+		const ea = run(a, 1440 * 8);
+		const eb = run(b, 1440 * 8);
+		expect(count(eb, "decisionIssued")).toBeGreaterThanOrEqual(1); // never answered, so only the first opens
 		expect(a.state.rng.contracts).toBe(b.state.rng.contracts);
 		expect(a.state.rng.reliability).toBe(b.state.rng.reliability);
 		expect(count(ea, "componentFailed")).toBe(count(eb, "componentFailed"));
@@ -768,18 +807,47 @@ describe("determinism and snapshots", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		expect(snap.version).toBe(SNAPSHOT_VERSION);
 		snap.version = 2;
-		for (const k of ["memos", "memoHistory", "modifiers", "nextMemoTick", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
+		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
 		delete snap.state.rng.events;
-		delete snap.state.nextId.memo;
+		delete snap.state.nextId.decision;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(old.state).toMatchObject({ memos: [], memoHistory: [], modifiers: [], lastIssuedDay: {}, standing: 50, gameOver: null, nextMemoTick: 300 + 1440 });
-		expect(old.state.nextId.memo).toBe(1);
+		expect(old.state).toMatchObject({ decision: null, decisionHistory: [], modifiers: [], lastIssuedDay: {}, standing: 50, gameOver: null, nextDecisionTick: 300 + 1440, decisionGate: true, advisorTips: [] });
+		expect(old.state.nextId.decision).toBe(1);
 		expect(old.state.rng.events).toBe(createRng(5).events);
 		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
 		playDays(old, 4);
-		expect(old.state.memoHistory.length + old.state.memos.length).toBeGreaterThan(0);
+		expect(old.state.decisionHistory.length + (old.state.decision ? 1 : 0)).toBeGreaterThan(0);
 		// And the migrated state reloads cleanly.
 		expect(() => simFromSnapshot(old.content, JSON.parse(JSON.stringify(old.snapshot())))).not.toThrow();
+	});
+
+	it("a v8 save with pending memos becomes one pending decision (no expiry), history and counters move over", () => {
+		const sim = mk(5);
+		playDays(sim, 3);
+		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
+		const st = snap.state;
+		snap.version = 8;
+		for (const k of ["decision", "decisionHistory", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips"]) delete st[k];
+		delete st.nextId.decision;
+		delete st.stats.decisionsMade;
+		st.memos = [{ id: 4, eventId: "r2", issuedAt: 100, expiresAt: 5000 }, { id: 5, eventId: "r1", issuedAt: 200, expiresAt: 5100 }];
+		st.memoHistory = [{ memoId: 2, eventId: "r1", title: "Title r1", choiceId: "a", outcome: "o", tick: 50, auto: true }];
+		st.nextMemoTick = 4321;
+		st.nextId.memo = 6;
+		st.stats.memosAnswered = 7;
+		st.standingLog = [{ tick: 10, delta: -2, cause: "memo", detail: "Memo: x" }];
+		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
+		expect(old.state.decision).toEqual({ id: 4, eventId: "r2", issuedAt: 100, deferred: false, hiddenUntil: 0 });
+		expect(old.state.decisionHistory).toEqual([{ decisionId: 2, eventId: "r1", title: "Title r1", choiceId: "a", outcome: "o", tick: 50 }]);
+		expect(old.state).toMatchObject({ nextDecisionTick: 4321, decisionGate: true, advisorTips: [] });
+		expect(old.state.nextId.decision).toBe(6);
+		expect(old.state.stats.decisionsMade).toBe(7);
+		expect(old.state.standingLog[0].cause).toBe("decision");
+		for (const gone of ["memos", "memoHistory", "nextMemoTick"]) expect(old.state).not.toHaveProperty(gone);
+		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
+		// Waiting never expires it, however long the old clock had run.
+		run(old, 1440 * 3);
+		expect(old.state.decision?.id).toBe(4);
 	});
 
 	it("a bankrupt v2 save keeps its game over", () => {
@@ -787,9 +855,9 @@ describe("determinism and snapshots", () => {
 		sim.state.bankrupt = true;
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		snap.version = 2;
-		for (const k of ["memos", "memoHistory", "modifiers", "nextMemoTick", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
+		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
 		delete snap.state.rng.events;
-		delete snap.state.nextId.memo;
+		delete snap.state.nextId.decision;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
 		expect(old.view().gameOver).toEqual({ kind: "bankrupt", tick: 0 });
 	});
@@ -799,7 +867,7 @@ describe("determinism and snapshots", () => {
 			const sim = mk(5);
 			playDays(sim, 2);
 			// Make sure there is something of every kind to corrupt.
-			if (sim.state.memos.length === 0) inject(sim, "r1");
+			if (!sim.state.decision) inject(sim, "r1");
 			sim.state.modifiers.push({ kind: "ambient", value: 1, endsAt: 99999, label: "x" });
 			sim.state.gameOver = { kind: "victory", tick: 5 };
 			return JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
@@ -812,11 +880,11 @@ describe("determinism and snapshots", () => {
 		it("accepts the untouched snapshot", () => {
 			expect(() => simFromSnapshot(mk(5).content, base() as never)).not.toThrow();
 		});
-		it("rejects bad Ministry state", () => {
-			reject((s) => { s.memos[0].eventId = "ghost"; }, /^Invalid save: .*unknown event/);
-			reject((s) => { s.memos[0].id = 0; }, /^Invalid save: .*memo/);
-			reject((s) => { s.nextId.memo = 0; }, /^Invalid save: /);
-			reject((s) => { delete s.nextId.memo; }, /^Invalid save: nextId\.memo/);
+		it("rejects bad decision state", () => {
+			reject((s) => { s.decision.eventId = "ghost"; }, /^Invalid save: .*unknown event/);
+			reject((s) => { s.decision.id = 0; }, /^Invalid save: .*decision/);
+			reject((s) => { s.nextId.decision = 0; }, /^Invalid save: /);
+			reject((s) => { delete s.nextId.decision; }, /^Invalid save: nextId\.decision/);
 			reject((s) => { s.standing = 101; }, /^Invalid save: standing/);
 			reject((s) => { s.standing = -1; }, /^Invalid save: standing/);
 			reject((s) => { s.standing = "x"; }, /^Invalid save: state\.standing/);
@@ -824,19 +892,19 @@ describe("determinism and snapshots", () => {
 			reject((s) => { s.modifiers[s.modifiers.length - 1].value = -2; kindFix(s); }, /^Invalid save: modifiers/);
 			reject((s) => { s.gameOver = { kind: "meh", tick: 1 }; }, /^Invalid save: gameOver/);
 			reject((s) => { s.gameOver = 5; }, /^Invalid save: gameOver/);
-			reject((s) => { s.memoHistory = new Array(21).fill({ memoId: 1, eventId: "r1", title: "t", choiceId: "a", outcome: "o", tick: 1, auto: false }); }, /^Invalid save: memoHistory/);
-			reject((s) => { s.memoHistory = [{ memoId: 1 }]; }, /^Invalid save: memoHistory\[0\]/);
+			reject((s) => { s.decisionHistory = new Array(21).fill({ decisionId: 1, eventId: "r1", title: "t", choiceId: "a", outcome: "o", tick: 1 }); }, /^Invalid save: decisionHistory/);
+			reject((s) => { s.decisionHistory = [{ decisionId: 1 }]; }, /^Invalid save: decisionHistory\[0\]/);
 			reject((s) => { s.lastIssuedDay = { r1: 1.5 }; }, /^Invalid save: lastIssuedDay/);
 			reject((s) => { s.lastIssuedDay = []; }, /^Invalid save: lastIssuedDay/);
 			reject((s) => { delete s.rng.events; }, /^Invalid save: rng\.events/);
-			reject((s) => { s.nextMemoTick = Number.NaN; }, /^Invalid save: /);
+			reject((s) => { s.nextDecisionTick = Number.NaN; }, /^Invalid save: /);
 		});
 		function kindFix(s: Raw): void {
 			s.modifiers[s.modifiers.length - 1].kind = "payout";
 		}
-		it("rejects a memo whose event no longer exists in the content", () => {
+		it("rejects a decision whose event no longer exists in the content", () => {
 			const snap = base();
-			const other = contentWith([ev("different")], eventsBalance(500, 3, 600));
+			const other = contentWith([ev("different")], eventsBalance(500, 600));
 			expect(() => simFromSnapshot(other, snap as never)).toThrow(/^Invalid save: .*unknown event/);
 		});
 	});

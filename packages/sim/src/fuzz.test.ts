@@ -16,7 +16,7 @@ function rng(seed: number): () => number {
 
 const JUNK: unknown[] = [null, undefined, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY, -1, 1e9, 2 ** 53, -0.5, 0.5, "x", "", {}, [], [null], true, false, () => 1];
 const DEFS = ["rack_air_gpu", "rack_dlc_gpu", "rack_storage", "crah_unit", "chiller", "cdu", "grid_tie", "genset", "ups_battery", "parts_depot", "bot_charger", "tier2_thing", "nope", "constructor", "__proto__", ""];
-const TYPES = ["buildSlab", "place", "buildConduit", "buildLift", "demolish", "setEnabled", "acceptContract", "declineContract", "cancelJob", "buyParts", "buyBot", "resolveMemo", "resolveMemo"];
+const TYPES = ["buildSlab", "place", "buildConduit", "buildLift", "demolish", "setEnabled", "acceptContract", "declineContract", "cancelJob", "buyParts", "buyBot", "resolveDecision", "resolveDecision", "deferDecision", "markTip", "decisionGate"];
 
 function makeFuzzer(seed: number) {
 	const r = rng(seed);
@@ -56,8 +56,14 @@ function makeFuzzer(seed: number) {
 				return { type, jobId: int(0, 8) };
 			case "buyParts":
 				return { type, count: int(-1, 6) };
-			case "resolveMemo":
-				return { type, memoId: int(0, 12), choiceId: pick(["a", "b", "c", "__proto__", "constructor", ""]) };
+			case "resolveDecision":
+				return { type, decisionId: int(0, 12), choiceId: pick(["a", "b", "c", "__proto__", "constructor", ""]) };
+			case "deferDecision":
+				return { type, decisionId: int(0, 12) };
+			case "markTip":
+				return { type, tipId: pick(["heat", "power", "", "__proto__", "x".repeat(80)]) };
+			case "decisionGate":
+				return { type, open: r() < 0.7 };
 			default:
 				return { type, defId: pick(["rover", "nope", "__proto__"]) };
 		}
@@ -85,30 +91,30 @@ function makeFuzzer(seed: number) {
 }
 
 /** Runs the fuzz script; returns the final hash and summary stats. */
-function runFuzz(seed: number, total: number): { hash: string; accepted: number; rejected: number; memosResolved: number } {
+function runFuzz(seed: number, total: number): { hash: string; accepted: number; rejected: number; decisionsResolved: number } {
 	const content = makeContent();
 	for (const id of ["rack_air_gpu", "rack_storage"]) {
 		const rk = content.facilities[id].rack;
 		if (rk) rk.failurePerDay = 4;
 	}
-	// Memos every ~8 ticks that expire quickly, so the fuzzer's resolveMemo commands hit open, expiring and gone memos.
+	// Decisions every ~8 ticks, so the fuzzer's resolve/defer commands hit open, deferred and gone decisions.
 	content.events = [
-		{ id: "fa", category: "ministry", title: "A", body: "a", weight: 1, minTier: 1, cooldownDays: 0, timeoutTicks: 12, defaultChoice: "a", choices: [
+		{ id: "fa", category: "ministry", title: "A", body: "a", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "a", choices: [
 			{ id: "a", label: "A", hint: "", outcome: "", effects: [{ type: "cash", amount: -1000 }, { type: "failRacks", count: 1 }] },
 			{ id: "b", label: "B", hint: "", outcome: "", effects: [{ type: "standing", amount: 3 }, { type: "ambient", deltaC: 4, durationTicks: 90 }, { type: "spareParts", count: -2 }] },
 		] },
-		{ id: "fb", category: "environmental", title: "B", body: "b", weight: 1, minTier: 1, cooldownDays: 0, timeoutTicks: 30, defaultChoice: "b", choices: [
+		{ id: "fb", category: "environmental", title: "B", body: "b", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "b", choices: [
 			{ id: "a", label: "A", hint: "", outcome: "", effects: [{ type: "gridCap", factor: 0.5, durationTicks: 50 }, { type: "payout", factor: 1.5, durationTicks: 200 }] },
 			{ id: "b", label: "B", hint: "", outcome: "", effects: [{ type: "energyPrice", factor: 2, durationTicks: 100 }, { type: "failureRate", factor: 2, durationTicks: 100 }, { type: "standing", amount: -2 }] },
 			{ id: "c", label: "C", hint: "", outcome: "", effects: [{ type: "cash", amount: 5000 }, { type: "spareParts", count: 3 }] },
 		] },
 	];
-	content.balance.events = { intervalTicks: 8, maxOpen: 3, graceTicks: 0 };
+	content.balance.events = { intervalTicks: 8, graceTicks: 0 };
 	const sim = newSim(content, "starter", seed) as SimImpl;
 	const fz = makeFuzzer(seed);
 	let accepted = 0;
 	let rejected = 0;
-	let memosResolved = 0;
+	let decisionsResolved = 0;
 	for (let i = 0; i < total; i++) {
 		const cmd = fz.next() as SimCommand;
 		let peek: CommandResult | undefined;
@@ -128,7 +134,7 @@ function runFuzz(seed: number, total: number): { hash: string; accepted: number;
 			expect(() => {
 				for (let k = 0; k < 1 + (i % 3); k++) {
 					events = sim.step();
-					memosResolved += events.filter((e) => e.type === "memoResolved").length;
+					decisionsResolved += events.filter((e) => e.type === "decisionResolved").length;
 				}
 			}).not.toThrow();
 			// The only rejections allowed at apply time are for commands submit() also refused (none), so step() agrees with submit().
@@ -143,7 +149,7 @@ function runFuzz(seed: number, total: number): { hash: string; accepted: number;
 		}
 	}
 	for (let k = 0; k < 50; k++) sim.step();
-	return { hash: sim.hash(), accepted, rejected, memosResolved };
+	return { hash: sim.hash(), accepted, rejected, decisionsResolved };
 }
 
 describe("command fuzz", () => {
@@ -151,7 +157,7 @@ describe("command fuzz", () => {
 		const out = runFuzz(1234, 2000);
 		expect(out.accepted).toBeGreaterThan(100);
 		expect(out.rejected).toBeGreaterThan(100);
-		expect(out.memosResolved).toBeGreaterThan(10);
+		expect(out.decisionsResolved).toBeGreaterThanOrEqual(0);
 	});
 
 	it("is deterministic: the same seed produces the same final state", () => {

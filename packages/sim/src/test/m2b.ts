@@ -19,7 +19,7 @@ export const farm = scenario("farm", {
 	],
 });
 
-export const QUIET_EVENTS: Partial<Balance> = { events: { intervalTicks: 1_000_000_000, maxOpen: 3, graceTicks: 1_000_000_000 } };
+export const QUIET_EVENTS: Partial<Balance> = { events: { intervalTicks: 1_000_000_000, graceTicks: 1_000_000_000 } };
 export const NO_OFFERS: Partial<Balance> = { economy: { slaPenaltyFactor: 1.5, maxOffers: 0, offerIntervalTicks: 100, offerExpiryTicks: 100 } };
 
 /** Farm content with no random offers, no random memos and no random failures. */

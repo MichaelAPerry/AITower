@@ -125,7 +125,7 @@ export const balance: Balance = {
 	economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 180, offerExpiryTicks: 720 },
 	tiers: { pflops: [0, 60, 300, 1000], uptime: [0, 0.95, 0.98, 0.995], reward: [0, 500_000, 2_000_000, 5_000_000] },
 	standing: { start: 50, dailyGood: 1, dailyBad: -3, dailyNearMiss: -3, dailyMissSpan: 0.05, jobFailed: -4, jobCompleted: 1 },
-	events: { intervalTicks: 720, maxOpen: 3, graceTicks: 1440 },
+	events: { intervalTicks: 720, graceTicks: 1440 },
 	research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
 	clerk: { feeShare: 0.05 },
 	loans: { maxByTier: [2_000_000, 6_000_000, 15_000_000, 40_000_000], dailyRate: 0.004 },

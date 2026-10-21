@@ -180,7 +180,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 			a.setMusicVolume(0.5);
 			expect(vi.getTimerCount()).toBe(base);
 
-			a.update(view(2), [{ type: "memoIssued", memoId: 1, eventId: "x" }, { type: "tierUp", tier: 2, reward: 1 }, { type: "rackTripped", facilityId: 1 }]);
+			a.update(view(2), [{ type: "decisionIssued", decisionId: 1, eventId: "x" }, { type: "tierUp", tier: 2, reward: 1 }, { type: "rackTripped", facilityId: 1 }]);
 			a.update(view(3, { gameOver: { kind: "shutdown", tick: 3 } } as Partial<SimView>), [{ type: "gameOver", kind: "shutdown" }]);
 			a.destroy();
 			vi.advanceTimersByTime(60_000);

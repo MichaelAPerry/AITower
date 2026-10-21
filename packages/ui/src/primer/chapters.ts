@@ -160,17 +160,17 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	const unlocks = `Machines: ${list(gear, 5)}. Research: ${list(researchNodes, 3)}.`;
 	const text: Record<AscensionPath, { earn: string; win: string; risk: string }> = {
 		biotech: {
-			earn: "Leanings grow when you pick Biotech answers in memos, research the Wetware steps, and keep nutrient plants and organoid cabinets running.",
+			earn: "Leanings grow when you pick Biotech answers in advisor decisions, research the Wetware steps, and keep nutrient plants and organoid cabinets running.",
 			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. A Living Tower needs ${e.livingTower.pflops} PF with lots of growth. A Clean Tower needs ${e.cleanTower.pflops} PF with very little. Choose one and stay with it.`,
 			risk: "Growth spreads if you do not contain it. Sterile bays and quarantine locks cost money and keep it tidy. The Ministry will say it is under control.",
 		},
 		greentech: {
-			earn: "Leanings grow when you pick Greentech answers in memos, research the sun, wind and heat steps, and keep panels, masts and heat links running.",
+			earn: "Leanings grow when you pick Greentech answers in advisor decisions, research the sun, wind and heat steps, and keep panels, masts and heat links running.",
 			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Reach ${pct(gx.minScore)} with ${gx.pflops} PF to be an exemplar. Sell waste heat (heat reuse) and grow algae for carbon credits.`,
 			risk: `Some days are dark and still. Weather-dependent supply drops to ${pct(c.balance.green.droughtFactor)} for ${c.balance.green.droughtHours} hours. Keep a genset ready and a UPS charged.`,
 		},
 		synthetic: {
-			earn: "Leanings grow when you pick Synthetic answers in memos, research the Continuity steps, and run the newest top-tier racks.",
+			earn: "Leanings grow when you pick Synthetic answers in advisor decisions, research the Continuity steps, and run the newest top-tier racks.",
 			win: `Your Refinement is uptime multiplied by the share of compute on top-tier racks. Reach ${pct(mm.minScore)} with ${mm.pflops} PF. Cool lattice racks on a cryo loop. Keep everything running behind monitors and a backup vault.`,
 			risk: "One long outage hurts twice, because Refinement counts uptime. The minds are polite and dislike being switched off.",
 		},

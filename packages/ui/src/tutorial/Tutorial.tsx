@@ -149,10 +149,6 @@ export function Tutorial({ store, content, state, ui, setUi }: TutorialProps) {
 		writeHints(n);
 		setSeen(n);
 	};
-	// Opening the inbox is what the memo hint asks for: it has done its job.
-	useEffect(() => {
-		if (hintId === "memo" && ui.inboxOpen) dismissHint("memo");
-	});
 	// Point the camera at the hot rack once, when its hint first shows.
 	const hotId = hintId === "heat" ? hotRack(state, ctx) : undefined;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: focus once per hint

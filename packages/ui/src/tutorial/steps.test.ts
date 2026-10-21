@@ -87,11 +87,9 @@ describe("coach-mark steps", () => {
 });
 
 describe("just-in-time hints", () => {
-	it("point at a hot rack once, and at the inbox once, then never again", () => {
+	it("point at a hot rack once, then never again", () => {
 		expect(activeHint(state({ status: "throttled" }), {}, ctx)).toBe("heat");
 		expect(activeHint(state({ status: "throttled" }), { heat: true }, ctx)).toBeNull();
-		expect(activeHint(state({ memos: 1 }), {}, ctx)).toBe("memo");
-		expect(activeHint(state({ memos: 1 }), { memo: true }, ctx)).toBeNull();
 		expect(activeHint(state({}), {}, ctx)).toBeNull();
 		expect(HINTS.heat.text).toBe("Too hot: add an air handler nearby.");
 	});

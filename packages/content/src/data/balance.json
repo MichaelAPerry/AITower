@@ -184,7 +184,6 @@
  },
  "events": {
   "intervalTicks": 3600,
-  "maxOpen": 3,
   "graceTicks": 1440
  }
 }

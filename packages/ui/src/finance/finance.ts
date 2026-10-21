@@ -118,7 +118,7 @@ export function lifetimeRows(s: LifetimeStats | undefined): StatRow[] {
 		{ label: "Facilities built", value: String(s.facilitiesBuilt) },
 		{ label: "Component failures", value: String(s.componentFailures) },
 		{ label: "Repairs done", value: String(s.repairs) },
-		{ label: "Memos answered", value: String(s.memosAnswered) },
+		{ label: "Decisions made", value: String(s.decisionsMade) },
 		{ label: "Research points earned", value: Math.floor(s.researchPointsEarned).toLocaleString("en-US") },
 	];
 }

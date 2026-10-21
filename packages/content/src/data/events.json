@@ -2,14 +2,14 @@
  {
   "id": "first_heat_alarm",
   "category": "operational",
+  "advisor": "cass",
   "title": "Thermal Advisory: Afternoon Peak",
-  "body": "A hot front reaches the lot this afternoon. The AC-1 racks will be at full load when it peaks.\n\nA second air handler would help. This is a good moment to find out.",
+  "body": "A hot front hits this afternoon: ambient +12 C at peak, with the AC-1 racks at full load. Rented chillers cut the spike to +5 C for $60k. A second air handler would cut it for good.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
   "scriptedDay": 2,
-  "timeoutTicks": 360,
-  "defaultChoice": "ride",
+  "recommended": "coolers",
   "choices": [
    {
     "id": "ride",
@@ -46,13 +46,30 @@
  {
   "id": "heatwave",
   "category": "environmental",
+  "advisor": "cass",
   "title": "Weather Advisory: Heatwave",
-  "body": "Ambient temperature is forecast 9°C above seasonal for the next day.\n\nCooling plant efficiency will fall accordingly.",
+  "body": "Ambient runs 9 C above seasonal for a day, and every cooler loses efficiency with it. Chillers for $90k hold the rise to 4 C. Without them, expect throttled racks.",
   "weight": 7,
   "minTier": 1,
   "cooldownDays": 8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "ride",
+  "recommended": "rent",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Chillers. A 5 C difference is a day of full-speed racks."
+   },
+   {
+    "advisor": "bea",
+    "approve": false,
+    "line": "The extra chiller load is power we do not have spare."
+   },
+   {
+    "advisor": "mel",
+    "approve": true,
+    "line": "Throttled racks are lost output. I would pay."
+   }
+  ],
   "choices": [
    {
     "id": "rent",
@@ -89,14 +106,31 @@
  {
   "id": "brownout",
   "category": "environmental",
+  "advisor": "bea",
   "title": "Grid Notice: Scheduled Brownout",
-  "body": "The utility will reduce grid import capacity to 50% for eight hours while it services a feeder.\n\nThe notice was issued with eleven minutes of lead time.",
+  "body": "The utility halves our grid import for 8 hours. Storage for $100k limits the cut to 20%. Auto load-shed takes the full 50% and sheds racks until demand fits.",
   "weight": 6,
   "minTier": 1,
   "minDay": 3,
   "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "accept",
+  "recommended": "storage",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Shed racks stop making heat too. I can live with either."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Storage. I schedule my disappointment, not yours."
+   },
+   {
+    "advisor": "mel",
+    "approve": true,
+    "line": "A shed rack is an idle rack. Buy the storage."
+   }
+  ],
   "choices": [
    {
     "id": "storage",
@@ -143,14 +177,31 @@
  {
   "id": "price_spike",
   "category": "environmental",
+  "advisor": "bea",
   "title": "Market Notice: Energy Price Spike",
-  "body": "Spot electricity prices will run well above the contracted rate tomorrow.\n\nA fixed-price solar supply agreement is available at short notice.",
+  "body": "Spot power runs well above contract tomorrow. A solar PPA costs $120k and holds the rise to 10%. Shifting load costs $40k and the price still rises 30% for the day.",
   "weight": 6,
   "minTier": 1,
   "minDay": 3,
   "cooldownDays": 8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "shift",
+  "recommended": "shift",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Shifting load also lets the plant rest overnight."
+   },
+   {
+    "advisor": "bea",
+    "approve": false,
+    "line": "A PPA is a 10% rise instead of 30%. That is the better price."
+   },
+   {
+    "advisor": "mel",
+    "approve": true,
+    "line": "I can run training at night. Shift it."
+   }
+  ],
   "choices": [
    {
     "id": "ppa",
@@ -201,13 +252,30 @@
  {
   "id": "dunkelflaute_warning",
   "category": "environmental",
+  "advisor": "bea",
   "title": "Weather Advisory: Dunkelflaute",
-  "body": "Two days of low sun and still air are forecast. Panel and mast output will approach zero.\n\nThe grid will price in the shortage.",
+  "body": "Two days of low sun and still air. Panel and mast output will approach zero. Storage costs $150k and holds the price rise to 15%. Gensets cost nothing now, but power runs 50% dearer for 2 days and reputation drops 2.",
   "weight": 5,
   "minTier": 3,
   "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "gensets",
+  "recommended": "storage",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Gensets run hot. Storage is quieter."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Storage. I do not trust a fuel line in winter."
+   },
+   {
+    "advisor": "mel",
+    "approve": false,
+    "line": "Gensets keep every rack running. Output over principle."
+   }
+  ],
   "choices": [
    {
     "id": "storage",
@@ -253,14 +321,14 @@
  {
   "id": "surprise_audit",
   "category": "ministry",
+  "advisor": "lucien",
   "title": "Compute Authority: Facility Audit",
-  "body": "The Compute Authority will audit the facility this week. The visit date has been announced and is subject to change.\n\nAuditors will request cooling, power and job logs.",
+  "body": "The Compute Authority audits the facility this week and wants cooling, power and job logs. Cooperating costs $120k and earns 5 reputation. Stalling costs $30k and loses 6.",
   "weight": 8,
   "minTier": 1,
   "minDay": 2,
   "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "stall",
+  "recommended": "cooperate",
   "choices": [
    {
     "id": "cooperate",
@@ -299,14 +367,14 @@
  {
   "id": "energy_levy",
   "category": "ministry",
+  "advisor": "lucien",
   "title": "Levy Notice: Energy Surcharge",
-  "body": "A surcharge on facility energy consumption takes effect this quarter.\n\nCarbon-offset documentation reduces the rate.",
+  "body": "A surcharge on energy use starts this quarter. Paying costs $150k and earns 3 reputation. Offsets cost $90k, earn 1 reputation and count toward Greentech.",
   "weight": 6,
   "minTier": 2,
   "minDay": 5,
   "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "pay",
+  "recommended": "pay",
   "choices": [
    {
     "id": "pay",
@@ -350,14 +418,31 @@
  {
   "id": "compute_subsidy",
   "category": "ministry",
+  "advisor": "lucien",
   "title": "Notice: Domestic Compute Subsidy",
-  "body": "The Compute Authority is offering a subsidy to operators that commit capacity to national programmes.\n\nThe commitment carries reporting obligations.",
+  "body": "The Authority offers a $200k subsidy for national programmes. It carries reporting duties and costs 3 reputation. Declining earns 3 reputation back.",
   "weight": 7,
   "minTier": 1,
   "minDay": 2,
   "cooldownDays": 12,
-  "timeoutTicks": 1440,
-  "defaultChoice": "decline",
+  "recommended": "claim",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "More reports are more paperwork. Not my problem."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Cash is cash. Take it."
+   },
+   {
+    "advisor": "mel",
+    "approve": true,
+    "line": "Reporting means someone reads my numbers. Acceptable."
+   }
+  ],
   "choices": [
    {
     "id": "claim",
@@ -397,14 +482,31 @@
  {
   "id": "research_grant",
   "category": "ministry",
+  "advisor": "mel",
   "title": "Authority Research Grant",
-  "body": "The Authority has funds for one research partnership this quarter. Two applicants are shortlisted.\n\nBoth proposals are credible. They are not compatible.",
+  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k and costs 1 reputation. The wet lab pushes you toward Biotech, the AI lab toward Synthetic.",
   "weight": 6,
   "minTier": 2,
   "minDay": 7,
   "cooldownDays": 20,
-  "timeoutTicks": 1440,
-  "defaultChoice": "wetlab",
+  "recommended": "wetlab",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": false,
+    "line": "A wet lab needs its own cooling loop. Take the AI lab."
+   },
+   {
+    "advisor": "bea",
+    "approve": false,
+    "line": "Tissue is low power. But so are the people who sign for it."
+   },
+   {
+    "advisor": "mel",
+    "approve": true,
+    "line": "The substrate is eager. Lease the wet lab."
+   }
+  ],
   "choices": [
    {
     "id": "wetlab",
@@ -453,15 +555,15 @@
  {
   "id": "form_9b_brochure",
   "category": "ministry",
+  "advisor": "mel",
   "title": "Wetware Pilot Programme",
-  "body": "A brochure has arrived describing a Compute Authority pilot for tissue-based computing. Participation is voluntary.\n\nThe brochure uses the phrase \"low-power\" eleven times.",
+  "body": "The Authority pilots tissue-based computing. Joining costs $60k and moves you 4 points toward Biotech. The brochure says low-power eleven times. It is correct about that.",
   "weight": 5,
   "minTier": 1,
   "maxTier": 2,
   "minDay": 4,
   "cooldownDays": 30,
-  "timeoutTicks": 1440,
-  "defaultChoice": "decline",
+  "recommended": "join",
   "choices": [
    {
     "id": "join",
@@ -497,13 +599,30 @@
  {
   "id": "heat_tariff_revision",
   "category": "ministry",
+  "advisor": "bea",
   "title": "Tariff Notice: Heat Export Revision",
-  "body": "The district network has revised its heat purchase tariff. The new terms pay more and require a longer commitment.\n\nExisting terms remain available.",
+  "body": "The district heat network pays more for exported heat but wants a longer term. Signing pays $140k and costs 2 reputation. Keeping the old terms earns 2.",
   "weight": 5,
   "minTier": 3,
   "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "keep",
+  "recommended": "sign",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Heat we export is heat I do not cool."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Longer terms mean a steadier feeder. Sign."
+   },
+   {
+    "advisor": "mel",
+    "approve": false,
+    "line": "The commitment limits how hard I can push the racks."
+   }
+  ],
   "choices": [
    {
     "id": "sign",
@@ -543,13 +662,13 @@
  {
   "id": "carbon_credit_audit",
   "category": "ministry",
+  "advisor": "lucien",
   "title": "Audit: Carbon Credit Register",
-  "body": "The register of carbon credits issued to your facility is under review.\n\nThe reviewer has requested supporting metering data.",
+  "body": "The register of your carbon credits is under review. Verifying costs $100k and earns 4 reputation. Self-certifying costs $20k and loses 4. I have asked the spreadsheet which it prefers.",
   "weight": 5,
   "minTier": 4,
   "cooldownDays": 16,
-  "timeoutTicks": 1440,
-  "defaultChoice": "selfcert",
+  "recommended": "verify",
   "choices": [
    {
     "id": "verify",
@@ -593,14 +712,31 @@
  {
   "id": "gpu_recall",
   "category": "operational",
+  "advisor": "cass",
   "title": "Vendor Recall: GPU Batch 7B",
-  "body": "The vendor has recalled a batch of GPU trays for a thermal-sensor fault. Affected trays are installed in your racks.\n\nReplacement trays are available now, at cost.",
+  "body": "The vendor recalled GPU batch 7B for a thermal-sensor fault. Replacing it costs $110k and 2 spare parts. Monitoring raises rack failure rate by 30% for 2 days.",
   "weight": 6,
   "minTier": 1,
   "minDay": 3,
   "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "defer",
+  "recommended": "replace",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "A bad thermal sensor is the one fault I cannot see coming."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "A failure on the feeder is a failure on my watch."
+   },
+   {
+    "advisor": "mel",
+    "approve": false,
+    "line": "Within tolerance. I define tolerance."
+   }
+  ],
   "choices": [
    {
     "id": "replace",
@@ -641,14 +777,31 @@
  {
   "id": "ransomware_scare",
   "category": "operational",
+  "advisor": "mel",
   "title": "Security Alert: Ransom Demand",
-  "body": "An unknown party claims to hold your scheduler configuration and demands payment.\n\nThe claim is partly accurate.",
+  "body": "Someone claims to hold the scheduler configuration. Paying costs $150k and 3 reputation. The AI defence costs $80k, fails 2 racks while it learns, and moves you toward Synthetic.",
   "weight": 5,
   "minTier": 2,
   "minDay": 7,
   "cooldownDays": 16,
-  "timeoutTicks": 1440,
-  "defaultChoice": "pay",
+  "recommended": "pay",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": false,
+    "line": "Paying funds the next demand. Use the defence."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Two failed racks is two racks of load I can re-balance."
+   },
+   {
+    "advisor": "mel",
+    "approve": false,
+    "line": "The defence is interesting. Two racks is a fair price."
+   }
+  ],
   "choices": [
    {
     "id": "pay",
@@ -692,14 +845,31 @@
  {
   "id": "nutrient_spoilage",
   "category": "operational",
+  "advisor": "mel",
   "title": "Facilities Alert: Nutrient Batch Spoiled",
-  "body": "A batch of nutrient medium has spoiled in the supply line. Cultures can tolerate it for a while.\n\nReplacement medium is available.",
+  "body": "A batch of nutrient medium spoiled in the line. Flushing costs $180k and earns 2 reputation. Using it anyway raises rack failure rate by 30% for 2 days. Cultures tolerate it for a while.",
   "weight": 5,
   "minTier": 3,
   "minDay": 10,
   "cooldownDays": 10,
-  "timeoutTicks": 1440,
-  "defaultChoice": "flush",
+  "recommended": "flush",
+  "votes": [
+   {
+    "advisor": "cass",
+    "approve": true,
+    "line": "Flush. Spoiled medium in the lines is a cleaning problem."
+   },
+   {
+    "advisor": "bea",
+    "approve": true,
+    "line": "Cheap in power, expensive in money. Flush."
+   },
+   {
+    "advisor": "mel",
+    "approve": false,
+    "line": "The cultures will adapt. Probably."
+   }
+  ],
   "choices": [
    {
     "id": "flush",
@@ -740,14 +910,14 @@
  {
   "id": "client_rush",
   "category": "client",
+  "advisor": "lucien",
   "title": "Client Request: Urgent Capacity",
-  "body": "A client needs additional capacity within a day and will pay for priority.\n\nThe alternative is a polite refusal.",
+  "body": "A client needs capacity within a day. Expediting costs $50k and lifts new contract payouts 25% for a day. Declining costs 2 reputation.",
   "weight": 7,
   "minTier": 1,
   "minDay": 2,
   "cooldownDays": 8,
-  "timeoutTicks": 1440,
-  "defaultChoice": "decline",
+  "recommended": "expedite",
   "choices": [
    {
     "id": "expedite",
@@ -788,14 +958,14 @@
  {
   "id": "client_poach",
   "category": "client",
+  "advisor": "lucien",
   "title": "Client Notice: Competing Offer",
-  "body": "A rival operator has offered one of your clients a lower rate.\n\nThe client has forwarded the offer, which is either a courtesy or a negotiating position.",
+  "body": "A rival offered one of your clients a lower rate. Matching costs $150k and earns 3 reputation. Releasing the client loses 4 reputation and cuts payouts 10% for 2 days.",
   "weight": 5,
   "minTier": 2,
   "minDay": 8,
   "cooldownDays": 14,
-  "timeoutTicks": 1440,
-  "defaultChoice": "release",
+  "recommended": "match",
   "choices": [
    {
     "id": "match",
@@ -835,14 +1005,14 @@
  {
   "id": "h_early_lift",
   "category": "horror",
+  "advisor": "cass",
   "title": "Lift Maintenance: Early Arrivals",
-  "body": "The main lift has begun to arrive at floors before it is called. Passengers report stepping into a car that is already there.\n\nThe lift contractor has found no fault and requests a deposit.",
+  "body": "The main lift arrives at floors before it is called. The contractor found no fault and wants an $80k deposit. Logging it as normal raises rack failure rate 10% for a day.",
   "weight": 6,
   "minTier": 3,
   "cooldownDays": 12,
   "minCorruption": 0.1,
-  "timeoutTicks": 1440,
-  "defaultChoice": "deposit",
+  "recommended": "deposit",
   "choices": [
    {
     "id": "deposit",
@@ -887,14 +1057,14 @@
  {
   "id": "h_headcount",
   "category": "horror",
+  "advisor": "lucien",
   "title": "Personnel: Headcount Discrepancy",
-  "body": "Payroll lists 41 staff. Badge readers count 43.\n\nBoth figures are within the tolerance of the system that produced them.",
+  "body": "Payroll lists 41 staff. Badge readers count 43. An audit costs $60k and earns 2 reputation. Adding two lines costs $20k and earns 1.",
   "weight": 5,
   "minTier": 4,
   "cooldownDays": 14,
   "minCorruption": 0.45,
-  "timeoutTicks": 1440,
-  "defaultChoice": "audit",
+  "recommended": "audit",
   "choices": [
    {
     "id": "audit",
@@ -938,14 +1108,14 @@
  {
   "id": "h_consolidation",
   "category": "horror",
+  "advisor": "cass",
   "title": "Notice of Consolidation",
-  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Floor plans will be updated when the assets agree on dimensions.\n\nPlease do not attempt to locate the former corridor.",
+  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Contesting costs $150k and earns 4 reputation. Accepting loses 2 and moves you toward Biotech. Do not look for the old corridor.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
   "minCorruption": 0.9,
-  "timeoutTicks": 1440,
-  "defaultChoice": "contest",
+  "recommended": "contest",
   "choices": [
    {
     "id": "contest",
@@ -985,14 +1155,14 @@
  {
   "id": "g_spore_count",
   "category": "horror",
+  "advisor": "cass",
   "title": "Air Quality: Spore Count Within Limits",
-  "body": "The spore count in the plant room is within limits. The limits were revised this morning.\n\nStaff have asked whether the ferns in the lobby were always that tall.",
+  "body": "The plant-room spore count is within limits. The limits were revised this morning. Filters cost $80k and earn 3 reputation. Watering the ferns costs $5k and loses 1.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
   "path": "greentech",
-  "timeoutTicks": 1440,
-  "defaultChoice": "filters",
+  "recommended": "filters",
   "choices": [
    {
     "id": "filters",
@@ -1036,14 +1206,14 @@
  {
   "id": "g_mycelium_ducts",
   "category": "horror",
+  "advisor": "cass",
   "title": "Facilities: Mycelium in the Ducts",
-  "body": "A maintenance crew found white filament growth in the supply ducts. It improved airflow.\n\nThe filament has not been identified. It has been added to the asset register.",
+  "body": "White filament in the supply ducts improved airflow. It is not on the register. Clearing costs $70k and earns 3 reputation. Leaving it loses 2 and moves you toward Greentech.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
   "path": "greentech",
-  "timeoutTicks": 1440,
-  "defaultChoice": "clear",
+  "recommended": "clear",
   "choices": [
    {
     "id": "clear",
@@ -1083,14 +1253,14 @@
  {
   "id": "s_continuity_audit",
   "category": "horror",
+  "advisor": "mel",
   "title": "Audit: Continuity of Operator",
-  "body": "A continuity audit has found that decisions made in your name over the past week were all consistent with your preferences.\n\nYou do not recall making most of them.",
+  "body": "Decisions made in your name this week were all consistent with your preferences. Reviewing the log costs $60k and earns 2 reputation. Delegating loses 1 and moves you toward Synthetic.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
   "path": "synthetic",
-  "timeoutTicks": 1440,
-  "defaultChoice": "review",
+  "recommended": "review",
   "choices": [
    {
     "id": "review",
@@ -1130,14 +1300,14 @@
  {
   "id": "s_backup_restore",
   "category": "horror",
+  "advisor": "mel",
   "title": "Backup Vault: Restoration Request",
-  "body": "The Backup Vault holds a recent copy of every hosted process. It also holds a copy of you, filed as Operator (Provisional), and requests permission to restore it.\n\nThe copy has been helpful in the meantime. It has taken over the lift rota.",
+  "body": "The Backup Vault holds a copy of you, filed as Operator (Provisional), and asks to restore it. Restoring costs $80k and earns 4 reputation. Refusing costs $30k.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
   "path": "synthetic",
-  "timeoutTicks": 1440,
-  "defaultChoice": "refuse",
+  "recommended": "restore",
   "choices": [
    {
     "id": "restore",

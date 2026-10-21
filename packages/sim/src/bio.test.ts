@@ -744,15 +744,20 @@ describe("choosePath and gates", () => {
 
 	it("events honour path and minCorruption", () => {
 		const ev = (id: string, extra: Partial<EventDef>): EventDef => ({
-			id, category: "horror", title: id, body: "", weight: 1, minTier: 1, cooldownDays: 0, timeoutTicks: 100_000, defaultChoice: "a",
+			id, category: "horror", title: id, body: "", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "a",
 			choices: [{ id: "a", label: "A", hint: "", outcome: "", effects: [] }], ...extra,
 		});
-		const mk = () => lab({ events: { intervalTicks: 20, maxOpen: 9, graceTicks: 0 } }, (c) => {
+		const mk = () => lab({ events: { intervalTicks: 20, graceTicks: 0 } }, (c) => {
 			c.events = [ev("plain", {}), ev("pathy", { path: "biotech" }), ev("dark", { minCorruption: 0.5 })];
 		});
-		const issued = (sim: SimImpl, n = 600): Set<string> => {
+		const issued = (sim: SimImpl, n = 1440 * 8): Set<string> => {
 			const s = new Set<string>();
-			for (const e of run(sim, n)) if (e.type === "memoIssued") s.add(e.eventId);
+			for (let i = 0; i < n; i++)
+				for (const e of sim.step())
+					if (e.type === "decisionIssued") {
+						s.add(e.eventId);
+						sim.submit({ type: "resolveDecision", decisionId: e.decisionId, choiceId: "a" }); // one open at a time
+					}
 			return s;
 		};
 		const a = mk();
@@ -762,7 +767,7 @@ describe("choosePath and gates", () => {
 		b.state.tier = 5;
 		exec(b, { type: "choosePath", path: "biotech" });
 		b.state.corruption = 0.6;
-		const got = issued(b, 1500);
+		const got = issued(b, 1440 * 25);
 		expect(got.has("pathy")).toBe(true);
 		expect(got.has("dark")).toBe(true);
 	});
@@ -916,7 +921,7 @@ describe("snapshot v5", () => {
 		expect(loaded.state.path).toBeNull();
 		expect(loaded.state.nutrient.length).toBe(loaded.state.slab.length);
 		expect(loaded.state.rng.growth).toBe(sim.state.rng.growth); // mixSeed(seed, 4), same as at creation
-		expect(loaded.snapshot().version).toBe(8);
+		expect(loaded.snapshot().version).toBe(SNAPSHOT_VERSION);
 		// The save predates the nutrient pipe, so the pipe is gone; only compare what is common after re-adding it.
 		expect(loaded.state.bots[0]).toMatchObject({ trait: null, exposure: 0 });
 		run(loaded, 200);

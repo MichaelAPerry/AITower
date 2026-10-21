@@ -140,7 +140,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	const s = fields(raw, {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
-		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextMemoTick: "num", standing: "num", researchPoints: "num", clerkAccepted: "int",
+		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextDecisionTick: "num", lastDecisionDay: "int", decisionGate: "bool", standing: "num", researchPoints: "num", clerkAccepted: "int",
 		loanPrincipal: "num", nutrientNetCount: "int", contaminatedShare: "num", irreversible: "bool", corruption: "num",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
@@ -181,7 +181,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	}
 
 	// ── id allocator ──
-	const nextId = fields(s.nextId, { facility: "int", lift: "int", bot: "int", contract: "int", job: "int", workOrder: "int", memo: "int" }, "nextId") as Record<string, number>;
+	const nextId = fields(s.nextId, { facility: "int", lift: "int", bot: "int", contract: "int", job: "int", workOrder: "int", decision: "int" }, "nextId") as Record<string, number>;
 	for (const [k, v] of Object.entries(nextId)) if (v < 1) fail(`nextId.${k} must be at least 1`);
 
 	// ── facilities ──
@@ -299,7 +299,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	const m = fields(s.metrics, METRIC_NUMS, "metrics");
 	for (const ring of ["ringTotalKwh", "ringItKwh", "ringShouldRun", "ringRunning", "ringGreenKwh", "ringHeatKwh"]) typed(m, ring, Float64Array, TICKS_PER_DAY);
 	fields(s.rng, { contracts: "num", reliability: "num", events: "num", growth: "num", weather: "num" }, "rng");
-	validateMinistry(content, s, nextId.memo);
+	validateMinistry(content, s, nextId.decision);
 	validateManagement(content, s);
 	validateBiotech(s);
 	validateGreen(s);
@@ -313,7 +313,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 const GRADES = ["A", "B", "C", "D", "E"];
 const STATS: Record<string, Kind> = {
 	revenue: "num", pflopHours: "num", jobsCompleted: "int", jobsFailed: "int", peakPflops: "num", facilitiesBuilt: "int", componentFailures: "int",
-	repairs: "int", memosAnswered: "int", researchPointsEarned: "num",
+	repairs: "int", decisionsMade: "int", researchPointsEarned: "num",
 };
 const REPORT: Record<string, Kind> = {
 	quarter: "int", fromDay: "int", toDay: "int", revenue: "num", costs: "num", uptime: "num", pue: "num", jobsCompleted: "int", jobsFailed: "int",
@@ -393,21 +393,21 @@ function validateGreen(s: Obj): void {
 	}
 }
 
-function validateMinistry(content: ContentDB, s: Obj, nextMemo: number): void {
+function validateMinistry(content: ContentDB, s: Obj, nextDecision: number): void {
 	const standing = s.standing as number;
 	if (standing < 0 || standing > 100) fail(`standing ${standing} is outside 0..100`);
-	const memos = array(s, "memos") as { id: number; eventId: string }[];
-	memos.forEach((m, i) => {
-		fields(m, { id: "int", eventId: "str", issuedAt: "num", expiresAt: "num" }, `memos[${i}]`);
-		const def = content.events.find((e) => e.id === m.eventId);
-		if (!def) fail(`memos[${i}] uses unknown event '${m.eventId}'`);
-		else if (!def.choices.some((c) => c.id === def.defaultChoice)) fail(`memos[${i}] event '${m.eventId}' has no default choice`);
+	if (s.decision !== null) {
+		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string };
+		if (!content.events.some((e) => e.id === d.eventId)) fail(`decision uses unknown event '${d.eventId}'`);
+		checkIds([d], nextDecision, "decision");
+	}
+	array(s, "decisionHistory").forEach((h, i) => {
+		fields(h, { decisionId: "int", eventId: "str", title: "str", choiceId: "str", outcome: "str", tick: "num" }, `decisionHistory[${i}]`);
 	});
-	checkIds(memos, nextMemo, "memo");
-	array(s, "memoHistory").forEach((h, i) => {
-		fields(h, { memoId: "int", eventId: "str", title: "str", choiceId: "str", outcome: "str", tick: "num", auto: "bool" }, `memoHistory[${i}]`);
+	if ((s.decisionHistory as unknown[]).length > 20) fail("decisionHistory is too long");
+	array(s, "advisorTips").forEach((t, i) => {
+		if (typeof t !== "string") fail(`advisorTips[${i}] must be a string`);
 	});
-	if ((s.memoHistory as unknown[]).length > 20) fail("memoHistory is too long");
 	array(s, "standingLog").forEach((h, i) => {
 		fields(h, { tick: "num", delta: "num", cause: "str", detail: "str" }, `standingLog[${i}]`);
 	});

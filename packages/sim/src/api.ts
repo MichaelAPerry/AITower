@@ -44,8 +44,14 @@ export type SimCommand =
 	| { type: "buyParts"; count: number }
 	/** Spawn a bot at the first charger with space. */
 	| { type: "buyBot"; defId: string }
-	/** Answer an open Ministry memo with one of its choice ids. */
-	| { type: "resolveMemo"; memoId: number; choiceId: string }
+	/** Answer the open advisor decision with one of its choice ids. */
+	| { type: "resolveDecision"; decisionId: number; choiceId: string }
+	/** "Defer one day": once per decision; it returns a game day later. */
+	| { type: "deferDecision"; decisionId: number }
+	/** App-side pacing: while closed no new decision is issued (the app closes it for 3 real minutes after each one). */
+	| { type: "decisionGate"; open: boolean }
+	/** Remember an advisor tip as shown, so it never fires again in this game. */
+	| { type: "markTip"; tipId: string }
 	/** Spend research points on a tech node (prerequisites researched, tier ≥ minTier, enough RP). */
 	| { type: "research"; techId: string }
 	/** Set the Contracts Clerk's standing order (needs the `contractsClerk` feature researched). */
@@ -158,9 +164,10 @@ export type SimEvent =
 	| { type: "tierUp"; tier: number; reward: number }
 	| { type: "newDay"; day: number }
 	| { type: "bankrupt" }
-	| { type: "memoIssued"; memoId: number; eventId: string }
-	/** `auto` = timed out and resolved with the default choice. */
-	| { type: "memoResolved"; memoId: number; eventId: string; choiceId: string; auto: boolean }
+	/** A decision opened (or came back from deferral). The app stops the clock. */
+	| { type: "decisionIssued"; decisionId: number; eventId: string }
+	| { type: "decisionDeferred"; decisionId: number; until: number }
+	| { type: "decisionResolved"; decisionId: number; eventId: string; choiceId: string }
 	| { type: "standingChanged"; standing: number; delta: number }
 	/** `ending` is set for path endings (kind "victory", or "absorbed" for the secret one). */
 	| { type: "gameOver"; kind: GameOverKind; ending?: EndingId }
@@ -378,8 +385,8 @@ export type GameOverKind = "bankrupt" | "shutdown" | "victory" | "absorbed";
 export type AuditGrade = "A" | "B" | "C" | "D" | "E";
 
 /** Quarterly Ministry audit (every `balance.audit.periodDays` days, filed at midnight). */
-/** What moved reputation: a Ministry memo, a finished/failed job, the daily uptime check, or the quarterly audit. */
-export type StandingCause = "memo" | "job" | "daily-uptime" | "audit";
+/** What moved reputation: an advisor decision, a finished/failed job, the daily uptime check, or the quarterly audit. */
+export type StandingCause = "decision" | "job" | "daily-uptime" | "audit";
 
 export interface StandingLogEntry {
 	tick: number;
@@ -423,20 +430,25 @@ export interface LifetimeStats {
 	facilitiesBuilt: number;
 	componentFailures: number;
 	repairs: number;
-	memosAnswered: number;
+	decisionsMade: number;
 	researchPointsEarned: number;
 }
 
-export interface MemoView {
+export interface DecisionView {
 	id: number;
 	eventId: string;
+	advisor: import("@aitower/content").AdvisorId;
 	category: import("@aitower/content").EventCategory;
 	title: string;
 	body: string;
 	choices: { id: string; label: string; hint: string }[];
-	defaultChoice: string;
+	/** The advisor's recommended choice id. */
+	recommended: string;
+	/** MAGI vote (Cass, Bea, Mel) when the decision spans several areas. */
+	votes?: import("@aitower/content").EventVote[];
 	issuedAt: number;
-	expiresAt: number;
+	/** "Defer one day" is still available. */
+	canDefer: boolean;
 }
 
 /** A temporary effect currently in force (from a resolved memo). */
@@ -496,10 +508,16 @@ export interface SimView {
 	/** One sample every 10 ticks, last 1440 samples. */
 	history: MetricSample[];
 	bankrupt: boolean;
-	/** Open (unanswered) Ministry memos, oldest first. */
-	memos: MemoView[];
-	/** Last 20 resolved memos, newest last, with the outcome text shown to the player. */
-	memoHistory: { memoId: number; eventId: string; title: string; choiceId: string; outcome: string; tick: number; auto: boolean }[];
+	/** The open advisor decision, or null. While it is open the app holds the clock. */
+	decision: DecisionView | null;
+	/** Tick a deferred decision returns, or null. */
+	decisionReturnsAt: number | null;
+	/** App pacing gate (see the `decisionGate` command). */
+	decisionGate: boolean;
+	/** Last 20 resolved decisions, newest last, with the outcome text shown to the player. */
+	decisionHistory: { decisionId: number; eventId: string; title: string; choiceId: string; outcome: string; tick: number }[];
+	/** Advisor tip ids already shown this game. */
+	advisorTips: string[];
 	modifiers: ModifierView[];
 	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
 	standing: number;

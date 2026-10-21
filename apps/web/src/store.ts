@@ -26,6 +26,8 @@ const UI_NOTIFY_MS = 66;
 /** Pre-M1 single-slot autosave (raw SimSnapshot JSON in localStorage). Migrated once into slot "auto". */
 export const LEGACY_AUTOSAVE_KEY = "aitower.autosave.v1";
 const NAME_MAX = 60;
+/** Real time between advisor decisions (M6.3): never more than one per three real minutes, at any speed. */
+export const DECISION_GAP_MS = 3 * 60 * 1000;
 
 export interface StoreOptions {
 	/** Where save slots live. Default: IndexedDB with a localStorage fallback. */
@@ -127,10 +129,39 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		const log = state.log.concat(events.map((event) => ({ tick, event })));
 		state = { ...state, log: log.length > LOG_CAP ? log.slice(log.length - LOG_CAP) : log };
 	};
+	/**
+	 * Advisor decisions. The sim never blocks; the clock owner (this store, via the loop) holds the clock while a decision is
+	 * open, so the game stays a pure function of (seed, commands). Pacing: one decision per game day is the sim's rule; the
+	 * 3-real-minute rule is the gate, which this store closes when a decision opens and reopens on a timer.
+	 */
+	let gateTimer: ReturnType<typeof setTimeout> | null = null;
+	const reopenGateIn = (ms: number) => {
+		if (gateTimer !== null) clearTimeout(gateTimer);
+		gateTimer = setTimeout(() => {
+			gateTimer = null;
+			sim.submit({ type: "decisionGate", open: true });
+		}, ms);
+	};
+	const decisionOpen = (): boolean => sim.view().decision !== null;
+	/** A decision just opened: stop the clock and close the gate for three real minutes. */
+	const holdForDecision = () => {
+		sim.submit({ type: "decisionGate", open: false });
+		reopenGateIn(DECISION_GAP_MS);
+		if (state.speed !== 0) state = { ...state, speed: 0 };
+	};
+	/** After a load or a new game: a decision left open holds the clock; a closed gate gets its timer back. */
+	const syncDecision = () => {
+		if (gateTimer !== null) clearTimeout(gateTimer);
+		gateTimer = null;
+		const v = sim.view();
+		if (v.decision && state.speed !== 0) state = { ...state, speed: 0 };
+		if (!v.decisionGate) reopenGateIn(DECISION_GAP_MS);
+	};
 	const replaceSim = (next: Sim) => {
 		sim = next;
 		dirty = true;
 		state = { ...state, view: sim.view(), log: [], selection: null, tool: { kind: "select" } };
+		syncDecision();
 		renderer?.setSelection(null);
 		renderer?.setGhost(null);
 		notify();
@@ -225,7 +256,10 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			return r;
 		},
 		canPlace: (defId, floor, x) => sim.canPlace(defId, floor, x),
-		setSpeed: (speed: Speed) => patch({ speed }),
+		setSpeed: (speed: Speed) => {
+			if (speed !== 0 && decisionOpen()) return; // a decision is waiting: the clock stays stopped until it is answered
+			patch({ speed });
+		},
 		setOverlay(overlay: OverlayMode) {
 			renderer?.setOverlay(overlay);
 			patch({ overlay });
@@ -314,6 +348,10 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 			for (let i = 0; i < n; i++) {
 				const ev = sim.step();
 				for (const e of ev) events.push(e);
+				if (ev.some((e) => e.type === "decisionIssued")) {
+					holdForDecision();
+					break; // the rest of this frame's ticks are not run: the game stops where the decision opened
+				}
 			}
 			if (n > 0) dirty = true;
 			pushLog(events);

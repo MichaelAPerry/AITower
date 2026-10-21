@@ -6,7 +6,7 @@ import { OverlaySwitcher } from "../components/OverlaySwitcher";
 import { fmtMoney, fmtPower, fmtPue, fmtTemp } from "../format";
 import { FinanceTab } from "../finance/FinanceTab";
 import { leadingPath } from "../ascension/ascension";
-import { ModifierChips } from "../memo/MemoDesk";
+import { ModifierChips } from "../status/Status";
 import { PanelHead, PanelTabs } from "../panel/PanelShell";
 import { Telemetry } from "../calm/Panels";
 import { moneyFlow, pueExplain, reputationTrend, reputationWhy, uptimeVerdict } from "./insights";

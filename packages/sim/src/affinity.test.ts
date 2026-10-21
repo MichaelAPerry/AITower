@@ -1,7 +1,7 @@
-/** M4b-T1: path affinity (memos, research, running facilities), snapshot v7, and the Foreman's reach rule. */
+/** M4b-T1: path affinity (decisions, research, running facilities), snapshot v7, and the Foreman's reach rule. */
 import type { EventDef, TechNode } from "@aitower/content";
 import { describe, expect, it } from "vitest";
-import { type SimImpl, simFromSnapshot } from "./sim";
+import { type SimImpl, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";
 import { AFFINITY_PER_FACILITY_HOUR, AFFINITY_PER_TECH, facilityPath } from "./progression/affinity";
 import { reachableFloors } from "./automation/foreman";
 import { addBot } from "./world/entities";
@@ -66,7 +66,7 @@ describe("path affinity", () => {
 	it("memo affinity effects add their amount (and never go below zero)", () => {
 		const c = mk();
 		const def: EventDef = {
-			id: "fx", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 0, timeoutTicks: 600, defaultChoice: "a",
+			id: "fx", category: "ministry", title: "t", body: "b", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "a",
 			choices: [
 				{ id: "a", label: "A", hint: "h", outcome: "o", effects: [{ type: "affinity", path: "synthetic", amount: 4 }] },
 				{ id: "b", label: "B", hint: "h", outcome: "o", effects: [{ type: "affinity", path: "synthetic", amount: -9 }] },
@@ -75,10 +75,10 @@ describe("path affinity", () => {
 		c.events = [def];
 		const sim = newSim(c, "empty");
 		const memo = (choiceId: string) => {
-			const id = sim.state.nextId.memo++;
-			sim.state.memos.push({ id, eventId: "fx", issuedAt: sim.state.tick, expiresAt: sim.state.tick + 100_000 });
+			const id = sim.state.nextId.decision++;
+			sim.state.decision = { id, eventId: "fx", issuedAt: sim.state.tick, deferred: false, hiddenUntil: 0 };
 			sim.invalidateProjection();
-			exec(sim, { type: "resolveMemo", memoId: id, choiceId });
+			exec(sim, { type: "resolveDecision", decisionId: id, choiceId });
 		};
 		memo("a");
 		expect(aff(sim).synthetic).toBe(4);
@@ -129,7 +129,7 @@ describe("snapshot v7+", () => {
 		delete snap.state.affinity;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
 		expect(aff(old)).toEqual({ biotech: 0, greentech: 0, synthetic: 0 });
-		expect(old.snapshot().version).toBe(8);
+		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
 		run(old, 120);
 		expect(old.state.affinity.greentech).toBeGreaterThan(0);
 	});

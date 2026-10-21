@@ -354,7 +354,7 @@ describe("quarterly audit", () => {
 describe("lifetime stats", () => {
 	it("tracks revenue, PF-hours, jobs, peak, builds, failures, repairs, memos and RP", () => {
 		const sim = newSim(farmContent(), "farm");
-		expect(sim.view().stats).toEqual({ revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, memosAnswered: 0, researchPointsEarned: 0 });
+		expect(sim.view().stats).toEqual({ revenue: 0, pflopHours: 0, jobsCompleted: 0, jobsFailed: 0, peakPflops: 0, facilitiesBuilt: 0, componentFailures: 0, repairs: 0, decisionsMade: 0, researchPointsEarned: 0 });
 		exec(sim, { type: "buildSlab", floor: 1, x0: 0, x1: 20 });
 		sim.submit({ type: "place", defId: "tier2_thing", floor: 0, x: 40 }); // tier 2: refused, not counted
 		sim.state.tier = 2;
