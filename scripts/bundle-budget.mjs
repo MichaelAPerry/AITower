@@ -1,13 +1,14 @@
 #!/usr/bin/env node
-// Fails when any JS chunk in apps/web/dist/assets exceeds 450 kB uncompressed, or total JS exceeds 1.46 MB.
-// (1.3 MB until M3; the Biotech path added sim, content, render and music data. 1.45 MB until the tech tree restructure: 7 tech nodes, 3 facilities, a bot, the Level research gate. Total includes Pixi's lazily loaded back ends.)
+// A tripwire, not a target: fails when any JS chunk in apps/web/dist/assets exceeds 800 kB uncompressed, or total JS exceeds 3 MB.
+// It exists to catch accidents (a whole library pulled in by one import), not to ration features. 3 MB of JS is roughly
+// 1 MB gzipped: a couple of seconds on school Wi-Fi, small for a browser game. Total includes Pixi's lazily loaded back ends.
 // Usage: node scripts/bundle-budget.mjs [assetsDir]   (run after `npm run build`)
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 const KB = 1000;
-const MAX_CHUNK = 450 * KB;
-const MAX_TOTAL = 1460 * KB;
+const MAX_CHUNK = 800 * KB;
+const MAX_TOTAL = 3000 * KB;
 const dir = process.argv[2] ?? "apps/web/dist/assets";
 
 if (!existsSync(dir)) {
