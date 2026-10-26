@@ -126,8 +126,8 @@ Unlock: **research only**. No commit, no bond. Starters are separate buildings m
 
 | Item (id) | Unlock | Grounding | Cost | Draw/Out kW | Heat/Cap kW | PF | W | SP | Seal B/G |
 |--|--|--|--|--|--|--|--|--|--|
-| **OC-0 Culture Rack** (rack_culture_s, new) | `culture_media` (L2) + `culture_bench` (L3) | Lab cell-culture incubator | 0.90M | -8 | 8 | 40 | 2 | Syn 1; Bio 0.5 after commit | +3/0 |
-| **NT-1 Nutrient Tank** (nutrient_tank_s, new) | `culture_bench` | Bench bioreactor media feed (nutrient 6, feeds 2 OC-0) | 0.25M | -2 | - | - | 1 | - | +2/+1 |
+| **OC-0 Culture Rack** (rack_culture_s, new) | `culture_media` (L2) + `culture_bench` (L3) | Lab cell-culture incubator | 0.90M | -8 | 8 | 40 | 2 | Syn 1; Bio 0.5 after commit | 0/+1 |
+| **NT-1 Nutrient Tank** (nutrient_tank_s, new) | `culture_bench` | Bench bioreactor media feed (nutrient 6, feeds 2 OC-0) | 0.25M | -2 | - | - | 1 | - | 0/+1 |
 | **NM-1 Neuromorphic Rack** (rack_neuromorphic) | `inference_foundry` (L3) | Loihi-style spiking chips, very low power | 0.80M | -12 | 12 | 50 | 2 | Syn 1; Green 0.5 after commit | -1/-2 |
 | **PV Wall Panels 150 kW** (solar_skin) | `solar_charter` (L3) | Facade photovoltaics | 0.45M | +150 | - | - | 4 | - | -1/-6 |
 | **OA-400 Outside-Air Economizer** (crah_econ, new) | `economizer` (L3) | Free-air cooling, allowed by ASHRAE when outside air is cool | 0.35M | -6 | 400 (full at 18 C or less, 40% at 27 C) | - | 3 | - | 0/-2 |
@@ -137,10 +137,10 @@ What a Starter costs in seal:
 
 | Set | Bio seal | Green seal | Bond |
 |--|--|--|--|
-| Bio starters (OC-0 + NT-1) | **+5 scar** (permanent) | +1 | Mel +1 once |
+| Bio starters (OC-0 + NT-1) | 0 (dabbling never closes the tree you are trying) | +2 | Mel +1 once |
 | Green starters (NM-1, PV Wall, OA-400, HRU) | -1 (cleans) | **no scar**; cleans up to 13 residue | Bea +1 once |
 
-Bio is the dangerous one to dabble in: contamination is real and cannot be unbuilt. Green starters are safe but weak (a Starter Green rack is 50 PF and the weather decides the rest).
+Starters never scar their own tree (coordinator fix: a Bio starter that scarred Bio punished the player for trying Bio). Bio starters scar Green a little. Green starters are safe but weak (a Starter Green rack is 50 PF and the weather decides the rest).
 
 ### 2.3 Synthetic: The Lattice
 
@@ -318,6 +318,21 @@ Why Synthetic is easiest:
 5. It keeps ticking while the player builds Bio or Green, since shared racks still feed it (about 75 days to 1000 SP at 400 PF of shared racks). That clock is the pull: a slow Bio or Green player loses to the Lattice by default.
 
 Tuning knobs: `spPerPflopHour`, `spWeights`, rack costs, seal numbers. Set tree difficulty with Green weight times green score (target mean effective 1.5) and Bio contamination rates.
+
+### 5.1 Coordinator balance check (fixes applied to this spec)
+
+Checked against `balance.json` (spTarget 1000, spPerPflopHour 0.0014, bondStart 20 (Luci 30), bondFollow +3, bondCommit 50, Level PF gates 120 / 400 / 1200 / 3000).
+
+| Check | Result |
+|--|--|
+| SP arithmetic | 1000 SP = 29,760 weighted PF-days. Synthetic 25 days = 744 PF average: consistent with Level 4 (1200 PF) late. Bio 38 days and Green 44 days are consistent with their weights and seal assumptions. OK. |
+| **Bond pace (was broken)** | Commit needs bond 50 from 20 = 10 followed decisions for ONE advisor by day 9. Not reachable: commit would slip to about day 20+, so Bio about 50+ days and Green about 60+. **Fix:** the After-hours visit (VN_WRITING.md dating proposal 1) gives +3 bond to the advisor visited, once a day. Focusing one advisor reaches 50 by about day 7-9 with normal follows. Target: an attentive player can commit by day 10-12. |
+| **Starter scar (was backwards)** | OC-0 / NT-1 scarred Bio, so trying Bio made Bio harder. Fixed above: starters never scar their own tree. |
+| Lattice pull | A Bio or Green player keeping 400 PF of shared racks still feeds the Lattice at about 13 SP a day (about 75 days to 1000). Bio and Green targets (38-44, worst case about 55) stay ahead of it, so the pull is pressure, not a trap. OK. |
+| SP per $ | Synthetic about 220 weighted SP-PF per $M, Bio about 71, Green about 84. Synthetic about 3x cheaper per point: intended (easy), but the largest gap to watch in playtest. |
+| Support capex | 8-25% rule holds in each tree (Green near the top because of weather power; repaid by credits and heat). OK. |
+
+**Acceptance (after implementation):** `soulRun.ts` scripted runs per tree on seeds 1-3 must land within 20% of the day targets (Synthetic 25, Bio 38, Green 44), with no bankruptcy. If not, tune `spWeights`, rack costs and seal numbers, not the targets.
 
 ## 6. Migration note
 
