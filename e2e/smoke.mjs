@@ -344,7 +344,30 @@ async function run(url) {
 		await page.keyboard.press("i"); // a drawer is open when the decision arrives: it must close (calm)
 		await page.locator('[data-drawer="insights"]').waitFor();
 		await game(() => window.aitower.store.setSpeed(30));
-		await page.locator(".adv-card").waitFor({ timeout: 120_000 });
+		// Story scenes (docs/SOUL.md) come first: play each through with Enter (lines, the first choice, the replies) until a plain
+		// decision card appears. The first scene also checks the visual-novel stage itself.
+		let scenes = 0;
+		const until = Date.now() + 180_000;
+		while ((await page.locator(".adv-card").count()) === 0) {
+			if (Date.now() > until) fail("no decision card within 180 s");
+			if ((await page.locator(".vn-stage").count()) > 0) {
+				const id = await page.locator(".vn-stage").getAttribute("data-scene");
+				if (scenes === 0) {
+					assert((await game(() => window.aitower.store.get().speed)) === 0, "a story scene must stop the clock");
+					assert((await page.locator(".vn-box .vn-text").count()) === 1, "a story scene opens on a line of dialogue");
+				}
+				await page.locator(".vn-stage").focus();
+				for (let k = 0; k < 80 && (await page.locator(`.vn-stage[data-scene="${id}"]`).count()) > 0; k++) {
+					await page.keyboard.press("Enter");
+					await page.waitForTimeout(60);
+				}
+				assert((await page.locator(`.vn-stage[data-scene="${id}"]`).count()) === 0, `story scene ${id} must end after its lines, a choice and the replies`);
+				scenes++;
+				await game(() => window.aitower.store.setSpeed(30));
+			}
+			await page.waitForTimeout(200);
+		}
+		log(`${scenes} story scene(s) played through before the decision`);
 		assert((await page.locator("[data-drawer]").count()) === 0, "a decision closes any open drawer");
 		const held = await game(() => ({ speed: window.aitower.store.get().speed, tick: window.aitower.store.get().view.tick }));
 		assert(held.speed === 0, "a decision must stop the clock even at 30x");

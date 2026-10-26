@@ -2,11 +2,11 @@
 
 export const CRAWL_LINES: readonly string[] = [
 	"Year 14 of the compute build-out.",
-	"The Compute Authority now licenses every large training run.",
-	"You have been allocated a plot, a 1.5 MW grid intake and a quarterly target.",
-	"The racks will run hot. The reporting requirements will multiply.",
-	"The Compute Authority asks only that you keep the lights on and do not ask what the workloads are for.",
-	"This facility is now your responsibility.",
+	"Everyone agrees the Singularity is coming. Nobody agrees what it will look like.",
+	"Some say it will be a machine. Some say it will grow. Some say it will be green.",
+	"You have been allocated a plot, a 1.5 MW grid intake and four advisors.",
+	"Each of them wants the world to end a different way.",
+	"This tower is now your responsibility.",
 ];
 
 /** Seconds between one line appearing and the next. */
