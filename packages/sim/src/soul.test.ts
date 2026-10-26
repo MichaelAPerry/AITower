@@ -196,7 +196,7 @@ describe("story scenes and objections", () => {
 		const s = sim(c);
 		s.state.cash = 1e9;
 		place(s, "genset", 0, 6);
-		steps(s, 2);
+		steps(s, 12);
 		const d = s.view().decision;
 		expect(d?.eventId).toBe("obj_greentech");
 		expect(d?.subject).toEqual({ defId: "genset", name: s.content.facilities.genset.name });
@@ -211,7 +211,7 @@ describe("story scenes and objections", () => {
 		const c = content((x) => (x.events = x.events.filter((e) => e.id === "st_commit")));
 		const s = sim(c);
 		s.state.tier = 3;
-		steps(s, 5);
+		steps(s, 12);
 		expect(s.view().decision?.eventId).toBe("st_commit");
 		answer(s, "luci");
 		expect(s.state.path).toBe("synthetic");
@@ -221,7 +221,7 @@ describe("story scenes and objections", () => {
 		const c = content((x) => (x.events = x.events.filter((e) => e.id.startsWith("st_seal_green"))));
 		const s = sim(c);
 		s.state.sealResidue.greentech = 40;
-		steps(s, 3);
+		steps(s, 12);
 		expect(s.view().decision?.eventId).toBe("st_seal_green_25");
 		const residue = s.state.sealResidue.greentech;
 		answer(s, "care");

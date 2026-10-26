@@ -184,7 +184,7 @@ describe("ascension", () => {
 		const rows = pathRows(content, store.get().view);
 		expect(rows.map((r) => [r.id, r.available])).toEqual([["biotech", true], ["greentech", false], ["synthetic", false]]);
 		const html = renderToString(<AscensionForm rows={rows} tier={5} pending={null} onPick={() => {}} onConfirm={() => {}} onCancel={() => {}} onClose={() => {}} />);
-		expect(html).toContain("ASCENSION");
+		expect(html).toContain("WHICH WAY THE WORLD ENDS");
 		expect(html.match(/ui-asc-soon/g)?.length).toBe(2);
 		expect(pathToConfirm(content, "greentech")).toBeNull();
 		expect(pathToConfirm(content, "biotech")).toBe("biotech");
@@ -237,12 +237,12 @@ describe("ascension", () => {
 
 describe("endings", () => {
 	const { content } = setup();
-	const over = (kind: "victory" | "absorbed" | "bankrupt", ending?: "livingTower" | "cleanTower" | "absorbed") => ({ kind, tick: 1, ...(ending ? { ending } : {}) });
+	const over = (kind: "victory" | "absorbed" | "bankrupt", ending?: "flesh" | "garden" | "absorbed") => ({ kind, tick: 1, ...(ending ? { ending } : {}) });
 	it("prints the content's text for the ending reached", () => {
-		const living = overCopyFor(over("victory", "livingTower"), content);
-		expect(living.heading).toBe("LIVING TOWER");
-		expect(living.lines).toEqual(content.endings[0].body.split("\n\n"));
-		expect(overCopyFor(over("victory", "cleanTower"), content).heading).toBe("CLEAN TOWER");
+		const flesh = overCopyFor(over("victory", "flesh"), content);
+		expect(flesh.heading).toBe("THE FLESH REMEMBERS");
+		expect(flesh.lines).toEqual(content.endings.find((e) => e.id === "flesh")?.body.split("\n\n"));
+		expect(overCopyFor(over("victory", "garden"), content).heading).toBe("THE GARDEN");
 		const abs = overCopyFor(over("absorbed", "absorbed"), content);
 		expect(abs).toMatchObject({ heading: "ABSORBED", tone: "red", stamp: "ABSORBED" });
 		expect(overCopyFor(over("absorbed"), content).heading).toBe("ABSORBED"); // kind alone is enough
@@ -250,7 +250,7 @@ describe("endings", () => {
 	it("keeps the old copy for bankrupt, shutdown and a victory without an ending, and when content lacks the ending", () => {
 		expect(overCopyFor(over("bankrupt"), content).heading).toBe("NOTICE OF TERMINATION");
 		expect(overCopyFor(over("victory"), content).heading).toBe("COMMENDATION");
-		expect(overCopyFor(over("victory", "livingTower"), { ...content, endings: [] }).heading).toBe("COMMENDATION");
+		expect(overCopyFor(over("victory", "flesh"), { ...content, endings: [] }).heading).toBe("COMMENDATION");
 		expect(endingOf(over("absorbed"))).toBe("absorbed");
 		expect(endingOf(over("bankrupt"))).toBeUndefined();
 	});
@@ -258,13 +258,12 @@ describe("endings", () => {
 		expect(overCopyFor(over("absorbed"), content, "full").stamp).toBe("ABSORBED");
 		expect(overCopyFor(over("absorbed"), content, "off").stamp).toBe("TAKEN OVER");
 	});
-	it("CURRENT ORDERS shows the ending progress, but never announces the secret one", () => {
+	it("CURRENT ORDERS shows the leading tree's Singularity progress, never the secret ending", () => {
 		const { content: c, store } = setup();
 		const v = store.get().view;
-		expect(endingLine({ ...v, endingProgress: { ending: "livingTower", days: 2, needed: 3 } }, c)).toBe("Living Tower: 2 of 3 days");
-		expect(endingLine({ ...v, endingProgress: { ending: "cleanTower", days: 2.9, needed: 7 } }, c)).toBe("Clean Tower: 2 of 7 days");
-		expect(endingLine({ ...v, endingProgress: { ending: "absorbed", days: 1, needed: 1 } }, c)).toBeNull();
-		expect(endingLine({ ...v, endingProgress: null }, c)).toBeNull();
+		expect(endingLine(v, c)).toBeNull(); // no points yet
+		expect(endingLine({ ...v, soul: { ...v.soul, sp: { synthetic: 420, biotech: 0, greentech: 0 } } }, c)).toBe("The Lattice: 42%");
+		expect(endingLine({ ...v, soul: { ...v.soul, sp: { synthetic: 100, biotech: 0, greentech: 333 } } }, c)).toBe("The Garden: 33%");
 	});
 });
 
@@ -282,7 +281,7 @@ describe("event wording", () => {
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content, "off").text).toMatch(/no longer be reversed/);
 		expect(describeEvent({ type: "pathChosen", path: "biotech" }, v, content).text).toMatch(/path committed: Biotech/);
 		expect(describeEvent({ type: "gameOver", kind: "absorbed", ending: "absorbed" }, v, content).text).toMatch(/reclassified as a Compute Authority asset/);
-		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "livingTower" }, v, content).text).toMatch(/Living Tower/);
+		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "flesh" }, v, content).text).toMatch(/The Flesh Remembers/);
 	});
 	it("no horror words reach a toast in the Compute Authority voice", () => {
 		for (const e of [{ type: "growthSprouted", facilityId: grown }, { type: "botMutated", botId: 1, trait: "fleshed" }, { type: "contaminationIrreversible" }] as const) expect(describeEvent(e, v, content).text).not.toMatch(/mutat|infect|contamin|flesh|gore|blood/i);

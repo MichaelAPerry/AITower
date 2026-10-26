@@ -8,6 +8,8 @@ import { useSaves } from "../menu/useSaves";
 import { scenarioCards, showPicker, validScenario } from "./scenarios";
 import { backdropCaption, continueSummary, startGame, type TitleItem, titleBackdrop, titleItems } from "./titleState";
 import "./title.css";
+import "./title-pc98.css";
+import { BACKDROP } from "../art";
 
 export interface TitleScreenProps {
 	store: GameStore;
@@ -94,6 +96,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 		// biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal; the key handler implements arrow navigation and the focus loop
 		<div className="ui-title" ref={root} onKeyDown={onKeyDown} data-menu-open={menuOpen || undefined}>
 			<div className="ui-title-sky" aria-hidden="true">
+				<img className="ui-title-art" src={BACKDROP.title} alt="" draggable={false} />
 				<span className="ui-title-sign">{saves ? backdropCaption(titleBackdrop(saves)) : "COMPUTE AUTHORITY"}</span>
 			</div>
 			<div className="ui-title-cabinet ui-panel" role="dialog" aria-modal="true" aria-label="AItower title screen">
@@ -101,7 +104,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 					<span className="ui-title-brand">
 						AI<b>TOWER</b>
 					</span>
-					<span className="ui-title-sub">LICENSED AI COMPUTE OPERATOR</span>
+					<span className="ui-title-sub">THREE ROADS TO THE END OF THE WORLD</span>
 				</div>
 				<div className="ui-crt crt-amber ui-title-crt">
 					{!saves && <p className="ui-title-wait">LOADING SAVES…</p>}

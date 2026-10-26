@@ -7,6 +7,9 @@ import { fmtMoney } from "../format";
 import { pushNotice } from "../notices";
 import { ADVISORS, choiceChipList, effectsOf, priceLine, tally } from "./advisors";
 import { Portrait } from "./Portrait";
+import { PORTRAITS } from "../art";
+import { StoryScene } from "../vn/StoryScene";
+import { reducedMotion } from "../title/crawl";
 import "./advisors.css";
 
 const CATEGORY: Record<string, string> = { ministry: "Compute Authority", environmental: "Weather and grid", operational: "Operations", client: "Clients", horror: "Unfiled" };
@@ -60,6 +63,7 @@ export const DECISION_ARTICLE: Record<AdvisorId, { id: string; label: string }> 
 export function DecisionCard({ store, content, state, onHandbook }: { store: GameStore; content: ContentDB; state: GameState; onHandbook?: (id: string) => void }) {
 	const d = state.view.decision;
 	if (!d) return null;
+	if (d.category === "story") return <StoryScene key={d.id} store={store} decision={d} reduced={reducedMotion(state.settings.reducedMotion)} />;
 	const a = ADVISORS[d.advisor];
 	const answer = (choiceId: string): void => {
 		const r = store.dispatch({ type: "resolveDecision", decisionId: d.id, choiceId });
@@ -72,6 +76,9 @@ export function DecisionCard({ store, content, state, onHandbook }: { store: Gam
 	const stain = decisionStain(state.view.corruption ?? 0, state.settings.horrorIntensity);
 	return (
 		<div className="adv-scrim" data-decision={d.id}>
+			<div className="adv-vn-figure" aria-hidden="true" style={{ ["--adv" as string]: a.color }}>
+				<img src={PORTRAITS[d.advisor][d.category === "horror" ? "unsettling" : "neutral"]} alt="" draggable={false} />
+			</div>
 			<article className={`adv-card ui-panel ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-modal="false" aria-labelledby="adv-card-title" data-help="decision" style={{ ["--adv" as string]: a.color }} key={d.id}>
 				<header className="adv-card-head">
 					<Portrait id={d.advisor} size={52} talking />

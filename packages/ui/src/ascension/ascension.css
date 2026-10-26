@@ -92,3 +92,91 @@
 .aitower-hud .ui-asc .ui-confirm {
 	margin-top: 6px;
 }
+
+/* FORM A-5, PC-98: each tree shows its floor painting; a closed tree says why. */
+.aitower-hud .ui-asc-art {
+	display: block;
+	width: 100%;
+	height: 96px;
+	object-fit: cover;
+	image-rendering: pixelated;
+	border: 1px solid var(--pc-rule-in);
+	margin-bottom: 6px;
+}
+.aitower-hud .ui-asc-champ {
+	margin: 4px 0;
+	color: var(--accent);
+	font-size: 13px;
+}
+.aitower-hud .ui-asc-block {
+	margin: 0 0 6px;
+	color: var(--bad);
+	font-size: 13px;
+}
+.aitower-hud .ui-asc-path.is-blocked .ui-asc-art {
+	filter: grayscale(0.85) brightness(0.6);
+}
+.aitower-hud .ui-asc {
+	width: min(1040px, 100%);
+	padding: 18px 20px;
+	color: var(--text);
+	font: 15px/1.4 var(--f-body);
+	background: var(--pc-dither), rgba(6, 6, 38, 0.97);
+	border: 3px solid var(--pc-rule);
+	box-shadow: inset 0 0 0 2px #05051e, inset 0 0 0 3px var(--pc-rule-in), 4px 4px 0 rgba(0, 0, 0, 0.6);
+}
+.aitower-hud .ui-asc-form {
+	font: 12px/1.2 var(--f-display);
+	color: var(--accent);
+}
+.aitower-hud .ui-asc-head h2 {
+	font: 26px/1.1 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .ui-asc-paths {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
+}
+.aitower-hud .ui-asc-path {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 6px;
+	padding: 8px;
+	background: #05051e;
+	border: 1px solid var(--pc-rule-in);
+}
+.aitower-hud .ui-asc-path.is-picked {
+	outline: 2px solid var(--accent);
+	border-color: var(--accent);
+}
+.aitower-hud .ui-asc-art {
+	height: 120px;
+	margin: 0;
+}
+.aitower-hud .ui-asc-name {
+	font: 20px/1.1 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .ui-asc-path[data-path="synthetic"] .ui-asc-name {
+	color: var(--tree-syn);
+}
+.aitower-hud .ui-asc-path[data-path="biotech"] .ui-asc-name {
+	color: var(--tree-bio);
+}
+.aitower-hud .ui-asc-path[data-path="greentech"] .ui-asc-name {
+	color: var(--tree-green);
+}
+.aitower-hud .ui-asc-desc {
+	flex: 1;
+	font-size: 13px;
+	color: var(--text-dim);
+}
+.aitower-hud .ui-asc-path > .ui-stampbtn {
+	align-self: center;
+}
+@media (max-width: 860px) {
+	.aitower-hud .ui-asc-paths {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

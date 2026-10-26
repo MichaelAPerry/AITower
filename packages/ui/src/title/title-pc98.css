@@ -1,0 +1,153 @@
+/* Title screen, PC-98 (docs/SOUL.md §5): the title painting full-bleed, the menu in a framed box top left, like the concept. */
+.aitower-hud .ui-title {
+	padding: 0;
+	background: #05051e;
+}
+.aitower-hud .ui-title-art {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 60% 40%;
+	image-rendering: pixelated;
+}
+.aitower-hud .ui-title-sign {
+	bottom: 16px;
+	padding: 6px 14px 6px calc(14px + 0.6em);
+	font: 14px/1 var(--f-display);
+	color: var(--warn);
+	background: rgba(4, 4, 26, 0.85);
+	border: 1px solid var(--pc-rule-in);
+	text-shadow: none;
+}
+.aitower-hud .ui-title-cabinet {
+	position: absolute;
+	left: clamp(12px, 3vw, 40px);
+	top: clamp(12px, 3vh, 28px);
+	margin: 0;
+	width: min(430px, calc(100% - 24px));
+	max-height: calc(100% - 64px);
+	overflow-y: auto;
+	padding: 14px 16px 12px;
+	gap: 12px;
+	background: rgba(4, 4, 26, 0.86);
+}
+/* The painting carries the logo; the plate stays for screen readers and as a subtitle. */
+.aitower-hud .ui-title-brand {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+.aitower-hud .ui-title-plate {
+	justify-items: start;
+}
+.aitower-hud .ui-title-sub {
+	font: 12px/1 var(--f-display);
+	letter-spacing: 0.16em;
+	color: var(--accent);
+}
+.aitower-hud .ui-title-crt {
+	padding: 4px 0;
+	min-height: 0;
+	background: transparent;
+	box-shadow: none;
+}
+.aitower-hud .ui-title-item {
+	font: 24px/1.15 var(--f-display);
+	color: var(--text);
+	text-shadow: none;
+	padding: 4px 6px;
+	gap: 8px;
+}
+.aitower-hud .ui-title-cursor {
+	font-size: 18px;
+	color: var(--text);
+}
+.aitower-hud .ui-title-item:hover,
+.aitower-hud .ui-title-item:focus-visible {
+	color: var(--text);
+	background: transparent;
+	box-shadow: inset 0 -2px 0 var(--accent);
+}
+.aitower-hud .ui-title-item:hover .ui-title-cursor,
+.aitower-hud .ui-title-item:focus-visible .ui-title-cursor {
+	animation: vn-blink 0.9s steps(2) infinite;
+}
+.aitower-hud .ui-title-detail {
+	font-size: 13px;
+	color: var(--text-dim);
+	opacity: 1;
+}
+.aitower-hud .ui-title-card {
+	color: var(--text);
+	background: rgba(14, 14, 64, 0.85);
+	border: 1px solid var(--pc-rule-in);
+	border-left: 4px solid var(--pc-rule-in);
+	font: 13px/1.35 var(--f-body);
+}
+.aitower-hud .ui-title-card.is-on {
+	background: rgba(26, 26, 102, 0.95);
+	border-color: var(--pc-rule);
+	border-left-color: var(--accent);
+	box-shadow: none;
+}
+.aitower-hud .ui-title-card-head b,
+.aitower-hud .ui-title-card-facts {
+	font: 16px/1 var(--f-display);
+	color: var(--text);
+}
+.aitower-hud .ui-title-card-facts {
+	color: var(--money);
+}
+.aitower-hud .ui-title-card-desc {
+	font: 13px/1.35 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-title .ui-dymo {
+	background: transparent;
+	color: var(--text-dim);
+	border: 0;
+	box-shadow: none;
+	font: 12px/1 var(--f-display);
+	letter-spacing: 0.12em;
+	padding: 0;
+}
+
+/* Narrow, like the concept's menu: it must sit left of the painted logo. */
+.aitower-hud .ui-title-art {
+	object-position: 50% 0%;
+}
+.aitower-hud .ui-title-cabinet {
+	width: min(292px, calc(100% - 24px));
+	padding: 12px 12px 10px;
+	gap: 10px;
+}
+.aitower-hud .ui-title-item {
+	flex-wrap: wrap;
+	font-size: 21px;
+	row-gap: 2px;
+}
+.aitower-hud .ui-title-detail {
+	flex-basis: 100%;
+	margin-left: 26px;
+	text-align: left;
+	font-size: 12px;
+}
+.aitower-hud .ui-title-card {
+	padding: 6px 8px;
+}
+.aitower-hud .ui-title-card-head b,
+.aitower-hud .ui-title-card-facts {
+	font-size: 14px;
+}
+.aitower-hud .ui-title-card:not(.is-on) .ui-title-card-desc {
+	display: none;
+}
+.aitower-hud .ui-title-cabinet {
+	align-content: start;
+	height: auto;
+	bottom: auto;
+}

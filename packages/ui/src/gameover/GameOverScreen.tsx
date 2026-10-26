@@ -7,6 +7,7 @@ import { focusables, nextFocusIndex } from "../menu/focus";
 import { StampBtn } from "../menu/parts";
 import { endingOf, type GameOver, isFinal, lifetimeStats, overCopyFor } from "./gameOver";
 import "./gameover.css";
+import { EndingScene } from "./EndingScene";
 
 export interface GameOverScreenProps {
 	over: GameOver;
@@ -34,6 +35,10 @@ export function GameOverScreen({ over, view, content, horror = "full", onLoad, o
 	useEffect(() => {
 		if (!menuOpen && root.current) focusables(root.current)[0]?.focus();
 	}, [menuOpen, over.kind]);
+
+	// The three Singularity wins play as a visual-novel scene over their tree's painting.
+	const tree = over.kind === "victory" && ending ? content.endings?.find((e) => e.id === ending && e.backdrop) : undefined;
+	if (tree) return <EndingScene ending={tree} view={view} content={content} menuOpen={menuOpen} onContinue={onContinue} onNewGame={onNewGame} />;
 
 	const onKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
 		e.stopPropagation();

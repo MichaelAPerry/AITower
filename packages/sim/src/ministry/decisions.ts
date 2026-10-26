@@ -87,6 +87,8 @@ function issueScripted(ctx: TickCtx): void {
 
 /** Ticks a story scene waits after the last answered decision, so scenes do not arrive back to back. */
 export const STORY_SPACING_TICKS = 120;
+/** Story scenes and objections are checked every this many ticks (they walk the facility list). */
+export const STORY_CHECK_TICKS = 10;
 
 /** Does a story scene's trigger (and its level, day and path conditions) hold now? Objection scenes are issued separately. */
 export function storyHolds(state: SimState, content: ContentDB, e: EventDef): boolean {
@@ -115,7 +117,7 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
  */
 function issueStory(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
-	if (state.decision || state.lesson) return;
+	if (state.decision || state.lesson || state.tick % STORY_CHECK_TICKS !== 0) return;
 	const last = state.decisionHistory.at(-1);
 	if (last && state.tick - last.tick < STORY_SPACING_TICKS) return;
 	for (const e of content.events) {

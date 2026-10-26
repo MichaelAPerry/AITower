@@ -6,6 +6,7 @@ import { Jargon, TermScope } from "../glossary/Term";
 import { OutputBar, TierMark } from "./TierMark";
 import { findItem, itemForTool } from "./catalog";
 import { CATEGORY_LABEL, type Stat } from "./plain";
+import { SealNotes } from "../soul/SealNotes";
 
 function StatRow({ s }: { s: Stat }) {
 	return (
@@ -54,6 +55,7 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 			<p className="bld-blurb">
 				<Jargon text={item.blurb} />
 			</p>
+			<SealNotes def={item.def} view={view} />
 			<div className="bld-stats">
 				{item.stats.map((s) => (
 					<StatRow key={`${s.label}${s.sub}`} s={s} />

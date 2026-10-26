@@ -68,10 +68,24 @@
 	background: var(--adv);
 	border: 2px solid var(--panel);
 }
-.aitower-hud .adv-portrait .adv-disc {
-	fill: color-mix(in srgb, var(--adv) 30%, var(--housing-lo));
-	stroke: var(--adv);
-	stroke-width: 1.4;
+.aitower-hud .adv-portrait {
+	display: inline-block;
+	flex: none;
+	overflow: hidden;
+	background: #eef0ff;
+	border: 2px solid var(--adv);
+	box-shadow: 0 0 0 1px var(--bg), 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+.aitower-hud .adv-portrait img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	object-position: 50% 12%;
+	image-rendering: pixelated;
+}
+.aitower-hud .adv-full {
+	image-rendering: pixelated;
 }
 .aitower-hud .adv-line {
 	flex: 1;
@@ -178,8 +192,10 @@
 	position: absolute;
 	inset: 0;
 	z-index: 9;
-	display: grid;
-	place-items: center;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0;
 	padding: 56px 84px 70px 84px;
 	background: color-mix(in srgb, var(--ink) 38%, transparent);
 	pointer-events: auto;
@@ -247,7 +263,7 @@
 	align-items: center;
 	font: var(--fs-body) / 1.25 var(--f-body);
 }
-.aitower-hud .adv-magi li > svg {
+.aitower-hud .adv-magi li > .adv-portrait {
 	flex: none;
 }
 .aitower-hud .adv-magi em {
@@ -365,4 +381,30 @@
 .aitower-hud.is-reduced-motion .adv-card,
 .aitower-hud.is-reduced-motion .adv-face.is-speaking {
 	animation: none;
+}
+
+/* A standing portrait beside every decision card (the visual-novel half). */
+.aitower-hud .adv-vn-figure {
+	flex: none;
+	align-self: flex-end;
+	width: min(300px, 26vw);
+	aspect-ratio: 1;
+	margin-right: -6px;
+	margin-bottom: 8px;
+	background: #eef0ff;
+	border: 3px solid var(--adv);
+	box-shadow: 0 0 0 2px #05051e, 4px 4px 0 rgba(0, 0, 0, 0.6);
+	z-index: 1;
+}
+.aitower-hud .adv-vn-figure img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	image-rendering: pixelated;
+}
+@media (max-width: 900px) {
+	.aitower-hud .adv-vn-figure {
+		display: none;
+	}
 }

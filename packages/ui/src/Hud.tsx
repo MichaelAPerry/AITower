@@ -20,6 +20,7 @@ import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { DecisionCard } from "./advisors/DecisionCard";
+import { Dossier } from "./soul/Dossier";
 import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
@@ -49,6 +50,8 @@ import "./build/build.css";
 import "./build/tier.css";
 import "./panel/panel.css";
 import "./help/help.css";
+// The PC-98 look goes last: it swaps the theme tokens and frames (docs/SOUL.md §5).
+import "./pc98/pc98.css";
 
 export interface HudProps {
 	store: GameStore;
@@ -253,6 +256,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />
 				<Drawer {...props} />
 			</div>
+			{ui.dossier && !titleOpen && !over && <Dossier view={state.view} onClose={() => setUi({ dossier: false })} />}
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
 			{ascensionOpen && !titleOpen && !over && (
 				<AscensionSheet

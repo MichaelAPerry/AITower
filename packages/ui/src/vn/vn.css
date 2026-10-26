@@ -1,0 +1,217 @@
+/* Visual-novel scenes (docs/SOUL.md §5): floor painting, caption box, standing portrait and a framed dialogue box. */
+.aitower-hud .vn-stage {
+	position: fixed;
+	inset: 0;
+	z-index: 120;
+	pointer-events: auto;
+	outline: none;
+	background: color-mix(in srgb, var(--bg) 62%, transparent);
+	cursor: pointer;
+	overflow: hidden;
+	animation: vn-in 0.35s steps(6) both;
+}
+@keyframes vn-in {
+	from {
+		opacity: 0;
+	}
+}
+.aitower-hud .vn-stage.has-backdrop {
+	background: #000;
+}
+.aitower-hud .vn-backdrop {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	image-rendering: pixelated;
+	filter: brightness(0.82);
+}
+.aitower-hud .vn-caption {
+	position: absolute;
+	top: 18px;
+	left: 18px;
+	display: grid;
+	gap: 4px;
+	padding: 8px 14px 9px;
+	background: #05051e;
+	border: 2px solid var(--pc-rule);
+	box-shadow: inset 0 0 0 2px #05051e, inset 0 0 0 3px var(--pc-rule-in), 3px 3px 0 rgba(0, 0, 0, 0.6);
+	color: var(--text);
+	font: 15px/1.15 var(--f-display);
+	letter-spacing: 0.06em;
+	max-width: min(520px, 70vw);
+}
+.aitower-hud .vn-caption b {
+	font-weight: 400;
+	color: var(--accent);
+	font-size: 18px;
+}
+.aitower-hud .vn-figure {
+	position: absolute;
+	left: max(16px, calc(50% - 480px));
+	bottom: 196px;
+	width: min(340px, 34vw);
+	aspect-ratio: 1;
+	background: #eef0ff;
+	border: 3px solid var(--adv);
+	box-shadow: 0 0 0 2px #05051e, 4px 4px 0 rgba(0, 0, 0, 0.6);
+	animation: vn-figure-in 0.3s steps(5) both;
+}
+@keyframes vn-figure-in {
+	from {
+		transform: translateY(12px);
+		opacity: 0;
+	}
+}
+.aitower-hud .vn-figure img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	image-rendering: pixelated;
+}
+.aitower-hud .vn-box {
+	position: absolute;
+	left: 50%;
+	bottom: 22px;
+	transform: translateX(-50%);
+	width: min(960px, calc(100% - 32px));
+	min-height: 164px;
+	padding: 26px 26px 18px;
+	background: rgba(4, 4, 26, 0.94);
+	border: 3px solid var(--pc-rule);
+	box-shadow: inset 0 0 0 2px #04041a, inset 0 0 0 4px var(--adv), 4px 4px 0 rgba(0, 0, 0, 0.6);
+	cursor: default;
+}
+.aitower-hud .vn-name {
+	position: absolute;
+	top: -18px;
+	left: 18px;
+	padding: 5px 14px;
+	background: #04041a;
+	border: 2px solid var(--adv);
+	color: var(--adv);
+	font: 18px/1 var(--f-display);
+	letter-spacing: 0.08em;
+}
+.aitower-hud .vn-name.is-narrator {
+	color: var(--text-dim);
+	border-color: var(--pc-rule-in);
+}
+.aitower-hud .vn-text {
+	margin: 0;
+	font: 21px/1.55 var(--f-body);
+	color: var(--text);
+	white-space: pre-wrap;
+	min-height: 3.1em;
+}
+.aitower-hud .vn-text.is-narrator {
+	color: #c9cdf5;
+	font-style: italic;
+}
+.aitower-hud .vn-more {
+	display: inline-block;
+	margin-left: 8px;
+	color: var(--adv);
+	animation: vn-blink 0.9s steps(2) infinite;
+}
+@keyframes vn-blink {
+	50% {
+		opacity: 0;
+	}
+}
+.aitower-hud .vn-choices {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 6px;
+}
+.aitower-hud .vn-choice {
+	display: grid;
+	grid-template-columns: 22px auto 1fr;
+	align-items: baseline;
+	gap: 10px;
+	width: 100%;
+	padding: 7px 10px;
+	text-align: left;
+	background: transparent;
+	border: 1px solid transparent;
+	color: var(--text);
+	font: 20px/1.3 var(--f-body);
+	cursor: pointer;
+}
+.aitower-hud .vn-cursor {
+	color: var(--adv);
+	visibility: hidden;
+}
+.aitower-hud .vn-choice.is-sel {
+	background: color-mix(in srgb, var(--adv) 16%, transparent);
+	border-color: var(--adv);
+}
+.aitower-hud .vn-choice.is-sel .vn-cursor {
+	visibility: visible;
+	animation: vn-blink 0.9s steps(2) infinite;
+}
+.aitower-hud .vn-choice-hint {
+	justify-self: end;
+	color: var(--text-dim);
+	font-size: 15px;
+	text-align: right;
+}
+.aitower-hud.is-reduced-motion .vn-stage,
+.aitower-hud.is-reduced-motion .vn-figure,
+.aitower-hud.is-reduced-motion .vn-more {
+	animation: none;
+}
+@media (max-width: 720px) {
+	.aitower-hud .vn-figure {
+		width: 42vw;
+		bottom: auto;
+		top: 90px;
+	}
+	.aitower-hud .vn-text {
+		font-size: 17px;
+	}
+	.aitower-hud .vn-choice {
+		grid-template-columns: 18px 1fr;
+		font-size: 17px;
+	}
+	.aitower-hud .vn-choice-hint {
+		grid-column: 2;
+		justify-self: start;
+		text-align: left;
+	}
+}
+
+/* Ending: the service record in the dialogue box. */
+.aitower-hud .vn-record {
+	display: grid;
+	gap: 14px;
+}
+.aitower-hud .vn-stats {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+	gap: 4px 18px;
+	margin: 0;
+	font: 15px/1.3 var(--f-body);
+}
+.aitower-hud .vn-stats div {
+	display: flex;
+	justify-content: space-between;
+	gap: 10px;
+	border-bottom: 1px dotted var(--pc-rule-in);
+}
+.aitower-hud .vn-stats dt {
+	color: var(--text-dim);
+}
+.aitower-hud .vn-stats dd {
+	margin: 0;
+	color: var(--text);
+}
+.aitower-hud .vn-record .ui-over-acts {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}

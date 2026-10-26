@@ -1,3 +1,4 @@
+import "@fontsource/dotgothic16/latin-400.css";
 import "@fontsource/vt323";
 import "@fontsource/special-elite";
 import "@fontsource/silkscreen";
@@ -40,6 +41,8 @@ async function boot() {
 	const seedParam = params.get("seed");
 	const seed = seedParam !== null && seedParam.trim() !== "" && Number.isFinite(Number(seedParam)) ? Math.trunc(Number(seedParam)) : undefined;
 	await store.boot({ fresh: params.has("new"), seed });
+	// Dev builds only: screenshot and probe scripts reach the store (and through it the sim).
+	if ((import.meta as unknown as { env?: { DEV?: boolean } }).env?.DEV) (window as unknown as { __aitower: typeof store }).__aitower = store;
 	const speed = Number(params.get("speed"));
 	if (params.has("speed") && (SPEEDS as readonly number[]).includes(speed)) store.setSpeed(speed as (typeof SPEEDS)[number]);
 	const overlay = params.get("overlay");

@@ -1,5 +1,5 @@
 /** Pure colour helpers (numbers are 0xRRGGBB). Ramps use the STYLE.md tokens from `palette.ts`. */
-import { CB, HEAT_RAMP as R, HEAT_RAMP_CB as RCB, T, dk, lt, mix } from "./palette";
+import { CB, HEAT_RAMP as R, HEAT_RAMP_CB as RCB, T, lt, mix } from "./palette";
 
 export const hex = (s: string): number => {
 	const m = /^#?([0-9a-f]{6})$/i.exec(s.trim());
@@ -112,26 +112,26 @@ export interface SkyColors {
 	haze: number;
 }
 
-// Night: brown-black. Dawn/dusk: sodium. Day: dirty teal smog.
-const NIGHT_TOP = T.ink;
-const NIGHT_HZ = mix(T.ink, T.sodium, 0.16);
-const DAY_TOP = dk(mix(T.smog, T.verdigris, 0.2), 0.22);
-const DAY_HZ = mix(mix(T.smog, T.paper, 0.45), T.amber, 0.08);
-const DUSK_TOP = mix(T.housing, T.copper, 0.25);
-const DUSK_HZ = mix(T.sodium, T.copper, 0.35);
+// PC-98 sky (the title painting): indigo night, orange-to-violet dawn and dusk, a blue-violet day with a lavender horizon.
+const NIGHT_TOP = 0x07072a;
+const NIGHT_HZ = 0x24145a;
+const DAY_TOP = 0x2a3a9c;
+const DAY_HZ = 0xb79ad8;
+const DUSK_TOP = 0x3b1f7a;
+const DUSK_HZ = 0xff8a4a;
 
 /** Keyframes: [minuteOfDay, top, horizon, night, cityNear, cityFar, haze]. */
 const SKY_KEYS: readonly (readonly [number, number, number, number, number, number, number])[] = [
-	[0, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
-	[300, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
-	[370, mix(T.housing, T.smog, 0.3), mix(T.sodium, T.housing, 0.45), 0.5, T.housingLo, T.housing, mix(T.sodium, T.housing, 0.5)],
-	[450, mix(T.smog, T.housing, 0.25), mix(T.smog, T.paper, 0.32), 0.1, dk(T.smog, 0.55), dk(T.smog, 0.25), mix(T.smog, T.paper, 0.3)],
-	[540, DAY_TOP, DAY_HZ, 0, dk(T.smog, 0.5), dk(T.smog, 0.18), mix(T.smog, T.paper, 0.35)],
-	[1020, DAY_TOP, DAY_HZ, 0, dk(T.smog, 0.5), dk(T.smog, 0.18), mix(T.smog, T.paper, 0.35)],
-	[1110, DUSK_TOP, DUSK_HZ, 0.25, mix(T.housingLo, T.copper, 0.12), mix(T.housing, T.copper, 0.3), mix(T.sodium, T.paper, 0.2)],
-	[1170, mix(T.ink, T.housing, 0.6), mix(T.copper, T.ink, 0.45), 0.65, dk(T.housingLo, 0.1), mix(T.housingLo, T.copper, 0.15), mix(T.sodium, T.ink, 0.45)],
-	[1240, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
-	[1440, NIGHT_TOP, NIGHT_HZ, 1, dk(T.housingLo, 0.2), T.housingLo, mix(T.ink, T.sodium, 0.22)],
+	[0, NIGHT_TOP, NIGHT_HZ, 1, 0x050520, 0x0b0b33, 0x1e1450],
+	[300, NIGHT_TOP, NIGHT_HZ, 1, 0x050520, 0x0b0b33, 0x1e1450],
+	[370, 0x2a1d6e, 0xff9a5a, 0.5, 0x0b0b33, 0x161650, 0xd8789a],
+	[450, 0x2c3290, 0xd59ac0, 0.1, 0x0e0e40, 0x1e1e5e, 0xb08ad0],
+	[540, DAY_TOP, DAY_HZ, 0, 0x10104a, 0x23236a, 0x9a8fd0],
+	[1020, DAY_TOP, DAY_HZ, 0, 0x10104a, 0x23236a, 0x9a8fd0],
+	[1110, DUSK_TOP, DUSK_HZ, 0.25, 0x140e40, 0x2a1a5e, 0xff9a6a],
+	[1170, 0x150f4a, 0x7a2a6a, 0.65, 0x0a0830, 0x1c1250, 0x5a2a6a],
+	[1240, NIGHT_TOP, NIGHT_HZ, 1, 0x050520, 0x0b0b33, 0x1e1450],
+	[1440, NIGHT_TOP, NIGHT_HZ, 1, 0x050520, 0x0b0b33, 0x1e1450],
 ];
 
 export const skyColors = (minuteOfDay: number): SkyColors => {
@@ -182,7 +182,7 @@ export const droughtSky = (s: SkyColors, amount: number): SkyColors => {
  */
 export const skinColor = (c: number): number => {
 	const lum = (ch(c, 16) * 0.3 + ch(c, 8) * 0.59 + ch(c, 0) * 0.11) / 255;
-	return mix(mix(0x1d2832, 0x46586a, clamp01(lum)), c, 0.1);
+	return mix(mix(0x17175a, 0x4a52a8, clamp01(lum)), c, 0.12);
 };
 
 /** Accent hexes become cold light: the def's hue pulled toward the cyan accent. */

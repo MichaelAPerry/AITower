@@ -21,11 +21,14 @@ export interface AdvisorInfo {
 }
 
 export const ADVISORS: Record<AdvisorId, AdvisorInfo> = {
-	cass: { id: "cass", name: "Cass Parr", first: "Cass", role: "Facilities and Cooling", areas: "Air, liquid and immersion cooling, repairs, logistics", color: "#e8955a", motto: "The racks are fine. The room they are in is the problem." },
-	bea: { id: "bea", name: "Bea Altasar", first: "Bea", role: "Power Engineer", areas: "Grid, backup, storage, green power", color: "#f0d24a", motto: "I do not predict outages. I schedule my disappointment." },
-	mel: { id: "mel", name: "Dr. Mel Kiorre", first: "Mel", role: "Compute and Wetware", areas: "Racks, tissue, synthetic minds", color: "#5fd0a0", motto: "Everything is within tolerance. I define tolerance." },
-	luci: { id: "luci", name: "Luci Ferro", first: "Luci", role: "CFO and Authority Liaison", areas: "Money, contracts, reputation", color: "#a98bff", motto: "I have asked the spreadsheet, and it declined to comment." },
+	cass: { id: "cass", name: "Cass Parr", first: "Cass", role: "Cooling and Facilities", areas: "Air, liquid and immersion cooling, repairs, logistics", color: "#7fdcff", motto: "Somebody has to keep it cold. And ask if you're sleeping." },
+	bea: { id: "bea", name: "Bea Altasar", first: "Bea", role: "Power Engineer", areas: "Grid, backup, storage, green power", color: "#9be564", motto: "If anything in here burns diesel, it's because I lost an argument." },
+	mel: { id: "mel", name: "Dr. Mel Kiorre", first: "Mel", role: "Compute and Wetware", areas: "Racks, tissue, synthetic minds", color: "#c58bff", motto: "Is a mind grown in a jar less yours than one compiled?" },
+	luci: { id: "luci", name: "Luci Ferro", first: "Luci", role: "CFO and Logistics", areas: "Money, contracts, the Authority", color: "#ff5d6c", motto: "I sign the cheques, so you will like me eventually." },
 };
+
+/** Which tree each advisor argues for (Cass argues for nobody's Singularity). */
+export const ADVISOR_TREE: Record<AdvisorId, "synthetic" | "biotech" | "greentech" | null> = { luci: "synthetic", mel: "biotech", bea: "greentech", cass: null };
 
 export const ADVISOR_ORDER: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 

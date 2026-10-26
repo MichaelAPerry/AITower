@@ -5,35 +5,35 @@
  */
 
 /**
- * Synthetic neutral tokens (docs/STYLE_SYNTHETIC.md): glass, graphite and cold light. The key names are kept from the
+ * PC-98 tokens (docs/SOUL.md §5): indigo glass, white rules, cyan light and sunset accents. The key names are kept from the
  * cassette palette so every draw call re-skins at once; the values are the synthetic ones:
  * ink = `--bg`, paper = `--text`, brass = `--accent` (cyan fittings and edges), copper / verdigris = coolant supply / return
  * (cyan lines), amber = power / warn, sodium = warm white, putty / beige / olive = glass cabinet shades, wall = graphite façade.
  */
 export const T = {
-	ink: 0x0a0e13,
-	housing: 0x121a22,
-	housingHi: 0x1c2833,
-	housingLo: 0x0c1218,
-	putty: 0x3a4a58,
-	beige: 0x2c3a46,
-	olive: 0x26323c,
-	wall: 0x18222b,
-	brass: 0x5fd4e6,
-	brassDk: 0x2a7a88,
-	copper: 0x5fd4e6,
-	verdigris: 0x3a8fa3,
-	steel: 0x5a6b78,
-	paper: 0xdfe9ee,
-	amber: 0xf2b84b,
-	amberDim: 0x7a5a1f,
-	green: 0x4ee08a,
+	ink: 0x07072a,
+	housing: 0x12124a,
+	housingHi: 0x1c1c66,
+	housingLo: 0x0b0b33,
+	putty: 0x3d4290,
+	beige: 0x2d3278,
+	olive: 0x262a68,
+	wall: 0x181c58,
+	brass: 0x5ce1ff,
+	brassDk: 0x2a6fa0,
+	copper: 0x5ce1ff,
+	verdigris: 0x3a8fc0,
+	steel: 0x6b72c9,
+	paper: 0xf0f0ff,
+	amber: 0xffb347,
+	amberDim: 0x7a4a1f,
+	green: 0x6cf08f,
 	greenDim: 0x1d6a40,
-	red: 0xff5d5d,
-	sodium: 0xf0e2c8,
-	smog: 0x1a2630,
+	red: 0xff4d5e,
+	sodium: 0xffd7a8,
+	smog: 0x1c1a5a,
 	/** `--accent-2`: research. */
-	accent2: 0x9b8cff,
+	accent2: 0xff6ad5,
 	// M3 body-horror tokens (docs/review/ux-art.md): flesh (pink-beige), bile (olive), blood (deep desaturated red-brown).
 	flesh: 0xb5877a,
 	bile: 0x8a8a3a,
@@ -41,7 +41,7 @@ export const T = {
 } as const;
 
 /** `--money` (docs/STYLE_SYNTHETIC.md): cash and per-hour figures, the "+$" floaters. */
-export const MONEY = 0x7cf0b0;
+export const MONEY = 0xffd75e;
 
 /** STYLE.md heat ramp stops (overlay): ≤18 → 24 → 30 → 36 → 42 → ≥50 °C. */
 export const HEAT_RAMP = [0x1b3a5c, 0x3f7f6a, 0xffb000, 0xff8a3d, 0xff3b2f, 0xfff2c4] as const;

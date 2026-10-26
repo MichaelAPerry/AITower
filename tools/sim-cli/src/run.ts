@@ -150,7 +150,7 @@ export interface RunResult {
 	auto: { built: number; parts: number; bots: number };
 }
 
-export function runHeadless(content: ContentDB, scenarioId: string, days: number, seed: number, auto = false): RunResult {
+export function runHeadless(content: ContentDB, scenarioId: string, days: number, seed: number, auto = false, onDay?: (v: SimView) => void): RunResult {
 	const sim = createSim(content, scenarioId, seed);
 	const totals = { built: 0, parts: 0, bots: 0 };
 	const rackIds = new Set(Object.values(content.facilities).filter((d) => d.kind === "rack").map((d) => d.id));
@@ -209,6 +209,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			memos,
 			gameOver: v.gameOver?.kind ?? null,
 		});
+		onDay?.(v);
 	}
 	return { rows, hash: sim.hash(), auto: totals };
 }

@@ -41,6 +41,8 @@ export interface UiState {
 	searchFocus?: number;
 	/** The ascension path just filed (the sim applies it on the next tick), so CURRENT ORDERS stops offering FORM A-5 meanwhile. */
 	pathFiled?: PathFiled | null;
+	/** The advisors' dossier (bonds, and the secret numbers they trust you with) is open. */
+	dossier?: boolean;
 }
 
 /** Everything a HUD panel needs. Passed explicitly (no React context) to keep panels easy to test. */

@@ -13,7 +13,8 @@ import { describeEvent } from "./events";
 import { keyAction, runKey } from "./keyboard";
 import { onNotice } from "./notices";
 import { currentObjective } from "./objective/objective";
-import { PathGauge } from "./paths/PathGauge";
+import { SoulGauge } from "./soul/SoulGauge";
+import { treeBars } from "./soul/soul";
 import { droughtChip, pathGauge } from "./paths/paths";
 import { CRAWL_LINES, crawlSeconds, isSkipKey, lineDelay, reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
@@ -183,25 +184,21 @@ describe("top strip", () => {
 		expect(droughtChip({ drought: false }, content)).toBeNull();
 		expect(droughtChip({ drought: true }, content)?.title).toMatch(/Dunkelflaute/);
 	});
-	it("shows the path gauge of the chosen path only", () => {
+	it("shows the three Singularity bars, the committed tree active and a sealed one marked", () => {
 		const { store, content } = setup();
-		const gauges = () => findAll(TopStrip(panelProps(store, content)), (el) => el.type === PathGauge);
-		expect(gauges()).toHaveLength(1); // the element is always in the strip; it draws nothing off-path
 		const v = store.get().view;
-		expect(pathGauge({ path: null, greenScore: 0.5, refinement: 0.5 }, content)).toBeNull();
-		expect(pathGauge({ path: "biotech", greenScore: 0.5, refinement: 0.5 }, content)).toBeNull();
-		expect(pathGauge({ ...v, path: "greentech", greenScore: 0.62 }, content)).toMatchObject({ id: "greentech", label: "GREEN SCORE", value: 0.62 });
-		expect(pathGauge({ ...v, path: "synthetic", refinement: 0.4 }, content)).toMatchObject({ id: "synthetic", label: "REFINEMENT" });
-		expect(textOf(PathGauge({ view: { ...v, path: "greentech", greenScore: 0.62 }, content }))).toContain("62%");
-		expect(PathGauge({ view: v, content })).toBeNull();
+		const gauges = () => findAll(TopStrip(panelProps(store, content)), (el) => el.type === SoulGauge);
+		expect(gauges()).toHaveLength(1);
+		const bars = treeBars({ ...v.soul, sp: { synthetic: 500, biotech: 0, greentech: 100 }, sealedOut: ["biotech"] }, "greentech");
+		expect(bars.map((b) => [b.tree, b.state, b.frac])).toEqual([["synthetic", "active", 0.5], ["biotech", "sealed", 0], ["greentech", "active", 0.1]]);
+		expect(bars[0].title).toContain("1000 Singularity points");
+		expect(treeBars(v.soul, null)[2].state).toBe("dormant");
+		expect(textOf(SoulGauge({ view: { ...v, soul: { ...v.soul, sealedOut: ["biotech"] } }, onOpen: () => {} }))).toContain("SEALED");
 	});
-	it("the path gauge tooltip names the ending target from the content", () => {
+	it("the green score gauge names the Garden's target from the content", () => {
 		const { content } = setup();
-		content.balance.endings.greenExemplar = { minScore: 0.7, pflops: 160, days: 5 };
 		const g = pathGauge({ path: "greentech", greenScore: 0.5, refinement: 0 }, content);
-		expect(g?.title).toContain("70%");
-		expect(g?.title).toContain("160 PF compute");
-		expect(g?.title).toContain("5 days");
+		expect(g?.title).toContain("1000 Singularity points");
 	});
 	it("growth index gives way to the path gauge on Greentech and Synthetic unless corruption exists", () => {
 		expect(showGrowthGauge({ corruption: 0, tier: 4 })).toBe(true);

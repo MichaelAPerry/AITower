@@ -4,8 +4,8 @@ import { heatColor } from "./color";
 import { CB, HEAT_RAMP, HEAT_RAMP_CB, T, dk, lt, mat, mix } from "./palette";
 
 describe("palette", () => {
-	it("tokens match docs/STYLE_SYNTHETIC.md (bg, text, accent, accent-2, good, warn, bad)", () => {
-		const doc = readFileSync(new URL("../../../docs/STYLE_SYNTHETIC.md", import.meta.url), "utf8");
+	it("tokens match docs/STYLE_PC98.md (bg, text, accent, accent-2, good, warn, bad)", () => {
+		const doc = readFileSync(new URL("../../../docs/STYLE_PC98.md", import.meta.url), "utf8");
 		const val = (name: string): number => {
 			const m = new RegExp(`--${name}[\u0060][\\s|]*#([0-9a-f]{6})`, "i").exec(doc);
 			if (!m) throw new Error(`token ${name} missing`);

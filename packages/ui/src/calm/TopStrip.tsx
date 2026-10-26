@@ -6,7 +6,7 @@ import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
 import { StandingMeter } from "../status/Status";
 import { saveLamp } from "../menu/slots";
-import { PathGauge } from "../paths/PathGauge";
+import { SoulGauge } from "../soul/SoulGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
 import { currentObjective, isProblem } from "../objective/objective";
 import { clearanceProgress, fmtRateHour, maintenanceReadout, nextDrawer, perHour } from "./calm";
@@ -93,7 +93,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					<span className="ui-big">{drought.value}</span>
 				</div>
 			)}
-			<PathGauge view={view} content={content} />
+			<SoulGauge view={view} onOpen={() => setUi({ dossier: true })} />
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<div className="ui-sysbox">
 				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>

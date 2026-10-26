@@ -1,0 +1,90 @@
+/*
+ * PC-98 look (docs/SOUL.md §5): the concept art's deep indigo, white double-rule frames, square corners, a pixel gothic face
+ * and a faint 2-px dither on every panel. Imported last, so it only swaps tokens and frames: layouts stay where they were.
+ */
+.aitower-hud {
+	--bg: #07072a;
+	--panel: rgba(9, 9, 48, 0.93);
+	--panel-edge: #e9eaff;
+	--text: #f0f0ff;
+	--text-dim: #a3a9e6;
+	--accent: #5ce1ff;
+	--accent-2: #ff6ad5;
+	--good: #6cf08f;
+	--warn: #ffb347;
+	--bad: #ff4d5e;
+	--money: #ffd75e;
+	--t-std: #b4bae8;
+	--t-adv: #5ce1ff;
+	--t-fro: #ffb347;
+	--t-bio: #ff5d7d;
+	--t-green: #8ff06a;
+	--t-syn: #7fb4ff;
+	--radius: 0;
+	--radius-sm: 0;
+	--f-display: "DotGothic16", "IBM Plex Sans", system-ui, sans-serif;
+	--f-body: "DotGothic16", "IBM Plex Sans", system-ui, sans-serif;
+	--f-num: "DotGothic16", "IBM Plex Mono", ui-monospace, monospace;
+	--pc-rule: #e9eaff;
+	--pc-rule-in: #6b72c9;
+	--pc-dither: repeating-conic-gradient(rgba(255, 255, 255, 0.04) 0 25%, transparent 0 50%) 0 0 / 4px 4px;
+	--housing: #10104a;
+	--housing-hi: #1a1a66;
+	--housing-lo: #08082e;
+	--wall: #121252;
+	--olive: #16165a;
+	/* Tree colours, matching the three floor paintings. */
+	--tree-syn: #6fd3ff;
+	--tree-bio: #ff4f6d;
+	--tree-green: #9be564;
+	font-family: var(--f-body);
+	-webkit-font-smoothing: none;
+}
+
+/* Frames: a white rule, a dark gap and a thin inner rule, like the concept stat boxes. */
+.aitower-hud .ui-panel,
+.aitower-hud .ui-glass {
+	background: var(--pc-dither), var(--panel);
+	border: 2px solid var(--pc-rule);
+	border-radius: 0;
+	box-shadow:
+		inset 0 0 0 2px var(--bg),
+		inset 0 0 0 3px var(--pc-rule-in),
+		3px 3px 0 rgba(0, 0, 0, 0.55);
+	backdrop-filter: none;
+}
+.aitower-hud .ui-crt {
+	background: #04041c;
+	border-radius: 0;
+	box-shadow: inset 0 0 0 1px var(--pc-rule-in);
+}
+.aitower-hud .ui-btn,
+.aitower-hud .ui-tab {
+	border-radius: 0;
+	background: var(--housing-hi);
+	border: 1px solid var(--pc-rule);
+	box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.5);
+}
+.aitower-hud .ui-btn:hover,
+.aitower-hud .ui-tab:hover {
+	background: #26268a;
+}
+.aitower-hud .ui-tab.is-on,
+.aitower-hud .ui-btn.is-on {
+	background: var(--pc-rule);
+	color: var(--bg);
+}
+
+/* A faint scanline over the whole screen, like the photographed CRT in the concept art. Purely visual; it takes no input. */
+.aitower-hud::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	pointer-events: none;
+	z-index: 200;
+	background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.12) 0 1px, transparent 1px 3px);
+	mix-blend-mode: multiply;
+}
+.aitower-hud.no-crt::after {
+	display: none;
+}
