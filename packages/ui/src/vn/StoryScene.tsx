@@ -101,7 +101,7 @@ export function StoryScene({ store, decision: d, reduced }: { store: GameStore; 
 
 	return (
 		<div
-			className={`vn-stage ${backdrop ? "has-backdrop" : ""}`}
+			className={`vn-stage ${backdrop ? "has-backdrop" : "is-plain"}`}
 			ref={root}
 			tabIndex={-1}
 			role="dialog"

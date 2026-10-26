@@ -18,6 +18,13 @@
 .aitower-hud .vn-stage.has-backdrop {
 	background: #000;
 }
+/* Mid-game scenes have no painting (the tree floors are saved for the endings): a plain PC-98 indigo stage with a coarse dither. */
+.aitower-hud .vn-stage.is-plain {
+	background-color: #0b0b3a;
+	background-image: linear-gradient(#1a1a6e 50%, transparent 50%), linear-gradient(90deg, #1a1a6e 50%, transparent 50%);
+	background-size: 4px 4px;
+	background-blend-mode: soft-light;
+}
 .aitower-hud .vn-backdrop {
 	position: absolute;
 	inset: 0;

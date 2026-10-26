@@ -55,11 +55,11 @@
      },
      "handbook": "ch:power",
      "say": [
-      "Bea Altasar, power. Welcome to the hall. One job today: two racks, running a full day, and nothing goes dark.",
-      "Open Racks in the build bar, pick the AC-1 and drop it on the glowing slot. Everything else stays locked till it's in."
+      "Bea. Power. Welcome to the hall. One job today: two racks, a full day, nothing goes dark.",
+      "Racks tab in the build bar, pick the AC-1, drop it on the glowing slot. Everything else is locked till it's in. Don't touch the rest. I mean it."
      ],
      "after": [
-      "Hear that? 40 kW, flat out. A {{kw|kW}} is a rate: how hard something is pulling right now. The bar up top is the whole hall, 93 kW, against the feeder's 120. Remember that 120."
+      "Hear that? 40 kW, flat out. A {{kw|kW}} is a rate: how hard something pulls right now. The bar at the top is the whole hall, 93 kW, against a feeder that gives 120. Remember the 120. I will quiz you."
      ],
      "pause": true
     },
@@ -86,12 +86,12 @@
      },
      "handbook": "ch:power",
      "say": [
-      "{{capacity|Capacity}} is the most a supply can give, and this feeder tops out at 120 kW. The hall burns 53 before a single rack works (air handler, lift, the intake itself), and one rack takes it to 93. Put the second one in. Watch the bar."
+      "{{capacity|Capacity}} is the most a supply can give. This feeder tops out at 120 kW. The hall burns 53 before a single rack works (air handler, lift, the intake itself). One rack takes it to 93. Put the second one in and watch the bar."
      ],
      "afterBeat": "trip",
      "after": [
       "And there it goes. Two racks want 133 kW, the feeder gives 120, and the breaker does what breakers do. Load over capacity is a blackout. Every time. The whole job is keeping capacity above load, with {{headroom|headroom}} to spare.",
-      "Power overlay's on, so you can see the net. Now the part I hate: a generator."
+      "Power overlay's on so you can see the net. Next part, I hate: a generator."
      ],
      "pause": true
     },
@@ -119,11 +119,11 @@
      "overlay": "power",
      "handbook": "ch:power",
      "say": [
-      "Power tab, the Diesel Genset, the glowing slot. It starts itself when the grid can't keep up.",
-      "A {{genset|generator}} adds capacity: 120 from the feeder plus 800 from the diesel. It also adds smoke, and it doesn't wash out. Today it's the right tool. Later we'll talk about better ones."
+      "Power tab. Diesel Genset. Glowing slot. It starts itself when the grid can't keep up.",
+      "A {{genset|generator}} adds capacity: 120 from the feeder, plus 800 from the diesel. It also adds smoke, and smoke doesn't wash out. Today it's the right tool. Later I'll show you better ones, and you'll feel bad."
      ],
      "after": [
-      "That gap between what you can supply and what you're using is {{headroom|headroom}}. Lots of it now. Hold both racks flat out for one game day and you've passed."
+      "That gap between what you can supply and what you're using is {{headroom|headroom}}. Loads of it now. Hold both racks flat out for one game day and you pass."
      ],
      "pause": false
     },
@@ -143,7 +143,7 @@
      ],
      "handbook": "ch:power",
      "say": [
-      "Let the clock run. Keep headroom above 10% all day and don't let anything go dark. I'll be watching the meter. And the exhaust."
+      "Let the clock run. Keep headroom above 10% all day and don't let anything go dark. I'll watch the meter. And the exhaust."
      ]
     }
    ],
@@ -239,14 +239,14 @@
     "headroomPct": 50,
     "maxDarkTicks": 600
    },
-   "learned": "{{kw|kW}} is how hard equipment pulls right now; {{capacity|capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.",
+   "learned": "{{kw|kW}} is how hard equipment pulls right now. {{capacity|Capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.",
    "handbook": [
     "ch:power",
     "ch:power#kw"
    ],
    "next": "Where the Heat Goes",
    "bonus": 50000,
-   "outro": "Two racks, a whole day, lights on. Good. Next time I'll show you power that doesn't come out of a tank. Come find me when you want to learn where all this heat ends up."
+   "outro": "Two racks, a whole day, lights on. Okay. That's good. Next time I'll show you power that doesn't come out of a tank. Find me when you want to know where all this heat goes. Cass will be there. She'll ask if you slept."
   }
  ]
 }
