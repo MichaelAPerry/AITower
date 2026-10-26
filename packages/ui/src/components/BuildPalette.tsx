@@ -6,7 +6,7 @@ import { techGate, techName } from "../research/tech";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
 import { findItem, structure } from "../build/catalog";
-import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
+import { accessLocked, CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { OutputBar, TierMark } from "../build/TierMark";
 import { allowedIds } from "../lessons/lessons";
 import { toolKey } from "../tools/controller";
@@ -64,8 +64,10 @@ export function defSpecs(def: FacilityDef): [string, string][] {
 
 /** The line a locked row shows (tier first, then research), or null when the row is available. */
 export function lockText(def: FacilityDef, view: SimView, content: ContentDB): string | null {
-	const gate = techGate(def.tech, view, content);
-	const parts = [gate ? gate.replace("Requires research: ", "") : null, def.unlockTier > view.tier ? `Level ${def.unlockTier}` : null].filter(Boolean);
+	const r = lockReason(def, view, content);
+	if (!r) return null;
+	const gate = r.tech ? techGate(def.tech, view, content) : null;
+	const parts = [gate ? gate.replace("Requires research: ", "") : null, r.level !== undefined ? `Level ${r.level}` : null, r.access?.short ?? null].filter(Boolean);
 	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
 }
 
@@ -80,7 +82,7 @@ export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategor
 
 
 /** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
-function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; onPick: () => void; onHover: (key: string | null) => void }) {
+function Card({ item, picked, poor, lock, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; lock?: string; onPick: () => void; onHover: (key: string | null) => void }) {
 	const d = item.def;
 	return (
 		<button
@@ -88,7 +90,8 @@ function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean;
 			type="button"
 			data-tut={plain ? undefined : `card-${d ? d.id : item.key}`}
 			aria-pressed={picked}
-			className={["bld-card", picked ? "is-on" : "", item.tier ? `${item.tier.className} is-tier` : "", poor ? "is-poor" : "", item.danger ? "is-danger" : ""].filter(Boolean).join(" ")}
+			aria-disabled={lock ? true : undefined}
+			className={["bld-card", picked ? "is-on" : "", item.tier ? `${item.tier.className} is-tier` : "", poor ? "is-poor" : "", lock ? "is-locked" : "", item.danger ? "is-danger" : ""].filter(Boolean).join(" ")}
 			onClick={onPick}
 			onMouseEnter={() => onHover(item.key)}
 			onMouseLeave={() => onHover(null)}
@@ -96,11 +99,11 @@ function Card({ item, picked, poor, onPick, onHover, plain }: { plain?: boolean;
 			onBlur={() => onHover(null)}
 		>
 			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
-			{item.tier && <TierMark t={item.tier} />}
+			{item.tier && <TierMark t={item.tier} group={item.group} />}
 			<span className="bld-name">{item.name}</span>
 			{item.tier?.output && <OutputBar t={item.tier} />}
 			{item.tier?.note && <span className="bld-note">{item.tier.note}</span>}
-			<span className={`bld-cost ${poor ? "is-short" : ""}`}>{item.costText}</span>
+			{lock ? <span className="bld-lock">{lock}</span> : <span className={`bld-cost ${poor ? "is-short" : ""}`}>{item.costText}</span>}
 		</button>
 	);
 }
@@ -119,11 +122,18 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		if ((ui.buildHover ?? null) !== key) setUi({ buildHover: key });
 	};
 	const pick = (item: CatalogItem): void => {
+		const why = item.def ? accessLocked(item.def, view, content) : null;
+		if (why) {
+			// Reached the Level but not the commit or the bond: say what it takes, do not arm the tool.
+			pushNotice({ text: `${item.name}: ${why.text}`, severity: "info", key: `lock:${item.key}` });
+			return;
+		}
 		store.setGhost(null);
 		store.setTool(active === toolKey(item.tool) ? { kind: "select" } : item.tool);
 	};
 	// Called as a plain function (no hooks), so tests can walk the returned element tree.
-	const card = (item: CatalogItem, plain = false) => Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, onPick: () => pick(item), onHover: hover });
+	const card = (item: CatalogItem, plain = false) =>
+		Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, lock: item.def ? accessLocked(item.def, view, content)?.short : undefined, onPick: () => pick(item), onHover: hover });
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
@@ -141,8 +151,12 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 		// A lesson shows only what it teaches: the rest is not even listed.
 		const lesson = allowedIds(view);
-		cards = defs.filter((d) => !lockReason(d, view, content) && (!lesson || lesson.has(d.id))).map((d) => findItem(d.id, content) as CatalogItem);
-		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
+		// Open items first; then the ones whose Level is reached but need a commit or a bond (shown with the reason).
+		const shelf = (d: FacilityDef): boolean => !lesson || lesson.has(d.id);
+		const open = defs.filter((d) => !lockReason(d, view, content) && shelf(d));
+		const gated = lesson ? [] : defs.filter((d) => accessLocked(d, view, content));
+		cards = [...open, ...gated].map((d) => findItem(d.id, content) as CatalogItem);
+		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content) && !accessLocked(d, view, content)), view, content);
 	}
 	const rec = (recommended ?? []).map((id) => findItem(id, content)).filter((i): i is CatalogItem => !!i?.def && !lockReason(i.def, view, content));
 

@@ -71,10 +71,13 @@ export function reachableFloors(state: SimState, content: ContentDB, nav: Nav = 
 
 const affordable = (r: Run, d: FacilityDef): boolean => r.ctx.state.cash - d.cost >= r.reserve;
 
-/** Tier cap and path rule: core-ladder items up to `cap` ("auto" = highest unlocked); path items only when that path was chosen. */
+/**
+ * Tier cap: core-ladder items up to `cap` ("auto" = highest unlocked). Path items (Wetware, Green, Synthetic lanes) have no cap;
+ * whether the player may place them at all (commit, bond, line closed) is `buildable`'s rule, so the Foreman never goes beyond it.
+ */
 function allowed(r: Run, d: FacilityDef, cap: ForemanTierCap | undefined): boolean {
 	const info = facilityTier(d, r.ctx.content);
-	if (info.tier === "path") return r.ctx.state.path !== null && info.path === r.ctx.state.path;
+	if (info.tier === "path") return true;
 	const c = cap ?? "auto";
 	return c === "auto" || TIER_ORDER.indexOf(info.tier) <= TIER_ORDER.indexOf(c);
 }
@@ -190,7 +193,7 @@ function tryCooling(r: Run): boolean {
 		.sort((a, b) => b.tempC - a.tempC || a.id - b.id);
 	if (hot.length === 0) return false;
 	const defs = Object.values(content.facilities)
-		.filter((d) => d.kind === "crah" && (d.cooling?.capacityKw ?? 0) > 0 && buildable(r.ctx, d) && allowed(r, d, r.ctx.state.automation.foreman.coolingCap))
+		.filter((d) => d.kind === "crah" && !d.cooling?.bioOnly && (d.cooling?.capacityKw ?? 0) > 0 && buildable(r.ctx, d) && allowed(r, d, r.ctx.state.automation.foreman.coolingCap))
 		.sort((a, b) => (b.cooling?.capacityKw ?? 0) - (a.cooling?.capacityKw ?? 0) || byId(a, b));
 	for (const rack of hot) {
 		const rd = getDef(content, rack.defId).rack;
@@ -297,7 +300,7 @@ function racksBlocker(r: Run): string | null {
 function leavesRoom(r: Run, floor: number, x: number): boolean {
 	const { state, content } = r.ctx;
 	const crah = Object.values(content.facilities)
-		.filter((d) => d.kind === "crah" && buildable(r.ctx, d))
+		.filter((d) => d.kind === "crah" && !d.cooling?.bioOnly && buildable(r.ctx, d))
 		.sort((a, b) => (b.cooling?.capacityKw ?? 0) - (a.cooling?.capacityKw ?? 0) || byId(a, b))[0];
 	if (!crah) return true;
 	const reach = crah.cooling?.radius ?? 8;
@@ -345,7 +348,7 @@ function airRoom(r: Run, floor: number, x: number, w: number): { capKw: number; 
 	const perk = 1;
 	const covering = state.facilities.filter((f) => {
 		const d = getDef(content, f.defId);
-		return d.kind === "crah" && f.enabled && f.floor === floor && Math.max(0, f.x - (x + w - 1), x - (f.x + f.width - 1)) <= (d.cooling?.radius ?? 0);
+		return d.kind === "crah" && !d.cooling?.bioOnly && f.enabled && f.floor === floor && Math.max(0, f.x - (x + w - 1), x - (f.x + f.width - 1)) <= (d.cooling?.radius ?? 0);
 	});
 	let capKw = 0;
 	for (const c of covering) capKw += (getDef(content, c.defId).cooling?.capacityKw ?? 0) * perk;
@@ -445,7 +448,7 @@ function placeSupport(r: Run, b: Block): FacilityDef | null {
 	if (!p.cooling) return null;
 	if (s.kind === "air") {
 		const defs = Object.values(content.facilities)
-			.filter((d) => d.kind === "crah" && (d.cooling?.capacityKw ?? 0) > 0 && buildable(r.ctx, d) && allowed(r, d, p.coolingCap))
+			.filter((d) => d.kind === "crah" && !d.cooling?.bioOnly && (d.cooling?.capacityKw ?? 0) > 0 && buildable(r.ctx, d) && allowed(r, d, p.coolingCap))
 			.sort((a, b) => (b.cooling?.capacityKw ?? 0) - (a.cooling?.capacityKw ?? 0) || byId(a, b));
 		const enough = defs.filter((d) => (d.cooling?.capacityKw ?? 0) >= s.shortKw).sort((a, b) => a.cost - b.cost || byId(a, b));
 		for (const d of [...enough, ...defs.filter((x) => !enough.includes(x))]) {

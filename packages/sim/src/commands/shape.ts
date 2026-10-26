@@ -37,6 +37,7 @@ const NUMERIC: Record<string, readonly string[]> = {
 	repayLoan: ["amount"],
 	choosePath: [],
 	setAutomation: [],
+	upgradeFacility: ["facilityId"],
 };
 
 /**
@@ -78,6 +79,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 		if (type === "resolveDecision" && typeof raw.choiceId !== "string") return bad("choiceId must be a string");
 		if (type === "research" && typeof raw.techId !== "string") return bad("techId must be a string");
 		if (type === "choosePath" && typeof raw.path !== "string") return bad("path must be a string");
+		if (type === "upgradeFacility" && raw.defId !== undefined && typeof raw.defId !== "string") return bad("defId must be a string");
 		if (type === "setClerk") return normalizeClerk(raw.policy);
 		if (type === "setAutomation") {
 			const shaped = shapeAutomation(raw.policy);
@@ -101,6 +103,7 @@ export function normalizeCommand(raw: unknown): Normalized {
 		}
 		if (type === "research") out.techId = raw.techId;
 		if (type === "choosePath") out.path = raw.path;
+		if (type === "upgradeFacility" && typeof raw.defId === "string") out.defId = raw.defId;
 		if (type === "demolish") {
 			const layer = raw.layer;
 			if (layer !== undefined) {

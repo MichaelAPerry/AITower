@@ -41,9 +41,23 @@ export function rackHazard(content: ContentDB, f: Facility, factor = 1, contamin
 	return (d.rack.failurePerDay / TICKS_PER_DAY) * (1 + th.hazardPerDegree * Math.max(0, f.tempC - th.okC)) * (1 + content.balance.bio.hazardPerContamination * contamination) * factor;
 }
 
+/** Failure-rate multiplier from cold rooms (`cooling.failureFactor`) whose reach covers a rack: the best one counts, they do not stack. */
+export function coldRoomFactor(state: SimState, content: ContentDB, rack: Facility): number {
+	let best = 1;
+	for (const c of state.facilities) {
+		if (!c.enabled || c.failed || c.floor !== rack.floor) continue;
+		const cs = getDef(content, c.defId).cooling;
+		if (!cs || cs.failureFactor === undefined || cs.failureFactor >= best) continue;
+		const reach = cs.radius ?? 0;
+		if (Math.max(0, rack.x - (c.x + c.width - 1), c.x - (rack.x + rack.width - 1)) <= reach) best = cs.failureFactor;
+	}
+	return best;
+}
+
 export function reliabilityStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	const factor = modFactor(state, "failureRate") * perk(state, content, "failureRate");
+	const anyColdRoom = state.facilities.some((c) => getDef(content, c.defId).cooling?.failureFactor !== undefined);
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (f.grown && f.failed && f.recoverAt >= 0 && state.tick >= f.recoverAt) {
@@ -55,7 +69,8 @@ export function reliabilityStep(ctx: TickCtx): void {
 		}
 		if (!f.enabled || f.failed) continue;
 		if (d.kind !== "rack") continue;
-		if (nextRandom(state.rng, "reliability") < rackHazard(content, f, factor, facilityContamination(state, f))) {
+		const cold = anyColdRoom ? coldRoomFactor(state, content, f) : 1;
+		if (nextRandom(state.rng, "reliability") < rackHazard(content, f, factor * cold, facilityContamination(state, f))) {
 			if (f.grown) failGrowth(state, f, events);
 			else failRack(state, f, events);
 		}

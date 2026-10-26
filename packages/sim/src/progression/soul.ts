@@ -72,10 +72,16 @@ export function soulStep(ctx: TickCtx): void {
 	const w = s.spWeights;
 	const resid: Record<SealedTree, number> = { biotech: 0, greentech: 0 };
 	const pf: Record<TreeLine, number> = { shared: 0, synthetic: 0, biotech: 0, greentech: 0 };
+	/** Starter racks score like shared racks for Synthetic, and `starterWeight` for their own tree after the commit. */
+	const starter: Record<SealedTree, number> = { biotech: 0, greentech: 0 };
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.seal && running(d, f)) for (const t of SEALED_TREES) resid[t] += d.seal[t] ?? 0;
-		if (d.kind === "rack" && f.pflops > 0) pf[lineOf(d)] += f.pflops;
+		if (d.kind !== "rack" || f.pflops <= 0) continue;
+		if (d.tier === "starter" && (d.line === "biotech" || d.line === "greentech")) {
+			pf.shared += f.pflops;
+			starter[d.line] += f.pflops;
+		} else pf[lineOf(d)] += f.pflops;
 	}
 	for (const t of SEALED_TREES) addResidue(state, t, (resid[t] * s.residuePerDay) / 24);
 
@@ -85,8 +91,11 @@ export function soulStep(ctx: TickCtx): void {
 		return n * s.spPerPflopHour;
 	};
 	addSp(state, "synthetic", sum("synthetic"));
-	if (state.path === "biotech") addSp(state, "biotech", sum("biotech") * (1 - sealShare(state, content, "biotech")));
-	if (state.path === "greentech") addSp(state, "greentech", sum("greentech") * state.greenScore * (1 - sealShare(state, content, "greentech")));
+	// A Starter rack sits in the shared bucket (so Synthetic counts it at 1). For its own tree it counts only after the commit, at
+	// `starterWeight`; the tree's shared weight (Green's 0.5) is taken back out so it is not counted twice.
+	const own = (path: SealedTree): number => sum(path) + (starter[path] * s.starterWeight - (starter.biotech + starter.greentech) * (w[path].shared ?? 0)) * s.spPerPflopHour;
+	if (state.path === "biotech") addSp(state, "biotech", own("biotech") * (1 - sealShare(state, content, "biotech")));
+	if (state.path === "greentech") addSp(state, "greentech", own("greentech") * state.greenScore * (1 - sealShare(state, content, "greentech")));
 
 	// Lock-out: the committed tree rejects a tower that sealed it.
 	const p = state.path;

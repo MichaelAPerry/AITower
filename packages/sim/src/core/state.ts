@@ -411,6 +411,8 @@ export interface SimState {
 	objected: string[];
 	/** Trees that rejected the player after they committed to them (the path then fell back to synthetic). */
 	sealedOut: SealedTree[];
+	/** Bond rewards for building already paid (snapshot v13): "starter:<tree>" and "sig:<defId>". */
+	bondGiven: string[];
 	// ── Automation, greentech, scenarios (snapshot v6) ──
 	/** Standing orders (research / parts / bots / Foreman). */
 	automation: AutomationPolicy;

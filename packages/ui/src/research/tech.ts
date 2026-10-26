@@ -1,5 +1,5 @@
 /** Pure logic for the Department of Research: node states, plain-English effects, unlocks, build gating. */
-import type { ContentDB, TechBranch, TechEffect, TechNode } from "@aitower/content";
+import { type ContentDB, nodeTier, researchCommitBlock, type TechBranch, type TechEffect, type TechNode, TREE_NAME } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 
 export const BRANCHES: { id: TechBranch; label: string }[] = [
@@ -32,9 +32,13 @@ export function nodeState(node: TechNode, view: SimView, content: ContentDB): Te
 	const done = researchedSet(view);
 	if (done.has(node.id)) return { kind: "researched" };
 	const needs: string[] = [];
-	if (view.tier < node.minTier) needs.push(`Level ${node.minTier}`);
+	const tier = nodeTier(node, view.soul?.bonds ?? { cass: 0, bea: 0, mel: 0, luci: 0 });
+	if (view.tier < tier) needs.push(`Level ${tier}`);
 	for (const r of node.requires) if (!done.has(r)) needs.push(techName(content, r));
-	if (node.path !== undefined && view.path !== node.path) needs.push(`the ${node.path} path`);
+	// Bio and Green Specialist nodes wait for the commit; RP is never spent on them before it.
+	const commit = researchCommitBlock(node, view.path);
+	if (commit && needs.length === 0) return { kind: "locked", reason: commit };
+	if (commit) needs.push(`the commit to ${TREE_NAME[node.requiresCommit as NonNullable<typeof node.requiresCommit>]}`);
 	if (needs.length) return { kind: "locked", reason: `Requires ${needs.join(" and ")}` };
 	const rp = view.researchPoints ?? 0;
 	if (rp + 1e-9 < node.cost) return { kind: "poor", short: Math.ceil(node.cost - rp - 1e-9) };

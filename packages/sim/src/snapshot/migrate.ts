@@ -27,11 +27,16 @@
  *    (livingTower / cleanTower → flesh, greenExemplar → garden, millionMinds → singularity).
  *  - v11 → v12 (reputation removed): `standing`, `standingLog` and each report's `standingDelta` go; a "shutdown" game over
  *    (reputation 0) is kept as a final "bankrupt" one.
+ *  - v12 → v13 (the three catalogues, docs/TREES.md): removed facility ids are mapped (`rack_air_gpu3` → `rack_air_gpu2`,
+ *    `rack_imm_gpu` → `rack_imm_gpu2`), removed tech nodes are dropped and refunded as research points, the Vault Immersion Tank
+ *    (4 → 3 tiles) and the Mind Lattice (2 → 3 tiles) are refitted to their new width (a Mind Lattice with no free tile beside
+ *    it is sold back at its old price), `bondGiven` starts empty, and a tower that holds the Wetware Annex is granted the Culture
+ *    Bench that now comes first. Scars and residue are left alone: a tower that already owns Bio or Green items keeps them running.
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 12;
+export const SNAPSHOT_VERSION = 13;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -265,7 +270,76 @@ function migrateV11(state: RawState): RawState {
 	return state;
 }
 
-export const migrations: Record<number, StateMigration> = { 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** Facility ids removed by the catalogue redesign, with the item that replaces each in a saved tower. */
+export const REMOVED_FACILITIES: Readonly<Record<string, string>> = { rack_air_gpu3: "rack_air_gpu2", rack_imm_gpu: "rack_imm_gpu2" };
+/** Tech nodes removed by the catalogue redesign, with the research points they cost (refunded when held). */
+export const REMOVED_TECH: Readonly<Record<string, number>> = { hot_aisle: 2600, dielectric_handbook: 4200, ministry_liaison: 3400, procurement_committee: 3600 };
+/** Old purchase price of the Mind Lattice, refunded when it cannot be widened. */
+const OLD_MIND_LATTICE_COST = 8_000_000;
+
+/** The catalogue redesign. Works on the raw decoded state (typed arrays for the grids, plain objects elsewhere). */
+function migrateV12(state: RawState): RawState {
+	if (!Array.isArray(state.bondGiven)) state.bondGiven = [];
+	if (Array.isArray(state.techResearched)) {
+		const out: unknown[] = [];
+		for (const id of state.techResearched) {
+			if (typeof id === "string" && Object.hasOwn(REMOVED_TECH, id)) {
+				if (typeof state.researchPoints === "number") state.researchPoints += REMOVED_TECH[id];
+				continue;
+			}
+			if (!out.includes(id)) out.push(id);
+		}
+		if (out.includes("wetware_annex") && !out.includes("culture_bench")) out.push("culture_bench");
+		state.techResearched = out;
+	}
+	const { width, floorMin } = state;
+	const grids = state.facilityAt instanceof Int32Array && state.slab instanceof Uint8Array && state.liftAt instanceof Int32Array;
+	if (!Array.isArray(state.facilities) || typeof width !== "number" || typeof floorMin !== "number" || !grids) return state;
+	const facilityAt = state.facilityAt as Int32Array;
+	const slab = state.slab as Uint8Array;
+	const liftAt = state.liftAt as Int32Array;
+	const idx = (x: number, floor: number): number => (floor - floorMin) * width + x;
+	const keep: unknown[] = [];
+	let changed = false;
+	for (const f of state.facilities) {
+		if (!isObj(f) || typeof f.defId !== "string" || typeof f.x !== "number" || typeof f.floor !== "number" || typeof f.width !== "number") {
+			keep.push(f);
+			continue;
+		}
+		if (Object.hasOwn(REMOVED_FACILITIES, f.defId)) {
+			f.defId = REMOVED_FACILITIES[f.defId];
+			changed = true;
+		}
+		if (f.defId === "rack_imm_gpu3" && f.width === 4) {
+			facilityAt[idx(f.x + 3, f.floor)] = -1;
+			f.width = 3;
+			changed = true;
+		} else if (f.defId === "rack_mind_lattice" && f.width === 2) {
+			const x = f.x + 2;
+			const i = x < width ? idx(x, f.floor) : -1;
+			if (i >= 0 && slab[i] === 1 && facilityAt[i] < 0 && liftAt[i] < 0) {
+				facilityAt[i] = f.id as number;
+				f.width = 3;
+				changed = true;
+			} else {
+				for (let k = 0; k < 2; k++) facilityAt[idx(f.x + k, f.floor)] = -1;
+				if (typeof state.cash === "number") state.cash += OLD_MIND_LATTICE_COST;
+				if (Array.isArray(state.workOrders)) state.workOrders = state.workOrders.filter((w) => !(isObj(w) && w.facilityId === f.id));
+				changed = true;
+				continue; // sold back
+			}
+		}
+		keep.push(f);
+	}
+	if (changed) {
+		state.facilities = keep;
+		state.netsDirty = true;
+		if (typeof state.topologyRev === "number") state.topologyRev++;
+	}
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 12: migrateV12, 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

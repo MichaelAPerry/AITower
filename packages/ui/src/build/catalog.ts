@@ -1,8 +1,7 @@
 /** Catalog lookup shared by the build bar, the catalog grid and the Inspector. */
-import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
+import { type BuildCategory, type CatalogueGroup, catalogueGroup, type ContentDB, type FacilityDef, GROUP_LABEL } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
-import { techGate } from "../research/tech";
 import { conduitUnitCost, toolKey } from "../tools/controller";
 import { type CatalogItem, type Tab, facilityItem, lockReason, structureItems } from "./plain";
 
@@ -14,6 +13,12 @@ export function categoryDefs(content: ContentDB, view: SimView, cat: BuildCatego
 		.filter((d) => d.category === cat && !d.growth && !d.retired)
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 	return { open: defs.filter((d) => !lockReason(d, view, content)), locked: defs.filter((d) => lockReason(d, view, content)) };
+}
+
+/** The tag a card wears besides its tier badge: Starter, Specialist, Signature or Synthetic (Shared items wear none). */
+export function groupTag(def: FacilityDef): { group: CatalogueGroup; label: string } | null {
+	const group = catalogueGroup(def);
+	return group === "shared" ? null : { group, label: GROUP_LABEL[group] };
 }
 
 /** Find a catalog item by key (a structure tool key or a facility id). */
@@ -37,4 +42,4 @@ export function tabForItem(item: CatalogItem): Tab {
 	return item.category;
 }
 
-export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !lockReason(d, view, content) && !techGate(d.tech, view, content);
+export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !lockReason(d, view, content);

@@ -26,6 +26,7 @@ import { getDef } from "../world/defs";
 import { addAffinity } from "../progression/affinity";
 import { addBond, addResidue, addSp, isSealed, sealOf } from "../progression/soul";
 import { commitPath } from "../bio/path";
+import { featureUnlocked } from "../research/research";
 import { expireModifiers, modifierLabel } from "./modifiers";
 
 export const DECISION_HISTORY_LENGTH = 20;
@@ -254,7 +255,7 @@ function resolveNow(state: SimState, content: ContentDB, d: Decision, def: Event
 	for (const e of choice.effects) applyEffect(state, content, e, events);
 	// Taking an advisor's recommendation warms her to you; overruling her cools her a little.
 	const sb = content.balance.soul;
-	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow : sb.bondOverrule);
+	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow + (featureUnlocked(state, content, "openDoor") ? 1 : 0) : sb.bondOverrule);
 	state.decisionHistory.push({ decisionId: d.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick });
 	if (state.decisionHistory.length > DECISION_HISTORY_LENGTH) state.decisionHistory.splice(0, state.decisionHistory.length - DECISION_HISTORY_LENGTH);
 	events.push({ type: "decisionResolved", decisionId: d.id, eventId: def.id, choiceId: choice.id });

@@ -149,11 +149,13 @@ function statusLine(advisor: AdvisorId, view: SimView, content: ContentDB): Line
 /** "Why this over that" from the live content: coolant choices for Cass, tissue against racks for Mel. */
 function compareLine(advisor: AdvisorId, view: SimView, content: ContentDB): Line | null {
 	const racks = Object.values(content.facilities).filter((d) => isRackDef(d) && d.unlockTier <= Math.max(3, view.tier));
-	const top = (cool: string): FacilityDef | undefined => racks.filter((d) => d.rack?.cooling === cool).sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0))[0];
 	if (advisor === "cass") {
-		const air = top("air");
-		const dlc = top("dlc");
-		const imm = top("immersion");
+		// Immersion starts at Level 4 (the Two-Phase Tank), so Cass compares what Level 4 holds.
+		const upTo4 = Object.values(content.facilities).filter((d) => isRackDef(d) && d.unlockTier <= Math.max(4, view.tier));
+		const topOf = (cool: string): FacilityDef | undefined => upTo4.filter((d) => d.rack?.cooling === cool).sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0))[0];
+		const air = topOf("air");
+		const dlc = topOf("dlc");
+		const imm = topOf("immersion");
 		if (!air || !dlc || !imm) return null;
 		return {
 			id: "compare:cooling",

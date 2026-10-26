@@ -85,3 +85,52 @@
 	vertical-align: middle;
 }
 .aitower-hud .pr-tier { margin: 2px 0 8px; }
+
+/* Catalogue tags (docs/TREES.md): Starter, Specialist, Signature, Synthetic. Shared items wear none. */
+.aitower-hud .group-tag {
+	font: 500 10px/1 var(--f-num);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+	padding: 2px 5px;
+	border-radius: 2px;
+	border: 1px solid var(--gc, var(--text-dim));
+	color: var(--gc, var(--text-dim));
+	white-space: nowrap;
+}
+.aitower-hud .group-tag[data-group="starter"] { --gc: var(--good); }
+.aitower-hud .group-tag[data-group="specialist"] { --gc: var(--warn); }
+.aitower-hud .group-tag[data-group="signature"] { --gc: var(--accent-2); }
+.aitower-hud .group-tag[data-group="synthetic"] { --gc: var(--t-syn); }
+/* Reached the Level, but a commit or a bond is missing: the card stays on the shelf, dimmed, with the reason where the price was. */
+.aitower-hud .bld-card.is-locked {
+	opacity: 0.72;
+	cursor: not-allowed;
+}
+.aitower-hud .bld-card.is-locked .bld-thumb {
+	filter: grayscale(0.7);
+}
+.aitower-hud .bld-lock {
+	font: 500 12px/1.2 var(--f-body);
+	color: var(--warn);
+}
+.aitower-hud .bld-lock-why {
+	margin: 4px 0 0;
+	font: 500 13px/1.3 var(--f-body);
+	color: var(--warn);
+}
+.aitower-hud .bld-upgrade {
+	margin: 6px 0 0;
+	font: 400 12px/1.35 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-upgrade {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin-top: 8px;
+}
+.aitower-hud .ui-upgrade-why {
+	margin: 0;
+	font: 400 12px/1.3 var(--f-body);
+	color: var(--text-dim);
+}

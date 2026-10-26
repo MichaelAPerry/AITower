@@ -2,7 +2,7 @@
  * Plain-language copy and numbers for the Build catalog and its Inspector. Pure: no React, so it is unit-tested.
  * Every number comes from content; only the wording is written here.
  */
-import { conduitTech, type BuildCategory, type ContentDB, type FacilityDef } from "@aitower/content";
+import { access, conduitTech, type Access, type AccessBlock, type BuildCategory, type CatalogueGroup, catalogueGroup, type ContentDB, type FacilityDef } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
 import { tierView, type TierView } from "./tier";
@@ -48,6 +48,8 @@ export interface CatalogItem {
 	def?: FacilityDef;
 	/** Tier, frame class, output bar and note (facilities only). */
 	tier?: TierView;
+	/** Shared / Starter / Specialist / Synthetic / Signature (facilities only). */
+	group?: CatalogueGroup;
 	icon?: StatIcon;
 	danger?: boolean;
 }
@@ -124,6 +126,12 @@ export function plainStats(def: FacilityDef): Stat[] {
 	if (p?.needsCoolant) s.push({ icon: "drop", label: "Needs", sub: "A coolant pipe under it", value: "Pipe" });
 	if (p?.needsNutrient) s.push({ icon: "leaf", label: "Needs", sub: "A nutrient pipe under it", value: "Pipe" });
 	if (p?.minFloor !== undefined) s.push({ icon: "lift", label: "Floor", sub: "It only fits on upper floors", value: `${p.minFloor}+` });
+	if (p?.roofOnly) s.push({ icon: "lift", label: "Site", sub: "Roof only: nothing may be built above it", value: "Roof" });
+	if (p?.exteriorOnly) s.push({ icon: "slab", label: "Site", sub: "On the edge of a floor, against an outside wall", value: "Outer wall" });
+	if (p?.basementOnly) s.push({ icon: "lift", label: "Site", sub: "Basement only", value: "Below ground" });
+	if (def.cooling?.bioOnly) s.push({ icon: "drop", label: "Cools only", sub: `Wetware racks, down to ${def.cooling.holdC ?? 37} °C and no lower`, value: "Tissue" });
+	if (def.cooling?.freeAir) s.push({ icon: "drop", label: "Weather", sub: `Full cooling at ${def.cooling.freeAir.fullBelowC} °C outside or cooler, ${Math.round(def.cooling.freeAir.hotFactor * 100)}% at ${def.cooling.freeAir.hotC} °C`, value: "Free air" });
+	if (def.cooling?.failureFactor !== undefined) s.push({ icon: "demolish", label: "Fewer breakdowns", sub: "Racks in reach on its floor fail less often", value: `-${Math.round((1 - def.cooling.failureFactor) * 100)}%`, tone: "money" });
 	s.push({ icon: "slab", label: "Size", sub: "Floor space it takes", value: `${def.width} tile${def.width === 1 ? "" : "s"}` });
 	s.push({ icon: "$", label: "Costs", sub: `Then ${fmtMoney(def.upkeepPerDay)} a day to run`, value: fmtMoney(def.cost) });
 	return s;
@@ -167,6 +175,7 @@ export function facilityItem(def: FacilityDef, content: ContentDB): CatalogItem 
 		entry: `fac:${def.id}`,
 		def,
 		tier: tierView(def, content),
+		group: catalogueGroup(def),
 	};
 }
 
@@ -177,25 +186,43 @@ export function structureGate(item: CatalogItem, view: SimView, content: Content
 	return tech && techGate(tech, view, content) ? tech : undefined;
 }
 
-/** The tech/level reason a facility cannot be built yet, or null. */
-export function lockReason(def: FacilityDef, view: SimView, content: ContentDB): { level?: number; tech?: string } | null {
-	const tech = techGate(def.tech, view, content) ? def.tech : undefined;
-	const level = def.unlockTier > view.tier ? def.unlockTier : undefined;
-	return tech || level ? { level, tech } : null;
+/** The commit, bond and line rules for placing `def`, from the view (the same function the sim enforces). */
+export function viewAccess(def: FacilityDef, view: Pick<SimView, "path" | "tier" | "soul" | "facilities">): Access {
+	return access(def, {
+		path: view.path,
+		tier: view.tier,
+		bonds: view.soul?.bonds ?? { cass: 0, bea: 0, mel: 0, luci: 0 },
+		sealedOut: view.soul?.sealedOut,
+		owned: (id) => (view.facilities ?? []).reduce((n, f) => (f.defId === id ? n + 1 : n), 0),
+	});
 }
+
+/** The Level, research, commit and bond reasons a facility cannot be built yet, or null. */
+export function lockReason(def: FacilityDef, view: SimView, content: ContentDB): { level?: number; tech?: string; access?: AccessBlock } | null {
+	const acc = viewAccess(def, view);
+	const tech = !acc.preview && techGate(def.tech, view, content) ? def.tech : undefined;
+	const level = acc.tier > view.tier ? acc.tier : undefined;
+	return tech || level || acc.block ? { level, tech, access: acc.block ?? undefined } : null;
+}
+
+/** Items the player has reached the Level of but may not place: a commit or a bond is missing. They stay on the shelf, with the reason. */
+export const accessLocked = (def: FacilityDef, view: SimView, content: ContentDB): AccessBlock | null => {
+	const r = lockReason(def, view, content);
+	return r?.access && r.level === undefined ? r.access : null;
+};
 
 /**
  * The single "Coming at Level N" row: the next level's items, then research-gated items, then a count of the rest.
  * Returns no lines when nothing is locked.
  */
 export function lockedSummary(locked: FacilityDef[], view: SimView, content: ContentDB): string[] {
-	const byLevel = locked.filter((d) => d.unlockTier > view.tier);
-	const byTech = locked.filter((d) => d.unlockTier <= view.tier);
+	const byLevel = locked.filter((d) => viewAccess(d, view).tier > view.tier);
+	const byTech = locked.filter((d) => viewAccess(d, view).tier <= view.tier);
 	const lines: string[] = [];
 	let shown = 0;
 	if (byLevel.length) {
-		const next = Math.min(...byLevel.map((d) => d.unlockTier));
-		const names = byLevel.filter((d) => d.unlockTier === next).map((d) => d.name);
+		const next = Math.min(...byLevel.map((d) => viewAccess(d, view).tier));
+		const names = byLevel.filter((d) => viewAccess(d, view).tier === next).map((d) => d.name);
 		lines.push(`Coming at Level ${next}: ${names.join(", ")}`);
 		shown += names.length;
 	}

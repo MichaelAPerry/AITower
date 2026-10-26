@@ -118,8 +118,8 @@ describe("advisors argue with live numbers", () => {
 		expect(pitches(poor, content).find((x) => x.id === "pitch:cold_plate_gen3")).toBeUndefined();
 	});
 	it("wetware racks are pitched by Mel with power per kW", () => {
-		const v = ready("wetware_annex");
-		const p = pitches(v, content).find((x) => x.id === "pitch:wetware_annex");
+		const v = ready("culture_bench"); // the Starter node: it opens the OC-0 Culture Rack (the Specialist nodes wait for the commit)
+		const p = pitches(v, content).find((x) => x.id === "pitch:culture_bench");
 		expect(p?.advisor).toBe("mel");
 		expect(p?.text).toMatch(/PF per/);
 	});

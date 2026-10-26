@@ -13,6 +13,14 @@ import { perk } from "../research/research";
 
 const coupling = (kKw: number, perKj: number): number => Math.min(MAX_LINK_COUPLING, kKw * perKj);
 
+/** Outside-air cooling: full at or below `fullBelowC`, falling linearly to `hotFactor` at `hotC`, flat beyond. 1 for any other air handler. */
+export function freeAirFactor(free: { fullBelowC: number; hotC: number; hotFactor: number } | undefined, ambientC: number): number {
+	if (!free) return 1;
+	if (ambientC <= free.fullBelowC) return 1;
+	if (ambientC >= free.hotC) return free.hotFactor;
+	return 1 - ((1 - free.hotFactor) * (ambientC - free.fullBelowC)) / (free.hotC - free.fullBelowC);
+}
+
 export function airFieldStep(ctx: TickCtx): void {
 	const { state, content, scratch } = ctx;
 	const th = content.balance.thermal;
@@ -74,28 +82,40 @@ export function airFieldStep(ctx: TickCtx): void {
 		}
 	}
 
-	// CRAH sinks, in id order; each sees the result of the previous one.
+	// CRAH sinks, in id order; each sees the result of the previous one. A perfusion unit (`bioOnly`) cools only the cells under
+	// organoid racks and only down to its `holdC` (37 °C); an economizer (`freeAir`) loses capacity as the outside warms.
 	const coolingPerk = perk(state, content, "coolingCapacity");
+	let bioCells: Uint8Array | null = null;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind !== "crah") continue;
 		f.heatKw = 0;
 		if (!f.enabled) continue;
-		const capKw = (d.cooling?.capacityKw ?? 0) * coolingPerk * powerFactor(f.sat);
+		const cs = d.cooling;
+		const capKw = (cs?.capacityKw ?? 0) * coolingPerk * powerFactor(f.sat) * freeAirFactor(cs?.freeAir, amb);
 		if (capKw <= 0) continue;
-		const r = d.cooling?.radius ?? 0;
+		const target = cs?.holdC ?? CRAH_TARGET_C;
+		const bioOnly = cs?.bioOnly === true;
+		if (bioOnly && !bioCells) {
+			bioCells = new Uint8Array(n);
+			for (const o of state.facilities) {
+				const od = getDef(content, o.defId);
+				if (od.kind === "rack" && od.rack?.cooling === "bio" && !od.growth) for (let k = 0; k < o.width; k++) bioCells[cellIdx(state, o.x + k, o.floor)] = 1;
+			}
+		}
+		const r = cs?.radius ?? 0;
 		const x0 = Math.max(0, f.x - r);
 		const x1 = Math.min(w - 1, f.x + f.width - 1 + r);
 		let wantKw = 0;
 		for (let x = x0; x <= x1; x++) {
 			const i = cellIdx(state, x, f.floor);
-			if (slab[i] && next[i] > CRAH_TARGET_C) wantKw += (next[i] - CRAH_TARGET_C) / perKj;
+			if (slab[i] && next[i] > target && (!bioOnly || bioCells?.[i])) wantKw += (next[i] - target) / perKj;
 		}
 		if (wantKw <= 0) continue;
 		const scale = Math.min(1, capKw / wantKw);
 		for (let x = x0; x <= x1; x++) {
 			const i = cellIdx(state, x, f.floor);
-			if (slab[i] && next[i] > CRAH_TARGET_C) next[i] -= (next[i] - CRAH_TARGET_C) * scale;
+			if (slab[i] && next[i] > target && (!bioOnly || bioCells?.[i])) next[i] -= (next[i] - target) * scale;
 		}
 		f.heatKw = wantKw * scale;
 	}

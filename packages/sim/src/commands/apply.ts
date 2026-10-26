@@ -20,6 +20,7 @@ import {
 import { planDeferDecision, planDecisionGate, planMarkTip, planResolveDecision } from "../ministry/decisions";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
+import { planUpgrade } from "./upgrade";
 import { normalizeCommand } from "./shape";
 import { planConduit, planLift, planSlab } from "./structure";
 
@@ -108,6 +109,9 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "setAutomation":
 			plan = planSetAutomation(ctx, cmd.policy);
+			break;
+		case "upgradeFacility":
+			plan = planUpgrade(ctx, cmd.facilityId, cmd.defId);
 			break;
 		default:
 			return reject("unknown command type");

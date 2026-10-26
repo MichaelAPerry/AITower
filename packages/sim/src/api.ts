@@ -63,7 +63,12 @@ export type SimCommand =
 	/** Commit to an ascension path (tier ≥ balance.ascension.minTier, path available, not chosen before). Irreversible. */
 	| { type: "choosePath"; path: AscensionPath }
 	/** Replace the automation standing orders (the Foreman part needs the `foreman` feature researched). */
-	| { type: "setAutomation"; policy: AutomationPolicy };
+	| { type: "setAutomation"; policy: AutomationPolicy }
+	/**
+	 * Swap a facility in place for the next item down its tree (`FacilityDef.upgradesFrom`): costs the new item minus 50% of the old
+	 * one. `defId` picks the target when the facility upgrades to more than one item (default: the first one the player may build).
+	 */
+	| { type: "upgradeFacility"; facilityId: number; defId?: string };
 
 /**
  * Standing orders, each independently toggled. Checked once per game-hour, deterministic, and paid like the player would

@@ -237,12 +237,12 @@ describe("research order", () => {
 
 	it("respects prerequisites, clearance and the path gate (the same plan as the command)", () => {
 		const c = content();
-		c.tech.push({ id: "t_green", name: "Green", description: "", branch: "power", minTier: 1, cost: 1, requires: [], effects: [], path: "greentech" });
+		c.tech.push({ id: "t_green", name: "Green", description: "", branch: "power", minTier: 1, cost: 1, requires: [], effects: [], requiresCommit: "greentech" });
 		const sim = newSim(c, "lot");
 		giveRp(sim, 1000);
 		setPolicy(sim, (p) => (p.research = { enabled: true, branches: ["power"] }));
 		run(sim, 200);
-		expect(sim.state.techResearched).toEqual([]); // path not chosen
+		expect(sim.state.techResearched).toEqual([]); // not committed
 		sim.state.path = "greentech";
 		sim.invalidateProjection();
 		run(sim, 61);
