@@ -23,7 +23,7 @@ import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_RUNWAY_DAYS } from "
 import { cellCount, cellIdx } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
-import { dayCosts } from "../economy/ledger";
+import { expandDown, expandUp } from "./expand";
 import { createNav, type Nav, reachableRuns } from "../logistics/routing";
 import { findChargerWithSpace } from "../world/entities";
 import { getDef, isComputeRack } from "../world/defs";
@@ -124,6 +124,9 @@ const allFloors = (r: Run): number[] => {
 	return out;
 };
 
+/** Floors for racks, air handlers and bot docks: ground and up. Basements are kept for power and plant (generators fit nowhere else). */
+const upperFloors = (r: Run): number[] => allFloors(r).filter((f) => f >= 0);
+
 function place(r: Run, d: FacilityDef, spot: { floor: number; x: number }): boolean {
 	const { state, events } = r.ctx;
 	if (!runCommand(r.ctx, { type: "place", defId: d.id, floor: spot.floor, x: spot.x })) return false;
@@ -167,6 +170,13 @@ function tryPower(r: Run): boolean {
 			r.notes.power = `Power: Placed ${d.name} for a ${fmtKw(need)} shortfall`;
 			return true;
 		}
+		const grew = expandDown(r.ctx, (cost) => r.ctx.state.cash - cost >= r.reserve);
+		if (grew) {
+			r.reach = undefined;
+			rebuildNetworks(r.ctx);
+			r.notes.power = `Power: ${grew}, for a ${fmtKw(need)} shortfall`;
+			return true;
+		}
 		r.notes.power = `Power: Waiting: ${fmtKw(need)} short, no grid tie or generator fits (cost, tier cap or space)`;
 	}
 	return false;
@@ -183,6 +193,21 @@ function tryCooling(r: Run): boolean {
 		.filter((d) => d.kind === "crah" && (d.cooling?.capacityKw ?? 0) > 0 && buildable(r.ctx, d) && allowed(r, d, r.ctx.state.automation.foreman.coolingCap))
 		.sort((a, b) => (b.cooling?.capacityKw ?? 0) - (a.cooling?.capacityKw ?? 0) || byId(a, b));
 	for (const rack of hot) {
+		const rd = getDef(content, rack.defId).rack;
+		const liquid = rd ? rd.liquidFraction : 0;
+		// A liquid rack that is hot for want of coolant needs its loop fixed, not an air handler.
+		if (liquid > 0 && rack.noCoolant) {
+			r.coolDone.add(rack.id);
+			if (rack.coolantNet >= 0) {
+				const sup = placeSupport(r, { text: "", support: { kind: "coolant", net: rack.coolantNet, shortKw: (rd?.powerKw ?? 0) * liquid } });
+				if (sup) {
+					r.notes.cooling = `Cooling: Placed ${sup.name} for a liquid rack short of coolant`;
+					return true;
+				}
+			}
+			r.notes.cooling = `Cooling: Waiting: a liquid rack has no coolant (its loop needs a chiller and a CDU)`;
+			continue;
+		}
 		for (const d of defs) {
 			if (!affordable(r, d)) continue;
 			const reach = d.cooling?.radius ?? 0;
@@ -193,7 +218,7 @@ function tryCooling(r: Run): boolean {
 			for (const o of hot) {
 				if (o.floor === spot.floor && Math.max(0, o.x - (spot.x + d.width - 1), spot.x - (o.x + o.width - 1)) <= reach) r.coolDone.add(o.id);
 			}
-			r.notes.cooling = `Cooling: Placed ${d.name} for a rack at ${Math.round(rack.tempC)} C`;
+			r.notes.cooling = liquid > 0 ? `Cooling: Placed ${d.name} for the ${Math.round((1 - liquid) * 100)}% of a liquid rack's heat that still goes to air` : `Cooling: Placed ${d.name} for a rack at ${Math.round(rack.tempC)} C`;
 			return true;
 		}
 		r.notes.cooling = `Cooling: Waiting: a rack runs at ${Math.round(rack.tempC)} C and no air handler fits within reach (cost, tier cap or space)`;
@@ -209,7 +234,7 @@ function placeBest(r: Run, kind: "charger" | "depot"): boolean {
 		.sort((a, b) => (b.logistics?.capacity ?? 0) - (a.logistics?.capacity ?? 0) || byId(a, b));
 	for (const d of defs) {
 		if (!affordable(r, d)) continue;
-		const spot = findSpot(r, d, allFloors(r), () => true);
+		const spot = findSpot(r, d, upperFloors(r), () => true);
 		if (spot && place(r, d, spot)) return true;
 	}
 	return false;
@@ -241,8 +266,9 @@ function racksBlocker(r: Run): string | null {
 	if (state.workOrders.length > state.bots.length) return `Waiting: ${state.workOrders.length} repair jobs open for ${state.bots.length} bots, repairs first`;
 	const target = content.balance.tiers.uptime[state.tier - 1] ?? 0;
 	if (state.metrics.uptime < target) return `Waiting: uptime ${Math.round(state.metrics.uptime * 100)}% is under the ${Math.round(target * 100)}% target`;
+	// An operating loss (building is investment, not loss: counting it made every busy day block the next one).
 	const lastDay = state.ledger[state.ledger.length - 1];
-	if (lastDay && dayCosts(lastDay) > lastDay.revenue) return "Waiting: the last day closed in the red";
+	if (lastDay && lastDay.energy + lastDay.upkeep + lastDay.penalties + lastDay.interest + lastDay.fees + lastDay.taxes > lastDay.revenue) return "Waiting: the last day ran at an operating loss";
 	// Never grow into a shortage the Foreman is meant to be fixing: hot racks (cooling on) or a power net short of supply (power on).
 	const p = state.automation.foreman;
 	if (p.cooling && realRacks(r).some((f) => f.enabled && f.tempC > content.balance.thermal.okC - FOREMAN_HEAT_MARGIN_C)) return "Waiting: a rack is running hot, cooling comes first";
@@ -386,7 +412,7 @@ function tryPlaceRack(r: Run, d: FacilityDef): { placed: true } | { placed: fals
 		const used = isLiquid ? r.coolUsed : r.nutrientUsed;
 		for (const net of nets) {
 			if (need > net.spare) continue;
-			const spot = findSpot(r, d, allFloors(r), (floor, x) => lowestNet(r, layer, floor, x, d.width) === net.id && spotChecks(floor, x));
+			const spot = findSpot(r, d, upperFloors(r), (floor, x) => lowestNet(r, layer, floor, x, d.width) === net.id && spotChecks(floor, x));
 			if (spot && place(r, d, spot)) return finish(net.id, used, need, spot);
 		}
 		if (nets.length === 0 || nets.every((n) => n.cap <= 0)) {
@@ -398,7 +424,7 @@ function tryPlaceRack(r: Run, d: FacilityDef): { placed: true } | { placed: fals
 			if (need > best.spare) netBlock = { text: `Waiting: ${isLiquid ? `${fmtKw(need)} of coolant` : `${need} nutrient`} needed, ${isLiquid ? fmtKw(Math.max(0, best.spare)) : Math.max(0, Math.floor(best.spare))} free`, support: isLiquid ? { kind: "coolant", net: best.id, shortKw: need - best.spare } : undefined };
 		}
 	} else {
-		const spot = findSpot(r, d, allFloors(r), spotChecks);
+		const spot = findSpot(r, d, upperFloors(r), spotChecks);
 		if (spot && place(r, d, spot)) return finish(-1, r.coolUsed, 0, spot);
 	}
 	if (netBlock) return { placed: false, block: netBlock };
@@ -487,6 +513,16 @@ function tryRacks(r: Run): boolean {
 		const sup = placeSupport(r, b.block);
 		if (sup) {
 			r.notes.racks = `Racks: Next: ${sup.name}, then ${b.d.name}`;
+			return true;
+		}
+	}
+	// Out of room: grow the tower (a new floor with power and a lift stop), then place on it next time.
+	if (blocked.some((b) => b.block.text.startsWith("Waiting: no free powered slab"))) {
+		const grew = expandUp(r.ctx, (cost) => r.ctx.state.cash - cost >= r.reserve);
+		if (grew) {
+			r.reach = undefined;
+			rebuildNetworks(r.ctx);
+			r.notes.racks = `Racks: ${grew}, for more racks`;
 			return true;
 		}
 	}

@@ -135,7 +135,7 @@
    {
     "id": "storage",
     "label": "Buy storage",
-    "hint": "-$100k now · grid import x0.8 for 8h · Greentech +3",
+    "hint": "-$100k now · grid import x0.8 for 8h · Garden +3",
     "outcome": "Rented battery containers covered most of the shortfall.",
     "effects": [
      {
@@ -157,7 +157,7 @@
    {
     "id": "accept",
     "label": "Auto load-shed",
-    "hint": "grid import x0.5 for 8h · Synthetic +3",
+    "hint": "grid import x0.5 for 8h · Lattice +3",
     "outcome": "The scheduler shed low-priority jobs and the queue backed up.",
     "effects": [
      {
@@ -206,7 +206,7 @@
    {
     "id": "ppa",
     "label": "Sign solar PPA",
-    "hint": "-$120k now · energy price x1.1 for 1d · Greentech +5",
+    "hint": "-$120k now · energy price x1.1 for 1d · Garden +5",
     "outcome": "The agreement caps tomorrow's exposure and starts a longer relationship.",
     "effects": [
      {
@@ -228,7 +228,7 @@
    {
     "id": "shift",
     "label": "Shift load",
-    "hint": "-$40k now · energy price x1.3 for 1d · Synthetic +3",
+    "hint": "-$40k now · energy price x1.3 for 1d · Lattice +3",
     "outcome": "The scheduler moved jobs to cheaper hours. Throughput suffered.",
     "effects": [
      {
@@ -285,7 +285,7 @@
    {
     "id": "storage",
     "label": "Buy storage",
-    "hint": "-$150k now · energy price x1.15 for 2d · Greentech +4",
+    "hint": "-$150k now · energy price x1.15 for 2d · Garden +4",
     "outcome": "Contracted storage covered the worst of it.",
     "effects": [
      {
@@ -372,7 +372,7 @@
   "category": "ministry",
   "advisor": "luci",
   "title": "Levy Notice: Energy Surcharge",
-  "body": "A surcharge on energy use starts this quarter. Paying costs $150k. Offsets cost $90k and count toward Greentech. Cheaper and greener. I'd call that an easy one.",
+  "body": "A surcharge on energy use starts this quarter. Paying costs $150k. Offsets cost $90k and count toward the Garden. Cheaper and greener. I'd call that an easy one.",
   "weight": 6,
   "minTier": 2,
   "minDay": 5,
@@ -399,7 +399,7 @@
    {
     "id": "offset",
     "label": "Buy offsets",
-    "hint": "-$90k now · Greentech +3",
+    "hint": "-$90k now · Garden +3",
     "outcome": "Offset certificates were accepted at a discount.",
     "effects": [
      {
@@ -452,7 +452,7 @@
    {
     "id": "claim",
     "label": "Claim subsidy",
-    "hint": "+$200k now · Synthetic +3",
+    "hint": "+$200k now · Lattice +3",
     "outcome": "The subsidy arrived. So did the reporting template.",
     "effects": [
      {
@@ -501,7 +501,7 @@
   "category": "ministry",
   "advisor": "mel",
   "title": "Authority Research Grant",
-  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward Biotech, the AI lab toward Synthetic.",
+  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward the Flesh, the AI lab toward the Lattice.",
   "weight": 6,
   "minTier": 2,
   "minDay": 7,
@@ -528,7 +528,7 @@
    {
     "id": "wetlab",
     "label": "Lease wet lab",
-    "hint": "+$200k now · Biotech +5",
+    "hint": "+$200k now · Flesh +5",
     "outcome": "The lab moved in on Monday. Its freezers arrived on Tuesday.",
     "effects": [
      {
@@ -545,7 +545,7 @@
    {
     "id": "cognition",
     "label": "Host AI lab",
-    "hint": "+$200k now · Synthetic +5",
+    "hint": "+$200k now · Lattice +5",
     "outcome": "The lab brought its own models and a long list of requirements.",
     "effects": [
      {
@@ -571,7 +571,7 @@
   "category": "ministry",
   "advisor": "mel",
   "title": "Wetware Pilot Programme",
-  "body": "The Authority pilots tissue-based computing. Joining costs $60k and moves you 4 points toward Biotech. The brochure says low-power eleven times. It is correct about that.",
+  "body": "The Authority pilots tissue-based computing. Joining costs $60k and moves you 4 points toward the Flesh. The brochure says low-power eleven times. It is correct about that.",
   "weight": 5,
   "minTier": 1,
   "maxTier": 2,
@@ -582,7 +582,7 @@
    {
     "id": "join",
     "label": "Join pilot",
-    "hint": "-$60k now · Biotech +4",
+    "hint": "-$60k now · Flesh +4",
     "outcome": "You enrolled. The pilot coordinator sent a gift basket of reagents.",
     "effects": [
      {
@@ -642,7 +642,7 @@
    {
     "id": "sign",
     "label": "Sign district deal",
-    "hint": "+$140k now · energy price x1.05 for 3d · Greentech +5",
+    "hint": "+$140k now · energy price x1.05 for 3d · Garden +5",
     "outcome": "The longer contract was signed.",
     "effects": [
      {
@@ -690,7 +690,7 @@
    {
     "id": "verify",
     "label": "Verify credits",
-    "hint": "-$100k now · Greentech +3",
+    "hint": "-$100k now · Garden +3",
     "outcome": "Third-party verification confirmed the figures.",
     "effects": [
      {
@@ -776,7 +776,7 @@
    {
     "id": "defer",
     "label": "Monitor",
-    "hint": "rack failure rate x1.3 for 2d · Synthetic +2",
+    "hint": "rack failure rate x1.3 for 2d · Lattice +2",
     "outcome": "Automated monitoring watched the fault. It did not go away.",
     "effects": [
      {
@@ -798,7 +798,7 @@
   "category": "operational",
   "advisor": "mel",
   "title": "Security Alert: Ransom Demand",
-  "body": "Someone claims to hold the scheduler configuration. Paying costs $150k. The AI defence costs $80k, fails 2 racks while it learns, and moves you toward Synthetic.",
+  "body": "Someone claims to hold the scheduler configuration. Paying costs $150k. The AI defence costs $80k, fails 2 racks while it learns, and moves you toward the Lattice.",
   "weight": 5,
   "minTier": 2,
   "minDay": 7,
@@ -837,7 +837,7 @@
    {
     "id": "ai_defence",
     "label": "AI defence",
-    "hint": "-$80k now · 2 racks fail · Synthetic +5",
+    "hint": "-$80k now · 2 racks fail · Lattice +5",
     "outcome": "An automated response contained it. Two racks were isolated in the process.",
     "effects": [
      {
@@ -906,7 +906,7 @@
    {
     "id": "use_it",
     "label": "Use anyway",
-    "hint": "rack failure rate x1.3 for 2d · Biotech +4",
+    "hint": "rack failure rate x1.3 for 2d · Flesh +4",
     "outcome": "Cultures took it up eagerly. Equipment reliability suffered.",
     "effects": [
      {
@@ -938,7 +938,7 @@
    {
     "id": "expedite",
     "label": "Expedite",
-    "hint": "-$50k now · new contract payouts x1.25 for 1d · Synthetic +2",
+    "hint": "-$50k now · new contract payouts x1.25 for 1d · Lattice +2",
     "outcome": "Priority slots were opened.",
     "effects": [
      {
@@ -1043,7 +1043,7 @@
    {
     "id": "log",
     "label": "Log as normal",
-    "hint": "rack failure rate x1.1 for 1d · Biotech +3",
+    "hint": "rack failure rate x1.1 for 1d · Flesh +3",
     "outcome": "The behaviour was recorded as within tolerance.",
     "effects": [
      {
@@ -1087,7 +1087,7 @@
    {
     "id": "add",
     "label": "Add two lines",
-    "hint": "-$20k now · Biotech +4",
+    "hint": "-$20k now · Flesh +4",
     "outcome": "Two new employee records were created. Neither has requested a desk.",
     "effects": [
      {
@@ -1108,7 +1108,7 @@
   "category": "horror",
   "advisor": "cass",
   "title": "Notice of Consolidation",
-  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Contesting costs $150k. Accepting moves you toward Biotech. Do not look for the old corridor.",
+  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Contesting costs $150k. Accepting moves you toward the Flesh. Do not look for the old corridor.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
@@ -1130,7 +1130,7 @@
    {
     "id": "accept",
     "label": "Accept",
-    "hint": "Biotech +6",
+    "hint": "Flesh +6",
     "outcome": "Consolidation proceeded. Throughput rose.",
     "effects": [
      {
@@ -1169,7 +1169,7 @@
    {
     "id": "ferns",
     "label": "Water the ferns",
-    "hint": "-$5k now · Greentech +4",
+    "hint": "-$5k now · Garden +4",
     "outcome": "The ferns were watered. They are noted to be thriving.",
     "effects": [
      {
@@ -1190,7 +1190,7 @@
   "category": "horror",
   "advisor": "cass",
   "title": "Facilities: Mycelium in the Ducts",
-  "body": "White filament in the supply ducts improved airflow. It is not on the register. Clearing costs $70k. Leaving it moves you toward Greentech.",
+  "body": "White filament in the supply ducts improved airflow. It is not on the register. Clearing costs $70k. Leaving it moves you toward the Garden.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
@@ -1212,7 +1212,7 @@
    {
     "id": "leave",
     "label": "Leave it",
-    "hint": "Greentech +5",
+    "hint": "Garden +5",
     "outcome": "Airflow remained improved. Nobody has asked what it is eating.",
     "effects": [
      {
@@ -1229,7 +1229,7 @@
   "category": "horror",
   "advisor": "mel",
   "title": "Audit: Continuity of Operator",
-  "body": "Decisions made in your name this week were all consistent with your preferences. Reviewing the log costs $60k. Delegating moves you toward Synthetic.",
+  "body": "Decisions made in your name this week were all consistent with your preferences. Reviewing the log costs $60k. Delegating moves you toward the Lattice.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
@@ -1251,7 +1251,7 @@
    {
     "id": "delegate",
     "label": "Delegate",
-    "hint": "Synthetic +5",
+    "hint": "Lattice +5",
     "outcome": "Authority was delegated. Approvals are now faster.",
     "effects": [
      {
@@ -1278,7 +1278,7 @@
    {
     "id": "restore",
     "label": "Restore copy",
-    "hint": "-$80k now · Synthetic +6",
+    "hint": "-$80k now · Lattice +6",
     "outcome": "The copy was restored. It thanked you.",
     "effects": [
      {

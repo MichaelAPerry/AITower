@@ -238,6 +238,31 @@ function giveUp(ctx: TickCtx, bot: Bot, def: BotDef): void {
 	goHome(ctx, bot, def);
 }
 
+/** Ticks a fresh work order waits for its nearest idle bot before any bot may take it. */
+export const NEAREST_BOT_TICKS = 30;
+/** A floor counts like this many tiles of walking when comparing bot distances. */
+const FLOOR_TILES = 20;
+
+/** A bot parked at its dock with enough battery and no back-off: it could take an order now. */
+function idleAtHome(state: SimState, b: Bot): boolean {
+	return b.workOrderId < 0 && (b.task === "none" || b.task === "charge") && b.battery >= BOT_RESUME_BATTERY && state.tick >= b.retryAt;
+}
+
+/**
+ * Another idle bot is closer to the rack than `bot` (floors weighted as FLOOR_TILES tiles, ties to the lower id). Keeps every
+ * repair from going to the bots of the first dock: each dock serves the racks around it (playtest bug: other docks unused).
+ */
+function closerIdleBot(state: SimState, bot: Bot, rack: { floor: number; x: number }): boolean {
+	const dist = (b: Bot): number => Math.abs(b.floor - rack.floor) * FLOOR_TILES + Math.abs(b.x - rack.x);
+	const mine = dist(bot);
+	for (const o of state.bots) {
+		if (o.id === bot.id || !idleAtHome(state, o)) continue;
+		const d = dist(o);
+		if (d < mine || (d === mine && o.id < bot.id)) return true;
+	}
+	return false;
+}
+
 /** A work order nobody holds and that is not backing off after a failed attempt. */
 const claimable = (state: SimState, wo: WorkOrder): boolean => wo.botId < 0 && !(wo.retryAt > state.tick && wo.retryRev === state.topologyRev);
 
@@ -256,6 +281,8 @@ function tryClaim(ctx: TickCtx, bot: Bot, def: BotDef, chain = false): boolean {
 		if (!claimable(state, wo)) continue;
 		const rack = findById(state.facilities, wo.facilityId);
 		if (!rack) continue;
+		// A fresh order goes to its nearest idle bot; after NEAREST_BOT_TICKS anyone may take it (so an unreachable "nearest" never stalls it).
+		if (!chain && state.tick - wo.createdAt < NEAREST_BOT_TICKS && closerIdleBot(state, bot, rack)) continue;
 		if (plans++ >= BOT_MAX_CLAIM_PLANS_PER_TICK) break;
 		if (!searched) {
 			search(ctx, bot, def);

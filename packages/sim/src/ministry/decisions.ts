@@ -229,7 +229,9 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 			else removeParts(state, content, Math.floor(-e.count));
 			break;
 		case "affinity":
+			// A lean toward a tree is also that many of its Singularity points (the chip reads "Garden +3").
 			addAffinity(state, e.path, e.amount);
+			addSp(state, e.path, e.amount);
 			break;
 		case "seal":
 			addResidue(state, e.path, e.amount);

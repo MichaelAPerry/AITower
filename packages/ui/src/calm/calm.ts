@@ -135,7 +135,7 @@ export function dockPicks(view: SimView, content: ContentDB): DockPick[] {
 
 // ─── Decision effect chips ────────────────────────────────────────────────
 
-const pathLabel = (p: string): string => (p === "synthetic" ? "Synthetic" : p === "greentech" ? "Greentech" : p === "biotech" ? "Biotech" : p);
+const pathLabel = (p: string): string => (p === "synthetic" ? "Lattice" : p === "greentech" ? "Garden" : p === "biotech" ? "Flesh" : p);
 
 /** "−$160k", "★−4", "2 racks fail": one effect as a compact chip. */
 export function effectChip(e: EventEffect): string {

@@ -124,6 +124,11 @@ export function AdvisorStrip(props: PanelProps & { /** A lesson's teacher speaks
 	const lastEnd = useRef(Number.NEGATIVE_INFINITY);
 	const firedLocal = useRef(new Set<string>());
 	const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+	// The build catalog and its inspector own the screen while open: an open answer card closes (playtest: it covered them).
+	const building = props.ui.paletteOpen;
+	useEffect(() => {
+		if (building) setAsking(null);
+	}, [building]);
 
 	// Heat tips wait for the heat to last (HeatWatch), so a momentary blip over the line stays quiet.
 	const heat = useRef<HeatWatch>(initialHeatWatch());

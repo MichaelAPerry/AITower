@@ -41,6 +41,6 @@ describe("decision card", () => {
 	it("affinity effects are path-coloured pills", () => {
 		const html = render("brownout");
 		expect(html).toContain("ui-pathchip");
-		expect(html).toContain("Greentech +3");
+		expect(html).toContain("Garden +3");
 	});
 });

@@ -47,8 +47,8 @@ describe("path affinity", () => {
 		expect(preselectedPath(content, { biotech: 0.1, greentech: 0.8, synthetic: 0.1 })).toBeNull();
 	});
 	it("renders affinity effects as path chips", () => {
-		expect(effectChip({ type: "affinity", path: "biotech", amount: 5 })).toBe("Biotech +5");
-		expect(effectChip({ type: "affinity", path: "synthetic", amount: -3 })).toBe("Synthetic −3");
-		expect(chipParts([{ type: "cash", amount: 5000 }, { type: "affinity", path: "greentech", amount: 4 }])).toEqual([{ text: "+$5k" }, { text: "Greentech +4", path: "greentech" }]);
+		expect(effectChip({ type: "affinity", path: "biotech", amount: 5 })).toBe("Flesh +5");
+		expect(effectChip({ type: "affinity", path: "synthetic", amount: -3 })).toBe("Lattice −3");
+		expect(chipParts([{ type: "cash", amount: 5000 }, { type: "affinity", path: "greentech", amount: 4 }])).toEqual([{ text: "+$5k" }, { text: "Garden +4", path: "greentech" }]);
 	});
 });

@@ -408,3 +408,12 @@
 		display: none;
 	}
 }
+
+/* While the build catalog is open the strip stays clear of the build inspector on the right, and no card opens above it
+   (playtest: portraits and answers covered the catalog and the inspector). */
+.aitower-hud.is-building .adv-strip {
+	width: min(720px, calc(100% - 76px - var(--dtab-w, 104px) - var(--drawer-w) * 0.68 - var(--gap) * 8));
+}
+.aitower-hud.is-building .adv-strip .adv-ask {
+	display: none;
+}

@@ -3,6 +3,7 @@ import type { ContentDB } from "@aitower/content";
 import { cellIdx, findById, removeById } from "../core/grid";
 import { type Bot, type Facility, GensetMode, type Lift, type SimState } from "../core/state";
 import { getDef, serviceTile } from "./defs";
+import { earn } from "../economy/ledger";
 
 export function addFacility(state: SimState, content: ContentDB, defId: string, floor: number, x: number): Facility {
 	const d = getDef(content, defId);
@@ -63,21 +64,43 @@ export function removeFacility(state: SimState, content: ContentDB, f: Facility)
 	// Job allocations referencing it are released (with rollback) by the next compute step.
 	// Work orders on it (bots notice the missing order and drop the task).
 	state.workOrders = state.workOrders.filter((w) => w.facilityId !== f.id);
-	// Bots homed at a removed charger look for another one.
-	for (const b of state.bots) if (b.homeId === f.id) b.homeId = findChargerWithSpace(state, content);
+	// Bots homed at a removed charger look for another one; with no dock left anywhere they are sold back at half price
+	// (playtest bug: bots kept wandering a tower with no dock).
+	for (const b of [...state.bots]) {
+		if (b.homeId !== f.id) continue;
+		b.homeId = findChargerWithSpace(state, content);
+		if (b.homeId < 0) {
+			earn(state, Math.round((content.bots[b.defId]?.cost ?? 0) / 2));
+			removeBot(state, b);
+		}
+	}
 }
 
-/** Lowest-id enabled charger with a free dock, or -1. */
+/** Remove a bot and every reference to it (its work order goes back to the queue, a lift drops it). */
+export function removeBot(state: SimState, b: Bot): void {
+	for (const wo of state.workOrders) if (wo.botId === b.id) wo.botId = -1;
+	for (const l of state.lifts) l.riders = l.riders.filter((id) => id !== b.id);
+	removeById(state.bots, b.id);
+}
+
+/** The charger with the most free docks (ties: lowest id), or -1. */
 export function findChargerWithSpace(state: SimState, content: ContentDB): number {
+	// The dock with the most free places (ties: lowest id), so new bots spread over every dock instead of filling the first.
+	let best = -1;
+	let bestFree = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind !== "charger") continue;
 		const cap = d.logistics?.capacity ?? 0;
 		let homed = 0;
 		for (const b of state.bots) if (b.homeId === f.id) homed++;
-		if (homed < cap) return f.id;
+		const free = cap - homed;
+		if (free > bestFree) {
+			best = f.id;
+			bestFree = free;
+		}
 	}
-	return -1;
+	return best;
 }
 
 export function addLift(state: SimState, x: number, floorMin: number, floorMax: number): Lift {

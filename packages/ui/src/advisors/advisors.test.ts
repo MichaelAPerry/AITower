@@ -164,7 +164,7 @@ describe("decision helpers: effects, price and MAGI vote", () => {
 	it("effect chips show money, durations and affinity pills", () => {
 		const e = content.events.find((x) => x.id === "brownout");
 		const chips = choiceChipList(e?.choices[0].effects ?? []);
-		expect(chips.map((c) => c.text)).toEqual(expect.arrayContaining(["−$100k", "grid ×0.8 · 8h", "Greentech +3"]));
+		expect(chips.map((c) => c.text)).toEqual(expect.arrayContaining(["−$100k", "grid ×0.8 · 8h", "Garden +3"]));
 		expect(chips.find((c) => c.path)?.path).toBe("greentech");
 		expect(cashCost(e?.choices[0].effects ?? [])).toBe(100000);
 	});
