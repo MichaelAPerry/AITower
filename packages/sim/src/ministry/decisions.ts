@@ -206,7 +206,7 @@ function removeParts(state: SimState, content: ContentDB, count: number): void {
 	}
 }
 
-function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events: SimEvent[], title: string): void {
+function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events: SimEvent[]): void {
 	switch (e.type) {
 		case "cash":
 			if (e.amount >= 0) earn(state, e.amount);
@@ -249,7 +249,7 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 function resolveNow(state: SimState, content: ContentDB, d: Decision, def: EventDef, choice: EventChoice, events: SimEvent[]): void {
 	state.decision = null;
 	state.stats.decisionsMade++;
-	for (const e of choice.effects) applyEffect(state, content, e, events, def.title);
+	for (const e of choice.effects) applyEffect(state, content, e, events);
 	// Taking an advisor's recommendation warms her to you; overruling her cools her a little.
 	const sb = content.balance.soul;
 	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow : sb.bondOverrule);

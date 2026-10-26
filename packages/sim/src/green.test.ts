@@ -1,7 +1,6 @@
 /** M4-T1: greentech and synthetic mechanics, scenarios, `earned` events, snapshot v6. */
 import type { Balance, ContentDB, Scenario } from "@aitower/content";
 import { describe, expect, it } from "vitest";
-import type { SimEvent } from "./api";
 import { GREEN_SMOOTHING } from "./core/constants";
 import { daylight } from "./green/weather";
 import { type SimImpl, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";

@@ -3,7 +3,7 @@ import { Stamp } from "../components/common";
 import type { FinanceTab as FinanceSection, PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
 import { pushNotice } from "../notices";
-import { cashDeltaText, fmtDailyRate, gradeTone, ledgerNet, lifetimeRows, loanInfo, repayPresets, signed, takePresets } from "./finance";
+import { cashDeltaText, fmtDailyRate, gradeTone, ledgerNet, lifetimeRows, loanInfo, repayPresets, takePresets } from "./finance";
 
 const report = (r: CommandResult): void => {
 	if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `fin:${r.reason}` });

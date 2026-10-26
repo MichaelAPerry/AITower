@@ -1,5 +1,3 @@
-}
-
 /* Modifier chips: top right of the world. */
 .aitower-hud .ui-modchips {
 	position: absolute;
@@ -46,11 +44,10 @@
 }
 
 /* The paper slip. */
-/* Top-bar budget: below ~1380 px (effective) the clearance lamps give way to the standing meter. */
+/* Top-bar budget: below ~1380 px (effective) the clearance lamps hide. */
 .aitower-hud.is-density-tight .ui-topbar .ui-tier {
 	display: none;
 }
 .aitower-hud.is-density-cramped .ui-savelamp-text {
 	display: none;
 }
-
