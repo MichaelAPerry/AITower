@@ -4,7 +4,7 @@ import type { SimCommand } from "../api";
 import { planNormalized } from "../commands/apply";
 import type { TickCtx } from "../core/context";
 import { spend } from "../economy/ledger";
-import { techGate } from "../research/research";
+import { placeBlock } from "../progression/access";
 
 /** Validate, charge and apply one command like `applyCommands` does; false when it was rejected. */
 export function runCommand(ctx: TickCtx, cmd: SimCommand): boolean {
@@ -15,7 +15,7 @@ export function runCommand(ctx: TickCtx, cmd: SimCommand): boolean {
 	return true;
 }
 
-/** Buildable now: tier and research gates pass, not a growth. */
+/** Buildable now: the Level, research, commit and bond rules pass (the Foreman only builds what the player may place), not a growth. */
 export function buildable(ctx: TickCtx, d: FacilityDef): boolean {
-	return !d.growth && !d.retired && d.unlockTier <= ctx.state.tier && techGate(ctx.state, ctx.content, d.tech) === null;
+	return !d.growth && !d.retired && placeBlock(ctx.state, ctx.content, d) === null;
 }

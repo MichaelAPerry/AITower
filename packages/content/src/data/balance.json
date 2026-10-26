@@ -9,13 +9,13 @@
   0.6,
   0.7,
   0.85,
-  1.0,
+  1,
   1.1,
   1.1,
   1.05,
-  1.0,
-  1.0,
-  1.0,
+  1,
+  1,
+  1,
   1.05,
   1.1,
   1.25,
@@ -152,12 +152,12 @@
  },
  "soul": {
   "spTarget": 1000,
-  "spPerPflopHour": 0.0014,
+  "spPerPflopHour": 0.0017,
   "spWeights": {
    "synthetic": {
     "shared": 1,
-    "synthetic": 2,
-    "greentech": 0.25,
+    "synthetic": 2.5,
+    "greentech": 0,
     "biotech": 0
    },
    "biotech": {
@@ -165,7 +165,7 @@
    },
    "greentech": {
     "shared": 0.5,
-    "greentech": 2.5
+    "greentech": 3.4
    }
   },
   "sealMax": 100,
@@ -181,6 +181,7 @@
   "bondCommit": 50,
   "bondEpilogue": 60,
   "bondFollow": 3,
-  "bondOverrule": -1
+  "bondOverrule": -1,
+  "starterWeight": 0.5
  }
 }

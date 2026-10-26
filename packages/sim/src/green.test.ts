@@ -528,7 +528,7 @@ describe("snapshot v6", () => {
 		snap.version = 5;
 		const s = snap.state;
 		for (const k of ["automation", "wind", "droughtUntil", "greenScore", "refinement", "sandbox"]) delete s[k];
-		for (const k of ["sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
+		for (const k of ["sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut", "bondGiven"]) delete s[k];
 		s.endingDays = { livingTower: 0, cleanTower: 0 };
 		delete s.rng.weather;
 		for (const k of ["ringGreenKwh", "ringHeatKwh", "greenKw", "heatExportKw"]) delete s.metrics[k];
@@ -536,8 +536,8 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(12);
-		expect(base().snapshot().version).toBe(12);
+		expect(SNAPSHOT_VERSION).toBe(13);
+		expect(base().snapshot().version).toBe(13);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -559,7 +559,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(12);
+		expect(loaded.snapshot().version).toBe(13);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

@@ -53,7 +53,7 @@ describe("tree layout (real content)", () => {
 	it("stacks Cooling by line: air above liquid above immersion", () => {
 		const y = (id: string) => layout.byId.get(id)?.y ?? 0;
 		expect(y("desk_fan_standard")).toBeLessThan(y("chilled_loop"));
-		expect(y("chilled_loop")).toBeLessThan(y("dielectric_handbook"));
+		expect(y("chilled_loop")).toBeLessThan(y("two_phase_immersion"));
 		const cool = layout.lanes.find((l) => l.id === "cool");
 		expect(cool?.bands.map((b) => b.line)).toEqual(["air", "liquid", "immersion"]);
 	});

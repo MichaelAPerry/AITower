@@ -399,6 +399,9 @@ function validateSoul(s: Obj): void {
 	array(s, "sealedOut").forEach((x, i) => {
 		if (!SEALED.includes(x as string)) fail(`sealedOut[${i}] is invalid`);
 	});
+	array(s, "bondGiven").forEach((x, i) => {
+		if (typeof x !== "string") fail(`bondGiven[${i}] must be a string`);
+	});
 }
 
 /** Automation, weather, scores, sandbox flag (snapshot v6). */

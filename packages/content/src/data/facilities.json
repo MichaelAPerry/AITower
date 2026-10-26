@@ -66,7 +66,9 @@
   "seal": {
    "biotech": 2,
    "greentech": 2
-  }
+  },
+  "line": "synthetic",
+  "upgradesFrom": "rack_air_gpu2"
  },
  "rack_storage": {
   "id": "rack_storage",
@@ -157,7 +159,8 @@
   "seal": {
    "biotech": 3,
    "greentech": 10
-  }
+  },
+  "line": "synthetic"
  },
  "cdu": {
   "id": "cdu",
@@ -188,7 +191,8 @@
   "seal": {
    "biotech": 4,
    "greentech": 2
-  }
+  },
+  "line": "synthetic"
  },
  "grid_tie": {
   "id": "grid_tie",
@@ -365,38 +369,8 @@
   },
   "seal": {
    "greentech": 1
-  }
- },
- "rack_air_gpu3": {
-  "id": "rack_air_gpu3",
-  "name": "AC-4 Hot-Aisle Rack",
-  "description": "A sealed hot-aisle cabinet with ducted exhaust and tuned fan curves, delivering 52 PFLOPS from 70 kW of air-cooled silicon. The practical ceiling of air cooling. Superseded; no longer built.",
-  "kind": "rack",
-  "category": "rack",
-  "width": 2,
-  "cost": 880000,
-  "upkeepPerDay": 2600,
-  "unlockTier": 3,
-  "facilityKw": 0,
-  "color": "#b4a582",
-  "accent": "#7dff8f",
-  "rack": {
-   "cooling": "air",
-   "powerKw": 70,
-   "liquidFraction": 0,
-   "pflops": 52,
-   "storageTB": 0,
-   "failurePerDay": 0.24
   },
-  "placement": {
-   "needsPower": true
-  },
-  "tech": "hot_aisle",
-  "retired": true,
-  "seal": {
-   "biotech": 1,
-   "greentech": 2
-  }
+  "upgradesFrom": "rack_air_gpu"
  },
  "rack_dlc_gpu2": {
   "id": "rack_dlc_gpu2",
@@ -433,7 +407,8 @@
   "seal": {
    "biotech": 6,
    "greentech": 3
-  }
+  },
+  "upgradesFrom": "rack_dlc_gpu"
  },
  "rack_dlc_gpu3": {
   "id": "rack_dlc_gpu3",
@@ -470,44 +445,8 @@
   "seal": {
    "biotech": 8,
    "greentech": 4
-  }
- },
- "rack_imm_gpu": {
-  "id": "rack_imm_gpu",
-  "name": "IM-1 Immersion Tank",
-  "description": "Servers submerged in a tank of dielectric fluid, 95% of the 180 kW leaving through the heat exchanger: 300 PFLOPS per tank and a calm 0.15 failures a day.",
-  "kind": "rack",
-  "category": "rack",
-  "width": 3,
-  "cost": 3100000,
-  "upkeepPerDay": 7500,
-  "unlockTier": 3,
-  "facilityKw": 0,
-  "color": "#6f7473",
-  "accent": "#ffb000",
-  "rack": {
-   "cooling": "immersion",
-   "powerKw": 180,
-   "liquidFraction": 0.95,
-   "pflops": 300,
-   "storageTB": 0,
-   "failurePerDay": 0.15
   },
-  "placement": {
-   "needsPower": true,
-   "needsCoolant": true
-  },
-  "tech": "dielectric_handbook",
-  "flavor": {
-   "quote": "There is at present in the material world a universal tendency to the dissipation of mechanical energy.",
-   "author": "Lord Kelvin",
-   "source": "On a Universal Tendency in Nature to the Dissipation of Mechanical Energy, 1852"
-  },
-  "line": "synthetic",
-  "seal": {
-   "biotech": 14,
-   "greentech": 12
-  }
+  "upgradesFrom": "rack_dlc_gpu2"
  },
  "rack_imm_gpu2": {
   "id": "rack_imm_gpu2",
@@ -544,7 +483,8 @@
   "seal": {
    "biotech": 16,
    "greentech": 14
-  }
+  },
+  "upgradesFrom": "rack_dlc_gpu3"
  },
  "rack_infer": {
   "id": "rack_infer",
@@ -578,7 +518,8 @@
   },
   "seal": {
    "greentech": 1
-  }
+  },
+  "upgradesFrom": "rack_air_gpu2"
  },
  "rack_storage2": {
   "id": "rack_storage2",
@@ -612,7 +553,8 @@
   },
   "seal": {
    "greentech": 1
-  }
+  },
+  "upgradesFrom": "rack_storage"
  },
  "grid_tie_2": {
   "id": "grid_tie_2",
@@ -642,7 +584,8 @@
   },
   "seal": {
    "greentech": 8
-  }
+  },
+  "upgradesFrom": "grid_tie"
  },
  "grid_tie_3": {
   "id": "grid_tie_3",
@@ -670,10 +613,10 @@
    "author": "Gordon Moore",
    "source": "Cramming more components onto integrated circuits, Electronics, 19 April 1965"
   },
-  "line": "synthetic",
   "seal": {
    "greentech": 10
-  }
+  },
+  "upgradesFrom": "grid_tie_2"
  },
  "genset_gas": {
   "id": "genset_gas",
@@ -706,7 +649,9 @@
   "seal": {
    "biotech": 3,
    "greentech": 12
-  }
+  },
+  "line": "synthetic",
+  "upgradesFrom": "genset"
  },
  "ups_flywheel": {
   "id": "ups_flywheel",
@@ -766,7 +711,8 @@
   "seal": {
    "biotech": 2,
    "greentech": 6
-  }
+  },
+  "upgradesFrom": "ups_battery"
  },
  "crah_rear_door": {
   "id": "crah_rear_door",
@@ -796,7 +742,8 @@
   },
   "seal": {
    "greentech": 2
-  }
+  },
+  "upgradesFrom": "crah_unit"
  },
  "crah_hc": {
   "id": "crah_hc",
@@ -826,7 +773,8 @@
   },
   "seal": {
    "greentech": 3
-  }
+  },
+  "upgradesFrom": "crah_rear_door"
  },
  "chiller_tower": {
   "id": "chiller_tower",
@@ -843,7 +791,7 @@
   "accent": "#c06a3b",
   "cooling": {
    "capacityKw": 2400,
-   "cop": 7.0
+   "cop": 7
   },
   "placement": {
    "needsPower": true,
@@ -857,7 +805,9 @@
   },
   "seal": {
    "greentech": 6
-  }
+  },
+  "line": "synthetic",
+  "upgradesFrom": "chiller"
  },
  "cdu_big": {
   "id": "cdu_big",
@@ -888,24 +838,26 @@
   "seal": {
    "biotech": 4,
    "greentech": 3
-  }
+  },
+  "line": "synthetic",
+  "upgradesFrom": "cdu"
  },
  "chiller_free": {
   "id": "chiller_free",
   "name": "Adiabatic Chiller CH-5000",
-  "description": "An evaporative free-cooling chiller that chills the loop with little compressor work: 5,000 kW at COP 11.",
+  "description": "A large adiabatic chiller that chills the loop with very little compressor work: 5,000 kW at COP 14.",
   "kind": "chiller",
   "category": "cooling",
   "width": 8,
   "cost": 7200000,
   "upkeepPerDay": 11000,
-  "unlockTier": 4,
+  "unlockTier": 5,
   "facilityKw": 40,
   "color": "#5f6968",
   "accent": "#d8eadf",
   "cooling": {
    "capacityKw": 5000,
-   "cop": 11.0
+   "cop": 14
   },
   "placement": {
    "needsPower": true,
@@ -920,7 +872,9 @@
   "line": "greentech",
   "seal": {
    "greentech": -4
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "crah_adiabatic"
  },
  "depot_big": {
   "id": "depot_big",
@@ -1005,7 +959,9 @@
   "seal": {
    "biotech": -6,
    "greentech": 2
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "nutrient_tank_s"
  },
  "sterile_bay": {
   "id": "sterile_bay",
@@ -1036,7 +992,8 @@
   "line": "biotech",
   "seal": {
    "biotech": 3
-  }
+  },
+  "tier": "specialist"
  },
  "culling_room": {
   "id": "culling_room",
@@ -1068,7 +1025,8 @@
   "line": "biotech",
   "seal": {
    "biotech": 6
-  }
+  },
+  "tier": "specialist"
  },
  "quarantine_lock": {
   "id": "quarantine_lock",
@@ -1092,7 +1050,9 @@
    "author": "Leslie Lamport",
    "source": "Email on distributed systems, 1987"
   },
-  "line": "biotech"
+  "line": "biotech",
+  "tier": "specialist",
+  "seal": {}
  },
  "bioreactor": {
   "id": "bioreactor",
@@ -1128,7 +1088,8 @@
   "seal": {
    "biotech": -10,
    "greentech": -4
-  }
+  },
+  "tier": "specialist"
  },
  "organoid_incubator": {
   "id": "organoid_incubator",
@@ -1170,6 +1131,15 @@
   "line": "biotech",
   "seal": {
    "biotech": -8
+  },
+  "tier": "specialist",
+  "upgradesFrom": "rack_culture_s",
+  "unlock": {
+   "preview": {
+    "who": "mel",
+    "min": 40,
+    "max": 2
+   }
   }
  },
  "dna_vault": {
@@ -1212,26 +1182,28 @@
   "line": "biotech",
   "seal": {
    "biotech": -5
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "rack_storage2"
  },
  "neural_pit": {
   "id": "neural_pit",
   "name": "OC-4 Neural Vat",
-  "description": "A four-tile vat of cultured neural tissue. 560 PFLOPS from 80 kW: 7 PFLOPS per kW. Must be held at 37 °C within 1 °C, draws 10 units of nutrient medium a tick, and is the most contaminating unit on the catalogue.",
+  "description": "A whole organ in a pit: 850 PFLOPS from 110 kW, 7.7 PFLOPS per kW. Held at 37 °C within 1 °C, and fed 12 units of nutrient a tick. Contamination follows it home.",
   "kind": "rack",
   "category": "bio",
   "width": 4,
-  "cost": 7000000,
-  "upkeepPerDay": 16000,
+  "cost": 12000000,
+  "upkeepPerDay": 24000,
   "unlockTier": 5,
   "facilityKw": 0,
   "color": "#7a5f5a",
   "accent": "#d99a94",
   "rack": {
    "cooling": "bio",
-   "powerKw": 80,
+   "powerKw": 110,
    "liquidFraction": 0,
-   "pflops": 560,
+   "pflops": 850,
    "storageTB": 0,
    "failurePerDay": 0.35,
    "bio": {
@@ -1253,8 +1225,11 @@
   },
   "line": "biotech",
   "seal": {
-   "biotech": -12
-  }
+   "biotech": -12,
+   "greentech": 2
+  },
+  "tier": "specialist",
+  "upgradesFrom": "rack_organoid_3"
  },
  "growth_mass": {
   "id": "growth_mass",
@@ -1382,7 +1357,7 @@
   },
   "placement": {
    "needsPower": true,
-   "minFloor": 1
+   "exteriorOnly": true
   },
   "tech": "solar_charter",
   "flavor": {
@@ -1394,7 +1369,8 @@
   "seal": {
    "biotech": -1,
    "greentech": -6
-  }
+  },
+  "tier": "starter"
  },
  "solar_canopy": {
   "id": "solar_canopy",
@@ -1405,7 +1381,7 @@
   "width": 8,
   "cost": 1100000,
   "upkeepPerDay": 600,
-  "unlockTier": 5,
+  "unlockTier": 4,
   "facilityKw": 0,
   "color": "#364a59",
   "accent": "#e3c15a",
@@ -1414,7 +1390,7 @@
   },
   "placement": {
    "needsPower": true,
-   "minFloor": 2
+   "roofOnly": true
   },
   "tech": "canopy_array",
   "flavor": {
@@ -1426,7 +1402,9 @@
   "seal": {
    "biotech": -1,
    "greentech": -10
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "solar_skin"
  },
  "wind_mast": {
   "id": "wind_mast",
@@ -1437,7 +1415,7 @@
   "width": 2,
   "cost": 1250000,
   "upkeepPerDay": 900,
-  "unlockTier": 3,
+  "unlockTier": 4,
   "facilityKw": 0,
   "color": "#8a9490",
   "accent": "#9fd0c0",
@@ -1446,7 +1424,7 @@
   },
   "placement": {
    "needsPower": true,
-   "minFloor": 3
+   "roofOnly": true
   },
   "tech": "wind_permit",
   "flavor": {
@@ -1457,7 +1435,8 @@
   "line": "greentech",
   "seal": {
    "greentech": -8
-  }
+  },
+  "tier": "specialist"
  },
  "heat_exchanger": {
   "id": "heat_exchanger",
@@ -1487,8 +1466,9 @@
   },
   "line": "greentech",
   "seal": {
-   "greentech": -6
-  }
+   "greentech": -3
+  },
+  "tier": "starter"
  },
  "heat_pipeline": {
   "id": "heat_pipeline",
@@ -1519,7 +1499,9 @@
   "line": "greentech",
   "seal": {
    "greentech": -12
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "heat_exchanger"
  },
  "algae_facade": {
   "id": "algae_facade",
@@ -1550,7 +1532,8 @@
   "seal": {
    "biotech": -2,
    "greentech": -8
-  }
+  },
+  "tier": "specialist"
  },
  "carbon_capture": {
   "id": "carbon_capture",
@@ -1580,7 +1563,9 @@
   "line": "greentech",
   "seal": {
    "greentech": -14
-  }
+  },
+  "tier": "specialist",
+  "upgradesFrom": "algae_facade"
  },
  "rack_neuromorphic": {
   "id": "rack_neuromorphic",
@@ -1616,17 +1601,18 @@
   "seal": {
    "biotech": -1,
    "greentech": -2
-  }
+  },
+  "tier": "starter"
  },
  "rack_photonic": {
   "id": "rack_photonic",
   "name": "PH-1 Photonic Rack",
-  "description": "Optical interconnect carries the arithmetic: 480 PFLOPS from only 40 kW of air-cooled draw, 12 PFLOPS per kW.",
+  "description": "Optical matrix multipliers on glass: 300 PFLOPS from only 40 kW of air-cooled draw, 7.5 PFLOPS per kW. The light is the computer.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
-  "cost": 6500000,
-  "upkeepPerDay": 9000,
+  "cost": 4500000,
+  "upkeepPerDay": 7500,
   "unlockTier": 5,
   "facilityKw": 0,
   "color": "#b8c4b6",
@@ -1635,7 +1621,7 @@
    "cooling": "air",
    "powerKw": 40,
    "liquidFraction": 0,
-   "pflops": 480,
+   "pflops": 300,
    "storageTB": 0,
    "failurePerDay": 0.16
   },
@@ -1651,24 +1637,33 @@
   "line": "greentech",
   "seal": {
    "greentech": -4
+  },
+  "tier": "specialist",
+  "upgradesFrom": "rack_neuromorphic2",
+  "unlock": {
+   "early": {
+    "who": "bea",
+    "min": 60,
+    "tier": 4
+   }
   }
  },
  "cryo_core": {
   "id": "cryo_core",
   "name": "Cryo Chiller CC-3000",
-  "description": "Cascade refrigeration that holds the coolant loop colder than any weather. Removes 3,000 kW at a COP of 16 for 25 kW of upkeep. Sits on a coolant loop.",
+  "description": "A low-temperature refrigerant plant that drives the loop far below ambient: 3,000 kW at COP 16. The refrigerant is somebody else's problem.",
   "kind": "chiller",
   "category": "cooling",
   "width": 6,
   "cost": 5200000,
   "upkeepPerDay": 6000,
-  "unlockTier": 5,
+  "unlockTier": 4,
   "facilityKw": 25,
   "color": "#7c8e9a",
   "accent": "#b6e4f0",
   "cooling": {
    "capacityKw": 3000,
-   "cop": 16.0
+   "cop": 16
   },
   "placement": {
    "needsPower": true,
@@ -1684,26 +1679,27 @@
   "seal": {
    "biotech": 25,
    "greentech": 15
-  }
+  },
+  "upgradesFrom": "chiller_tower"
  },
  "rack_mind_lattice": {
   "id": "rack_mind_lattice",
   "name": "ML-1 Mind Lattice Rack",
-  "description": "A liquid-cooled lattice of hosted processes with persistent memory. Delivers 700 PFLOPS from 220 kW, 85% of it leaving through the coolant loop, and needs a 187 kW share of coolant capacity. Ethics review classes it as a tenant.",
+  "description": "The whole floor behaving as one machine: 1,400 PFLOPS from 520 kW of liquid-cooled load, 2.7 PFLOPS per kW. The end of the Lattice line. It is not a rack so much as a decision.",
   "kind": "rack",
   "category": "rack",
-  "width": 2,
-  "cost": 8000000,
-  "upkeepPerDay": 15000,
+  "width": 3,
+  "cost": 12000000,
+  "upkeepPerDay": 22000,
   "unlockTier": 5,
   "facilityKw": 0,
   "color": "#8d8fa8",
   "accent": "#b9a6ff",
   "rack": {
    "cooling": "dlc",
-   "powerKw": 220,
+   "powerKw": 520,
    "liquidFraction": 0.85,
-   "pflops": 700,
+   "pflops": 1400,
    "storageTB": 0,
    "failurePerDay": 0.2
   },
@@ -1719,8 +1715,16 @@
   },
   "line": "synthetic",
   "seal": {
-   "biotech": 20,
-   "greentech": 6
+   "biotech": 24,
+   "greentech": 8
+  },
+  "upgradesFrom": "rack_imm_gpu3",
+  "unlock": {
+   "early": {
+    "who": "luci",
+    "min": 60,
+    "tier": 4
+   }
   }
  },
  "continuity_monitor": {
@@ -1754,7 +1758,8 @@
   "seal": {
    "biotech": 10,
    "greentech": 4
-  }
+  },
+  "upgradesFrom": "ups_flywheel"
  },
  "backup_vault": {
   "id": "backup_vault",
@@ -1790,7 +1795,8 @@
   "seal": {
    "biotech": 8,
    "greentech": 2
-  }
+  },
+  "upgradesFrom": "rack_storage2"
  },
  "grid_tie_4": {
   "id": "grid_tie_4",
@@ -1821,15 +1827,16 @@
   "line": "synthetic",
   "seal": {
    "greentech": 14
-  }
+  },
+  "upgradesFrom": "grid_tie_3"
  },
  "rack_imm_gpu3": {
   "id": "rack_imm_gpu3",
   "name": "IM-3 Vault Immersion Tank",
-  "description": "A vault-sized immersion tank. 380 kW and 800 PFLOPS per tank, 95% of the heat taken by a condenser coil the size of a lorry.",
+  "description": "The densest immersion tank: 800 PFLOPS from 380 kW in a vault of sealed, boiling fluorocarbon. Three tiles wide, 2.1 PFLOPS per kW. Dear, loud with PFAS and worth it.",
   "kind": "rack",
   "category": "rack",
-  "width": 4,
+  "width": 3,
   "cost": 6500000,
   "upkeepPerDay": 16000,
   "unlockTier": 5,
@@ -1858,7 +1865,8 @@
   "seal": {
    "biotech": 18,
    "greentech": 16
-  }
+  },
+  "upgradesFrom": "rack_imm_gpu2"
  },
  "rack_organoid_2": {
   "id": "rack_organoid_2",
@@ -1869,7 +1877,7 @@
   "width": 3,
   "cost": 4500000,
   "upkeepPerDay": 9000,
-  "unlockTier": 5,
+  "unlockTier": 4,
   "facilityKw": 0,
   "color": "#b9a88f",
   "accent": "#c98a86",
@@ -1900,6 +1908,878 @@
   "line": "biotech",
   "seal": {
    "biotech": -10
+  },
+  "tier": "specialist",
+  "upgradesFrom": "organoid_incubator"
+ },
+ "cdu_hall": {
+  "id": "cdu_hall",
+  "name": "CDU Hall 6 MW",
+  "description": "A facility-scale coolant distribution skid on frosted pipework. Moves 6,000 kW of heat for 40 kW of pumping, for the immersion halls.",
+  "kind": "cdu",
+  "category": "cooling",
+  "width": 5,
+  "cost": 4500000,
+  "upkeepPerDay": 5200,
+  "unlockTier": 5,
+  "facilityKw": 40,
+  "color": "#8a9aa6",
+  "accent": "#9fe7ff",
+  "cooling": {
+   "capacityKw": 6000
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "immersion_vault",
+  "line": "synthetic",
+  "upgradesFrom": "cdu_big",
+  "seal": {
+   "biotech": 5,
+   "greentech": 4
+  },
+  "flavor": {
+   "quote": "Heat, like gravity, penetrates every substance of the universe, its rays occupy all parts of space.",
+   "author": "Joseph Fourier",
+   "source": "The Analytical Theory of Heat, 1822 (tr. Freeman, 1878)"
+  }
+ },
+ "cryo_plant": {
+  "id": "cryo_plant",
+  "name": "CC-8000 Cryo Plant",
+  "description": "The central refrigerant plant of a Lattice tower: 8,000 kW of heat removal at COP 18 for 50 kW of compressor work. Frost on everything within sight.",
+  "kind": "chiller",
+  "category": "cooling",
+  "width": 8,
+  "cost": 11000000,
+  "upkeepPerDay": 12000,
+  "unlockTier": 5,
+  "facilityKw": 50,
+  "color": "#7a8c97",
+  "accent": "#bff0ff",
+  "cooling": {
+   "capacityKw": 8000,
+   "cop": 18
+  },
+  "placement": {
+   "needsPower": true,
+   "needsCoolant": true
+  },
+  "tech": "cryo_plant",
+  "line": "synthetic",
+  "upgradesFrom": "cryo_core",
+  "seal": {
+   "biotech": 30,
+   "greentech": 18
+  },
+  "flavor": {
+   "quote": "Some say the world will end in fire, Some say in ice.",
+   "author": "Robert Frost",
+   "source": "Fire and Ice, Harper's Magazine, December 1920"
+  }
+ },
+ "genset_cc": {
+  "id": "genset_cc",
+  "name": "Combined-Cycle Block 12 MW",
+  "description": "A gas plant behind the fence: 12,000 kW at $14 a kWh, 20 minutes to speed. Cheaper power than the turbine, once it is warm.",
+  "kind": "genset",
+  "category": "power",
+  "width": 8,
+  "cost": 9000000,
+  "upkeepPerDay": 12000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#3c4a52",
+  "accent": "#ffd23f",
+  "power": {
+   "capacityKw": 12000,
+   "startDelayTicks": 20,
+   "costPerKwh": 14
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "combined_cycle",
+  "line": "synthetic",
+  "upgradesFrom": "genset_gas",
+  "seal": {
+   "biotech": 3,
+   "greentech": 25
+  },
+  "flavor": {
+   "quote": "It is wholly a confusion of ideas to suppose that the economical use of fuel is equivalent to a diminished consumption.",
+   "author": "W. Stanley Jevons",
+   "source": "The Coal Question, 1865"
+  }
+ },
+ "reactor_smr": {
+  "id": "reactor_smr",
+  "name": "Small Modular Reactor 10 MW",
+  "description": "A sealed reactor block under a warning stripe: 10,000 kW at $4 a kWh, ten hours to reach power. The cheapest firm energy in the game, and the slowest to start.",
+  "kind": "genset",
+  "category": "power",
+  "width": 8,
+  "cost": 24000000,
+  "upkeepPerDay": 20000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#46525a",
+  "accent": "#f2c230",
+  "power": {
+   "capacityKw": 10000,
+   "startDelayTicks": 600,
+   "costPerKwh": 4
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "reactor_licence",
+  "line": "synthetic",
+  "seal": {
+   "biotech": 4,
+   "greentech": 8
+  },
+  "flavor": {
+   "quote": "It is not too much to expect that our children will enjoy in their homes electrical energy too cheap to meter",
+   "author": "Lewis Strauss",
+   "source": "Address to the National Association of Science Writers, 16 September 1954"
+  }
+ },
+ "rack_culture_s": {
+  "id": "rack_culture_s",
+  "name": "OC-0 Culture Rack",
+  "description": "A lab cell-culture incubator on a bench-top feed: 40 PFLOPS from 8 kW of cultured tissue. Held at 37 °C within 1 °C and fed 2 units of nutrient a tick. A Starter: anyone may build it, and it teaches the shape of the Flesh.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 2,
+  "cost": 900000,
+  "upkeepPerDay": 2200,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#c9bfae",
+  "accent": "#e9a9b5",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 8,
+   "liquidFraction": 0,
+   "pflops": 40,
+   "storageTB": 0,
+   "failurePerDay": 0.3,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 2,
+    "contamination": 0.0012
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "culture_bench",
+  "line": "biotech",
+  "tier": "starter",
+  "seal": {
+   "greentech": 1
+  },
+  "flavor": {
+   "quote": "In the fields of observation chance favours only the prepared mind.",
+   "author": "Louis Pasteur",
+   "source": "Lecture at the University of Lille, 7 December 1854"
+  }
+ },
+ "nutrient_tank_s": {
+  "id": "nutrient_tank_s",
+  "name": "NT-1 Nutrient Tank",
+  "description": "A waist-high bench bioreactor of media. Supplies 6 units a tick to its pipe net, enough for two OC-0 racks. A Starter: anyone may build it.",
+  "kind": "nutrient",
+  "category": "bio",
+  "width": 2,
+  "cost": 250000,
+  "upkeepPerDay": 600,
+  "unlockTier": 3,
+  "facilityKw": 2,
+  "color": "#6d7a58",
+  "accent": "#b7c26a",
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "bio": {
+   "nutrientCapacity": 6
+  },
+  "tech": "culture_bench",
+  "line": "biotech",
+  "tier": "starter",
+  "seal": {
+   "greentech": 1
+  },
+  "flavor": {
+   "quote": "Tell me what you eat, and I will tell you what you are.",
+   "author": "Jean Anthelme Brillat-Savarin",
+   "source": "Physiologie du gout, 1825"
+  }
+ },
+ "rack_organoid_3": {
+  "id": "rack_organoid_3",
+  "name": "OC-3 Perfused Cortex",
+  "description": "Vascularised tissue scaffolds on a perfusion loop: 520 PFLOPS from 70 kW, 7.4 PFLOPS per kW. Held at 37 °C within 1 °C, fed 7 units of nutrient a tick and a contamination risk to match.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 3,
+  "cost": 7500000,
+  "upkeepPerDay": 14000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#b78f8a",
+  "accent": "#e0707a",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 70,
+   "liquidFraction": 0,
+   "pflops": 520,
+   "storageTB": 0,
+   "failurePerDay": 0.34,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 7,
+    "contamination": 0.006
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "tissue_scaffolds",
+  "line": "biotech",
+  "tier": "specialist",
+  "upgradesFrom": "rack_organoid_2",
+  "seal": {
+   "biotech": -11,
+   "greentech": 2
+  },
+  "flavor": {
+   "quote": "Any man could, if he were so inclined, be the sculptor of his own brain.",
+   "author": "Santiago Ramon y Cajal",
+   "source": "Advice for a Young Investigator, 1897"
+  }
+ },
+ "rack_organoid_3m": {
+  "id": "rack_organoid_3m",
+  "name": "Mel's Cortex",
+  "description": "Mel's own cabinet of the Perfused Cortex: 600 PFLOPS from 70 kW, 15% more than the OC-3, and it sheds twice the contamination. She is very proud of it. She does not say why it glows.",
+  "kind": "rack",
+  "category": "bio",
+  "width": 3,
+  "cost": 7500000,
+  "upkeepPerDay": 14000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#a88fb4",
+  "accent": "#c39bff",
+  "rack": {
+   "cooling": "bio",
+   "powerKw": 70,
+   "liquidFraction": 0,
+   "pflops": 600,
+   "storageTB": 0,
+   "failurePerDay": 0.34,
+   "bio": {
+    "targetC": 37,
+    "toleranceC": 1,
+    "nutrientUse": 7,
+    "contamination": 0.012
+   }
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "tech": "tissue_scaffolds",
+  "line": "biotech",
+  "tier": "specialist",
+  "unlock": {
+   "bond": {
+    "who": "mel",
+    "min": 70
+   },
+   "commit": "biotech"
+  },
+  "seal": {
+   "biotech": -11,
+   "greentech": 2
+  },
+  "flavor": {
+   "quote": "Facts do not cease to exist because they are ignored.",
+   "author": "Aldous Huxley",
+   "source": "Proper Studies, 1927"
+  }
+ },
+ "perfusion_bath": {
+  "id": "perfusion_bath",
+  "name": "Perfusion Bath PB-60",
+  "description": "A water bath at 37 °C along the rack row. Draws 60 kW of heat from the cells under organoid racks within 5 tiles, and never cools them below 37 °C. Air racks are not its business.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 2,
+  "cost": 500000,
+  "upkeepPerDay": 800,
+  "unlockTier": 3,
+  "facilityKw": 4,
+  "color": "#b9a3a3",
+  "accent": "#e58a96",
+  "cooling": {
+   "capacityKw": 60,
+   "radius": 5,
+   "holdC": 37,
+   "bioOnly": true
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "perfusion_baths",
+  "tier": "specialist",
+  "line": "biotech",
+  "seal": {
+   "biotech": -2
+  },
+  "flavor": {
+   "quote": "The constancy of the internal environment is the condition for a free and independent life.",
+   "author": "Claude Bernard",
+   "source": "Lectures on the Phenomena of Life Common to Animals and Plants, 1878"
+  }
+ },
+ "perfusion_manifold": {
+  "id": "perfusion_manifold",
+  "name": "Perfusion Manifold PM-250",
+  "description": "A bioreactor heat-exchange loop. Draws 250 kW of heat from the cells under organoid racks within 8 tiles, holding them at 37 °C.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 3,
+  "cost": 1600000,
+  "upkeepPerDay": 1900,
+  "unlockTier": 4,
+  "facilityKw": 12,
+  "color": "#b9a3a3",
+  "accent": "#e58a96",
+  "cooling": {
+   "capacityKw": 250,
+   "radius": 8,
+   "holdC": 37,
+   "bioOnly": true
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "perfusion_manifold",
+  "line": "biotech",
+  "upgradesFrom": "perfusion_bath",
+  "seal": {
+   "biotech": -3
+  },
+  "tier": "specialist",
+  "flavor": {
+   "quote": "The heart of animals is the foundation of their life, the sovereign of everything within them, the sun of their microcosm",
+   "author": "William Harvey",
+   "source": "On the Motion of the Heart and Blood in Animals, 1628"
+  }
+ },
+ "vascular_plant": {
+  "id": "vascular_plant",
+  "name": "Vascular Plant VP-1000",
+  "description": "An industrial bioprocess thermal plant. Draws 1,000 kW of heat from the cells under organoid racks within 12 tiles, holding them at 37 °C.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 5,
+  "cost": 5500000,
+  "upkeepPerDay": 6000,
+  "unlockTier": 5,
+  "facilityKw": 35,
+  "color": "#b9a3a3",
+  "accent": "#e58a96",
+  "cooling": {
+   "capacityKw": 1000,
+   "radius": 12,
+   "holdC": 37,
+   "bioOnly": true
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "vascular_plant",
+  "line": "biotech",
+  "upgradesFrom": "perfusion_manifold",
+  "seal": {
+   "biotech": -4
+  },
+  "tier": "specialist",
+  "flavor": {
+   "quote": "When we try to pick out anything by itself, we find it hitched to everything else in the universe.",
+   "author": "John Muir",
+   "source": "My First Summer in the Sierra, 1911"
+  }
+ },
+ "nutrient_works": {
+  "id": "nutrient_works",
+  "name": "Nutrient Works NW-60",
+  "description": "Fermentation-scale media production. Supplies 60 units a tick to its pipe net, at $2 a unit, for 60 kW of pumping.",
+  "kind": "nutrient",
+  "category": "bio",
+  "width": 4,
+  "cost": 3200000,
+  "upkeepPerDay": 6000,
+  "unlockTier": 4,
+  "facilityKw": 60,
+  "color": "#6d7a58",
+  "accent": "#b7c26a",
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "bio": {
+   "nutrientCapacity": 60
+  },
+  "tech": "nutrient_works",
+  "line": "biotech",
+  "upgradesFrom": "nutrient_plant",
+  "seal": {
+   "biotech": -8,
+   "greentech": 3
+  },
+  "tier": "specialist",
+  "flavor": {
+   "quote": "If you wish to make an apple pie from scratch, you must first invent the universe.",
+   "author": "Carl Sagan",
+   "source": "Cosmos, 1980"
+  }
+ },
+ "biogas_digester": {
+  "id": "biogas_digester",
+  "name": "Biogas Digester BG-2000",
+  "description": "An anaerobic digestion plant, a domed tank with a flare stub. Burns 50 units of nutrient medium a tick for up to 2,000 kW, and leaks 0.006 contamination a tick into each tile it stands on.",
+  "kind": "bioreactor",
+  "category": "bio",
+  "width": 6,
+  "cost": 9000000,
+  "upkeepPerDay": 14000,
+  "unlockTier": 5,
+  "facilityKw": 40,
+  "color": "#5d6243",
+  "accent": "#c98a86",
+  "power": {
+   "capacityKw": 2000
+  },
+  "placement": {
+   "needsPower": true,
+   "needsNutrient": true
+  },
+  "bio": {
+   "nutrientUse": 50,
+   "contamination": 0.006
+  },
+  "tech": "biogas_digester",
+  "line": "biotech",
+  "upgradesFrom": "bioreactor",
+  "seal": {
+   "biotech": -12,
+   "greentech": -6
+  },
+  "tier": "specialist",
+  "flavor": {
+   "quote": "We may lay it down as an incontestable axiom, that, in all the operations of art and nature, nothing is created",
+   "author": "Antoine Lavoisier",
+   "source": "Elements of Chemistry, 1790 (tr. Kerr)"
+  }
+ },
+ "rack_neuromorphic2": {
+  "id": "rack_neuromorphic2",
+  "name": "NM-2 Event-Driven Array",
+  "description": "A mesh of spiking arrays that draw almost nothing for sparse work: 150 PFLOPS from 28 kW of air-cooled load, 5.4 PFLOPS per kW.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 2,
+  "cost": 2100000,
+  "upkeepPerDay": 5500,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#a2b79a",
+  "accent": "#6fe08a",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 28,
+   "liquidFraction": 0,
+   "pflops": 150,
+   "storageTB": 0,
+   "failurePerDay": 0.22
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "event_array",
+  "line": "greentech",
+  "tier": "specialist",
+  "upgradesFrom": "rack_neuromorphic",
+  "seal": {
+   "biotech": -1,
+   "greentech": -3
+  },
+  "flavor": {
+   "quote": "We may hope that machines will eventually compete with men in all purely intellectual fields.",
+   "author": "Alan Turing",
+   "source": "Computing Machinery and Intelligence, Mind, 1950"
+  }
+ },
+ "rack_photonic2": {
+  "id": "rack_photonic2",
+  "name": "PH-2 Photonic Mesh",
+  "description": "A chip-to-chip optical fabric behind glass: 600 PFLOPS from 70 kW of air-cooled load, 8.6 PFLOPS per kW, the best in the game. Three tiles wide and the lowest PFLOPS per tile of the trees.",
+  "kind": "rack",
+  "category": "rack",
+  "width": 3,
+  "cost": 8000000,
+  "upkeepPerDay": 13000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#c8d3d6",
+  "accent": "#7fe3ff",
+  "rack": {
+   "cooling": "air",
+   "powerKw": 70,
+   "liquidFraction": 0,
+   "pflops": 600,
+   "storageTB": 0,
+   "failurePerDay": 0.16
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "photonic_mesh",
+  "line": "greentech",
+  "upgradesFrom": "rack_photonic",
+  "seal": {
+   "greentech": -5
+  },
+  "tier": "specialist",
+  "flavor": {
+   "quote": "Are not the Rays of Light very small Bodies emitted from shining Substances?",
+   "author": "Isaac Newton",
+   "source": "Opticks, Query 29, 1704"
+  }
+ },
+ "crah_econ": {
+  "id": "crah_econ",
+  "name": "OA-400 Outside-Air Economizer",
+  "description": "A louvred roof box that brings cool outside air in. Removes up to 400 kW within 6 tiles at 18 °C outside or colder, falling to 40% at 27 °C. Free cooling when the weather helps, almost none when it does not. A Starter: anyone may build it.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 3,
+  "cost": 350000,
+  "upkeepPerDay": 500,
+  "unlockTier": 3,
+  "facilityKw": 6,
+  "color": "#a4b0a0",
+  "accent": "#9be0b0",
+  "cooling": {
+   "capacityKw": 400,
+   "radius": 6,
+   "freeAir": {
+    "fullBelowC": 18,
+    "hotC": 27,
+    "hotFactor": 0.4
+   }
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "economizer",
+  "tier": "starter",
+  "line": "greentech",
+  "seal": {
+   "greentech": -2
+  },
+  "flavor": {
+   "quote": "Nature, to be commanded, must be obeyed.",
+   "author": "Francis Bacon",
+   "source": "Novum Organum, 1620"
+  }
+ },
+ "crah_adiabatic": {
+  "id": "crah_adiabatic",
+  "name": "AD-1500 Adiabatic Unit",
+  "description": "An evaporative air handler with a wet pad: 1,500 kW of heat removal within 10 tiles for 20 kW of fans. It drinks water and is happiest in dry air.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 4,
+  "cost": 2600000,
+  "upkeepPerDay": 3200,
+  "unlockTier": 4,
+  "facilityKw": 20,
+  "color": "#8fa8a6",
+  "accent": "#a8f0e0",
+  "cooling": {
+   "capacityKw": 1500,
+   "radius": 10
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "adiabatic_cooling",
+  "tier": "specialist",
+  "upgradesFrom": "crah_econ",
+  "line": "greentech",
+  "seal": {
+   "greentech": -3
+  },
+  "flavor": {
+   "quote": "Everybody talks about the weather, but nobody does anything about it.",
+   "author": "Charles Dudley Warner",
+   "source": "Editorial, Hartford Courant, 24 August 1897 (often credited to Mark Twain)"
+  }
+ },
+ "fuel_cell": {
+  "id": "fuel_cell",
+  "name": "Hydrogen Fuel-Cell FC-1000",
+  "description": "A pale cabinet over a bank of hydrogen cylinders: 1,000 kW at $30 a kWh, in about 4 minutes. Clean, quiet and ruinously dear; it exists to replace the diesel for the dry weeks.",
+  "kind": "genset",
+  "category": "power",
+  "width": 4,
+  "cost": 1800000,
+  "upkeepPerDay": 2200,
+  "unlockTier": 4,
+  "facilityKw": 0,
+  "color": "#8fb4c4",
+  "accent": "#bfe8ff",
+  "power": {
+   "capacityKw": 1000,
+   "startDelayTicks": 4,
+   "costPerKwh": 30
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "tech": "hydrogen_cell",
+  "tier": "specialist",
+  "upgradesFrom": "genset",
+  "line": "greentech",
+  "seal": {
+   "greentech": -2
+  },
+  "flavor": {
+   "quote": "I believe that water will one day be employed as fuel",
+   "author": "Jules Verne",
+   "source": "The Mysterious Island, 1874"
+  }
+ },
+ "ups_iron_air": {
+  "id": "ups_iron_air",
+  "name": "Iron-Air Store IA-20",
+  "description": "A long rust-orange container of iron-air cells: 20,000 kWh at up to 1,500 kW, about 100 hours of backup for a small hall, at 50% round-trip efficiency.",
+  "kind": "ups",
+  "category": "power",
+  "width": 6,
+  "cost": 5000000,
+  "upkeepPerDay": 3000,
+  "unlockTier": 5,
+  "facilityKw": 12,
+  "color": "#a5654a",
+  "accent": "#ffa56b",
+  "power": {
+   "capacityKw": 1500,
+   "storageKwh": 20000,
+   "efficiency": 0.5
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "iron_air_charter",
+  "tier": "specialist",
+  "upgradesFrom": "ups_bank_big",
+  "line": "greentech",
+  "seal": {
+   "greentech": -6
+  },
+  "flavor": {
+   "quote": "It is always darkest just before the day dawneth.",
+   "author": "Thomas Fuller",
+   "source": "A Pisgah-Sight of Palestine, 1650"
+  }
+ },
+ "geothermal": {
+  "id": "geothermal",
+  "name": "Geothermal Well GW-2000",
+  "description": "An enhanced-geothermal wellhead in the basement, hot pipes and a pump: 2,000 kW of firm power at $2 a kWh. Needs a basement floor, and never needs the weather.",
+  "kind": "genset",
+  "category": "power",
+  "width": 4,
+  "cost": 6500000,
+  "upkeepPerDay": 5000,
+  "unlockTier": 5,
+  "facilityKw": 0,
+  "color": "#6f6a60",
+  "accent": "#e8e0d0",
+  "power": {
+   "capacityKw": 2000,
+   "startDelayTicks": 12,
+   "costPerKwh": 2
+  },
+  "placement": {
+   "needsPower": true,
+   "basementOnly": true
+  },
+  "tech": "geothermal_charter",
+  "tier": "specialist",
+  "line": "greentech",
+  "seal": {
+   "greentech": -14
+  },
+  "flavor": {
+   "quote": "We find no vestige of a beginning,—no prospect of an end.",
+   "author": "James Hutton",
+   "source": "Theory of the Earth, 1788"
+  }
+ },
+ "grid_tie_lucy": {
+  "id": "grid_tie_lucy",
+  "name": "Luci's Rate Card",
+  "description": "A 9 MW grid intake at a quarter off, negotiated by Luci herself in crimson and gold. Same capacity as the Grid Intake 9 MW for $1.1M. The catch is on the other page.",
+  "kind": "grid_tie",
+  "category": "power",
+  "width": 8,
+  "cost": 1100000,
+  "upkeepPerDay": 5500,
+  "unlockTier": 3,
+  "facilityKw": 45,
+  "color": "#a83a3a",
+  "accent": "#f0c04a",
+  "power": {
+   "capacityKw": 9000
+  },
+  "placement": {
+   "maxFloor": 0,
+   "needsPower": true
+  },
+  "unlock": {
+   "bond": {
+    "who": "luci",
+    "min": 40
+   }
+  },
+  "seal": {
+   "greentech": 16
+  },
+  "flavor": {
+   "quote": "A cynic is a man who knows the price of everything and the value of nothing.",
+   "author": "Oscar Wilde",
+   "source": "Lady Windermere's Fan, act 3, 1892"
+  }
+ },
+ "microgrid_bea": {
+  "id": "microgrid_bea",
+  "name": "Leaf-Bolt Microgrid",
+  "description": "Bea's own block of 600 kW of photovoltaics on a cabinet with a leaf-bolt badge. Sun-dependent like any panel; the storage half of her design is still in the drawer.",
+  "kind": "solar",
+  "category": "power",
+  "width": 4,
+  "cost": 1900000,
+  "upkeepPerDay": 900,
+  "unlockTier": 3,
+  "facilityKw": 0,
+  "color": "#7aa86a",
+  "accent": "#d6c25a",
+  "power": {
+   "capacityKw": 600
+  },
+  "placement": {
+   "needsPower": true,
+   "exteriorOnly": true
+  },
+  "line": "greentech",
+  "unlock": {
+   "bond": {
+    "who": "bea",
+    "min": 40
+   }
+  },
+  "seal": {
+   "biotech": -1,
+   "greentech": -12
+  },
+  "flavor": {
+   "quote": "A thing is right when it tends to preserve the integrity, stability, and beauty of the biotic community.",
+   "author": "Aldo Leopold",
+   "source": "A Sand County Almanac, 1949"
+  }
+ },
+ "ice_store": {
+  "id": "ice_store",
+  "name": "Ice Thermal Battery",
+  "description": "An insulated white tank that freezes water at night and melts it at the peak. Draws 800 kW of heat from the air within 8 tiles. Cass built the first one herself.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 3,
+  "cost": 1200000,
+  "upkeepPerDay": 900,
+  "unlockTier": 3,
+  "facilityKw": 4,
+  "color": "#dfe8ee",
+  "accent": "#9fe3ff",
+  "cooling": {
+   "capacityKw": 800,
+   "radius": 8
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "unlock": {
+   "bond": {
+    "who": "cass",
+    "min": 40
+   }
+  },
+  "seal": {},
+  "flavor": {
+   "quote": "One must have a mind of winter",
+   "author": "Wallace Stevens",
+   "source": "The Snow Man, Harmonium, 1923"
+  }
+ },
+ "cold_room": {
+  "id": "cold_room",
+  "name": "Cold Room",
+  "description": "A cold, quiet room with a heavy door. Cuts the failure rate of every rack within 8 tiles on its floor by 20%. It also pulls 60 kW of heat from the air there. Cass says it helps people think.",
+  "kind": "crah",
+  "category": "cooling",
+  "width": 4,
+  "cost": 2000000,
+  "upkeepPerDay": 1200,
+  "unlockTier": 4,
+  "facilityKw": 6,
+  "color": "#cfd8dc",
+  "accent": "#80d8ff",
+  "cooling": {
+   "capacityKw": 60,
+   "radius": 8,
+   "failureFactor": 0.8
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "unlock": {
+   "bond": {
+    "who": "cass",
+    "min": 70
+   }
+  },
+  "seal": {},
+  "flavor": {
+   "quote": "After great pain, a formal feeling comes.",
+   "author": "Emily Dickinson",
+   "source": "Poem 341, c. 1862"
   }
  }
 }

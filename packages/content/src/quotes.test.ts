@@ -6,10 +6,10 @@ import type { ContentDB, Flavor } from "./schema";
 const docs = readFileSync(new URL("../../../docs/QUOTES.md", import.meta.url), "utf8");
 const rows = docs.split("\n").filter((l) => l.startsWith("| `"));
 
-const flavors = (db: ContentDB): { id: string; f: Flavor }[] => [
-	...Object.values(db.facilities).flatMap((d) => (d.flavor ? [{ id: d.id, f: d.flavor }] : [])),
-	...db.tech.flatMap((n) => (n.flavor ? [{ id: n.id, f: n.flavor }] : [])),
-	...Object.values(db.bots).flatMap((b) => (b.flavor ? [{ id: b.id, f: b.flavor }] : [])),
+const flavors = (db: ContentDB): { id: string; kind: string; f: Flavor }[] => [
+	...Object.values(db.facilities).flatMap((d) => (d.flavor ? [{ id: d.id, kind: "facility", f: d.flavor }] : [])),
+	...db.tech.flatMap((n) => (n.flavor ? [{ id: n.id, kind: "tech", f: n.flavor }] : [])),
+	...Object.values(db.bots).flatMap((b) => (b.flavor ? [{ id: b.id, kind: "bot", f: b.flavor }] : [])),
 ];
 
 describe("flavor validation", () => {
@@ -53,8 +53,9 @@ describe("flavor quotes", () => {
 		for (const [author, n] of count) expect(n, author).toBeLessThanOrEqual(4);
 	});
 	it("lists every quote in docs/QUOTES.md with the item id, author and a verification URL", () => {
-		for (const { id, f } of flavors(db)) {
-			const row = rows.find((r) => r.startsWith(`| \`${id}\` |`));
+		// A facility and a tech node may share an id (perfusion_manifold, cryo_plant...), so rows are keyed by kind too.
+		for (const { id, kind, f } of flavors(db)) {
+			const row = rows.find((r) => r.startsWith(`| \`${id}\` | ${kind} |`));
 			expect(row, `${id} missing from docs/QUOTES.md`).toBeDefined();
 			expect(row, id).toContain(f.quote);
 			expect(row, id).toContain(f.author);

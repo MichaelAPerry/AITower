@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
-import type { Balance } from "@aitower/content";
+import { type Balance, type ContentDB, upgradeCost, upgradesTo } from "@aitower/content";
+import type { GameStore } from "@aitower/shared";
 import type { BotState, FacilityView, SimView } from "@aitower/sim";
-import { fmtDuration, fmtEnergy, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
+import { fmtDuration, fmtEnergy, fmtMoney, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
 import { pushNotice } from "../notices";
 import { bioWords, facilityName, tissueState, traitInfo, organoidBand } from "../bio/bio";
 import { rackProblem } from "../objective/diagnose";
@@ -140,6 +141,42 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 	);
 }
 
+/**
+ * Upgrade actions: one button per item this facility upgrades to (`upgradesFrom`), with the price (new cost less half of the old one).
+ * The sim decides whether it is open (Level, research, commit, bond, room beside it); its reason is shown when it is not.
+ */
+export function UpgradeActions({ store, content, f }: { store: GameStore; content: ContentDB; f: FacilityView }) {
+	const from = content.facilities[f.defId];
+	if (!from || f.grown) return null;
+	const targets = upgradesTo(content, f.defId);
+	if (targets.length === 0) return null;
+	return (
+		<div className="ui-upgrade" data-tut="upgrade">
+			{targets.map((to) => {
+				const cmd = { type: "upgradeFacility", facilityId: f.id, defId: to.id } as const;
+				const can = store.canBuild(cmd);
+				return (
+					<div key={to.id} className="ui-upgrade-row">
+						<button
+							type="button"
+							className="ui-btn"
+							disabled={!can.ok}
+							title={can.ok ? `Swap in place for ${to.name}` : can.reason}
+							onClick={() => {
+								const r = store.dispatch(cmd);
+								if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `upgrade:${r.reason}` });
+							}}
+						>
+							Upgrade to {to.name} · {fmtMoney(upgradeCost(from, to))}
+						</button>
+						{!can.ok && <p className="ui-upgrade-why">{can.reason}</p>}
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
 function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f: FacilityView }) {
 	const { view } = state;
 	const def = content.facilities[f.defId];
@@ -220,6 +257,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				</Row>
 			</div>
 			<NetSummaries view={view} f={f} />
+			<UpgradeActions store={store} content={content} f={f} />
 			<div className="ui-insp-actions">
 				<Toggle
 					on={f.enabled}

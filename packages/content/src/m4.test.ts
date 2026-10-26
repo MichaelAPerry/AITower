@@ -28,7 +28,7 @@ describe("M4 content (bundled)", () => {
 		it("has about 8 facilities covering solar, wind, heat export, carbon and green racks", () => {
 			const green = ["solar_skin", "solar_canopy", "wind_mast", "heat_exchanger", "heat_pipeline", "algae_facade", "carbon_capture", "rack_neuromorphic", "rack_photonic"];
 			expect(green).toHaveLength(9);
-			expect(kinds("solar").map((d) => d.id).sort()).toEqual(["solar_canopy", "solar_skin"]);
+			expect(kinds("solar").map((d) => d.id).sort()).toEqual(["microgrid_bea", "solar_canopy", "solar_skin"]);
 			expect(kinds("wind").map((d) => d.id)).toEqual(["wind_mast"]);
 			expect(kinds("heat_export").map((d) => d.id).sort()).toEqual(["heat_exchanger", "heat_pipeline"]);
 			expect(kinds("carbon").map((d) => d.id).sort()).toEqual(["algae_facade", "carbon_capture"]);
@@ -131,24 +131,32 @@ describe("M4 content (bundled)", () => {
 			}
 		});
 
-		it("has a Greentech branch of about 8 nodes: T3 basics and T5 path nodes", () => {
+		it("has a Greentech branch of about 8 nodes: T3 Starter basics and commit-only Specialist nodes from T3 to T5", () => {
 			expect(GREEN_TECH.length).toBeGreaterThanOrEqual(8);
 			const path = GREEN_TECH.filter((id) => byTech.get(id)!.path === "greentech");
-			expect(path.length).toBeGreaterThanOrEqual(4);
-			for (const id of path) expect(byTech.get(id)!.minTier, id).toBe(5);
+			expect(path.length).toBeGreaterThanOrEqual(6);
+			for (const id of path) {
+				expect(byTech.get(id)!.requiresCommit, id).toBe("greentech");
+				expect(byTech.get(id)!.minTier, id).toBeGreaterThanOrEqual(3);
+			}
 			const basics = GREEN_TECH.filter((id) => byTech.get(id)!.path === undefined);
-			expect(basics.length).toBeGreaterThanOrEqual(4);
-			for (const id of basics) expect(byTech.get(id)!.minTier, id).toBe(3);
+			expect(basics.length).toBeGreaterThanOrEqual(2);
+			for (const id of basics) {
+				expect(byTech.get(id)!.minTier, id).toBe(3);
+				expect(byTech.get(id)!.requiresCommit, id).toBeUndefined();
+			}
 			for (const id of ["canopy_array", "heat_pipeline_franchise", "carbon_capture_dossier", "photonic_bench"]) expect(byTech.get(id)!.path, id).toBe("greentech");
 		});
 
-		it("has 5 Synthetic nodes, all T5 and path-gated", () => {
+		it("has 5 Synthetic nodes, all T4 or T5, tagged Synthetic and open to anyone on the default path", () => {
 			expect(SYNTH_TECH).toHaveLength(5);
 			for (const id of SYNTH_TECH) {
 				expect(byTech.get(id)!.path, id).toBe("synthetic");
-				expect(byTech.get(id)!.minTier, id).toBe(5);
+				expect(byTech.get(id)!.requiresCommit, id).toBeUndefined();
+				expect(byTech.get(id)!.minTier, id).toBeGreaterThanOrEqual(4);
 			}
-			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(5);
+			// + Combined-Cycle, Cryo Plant and Reactor Licence (docs/TREES.md).
+			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(8);
 		});
 
 		it("T3 basics take 1-3 days of typical output and path nodes 2.5-8 days", () => {

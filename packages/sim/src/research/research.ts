@@ -1,5 +1,5 @@
 /** Research: tech perks, gating, the `research` command and RP income. */
-import type { ContentDB, FeatureId, PerkKind, TechNode } from "@aitower/content";
+import { nodeTier, researchCommitBlock, type ContentDB, type FeatureId, type PerkKind, type TechNode } from "@aitower/content";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import type { SimState } from "../core/state";
 import { AFFINITY_PER_TECH, addAffinity, techPath } from "../progression/affinity";
@@ -81,8 +81,10 @@ export function planResearch(ctx: PlanCtx, techId: string): Plan {
 	for (const req of node.requires) {
 		if (!isResearched(state, req)) return reject(`missing prerequisite: ${techNode(content, req)?.name ?? req}`);
 	}
-	if (node.path !== undefined && state.path !== node.path) return reject(`requires the ${node.path} path`);
-	if (state.tier < node.minTier) return reject(`requires Clearance ${node.minTier}`);
+	const commit = researchCommitBlock(node, state.path);
+	if (commit) return reject(commit);
+	const tier = nodeTier(node, state.bonds);
+	if (state.tier < tier) return reject(`requires Clearance ${tier}`);
 	if (state.researchPoints < node.cost) return reject(`needs ${rp(node.cost)} RP, have ${rp(state.researchPoints)}`);
 	return accept(0, (events) => {
 		state.researchPoints = Math.max(0, state.researchPoints - node.cost);

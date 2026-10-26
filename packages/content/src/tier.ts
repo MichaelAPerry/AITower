@@ -68,7 +68,7 @@ export function outputShare(def: FacilityDef, content: Pick<ContentDB, "faciliti
 
 /** Balance note from the design doc: shown on the card of the item where a line stops improving. */
 export const AIR_TOPS_OUT = "Air tops out here";
-const AIR_TOPS_OUT_IDS: ReadonlySet<string> = new Set(["rack_air_gpu3", "rack_air_gpu2"]);
+const AIR_TOPS_OUT_IDS: ReadonlySet<string> = new Set(["rack_infer"]);
 export const tierNote = (def: FacilityDef): string | undefined => (AIR_TOPS_OUT_IDS.has(def.id) ? AIR_TOPS_OUT : undefined);
 
 /** What a rack's cooling line is (the Foreman's "Racks: Air / Liquid / Immersion line"). */

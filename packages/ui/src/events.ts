@@ -43,6 +43,7 @@ const commandName: Record<SimCommand["type"], string> = {
 	repayLoan: "Repay loan",
 	choosePath: "Choose path",
 	setAutomation: "Automation orders",
+	upgradeFacility: "Upgrade",
 };
 
 const gradeSeverity = (g: AuditGrade): Severity => {

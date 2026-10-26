@@ -51,7 +51,7 @@ describe("secret seal numbers", () => {
 		s.state.tier = 5;
 		s.state.techResearched.push("solar_charter");
 		s.invalidateProjection();
-		place(s, "solar_skin", 1, 30);
+		place(s, "solar_skin", 1, 40); // exterior wall: the edge of the floor
 		expect(s.state.sealScar).toEqual(before);
 		s.state.sealResidue.greentech = 1;
 		steps(s, 24 * 60);

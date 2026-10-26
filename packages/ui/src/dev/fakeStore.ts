@@ -126,7 +126,7 @@ export function createFakeContent(): ContentDB {
 			automation: { partsBatch: 5, foremanPerHour: 1 },
 			ascension: { minTier: 5 },
 			endings: { absorbed: { corruption: 1 } },
-			soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, bondStart: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
+			soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, starterWeight: 0.5, bondStart: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
 			audit: { periodDays: 7, cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
 		scenarios: FAKE_SCENARIOS,

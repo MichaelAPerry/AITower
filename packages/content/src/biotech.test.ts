@@ -20,9 +20,25 @@ describe("biotech content (bundled)", () => {
 		expect(validateContent(db)).toEqual([]);
 	});
 
-	it("has the nine biotech facilities, four of them hardware, and every one gated by wetware tech", () => {
-		expect(player.map((d) => d.id).sort()).toEqual(["bioreactor", "culling_room", "dna_vault", "neural_pit", "nutrient_plant", "organoid_incubator", "quarantine_lock", "rack_organoid_2", "sterile_bay"]);
-		expect(player.filter((d) => d.rack)).toHaveLength(4);
+	it("has the fifteen wetware facilities (Starter, Specialist and Mel's signature cortex), eight of them racks, each gated by wetware tech", () => {
+		expect(player.map((d) => d.id).sort()).toEqual([
+			"biogas_digester",
+			"bioreactor",
+			"culling_room",
+			"dna_vault",
+			"neural_pit",
+			"nutrient_plant",
+			"nutrient_tank_s",
+			"nutrient_works",
+			"organoid_incubator",
+			"quarantine_lock",
+			"rack_culture_s",
+			"rack_organoid_2",
+			"rack_organoid_3",
+			"rack_organoid_3m",
+			"sterile_bay",
+		]);
+		expect(player.filter((d) => d.rack)).toHaveLength(7);
 		const byId = new Map(db.tech.map((n) => [n.id, n]));
 		for (const d of player) {
 			const node = byId.get(d.tech as string);
@@ -38,7 +54,8 @@ describe("biotech content (bundled)", () => {
 
 	it("organoids deliver at least 1.3x the PFLOPS per kW of the best non-bio rack, at 37 C +- 1", () => {
 		const perKw = (id: string): number => (f[id].rack?.pflops ?? 0) / (f[id].rack?.powerKw ?? 1);
-		const bestT4 = Math.max(...Object.values(f).filter((d) => d.rack && d.rack.cooling !== "bio" && d.unlockTier <= 4 && d.id !== "rack_photonic").map((d) => perKw(d.id)));
+		// Against the shared and Synthetic racks: the Green line (neuromorphic, photonic) is the one that beats the Flesh on PFLOPS per kW.
+		const bestT4 = Math.max(...Object.values(f).filter((d) => d.rack && d.rack.cooling !== "bio" && d.line !== "greentech" && d.unlockTier <= 4).map((d) => perKw(d.id)));
 		for (const id of ["organoid_incubator", "neural_pit"]) {
 			expect(perKw(id) / bestT4, id).toBeGreaterThan(1.3);
 			expect(perKw(id) / bestT4, id).toBeLessThan(3.4);
@@ -47,15 +64,18 @@ describe("biotech content (bundled)", () => {
 		expect(f.dna_vault.rack?.storageTB).toBeGreaterThan(f.rack_storage2.rack?.storageTB as number);
 	});
 
-	it("incubators unlock at the Wetware Annex tier 3; the neural pit needs Clearance 5 and a path node", () => {
+	it("incubators unlock at the Wetware Annex tier 3 (commit only); the neural pit needs Clearance 5 and a commit node", () => {
 		expect(f.organoid_incubator.unlockTier).toBe(3);
 		expect(f.nutrient_plant.unlockTier).toBe(3);
 		expect(f.neural_pit.unlockTier).toBe(5);
 		const node = db.tech.find((n) => n.id === f.neural_pit.tech);
-		expect(node?.path).toBe("biotech");
+		expect(node?.requiresCommit).toBe("biotech");
 		expect(db.tech.find((n) => n.id === "wetware_annex")?.minTier).toBe(3);
+		expect(db.tech.find((n) => n.id === "wetware_annex")?.requiresCommit).toBe("biotech");
 		expect(db.tech.filter((n) => n.branch === "wetware").length).toBeGreaterThanOrEqual(8);
-		expect(db.tech.filter((n) => n.path === "biotech").every((n) => n.minTier === 5 && n.branch === "wetware")).toBe(true);
+		// Every node that needs the commit comes at or after the commit Level, and the Starter nodes need none.
+		for (const n of db.tech.filter((x) => x.requiresCommit === "biotech")) expect(n.minTier, n.id).toBeGreaterThanOrEqual(db.balance.ascension.minTier);
+		for (const id of ["culture_media", "culture_bench"]) expect(db.tech.find((n) => n.id === id)?.requiresCommit, id).toBeUndefined();
 	});
 
 	it("has free, unreliable, unbuildable growths", () => {
@@ -183,7 +203,7 @@ describe("organoid contracts", () => {
 		const out = Array.from({ length: 800 }, () => generateContract(rng, { tier: 4, capacityPflops: 5000, day: 20 }, db));
 		const bioJobs = out.filter((c) => db.clients.find((k) => k.id === c.clientId)?.needsBio);
 		expect(bioJobs.length).toBeGreaterThan(40);
-		const best = db.facilities.organoid_incubator.rack?.pflops as number;
+		const best = Math.max(...Object.values(db.facilities).filter((d) => d.rack?.cooling === "bio" && !d.growth && d.unlockTier <= 4).map((d) => d.rack?.pflops ?? 0));
 		for (const c of bioJobs) {
 			expect(c.needsBio).toBe(true);
 			if (c.kind === "inference") expect(c.sustainedPflops).toBeLessThanOrEqual(4 * best * 0.6 + 0.1);
@@ -201,7 +221,7 @@ describe("validateContent: M3 rules", () => {
 		expect(broken((db) => (db.facilities.quarantine_lock.bio = { contamination: 1 }))).toMatch(/unexpected "bio" spec/);
 		expect(broken((db) => (db.facilities.sterile_bay.category = "cooling"))).toMatch(/category/);
 		expect(broken((db) => (db.facilities.organoid_incubator.category = "rack"))).toMatch(/should be "bio"/);
-		expect(broken((db) => (db.facilities.nutrient_plant.width = 2))).toMatch(/nutrient must be at least 3/);
+		expect(broken((db) => (db.facilities.nutrient_plant.width = 1))).toMatch(/nutrient must be at least 2/);
 		expect(broken((db) => (db.facilities.bioreactor.width = 3))).toMatch(/bioreactor must be at least 4/);
 	});
 

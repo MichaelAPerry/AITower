@@ -127,3 +127,6 @@ The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, 
 1. Read the owner's playtest notes; fix bugs first.
 2. Tune `balance.soul` and the seal numbers.
 3. Then the "Next" list in section 0.
+
+### Catalogue redesign (docs/TREES.md)
+Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgradeCost`); sim placement goes through progression/access.ts, `upgradeFacility` in commands/upgrade.ts, snapshot v13 (migrateV12, `bondGiven`). UI reads the same `access()` for tags and lock reasons. Balance: `tools/sim-cli/src/soulRun.ts [scenario] [days] [seeds] [synthetic|biotech|greentech|all]` with the scripted player in player.ts.

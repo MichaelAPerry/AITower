@@ -116,6 +116,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		bonds: { ...content.balance.soul.bondStart },
 		objected: [],
 		sealedOut: [],
+		bondGiven: [],
 		automation: defaultAutomation(),
 		wind: 0.6,
 		droughtUntil: 0,

@@ -55,7 +55,7 @@ const TECH_LANES: TechLane[] = ["adm", "log", "pow", "cool", "comp", "wet", "gre
 const TECH_LINES: TechLine[] = ["air", "liquid", "immersion"];
 const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
-const FEATURES = ["contractsClerk", "foreman", "foremanPace"];
+const FEATURES = ["contractsClerk", "foreman", "foremanPace", "openDoor"];
 /** Letter grades A..E used by `balance.audit`. */
 const GRADES = 5;
 
@@ -100,9 +100,11 @@ export function validateFlavor(p: Problems, w: string, f: unknown): void {
 export function conduitTech(db: ContentDB, layer: "power" | "coolant" | "nutrient"): string | undefined {
 	if (layer === "power") return undefined;
 	const kinds = layer === "coolant" ? ["chiller", "cdu"] : ["nutrient"];
+	// Earliest Level first; at the same Level the cheapest research (a Starter's node comes before a Specialist's).
+	const cost = (d: FacilityDef): number => db.tech?.find((t) => t.id === d.tech)?.cost ?? 0;
 	const defs = Object.values(db.facilities)
 		.filter((d) => kinds.includes(d.kind) && !d.retired)
-		.sort((a, b) => a.unlockTier - b.unlockTier || (a.id < b.id ? -1 : 1));
+		.sort((a, b) => a.unlockTier - b.unlockTier || cost(a) - cost(b) || (a.id < b.id ? -1 : 1));
 	return defs[0]?.tech;
 }
 
@@ -156,6 +158,54 @@ function validateGreen(p: Problems, w: string, d: FacilityDef): void {
 	if (d.kind === "carbon") num(p, `${w}.creditsPerDay`, g.creditsPerDay, { gt: 0 });
 }
 
+/** Catalogue fields (docs/TREES.md): tier, unlock, line consistency. `upgradesFrom` is checked against the whole table in `validateUpgrades`. */
+function validateCatalogue(p: Problems, w: string, d: FacilityDef): void {
+	if (d.tier !== undefined && d.tier !== "starter" && d.tier !== "specialist") p.push(`${w}.tier: expected "starter" or "specialist", got ${JSON.stringify(d.tier)}`);
+	const treeLine = d.line === "biotech" || d.line === "greentech";
+	if (!d.growth && treeLine && d.tier === undefined && !d.unlock?.bond) p.push(`${w}.tier: a ${d.line} item must be a "starter" or a "specialist" (or a signature build)`);
+	if (d.tier !== undefined && !treeLine) p.push(`${w}.tier: only Bio and Green line items have a tier`);
+	const u = d.unlock;
+	if (u === undefined) return;
+	if (typeof u !== "object" || u === null) return void p.push(`${w}.unlock: expected an object`);
+	const who = (k: string, v: { who: AdvisorId; min: number } | undefined): void => {
+		if (v === undefined) return;
+		if (!ADVISORS.includes(v.who)) p.push(`${w}.unlock.${k}.who: unknown advisor "${v.who}"`);
+		num(p, `${w}.unlock.${k}.min`, v.min, { min: 1, max: 100 });
+	};
+	who("bond", u.bond);
+	who("early", u.early);
+	who("preview", u.preview);
+	if (u.commit !== undefined && !["biotech", "greentech"].includes(u.commit)) p.push(`${w}.unlock.commit: only biotech or greentech can be committed to`);
+	if (u.early) num(p, `${w}.unlock.early.tier`, u.early.tier, { min: 1, max: d.unlockTier, int: true });
+	if (u.preview) num(p, `${w}.unlock.preview.max`, u.preview.max, { min: 1, int: true });
+	if (d.tier === "starter" && u.commit) p.push(`${w}.unlock.commit: a starter is open to anyone`);
+	if (u.preview && !(d.tier === "specialist" || u.commit)) p.push(`${w}.unlock.preview: only a specialist (commit-gated) item has a preview`);
+}
+
+/** `upgradesFrom` must name another real, non-retired item and never go back down the Levels or loop. */
+function validateUpgrades(p: Problems, db: ContentDB): void {
+	for (const [key, d] of Object.entries(db.facilities ?? {})) {
+		if (d.upgradesFrom === undefined) continue;
+		const w = `facilities.${key}.upgradesFrom`;
+		const from = db.facilities[d.upgradesFrom];
+		if (!from) {
+			p.push(`${w}: unknown facility "${d.upgradesFrom}"`);
+			continue;
+		}
+		if (d.upgradesFrom === key) p.push(`${w}: upgrades itself`);
+		if (from.retired || from.growth) p.push(`${w}: "${d.upgradesFrom}" cannot be upgraded`);
+		if (from.unlockTier > d.unlockTier) p.push(`${w}: "${d.upgradesFrom}" opens at Level ${from.unlockTier}, after ${key} (Level ${d.unlockTier})`);
+		const seen = new Set<string>([key]);
+		for (let c: FacilityDef | undefined = from; c; c = c.upgradesFrom ? db.facilities[c.upgradesFrom] : undefined) {
+			if (seen.has(c.id)) {
+				p.push(`${w}: upgrade loop through "${c.id}"`);
+				break;
+			}
+			seen.add(c.id);
+		}
+	}
+}
+
 function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: number): void {
 	const w = `facilities.${key}`;
 	if (d.id !== key) p.push(`${w}: id "${d.id}" does not match key`);
@@ -163,6 +213,7 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	str(p, `${w}.description`, d.description);
 	validateFlavor(p, w, d.flavor);
 	if (d.line !== undefined && !["shared", "synthetic", "biotech", "greentech"].includes(d.line)) p.push(`${w}.line: unknown tree line "${d.line}"`);
+	validateCatalogue(p, w, d);
 	for (const [t, v] of Object.entries(d.seal ?? {})) {
 		if (!SEALED.includes(t)) p.push(`${w}.seal.${t}: only biotech or greentech can be sealed`);
 		num(p, `${w}.seal.${t}`, v, { min: -50, max: 50 });
@@ -239,6 +290,17 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		num(p, `${w}.cooling.capacityKw`, d.cooling.capacityKw, { gt: 0 });
 		if (d.kind === "chiller") num(p, `${w}.cooling.cop`, d.cooling.cop, { gt: 0 });
 		if (d.kind === "crah") num(p, `${w}.cooling.radius`, d.cooling.radius, { gt: 0 });
+		const c = d.cooling;
+		if (c.holdC !== undefined) num(p, `${w}.cooling.holdC`, c.holdC, { min: 1, max: 60 });
+		if (c.bioOnly !== undefined && typeof c.bioOnly !== "boolean") p.push(`${w}.cooling.bioOnly: expected a boolean`);
+		if (c.freeAir) {
+			num(p, `${w}.cooling.freeAir.fullBelowC`, c.freeAir.fullBelowC);
+			num(p, `${w}.cooling.freeAir.hotC`, c.freeAir.hotC);
+			num(p, `${w}.cooling.freeAir.hotFactor`, c.freeAir.hotFactor, { min: 0, max: 1 });
+			if (isNum(c.freeAir.fullBelowC) && isNum(c.freeAir.hotC) && c.freeAir.hotC <= c.freeAir.fullBelowC) p.push(`${w}.cooling.freeAir: hotC must be above fullBelowC`);
+		}
+		if (c.failureFactor !== undefined) num(p, `${w}.cooling.failureFactor`, c.failureFactor, { gt: 0, max: 1 });
+		if ((c.holdC !== undefined || c.bioOnly || c.freeAir || c.failureFactor !== undefined) && d.kind !== "crah") p.push(`${w}.cooling: holdC, bioOnly, freeAir and failureFactor are for air handlers (crah)`);
 	}
 	if (d.logistics) {
 		num(p, `${w}.logistics.capacity`, d.logistics.capacity, { min: 1, int: true });
@@ -251,6 +313,8 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		if (pl.minFloor !== undefined && pl.maxFloor !== undefined && pl.minFloor > pl.maxFloor) {
 			p.push(`${w}.placement: minFloor > maxFloor`);
 		}
+		for (const k of ["roofOnly", "exteriorOnly", "basementOnly"] as const) if (pl[k] !== undefined && typeof pl[k] !== "boolean") p.push(`${w}.placement.${k}: expected a boolean`);
+		if (pl.basementOnly && pl.roofOnly) p.push(`${w}.placement: cannot be both roofOnly and basementOnly`);
 	}
 }
 
@@ -770,6 +834,7 @@ function validateSoul(p: Problems, b: ContentDB["balance"]): void {
 	num(p, "balance.soul.sealMax", s.sealMax, { gt: 0 });
 	num(p, "balance.soul.residuePerDay", s.residuePerDay, { min: 0, max: 1 });
 	num(p, "balance.soul.objectionScar", s.objectionScar, { gt: 0 });
+	num(p, "balance.soul.starterWeight", s.starterWeight, { min: 0, max: 5 });
 	for (const k of ["bondReveal", "bondCommit", "bondEpilogue"] as const) num(p, `balance.soul.${k}`, s[k], { min: 0, max: 100 });
 	num(p, "balance.soul.bondFollow", s.bondFollow, { min: 0, max: 20 });
 	num(p, "balance.soul.bondOverrule", s.bondOverrule, { min: -20, max: 0 });
@@ -890,6 +955,13 @@ function validateTech(p: Problems, db: ContentDB): void {
 			});
 		if (!Array.isArray(n.requires)) p.push(`${w}.requires: expected an array`);
 		if (n.path !== undefined && !PATHS.includes(n.path)) p.push(`${w}.path: unknown path "${n.path}"`);
+		if (n.requiresCommit !== undefined && !SEALED.includes(n.requiresCommit)) p.push(`${w}.requiresCommit: only biotech or greentech can be committed to`);
+		if (n.requiresCommit !== undefined && isNum(db.balance?.ascension?.minTier) && isNum(n.minTier) && n.minTier < db.balance.ascension.minTier) p.push(`${w}.minTier: a commit node cannot come before the commit (Clearance ${db.balance.ascension.minTier})`);
+		if (n.earlyTier !== undefined) {
+			if (!ADVISORS.includes(n.earlyTier.who)) p.push(`${w}.earlyTier.who: unknown advisor "${n.earlyTier.who}"`);
+			num(p, `${w}.earlyTier.min`, n.earlyTier.min, { min: 1, max: 100 });
+			num(p, `${w}.earlyTier.tier`, n.earlyTier.tier, { min: 1, max: n.minTier, int: true });
+		}
 		const ascend = db.balance?.ascension?.minTier;
 		if (n.path !== undefined && isNum(ascend) && isNum(n.minTier) && n.minTier < ascend) p.push(`${w}.minTier: a path node cannot come before the path is chosen (Clearance ${ascend})`);
 	});
@@ -931,7 +1003,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 }
 
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
-const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 3, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
+const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 2, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
 
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
@@ -1011,6 +1083,7 @@ export function validateContent(db: ContentDB): string[] {
 	validateResearchBalance(p, db);
 	validateLanes(p, db);
 	validateTech(p, db);
+	validateUpgrades(p, db);
 	validateBioBalance(p, db);
 	validatePathsAndEndings(p, db);
 

@@ -731,11 +731,11 @@ describe("choosePath and gates", () => {
 
 	it("a path tech node cannot be researched before its path is chosen", () => {
 		const sim = lab({}, (c) => {
-			c.tech.push({ id: "bio_t", name: "Bio Tech", description: "", branch: "wetware", minTier: 1, cost: 1, requires: [], effects: [], path: "biotech" });
+			c.tech.push({ id: "bio_t", name: "Bio Tech", description: "", branch: "wetware", minTier: 1, cost: 1, requires: [], effects: [], requiresCommit: "biotech" });
 		});
 		giveRp(sim, 10);
 		const r = sim.submit({ type: "research", techId: "bio_t" });
-		expect(!r.ok && r.reason).toMatch(/biotech path/);
+		expect(!r.ok && r.reason).toMatch(/Commit to The Flesh/);
 		sim.state.tier = 5;
 		sim.invalidateProjection();
 		exec(sim, { type: "choosePath", path: "biotech" });
@@ -870,7 +870,7 @@ describe("snapshot v5", () => {
 		expect(snap.version).toBe(SNAPSHOT_VERSION);
 		const s = snap.state;
 		snap.version = 4;
-		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
+		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut", "bondGiven"]) delete s[k];
 		delete s.rng.growth;
 		delete s.metrics.organoidPflops;
 		for (const f of s.facilities) for (const k of ["nutrientNet", "nutrientSat", "noNutrient", "tooCold", "grown", "recoverAt"]) delete f[k];
@@ -894,7 +894,7 @@ describe("snapshot v5", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Record<string, any> };
 		const s = snap.state;
 		snap.version = 4;
-		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
+		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut", "bondGiven"]) delete s[k];
 		delete s.rng.growth;
 		delete s.metrics.organoidPflops;
 		for (const f of s.facilities) for (const k of ["nutrientNet", "nutrientSat", "noNutrient", "tooCold", "grown", "recoverAt"]) delete f[k];

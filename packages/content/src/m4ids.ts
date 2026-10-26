@@ -36,3 +36,50 @@ export const V2_TECH = ["culture_media", "fleet_command", "grid_autonomy", "imme
 export const V2_FACILITIES = ["grid_tie_4", "rack_imm_gpu3", "rack_organoid_2"];
 
 export const M4_TECH = [...GREEN_TECH, ...SYNTH_TECH, ...AUTOMATION_TECH];
+
+/** The three catalogues (docs/TREES.md): facilities and tech nodes that are new, so the older trunk tests set them aside. */
+export const V3_FACILITIES = [
+	"cdu_hall",
+	"cryo_plant",
+	"genset_cc",
+	"reactor_smr",
+	"rack_culture_s",
+	"nutrient_tank_s",
+	"rack_organoid_3",
+	"rack_organoid_3m",
+	"perfusion_bath",
+	"perfusion_manifold",
+	"vascular_plant",
+	"nutrient_works",
+	"biogas_digester",
+	"rack_neuromorphic2",
+	"rack_photonic2",
+	"crah_econ",
+	"crah_adiabatic",
+	"fuel_cell",
+	"ups_iron_air",
+	"geothermal",
+	"grid_tie_lucy",
+	"microgrid_bea",
+	"ice_store",
+	"cold_room",
+	// reworked into the Green line (Level 5, adiabatic plant)
+	"chiller_free",
+];
+export const V3_TECH = [
+	"culture_bench",
+	"perfusion_baths",
+	"nutrient_works",
+	"perfusion_manifold",
+	"vascular_plant",
+	"biogas_digester",
+	"economizer",
+	"event_array",
+	"hydrogen_cell",
+	"iron_air_charter",
+	"geothermal_charter",
+	"photonic_mesh",
+	"combined_cycle",
+	"cryo_plant",
+	"reactor_licence",
+];
