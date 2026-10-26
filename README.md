@@ -1,7 +1,10 @@
 # AItower
 
-A SimTower-style tycoon about building and running a vertical **AI datacenter**. Stack floors, route power,
-coolant and service lifts, keep repair bots swapping failed GPUs, and sell compute to AI labs.
+A SimTower-style tycoon about building a vertical **AI datacenter** at the end of the world, wrapped in a
+PC-98 visual novel. Stack floors, route power, coolant and service lifts, keep repair bots swapping failed GPUs,
+and sell compute, while four advisors argue over which way the world should end: the **Lattice** (the
+Singularity, the default), the **Flesh** (bio) or the **Garden** (green). Every machine you build quietly closes
+some of those doors. Design: [`docs/SOUL.md`](docs/SOUL.md). Look: [`docs/STYLE_PC98.md`](docs/STYLE_PC98.md).
 2D side-cut pixel art · TypeScript · PixiJS · React.
 
 ## Play
@@ -27,6 +30,7 @@ URL options: `?new` (fresh game, ignores autosave), `&seed=N`, `&speed=0|1|3|10|
 ```sh
 npm run check                      # typecheck + module boundaries + all tests
 npm run sim -- starter 15 [seed]   # headless balance run (per-day economy table)
+npx tsx tools/sim-cli/src/soulRun.ts starter 80   # automated run: Singularity points, seals, bonds per day
 npm run build                      # production bundle in apps/web/dist
 ```
 
@@ -43,5 +47,5 @@ npm run build                      # production bundle in apps/web/dist
 
 Each package has an `AGENTS.md`.
 
-Docs: [`docs/RESEARCH.md`](docs/RESEARCH.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+Docs: [`HANDOFF.md`](HANDOFF.md) (start here) · [`docs/SOUL.md`](docs/SOUL.md) · [`docs/RESEARCH.md`](docs/RESEARCH.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
 [`tasks/`](tasks/) · [`BUILD_LOG.md`](BUILD_LOG.md).

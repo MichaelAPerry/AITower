@@ -27,7 +27,7 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   Shown at boot over a paused game unless the URL has `?new` (the e2e smoke test needs that). `<Hud title>` overrides it (the dev
   harness uses `?title=1`; SSR tests have no `location`, so no title). Only Continue, New game and Load leave it; Esc does nothing.
   The system menu opened from it has only Load, Settings and Controls (`SystemMenu fromTitle`) and calls `onReplaced` after a load.
-- `advisors/` (M6.3, replaces UNIT-7 and the memo desk): four advisors (Cass Parr, Bea Altasar, Dr. Mel Kiorre, Lucien Ferro). Pure: `advisors.ts`
+- `advisors/` (M6.3, replaces UNIT-7 and the memo desk): four advisors (Cass Parr, Bea Altasar, Dr. Mel Kiorre, Luci Ferro), drawn from the PC-98 portraits in `art/` (`Portrait`, `FullPortrait`, four moods). Pure: `advisors.ts`
   (metadata, `{{term|label}}` markup, effect chips, `priceLine`, `tally`), `suggest.ts` (problem detection: the old UNIT-7 rules, each with an owner
   advisor and Handbook link), `talk.ts` (`tipCandidates`, `pitches` = "when a better rack is available and affordable its advisor compares the slot",
   `answerFor` = the ranked Ask answer, `nextTip`). React: `AdvisorStrip.tsx` (docked strip bottom-left of the world, four portrait buttons, one
@@ -35,7 +35,10 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   the snapshot as `advisorTips`; quiet during coach marks and the first game day except urgent problems; Esc closes Ask without opening the menu),
   `DecisionCard.tsx` (the decision card with the MAGI vote), `Portrait.tsx` (inline SVG busts), `advisors.css`. The Settings toggle is `advisorTips`
   (tips only; decisions always appear; Ask always works).
-- `status/`: the reputation meter and active-effect chips (`Status.tsx`, `status.ts`, `status.css`), kept from the old memo desk.
+- `status/`: active-effect chips (`Status.tsx`, `status.ts`, `status.css`).
+- `vn/`: story scenes as a visual novel (`StoryScene.tsx`: backdrop, caption, portrait, typewriter lines, ▶ choices, replies; the choice is filed after the replies). `gameover/EndingScene.tsx`: the three Singularity endings with the top-bond advisor's epilogue.
+- `soul/`: the three Singularity bars (`SoulGauge`), the advisors' dossier (`Dossier`), build-card notes on secret numbers (`SealNotes`), and pure helpers (`soul.ts`).
+- `pc98/pc98.css` (imported last): the PC-98 tokens and frames (docs/STYLE_PC98.md). `art/`: portraits and backdrops as lossless WebP.
 - `gameover/`: `gameOver.ts` (pure: `gameOverToShow`/`keepDismissed` give once-only, stats, copy), `GameOverScreen.tsx`. Bankrupt and
   shutdown are final (Load game / New game); victory has Continue in sandbox. Pauses once when it appears.
 - `tutorial/`: `steps.ts` (data + predicates), `Tutorial.tsx`, `clock.ts` (`applyClock`: pause on entry, run at 3x only for steps
@@ -78,8 +81,8 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   `dev/fakeSaves.ts` gives it in-memory async save slots, export/import text and `newGame`.
 - `dev/` (package root): Vite harness. Run `npx vite packages/ui/dev --port 5175`, then
   `node scripts/screenshot.mjs http://localhost:5175 out.png 1440 900 1500`.
-  Extra params: `?title=1` (&`saves=0` for a first visit), `?memo=N` (&`hist=1`), `?standing=N`, `?mod=1`, `?over=bankrupt|shutdown|victory`,
-  `?tut=<step id>|none`, `?toasts=0`. The fake store has `issueMemo`, `setStanding`, `addModifier`, `triggerGameOver`.
+  Extra params: `?title=1` (&`saves=0` for a first visit), `?memo=N` (&`hist=1`), `?mod=1`, `?over=bankrupt|victory|absorbed|singularity|flesh|garden`,
+  `?tut=<step id>|none`, `?toasts=0`. The fake store has `issueMemo`, `addModifier`, `triggerGameOver`.
   M2b params: `?clerk=1|on` (clerk hired, or switched on with limits), `?rp=N` research points, `?research=1` opens the sheet, `?audit=A..E` files an audit
   after load, `?fin=credit|audits|record` (with `?tab=finance`).
   Query params: `?tab=jobs|telemetry|finance|alerts`, `?overlay=heat`, `?sel=<facilityId>|bot|lift|none`,
@@ -146,7 +149,7 @@ subscribe, and Hud/SystemMenu server-render tests. There is no DOM test environm
 input, download) was verified in Chromium through the dev harness.
 
 ## Calm HUD and synthetic look (M3-T4b; supersedes the layout notes above where they differ)
-Layout: a thin **top strip** (`calm/TopStrip.tsx`: day/clock, speed, TREASURY, PER HOUR, Clearance bar, STANDING, growth index, INBOX, MENU), the world, a **NEXT chip**
+Layout: a thin **top strip** (`calm/TopStrip.tsx`: day/clock, speed, TREASURY, PER HOUR, Level bar, the Singularity bars, growth index, MENU), the world, a **NEXT chip**
 (top centre, from `currentObjective`; tooltip = detail; click opens the drawer or FORM A-5), a **ticker** (bottom, click = alert log), a **build dock** (bottom left, 3 picks +
 More = the full `BuildPalette` as a popover, Wetware tab included) and **drawers on the right edge** (`calm/Parts.tsx`; one at a time; classes `ui-edge`, `data-drawer`):
 C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). The bottom panel, TopBar and CURRENT ORDERS are gone.

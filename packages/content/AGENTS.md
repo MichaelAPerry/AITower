@@ -9,14 +9,14 @@ Game data, validation and the contract generator. Depends on nothing.
 | `src/data/*.json` | Facilities, bots, clients, structure costs, lift, balance, scenarios. Records are keyed by `id`. |
 | `src/load.ts` | `loadContent()` — statically imports the JSON, deep-copies it, attaches `generateContract`, validates, throws listing every problem. |
 | `src/validate.ts` | `validateContent(db): string[]` — hand-written checks (ids/keys, kind→category→spec, numbers, 24-hour price curve, tier arrays, thermal stability, scenario placement: lot bounds, slab support, overlaps, lift shafts, power/coolant conduits, min/max floor). `facilityNeedsPower(def)` mirrors the sim default. |
-| `src/data/events.json` | 24 Compute Authority memos (7 ministry-category, 4 environmental, 4 operational, 2 client, 7 horror; incl. the day-2 scripted `first_heat_alarm`). Each has exactly 2 choices; 23 of 48 carry an `affinity` effect (+2..+6) toward biotech, greentech or synthetic. Hints state real numbers in a fixed format (`+$150k now · standing -5 · ambient +8°C for 12h`); `events.test.ts` checks them. `balance.events.intervalTicks` is 3600 (about 2.5 game days, ±50%). The `ministry` category id is frozen in the schema; it now means Compute Authority notices. Voice guide: `tasks/m4b/README.md`. |
+| `src/data/events.json` | 24 Compute Authority memos (7 ministry-category, 4 environmental, 4 operational, 2 client, 7 horror; incl. the day-2 scripted `first_heat_alarm`). Each has exactly 2 choices; 23 of 48 carry an `affinity` effect (+2..+6) toward biotech, greentech or synthetic. Hints state real numbers in a fixed format (`+$150k now · ambient +8°C for 12h · Garden +3`; `seal`, `bond`, `sp` and `commitPath` effects are hidden); `events.test.ts` checks them. `balance.events.intervalTicks` is 3600 (about 2.5 game days, ±50%). The `ministry` category id is frozen in the schema; it now means Compute Authority notices. Voice guide: `tasks/m4b/README.md`. |
 | `src/data/tech.json` | M2b research tree: 36 nodes, 5 branches, tiers 1-4 (8/10/12/6). Unlocks are declared on the facility/bot (`tech: "<node id>"`), never on the node; perks stay within x0.8-1.15. Generated descriptions state the real numbers, so re-check them if a value changes. |
 | `src/data/facilities.json` | 31 facilities (11 original, ungated; 20 M2b ones, all `tech`-gated, `unlockTier` 2-4). `bots.json`: rover + tech-gated `drone` (flying) and `lifter` (carry 3). |
 | `src/contracts.ts` | `generateContract` (deterministic; randomness only via `rng`), `pickClient`, `CONTRACT_TUNING` ($/PFLOP-h rates and size ranges). |
 | `src/*.test.ts` | Loader/validator and generator tests. |
 
 ## Invariants
-- Event ids are `[a-z0-9_]+` and unique; `defaultChoice` must exist; effect durations are positive integers; weights > 0; `gridCap` factor 0..1 (0 = blackout). `validateContent` also checks `balance.standing` / `balance.events`.
+- Event ids are `[a-z0-9_]+` and unique; `defaultChoice` must exist; effect durations are positive integers; weights > 0; `gridCap` factor 0..1 (0 = blackout). `validateContent` also checks `balance.events` and `balance.soul`.
 - M2 economy: tier rewards are 5x the M1 values; `rack_dlc_gpu` is 130 PFLOPS so it computes ~1.6x the air PFLOPS per dollar once CDU/chiller/CRAH shares are counted (test in `events.test.ts`).
 - Facility ids are fixed (other packages and tests reference them): `rack_air_gpu`, `rack_dlc_gpu`, `rack_storage`,
   `crah_unit`, `chiller`, `cdu`, `grid_tie`, `genset`, `ups_battery`, `parts_depot`, `bot_charger`; bot `rover`;
@@ -36,7 +36,7 @@ Game data, validation and the contract generator. Depends on nothing.
 `npx vitest run packages/content` · `npm run typecheck` · `npm run check:boundaries`
 
 ## M3 (Biotech path)
-- Clearance 5 (3,000 PF, uptime 0.992, reward $25M, loan cap $100M); `ascension.minTier` 5. `paths.json` (all three paths available since M4), `endings.json` (3), `balance.bio` / `balance.endings` tuned (see `biotech.test.ts` for the contamination model checks).
+- Clearance 5 (3,000 PF, uptime 0.992, reward $25M, loan cap $100M); `ascension.minTier` 3. `paths.json` (the three trees), `endings.json` (singularity, flesh, garden with per-advisor epilogues, absorbed), `balance.bio` / `balance.endings` tuned (see `biotech.test.ts` for the contamination model checks).
 - 8 biotech facilities + 3 growths (`growth: true`, free, no tech), all other wetware facilities gated by a `wetware`-branch tech (`wetware_annex` T3, five T4 nodes, T5 `path: "biotech"` nodes). Organoid racks: `cooling: "bio"`, category `"bio"`, `rack.bio` required, liquidFraction 0, `needsNutrient`. Bioreactors need both `power` and `bio` specs. Nutrient is never pre-placed in scenarios.
 - 4 `needsBio` clients (generator sizes them against <= 4 of the best bio racks and sets `needsBio` on the spec); events: 4 T1-T2 seeds, 8 biotech memos, 13 `horror` memos (`minCorruption` 0.1..0.9, required for horror).
 - Tech tree totals: trunk 60-90 days, wetware branch 30-50 more.
@@ -47,4 +47,9 @@ Game data, validation and the contract generator. Depends on nothing.
 - Research: no new branches exist, so greentech nodes live in `power` (photonic in `compute`) and synthetic nodes in `compute`. T3 basics need no path; T5 nodes carry `path` (validator: a path node's minTier >= `ascension.minTier`). `works_foreman` (administration, minTier 1 so a fully automated run can reach Clearance 2; 2,200 RP) is the only `foreman` feature node; `FEATURES` in validate.ts now includes it.
 - Events: 6 greentech memos (Dunkelflaute, two heat-tariff memos, soiling, wind noise, carbon audit) plus 4 fungal and 4 identity `horror` memos gated by `path` (greentech/synthetic), minTier 5, with no `minCorruption`: the sim's corruption does not move on those paths, so the validator exempts them from the corruption-gate rule.
 - Scenarios: `brownfield` (startTier 2, $350k, six air cabinets on one CRAH, hot at ~81 C, six slab floors) and `sandbox` (`sandbox: true`, $500M, startTier 5). Both are exercised by `sim-cli`. Coolant nets are per floor: keep the chiller/CDU on the same floor as the liquid racks.
-- Balance: `green` heatPrice 3 (40% of electricity), creditPrice 40, drought 6%/day, x0.1 for 16 h; `automation` partsBatch 5, foremanPerHour 1; `greenExemplar` 0.7 / 3,000 PF / 4 days; `millionMinds` 0.85 / 3,600 PF / 5 days. Reasons are asserted in `m4.test.ts`.
+- Balance: `green` heatPrice 3 (40% of electricity), creditPrice 40, drought 6%/day, x0.1 for 16 h; `automation` partsBatch 5, foremanPerHour 1. Reasons are asserted in `m4.test.ts`.
+
+## The Soul (docs/SOUL.md)
+- `facilities.json`: every facility has a `line` (absent = shared) and secret `seal` numbers for biotech/greentech (positive scars, negative heals).
+- `story.json`: the story scenes (category `story`, `trigger`, `whenPath`, `lines`, per-choice `reply`, `backdrop`, `location`), merged into `events` by `load.ts`.
+- `balance.soul`: SP target and weights, seal max and residue rate, objection threshold, bond start and gates. Reputation (`balance.standing`) was removed.
