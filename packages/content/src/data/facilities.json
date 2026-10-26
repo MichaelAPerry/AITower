@@ -596,7 +596,7 @@
   "width": 8,
   "cost": 1500000,
   "upkeepPerDay": 5500,
-  "unlockTier": 3,
+  "unlockTier": 4,
   "facilityKw": 45,
   "color": "#4a4f35",
   "accent": "#f0e8cc",

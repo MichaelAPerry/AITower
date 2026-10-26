@@ -106,7 +106,7 @@ Verdicts: **K** kept, **R** reworked into a tree (stats or line changed), **C** 
 
 Upgrade cost is always `new cost - 50% old cost`. Failure rates and bio fields of existing items stay as in the data unless stated.
 
-### 2.1 Shared (Levels 1-3, everyone)
+### 2.1 Shared (everyone; Grid 9 MW opens at Level 4)
 
 | Item (id) | Grounding | Cost | Draw/Out kW | Heat/Cap kW | PF | W | Upgrades from | SP | Seal B/G |
 |--|--|--|--|--|--|--|--|--|--|

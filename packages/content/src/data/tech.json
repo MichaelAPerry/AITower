@@ -531,7 +531,7 @@
   "description": "A private line to the transmission grid. Grid energy price -5%. Unlocks the Grid Intake 9 MW.",
   "branch": "power",
   "lane": "pow",
-  "minTier": 3,
+  "minTier": 4,
   "cost": 14000,
   "requires": [
    "gas_concession",

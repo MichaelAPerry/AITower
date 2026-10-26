@@ -30,7 +30,7 @@ const SPEC: Row[] = [
 	["crah_hc", 0.48, 75, 0, 700, 4, 3, "high_capacity_air", 0, 3],
 	["grid_tie", 0.25, 0, 0, 1500, 4, 1, undefined, 0, 8],
 	["grid_tie_2", 0.52, 0, 0, 3500, 5, 2, "substation_licence", 0, 8],
-	["grid_tie_3", 1.5, 0, 0, 9000, 8, 3, "feeder_treaty", 0, 10],
+	["grid_tie_3", 1.5, 0, 0, 9000, 8, 4, "feeder_treaty", 0, 10],
 	["genset", 0.35, 0, 0, 800, 4, 1, undefined, 6, 20],
 	["ups_battery", 0.3, 0, 0, 500, 3, 1, undefined, 3, 5],
 	["ups_bank_big", 1.4, 0, 0, 2000, 5, 3, "accumulator_charter", 2, 6],
