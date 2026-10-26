@@ -1,0 +1,399 @@
+[
+ {
+  "id": "msg_cass_1",
+  "from": "cass",
+  "maxBond": 30,
+  "text": "Did you eat?",
+  "taps": [
+   {
+    "label": "Yes",
+    "back": "Good."
+   },
+   {
+    "label": "Not yet",
+    "back": "Go. I'll wait."
+   }
+  ]
+ },
+ {
+  "id": "msg_cass_2",
+  "from": "cass",
+  "maxBond": 30,
+  "text": "Chiller four iced again. Not your fault.",
+  "taps": [
+   {
+    "label": "Thanks",
+    "back": "Mm."
+   },
+   {
+    "label": "Need help?",
+    "back": "Bring a torch."
+   }
+  ]
+ },
+ {
+  "id": "msg_cass_3",
+  "from": "cass",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Did you sleep?",
+  "taps": [
+   {
+    "label": "Yes",
+    "back": "Good."
+   },
+   {
+    "label": "A bit",
+    "back": "Define a bit."
+   }
+  ]
+ },
+ {
+  "id": "msg_cass_4",
+  "from": "cass",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Left a mug on your desk. It's cold now. Sorry.",
+  "taps": [
+   {
+    "label": "I'll drink it",
+    "back": "It's awful."
+   },
+   {
+    "label": "Thanks",
+    "back": "Okay."
+   }
+  ]
+ },
+ {
+  "id": "msg_cass_5",
+  "from": "cass",
+  "minBond": 50,
+  "maxBond": 70,
+  "text": "Snow's coming in. The window's open if you want it.",
+  "taps": [
+   {
+    "label": "On my way",
+    "back": "Bring a coat."
+   },
+   {
+    "label": "Save me a seat",
+    "back": "There's one."
+   }
+  ]
+ },
+ {
+  "id": "msg_cass_6",
+  "from": "cass",
+  "minBond": 70,
+  "text": "I'm up. You?",
+  "taps": [
+   {
+    "label": "Always",
+    "back": "Come down."
+   },
+   {
+    "label": "Nearly asleep",
+    "back": "Good. Night."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_1",
+  "from": "bea",
+  "maxBond": 30,
+  "text": "Roof's open. Bring a hat.",
+  "taps": [
+   {
+    "label": "Coming",
+    "back": "Right."
+   },
+   {
+    "label": "Busy",
+    "back": "Sure."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_2",
+  "from": "bea",
+  "maxBond": 30,
+  "text": "Pigeons on the panels again.",
+  "taps": [
+   {
+    "label": "Ha",
+    "back": "It's not funny."
+   },
+   {
+    "label": "Names?",
+    "back": "Dave. And Dave."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_3",
+  "from": "bea",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Fern three looks better. Don't make it weird.",
+  "taps": [
+   {
+    "label": "Weird?",
+    "back": "Don't."
+   },
+   {
+    "label": "Proud of you",
+    "back": "Shut up. Thanks."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_4",
+  "from": "bea",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Found the good wrench. It was under the sandwiches.",
+  "taps": [
+   {
+    "label": "Gross",
+    "back": "Mine."
+   },
+   {
+    "label": "Keep it",
+    "back": "Plan to."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_5",
+  "from": "bea",
+  "minBond": 50,
+  "maxBond": 70,
+  "text": "Sunrise is 6:12. Just so you know.",
+  "taps": [
+   {
+    "label": "I'll be there",
+    "back": "Okay. Hi."
+   },
+   {
+    "label": "Too early",
+    "back": "Come anyway."
+   }
+  ]
+ },
+ {
+  "id": "msg_bea_6",
+  "from": "bea",
+  "minBond": 70,
+  "text": "Saved you the pickle.",
+  "taps": [
+   {
+    "label": "My hero",
+    "back": "Shut up."
+   },
+   {
+    "label": "Thanks",
+    "back": "Yeah."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_1",
+  "from": "mel",
+  "maxBond": 30,
+  "text": "Sorry to bother you. Nothing's wrong.",
+  "taps": [
+   {
+    "label": "No bother",
+    "back": "Oh. Good."
+   },
+   {
+    "label": "Okay?",
+    "back": "Yes. Noted."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_2",
+  "from": "mel",
+  "maxBond": 30,
+  "text": "The culture smells like bread today. Is that good? I don't know.",
+  "taps": [
+   {
+    "label": "Good sign",
+    "back": "Hm. Noted."
+   },
+   {
+    "label": "Bread?",
+    "back": "Slightly. Sorry."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_3",
+  "from": "mel",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "I wrote your name on my glove. By accident.",
+  "taps": [
+   {
+    "label": "Rub it out",
+    "back": "Okay."
+   },
+   {
+    "label": "Leave it",
+    "back": "I will."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_4",
+  "from": "mel",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "A clarinet came on the radio. I thought of the lab.",
+  "taps": [
+   {
+    "label": "Same",
+    "back": "Oh."
+   },
+   {
+    "label": "Which song?",
+    "back": "I didn't catch it."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_5",
+  "from": "mel",
+  "minBond": 50,
+  "maxBond": 70,
+  "text": "I made tea in the lab. Two cups. If you like.",
+  "taps": [
+   {
+    "label": "On my way",
+    "back": "It's hot."
+   },
+   {
+    "label": "Save mine",
+    "back": "I'll keep it warm."
+   }
+  ]
+ },
+ {
+  "id": "msg_mel_6",
+  "from": "mel",
+  "minBond": 70,
+  "text": "I checked my pulse. It's fast. I think it's you.",
+  "taps": [
+   {
+    "label": "Same",
+    "back": "Oh. Good."
+   },
+   {
+    "label": "Check again",
+    "back": "Checking. Still fast."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_1",
+  "from": "luci",
+  "maxBond": 30,
+  "text": "Your quarterly is attached. No notes.",
+  "taps": [
+   {
+    "label": "Thanks",
+    "back": "Noted."
+   },
+   {
+    "label": "Sorry",
+    "back": "I'll revise the figure."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_2",
+  "from": "luci",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Lunch is on the company. Don't tell the company.",
+  "taps": [
+   {
+    "label": "Yes",
+    "back": "Twelve-thirty."
+   },
+   {
+    "label": "Busy",
+    "back": "Pity. It's a nice sandwich."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_3",
+  "from": "luci",
+  "minBond": 30,
+  "maxBond": 50,
+  "text": "Saw a cheque for $41. Hardware shop. Curious, not cross.",
+  "taps": [
+   {
+    "label": "The roof",
+    "back": "Ah."
+   },
+   {
+    "label": "Mine",
+    "back": "Fine."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_4",
+  "from": "luci",
+  "minBond": 50,
+  "maxBond": 70,
+  "text": "Midnight close. You're welcome to watch.",
+  "taps": [
+   {
+    "label": "I'll be there",
+    "back": "I'll bring the good pen."
+   },
+   {
+    "label": "Early start",
+    "back": "Next month, then."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_5",
+  "from": "luci",
+  "minBond": 50,
+  "maxBond": 70,
+  "text": "Red coat tomorrow. For the record.",
+  "taps": [
+   {
+    "label": "Noted",
+    "back": "Good."
+   },
+   {
+    "label": "Why?",
+    "back": "No reason. Darling."
+   }
+  ]
+ },
+ {
+  "id": "msg_luci_6",
+  "from": "luci",
+  "minBond": 70,
+  "text": "Stay.",
+  "taps": [
+   {
+    "label": "Staying",
+    "back": "Good."
+   },
+   {
+    "label": "Where?",
+    "back": "Here. Anywhere."
+   }
+  ]
+ }
+]

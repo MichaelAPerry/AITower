@@ -6,8 +6,8 @@
  *   biotech   : shared racks to Level 3, commit to The Flesh, then organoid halls with nutrient, sterile bays and perfusion.
  *   greentech : shared racks to Level 3, commit to The Garden, then neuromorphic / photonic halls with PV, wind and heat export.
  *
- * Bond pace: the After-hours visit (a dating-side feature) does not exist in the sim yet, so the policy adds +3 bond a day to the
- * tree's champion by editing the state directly (`visitBond`), as the design assumes an attentive player gets from visits.
+ * Bond pace: once a game day the player stays late with the tree's champion (the real `visitAdvisor` command: +3 bond, then the
+ * scene's first choice, a warm +1), which is the pace the balance in docs/TREES.md section 5.1 depends on.
  */
 import {
 	access,
@@ -725,16 +725,15 @@ export class Player {
 		if (v.clerk.unlocked && !v.clerk.policy.enabled) this.submit({ type: "setClerk", policy: PERMISSIVE_CLERK });
 	}
 
-	/** Called at the start of each game day: the champion's After-hours visit (simulated, +3 bond a day). */
+	/** Called at the start of each game day: the After-hours visit with the tree's champion, through the real command. */
 	dayStart(day: number): void {
 		if (day === this.day) return;
 		this.day = day;
-		if (this.tree === "synthetic") return;
-		const st = (this.sim as unknown as { state?: { bonds: Record<string, number> } }).state;
-		if (!st) return;
-		const who = CHAMPION[this.tree];
-		st.bonds[who] = Math.min(100, st.bonds[who] + 3);
-		(this.sim as unknown as { invalidateProjection?: () => void }).invalidateProjection?.();
+		const r = this.sim.submit({ type: "visitAdvisor", advisor: CHAMPION[this.tree] });
+		if (!r.ok) return; // a decision is open, or the lesson forbids it: skip today
+		this.sim.flush();
+		const d = this.sim.view().decision;
+		if (d) this.submit({ type: "resolveDecision", decisionId: d.id, choiceId: d.choices[0].id });
 	}
 
 	/** Accept an offer the way the harness always does (clerk off) or leave it to the clerk. */

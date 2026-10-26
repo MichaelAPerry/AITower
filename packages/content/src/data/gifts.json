@@ -1,0 +1,30 @@
+[
+ {
+  "advisor": "luci",
+  "liked": "rack_infer",
+  "disliked": "algae_facade",
+  "likedLine": "Luci read the spec sheet twice. \"Billed by the hour. Good.\"",
+  "dislikedLine": "Luci slid the invoice back across. \"That's a hobby, Operator.\""
+ },
+ {
+  "advisor": "mel",
+  "liked": "nutrient_tank_s",
+  "disliked": "crah_econ",
+  "likedLine": "Mel laid a hand flat on the tank. \"It's warm.\" She sounded surprised.",
+  "dislikedLine": "Mel looked at the louvres. \"That lets the outside in.\" She went to check the cultures."
+ },
+ {
+  "advisor": "bea",
+  "liked": "heat_exchanger",
+  "disliked": "genset",
+  "likedLine": "Bea knocked twice on the heat exchanger. \"Hi.\" She was grinning.",
+  "dislikedLine": "Bea looked at the genset for a while. Then she shut the door on it."
+ },
+ {
+  "advisor": "cass",
+  "liked": "cdu",
+  "disliked": "genset_gas",
+  "likedLine": "Cass checked the gauges before she said anything. \"Clean loop.\" She nodded.",
+  "dislikedLine": "Cass held her mug well away from the turbine. \"It's loud,\" she said. \"And hot.\""
+ }
+]

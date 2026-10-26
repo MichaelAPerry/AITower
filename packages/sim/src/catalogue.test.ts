@@ -396,7 +396,7 @@ describe("snapshot v13", () => {
 		const rp = s.state.researchPoints;
 		const scar = { ...s.state.sealScar };
 		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(13);
+		expect(loaded.snapshot().version).toBeGreaterThanOrEqual(13);
 		const ids = loaded.state.facilities.map((f) => f.defId);
 		expect(ids).not.toContain("rack_air_gpu3");
 		expect(ids).not.toContain("rack_imm_gpu");

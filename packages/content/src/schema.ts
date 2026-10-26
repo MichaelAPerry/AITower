@@ -649,6 +649,31 @@ export interface SoulBalance {
 	/** Bond change when the player takes / overrules an advisor's recommendation. */
 	bondFollow: number;
 	bondOverrule: number;
+	/** Bond the advisor you visit After hours earns (once per game day). */
+	afterHoursBond: number;
+	/** Bond change for a gift she likes / dislikes (once per item). */
+	giftLiked: number;
+	giftDisliked: number;
+	/** Bond for a one-tap reply to her message. */
+	messageBond: number;
+	/** The confession asks the top-bond advisor at this bond or more, once the tower reaches `confessionTier`. */
+	confessionBond: number;
+	confessionTier: number;
+}
+
+/** Named bond stages (docs/VN_WRITING.md, dating proposal 2). The first number of each stage is its lower bound. */
+export type BondStage = "colleague" | "friend" | "close" | "devoted";
+export const BOND_STAGES: readonly { id: BondStage; name: string; from: number }[] = [
+	{ id: "colleague", name: "Colleague", from: 0 },
+	{ id: "friend", name: "Friend", from: 30 },
+	{ id: "close", name: "Close", from: 50 },
+	{ id: "devoted", name: "Devoted", from: 70 },
+];
+/** The stage a bond (0..100) is in: Colleague 0-29, Friend 30-49, Close 50-69, Devoted 70-100. */
+export function bondStage(bond: number): { id: BondStage; name: string; from: number } {
+	let st = BOND_STAGES[0];
+	for (const x of BOND_STAGES) if (bond >= x.from) st = x;
+	return st;
 }
 
 /** One line of a visual-novel scene. */
@@ -670,7 +695,11 @@ export type StoryTrigger =
 	| { kind: "sp"; path: AscensionPath; atLeast: number }
 	| { kind: "seal"; path: SealedTree; atLeast: number }
 	| { kind: "sealedOut"; path: SealedTree }
-	| { kind: "objection"; path: SealedTree };
+	| { kind: "objection"; path: SealedTree }
+	/** After-hours visits: issued only by the `visitAdvisor` command (never by the story queue). Weighted by bond stage. */
+	| { kind: "afterHours" }
+	/** The confession (docs/VN_WRITING.md, proposal 6): issued once the tower reaches `soul.confessionTier`, to the top-bond advisor at `soul.confessionBond`+. */
+	| { kind: "confession" };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
@@ -711,7 +740,11 @@ export type EventEffect =
 	/** Commit to a tree, as FORM A-5 would (ignored if a path is already chosen). The trap in "Luci, you decide". */
 	| { type: "commitPath"; path: AscensionPath }
 	/** Add (or remove) Singularity points of a tree directly (Mel's shortcuts, Cass's slow week). */
-	| { type: "sp"; path: AscensionPath; amount: number };
+	| { type: "sp"; path: AscensionPath; amount: number }
+	/** Hidden: remember a fact about the player (an id from `data/memories.json`). Shown on the dossier as "She remembers". */
+	| { type: "flag"; id: string }
+	/** Lock the route: this advisor's epilogue closes the ending. Only the first lock counts. */
+	| { type: "route"; advisor: AdvisorId };
 
 export interface EventChoice {
 	/** Stable id, e.g. "approve" | "deny" | "file". */
@@ -725,6 +758,8 @@ export interface EventChoice {
 	effects: EventEffect[];
 	/** Story scenes: what the advisors say back after this choice (pushback, approval). */
 	reply?: SceneLine[];
+	/** An earned option: it is only offered once this advisor's bond is at least `atLeast`. */
+	minBond?: { advisor: AdvisorId; atLeast: number };
 }
 
 export interface EventDef {
@@ -757,6 +792,18 @@ export interface EventDef {
 	trigger?: StoryTrigger;
 	/** Story scenes: only while the committed path is one of these (null = no path yet). */
 	whenPath?: (AscensionPath | null)[];
+	/** Story scenes: only once this advisor's bond is at least `atLeast` (a stage: 30 Friend, 50 Close, 70 Devoted). */
+	minBond?: { advisor: AdvisorId; atLeast: number };
+	/** Story scenes: only while this advisor's bond is below `below` (After-hours pools use it to stay in a stage). */
+	maxBond?: { advisor: AdvisorId; below: number };
+	/** Story scenes (rivals): only while `high`'s bond is at least `atLeast` above `low`'s. */
+	bondGap?: { high: AdvisorId; low: AdvisorId; atLeast: number };
+	/** Story scenes: only once no route is locked / or this one is. `true` = only while the route is still open. */
+	routeOpen?: boolean;
+	/** Story scenes: answering never adds the follow / overrule bond (After-hours visits, the confession). */
+	quiet?: boolean;
+	/** After-hours visits: the scene belongs to its stage only. By default a visit of a lower stage may be replayed as filler once the current stage's scenes are all seen; a staged one never is. */
+	staged?: boolean;
 	/** Story scenes: the dialogue before the choice. `{item}` is replaced by the subject facility's name. */
 	lines?: SceneLine[];
 	/** Story scenes: the backdrop (a tree floor) and the caption box text. */
@@ -814,6 +861,36 @@ export interface EndingDef {
 	backdrop?: AscensionPath;
 	/** Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). */
 	epilogue?: Partial<Record<AdvisorId, string>>;
+	/** With a locked route: one line from each of the other advisors, who noticed whom you chose. Keyed by the one who speaks. */
+	routeAck?: Partial<Record<AdvisorId, string>>;
+}
+
+/** A gift an advisor likes and one she dislikes (docs/VN_WRITING.md, proposal 4). Once per item. */
+export interface GiftDef {
+	advisor: AdvisorId;
+	liked: string;
+	disliked: string;
+	/** The line (toast) when she gets the liked / disliked item. */
+	likedLine: string;
+	dislikedLine: string;
+}
+
+/** A one-line text from an advisor (proposal 8). `taps` are the one-tap replies; each earns `soul.messageBond`. */
+export interface MessageDef {
+	id: string;
+	from: AdvisorId;
+	text: string;
+	/** Stage band, like story scenes. */
+	minBond?: number;
+	maxBond?: number;
+	taps: { label: string; back: string }[];
+}
+
+/** What an advisor remembers: a flag set by a story choice, worded for the dossier (proposal 9). */
+export interface MemoryDef {
+	flag: string;
+	advisor: AdvisorId;
+	text: string;
 }
 
 /** An ascension path as offered at Clearance `balance.ascension.minTier`. */
@@ -885,5 +962,8 @@ export interface ContentDB {
 	lanes?: LaneDef[];
 	paths: PathDef[];
 	endings: EndingDef[];
+	gifts: GiftDef[];
+	messages: MessageDef[];
+	memories: MemoryDef[];
 	generateContract: ContractGenerator;
 }

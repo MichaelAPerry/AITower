@@ -32,11 +32,13 @@
  *    (4 → 3 tiles) and the Mind Lattice (2 → 3 tiles) are refitted to their new width (a Mind Lattice with no free tile beside
  *    it is sold back at its old price), `bondGiven` starts empty, and a tower that holds the Wetware Annex is granted the Culture
  *    Bench that now comes first. Scars and residue are left alone: a tower that already owns Bio or Green items keeps them running.
+ *  - v13 → v14 (the dating systems, docs/VN_WRITING.md): `route` (null), memory `flags`, After-hours `afterHoursDay` (-1) and
+ *    `afterSeen`, `gifted`, the `inbox` with `messageDay` (-1) and `messageSeen`.
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 13;
+export const SNAPSHOT_VERSION = 14;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -339,7 +341,20 @@ function migrateV12(state: RawState): RawState {
 	return state;
 }
 
-export const migrations: Record<number, StateMigration> = { 12: migrateV12, 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** The dating systems. Everything starts empty (a tower already at Level 4 is asked its confession at the next story check). */
+function migrateV13(state: RawState): RawState {
+	if (state.route === undefined) state.route = null;
+	if (!Array.isArray(state.flags)) state.flags = [];
+	if (typeof state.afterHoursDay !== "number") state.afterHoursDay = -1;
+	if (!Array.isArray(state.afterSeen)) state.afterSeen = [];
+	if (!Array.isArray(state.gifted)) state.gifted = [];
+	if (!Array.isArray(state.inbox)) state.inbox = [];
+	if (typeof state.messageDay !== "number") state.messageDay = -1;
+	if (!Array.isArray(state.messageSeen)) state.messageSeen = [];
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 13: migrateV13, 12: migrateV12, 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

@@ -244,7 +244,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		irreversible: false,
 		path: null,
 		organoidPflops: 0,
-		soul: { sp: { synthetic: 0, biotech: 0, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, sealedOut: [], commitBlock: { synthetic: null, biotech: null, greentech: null } },
+		soul: { sp: { synthetic: 0, biotech: 0, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, sealedOut: [], commitBlock: { synthetic: null, biotech: null, greentech: null }, route: null, flags: [], afterHours: { available: true, reason: null }, inbox: [], giftable: [], gifted: [] },
 		affinity: { biotech: 0, greentech: 0, synthetic: 0 },
 		pathScore: 0,
 		greenScore: 0,

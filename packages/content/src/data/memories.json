@@ -1,0 +1,412 @@
+[
+ {
+  "flag": "intro_dunno",
+  "advisor": "cass",
+  "text": "You said you didn't know yet what the tower was for."
+ },
+ {
+  "flag": "intro_coffee",
+  "advisor": "cass",
+  "text": "You asked who was buying the coffee."
+ },
+ {
+  "flag": "cass_every_day",
+  "advisor": "cass",
+  "text": "You said you think about stopping. Every day."
+ },
+ {
+  "flag": "cass_stayed_night",
+  "advisor": "cass",
+  "text": "You stayed for ten minutes of terrible coffee."
+ },
+ {
+  "flag": "cass_asked_instead",
+  "advisor": "cass",
+  "text": "You asked what she would do instead."
+ },
+ {
+  "flag": "cass_gauges",
+  "advisor": "cass",
+  "text": "You let her show you the gauges at three in the morning."
+ },
+ {
+  "flag": "cass_blanket",
+  "advisor": "cass",
+  "text": "You slept at your desk. She left you the blanket."
+ },
+ {
+  "flag": "cass_coldroom",
+  "advisor": "cass",
+  "text": "You stood in the cold room with her."
+ },
+ {
+  "flag": "cass_asked_home",
+  "advisor": "cass",
+  "text": "You asked her to come home and sleep."
+ },
+ {
+  "flag": "cass_window_hand",
+  "advisor": "cass",
+  "text": "You held her hand at the window."
+ },
+ {
+  "flag": "cass_remember",
+  "advisor": "cass",
+  "text": "You promised to remember the people outside."
+ },
+ {
+  "flag": "cass_form_wait",
+  "advisor": "cass",
+  "text": "You took FORM A-5 home to sleep on it."
+ },
+ {
+  "flag": "cass_read_form",
+  "advisor": "cass",
+  "text": "You read FORM A-5 with her."
+ },
+ {
+  "flag": "confess_cass_yes",
+  "advisor": "cass",
+  "text": "You said yes. She's staying."
+ },
+ {
+  "flag": "confess_cass_later",
+  "advisor": "cass",
+  "text": "You asked her to wait."
+ },
+ {
+  "flag": "confess_cass_no",
+  "advisor": "cass",
+  "text": "You said no. She thanked you for saying it straight."
+ },
+ {
+  "flag": "gift_cass",
+  "advisor": "cass",
+  "text": "You gave her the coolant distribution unit. She checked the gauges first."
+ },
+ {
+  "flag": "gift_cass_bad",
+  "advisor": "cass",
+  "text": "You gave her the gas turbine."
+ },
+ {
+  "flag": "intro_outlive",
+  "advisor": "bea",
+  "text": "You said the tower should outlive us."
+ },
+ {
+  "flag": "bea_cert",
+  "advisor": "bea",
+  "text": "You bought the certificate."
+ },
+ {
+  "flag": "bea_panels",
+  "advisor": "bea",
+  "text": "You bought the panels for the north wall."
+ },
+ {
+  "flag": "diesel_signed",
+  "advisor": "bea",
+  "text": "You took the diesel."
+ },
+ {
+  "flag": "diesel_refused",
+  "advisor": "bea",
+  "text": "You turned the diesel down."
+ },
+ {
+  "flag": "bea_ferns_cared",
+  "advisor": "bea",
+  "text": "You said you'd keep an eye on the ferns."
+ },
+ {
+  "flag": "bea_ferns_shrug",
+  "advisor": "bea",
+  "text": "You said it was just ferns."
+ },
+ {
+  "flag": "bea_ferns_watered",
+  "advisor": "bea",
+  "text": "You watered a fern with her."
+ },
+ {
+  "flag": "bea_river_walked",
+  "advisor": "bea",
+  "text": "You walked the outfall in her spare boots."
+ },
+ {
+  "flag": "bea_river_shrug",
+  "advisor": "bea",
+  "text": "You said the river was dying anyway."
+ },
+ {
+  "flag": "bea_credits_honest",
+  "advisor": "bea",
+  "text": "You sold only the credits you'd earned."
+ },
+ {
+  "flag": "bea_credits_sold",
+  "advisor": "bea",
+  "text": "You sold the credits, all of them."
+ },
+ {
+  "flag": "bea_wrench_flirt",
+  "advisor": "bea",
+  "text": "You said you'd bring the good wrench."
+ },
+ {
+  "flag": "bea_roof_night",
+  "advisor": "bea",
+  "text": "You lay on the warm panels with her."
+ },
+ {
+  "flag": "bea_roof_count",
+  "advisor": "bea",
+  "text": "You counted the lit windows with her."
+ },
+ {
+  "flag": "bea_goodwrench",
+  "advisor": "bea",
+  "text": "You held the bucket while she used the good wrench."
+ },
+ {
+  "flag": "bea_every_morning",
+  "advisor": "bea",
+  "text": "You said you'd come up every morning."
+ },
+ {
+  "flag": "confess_bea_yes",
+  "advisor": "bea",
+  "text": "You said yes. Properly."
+ },
+ {
+  "flag": "confess_bea_later",
+  "advisor": "bea",
+  "text": "You asked her for a bit."
+ },
+ {
+  "flag": "confess_bea_no",
+  "advisor": "bea",
+  "text": "You said no. She said thanks for the answer."
+ },
+ {
+  "flag": "gift_bea",
+  "advisor": "bea",
+  "text": "You gave her the heat recovery unit. She said hi to it."
+ },
+ {
+  "flag": "gift_bea_bad",
+  "advisor": "bea",
+  "text": "You gave her the diesel genset."
+ },
+ {
+  "flag": "mel_said_yes",
+  "advisor": "mel",
+  "text": "You said a copy of you would be you."
+ },
+ {
+  "flag": "mel_said_no",
+  "advisor": "mel",
+  "text": "You said it would be someone else."
+ },
+ {
+  "flag": "mel_asked_want",
+  "advisor": "mel",
+  "text": "You asked if she'd want it to be you."
+ },
+ {
+  "flag": "mel_asked_okay",
+  "advisor": "mel",
+  "text": "You asked if she was all right."
+ },
+ {
+  "flag": "mel_flinch_cared",
+  "advisor": "mel",
+  "text": "You asked what the cultures need."
+ },
+ {
+  "flag": "mel_flinch_shrug",
+  "advisor": "mel",
+  "text": "You said they'd adapt."
+ },
+ {
+  "flag": "mel_held_jar",
+  "advisor": "mel",
+  "text": "You held the jar."
+ },
+ {
+  "flag": "mel_glove_word",
+  "advisor": "mel",
+  "text": "She wrote a word on your hand."
+ },
+ {
+  "flag": "mel_seeded",
+  "advisor": "mel",
+  "text": "You seeded the ducts."
+ },
+ {
+  "flag": "mel_slow",
+  "advisor": "mel",
+  "text": "You let it grow at its own pace."
+ },
+ {
+  "flag": "mel_first",
+  "advisor": "mel",
+  "text": "You said you'd be the first."
+ },
+ {
+  "flag": "mel_firstjar",
+  "advisor": "mel",
+  "text": "You held the first jar with her."
+ },
+ {
+  "flag": "mel_firstmemory",
+  "advisor": "mel",
+  "text": "You told her your first memory. A green door."
+ },
+ {
+  "flag": "mel_cushion",
+  "advisor": "mel",
+  "text": "You sat on the cushion."
+ },
+ {
+  "flag": "mel_cuff",
+  "advisor": "mel",
+  "text": "She undid the cuff for you."
+ },
+ {
+  "flag": "mel_wrist",
+  "advisor": "mel",
+  "text": "You let her hold your wrist."
+ },
+ {
+  "flag": "confess_mel_yes",
+  "advisor": "mel",
+  "text": "You said yes. Next to her."
+ },
+ {
+  "flag": "confess_mel_later",
+  "advisor": "mel",
+  "text": "You asked for time to think."
+ },
+ {
+  "flag": "confess_mel_no",
+  "advisor": "mel",
+  "text": "You said no. She thanked you for the clear result."
+ },
+ {
+  "flag": "gift_mel",
+  "advisor": "mel",
+  "text": "You gave her the nutrient tank. She said it was warm."
+ },
+ {
+  "flag": "gift_mel_bad",
+  "advisor": "mel",
+  "text": "You gave her the outside-air economizer."
+ },
+ {
+  "flag": "luci_money",
+  "advisor": "luci",
+  "text": "You said the tower was for money."
+ },
+ {
+  "flag": "luci_decided",
+  "advisor": "luci",
+  "text": "You let her sign FORM A-5."
+ },
+ {
+  "flag": "luci_diesel_signed",
+  "advisor": "luci",
+  "text": "You signed the fuel deal."
+ },
+ {
+  "flag": "luci_diesel_refused",
+  "advisor": "luci",
+  "text": "You refused the fuel deal."
+ },
+ {
+  "flag": "luci_smallprint",
+  "advisor": "luci",
+  "text": "You made her read the small print."
+ },
+ {
+  "flag": "luci_want",
+  "advisor": "luci",
+  "text": "You asked what she wanted."
+ },
+ {
+  "flag": "luci_hand90",
+  "advisor": "luci",
+  "text": "You took her hand when the lights flickered."
+ },
+ {
+  "flag": "luci_tremor",
+  "advisor": "luci",
+  "text": "You told her her hand was shaking."
+ },
+ {
+  "flag": "luci_eye_offer",
+  "advisor": "luci",
+  "text": "You told her she could say it whenever."
+ },
+ {
+  "flag": "luci_hand",
+  "advisor": "luci",
+  "text": "You held her hand until it stopped."
+ },
+ {
+  "flag": "luci_closed_with",
+  "advisor": "luci",
+  "text": "You stayed until the numbers closed."
+ },
+ {
+  "flag": "luci_pencil",
+  "advisor": "luci",
+  "text": "You left your name in pencil."
+ },
+ {
+  "flag": "luci_inked",
+  "advisor": "luci",
+  "text": "You had your name inked."
+ },
+ {
+  "flag": "luci_walked",
+  "advisor": "luci",
+  "text": "You walked the aisle with her. Eighty-one paces."
+ },
+ {
+  "flag": "luci_pen",
+  "advisor": "luci",
+  "text": "You took the gold pen."
+ },
+ {
+  "flag": "luci_dawn",
+  "advisor": "luci",
+  "text": "You took her hand at dawn."
+ },
+ {
+  "flag": "confess_luci_yes",
+  "advisor": "luci",
+  "text": "You said yes."
+ },
+ {
+  "flag": "confess_luci_later",
+  "advisor": "luci",
+  "text": "You said not yet. The offer's still open."
+ },
+ {
+  "flag": "confess_luci_no",
+  "advisor": "luci",
+  "text": "You said no. She said she'd have it filed."
+ },
+ {
+  "flag": "gift_luci",
+  "advisor": "luci",
+  "text": "You gave her the inference accelerator. She read the sheet twice."
+ },
+ {
+  "flag": "gift_luci_bad",
+  "advisor": "luci",
+  "text": "You gave her the algae facade."
+ }
+]

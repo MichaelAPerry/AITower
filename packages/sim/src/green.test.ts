@@ -536,8 +536,8 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(13);
-		expect(base().snapshot().version).toBe(13);
+		expect(SNAPSHOT_VERSION).toBe(14);
+		expect(base().snapshot().version).toBe(14);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -559,7 +559,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(13);
+		expect(loaded.snapshot().version).toBe(14);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

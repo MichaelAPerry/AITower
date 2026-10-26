@@ -11,7 +11,7 @@
  * Pause: the sim itself never blocks. The clock owner (the app's store/loop) holds the clock while a decision is open, which
  * keeps the sim a pure function of (seed, commands): the same commands give the same game however fast it is played.
  */
-import { type ContentDB, type EventChoice, type EventDef, type EventEffect, SEALED_TREES } from "@aitower/content";
+import { ADVISOR_IDS, type AdvisorId, type ContentDB, type EventChoice, type EventDef, type EventEffect, SEALED_TREES } from "@aitower/content";
 import type { SimEvent } from "../api";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import { stockParts } from "../commands/operations";
@@ -58,10 +58,15 @@ function eligible(state: SimState, content: ContentDB): EventDef[] {
 	});
 }
 
-function openDecision(state: SimState, e: EventDef, events: SimEvent[], subject?: string): void {
+/**
+ * Open `e` as the pending decision. `paced` (default) counts it toward the one-decision-a-day rule and announces it so the app
+ * stops the clock; an After-hours visit is neither (the player asked for it, and the app already holds the clock).
+ */
+export function openDecision(state: SimState, e: EventDef, events: SimEvent[], subject?: string, paced = true): void {
 	const decision: Decision = { id: state.nextId.decision++, eventId: e.id, issuedAt: state.tick, deferred: false, hiddenUntil: 0 };
 	if (subject !== undefined) decision.subject = subject;
 	state.decision = decision;
+	if (!paced) return;
 	state.lastIssuedDay[e.id] = dayOf(state.tick);
 	state.lastDecisionDay = dayOf(state.tick);
 	events.push({ type: "decisionIssued", decisionId: decision.id, eventId: e.id });
@@ -90,14 +95,39 @@ export const STORY_SPACING_TICKS = 120;
 /** Story scenes and objections are checked every this many ticks (they walk the facility list). */
 export const STORY_CHECK_TICKS = 10;
 
-/** Does a story scene's trigger (and its level, day and path conditions) hold now? Objection scenes are issued separately. */
-export function storyHolds(state: SimState, content: ContentDB, e: EventDef): boolean {
-	const t = e.trigger;
-	if (!t || t.kind === "objection") return false;
+/** The advisor with the highest bond (ties go to the earlier of cass, bea, mel, luci). */
+export function topBondAdvisor(state: SimState): AdvisorId {
+	let best: AdvisorId = ADVISOR_IDS[0];
+	for (const id of ADVISOR_IDS) if (state.bonds[id] > state.bonds[best]) best = id;
+	return best;
+}
+
+/** The scene's own conditions besides its trigger: Level, day, path, route, bond stage (`minBond` / `maxBond`) and rivalry (`bondGap`). */
+export function conditionsHold(state: SimState, e: EventDef, ignoreMaxBond = false): boolean {
 	if (state.tier < e.minTier || (e.maxTier !== undefined && state.tier > e.maxTier)) return false;
 	if (dayOf(state.tick) < (e.minDay ?? 0)) return false;
 	if (e.whenPath && !e.whenPath.includes(state.path)) return false;
+	if (e.routeOpen && state.route !== null) return false;
+	if (e.minBond && state.bonds[e.minBond.advisor] < e.minBond.atLeast) return false;
+	if (!ignoreMaxBond && e.maxBond && state.bonds[e.maxBond.advisor] >= e.maxBond.below) return false;
+	if (e.bondGap && state.bonds[e.bondGap.high] - state.bonds[e.bondGap.low] < e.bondGap.atLeast) return false;
+	return true;
+}
+
+/** Does a story scene's trigger (and its level, day, path and bond conditions) hold now? Objections and After-hours visits are issued elsewhere. */
+export function storyHolds(state: SimState, content: ContentDB, e: EventDef): boolean {
+	const t = e.trigger;
+	if (!t || t.kind === "objection" || t.kind === "afterHours") return false;
+	if (!conditionsHold(state, e)) return false;
 	switch (t.kind) {
+		case "confession": {
+			// One confession per game, to the advisor you are closest to, at the Level threshold; never once a route is locked.
+			const s = content.balance.soul;
+			if (state.route !== null || state.tier < s.confessionTier) return false;
+			if (content.events.some((x) => x.trigger?.kind === "confession" && state.scriptedIssued.includes(x.id))) return false;
+			const top = topBondAdvisor(state);
+			return top === e.advisor && state.bonds[top] >= s.confessionBond;
+		}
 		case "tick":
 			return state.tick >= t.atLeast;
 		case "tier":
@@ -246,19 +276,35 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 		case "sp":
 			addSp(state, e.path, e.amount);
 			break;
+		case "flag":
+			addFlag(state, e.id);
+			break;
+		case "route":
+			if (state.route === null) state.route = e.advisor;
+			break;
 	}
+}
+
+/** Remember a fact about the player (no duplicates, capped so a hostile save cannot grow it). */
+export function addFlag(state: SimState, id: string): void {
+	if (!state.flags.includes(id) && state.flags.length < 200) state.flags.push(id);
 }
 
 function resolveNow(state: SimState, content: ContentDB, d: Decision, def: EventDef, choice: EventChoice, events: SimEvent[]): void {
 	state.decision = null;
-	state.stats.decisionsMade++;
+	if (!def.quiet) state.stats.decisionsMade++;
 	for (const e of choice.effects) applyEffect(state, content, e, events);
-	// Taking an advisor's recommendation warms her to you; overruling her cools her a little.
+	// Taking an advisor's recommendation warms her to you; overruling her cools her a little. (Visits and the confession are not advice.)
 	const sb = content.balance.soul;
-	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow + (featureUnlocked(state, content, "openDoor") ? 1 : 0) : sb.bondOverrule);
+	if (!def.quiet) addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow + (featureUnlocked(state, content, "openDoor") ? 1 : 0) : sb.bondOverrule);
 	state.decisionHistory.push({ decisionId: d.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick });
 	if (state.decisionHistory.length > DECISION_HISTORY_LENGTH) state.decisionHistory.splice(0, state.decisionHistory.length - DECISION_HISTORY_LENGTH);
 	events.push({ type: "decisionResolved", decisionId: d.id, eventId: def.id, choiceId: choice.id });
+}
+
+/** An earned option (`EventChoice.minBond`) is offered only once her bond is high enough. */
+export function choiceAvailable(state: SimState, c: EventChoice): boolean {
+	return !c.minBond || state.bonds[c.minBond.advisor] >= c.minBond.atLeast;
 }
 
 /** The decision the player can currently see and answer (not deferred), or undefined. */
@@ -274,7 +320,7 @@ export function planResolveDecision(ctx: PlanCtx, decisionId: number, choiceId: 
 	const def = eventDef(content, d.eventId);
 	if (!def) return reject("decision refers to unknown event");
 	const choice = def.choices.find((c) => c.id === choiceId);
-	if (!choice) return reject("no such choice");
+	if (!choice || !choiceAvailable(state, choice)) return reject("no such choice");
 	return accept(0, (events) => resolveNow(state, content, d, def, choice, events));
 }
 

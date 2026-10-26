@@ -182,6 +182,12 @@
   "bondEpilogue": 60,
   "bondFollow": 3,
   "bondOverrule": -1,
+  "afterHoursBond": 3,
+  "giftLiked": 4,
+  "giftDisliked": -3,
+  "messageBond": 1,
+  "confessionBond": 60,
+  "confessionTier": 4,
   "starterWeight": 0.5
  }
 }

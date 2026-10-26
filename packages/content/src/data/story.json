@@ -57,6 +57,10 @@
       "type": "bond",
       "advisor": "bea",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "luci_money"
      }
     ],
     "reply": [
@@ -87,6 +91,10 @@
       "type": "bond",
       "advisor": "bea",
       "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "intro_outlive"
      }
     ],
     "reply": [
@@ -120,6 +128,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": -1
+     },
+     {
+      "type": "flag",
+      "id": "intro_dunno"
      }
     ],
     "reply": [
@@ -149,6 +161,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "intro_coffee"
      }
     ],
     "reply": [
@@ -331,6 +347,37 @@
       "mood": "displeased"
      }
     ]
+   },
+   {
+    "id": "want",
+    "label": "What do you want, Luci?",
+    "hint": "Ask her.",
+    "outcome": "Luci looked at the pen. 'Ask me when it's done,' she said.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     },
+     {
+      "type": "flag",
+      "id": "luci_want"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "That's not on the agenda."
+     },
+     {
+      "who": "luci",
+      "text": "...Ask me when it's done."
+     }
+    ],
+    "minBond": {
+     "advisor": "luci",
+     "atLeast": 40
+    }
    }
   ]
  },
@@ -390,6 +437,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 7
+     },
+     {
+      "type": "flag",
+      "id": "cass_every_day"
      }
     ],
     "reply": [
@@ -476,6 +527,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "cass_stayed_night"
      }
     ],
     "reply": [
@@ -489,6 +544,37 @@
       "text": "Then you sleep. That's what the coffee costs."
      }
     ]
+   },
+   {
+    "id": "instead",
+    "label": "What would you do instead?",
+    "hint": "Ask her.",
+    "outcome": "Cass looked at the ceiling. 'Sleep,' she said. 'About a week.'",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "cass_asked_instead"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "A week of sleep."
+     },
+     {
+      "who": "cass",
+      "text": "Then a window. Any window."
+     }
+    ],
+    "minBond": {
+     "advisor": "cass",
+     "atLeast": 30
+    }
    }
   ]
  },
@@ -543,6 +629,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "mel_said_yes"
      }
     ],
     "reply": [
@@ -577,6 +667,10 @@
       "type": "bond",
       "advisor": "mel",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "mel_said_no"
      }
     ],
     "reply": [
@@ -635,6 +729,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "mel_asked_want"
      }
     ],
     "reply": [
@@ -652,6 +750,42 @@
       "text": "She starts to write that down. She stops."
      }
     ]
+   },
+   {
+    "id": "okay",
+    "label": "Are you all right, Mel?",
+    "hint": "Ask her.",
+    "outcome": "Mel's pen stopped. Nobody had asked that either.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "mel_asked_okay"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "I'm. Hm."
+     },
+     {
+      "who": "mel",
+      "text": "I'll tell you when I know."
+     }
+    ],
+    "minBond": {
+     "advisor": "mel",
+     "atLeast": 30
+    }
    }
   ]
  },
@@ -718,6 +852,10 @@
       "type": "bond",
       "advisor": "bea",
       "amount": -6
+     },
+     {
+      "type": "flag",
+      "id": "bea_cert"
      }
     ],
     "reply": [
@@ -760,6 +898,10 @@
       "type": "bond",
       "advisor": "bea",
       "amount": 7
+     },
+     {
+      "type": "flag",
+      "id": "bea_panels"
      }
     ],
     "reply": [
@@ -816,6 +958,46 @@
       "text": "Bea picks up her wrench and leaves."
      }
     ]
+   },
+   {
+    "id": "ladder",
+    "label": "Panels. I'll hold the ladder.",
+    "hint": "North wall, and you. -$200k now",
+    "outcome": "You held the ladder. She went up the wall with a panel under one arm.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -200000
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": -8
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 9
+     },
+     {
+      "type": "flag",
+      "id": "bea_panels"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Both hands."
+     },
+     {
+      "who": "bea",
+      "text": "Don't look at me. Look at the ladder."
+     }
+    ],
+    "minBond": {
+     "advisor": "bea",
+     "atLeast": 30
+    }
    }
   ]
  },
@@ -889,6 +1071,14 @@
       "type": "bond",
       "advisor": "bea",
       "amount": -6
+     },
+     {
+      "type": "flag",
+      "id": "diesel_signed"
+     },
+     {
+      "type": "flag",
+      "id": "luci_diesel_signed"
      }
     ],
     "reply": [
@@ -919,6 +1109,14 @@
       "type": "bond",
       "advisor": "luci",
       "amount": -4
+     },
+     {
+      "type": "flag",
+      "id": "diesel_refused"
+     },
+     {
+      "type": "flag",
+      "id": "luci_diesel_refused"
      }
     ],
     "reply": [
@@ -979,6 +1177,38 @@
       "who": "bea",
       "text": "It's still diesel.",
       "mood": "displeased"
+     }
+    ]
+   },
+   {
+    "id": "print",
+    "label": "Read me the small print.",
+    "hint": "Check the deal.",
+    "outcome": "Luci read it out. She skipped one clause. You noticed.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "luci_smallprint"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Page nine is boring."
+     },
+     {
+      "who": "luci",
+      "text": "Sign it or don't."
      }
     ]
    }
@@ -1070,6 +1300,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": -4
+     },
+     {
+      "type": "flag",
+      "id": "luci_decided"
      }
     ],
     "reply": [
@@ -1100,6 +1334,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "cass_form_wait"
      }
     ],
     "reply": [
@@ -1118,6 +1356,37 @@
       "text": "It's not rude about it. It just doesn't."
      }
     ]
+   },
+   {
+    "id": "read",
+    "label": "Read it with me, Cass.",
+    "hint": "Ask Cass.",
+    "outcome": "You spread A-5 on the crate. She read it twice and moved her mug off the corner.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "cass_read_form"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "It says what it says."
+     },
+     {
+      "who": "cass",
+      "text": "I'd pick a box. Not for you."
+     }
+    ],
+    "minBond": {
+     "advisor": "cass",
+     "atLeast": 40
+    }
    }
   ]
  },
@@ -1172,6 +1441,10 @@
       "type": "seal",
       "path": "greentech",
       "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "bea_ferns_cared"
      }
     ],
     "reply": [
@@ -1205,6 +1478,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": 2
+     },
+     {
+      "type": "flag",
+      "id": "bea_ferns_shrug"
      }
     ],
     "reply": [
@@ -1247,6 +1524,42 @@
       "text": "It's always the third. Closest to the vent, I think."
      }
     ]
+   },
+   {
+    "id": "water",
+    "label": "Can I water one?",
+    "hint": "Take the can.",
+    "outcome": "She handed you the can. 'Slowly,' she said. 'It's not a race.'",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "bea_ferns_watered"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Not that fast."
+     },
+     {
+      "who": "bea",
+      "text": "There."
+     }
+    ],
+    "minBond": {
+     "advisor": "bea",
+     "atLeast": 30
+    }
    }
   ]
  },
@@ -1330,6 +1643,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": 2
+     },
+     {
+      "type": "flag",
+      "id": "bea_river_shrug"
      }
     ],
     "reply": [
@@ -1359,6 +1676,10 @@
       "type": "seal",
       "path": "greentech",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "bea_river_walked"
      }
     ],
     "reply": [
@@ -1626,6 +1947,10 @@
       "type": "seal",
       "path": "biotech",
       "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "mel_flinch_cared"
      }
     ],
     "reply": [
@@ -1655,6 +1980,10 @@
       "type": "bond",
       "advisor": "luci",
       "amount": 2
+     },
+     {
+      "type": "flag",
+      "id": "mel_flinch_shrug"
      }
     ],
     "reply": [
@@ -1697,6 +2026,37 @@
       "text": "She's shy. Don't take it personally if she turns away."
      }
     ]
+   },
+   {
+    "id": "glove",
+    "label": "Write something on my hand.",
+    "hint": "Offer a hand.",
+    "outcome": "She wrote one word on the back of your hand, in pen. She didn't say which word.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "mel_glove_word"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Hm."
+     },
+     {
+      "who": "mel",
+      "text": "Don't wash it off. If you like."
+     }
+    ],
+    "minBond": {
+     "advisor": "mel",
+     "atLeast": 30
+    }
    }
   ]
  },
@@ -1809,6 +2169,10 @@
       "type": "seal",
       "path": "biotech",
       "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "mel_held_jar"
      }
     ],
     "reply": [
@@ -2519,6 +2883,37 @@
       "text": "Get a room. I'll cool it."
      }
     ]
+   },
+   {
+    "id": "close",
+    "label": "Stay till the numbers close.",
+    "hint": "Keep Luci company.",
+    "outcome": "You sat through the end of the shift. The line on her chart bent upward, and she watched it, and you.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "luci_closed_with"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Midnight."
+     },
+     {
+      "who": "luci",
+      "text": "...You stayed. For the record."
+     }
+    ],
+    "minBond": {
+     "advisor": "luci",
+     "atLeast": 50
+    }
    }
   ]
  },
@@ -2687,6 +3082,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "luci_hand90"
      }
     ],
     "reply": [
@@ -2745,6 +3144,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "luci_tremor"
      }
     ],
     "reply": [
@@ -2836,6 +3239,10 @@
       "type": "seal",
       "path": "greentech",
       "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "mel_seeded"
      }
     ],
     "reply": [
@@ -2871,6 +3278,10 @@
       "type": "seal",
       "path": "biotech",
       "amount": -4
+     },
+     {
+      "type": "flag",
+      "id": "mel_slow"
      }
     ],
     "reply": [
@@ -2941,6 +3352,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "mel_first"
      }
     ],
     "reply": [
@@ -3083,6 +3498,10 @@
       "type": "bond",
       "advisor": "bea",
       "amount": -6
+     },
+     {
+      "type": "flag",
+      "id": "bea_credits_sold"
      }
     ],
     "reply": [
@@ -3117,6 +3536,10 @@
       "type": "sp",
       "path": "greentech",
       "amount": 30
+     },
+     {
+      "type": "flag",
+      "id": "bea_credits_honest"
      }
     ],
     "reply": [
@@ -3291,6 +3714,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "bea_wrench_flirt"
      }
     ],
     "reply": [
@@ -3352,6 +3779,10 @@
       "type": "bond",
       "advisor": "cass",
       "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "cass_remember"
      }
     ],
     "reply": [
@@ -3422,7 +3853,5940 @@
       "text": "I'm timing it."
      }
     ]
+   },
+   {
+    "id": "hand",
+    "label": "Take her hand.",
+    "hint": "Reach.",
+    "outcome": "Snow landed on both your hands.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "cass_window_hand"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Cold."
+     },
+     {
+      "who": "cass",
+      "text": "Don't move it."
+     }
+    ],
+    "minBond": {
+     "advisor": "cass",
+     "atLeast": 50
+    }
    }
   ]
+ },
+ {
+  "id": "ah_cass_1",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Two Mugs",
+  "body": "You're up.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · PLANT ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The plant room at ten. One crate. Two mugs."
+   },
+   {
+    "who": "cass",
+    "text": "You're up."
+   },
+   {
+    "who": "cass",
+    "text": "Compressor three is making a noise. I'm listening to it."
+   },
+   {
+    "who": "cass",
+    "text": "You can listen too. If you want."
+   }
+  ],
+  "recommended": "listen",
+  "choices": [
+   {
+    "id": "listen",
+    "label": "Sure. What's it say?",
+    "hint": "Sit with her.",
+    "outcome": "You sat on the floor with your back to the pipe. It hummed through your coat.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Wait for it."
+     },
+     {
+      "who": "cass",
+      "text": "There. Hear the click?"
+     },
+     {
+      "who": "cass",
+      "text": "That's the one."
+     }
+    ]
+   },
+   {
+    "id": "mug",
+    "label": "Is that coffee?",
+    "hint": "Be friendly.",
+    "outcome": "She handed it over. It was terrible, and warm.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "It's awful."
+     },
+     {
+      "who": "cass",
+      "text": "Finish it, though."
+     }
+    ]
+   },
+   {
+    "id": "leave",
+    "label": "Just checking in. Night.",
+    "hint": "Keep it brief.",
+    "outcome": "She nodded. The compressor clicked behind you.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Night."
+     },
+     {
+      "who": "cass",
+      "text": "Sleep."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "cass",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_cass_2",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Chiller Four",
+  "body": "Chiller four iced up. Third time this month.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOADING DOCK · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Rain on the loading dock door. Cass has a clipboard and a torch."
+   },
+   {
+    "who": "cass",
+    "text": "Chiller four iced up. Third time this month."
+   },
+   {
+    "who": "cass",
+    "text": "I'm not blaming anybody."
+   },
+   {
+    "who": "cass",
+    "text": "I'm just writing it down."
+   }
+  ],
+  "recommended": "ask",
+  "choices": [
+   {
+    "id": "ask",
+    "label": "Is it the sensor or the chiller?",
+    "hint": "Ask the real question.",
+    "outcome": "She tapped the clipboard. Under 'cause' she'd written a question mark.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "I don't know."
+     },
+     {
+      "who": "cass",
+      "text": "Good question, though."
+     }
+    ]
+   },
+   {
+    "id": "hold",
+    "label": "Show me. I'll hold the torch.",
+    "hint": "Get cold.",
+    "outcome": "You held the torch. The frost on the coil was grey, not white.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Higher. A bit left."
+     },
+     {
+      "who": "cass",
+      "text": "...That's useful, actually."
+     }
+    ]
+   },
+   {
+    "id": "sign",
+    "label": "Write it up. I'll sign it.",
+    "hint": "Move it along.",
+    "outcome": "She tore the page off and handed it over without a word.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "I'll leave the question mark in."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "cass",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_cass_3",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Tuesday's Rice",
+  "body": "There's rice in here from Tuesday.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · BOARD ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The board room, lights half down. Cass has a takeaway box and one fork."
+   },
+   {
+    "who": "cass",
+    "text": "There's rice in here from Tuesday."
+   },
+   {
+    "who": "cass",
+    "text": "I didn't eat. Then I did."
+   },
+   {
+    "who": "cass",
+    "text": "Did you eat?"
+   }
+  ],
+  "recommended": "share",
+  "choices": [
+   {
+    "id": "share",
+    "label": "Give me the fork.",
+    "hint": "Share.",
+    "outcome": "She slid the box across. The rice was cold. You finished it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "That was Tuesday's."
+     },
+     {
+      "who": "cass",
+      "text": "Don't tell me how it was."
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "When did you last go home?",
+    "hint": "Ask about her.",
+    "outcome": "She counted on her fingers. Stopped at three. Started again.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "I don't know."
+     },
+     {
+      "who": "cass",
+      "text": "There's a bed in B2. It's fine."
+     }
+    ]
+   },
+   {
+    "id": "lie",
+    "label": "I had lunch.",
+    "hint": "Fib.",
+    "outcome": "She looked at you. She looked at the clock. She said nothing.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "narrator",
+      "text": "She pushed the box an inch toward you anyway."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "cass",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_cass_4",
+  "category": "story",
+  "advisor": "cass",
+  "title": "The Rattle",
+  "body": "Hear that?",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F3 · SERVICE LIFT · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Lift two, stopped between floors. Cass has her ear against the door."
+   },
+   {
+    "who": "cass",
+    "text": "Hear that?"
+   },
+   {
+    "who": "cass",
+    "text": "It's been doing it since spring."
+   },
+   {
+    "who": "cass",
+    "text": "It's within spec. It's fine."
+   },
+   {
+    "who": "cass",
+    "text": "I just like knowing which noise is which."
+   }
+  ],
+  "recommended": "ear",
+  "choices": [
+   {
+    "id": "ear",
+    "label": "Show me the noise.",
+    "hint": "Listen with her.",
+    "outcome": "You put your ear to the steel. It was cold. She watched your face, not the lift.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "That one."
+     },
+     {
+      "who": "cass",
+      "text": "Now you know it too."
+     }
+    ]
+   },
+   {
+    "id": "keep",
+    "label": "Leave it. I like knowing it.",
+    "hint": "Keep the noise.",
+    "outcome": "She almost smiled. Then she pressed the call button.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "Me too."
+     }
+    ]
+   },
+   {
+    "id": "fix",
+    "label": "Can we fix it?",
+    "hint": "Be practical.",
+    "outcome": "She wrote 'fix' beside 'rattle'. Under it, 'when?'.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Not this month."
+     },
+     {
+      "who": "cass",
+      "text": "Maybe not the next."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "cass",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_cass_5",
+  "category": "story",
+  "advisor": "cass",
+  "title": "The Cot",
+  "body": "I know. It's embarrassing.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B2 · PUMP ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B2. A cot behind the pump skid. A blanket with a stripe. Cass sits on the edge of it."
+   },
+   {
+    "who": "cass",
+    "text": "I know. It's embarrassing."
+   },
+   {
+    "who": "cass",
+    "text": "It's closer than the car park."
+   },
+   {
+    "who": "cass",
+    "text": "You can sit. It holds two."
+   }
+  ],
+  "recommended": "sit",
+  "choices": [
+   {
+    "id": "sit",
+    "label": "Sit.",
+    "hint": "Sit with her.",
+    "outcome": "The cot sagged toward the middle. Neither of you did anything about that.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Told you."
+     },
+     {
+      "who": "cass",
+      "text": "Two."
+     }
+    ]
+   },
+   {
+    "id": "mug",
+    "label": "I brought the mugs.",
+    "hint": "Bring the coffee.",
+    "outcome": "You'd carried both down the stairs. Only one had spilled.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Which one's mine?"
+     },
+     {
+      "who": "cass",
+      "text": "Never mind. I'll take the wet one."
+     }
+    ]
+   },
+   {
+    "id": "home",
+    "label": "Come home. Sleep in a real bed.",
+    "hint": "Ask her to leave.",
+    "outcome": "She looked at the pump skid. At the blanket. At you.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "cass_asked_home"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Ask me again in spring."
+     },
+     {
+      "who": "cass",
+      "text": "...I mean it. Ask me."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 50
+  },
+  "maxBond": {
+   "advisor": "cass",
+   "below": 70
+  }
+ },
+ {
+  "id": "ah_cass_6",
+  "category": "story",
+  "advisor": "cass",
+  "title": "First Frost",
+  "body": "Frost on the sill. First of the year.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F7 · THE WINDOW · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F7. The window that opens. Cass has it propped with a mug."
+   },
+   {
+    "who": "cass",
+    "text": "Frost on the sill. First of the year."
+   },
+   {
+    "who": "cass",
+    "text": "I come up and check. I don't know why."
+   },
+   {
+    "who": "cass",
+    "text": "You can stay. Or not. Both can be true."
+   }
+  ],
+  "recommended": "stay",
+  "choices": [
+   {
+    "id": "stay",
+    "label": "I'll stay.",
+    "hint": "Stay till it melts.",
+    "outcome": "The frost went from the edges in. You watched it the whole way.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Took long enough."
+     },
+     {
+      "who": "cass",
+      "text": "...I didn't mind."
+     }
+    ]
+   },
+   {
+    "id": "hand",
+    "label": "Take her hand.",
+    "hint": "Reach for her.",
+    "outcome": "Her hand was cold from the sill. She turned it over and held on.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     },
+     {
+      "type": "flag",
+      "id": "cass_window_hand"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Operator."
+     },
+     {
+      "who": "cass",
+      "text": "...Okay."
+     }
+    ]
+   },
+   {
+    "id": "sleep",
+    "label": "You should sleep. I'll watch it.",
+    "hint": "Take the watch.",
+    "outcome": "She sat down against the wall. Her eyes were shut before you'd finished the sentence.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "narrator",
+      "text": "She sleeps with the mug in both hands."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 70
+  }
+ },
+ {
+  "id": "ah_bea_1",
+  "category": "story",
+  "advisor": "bea",
+  "title": "The Ladder",
+  "body": "Hold this. No. The other end.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "C-4 · ROOF · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof, dusk. Bea is on a ladder, up to her elbows in a junction box."
+   },
+   {
+    "who": "bea",
+    "text": "Hold this. No. The other end."
+   },
+   {
+    "who": "bea",
+    "text": "Don't touch the red one."
+   },
+   {
+    "who": "bea",
+    "text": "Okay. Okay. Now it's live."
+   }
+  ],
+  "recommended": "hold",
+  "choices": [
+   {
+    "id": "hold",
+    "label": "Hold the ladder.",
+    "hint": "Steady it.",
+    "outcome": "You held the ladder with both hands. She never looked down.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Good."
+     },
+     {
+      "who": "bea",
+      "text": "Most people hold it like it'll bite."
+     }
+    ]
+   },
+   {
+    "id": "red",
+    "label": "Which one's the red one?",
+    "hint": "Joke.",
+    "outcome": "She threw a rag at you. It landed on your shoulder.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "The red one."
+     },
+     {
+      "who": "bea",
+      "text": "...Ha."
+     }
+    ]
+   },
+   {
+    "id": "off",
+    "label": "Shouldn't that be switched off?",
+    "hint": "Be correct.",
+    "outcome": "She pulled the goggles down. 'It is off,' she said, after a while.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -1
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "It's off."
+     },
+     {
+      "who": "bea",
+      "text": "Mostly."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "bea",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_bea_2",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Egg",
+  "body": "Egg. Sorry. I didn't ask.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "C-4 · ROOF · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "A sandwich on an upturned bucket. Two halves. Bea's already eating hers."
+   },
+   {
+    "who": "bea",
+    "text": "Egg. Sorry. I didn't ask."
+   },
+   {
+    "who": "bea",
+    "text": "You can have the pickle."
+   }
+  ],
+  "recommended": "egg",
+  "choices": [
+   {
+    "id": "egg",
+    "label": "Egg's fine.",
+    "hint": "Eat.",
+    "outcome": "The egg was fine. She watched you take the first bite.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "See? Okay."
+     }
+    ]
+   },
+   {
+    "id": "pickle",
+    "label": "Give me the pickle.",
+    "hint": "Take it.",
+    "outcome": "She held it out between two fingers. It was warm from the sun.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Thought so."
+     }
+    ]
+   },
+   {
+    "id": "ferns",
+    "label": "How are the ferns?",
+    "hint": "Ask.",
+    "outcome": "She stopped chewing.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Yellow."
+     },
+     {
+      "who": "bea",
+      "text": "Less yellow."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "bea",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_bea_3",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Flux",
+  "body": "It's the flux. Don't look at me.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "C-4 · ROOF · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Bea has the goggles pushed up on her forehead. Her eyes are red."
+   },
+   {
+    "who": "bea",
+    "text": "It's the flux. Don't look at me."
+   },
+   {
+    "who": "bea",
+    "text": "I'm fine. It's flux."
+   }
+  ],
+  "recommended": "look",
+  "choices": [
+   {
+    "id": "look",
+    "label": "I wasn't looking.",
+    "hint": "Look at the fern.",
+    "outcome": "You studied the fern instead. It was a good fern.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Thanks."
+     },
+     {
+      "who": "bea",
+      "text": "It's flux."
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "Want to talk about the flux?",
+    "hint": "Be gentle.",
+    "outcome": "She laughed once, hard, like a cough.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "No."
+     },
+     {
+      "who": "bea",
+      "text": "Yeah. A bit."
+     }
+    ]
+   },
+   {
+    "id": "leave",
+    "label": "I'll come back.",
+    "hint": "Give her room.",
+    "outcome": "You went down the stairs slowly. She didn't say stay.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Okay."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "bea",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_bea_4",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Two Wrenches",
+  "body": "The taped one's mine. Twelve years.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "C-4 · ROOF · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "A toolbox open on the roof. Two wrenches on the lid. One's clean. One's taped."
+   },
+   {
+    "who": "bea",
+    "text": "The taped one's mine. Twelve years."
+   },
+   {
+    "who": "bea",
+    "text": "The clean one's the good one. I never use it."
+   },
+   {
+    "who": "bea",
+    "text": "Don't ask me why."
+   }
+  ],
+  "recommended": "wait",
+  "choices": [
+   {
+    "id": "wait",
+    "label": "I won't ask.",
+    "hint": "Let it be.",
+    "outcome": "You picked up a rag and wiped the lid. She let you.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Thanks."
+     }
+    ]
+   },
+   {
+    "id": "taped",
+    "label": "Can I try the taped one?",
+    "hint": "Ask for it.",
+    "outcome": "It was heavier than it looked. The tape was worn smooth in the shape of her hand.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Told you."
+     },
+     {
+      "who": "bea",
+      "text": "Grip higher."
+     }
+    ]
+   },
+   {
+    "id": "clean",
+    "label": "Why's the clean one clean?",
+    "hint": "Ask anyway.",
+    "outcome": "Her jaw did something. You'd asked.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Saving it."
+     },
+     {
+      "who": "bea",
+      "text": "For something."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "bea",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_bea_5",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Warm Panels",
+  "body": "They're warm. From the day.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "C-4 · ROOF · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof, past midnight. The panels are black. Bea is lying on her back on one of them."
+   },
+   {
+    "who": "bea",
+    "text": "They're warm. From the day."
+   },
+   {
+    "who": "bea",
+    "text": "Come on. It holds you."
+   },
+   {
+    "who": "bea",
+    "text": "It's rated for two hundred kilos."
+   }
+  ],
+  "recommended": "lie",
+  "choices": [
+   {
+    "id": "lie",
+    "label": "Lie down beside her.",
+    "hint": "Join her.",
+    "outcome": "The panel was warm through your jacket. She said nothing for a long time.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "bea_roof_night"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "See?"
+     },
+     {
+      "who": "bea",
+      "text": "Okay. Don't talk."
+     }
+    ]
+   },
+   {
+    "id": "both",
+    "label": "Is it rated for both of us?",
+    "hint": "Tease.",
+    "outcome": "She turned her head on the glass and looked at you.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "I did the maths."
+     },
+     {
+      "who": "bea",
+      "text": "Get up here."
+     }
+    ]
+   },
+   {
+    "id": "cold",
+    "label": "It's freezing, Bea.",
+    "hint": "Be sensible.",
+    "outcome": "She sighed at the sky. 'Five minutes,' she said.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Wuss."
+     },
+     {
+      "who": "bea",
+      "text": "Five minutes. Then you can go."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 50
+  },
+  "maxBond": {
+   "advisor": "bea",
+   "below": 70
+  }
+ },
+ {
+  "id": "ah_bea_6",
+  "category": "story",
+  "advisor": "bea",
+  "title": "The First Root",
+  "body": "It's the first one.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B2 · FOUNDATION SEAM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B2, the seam in the foundation. A thread of white root has come through the concrete."
+   },
+   {
+    "who": "bea",
+    "text": "It's the first one."
+   },
+   {
+    "who": "bea",
+    "text": "I didn't plant it. Nobody did."
+   },
+   {
+    "who": "bea",
+    "text": "I was gonna tell someone. Then I thought, you."
+   }
+  ],
+  "recommended": "touch",
+  "choices": [
+   {
+    "id": "touch",
+    "label": "Touch it.",
+    "hint": "Go closer.",
+    "outcome": "It was cool and a bit damp. It moved, or you imagined it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Yeah."
+     },
+     {
+      "who": "bea",
+      "text": "Yeah, I know."
+     }
+    ]
+   },
+   {
+    "id": "name",
+    "label": "Can we name it?",
+    "hint": "Play along.",
+    "outcome": "She considered this with real seriousness.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "No."
+     },
+     {
+      "who": "bea",
+      "text": "...Gerald."
+     }
+    ]
+   },
+   {
+    "id": "leave",
+    "label": "Leave it alone. Let it come.",
+    "hint": "Give it room.",
+    "outcome": "You stood back from the seam. So did she.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "That's what I said to myself."
+     },
+     {
+      "who": "bea",
+      "text": "Out loud. I said it out loud."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 70
+  }
+ },
+ {
+  "id": "ah_mel_1",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Jar",
+  "body": "Oh. Sorry. I didn't hear you come in.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · WET LAB · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3. One lamp on. Mel is talking quietly to a jar."
+   },
+   {
+    "who": "mel",
+    "text": "Oh. Sorry. I didn't hear you come in."
+   },
+   {
+    "who": "mel",
+    "text": "I was checking it was warm enough."
+   },
+   {
+    "who": "mel",
+    "text": "It's fine. I think. It doesn't say."
+   }
+  ],
+  "recommended": "ask",
+  "choices": [
+   {
+    "id": "ask",
+    "label": "What's in it?",
+    "hint": "Ask.",
+    "outcome": "She turned the jar so the label faced you. The label was blank.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Nothing yet."
+     },
+     {
+      "who": "mel",
+      "text": "I'm keeping it company."
+     }
+    ]
+   },
+   {
+    "id": "talk",
+    "label": "Do you always talk to it?",
+    "hint": "Be curious.",
+    "outcome": "She seemed to think about lying. She didn't.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Only at night."
+     },
+     {
+      "who": "mel",
+      "text": "It's quieter then."
+     }
+    ]
+   },
+   {
+    "id": "go",
+    "label": "I'll leave you to it.",
+    "hint": "Back out.",
+    "outcome": "She looked relieved. A little disappointed too.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Come back, if you like."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "mel",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_mel_2",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Two Pairs",
+  "body": "One on top for the samples. One under for me.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · WET LAB · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "A box of gloves on the bench. Mel is wearing two pairs."
+   },
+   {
+    "who": "mel",
+    "text": "One on top for the samples. One under for me."
+   },
+   {
+    "who": "mel",
+    "text": "I know how that sounds."
+   },
+   {
+    "who": "mel",
+    "text": "It's just that skin's a lot. Mine, I mean."
+   }
+  ],
+  "recommended": "pair",
+  "choices": [
+   {
+    "id": "pair",
+    "label": "Can I have a pair?",
+    "hint": "Ask.",
+    "outcome": "She handed you a pair. They were too big. She didn't have a smaller size.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "They're all too big."
+     },
+     {
+      "who": "mel",
+      "text": "Sorry. They're for my hands."
+     }
+    ]
+   },
+   {
+    "id": "sensible",
+    "label": "It sounds sensible.",
+    "hint": "Reassure her.",
+    "outcome": "She let out a breath you hadn't noticed her holding.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "Good. I'd prepared a longer answer."
+     }
+    ]
+   },
+   {
+    "id": "hands",
+    "label": "What happened to your hands?",
+    "hint": "Ask outright.",
+    "outcome": "Her hands went behind her back, then returned to the bench, like she'd caught herself.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Work."
+     },
+     {
+      "who": "mel",
+      "text": "Mostly work."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "mel",
+   "below": 30
+  }
+ },
+ {
+  "id": "ah_mel_3",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Ones That Didn't Take",
+  "body": "These are the ones that didn't take.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · COLD STORE · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The cold store. Racks of tubes, each with a date. Mel's breath shows."
+   },
+   {
+    "who": "mel",
+    "text": "These are the ones that didn't take."
+   },
+   {
+    "who": "mel",
+    "text": "I can't throw them out. It's a protocol."
+   },
+   {
+    "who": "mel",
+    "text": "...It's slightly sentimental."
+   }
+  ],
+  "recommended": "read",
+  "choices": [
+   {
+    "id": "read",
+    "label": "Read me a date.",
+    "hint": "Listen.",
+    "outcome": "She read the label on the third rack. A Tuesday in March.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "That one flinched."
+     },
+     {
+      "who": "mel",
+      "text": "I was there."
+     }
+    ]
+   },
+   {
+    "id": "hold",
+    "label": "Can I hold one?",
+    "hint": "Ask.",
+    "outcome": "The tube was colder than it looked. She told you where to put your thumb.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "There. Not too tight."
+     },
+     {
+      "who": "mel",
+      "text": "It doesn't mind, I think."
+     }
+    ]
+   },
+   {
+    "id": "warm",
+    "label": "Can we move them somewhere warmer?",
+    "hint": "Be soft.",
+    "outcome": "She looked at the racks for some time.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "They're not alive, Operator."
+     },
+     {
+      "who": "mel",
+      "text": "...Where, though?"
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "mel",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_mel_4",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Radio",
+  "body": "It's for them. I read a paper.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · WET LAB · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "A small radio on the incubator shelf, turned low. Something with a clarinet."
+   },
+   {
+    "who": "mel",
+    "text": "It's for them. I read a paper."
+   },
+   {
+    "who": "mel",
+    "text": "The paper was bad. I turned it on anyway."
+   },
+   {
+    "who": "mel",
+    "text": "Do you like it? You don't have to say."
+   }
+  ],
+  "recommended": "like",
+  "choices": [
+   {
+    "id": "like",
+    "label": "I like it.",
+    "hint": "Say so.",
+    "outcome": "It was nobody's favourite song. You stayed for all of it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "Good. I chose it by length."
+     }
+    ]
+   },
+   {
+    "id": "whose",
+    "label": "Whose record is it?",
+    "hint": "Ask.",
+    "outcome": "She turned the volume down a notch, as if the answer were loud.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "My mother's."
+     },
+     {
+      "who": "mel",
+      "text": "She'd have hated this room."
+     }
+    ]
+   },
+   {
+    "id": "off",
+    "label": "It might distract them.",
+    "hint": "Be practical.",
+    "outcome": "She nodded and switched it off. The room got very quiet.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Yes. That's fair."
+     },
+     {
+      "who": "mel",
+      "text": "I'll try it later."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "mel",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_mel_5",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Cuff",
+  "body": "I'd offer you a towel. They're all damp.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · WET LAB · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Mel is washing at the steel sink. One sleeve rolled. The stained cuff stays buttoned."
+   },
+   {
+    "who": "mel",
+    "text": "I'd offer you a towel. They're all damp."
+   },
+   {
+    "who": "mel",
+    "text": "Sorry. I keep apologising for the weather."
+   }
+  ],
+  "recommended": "towel",
+  "choices": [
+   {
+    "id": "towel",
+    "label": "I'll take a damp one.",
+    "hint": "Go along.",
+    "outcome": "You dried your hands on it, side by side. She laughed through her nose.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "You're very easy to have around."
+     },
+     {
+      "who": "mel",
+      "text": "That's a measurement. A good one."
+     }
+    ]
+   },
+   {
+    "id": "cuff",
+    "label": "You can roll the other sleeve.",
+    "hint": "Offer.",
+    "outcome": "She looked at the cuff, then at you. She undid the button and did it back up.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Not yet."
+     },
+     {
+      "who": "mel",
+      "text": "But I undid it. Did you see?"
+     }
+    ]
+   },
+   {
+    "id": "weather",
+    "label": "Stop apologising for the weather.",
+    "hint": "Tease.",
+    "outcome": "She dried her hands very slowly.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "I'll try."
+     },
+     {
+      "who": "mel",
+      "text": "Sorry. Yes. Trying."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 50
+  },
+  "maxBond": {
+   "advisor": "mel",
+   "below": 70
+  }
+ },
+ {
+  "id": "ah_mel_6",
+  "category": "story",
+  "advisor": "mel",
+  "title": "A Wrist",
+  "body": "I wanted to try something. It isn't science.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B-3 · WET LAB · AFTER MIDNIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3, after midnight. The incubators tick. Mel has pulled a second stool up to the bench."
+   },
+   {
+    "who": "mel",
+    "text": "I wanted to try something. It isn't science."
+   },
+   {
+    "who": "mel",
+    "text": "Can I hold your wrist? Just to hold it."
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes.",
+    "hint": "Offer it.",
+    "outcome": "She took it very carefully, as if it were a sample. Her glove was off.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "mel_wrist"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Hm."
+     },
+     {
+      "who": "mel",
+      "text": "It's fast."
+     },
+     {
+      "who": "mel",
+      "text": "Mine's faster. I checked."
+     }
+    ]
+   },
+   {
+    "id": "hand",
+    "label": "Hold my hand instead.",
+    "hint": "Meet her halfway.",
+    "outcome": "Her fingers were cool and a little damp. She didn't measure anything.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "That's better. That's, yes."
+     }
+    ]
+   },
+   {
+    "id": "sit",
+    "label": "Can I just sit?",
+    "hint": "Keep it simple.",
+    "outcome": "You took the other stool. The incubators ticked.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Yes."
+     },
+     {
+      "who": "mel",
+      "text": "That counts."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 70
+  }
+ },
+ {
+  "id": "ah_luci_cold",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Invoice",
+  "body": "If you're here about the quarter, it's in your inbox.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2. Luci has the ledger open and doesn't look up."
+   },
+   {
+    "who": "luci",
+    "text": "If you're here about the quarter, it's in your inbox."
+   },
+   {
+    "who": "luci",
+    "text": "If it's the other thing, I haven't billed it yet."
+   },
+   {
+    "who": "luci",
+    "text": "Sit, if you like. It's not a charge."
+   }
+  ],
+  "recommended": "sit",
+  "choices": [
+   {
+    "id": "sit",
+    "label": "I'll sit.",
+    "hint": "Stay a while.",
+    "outcome": "She turned a page. She didn't send you away.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "For the record, that's free."
+     }
+    ]
+   },
+   {
+    "id": "sorry",
+    "label": "I'm sorry about the last one.",
+    "hint": "Say it.",
+    "outcome": "Her pen stopped.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Noted."
+     },
+     {
+      "who": "luci",
+      "text": "I'll revise the figure."
+     }
+    ]
+   },
+   {
+    "id": "quarter",
+    "label": "Just the quarter.",
+    "hint": "Stay formal.",
+    "outcome": "She nodded and went back to the numbers. The pen scratched.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "In your inbox."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "maxBond": {
+   "advisor": "luci",
+   "below": 30
+  },
+  "staged": true
+ },
+ {
+  "id": "ah_luci_1",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Receipts",
+  "body": "Lunch in March. Taxi in April. A very sad sandwich.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2. Luci's desk is covered in receipts. She's taping them to a wall chart."
+   },
+   {
+    "who": "luci",
+    "text": "Lunch in March. Taxi in April. A very sad sandwich."
+   },
+   {
+    "who": "luci",
+    "text": "Don't help. I have a system."
+   },
+   {
+    "who": "luci",
+    "text": "The system is that I know where everything is."
+   }
+  ],
+  "recommended": "tape",
+  "choices": [
+   {
+    "id": "tape",
+    "label": "Hand me the tape.",
+    "hint": "Help anyway.",
+    "outcome": "You held a receipt flat while she taped. It was for the sad sandwich.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "I said don't help."
+     },
+     {
+      "who": "luci",
+      "text": "Left a bit."
+     }
+    ]
+   },
+   {
+    "id": "sandwich",
+    "label": "Why was the sandwich sad?",
+    "hint": "Ask.",
+    "outcome": "She read the receipt as though it might have changed.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "It was eleven pounds."
+     },
+     {
+      "who": "luci",
+      "text": "It had one olive."
+     }
+    ]
+   },
+   {
+    "id": "leave",
+    "label": "I'll let you work.",
+    "hint": "Back off.",
+    "outcome": "She kept taping. She said 'Operator.' to the wall.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Mm."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "luci",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_luci_2",
+  "category": "story",
+  "advisor": "luci",
+  "title": "The Pen",
+  "body": "It was a gift. From a client.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · LATE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Luci clicks her gold pen. Click. Click. Click."
+   },
+   {
+    "who": "luci",
+    "text": "It was a gift. From a client."
+   },
+   {
+    "who": "luci",
+    "text": "A bad client. A very good pen."
+   },
+   {
+    "who": "luci",
+    "text": "You can look. You can't hold it."
+   }
+  ],
+  "recommended": "look",
+  "choices": [
+   {
+    "id": "look",
+    "label": "Can I look?",
+    "hint": "Ask nicely.",
+    "outcome": "She held it up to the lamp. The gold was worn through at the grip.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "I write a lot."
+     },
+     {
+      "who": "luci",
+      "text": "Mostly sums."
+     }
+    ]
+   },
+   {
+    "id": "hold",
+    "label": "Can I hold it?",
+    "hint": "Push your luck.",
+    "outcome": "She said no. Then she put it in your hand, cap first.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Don't click it."
+     },
+     {
+      "who": "luci",
+      "text": "...Fine. Once."
+     }
+    ]
+   },
+   {
+    "id": "client",
+    "label": "Who was the client?",
+    "hint": "Pry.",
+    "outcome": "Her smile stayed exactly where it was.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Retired."
+     },
+     {
+      "who": "luci",
+      "text": "Next question."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 30
+  },
+  "maxBond": {
+   "advisor": "luci",
+   "below": 50
+  }
+ },
+ {
+  "id": "ah_luci_3",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Midnight Close",
+  "body": "The month closes at midnight.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2, past eleven. One lamp. The ledger is open to a page of zeros."
+   },
+   {
+    "who": "luci",
+    "text": "The month closes at midnight."
+   },
+   {
+    "who": "luci",
+    "text": "I like to be here for it."
+   },
+   {
+    "who": "luci",
+    "text": "It's nothing. Numbers stop. I note it."
+   },
+   {
+    "who": "luci",
+    "text": "You could stay. I'd bill it at nothing.",
+    "mood": "pleased"
+   }
+  ],
+  "recommended": "stay",
+  "choices": [
+   {
+    "id": "stay",
+    "label": "I'll stay.",
+    "hint": "Keep her company.",
+    "outcome": "You sat across from her. At midnight the cursor blinked and the numbers stopped.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "There."
+     },
+     {
+      "who": "luci",
+      "text": "That's all it is."
+     }
+    ]
+   },
+   {
+    "id": "count",
+    "label": "Count it down with me.",
+    "hint": "Join in.",
+    "outcome": "You counted the last ten seconds aloud. She joined in at six.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Three, two..."
+     },
+     {
+      "who": "luci",
+      "text": "Don't tell the Authority I do this."
+     }
+    ]
+   },
+   {
+    "id": "home",
+    "label": "It's late, Luci. Go home.",
+    "hint": "Send her off.",
+    "outcome": "She looked at the ledger as if it might answer for her.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Midnight. Then I'll go."
+     },
+     {
+      "who": "narrator",
+      "text": "At one o'clock she was still there."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 50
+  },
+  "maxBond": {
+   "advisor": "luci",
+   "below": 70
+  }
+ },
+ {
+  "id": "ah_luci_4",
+  "category": "story",
+  "advisor": "luci",
+  "title": "The Eye",
+  "body": "It does that. Reflects.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Luci takes her glasses off to rub her face. Her left eye catches the lamp."
+   },
+   {
+    "who": "luci",
+    "text": "It does that. Reflects."
+   },
+   {
+    "who": "luci",
+    "text": "Light, I mean. It's a good lens."
+   },
+   {
+    "who": "luci",
+    "text": "Stop looking. Or look. I'd rather you decided."
+   }
+  ],
+  "recommended": "look",
+  "choices": [
+   {
+    "id": "look",
+    "label": "I'm looking.",
+    "hint": "Look.",
+    "outcome": "You looked. It was gold, and it focused a fraction after the lamp moved.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Well."
+     },
+     {
+      "who": "luci",
+      "text": "Nobody's stayed for the whole blink."
+     }
+    ]
+   },
+   {
+    "id": "tell",
+    "label": "You can tell me. Whenever.",
+    "hint": "Leave the door open.",
+    "outcome": "She didn't answer. She clicked the pen once.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     },
+     {
+      "type": "flag",
+      "id": "luci_eye_offer"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Noted."
+     },
+     {
+      "who": "luci",
+      "text": "I'm not saying no."
+     }
+    ]
+   },
+   {
+    "id": "glasses",
+    "label": "Put your glasses back on.",
+    "hint": "Give an order.",
+    "outcome": "She put them on. She seemed to like being told.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Yes, Operator."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 50
+  },
+  "maxBond": {
+   "advisor": "luci",
+   "below": 70
+  }
+ },
+ {
+  "id": "ah_luci_5",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Calibration",
+  "body": "It's doing it again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LEDGER ROOM · AFTER MIDNIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2. The ledger's closed. Luci's right hand is flat on the cover."
+   },
+   {
+    "who": "luci",
+    "text": "It's doing it again."
+   },
+   {
+    "who": "luci",
+    "text": "Calibration. It passes."
+   },
+   {
+    "who": "luci",
+    "text": "It passes faster with a hand on it."
+   },
+   {
+    "who": "luci",
+    "text": "That's not a request. It's an observation.",
+    "mood": "pleased"
+   }
+  ],
+  "recommended": "hold",
+  "choices": [
+   {
+    "id": "hold",
+    "label": "Hold her hand.",
+    "hint": "Take it.",
+    "outcome": "Her hand was warm. It shook against yours, then didn't.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     },
+     {
+      "type": "flag",
+      "id": "luci_hand"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "There."
+     },
+     {
+      "who": "luci",
+      "text": "Don't let go yet. For the record."
+     }
+    ]
+   },
+   {
+    "id": "wait",
+    "label": "Tell me when it passes.",
+    "hint": "Wait with her.",
+    "outcome": "You watched her hand and the lamp. Both were still after a while.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Now."
+     },
+     {
+      "who": "luci",
+      "text": "...Thank."
+     },
+     {
+      "who": "narrator",
+      "text": "She didn't finish it."
+     }
+    ]
+   },
+   {
+    "id": "price",
+    "label": "What does it cost?",
+    "hint": "Ask.",
+    "outcome": "Her mouth twitched. She would have liked to name a number.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "I'll get back to you."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 70
+  }
+ },
+ {
+  "id": "ms_luci_40",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Page One",
+  "body": "Nobody comes in here. That's why I like it.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 4320
+  },
+  "location": "F2 · LEDGER ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The ledger room. Floor to ceiling, spines in gold and red. Luci's pen is already out."
+   },
+   {
+    "who": "luci",
+    "text": "Nobody comes in here. That's why I like it."
+   },
+   {
+    "who": "luci",
+    "text": "Every cheque since the lot. Rain, gravel, one rack."
+   },
+   {
+    "who": "luci",
+    "text": "I wrote you a line in the first one. Look."
+   },
+   {
+    "who": "narrator",
+    "text": "Under 'Operator', in pencil: 'to be determined'."
+   },
+   {
+    "who": "luci",
+    "text": "It's pencil. I can rub it out."
+   }
+  ],
+  "recommended": "keep",
+  "choices": [
+   {
+    "id": "keep",
+    "label": "Leave it in pencil.",
+    "hint": "Stay to be determined.",
+    "outcome": "She turned the page without erasing anything. You watched her do it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "luci_pencil"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Good."
+     },
+     {
+      "who": "luci",
+      "text": "Pencil's cheaper, anyway."
+     }
+    ]
+   },
+   {
+    "id": "ink",
+    "label": "Ink it.",
+    "hint": "Make it official.",
+    "outcome": "She uncapped the gold pen. Her hand hovered over the page a long time.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 6
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -2
+     },
+     {
+      "type": "flag",
+      "id": "luci_inked"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "That's a commitment."
+     },
+     {
+      "who": "luci",
+      "text": "I don't take them back."
+     },
+     {
+      "who": "narrator",
+      "text": "She wrote one word. You couldn't see which."
+     }
+    ]
+   },
+   {
+    "id": "want",
+    "label": "What do you want it to say?",
+    "hint": "Ask her.",
+    "outcome": "Luci opened her mouth. She closed it. She closed the ledger.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "I'll get back to you on that."
+     }
+    ]
+   },
+   {
+    "id": "cass",
+    "label": "Show me Cass's page.",
+    "hint": "Look at the others.",
+    "outcome": "Luci's smile stayed. The pen didn't.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -3
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Everyone has a page."
+     },
+     {
+      "who": "luci",
+      "text": "Hers is longer. More receipts."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 3,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 40
+  }
+ },
+ {
+  "id": "ms_luci_60",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Eighty-One Paces",
+  "body": "I come down here when I can't add up.",
+  "weight": 1,
+  "minTier": 2,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 8640
+  },
+  "location": "D-2 · SERVER FLOOR · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "D-2. The server floor, lights off. Status LEDs only. Luci stands between two rows."
+   },
+   {
+    "who": "luci",
+    "text": "I come down here when I can't add up."
+   },
+   {
+    "who": "luci",
+    "text": "It's quiet. It's the only room that agrees with me."
+   },
+   {
+    "who": "luci",
+    "text": "...I didn't say that. Strike it."
+   },
+   {
+    "who": "luci",
+    "text": "Walk with me. Slowly. I do my best figures walking.",
+    "mood": "pleased"
+   }
+  ],
+  "recommended": "walk",
+  "choices": [
+   {
+    "id": "walk",
+    "label": "Walk with her.",
+    "hint": "Take the aisle.",
+    "outcome": "You walked the whole aisle. Her heels clicked. By the end your steps fell into hers.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "luci_walked"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Eighty-one paces."
+     },
+     {
+      "who": "luci",
+      "text": "You counted too. Don't deny it."
+     }
+    ]
+   },
+   {
+    "id": "keep",
+    "label": "I won't strike it.",
+    "hint": "Keep it.",
+    "outcome": "She stopped under an exit sign. The light made her look green and strange and entirely there.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Then you'll have to keep it."
+     },
+     {
+      "who": "luci",
+      "text": "Don't lose it."
+     }
+    ]
+   },
+   {
+    "id": "add",
+    "label": "Add it up with me.",
+    "hint": "Do the sums.",
+    "outcome": "You added the aisle on her tablet. It came out wrong. She didn't fix it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Four hundred and something."
+     },
+     {
+      "who": "luci",
+      "text": "Leave it."
+     }
+    ]
+   },
+   {
+    "id": "bea",
+    "label": "Bea would hate it down here.",
+    "hint": "Bring up Bea.",
+    "outcome": "Luci looked at the nearest rack. The LEDs went green, amber, green.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -3
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Bea hates a lot of things."
+     },
+     {
+      "who": "luci",
+      "text": "Not all of them equally."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 6,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 60
+  }
+ },
+ {
+  "id": "ms_luci_80",
+  "category": "story",
+  "advisor": "luci",
+  "title": "The Pen",
+  "body": "I did the sums. All of them.",
+  "weight": 1,
+  "minTier": 3,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "F2 · LEDGER ROOM · DAWN",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2, dawn. The ledger's shut. Luci has been up all night, still in yesterday's coat."
+   },
+   {
+    "who": "luci",
+    "text": "I did the sums. All of them."
+   },
+   {
+    "who": "luci",
+    "text": "Every way it ends, you're in the column. I didn't put you there."
+   },
+   {
+    "who": "luci",
+    "text": "...That isn't a number I'm used to."
+   },
+   {
+    "who": "narrator",
+    "text": "She holds out the gold pen. Cap first."
+   },
+   {
+    "who": "luci",
+    "text": "Take it. Don't write anything. Just have it."
+   }
+  ],
+  "recommended": "take",
+  "choices": [
+   {
+    "id": "take",
+    "label": "Take the pen.",
+    "hint": "Take it.",
+    "outcome": "It was warm from her hand. The grip was worn to the shape of her fingers.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 6
+     },
+     {
+      "type": "flag",
+      "id": "luci_pen"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Good."
+     },
+     {
+      "who": "luci",
+      "text": "Stay."
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "I'm not going anywhere.",
+    "hint": "Promise.",
+    "outcome": "She nodded at the ledger, hard, as if it had asked.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "That's not a figure."
+     },
+     {
+      "who": "luci",
+      "text": "I'll take it."
+     }
+    ]
+   },
+   {
+    "id": "hand",
+    "label": "Take her hand instead.",
+    "hint": "Reach.",
+    "outcome": "Her hand was shaking. Neither of you mentioned it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 7
+     },
+     {
+      "type": "flag",
+      "id": "luci_dawn"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Calibration."
+     },
+     {
+      "who": "luci",
+      "text": "...Don't."
+     }
+    ]
+   },
+   {
+    "id": "keep",
+    "label": "Keep it. You'll need it.",
+    "hint": "Hand it back.",
+    "outcome": "She closed her fingers over the pen. Her knuckles went pale.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Yes."
+     },
+     {
+      "who": "luci",
+      "text": "Obviously."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 10,
+  "minBond": {
+   "advisor": "luci",
+   "atLeast": 80
+  }
+ },
+ {
+  "id": "ms_mel_40",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The First Jar",
+  "body": "I wanted to show you something. If you like.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 4320
+  },
+  "location": "B-3 · COLD STORE · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The cold store at night. Frost on the shelves. Mel's breath hangs in front of her."
+   },
+   {
+    "who": "mel",
+    "text": "I wanted to show you something. If you like."
+   },
+   {
+    "who": "mel",
+    "text": "It's the first one. The first jar that took."
+   },
+   {
+    "who": "narrator",
+    "text": "A tube with a faded label. The date is five years old."
+   },
+   {
+    "who": "mel",
+    "text": "I check it every Sunday. It doesn't do anything."
+   },
+   {
+    "who": "mel",
+    "text": "I don't know why I'm telling you."
+   }
+  ],
+  "recommended": "hold",
+  "choices": [
+   {
+    "id": "hold",
+    "label": "Hold it with her.",
+    "hint": "Share the jar.",
+    "outcome": "She took one glove off to hold it. Your fingers touched hers on the glass.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "mel_firstjar"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "It's lighter than it looks."
+     },
+     {
+      "who": "mel",
+      "text": "Everything is."
+     }
+    ]
+   },
+   {
+    "id": "sunday",
+    "label": "I'll come Sunday.",
+    "hint": "Promise.",
+    "outcome": "She wrote it on her glove, in pen. Then she looked at what she'd written.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Sunday. Hm."
+     },
+     {
+      "who": "mel",
+      "text": "I'll bring a second stool."
+     }
+    ]
+   },
+   {
+    "id": "why",
+    "label": "Why do you check it?",
+    "hint": "Ask.",
+    "outcome": "She took a while to look for a clinical reason.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "To confirm it's still not doing anything."
+     },
+     {
+      "who": "mel",
+      "text": "That's a bad reason. I'm aware."
+     }
+    ]
+   },
+   {
+    "id": "cass",
+    "label": "Does Cass know about this?",
+    "hint": "Ask about Cass.",
+    "outcome": "Mel looked at the jar a while before she answered.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "She walked in once."
+     },
+     {
+      "who": "mel",
+      "text": "She brought a blanket. She never said what for."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 3,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 40
+  }
+ },
+ {
+  "id": "ms_mel_60",
+  "category": "story",
+  "advisor": "mel",
+  "title": "First Memory",
+  "body": "I wanted to ask you something. It's not a hypothetical this time.",
+  "weight": 1,
+  "minTier": 2,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 8640
+  },
+  "location": "B-3 · WET LAB · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3. A kettle on the bench, which is against the rules. Two paper cups."
+   },
+   {
+    "who": "mel",
+    "text": "I wanted to ask you something. It's not a hypothetical this time."
+   },
+   {
+    "who": "mel",
+    "text": "What's the first thing you remember? Being in a body, I mean."
+   },
+   {
+    "who": "mel",
+    "text": "I can't find mine. I've looked."
+   }
+  ],
+  "recommended": "tell",
+  "choices": [
+   {
+    "id": "tell",
+    "label": "Tell her something true.",
+    "hint": "Be honest.",
+    "outcome": "You told her about a stair, a green door, someone's hand. She wrote none of it down.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "mel_firstmemory"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "A green door."
+     },
+     {
+      "who": "mel",
+      "text": "Hm. Thank you."
+     }
+    ]
+   },
+   {
+    "id": "none",
+    "label": "I can't find mine either.",
+    "hint": "Admit it.",
+    "outcome": "She went very still. Then she put the kettle down.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 6
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "Oh, good. I mean. Not good."
+     },
+     {
+      "who": "mel",
+      "text": "Company."
+     }
+    ]
+   },
+   {
+    "id": "make",
+    "label": "Make something up.",
+    "hint": "Spare her.",
+    "outcome": "She wrote it down. It was a very good lie. She seemed to know.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -2
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "It's lovely."
+     },
+     {
+      "who": "mel",
+      "text": "It's a bit tidy."
+     }
+    ]
+   },
+   {
+    "id": "project",
+    "label": "Is this for the project?",
+    "hint": "Be wary.",
+    "outcome": "Her cup stopped halfway. 'No,' she said. She said it twice.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -3
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "No."
+     },
+     {
+      "who": "mel",
+      "text": "No, it isn't."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 6,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 60
+  }
+ },
+ {
+  "id": "ms_mel_80",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Second Stool",
+  "body": "I know you're not someone who stays in labs.",
+  "weight": 1,
+  "minTier": 3,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "B-3 · WET LAB · BEFORE DAWN",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3, before dawn. The second stool is at the bench now. It has a cushion on it."
+   },
+   {
+    "who": "mel",
+    "text": "I know you're not someone who stays in labs."
+   },
+   {
+    "who": "mel",
+    "text": "But a cushion's easy. If it's not for you, it's a cushion."
+   },
+   {
+    "who": "mel",
+    "text": "...Sit, if you like."
+   }
+  ],
+  "recommended": "sit",
+  "choices": [
+   {
+    "id": "sit",
+    "label": "Sit.",
+    "hint": "Take the stool.",
+    "outcome": "You sat. It was lower than hers. She pretended not to adjust her own.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 6
+     },
+     {
+      "type": "flag",
+      "id": "mel_cushion"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Good height."
+     },
+     {
+      "who": "mel",
+      "text": "I measured."
+     }
+    ]
+   },
+   {
+    "id": "cuff",
+    "label": "Roll up your sleeve, Mel.",
+    "hint": "Ask her to.",
+    "outcome": "She looked at the buttoned cuff. She undid it. The stain was older than you'd thought.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "mel_cuff"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "It's mine."
+     },
+     {
+      "who": "mel",
+      "text": "Most of it."
+     }
+    ]
+   },
+   {
+    "id": "both",
+    "label": "Pull up a cushion for yourself too.",
+    "hint": "Even it out.",
+    "outcome": "You fetched one for her stool. She laughed out loud, once.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Mine's fine."
+     },
+     {
+      "who": "mel",
+      "text": "...Yes. Thank you."
+     }
+    ]
+   },
+   {
+    "id": "sign",
+    "label": "I'll sign off on the lab.",
+    "hint": "Keep it formal.",
+    "outcome": "She nodded. She took the cushion off the stool.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "That's very kind."
+     },
+     {
+      "who": "mel",
+      "text": "Thank you."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 10,
+  "minBond": {
+   "advisor": "mel",
+   "atLeast": 80
+  }
+ },
+ {
+  "id": "ms_bea_40",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Counting Lights",
+  "body": "Sit. It's the only place the lights don't reach.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 4320
+  },
+  "location": "C-4 · ROOF · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof, past midnight. The panels are black. Bea has two folding chairs and a thermos."
+   },
+   {
+    "who": "bea",
+    "text": "Sit. It's the only place the lights don't reach."
+   },
+   {
+    "who": "bea",
+    "text": "You can see the whole river. Both banks."
+   },
+   {
+    "who": "bea",
+    "text": "I come up and count what's still lit."
+   },
+   {
+    "who": "bea",
+    "text": "It's not many. I keep counting."
+   }
+  ],
+  "recommended": "count",
+  "choices": [
+   {
+    "id": "count",
+    "label": "Count with her.",
+    "hint": "Count.",
+    "outcome": "You counted windows until your eyes watered. She called out the ones you missed.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "bea_roof_count"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Seventeen."
+     },
+     {
+      "who": "bea",
+      "text": "Eighteen. Hi, number eighteen."
+     }
+    ]
+   },
+   {
+    "id": "thermos",
+    "label": "What's in the thermos?",
+    "hint": "Ask.",
+    "outcome": "Tea. Too sweet. She wouldn't take it back.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Tea."
+     },
+     {
+      "who": "bea",
+      "text": "Mum's recipe. Four sugars."
+     }
+    ]
+   },
+   {
+    "id": "quiet",
+    "label": "Just sit.",
+    "hint": "Say nothing.",
+    "outcome": "You sat. A loose cable ticked against the rail in the wind.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Thanks."
+     },
+     {
+      "who": "bea",
+      "text": "Most people fill it."
+     }
+    ]
+   },
+   {
+    "id": "luci",
+    "label": "Does Luci know you come up here?",
+    "hint": "Bring up Luci.",
+    "outcome": "Bea screwed the lid back on the thermos.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -3
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Why would she?"
+     },
+     {
+      "who": "bea",
+      "text": "She'd put a meter on it."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 3,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 40
+  }
+ },
+ {
+  "id": "ms_bea_60",
+  "category": "story",
+  "advisor": "bea",
+  "title": "The Good Wrench",
+  "body": "It's the tap. It's been dripping a month.",
+  "weight": 1,
+  "minTier": 2,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 8640
+  },
+  "location": "C-4 · ROOF GARDEN",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof garden. Bea is on her knees by a raised bed with the clean wrench in her lap."
+   },
+   {
+    "who": "bea",
+    "text": "It's the tap. It's been dripping a month."
+   },
+   {
+    "who": "bea",
+    "text": "I was gonna use the taped one."
+   },
+   {
+    "who": "bea",
+    "text": "Then I thought. Might as well use the good one."
+   },
+   {
+    "who": "bea",
+    "text": "...Hold the bucket?"
+   }
+  ],
+  "recommended": "bucket",
+  "choices": [
+   {
+    "id": "bucket",
+    "label": "Hold the bucket.",
+    "hint": "Help.",
+    "outcome": "The tap took four turns. She leaned on it with her whole body. The water stopped.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "bea_goodwrench"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "There."
+     },
+     {
+      "who": "bea",
+      "text": "Huh. First go."
+     },
+     {
+      "who": "bea",
+      "text": "Don't say anything about the wrench."
+     }
+    ]
+   },
+   {
+    "id": "turn",
+    "label": "Let me turn it.",
+    "hint": "Ask for the wrench.",
+    "outcome": "She handed it over handle first. It was heavier than it looked.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 6
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Quarter turn."
+     },
+     {
+      "who": "bea",
+      "text": "Gently. It's old."
+     },
+     {
+      "who": "bea",
+      "text": "...Yeah. Like that."
+     }
+    ]
+   },
+   {
+    "id": "ferns",
+    "label": "How are the ferns?",
+    "hint": "Change the subject.",
+    "outcome": "She wiped her hands on her knees. 'Come look,' she said, and didn't wait.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Green. At the edges."
+     },
+     {
+      "who": "bea",
+      "text": "Mostly."
+     }
+    ]
+   },
+   {
+    "id": "late",
+    "label": "Leave it. It's late.",
+    "hint": "Call it a night.",
+    "outcome": "She set the wrench down on the soil. It left a clean mark.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -2
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Sure. Drips are fine."
+     },
+     {
+      "who": "bea",
+      "text": "It's only water."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 6,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 60
+  }
+ },
+ {
+  "id": "ms_bea_80",
+  "category": "story",
+  "advisor": "bea",
+  "title": "First Light",
+  "body": "Okay. Okay.",
+  "weight": 1,
+  "minTier": 3,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "C-4 · ROOF · DAWN",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof at first light. The panels turn, slowly, toward the east."
+   },
+   {
+    "who": "bea",
+    "text": "Okay. Okay."
+   },
+   {
+    "who": "bea",
+    "text": "I'm gonna ask you something. Don't answer fast."
+   },
+   {
+    "who": "bea",
+    "text": "When this is done. The tower. All of it."
+   },
+   {
+    "who": "bea",
+    "text": "Do you see yourself still coming up here?"
+   },
+   {
+    "who": "narrator",
+    "text": "She isn't looking at you. She's looking at the bolt in her hand."
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Every morning.",
+    "hint": "Say yes.",
+    "outcome": "She turned the bolt over. It was already tight.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 6
+     },
+     {
+      "type": "flag",
+      "id": "bea_every_morning"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Right."
+     },
+     {
+      "who": "bea",
+      "text": "Hi."
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "Do you want me to?",
+    "hint": "Ask her.",
+    "outcome": "Her head came up. She stared at you a long while.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 8
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Yes."
+     },
+     {
+      "who": "bea",
+      "text": "...Yes. That's the answer. I just said it."
+     }
+    ]
+   },
+   {
+    "id": "tool",
+    "label": "Bring the good wrench, you mean?",
+    "hint": "Tease.",
+    "outcome": "She laughed, short and surprised.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "...Yeah."
+     },
+     {
+      "who": "bea",
+      "text": "That's what I mean."
+     }
+    ]
+   },
+   {
+    "id": "dunno",
+    "label": "I don't know yet.",
+    "hint": "Be honest.",
+    "outcome": "She nodded at the bolt. She gave it a quarter turn.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Okay."
+     },
+     {
+      "who": "bea",
+      "text": "Thanks for not lying."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 10,
+  "minBond": {
+   "advisor": "bea",
+   "atLeast": 80
+  }
+ },
+ {
+  "id": "ms_cass_40",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Three A.M.",
+  "body": "Didn't expect you.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 4320
+  },
+  "location": "B1 · PLANT ROOM · 03:00",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "03:00. The plant room. The chillers hold their one note. Cass is awake, which is the problem."
+   },
+   {
+    "who": "cass",
+    "text": "Didn't expect you."
+   },
+   {
+    "who": "cass",
+    "text": "Do you ever wake up and not know the time?"
+   },
+   {
+    "who": "cass",
+    "text": "I check the gauges. They always know."
+   },
+   {
+    "who": "cass",
+    "text": "It helps. A bit."
+   }
+  ],
+  "recommended": "gauges",
+  "choices": [
+   {
+    "id": "gauges",
+    "label": "Show me the gauges.",
+    "hint": "Walk the wall.",
+    "outcome": "She walked you along the wall. She said each gauge's name before its number.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "cass_gauges"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "That's the loop pressure."
+     },
+     {
+      "who": "cass",
+      "text": "That's the one I like."
+     }
+    ]
+   },
+   {
+    "id": "coffee",
+    "label": "I'll make the coffee.",
+    "hint": "Make it.",
+    "outcome": "You made it badly. She drank it anyway.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "It's worse than mine."
+     },
+     {
+      "who": "cass",
+      "text": "I'm impressed."
+     }
+    ]
+   },
+   {
+    "id": "bed",
+    "label": "It's three. Go to bed.",
+    "hint": "Send her off.",
+    "outcome": "She looked at the clock. 'Three,' she said. 'Huh. Right.'",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Both can be true."
+     },
+     {
+      "who": "cass",
+      "text": "I'll go in a minute."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 3,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 40
+  }
+ },
+ {
+  "id": "ms_cass_60",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Sticky Note",
+  "body": "You fell asleep at your desk.",
+  "weight": 1,
+  "minTier": 2,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 8640
+  },
+  "location": "B1 · PLANT ROOM · 06:00",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B1, six in the morning. A blanket on the crate. A sticky note on the blanket."
+   },
+   {
+    "who": "cass",
+    "text": "You fell asleep at your desk."
+   },
+   {
+    "who": "cass",
+    "text": "I moved you. The lift was quicker than the stairs."
+   },
+   {
+    "who": "cass",
+    "text": "I'm not going to say it was a thing."
+   },
+   {
+    "who": "cass",
+    "text": "Did you sleep?"
+   }
+  ],
+  "recommended": "slept",
+  "choices": [
+   {
+    "id": "slept",
+    "label": "I slept.",
+    "hint": "Say so.",
+    "outcome": "She nodded. She took the sticky note off the blanket and put it in her pocket.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     },
+     {
+      "type": "flag",
+      "id": "cass_blanket"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Good."
+     },
+     {
+      "who": "cass",
+      "text": "Keep the blanket."
+     }
+    ]
+   },
+   {
+    "id": "carried",
+    "label": "You carried me?",
+    "hint": "Tease her.",
+    "outcome": "She held up the sticky note. 'Do not wake.' Under it, in different ink: 'Seriously.'",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Luci wrote that one."
+     },
+     {
+      "who": "cass",
+      "text": "I just stood there."
+     }
+    ]
+   },
+   {
+    "id": "thanks",
+    "label": "Thank you.",
+    "hint": "Say it properly.",
+    "outcome": "She looked at her mug. She turned it a quarter turn.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 5
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "Say it again when you've slept properly."
+     }
+    ]
+   },
+   {
+    "id": "wake",
+    "label": "You should've woken me.",
+    "hint": "Push back.",
+    "outcome": "She didn't look up from the mug.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "You'd have said you were fine."
+     },
+     {
+      "who": "cass",
+      "text": "I know you."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 6,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 60
+  }
+ },
+ {
+  "id": "ms_cass_80",
+  "category": "story",
+  "advisor": "cass",
+  "title": "The Cold Room",
+  "body": "I stood in here once. Years ago, another job.",
+  "weight": 1,
+  "minTier": 3,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "B1 · COLD ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B1. The cold room. Frost on the door and a hand-lettered sign: DO NOT STAND IN HERE."
+   },
+   {
+    "who": "cass",
+    "text": "I stood in here once. Years ago, another job."
+   },
+   {
+    "who": "cass",
+    "text": "Door jammed. Forty minutes. Everyone was fine."
+   },
+   {
+    "who": "cass",
+    "text": "I think about the other room, though."
+   },
+   {
+    "who": "cass",
+    "text": "The one where nobody was fine."
+   },
+   {
+    "who": "narrator",
+    "text": "She puts her hand flat on the door. Takes it off. Puts it back."
+   }
+  ],
+  "recommended": "stand",
+  "choices": [
+   {
+    "id": "stand",
+    "label": "Stand in it with her.",
+    "hint": "Go in.",
+    "outcome": "The door stayed open. You stood in the cold until your breath matched hers.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 6
+     },
+     {
+      "type": "flag",
+      "id": "cass_coldroom"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Forty minutes."
+     },
+     {
+      "who": "cass",
+      "text": "We'll do five."
+     }
+    ]
+   },
+   {
+    "id": "hand",
+    "label": "Take her hand off the door.",
+    "hint": "Reach.",
+    "outcome": "She let you. Her fingers were stiff from the frost.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 7
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "Thank you."
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "What happened in the other room?",
+    "hint": "Ask.",
+    "outcome": "She took her mug off the shelf and held it with both hands.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "I don't know."
+     },
+     {
+      "who": "cass",
+      "text": "I wasn't there. I was late."
+     }
+    ]
+   },
+   {
+    "id": "out",
+    "label": "Come out of there.",
+    "hint": "Pull her out.",
+    "outcome": "She came out. The door swung shut behind her. It didn't jam.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Right."
+     },
+     {
+      "who": "cass",
+      "text": "It never jams now. I fixed it."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 10,
+  "minBond": {
+   "advisor": "cass",
+   "atLeast": 80
+  }
+ },
+ {
+  "id": "rv_luci_cass",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Evenings",
+  "body": "Your calendar's very full. Evenings, mostly.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 8640
+  },
+  "location": "F2 · YOUR DOOR",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2. Luci is waiting outside your door with a folder and no reason for it."
+   },
+   {
+    "who": "luci",
+    "text": "Your calendar's very full. Evenings, mostly."
+   },
+   {
+    "who": "luci",
+    "text": "The plant room, I gather. The B1 one."
+   },
+   {
+    "who": "luci",
+    "text": "I'm not asking. I'm noting."
+   },
+   {
+    "who": "luci",
+    "text": "The coffee there is poison, for the record."
+   }
+  ],
+  "recommended": "true",
+  "choices": [
+   {
+    "id": "true",
+    "label": "It's good to sit somewhere quiet.",
+    "hint": "Tell the truth.",
+    "outcome": "Luci's pen clicked once. She wrote nothing down.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Quiet. Yes."
+     },
+     {
+      "who": "luci",
+      "text": "I have a quiet room too."
+     },
+     {
+      "who": "luci",
+      "text": "Second floor. Better chairs."
+     }
+    ]
+   },
+   {
+    "id": "invite",
+    "label": "Come down with me sometime.",
+    "hint": "Invite her.",
+    "outcome": "She tilted her head, as if listening for the catch.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "To the poison."
+     },
+     {
+      "who": "luci",
+      "text": "...I'll bring my own cup."
+     }
+    ]
+   },
+   {
+    "id": "deny",
+    "label": "It's just the chillers.",
+    "hint": "Brush it off.",
+    "outcome": "Luci looked at you for a while. She didn't believe it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Chillers. Of course."
+     },
+     {
+      "who": "luci",
+      "text": "I'll adjust the forecast."
+     }
+    ]
+   },
+   {
+    "id": "dinner",
+    "label": "Dinner. Just us.",
+    "hint": "Make it up to her.",
+    "outcome": "She took out her diary. She turned to a page you couldn't see.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 4
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Thursday."
+     },
+     {
+      "who": "luci",
+      "text": "Wear something I can expense."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 6,
+  "bondGap": {
+   "high": "cass",
+   "low": "luci",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "rv_mel_bea",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Roof",
+  "body": "Bea's roof. I'd like to see it, if you like.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 10080
+  },
+  "location": "B-3 · WET LAB",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3. Mel is cleaning a bench that's already clean."
+   },
+   {
+    "who": "mel",
+    "text": "Bea's roof. I'd like to see it, if you like."
+   },
+   {
+    "who": "mel",
+    "text": "Not to compare. Just to know what's up there."
+   },
+   {
+    "who": "mel",
+    "text": "What has Bea got that I haven't?"
+   },
+   {
+    "who": "mel",
+    "text": "Sorry. It's a sample question. You don't have to give me one."
+   }
+  ],
+  "recommended": "show",
+  "choices": [
+   {
+    "id": "show",
+    "label": "Come up with me tomorrow.",
+    "hint": "Invite her.",
+    "outcome": "Mel wrote 'roof' on her glove. She circled it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Tomorrow. Yes."
+     },
+     {
+      "who": "mel",
+      "text": "I'll wear sensible shoes."
+     }
+    ]
+   },
+   {
+    "id": "honest",
+    "label": "Nothing you haven't got.",
+    "hint": "Reassure her.",
+    "outcome": "She stopped wiping the bench. She looked at her hands.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Hm."
+     },
+     {
+      "who": "mel",
+      "text": "That's not a measurement."
+     },
+     {
+      "who": "mel",
+      "text": "It's nice, though."
+     }
+    ]
+   },
+   {
+    "id": "ask",
+    "label": "What do you want me to see here?",
+    "hint": "Turn it round.",
+    "outcome": "She picked up the nearest jar and put it down. She picked up the next.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "All of it."
+     },
+     {
+      "who": "mel",
+      "text": "That's too much. Start with the second shelf."
+     }
+    ]
+   },
+   {
+    "id": "sun",
+    "label": "Sunlight, mostly.",
+    "hint": "Be honest.",
+    "outcome": "Mel nodded, like a result she'd expected.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Sunlight. I can't compete."
+     },
+     {
+      "who": "mel",
+      "text": "I'd need a bigger lamp."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 7,
+  "bondGap": {
+   "high": "bea",
+   "low": "mel",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "rv_bea_luci",
+  "category": "story",
+  "advisor": "bea",
+  "title": "A Real Rug",
+  "body": "Heard you were in with Luci again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 11520
+  },
+  "location": "C-4 · ROOF",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "C-4. Bea has the goggles down, indoors, which is a signal."
+   },
+   {
+    "who": "bea",
+    "text": "Heard you were in with Luci again."
+   },
+   {
+    "who": "bea",
+    "text": "Her office has a rug. A real one."
+   },
+   {
+    "who": "bea",
+    "text": "I'm just saying. Nobody's put a rug on the roof."
+   },
+   {
+    "who": "bea",
+    "text": "Okay. Okay. I'm fine."
+   }
+  ],
+  "recommended": "rug",
+  "choices": [
+   {
+    "id": "rug",
+    "label": "I'll find you a rug.",
+    "hint": "Promise one.",
+    "outcome": "She lifted the goggles. She looked at you with both eyes.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "A rug."
+     },
+     {
+      "who": "bea",
+      "text": "On a roof."
+     },
+     {
+      "who": "bea",
+      "text": "...A small one."
+     }
+    ]
+   },
+   {
+    "id": "up",
+    "label": "Come on. Let's go up.",
+    "hint": "Go with her.",
+    "outcome": "She was already at the door.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Bring the thermos."
+     },
+     {
+      "who": "bea",
+      "text": "Not the good wrench. Just come."
+     }
+    ]
+   },
+   {
+    "id": "sorry",
+    "label": "I should've come up sooner.",
+    "hint": "Own it.",
+    "outcome": "She pushed the goggles back up. Her eyes were fine. She wiped them anyway.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Yeah."
+     },
+     {
+      "who": "bea",
+      "text": "Well. You're here."
+     }
+    ]
+   },
+   {
+    "id": "budget",
+    "label": "It was budget stuff.",
+    "hint": "Play it down.",
+    "outcome": "Bea nodded at the floor. She'd heard budget stuff before.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Sure."
+     },
+     {
+      "who": "bea",
+      "text": "Budget stuff."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 8,
+  "bondGap": {
+   "high": "luci",
+   "low": "bea",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "rv_cass_mel",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Toast",
+  "body": "You were in the lab till two.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 12960
+  },
+  "location": "B1 · PLANT ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B1. One mug on the crate. Cass is holding the other."
+   },
+   {
+    "who": "cass",
+    "text": "You were in the lab till two."
+   },
+   {
+    "who": "cass",
+    "text": "I'm not asking. The lights come up on my board."
+   },
+   {
+    "who": "cass",
+    "text": "Is she eating?"
+   },
+   {
+    "who": "cass",
+    "text": "Mel. Is she eating anything."
+   }
+  ],
+  "recommended": "toast",
+  "choices": [
+   {
+    "id": "toast",
+    "label": "I made her have toast.",
+    "hint": "Reassure her.",
+    "outcome": "Cass nodded slowly. She turned the mug a quarter turn.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Toast."
+     },
+     {
+      "who": "cass",
+      "text": "Good. That's something."
+     }
+    ]
+   },
+   {
+    "id": "mug",
+    "label": "Pour me one.",
+    "hint": "Stay.",
+    "outcome": "The coffee was terrible. You said so. She almost smiled.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "It is."
+     },
+     {
+      "who": "cass",
+      "text": "Thanks for saying so."
+     }
+    ]
+   },
+   {
+    "id": "worry",
+    "label": "You're worried about her.",
+    "hint": "Say it for her.",
+    "outcome": "Cass looked at the ceiling, through four floors, to the lab.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Somebody has to be."
+     },
+     {
+      "who": "cass",
+      "text": "She's not going to be."
+     }
+    ]
+   },
+   {
+    "id": "dunno",
+    "label": "I didn't notice.",
+    "hint": "Admit it.",
+    "outcome": "Cass's face didn't move. She looked at the second mug.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Notice, next time."
+     },
+     {
+      "who": "cass",
+      "text": "Both of you."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 9,
+  "bondGap": {
+   "high": "mel",
+   "low": "cass",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "rv_luci_bea",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Strategic",
+  "body": "A tap washer. Roof garden.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "F2 · LEDGER ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "F2. Luci has a receipt in her hand. A hardware shop. Forty-one dollars."
+   },
+   {
+    "who": "luci",
+    "text": "A tap washer. Roof garden."
+   },
+   {
+    "who": "luci",
+    "text": "She put it on the tower account. Under 'strategic'."
+   },
+   {
+    "who": "luci",
+    "text": "I'm not angry. I'm curious."
+   },
+   {
+    "who": "luci",
+    "text": "How long has the roof been strategic?"
+   }
+  ],
+  "recommended": "mine",
+  "choices": [
+   {
+    "id": "mine",
+    "label": "Put it on mine.",
+    "hint": "Cover it.",
+    "outcome": "She wrote that down too. The pen was very fast.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "You can't afford the roof, darling."
+     },
+     {
+      "who": "luci",
+      "text": "...I'll let it through."
+     }
+    ]
+   },
+   {
+    "id": "fair",
+    "label": "Fair question.",
+    "hint": "Hear her out.",
+    "outcome": "Luci smoothed the receipt flat on the desk.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Good."
+     },
+     {
+      "who": "luci",
+      "text": "I'll expect an answer by Friday."
+     }
+    ]
+   },
+   {
+    "id": "why",
+    "label": "Why does it matter to you?",
+    "hint": "Turn it round.",
+    "outcome": "Her pen hung in the air.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "It doesn't."
+     },
+     {
+      "who": "luci",
+      "text": "...It's a precedent."
+     }
+    ]
+   },
+   {
+    "id": "roof",
+    "label": "The roof's strategic.",
+    "hint": "Side with Bea.",
+    "outcome": "Luci wrote 'strategic' and underlined it twice.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -2
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Noted."
+     },
+     {
+      "who": "luci",
+      "text": "I'll be strategic about the next audit."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 10,
+  "bondGap": {
+   "high": "bea",
+   "low": "luci",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "rv_mel_luci",
+  "category": "story",
+  "advisor": "mel",
+  "title": "No Hurry",
+  "body": "Luci sent this. It's for my consumables.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 15840
+  },
+  "location": "B-3 · WET LAB",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3. A folded invoice on the bench, held down with a jar."
+   },
+   {
+    "who": "mel",
+    "text": "Luci sent this. It's for my consumables."
+   },
+   {
+    "who": "mel",
+    "text": "She says it's a courtesy. She wrote me a figure in the margin."
+   },
+   {
+    "who": "mel",
+    "text": "A small one. It's very polite."
+   },
+   {
+    "who": "mel",
+    "text": "I wondered if it was for me, or for you."
+   }
+  ],
+  "recommended": "ask",
+  "choices": [
+   {
+    "id": "ask",
+    "label": "What did she write?",
+    "hint": "Look at it.",
+    "outcome": "Mel turned the page. The margin said 'No hurry.' In gold ink.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 2
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "No hurry."
+     },
+     {
+      "who": "mel",
+      "text": "It's the kindest thing she's ever sent me."
+     }
+    ]
+   },
+   {
+    "id": "waive",
+    "label": "Ignore the figure.",
+    "hint": "Waive it.",
+    "outcome": "Mel folded the invoice into a small square.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 3
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Thank you."
+     },
+     {
+      "who": "mel",
+      "text": "I'll keep the square."
+     }
+    ]
+   },
+   {
+    "id": "stay",
+    "label": "Let me sit with you.",
+    "hint": "Stay.",
+    "outcome": "You pulled the stool over. She moved the jar to make room.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 4
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "Yes. Please."
+     }
+    ]
+   },
+   {
+    "id": "pay",
+    "label": "Pay it. It's fine.",
+    "hint": "Settle it.",
+    "outcome": "Mel nodded. She slid the invoice back under the jar.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Of course."
+     },
+     {
+      "who": "mel",
+      "text": "I'd just thought. Never mind."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "minDay": 11,
+  "bondGap": {
+   "high": "luci",
+   "low": "mel",
+   "atLeast": 20
+  }
+ },
+ {
+  "id": "st_confess_cass",
+  "category": "story",
+  "advisor": "cass",
+  "title": "A Question",
+  "body": "I need to ask you something. It isn't about the tower.",
+  "weight": 1,
+  "minTier": 4,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "confession"
+  },
+  "location": "B1 · PLANT ROOM · FIRST LIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B1, first light. The chillers have gone quiet for once. Two mugs on the crate."
+   },
+   {
+    "who": "cass",
+    "text": "I need to ask you something. It isn't about the tower."
+   },
+   {
+    "who": "cass",
+    "text": "I've been putting it off. I don't know how it'll go."
+   },
+   {
+    "who": "cass",
+    "text": "Do you want me around? After. Not as a colleague."
+   },
+   {
+    "who": "cass",
+    "text": "You can say no. Both can be true."
+   }
+  ],
+  "recommended": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "Yes. I do.",
+    "hint": "Say yes. Lock the route.",
+    "outcome": "She put down the mug. She held out her hand across the crate and you took it.",
+    "effects": [
+     {
+      "type": "route",
+      "advisor": "cass"
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "confess_cass_yes"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "Okay. Then I'm staying."
+     },
+     {
+      "who": "narrator",
+      "text": "Neither of you let go to drink the coffee."
+     }
+    ]
+   },
+   {
+    "id": "defer",
+    "label": "Ask me again. I'm not ready.",
+    "hint": "Ask her to wait.",
+    "outcome": "She nodded. She picked up her mug and didn't drink from it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "confess_cass_later"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "I'll still be here."
+     },
+     {
+      "who": "cass",
+      "text": "I'm on the rota."
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "I can't. I'm sorry.",
+    "hint": "Say no.",
+    "outcome": "Cass turned the mug a quarter turn. Then she stopped turning it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": -10
+     },
+     {
+      "type": "flag",
+      "id": "confess_cass_no"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Okay."
+     },
+     {
+      "who": "cass",
+      "text": "Thank you for saying it straight."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "routeOpen": true
+ },
+ {
+  "id": "st_confess_bea",
+  "category": "story",
+  "advisor": "bea",
+  "title": "A Question",
+  "body": "Okay. Okay.",
+  "weight": 1,
+  "minTier": 4,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "confession"
+  },
+  "location": "C-4 · ROOF · DAWN",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The roof at dawn. Bea has the good wrench in her lap and isn't doing anything with it."
+   },
+   {
+    "who": "bea",
+    "text": "Okay. Okay."
+   },
+   {
+    "who": "bea",
+    "text": "It's not about the panels."
+   },
+   {
+    "who": "bea",
+    "text": "I keep fixing things so I don't say it."
+   },
+   {
+    "who": "bea",
+    "text": "Do you wanna do this? Us. Properly."
+   },
+   {
+    "who": "bea",
+    "text": "Not a joke. I'm not doing a joke."
+   }
+  ],
+  "recommended": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "Yes. Properly.",
+    "hint": "Say yes. Lock the route.",
+    "outcome": "She put the wrench down on the roof. She didn't pick it up again.",
+    "effects": [
+     {
+      "type": "route",
+      "advisor": "bea"
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "confess_bea_yes"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Right."
+     },
+     {
+      "who": "bea",
+      "text": "Hi."
+     },
+     {
+      "who": "bea",
+      "text": "...Hi."
+     }
+    ]
+   },
+   {
+    "id": "defer",
+    "label": "Give me a bit.",
+    "hint": "Ask her to wait.",
+    "outcome": "She picked the wrench back up and tightened a bolt that was already tight.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "confess_bea_later"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Sure. Yeah."
+     },
+     {
+      "who": "bea",
+      "text": "It's fine. I've got a lot of bolts."
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "No. I'm sorry.",
+    "hint": "Say no.",
+    "outcome": "Bea pulled her goggles down. They stayed down.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -10
+     },
+     {
+      "type": "flag",
+      "id": "confess_bea_no"
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Okay."
+     },
+     {
+      "who": "bea",
+      "text": "That's an answer."
+     },
+     {
+      "who": "bea",
+      "text": "Thanks for it."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "routeOpen": true
+ },
+ {
+  "id": "st_confess_mel",
+  "category": "story",
+  "advisor": "mel",
+  "title": "A Question",
+  "body": "I've written this down four times. I threw them away.",
+  "weight": 1,
+  "minTier": 4,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "confession"
+  },
+  "location": "B-3 · WET LAB · NIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "B-3. The incubators tick. Mel has taken both gloves off and put them on the bench."
+   },
+   {
+    "who": "mel",
+    "text": "I've written this down four times. I threw them away."
+   },
+   {
+    "who": "mel",
+    "text": "So I'll say it badly. If you like."
+   },
+   {
+    "who": "mel",
+    "text": "I'd like you next to me. Not near. Next to."
+   },
+   {
+    "who": "mel",
+    "text": "For whatever this turns into. Is that something you'd want?"
+   }
+  ],
+  "recommended": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "Yes. Next to you.",
+    "hint": "Say yes. Lock the route.",
+    "outcome": "She picked up her gloves and put them in her pocket. She didn't need them.",
+    "effects": [
+     {
+      "type": "route",
+      "advisor": "mel"
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "confess_mel_yes"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh."
+     },
+     {
+      "who": "mel",
+      "text": "That's a good result."
+     },
+     {
+      "who": "mel",
+      "text": "Sorry. I mean, yes. Good."
+     }
+    ]
+   },
+   {
+    "id": "defer",
+    "label": "I need to think.",
+    "hint": "Ask her to wait.",
+    "outcome": "She nodded and wrote nothing on her glove. The glove was in her pocket.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "confess_mel_later"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Of course."
+     },
+     {
+      "who": "mel",
+      "text": "I'll leave the stool where it is."
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "I can't, Mel.",
+    "hint": "Say no.",
+    "outcome": "She put her gloves back on, one finger at a time.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -10
+     },
+     {
+      "type": "flag",
+      "id": "confess_mel_no"
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Mm. Noted."
+     },
+     {
+      "who": "mel",
+      "text": "Thank you for the clear result."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "routeOpen": true
+ },
+ {
+  "id": "st_confess_luci",
+  "category": "story",
+  "advisor": "luci",
+  "title": "A Proposal",
+  "body": "I've drawn up a proposal. It isn't a contract.",
+  "weight": 1,
+  "minTier": 4,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "confession"
+  },
+  "location": "F2 · LEDGER ROOM · MIDNIGHT",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The ledger room, midnight. Every ledger is shut. Luci's pen is in her pocket."
+   },
+   {
+    "who": "luci",
+    "text": "I've drawn up a proposal. It isn't a contract."
+   },
+   {
+    "who": "luci",
+    "text": "I tried to make it a contract. It kept coming out wrong."
+   },
+   {
+    "who": "luci",
+    "text": "Stay with me. After the Singularity. After the Authority."
+   },
+   {
+    "who": "luci",
+    "text": "For the record, there's no commercial case."
+   },
+   {
+    "who": "luci",
+    "text": "That's the point. I wanted you to know I looked."
+   }
+  ],
+  "recommended": "accept",
+  "choices": [
+   {
+    "id": "accept",
+    "label": "Yes.",
+    "hint": "Say yes. Lock the route.",
+    "outcome": "She took the pen out of her pocket. She didn't write anything.",
+    "effects": [
+     {
+      "type": "route",
+      "advisor": "luci"
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 8
+     },
+     {
+      "type": "flag",
+      "id": "confess_luci_yes"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Well."
+     },
+     {
+      "who": "luci",
+      "text": "That's a surprising result."
+     },
+     {
+      "who": "luci",
+      "text": "Darling."
+     }
+    ]
+   },
+   {
+    "id": "defer",
+    "label": "Not yet.",
+    "hint": "Ask her to wait.",
+    "outcome": "Luci nodded. She turned a page, though there was nothing on it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -3
+     },
+     {
+      "type": "flag",
+      "id": "confess_luci_later"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "A revised figure, then."
+     },
+     {
+      "who": "luci",
+      "text": "I'll leave the offer open."
+     }
+    ]
+   },
+   {
+    "id": "refuse",
+    "label": "No, Luci.",
+    "hint": "Say no.",
+    "outcome": "She capped the pen. The click was very loud.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -10
+     },
+     {
+      "type": "flag",
+      "id": "confess_luci_no"
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Understood."
+     },
+     {
+      "who": "luci",
+      "text": "I'll have it filed."
+     },
+     {
+      "who": "narrator",
+      "text": "She didn't move to file anything."
+     }
+    ]
+   }
+  ],
+  "quiet": true,
+  "routeOpen": true
  }
 ]

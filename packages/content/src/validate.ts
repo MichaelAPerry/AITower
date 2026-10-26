@@ -609,6 +609,9 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
 			num(p, `${w}.atLeast`, t.atLeast, { gt: 0 });
 			break;
+		case "afterHours":
+		case "confession":
+			break;
 		case "sealedOut":
 		case "objection":
 			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
@@ -668,6 +671,12 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 		case "commitPath":
 			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
 			break;
+		case "flag":
+			if (typeof (e as { id: unknown }).id !== "string" || !ID_RE.test((e as { id: string }).id)) p.push(`${w}.id: a flag id uses lowercase letters, digits and underscores`);
+			break;
+		case "route":
+			if (!ADVISORS.includes((e as { advisor: string }).advisor)) p.push(`${w}.advisor: unknown advisor`);
+			break;
 		default:
 			p.push(`${w}.type: unknown effect type ${JSON.stringify(t)}`);
 	}
@@ -686,6 +695,10 @@ function validateEventChoice(p: Problems, w: string, c: EventChoice): void {
 		validateEffect(p, `${w}.effects[${i}]`, e);
 	});
 	if (c.reply !== undefined) validateLines(p, `${w}.reply`, c.reply);
+	if (c.minBond !== undefined) {
+		if (!ADVISORS.includes(c.minBond.advisor)) p.push(`${w}.minBond.advisor: unknown advisor`);
+		num(p, `${w}.minBond.atLeast`, c.minBond.atLeast, { min: 1, max: 100 });
+	}
 }
 
 function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, seen: Set<string>): void {
@@ -715,6 +728,18 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 		else validateTrigger(p, `${w}.trigger`, e.trigger);
 		if (e.lines !== undefined) validateLines(p, `${w}.lines`, e.lines);
 	} else if (e.trigger !== undefined) p.push(`${w}.trigger: only story scenes have triggers`);
+	if (e.minBond !== undefined) {
+		if (!ADVISORS.includes(e.minBond.advisor)) p.push(`${w}.minBond.advisor: unknown advisor`);
+		num(p, `${w}.minBond.atLeast`, e.minBond.atLeast, { min: 1, max: 100 });
+	}
+	if (e.maxBond !== undefined) {
+		if (!ADVISORS.includes(e.maxBond.advisor)) p.push(`${w}.maxBond.advisor: unknown advisor`);
+		num(p, `${w}.maxBond.below`, e.maxBond.below, { min: 1, max: 101 });
+	}
+	if (e.bondGap !== undefined) {
+		if (!ADVISORS.includes(e.bondGap.high) || !ADVISORS.includes(e.bondGap.low) || e.bondGap.high === e.bondGap.low) p.push(`${w}.bondGap: two different advisors required`);
+		num(p, `${w}.bondGap.atLeast`, e.bondGap.atLeast, { min: 1, max: 100 });
+	}
 	if (e.whenPath !== undefined && (!Array.isArray(e.whenPath) || e.whenPath.some((x) => x !== null && !PATHS.includes(x)))) p.push(`${w}.whenPath: expected paths or null`);
 	if (e.backdrop !== undefined && e.backdrop !== "title" && !PATHS.includes(e.backdrop)) p.push(`${w}.backdrop: unknown backdrop`);
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
@@ -838,6 +863,12 @@ function validateSoul(p: Problems, b: ContentDB["balance"]): void {
 	for (const k of ["bondReveal", "bondCommit", "bondEpilogue"] as const) num(p, `balance.soul.${k}`, s[k], { min: 0, max: 100 });
 	num(p, "balance.soul.bondFollow", s.bondFollow, { min: 0, max: 20 });
 	num(p, "balance.soul.bondOverrule", s.bondOverrule, { min: -20, max: 0 });
+	num(p, "balance.soul.afterHoursBond", s.afterHoursBond, { min: 0, max: 20 });
+	num(p, "balance.soul.giftLiked", s.giftLiked, { min: 0, max: 20 });
+	num(p, "balance.soul.giftDisliked", s.giftDisliked, { min: -20, max: 0 });
+	num(p, "balance.soul.messageBond", s.messageBond, { min: 0, max: 20 });
+	num(p, "balance.soul.confessionBond", s.confessionBond, { min: 1, max: 100 });
+	num(p, "balance.soul.confessionTier", s.confessionTier, { min: 1, max: 10, int: true });
 	for (const a of ADVISORS) num(p, `balance.soul.bondStart.${a}`, s.bondStart?.[a as AdvisorId], { min: 0, max: 100 });
 	for (const path of PATHS) {
 		const w = s.spWeights?.[path];
@@ -892,6 +923,10 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			for (const [a, t] of Object.entries(d.epilogue ?? {})) {
 				if (!ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
 				str(p, `${w}.epilogue.${a}`, t);
+			}
+			for (const [a, t] of Object.entries(d.routeAck ?? {})) {
+				if (!ADVISORS.includes(a)) p.push(`${w}.routeAck.${a}: unknown advisor`);
+				str(p, `${w}.routeAck.${a}`, t);
 			}
 		});
 		for (const id of ENDINGS) if (!seen.has(id)) p.push(`endings: missing "${id}"`);
@@ -1005,6 +1040,62 @@ function validateTech(p: Problems, db: ContentDB): void {
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
 const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 2, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
 
+/** Gifts, messages and memories (the dating systems), and that every `flag` effect names a memory. */
+function validateDating(p: Problems, db: ContentDB): void {
+	const gifts = db.gifts;
+	if (!Array.isArray(gifts)) p.push("gifts: expected an array");
+	else {
+		const who = new Set<string>();
+		gifts.forEach((g, i) => {
+			const w = `gifts[${i}] (${g?.advisor})`;
+			if (!ADVISORS.includes(g.advisor)) p.push(`${w}.advisor: unknown advisor`);
+			if (who.has(g.advisor)) p.push(`${w}: one gift entry per advisor`);
+			who.add(g.advisor);
+			for (const k of ["liked", "disliked"] as const) if (!Object.hasOwn(db.facilities, g[k])) p.push(`${w}.${k}: unknown facility "${g[k]}"`);
+			if (g.liked === g.disliked) p.push(`${w}: liked and disliked must differ`);
+			str(p, `${w}.likedLine`, g.likedLine);
+			str(p, `${w}.dislikedLine`, g.dislikedLine);
+		});
+		for (const a of ADVISORS) if (!who.has(a)) p.push(`gifts: missing "${a}"`);
+	}
+	const memories = db.memories;
+	const flags = new Set<string>();
+	if (!Array.isArray(memories)) p.push("memories: expected an array");
+	else
+		memories.forEach((m, i) => {
+			const w = `memories[${i}] (${m?.flag})`;
+			if (typeof m.flag !== "string" || !ID_RE.test(m.flag)) p.push(`${w}.flag: use lowercase letters, digits and underscores`);
+			if (flags.has(m.flag)) p.push(`${w}: duplicate flag`);
+			flags.add(m.flag);
+			if (!ADVISORS.includes(m.advisor)) p.push(`${w}.advisor: unknown advisor`);
+			str(p, `${w}.text`, m.text);
+		});
+	const messages = db.messages;
+	if (!Array.isArray(messages)) p.push("messages: expected an array");
+	else {
+		const ids = new Set<string>();
+		messages.forEach((m, i) => {
+			const w = `messages[${i}] (${m?.id})`;
+			str(p, `${w}.id`, m.id);
+			if (ids.has(m.id)) p.push(`${w}: duplicate id`);
+			ids.add(m.id);
+			if (!ADVISORS.includes(m.from)) p.push(`${w}.from: unknown advisor`);
+			str(p, `${w}.text`, m.text);
+			if (m.minBond !== undefined) num(p, `${w}.minBond`, m.minBond, { min: 1, max: 100 });
+			if (m.maxBond !== undefined) num(p, `${w}.maxBond`, m.maxBond, { min: 1, max: 101 });
+			if (!Array.isArray(m.taps) || m.taps.length < 1 || m.taps.length > 3) p.push(`${w}.taps: one to three replies`);
+			else
+				m.taps.forEach((t, k) => {
+					str(p, `${w}.taps[${k}].label`, t.label);
+					str(p, `${w}.taps[${k}].back`, t.back);
+				});
+		});
+	}
+	for (const e of db.events ?? [])
+		for (const c of e.choices ?? [])
+			for (const f of c.effects ?? []) if (f.type === "flag" && !flags.has(f.id)) p.push(`events ${e.id}: flag "${f.id}" has no entry in memories`);
+}
+
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
 	const tierCount = db.balance?.tiers?.pflops?.length ?? 1;
@@ -1086,6 +1177,7 @@ export function validateContent(db: ContentDB): string[] {
 	validateUpgrades(p, db);
 	validateBioBalance(p, db);
 	validatePathsAndEndings(p, db);
+	validateDating(p, db);
 
 	const scenarios = db.scenarios ?? {};
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");

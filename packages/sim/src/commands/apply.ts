@@ -17,6 +17,7 @@ import {
 	planDeclineContract,
 	planSetEnabled,
 } from "./operations";
+import { planGiveGift, planReplyMessage, planVisitAdvisor } from "../ministry/dating";
 import { planDeferDecision, planDecisionGate, planMarkTip, planResolveDecision } from "../ministry/decisions";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
@@ -91,6 +92,15 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "markTip":
 			plan = planMarkTip(ctx, cmd.tipId);
+			break;
+		case "visitAdvisor":
+			plan = planVisitAdvisor(ctx, cmd.advisor);
+			break;
+		case "giveGift":
+			plan = planGiveGift(ctx, cmd.advisor, cmd.facilityId);
+			break;
+		case "replyMessage":
+			plan = planReplyMessage(ctx, cmd.msgId, cmd.tap);
 			break;
 		case "research":
 			plan = planResearch(ctx, cmd.techId);

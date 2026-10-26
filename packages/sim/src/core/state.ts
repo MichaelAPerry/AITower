@@ -188,6 +188,14 @@ export interface Decision {
 	subject?: string;
 }
 
+/** One text in the inbox. The words live in `ContentDB.messages[msgId]`. */
+export interface InboxMessage {
+	msgId: string;
+	from: AdvisorId;
+	tick: number;
+	tapped: number | null;
+}
+
 export interface DecisionRecord {
 	decisionId: number;
 	eventId: string;
@@ -413,6 +421,23 @@ export interface SimState {
 	sealedOut: SealedTree[];
 	/** Bond rewards for building already paid (snapshot v13): "starter:<tree>" and "sig:<defId>". */
 	bondGiven: string[];
+	// ── The dating systems (snapshot v14, docs/VN_WRITING.md) ──
+	/** The locked route (the confession was accepted): her epilogue closes the ending. Null until then. */
+	route: AdvisorId | null;
+	/** Memory flags set by story choices (ids from `ContentDB.memories`), oldest first, no duplicates. */
+	flags: string[];
+	/** Game day of the last After-hours visit (-1 = never): one visit per day. */
+	afterHoursDay: number;
+	/** After-hours scenes already played (so a pool does not repeat until it runs dry). */
+	afterSeen: string[];
+	/** Gifts already given, "advisor:defId". */
+	gifted: string[];
+	/** The inbox: advisor texts, newest last. `tapped` is the index of the reply the player sent (null = not answered). */
+	inbox: InboxMessage[];
+	/** Game day the last text arrived (-1 = none): at most one a day. */
+	messageDay: number;
+	/** Texts already sent, by id. */
+	messageSeen: string[];
 	// ── Automation, greentech, scenarios (snapshot v6) ──
 	/** Standing orders (research / parts / bots / Foreman). */
 	automation: AutomationPolicy;

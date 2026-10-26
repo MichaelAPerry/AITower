@@ -50,6 +50,12 @@ export type SimCommand =
 	| { type: "deferDecision"; decisionId: number }
 	/** App-side pacing: while closed no new decision is issued (the app closes it for 3 real minutes after each one). */
 	| { type: "decisionGate"; open: boolean }
+	/** After hours: spend the evening with one advisor (once per game day). She earns bond; a short scene opens as a decision. */
+	| { type: "visitAdvisor"; advisor: AdvisorId }
+	/** Give an owned item to the advisor who likes (or dislikes) it; once per advisor and item. */
+	| { type: "giveGift"; advisor: AdvisorId; facilityId: number }
+	/** One-tap reply to a text in the inbox (`tap` = index of the reply, -1 = leave it). */
+	| { type: "replyMessage"; msgId: string; tap: number }
 	/** Remember an advisor tip as shown, so it never fires again in this game. */
 	| { type: "markTip"; tipId: string }
 	/** Spend research points on a tech node (prerequisites researched, tier ≥ minTier, enough RP). */
@@ -194,7 +200,13 @@ export type SimEvent =
 	| { type: "droughtStarted" }
 	| { type: "droughtEnded" }
 	/** The committed tree's seal reached `soul.sealMax`: the path fell back to synthetic. */
-	| { type: "sealedOut"; path: SealedTree };
+	| { type: "sealedOut"; path: SealedTree }
+	/** The player stayed late with an advisor (the scene, if any, is the open decision). */
+	| { type: "visited"; advisor: AdvisorId }
+	/** A gift was given; `liked` says how she took it (the line is in `ContentDB.gifts`). */
+	| { type: "gifted"; advisor: AdvisorId; defId: string; liked: boolean }
+	| { type: "messageReceived"; from: AdvisorId; msgId: string }
+	| { type: "messageAnswered"; from: AdvisorId; msgId: string };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -443,6 +455,19 @@ export interface SoulView {
 	sealedOut: SealedTree[];
 	/** Why committing to each tree is blocked now (ignoring Level and an existing path), or null. */
 	commitBlock: Record<AscensionPath, string | null>;
+	// ── The dating systems ──
+	/** The locked route (the confession was accepted), or null. */
+	route: AdvisorId | null;
+	/** Memory flags set by the player's choices, oldest first (the dossier words them from `ContentDB.memories`). */
+	flags: string[];
+	/** An After-hours visit is possible now (once per game day, no decision open), or the reason it is not. */
+	afterHours: { available: boolean; reason: string | null };
+	/** The inbox, newest last: who texted, the text id, and the reply sent (null = not answered). */
+	inbox: { msgId: string; from: AdvisorId; tick: number; tapped: number | null }[];
+	/** Owned items an advisor has a taste for that were not given yet. */
+	giftable: { advisor: AdvisorId; defId: string; facilityId: number; liked: boolean }[];
+	/** Gifts already given, "advisor:defId". */
+	gifted: string[];
 }
 
 export interface DecisionView {

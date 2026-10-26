@@ -14,7 +14,8 @@ import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
 import { loanMax } from "../economy/credit";
 import { facilityContamination } from "../bio/index";
 import { commitBlock, sealOf } from "../progression/soul";
-import { eventDef } from "../ministry/decisions";
+import { choiceAvailable, eventDef } from "../ministry/decisions";
+import { giftable, visitBlock } from "../ministry/dating";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
@@ -84,7 +85,7 @@ function decisionView(state: SimState, content: ContentDB): DecisionView | null 
 		category: def.category,
 		title: def.title,
 		body: sub(def.body),
-		choices: def.choices.map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
+		choices: def.choices.filter((c) => choiceAvailable(state, c)).map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
 		recommended: def.recommended,
 		votes: def.votes?.map((v) => ({ ...v })),
 		issuedAt: d.issuedAt,
@@ -110,6 +111,12 @@ function soulView(state: SimState, content: ContentDB): SoulView {
 		bondEpilogue: s.bondEpilogue,
 		sealedOut: [...state.sealedOut],
 		commitBlock: { synthetic: null, biotech: commitBlock(state, content, "biotech"), greentech: commitBlock(state, content, "greentech") },
+		route: state.route,
+		flags: [...state.flags],
+		afterHours: { available: visitBlock(state) === null, reason: visitBlock(state) },
+		inbox: state.inbox.map((m) => ({ ...m })),
+		giftable: giftable(state, content),
+		gifted: [...state.gifted],
 	};
 }
 

@@ -402,6 +402,26 @@ function validateSoul(s: Obj): void {
 	array(s, "bondGiven").forEach((x, i) => {
 		if (typeof x !== "string") fail(`bondGiven[${i}] must be a string`);
 	});
+	validateDating(s);
+}
+
+/** The dating systems (snapshot v14): route, flags, After-hours, gifts, inbox. */
+function validateDating(s: Obj): void {
+	if (s.route !== null && !ADVISOR_KEYS.includes(s.route as string)) fail("route is invalid");
+	for (const key of ["flags", "afterSeen", "gifted", "messageSeen"]) {
+		array(s, key).forEach((x, i) => {
+			if (typeof x !== "string") fail(`${key}[${i}] must be a string`);
+		});
+	}
+	if (!Number.isInteger(s.afterHoursDay)) fail("afterHoursDay must be an integer");
+	if (!Number.isInteger(s.messageDay)) fail("messageDay must be an integer");
+	const inbox = array(s, "inbox");
+	if (inbox.length > 40) fail("inbox is too long");
+	inbox.forEach((m, i) => {
+		const o = fields(m, { msgId: "str", tick: "num" }, `inbox[${i}]`);
+		if (!ADVISOR_KEYS.includes(o.from as string)) fail(`inbox[${i}].from is invalid`);
+		if (o.tapped !== null && !Number.isInteger(o.tapped)) fail(`inbox[${i}].tapped must be null or an integer`);
+	});
 }
 
 /** Automation, weather, scores, sandbox flag (snapshot v6). */
