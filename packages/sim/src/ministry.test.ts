@@ -266,18 +266,17 @@ describe("resolveDecision", () => {
 		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: false, reason: "no such decision" });
 	});
 
-	it("waiting never changes anything: no timeout, no reputation change, however long it is open", () => {
-		const c = contentWith([ev("audit", { choices: [choice("a", [{ type: "standing", amount: -6 }, { type: "cash", amount: -500 }]), choice("b")] })]);
+	it("waiting never changes anything: no timeout, however long it is open", () => {
+		const c = contentWith([ev("audit", { choices: [choice("a", [{ type: "cash", amount: -500 }]), choice("b")] })]);
 		const sim = newSim(c, "empty", 1);
 		const id = inject(sim, "audit");
 		const events = run(sim, 1440 * 5);
 		expect(sim.state.decision?.id).toBe(id);
 		expect(count(events, "decisionResolved")).toBe(0);
-		expect(sim.view().standingLog.filter((e) => e.cause === "decision")).toEqual([]); // nothing about it ever touches reputation
 		expect(sim.view().decisionHistory).toHaveLength(0);
-		const before = sim.state.standing;
+		const before = sim.state.today.penalties;
 		resolve(sim, id, "a");
-		expect(sim.state.standing).toBeCloseTo(before - 6, 0); // only the player's choice moves reputation (a tick of daily drift aside)
+		expect(sim.state.today.penalties - before).toBe(500); // only the player's choice applies anything
 	});
 
 	it("keeps only the last 20 resolved decisions, newest last", () => {
@@ -319,13 +318,11 @@ describe("deferDecision", () => {
 		const c = contentWith([ev("fx"), ev("other")], eventsBalance(100, 0));
 		const sim = newSim(c, "empty", 1);
 		const id = inject(sim, "fx");
-		const rep = sim.state.standing;
 		const cash = sim.state.cash;
 		exec(sim, { type: "deferDecision", decisionId: id });
 		expect(sim.submit({ type: "resolveDecision", decisionId: id, choiceId: "a" })).toEqual({ ok: false, reason: "no such decision" });
 		const log = issueLog(sim, 1000, null);
 		expect(log).toHaveLength(0);
-		expect(sim.state.standing).toBe(rep);
 		expect(sim.state.cash).toBe(cash);
 	});
 });
@@ -551,20 +548,20 @@ describe("decision effects", () => {
 		const cash0 = sim.state.cash;
 		const events = applyEffects(sim, [
 			{ type: "cash", amount: -1000 },
-			{ type: "standing", amount: -5 },
+			{ type: "bond", advisor: "mel", amount: -5 },
 			{ type: "spareParts", count: 2 },
 			{ type: "energyPrice", factor: 1.5, durationTicks: 60 },
 		]);
 		expect(sim.state.today.penalties).toBeGreaterThanOrEqual(1000);
 		expect(cash0 - sim.state.cash).toBeGreaterThanOrEqual(1000);
-		expect(sim.state.standing).toBe(45);
+		expect(sim.state.bonds.mel).toBe(45);
 		expect(sim.view().spareParts).toBe(6);
 		expect(sim.state.modifiers).toHaveLength(1);
-		expect(events).toContainEqual({ type: "standingChanged", standing: 45, delta: -5 });
+		expect(events.some((e) => e.type === "decisionResolved")).toBe(true);
 	});
 });
 
-// ── standing ──────────────────────────────────────────────────────────────
+// ── jobs ──────────────────────────────────────────────────────────────────
 
 const training = (over: Partial<ContractSpec> = {}): ContractSpec => ({
 	clientId: "t",
@@ -592,60 +589,17 @@ function accept(sim: SimImpl, spec: ContractSpec): number {
 
 const noOffers = (extra: Partial<Balance> = {}) => contentWith([ev("fx")], { ...QUIET, economy: { slaPenaltyFactor: 1.5, maxOffers: 0, offerIntervalTicks: 100, offerExpiryTicks: 100 }, ...extra });
 
-describe("standing", () => {
-	it("starts at balance.standing.start", () => {
-		expect(newSim(contentWith([], { ...QUIET, standing: { start: 77, dailyGood: 1, dailyBad: -3, dailyNearMiss: -3, dailyMissSpan: 0.05, jobFailed: -4, jobCompleted: 1 } }), "empty").view().standing).toBe(77);
-	});
-
-	it("a day that meets the current tier's uptime target adds dailyGood, a missed one adds dailyBad", () => {
-		const good = newSim(noOffers(), "farm", 1);
-		const goodEvents = run(good, 1440);
-		expect(goodEvents.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 51, delta: 1 }]);
-
-		const bad = newSim(noOffers(), "farm", 1);
-		bad.state.tier = 2; // target 95 %
-		for (const f of bad.state.facilities) if (f.defId.startsWith("rack_")) failRack(bad.state, f, []);
-		const badEvents = run(bad, 1440);
-		expect(bad.state.metrics.uptime).toBeLessThan(0.95);
-		expect(badEvents.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 47, delta: -3 }]);
-		expect(bad.view().standing).toBe(47);
-
-		// The same dead racks do not matter at tier 1 (target 0).
-		const t1 = newSim(noOffers(), "farm", 1);
-		for (const f of t1.state.facilities) if (f.defId.startsWith("rack_")) failRack(t1.state, f, []);
-		expect(run(t1, 1440).filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 51, delta: 1 }]);
-	});
-
-	it("job outcomes: completed adds jobCompleted, a missed deadline and a cancel add jobFailed", () => {
+describe("no reputation", () => {
+	it("a missed day, a finished job and a failed job move nothing but money (reputation is gone)", () => {
 		const sim = newSim(noOffers(), "farm", 1);
+		sim.state.tier = 2;
 		accept(sim, training());
 		const done = run(sim, 60);
 		expect(count(done, "jobCompleted")).toBe(1);
-		expect(done.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 51, delta: 1 }]);
-
-		accept(sim, training({ work: 30, durationTicks: 30 }));
-		// Feasible when accepted; switching the racks off makes it miss the deadline.
-		for (const f of sim.state.facilities) if (f.defId === "rack_air_gpu") exec(sim, { type: "setEnabled", facilityId: f.id, enabled: false });
-		const failed = run(sim, 40);
-		expect(count(failed, "jobFailed")).toBe(1);
-		expect(failed.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 47, delta: -4 }]);
-
-		for (const f of sim.state.facilities) if (f.defId === "rack_air_gpu") exec(sim, { type: "setEnabled", facilityId: f.id, enabled: true });
-		const jobId = accept(sim, training({ work: 1000 }));
-		const cancelled = exec(sim, { type: "cancelJob", jobId });
-		expect(cancelled.filter((e) => e.type === "standingChanged")).toEqual([{ type: "standingChanged", standing: 43, delta: -4 }]);
-		expect(sim.view().standing).toBe(43);
-	});
-
-	it("memo standing effects apply, and standing clamps to 0..100 with the real delta reported", () => {
-		const sim = newSim(fxContent(), "empty", 1);
-		const up = applyEffects(sim, [{ type: "standing", amount: 80 }]);
-		expect(sim.state.standing).toBe(100);
-		expect(up).toContainEqual({ type: "standingChanged", standing: 100, delta: 50 });
-		const none = applyEffects(sim, [{ type: "standing", amount: 5 }]);
-		expect(none.filter((e) => e.type === "standingChanged")).toHaveLength(0);
-		const down = applyEffects(sim, [{ type: "standing", amount: -30 }]);
-		expect(down).toContainEqual({ type: "standingChanged", standing: 70, delta: -30 });
+		for (const f of sim.state.facilities) if (f.defId.startsWith("rack_")) failRack(sim.state, f, []);
+		const day = run(sim, 1440);
+		expect(day.filter((e) => e.type === "gameOver")).toHaveLength(0);
+		expect(sim.state).not.toHaveProperty("standing");
 	});
 });
 
@@ -671,32 +625,6 @@ describe("game over", () => {
 		expect(sim.view().gameOver?.kind).toBe("bankrupt");
 	});
 
-	it("shutdown: standing reaching 0 ends the game once; the sim keeps stepping", () => {
-		const sim = newSim(fxContent(), "farm", 1);
-		sim.state.standing = 3;
-		const events = applyEffects(sim, [{ type: "standing", amount: -10 }]);
-		expect(events).toContainEqual({ type: "standingChanged", standing: 0, delta: -3 });
-		expect(events.filter((e) => e.type === "gameOver")).toEqual([{ type: "gameOver", kind: "shutdown" }]);
-		expect(sim.view()).toMatchObject({ standing: 0, gameOver: { kind: "shutdown", tick: 0 } });
-		const more = applyEffects(sim, [{ type: "standing", amount: -10 }]);
-		expect(count(more, "gameOver")).toBe(0);
-		expect(more.filter((e) => e.type === "standingChanged")).toHaveLength(0);
-		const hash = sim.hash();
-		run(sim, 100);
-		expect(sim.hash()).not.toBe(hash);
-		expect(sim.state.standing).toBe(0);
-	});
-
-	it("shutdown also follows from a bad day", () => {
-		const sim = newSim(noOffers(), "farm", 1);
-		sim.state.tier = 2;
-		sim.state.standing = 2;
-		for (const f of sim.state.facilities) if (f.defId.startsWith("rack_")) failRack(sim.state, f, []);
-		const events = run(sim, 1440);
-		expect(events).toContainEqual({ type: "gameOver", kind: "shutdown" });
-		expect(sim.view().gameOver).toEqual({ kind: "shutdown", tick: 1439 });
-	});
-
 	it("reaching the top tier is no longer a win: only the path endings end the game that way", () => {
 		const c = noOffers({ tiers: { pflops: [0, 1], uptime: [0, 0], reward: [0, 100] } });
 		const sim = newSim(c, "farm", 1);
@@ -715,13 +643,12 @@ describe("game over", () => {
 
 	it("the first game over wins when several happen", () => {
 		const sim = newSim(fxContent(), "empty", 1);
-		sim.state.standing = 1;
-		applyEffects(sim, [{ type: "standing", amount: -1 }]);
+		sim.state.gameOver = { kind: "absorbed", tick: 0, ending: "absorbed" };
 		sim.state.cash = -1;
 		const events = run(sim, 1500);
 		expect(count(events, "bankrupt")).toBe(1);
 		expect(count(events, "gameOver")).toBe(0);
-		expect(sim.view().gameOver?.kind).toBe("shutdown");
+		expect(sim.view().gameOver?.kind).toBe("absorbed");
 	});
 });
 
@@ -739,7 +666,7 @@ function playDays(sim: SimImpl, days: number, hook?: (tick: number) => void): vo
 }
 
 const richEvents = (): EventDef[] => [
-	ev("r1", { choices: [choice("a", [{ type: "cash", amount: -5000 }, { type: "standing", amount: 2 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
+	ev("r1", { choices: [choice("a", [{ type: "cash", amount: -5000 }, { type: "bond", advisor: "bea", amount: 2 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
 	ev("r2", { advisor: "cass", recommended: "b", choices: [choice("a", [{ type: "failRacks", count: 1 }]), choice("b", [{ type: "energyPrice", factor: 1.5, durationTicks: 1200 }, { type: "spareParts", count: -1 }])] }),
 	ev("r3", { choices: [choice("a", [{ type: "payout", factor: 1.2, durationTicks: 3000 }]), choice("b", [{ type: "gridCap", factor: 0.9, durationTicks: 300 }, { type: "failureRate", factor: 1.4, durationTicks: 900 }])] }),
 ];
@@ -807,11 +734,11 @@ describe("determinism and snapshots", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		expect(snap.version).toBe(SNAPSHOT_VERSION);
 		snap.version = 2;
-		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
+		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "gameOver"]) delete snap.state[k];
 		delete snap.state.rng.events;
 		delete snap.state.nextId.decision;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(old.state).toMatchObject({ decision: null, decisionHistory: [], modifiers: [], lastIssuedDay: {}, standing: 50, gameOver: null, nextDecisionTick: 300 + 1440, decisionGate: true, advisorTips: [] });
+		expect(old.state).toMatchObject({ decision: null, decisionHistory: [], modifiers: [], lastIssuedDay: {}, gameOver: null, nextDecisionTick: 300 + 1440, decisionGate: true, advisorTips: [] });
 		expect(old.state.nextId.decision).toBe(1);
 		expect(old.state.rng.events).toBe(createRng(5).events);
 		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
@@ -835,14 +762,13 @@ describe("determinism and snapshots", () => {
 		st.nextMemoTick = 4321;
 		st.nextId.memo = 6;
 		st.stats.memosAnswered = 7;
-		st.standingLog = [{ tick: 10, delta: -2, cause: "memo", detail: "Memo: x" }];
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
 		expect(old.state.decision).toEqual({ id: 4, eventId: "r2", issuedAt: 100, deferred: false, hiddenUntil: 0 });
 		expect(old.state.decisionHistory).toEqual([{ decisionId: 2, eventId: "r1", title: "Title r1", choiceId: "a", outcome: "o", tick: 50 }]);
 		expect(old.state).toMatchObject({ nextDecisionTick: 4321, decisionGate: true, advisorTips: [] });
 		expect(old.state.nextId.decision).toBe(6);
 		expect(old.state.stats.decisionsMade).toBe(7);
-		expect(old.state.standingLog[0].cause).toBe("decision");
+		expect(old.state).not.toHaveProperty("standingLog");
 		for (const gone of ["memos", "memoHistory", "nextMemoTick"]) expect(old.state).not.toHaveProperty(gone);
 		expect(old.snapshot().version).toBe(SNAPSHOT_VERSION);
 		// Waiting never expires it, however long the old clock had run.
@@ -855,7 +781,7 @@ describe("determinism and snapshots", () => {
 		sim.state.bankrupt = true;
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		snap.version = 2;
-		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "standing", "gameOver"]) delete snap.state[k];
+		for (const k of ["decision", "decisionHistory", "modifiers", "nextDecisionTick", "lastDecisionDay", "decisionGate", "advisorTips", "lastIssuedDay", "gameOver"]) delete snap.state[k];
 		delete snap.state.rng.events;
 		delete snap.state.nextId.decision;
 		const old = simFromSnapshot(sim.content, snap as never) as SimImpl;
@@ -885,9 +811,6 @@ describe("determinism and snapshots", () => {
 			reject((s) => { s.decision.id = 0; }, /^Invalid save: .*decision/);
 			reject((s) => { s.nextId.decision = 0; }, /^Invalid save: /);
 			reject((s) => { delete s.nextId.decision; }, /^Invalid save: nextId\.decision/);
-			reject((s) => { s.standing = 101; }, /^Invalid save: standing/);
-			reject((s) => { s.standing = -1; }, /^Invalid save: standing/);
-			reject((s) => { s.standing = "x"; }, /^Invalid save: state\.standing/);
 			reject((s) => { s.modifiers[s.modifiers.length - 1].kind = "nope"; }, /^Invalid save: modifiers/);
 			reject((s) => { s.modifiers[s.modifiers.length - 1].value = -2; kindFix(s); }, /^Invalid save: modifiers/);
 			reject((s) => { s.gameOver = { kind: "meh", tick: 1 }; }, /^Invalid save: gameOver/);

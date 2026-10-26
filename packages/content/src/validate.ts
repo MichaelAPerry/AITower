@@ -562,9 +562,6 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 		case "cash":
 			num(p, `${w}.amount`, (e as { amount: number }).amount);
 			break;
-		case "standing":
-			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
-			break;
 		case "ambient":
 			num(p, `${w}.deltaC`, (e as { deltaC: number }).deltaC, { min: -40, max: 40 });
 			dur((e as { durationTicks: number }).durationTicks);
@@ -679,11 +676,6 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 
 function validateEvents(p: Problems, db: ContentDB): void {
 	const b = db.balance;
-	if (b?.standing) {
-		num(p, "balance.standing.start", b.standing.start, { min: 1, max: 100 });
-		for (const k of ["dailyGood", "dailyBad", "dailyNearMiss", "jobFailed", "jobCompleted"] as const) num(p, `balance.standing.${k}`, b.standing[k]);
-		num(p, "balance.standing.dailyMissSpan", b.standing.dailyMissSpan, { min: 0.001, max: 1 });
-	} else p.push("balance.standing: missing");
 	if (b?.events) {
 		num(p, "balance.events.intervalTicks", b.events.intervalTicks, { min: 1, int: true });
 		num(p, "balance.events.graceTicks", b.events.graceTicks, { min: 0, int: true });
@@ -728,7 +720,7 @@ function validateResearchBalance(p: Problems, db: ContentDB): void {
 	if (!b.audit) p.push("balance.audit: missing");
 	else {
 		num(p, "balance.audit.periodDays", b.audit.periodDays, { min: 1, int: true });
-		const grades = (key: "standingByGrade" | "cashShareByGrade", lo: number, hi: number): void => {
+		const grades = (key: "cashShareByGrade", lo: number, hi: number): void => {
 			const a = b.audit[key];
 			if (!Array.isArray(a) || a.length !== GRADES) {
 				p.push(`balance.audit.${key}: expected ${GRADES} entries (grades A..E), got ${Array.isArray(a) ? a.length : "none"}`);
@@ -739,7 +731,6 @@ function validateResearchBalance(p: Problems, db: ContentDB): void {
 				if (i > 0 && isNum(v) && isNum(a[i - 1]) && v > a[i - 1]) p.push(`balance.audit.${key}: a worse grade must not pay more (index ${i})`);
 			});
 		};
-		grades("standingByGrade", -100, 100);
 		grades("cashShareByGrade", -1, 1);
 	}
 }

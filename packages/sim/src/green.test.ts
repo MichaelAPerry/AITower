@@ -3,7 +3,6 @@ import type { Balance, ContentDB, Scenario } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimEvent } from "./api";
 import { GREEN_SMOOTHING } from "./core/constants";
-import { changeStanding } from "./ministry/standing";
 import { daylight } from "./green/weather";
 import { type SimImpl, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";
 import { balance, exec, facilityOf, makeContent, newSim, run, scenario } from "./test/fixture";
@@ -456,18 +455,6 @@ describe("scenarios", () => {
 		expect(rl.view().gameOver?.kind).toBe("bankrupt");
 	});
 
-	it("sandbox: standing can hit 0 without a shutdown; elsewhere it ends the game", () => {
-		const c = content([custom, plain]);
-		const sb = newSim(c, "custom");
-		const ev: SimEvent[] = [];
-		changeStanding(sb.state, -1000, ev, "decision", "test");
-		expect(sb.state.standing).toBe(0);
-		expect(sb.state.gameOver).toBeNull();
-		const normal = newSim(c, "plain");
-		changeStanding(normal.state, -1000, ev, "decision", "test");
-		expect(normal.state.gameOver?.kind).toBe("shutdown");
-	});
-
 	it("sandbox follows the scenario, not the save", () => {
 		const c = content([custom]);
 		const sim = newSim(c, "custom");
@@ -550,8 +537,8 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(11);
-		expect(base().snapshot().version).toBe(11);
+		expect(SNAPSHOT_VERSION).toBe(12);
+		expect(base().snapshot().version).toBe(12);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -573,7 +560,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(11);
+		expect(loaded.snapshot().version).toBe(12);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

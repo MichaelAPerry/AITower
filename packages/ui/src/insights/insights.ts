@@ -1,10 +1,9 @@
 /**
- * Plain-language numbers for the Insights panel (money, uptime, reputation, and the jargon behind a "details" fold).
+ * Plain-language numbers for the Insights panel (money, uptime, and the jargon behind a "details" fold).
  * Pure, so it is unit-tested. The wording is written here; every number comes from the sim view.
  */
-import type { LedgerDay, SimView, StandingLogEntry } from "@aitower/sim";
+import type { LedgerDay, SimView} from "@aitower/sim";
 import { perHour } from "../calm/calm";
-import { clockText } from "../contracts/contractText";
 import { fmtMoney, fmtPct } from "../format";
 
 const costs = (d: LedgerDay): number => d.energy + d.upkeep + d.penalties + (d.taxes ?? 0) + (d.interest ?? 0) + (d.fees ?? 0);
@@ -51,43 +50,8 @@ export function uptimeVerdict(view: Pick<SimView, "uptime" | "uptimeTarget" | "f
 		ok,
 		tone: ok ? "good" : gap ? "warn" : "bad",
 		headline: `Uptime ${pct} · target ${target}`,
-		sub: ok ? "Racks are working enough of the time. Keep it up." : "Racks are down too often. Reputation drops while uptime stays under the target.",
+		sub: ok ? "Racks are working enough of the time. Keep it up." : "Racks are down too often. The quarterly audit grades uptime against the target.",
 	};
-}
-
-const CAUSE: Record<StandingLogEntry["cause"], string> = {
-	job: "A job result",
-	"daily-uptime": "Daily uptime check",
-	audit: "Quarterly audit",
-	decision: "An advisor decision",
-};
-
-export interface WhyRow {
-	key: string;
-	when: string;
-	delta: number;
-	deltaText: string;
-	cause: string;
-	detail: string;
-}
-
-export const signedPts = (n: number): string => `${n > 0 ? "+" : n < 0 ? "−" : "±"}${Math.abs(Math.round(n * 10) / 10)}`;
-
-/** The "Why did it change?" list: newest first. */
-export function reputationWhy(view: Pick<SimView, "standingLog">, limit = 8): WhyRow[] {
-	return [...view.standingLog]
-		.reverse()
-		.slice(0, limit)
-		.map((e, i) => ({ key: `${e.tick}:${i}`, when: clockText(e.tick), delta: e.delta, deltaText: signedPts(e.delta), cause: CAUSE[e.cause] ?? e.cause, detail: e.detail }));
-}
-
-/** "Down 6 points in the last two days" / "Steady". */
-export function reputationTrend(view: Pick<SimView, "standingLog" | "tick">): { delta: number; text: string; tone: "good" | "warn" | "dim" } {
-	const since = view.tick - 2 * 1440;
-	const delta = view.standingLog.filter((e) => e.tick >= since).reduce((s, e) => s + e.delta, 0);
-	const r = Math.round(delta * 10) / 10;
-	if (r === 0) return { delta: 0, text: "Steady over the last two days.", tone: "dim" };
-	return { delta: r, text: `${r > 0 ? "Up" : "Down"} ${Math.abs(r)} point${Math.abs(r) === 1 ? "" : "s"} in the last two days.`, tone: r > 0 ? "good" : "warn" };
 }
 
 /** What PUE means, with this player's number in it. */

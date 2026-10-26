@@ -181,7 +181,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 			expect(vi.getTimerCount()).toBe(base);
 
 			a.update(view(2), [{ type: "decisionIssued", decisionId: 1, eventId: "x" }, { type: "tierUp", tier: 2, reward: 1 }, { type: "rackTripped", facilityId: 1 }]);
-			a.update(view(3, { gameOver: { kind: "shutdown", tick: 3 } } as Partial<SimView>), [{ type: "gameOver", kind: "shutdown" }]);
+			a.update(view(3, { gameOver: { kind: "bankrupt", tick: 3 } } as Partial<SimView>), [{ type: "gameOver", kind: "bankrupt" }]);
 			a.destroy();
 			vi.advanceTimersByTime(60_000);
 			expect(vi.getTimerCount()).toBe(0);

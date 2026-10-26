@@ -152,7 +152,6 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 	if (next < tiers.pflops.length) {
 		const need = tiers.pflops[next];
 		const have = installedPflops(view, content);
-		const uptime = tiers.uptime[next];
 		const techNeed = view.tierNeed?.techs ?? tiers.techs?.[next] ?? 0;
 		const techDone = view.tierNeed?.techsDone ?? view.techResearched?.length ?? 0;
 		const research = techNeed > techDone ? ` Research ${techNeed - techDone} more node${techNeed - techDone === 1 ? "" : "s"} (${techDone} of ${techNeed} done).` : "";
@@ -175,16 +174,16 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			return {
 				tone: "progress",
 				title: `Next: Level ${next + 1}`,
-				detail: `Reach ${need} PF compute (now ${have}): ${build}. Uptime must stay ≥ ${Math.round(uptime * 100)}%.${research}${idleNote}`,
+				detail: `Reach ${need} PF compute (now ${have}): ${build}.${research}${idleNote}`,
 			};
 		}
 		return {
 			tone: "progress",
 			title: `Next: Level ${next + 1}`,
-			detail: `Compute is enough (${have} PF).${research || " "}Keep uptime ≥ ${Math.round(uptime * 100)}% through the day; your level is reviewed at midnight.`,
+			detail: `Compute is enough (${have} PF).${research || " "}Your level is reviewed at midnight.`,
 		};
 	}
-	return { tone: "progress", title: "Top level reached", detail: "Keep the Treasury growing and the Compute Authority's reputation high." };
+	return { tone: "progress", title: "Top level reached", detail: "Keep the Treasury growing. One of the three Singularity bars will fill." };
 }
 
 /** True for problems (broken, too hot, no power, the red, a decision due); the Goals card carries plain progress. */

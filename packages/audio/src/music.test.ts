@@ -9,7 +9,7 @@ import { STINGER_NOTES } from "./music/stingers";
 import { nextDropout, saturationCurve, tapeParams } from "./music/tape";
 
 const ev = (e: SimEvent): SimEvent => e;
-const v = (itKw: number, minuteOfDay = 720, gameOver: null | { kind: "shutdown"; tick: number } = null) => ({ itKw, minuteOfDay, gameOver }) as Parameters<typeof musicParams>[0];
+const v = (itKw: number, minuteOfDay = 720, gameOver: null | { kind: "bankrupt"; tick: number } = null) => ({ itKw, minuteOfDay, gameOver }) as Parameters<typeof musicParams>[0];
 
 describe("score", () => {
 	it("is a 32-bar 96 BPM loop with notes inside the loop and their instrument's range", () => {
@@ -94,7 +94,7 @@ describe("director", () => {
 	it("fades to ~30% when paused and to 0 after game over", () => {
 		expect(musicParams(v(0), [], false).level).toBe(1);
 		expect(musicParams(v(0), [], true).level).toBeCloseTo(0.3);
-		const over = musicParams(v(0, 720, { kind: "shutdown", tick: 5 }), [], false);
+		const over = musicParams(v(0, 720, { kind: "bankrupt", tick: 5 }), [], false);
 		expect(over.level).toBe(0);
 		expect(over.silent).toBe(true);
 		expect(over.stingers).toEqual([]); // no event this frame: no stinger on a loaded game-over
@@ -105,7 +105,7 @@ describe("director", () => {
 		expect(musicParams(v(0), [ev({ type: "tierUp", tier: 2, reward: 1 })], false).stingers).toEqual(["fanfare"]);
 		const both = musicParams(v(0), [ev({ type: "decisionIssued", decisionId: 1, eventId: "x" }), ev({ type: "decisionIssued", decisionId: 2, eventId: "y" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
 		expect(both.stingers).toEqual(["fanfare", "teletype"]);
-		const over = musicParams(v(0, 720, { kind: "shutdown", tick: 5 }), [ev({ type: "gameOver", kind: "shutdown" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
+		const over = musicParams(v(0, 720, { kind: "bankrupt", tick: 5 }), [ev({ type: "gameOver", kind: "bankrupt" }), ev({ type: "tierUp", tier: 2, reward: 1 })], false);
 		expect(over.stingers).toEqual(["tapeStop"]);
 		expect(over.silent).toBe(true);
 		expect(musicParams(v(0), [ev({ type: "rackTripped", facilityId: 1 })], false).stingers).toEqual([]);
@@ -267,7 +267,7 @@ describe("mixer ducking", () => {
 	it("ducks on rackTripped, powerShortfall and gameOver only", () => {
 		expect(shouldDuck([ev({ type: "rackTripped", facilityId: 1 })])).toBe(true);
 		expect(shouldDuck([ev({ type: "powerShortfall", netId: 1, satisfaction: 0.5 })])).toBe(true);
-		expect(shouldDuck([ev({ type: "gameOver", kind: "shutdown" })])).toBe(true);
+		expect(shouldDuck([ev({ type: "gameOver", kind: "bankrupt" })])).toBe(true);
 		expect(shouldDuck([ev({ type: "tierUp", tier: 2, reward: 1 }), ev({ type: "decisionIssued", decisionId: 1, eventId: "x" })])).toBe(false);
 		expect(shouldDuck([])).toBe(false);
 	});

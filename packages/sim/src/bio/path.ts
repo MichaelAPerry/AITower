@@ -3,7 +3,7 @@ import type { AscensionPath } from "@aitower/content";
 import { accept, type Plan, type PlanCtx, reject } from "../commands/plan";
 import type { TickCtx } from "../core/context";
 import type { SimState } from "../core/state";
-import { setGameOver } from "../ministry/standing";
+import { setGameOver } from "../progression/gameOver";
 import { commitBlock } from "../progression/soul";
 
 export function planChoosePath(ctx: PlanCtx, path: AscensionPath): Plan {

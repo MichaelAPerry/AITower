@@ -59,6 +59,9 @@ export function runAction(a: AdvisorAction, p: Pick<PanelProps, "store" | "conte
 		case "ascension":
 			p.openAscension();
 			return;
+		case "dossier":
+			setUi({ dossier: true, paletteOpen: false, drawer: null, buildHover: null });
+			return;
 	}
 }
 

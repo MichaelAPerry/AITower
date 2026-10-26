@@ -96,8 +96,6 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		decisionGate: true,
 		advisorTips: [],
 		lastIssuedDay: {},
-		standing: content.balance.standing.start,
-		standingLog: [],
 		gameOver: null,
 		researchPoints: 0,
 		techResearched: [],

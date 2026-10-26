@@ -14,7 +14,7 @@ const core = chapters.filter((c) => c.group === "core");
 
 describe("chapters", () => {
 	it("has six core chapters, five Level chapters and three path chapters with unique ids", () => {
-		expect(core.map((c) => c.title)).toEqual(["What is a datacenter?", "Power", "Heat & cooling", "Why racks break", "Uptime & reputation", "Money"]);
+		expect(core.map((c) => c.title)).toEqual(["What is a datacenter?", "Power", "Heat & cooling", "Why racks break", "Uptime", "Money"]);
 		expect(chapters.filter((c) => c.group === "level")).toHaveLength(5);
 		expect(chapters.filter((c) => c.group === "path").map((c) => c.id)).toEqual(["ch:path-biotech", "ch:path-greentech", "ch:path-synthetic"]);
 		expect(new Set(chapters.map((c) => c.id)).size).toBe(chapters.length);
@@ -77,7 +77,7 @@ describe("jargon", () => {
 	const gloss = new Set(TERMS.flatMap((t) => [t.id, t.name.toLowerCase(), ...(t.aka ?? "").split(/\s+/)]));
 	const copy = [...chapters.flatMap((c) => c.blocks.map((b) => b.p)), ...HELP_KEYS.map((k) => HELP[k].text)].join(" ");
 	it("every technical term used in Handbook and help copy has a glossary entry", () => {
-		const terms = ["PUE", "CDU", "CRAH", "UPS", "COP", "DLC", "RP", "PF", "PFLOPS", "kW", "MW", "kWh", "Chiller", "Genset", "Throttle", "Brownout", "Uptime", "Rack", "Reputation", "Overlay", "PDU", "SLA", "SLO", "MTBF", "TDP", "PPA", "WUE"];
+		const terms = ["PUE", "CDU", "CRAH", "UPS", "COP", "DLC", "RP", "PF", "PFLOPS", "kW", "MW", "kWh", "Chiller", "Genset", "Throttle", "Brownout", "Uptime", "Rack", "Overlay", "PDU", "SLA", "SLO", "MTBF", "TDP", "PPA", "WUE"];
 		for (const t of terms) if (new RegExp(`\\b${t}\\b`, "i").test(copy)) expect(gloss.has(t.toLowerCase()), t).toBe(true);
 	});
 	it("any other ALL-CAPS word in chapter copy is a known label", () => {

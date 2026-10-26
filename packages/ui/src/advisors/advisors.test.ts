@@ -161,7 +161,7 @@ describe("decision helpers: effects, price and MAGI vote", () => {
 		expect(decision().votes?.map((v) => v.advisor)).toEqual(["cass", "bea", "mel"]);
 		expect(content.events.find((e) => e.id === "energy_levy")?.votes).toBeUndefined();
 	});
-	it("effect chips show money, reputation, durations and affinity pills", () => {
+	it("effect chips show money, durations and affinity pills", () => {
 		const e = content.events.find((x) => x.id === "brownout");
 		const chips = choiceChipList(e?.choices[0].effects ?? []);
 		expect(chips.map((c) => c.text)).toEqual(expect.arrayContaining(["−$100k", "grid ×0.8 · 8h", "Greentech +3"]));

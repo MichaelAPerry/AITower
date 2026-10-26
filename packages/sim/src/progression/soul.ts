@@ -12,7 +12,7 @@ import type { TickCtx } from "../core/context";
 import { TICKS_PER_HOUR } from "../core/constants";
 import { GensetMode, type SimState } from "../core/state";
 import { minuteOfDay } from "../core/time";
-import { setGameOver } from "../ministry/standing";
+import { setGameOver } from "./gameOver";
 import { getDef } from "../world/defs";
 
 export const lineOf = (d: FacilityDef): TreeLine => d.line ?? "shared";

@@ -15,10 +15,9 @@ export const HELP = {
 	perhour: { title: "Per hour", text: "How much money you are making or losing each game hour, averaged over the last six. Red means upkeep and power cost more than you earn.", entry: "basics:money" },
 	"res-level": { title: "Level research requirement", text: "To reach the next Level you must also finish this many research items, on top of output and uptime. Any branch counts.", entry: "basics:level" },
 	level: { title: "Level", text: "Your standing with the Compute Authority. Install more compute, keep uptime high and finish enough research to reach the next level, which unlocks bigger builds.", entry: "basics:level" },
-	reputation: { title: "Reputation", text: "How much the Compute Authority trusts you, 0 to 100. Good uptime and finished jobs raise it; missed deadlines lower it. At 0 you are shut down.", entry: "basics:reputation" },
-	singularity: { title: "Singularity", text: "One bar per tree. The Lattice fills from almost any rack; the Flesh and the Garden grow only once you commit at Level 3. The first full bar ends the world. Click: dossier.", entry: "basics:advisors" },
+	singularity: { title: "Singularity", text: "One bar per tree. The Lattice fills from almost any rack; the Flesh and the Garden grow only once you commit at Level 3. The first full bar ends the world. Click: dossier.", entry: "basics:singularity" },
 	advisors: { title: "Advisors", text: "Four advisors. Click a portrait to ask what to worry about. Tips show once and fade to a chip; the dot means a tip is waiting.", entry: "basics:advisors" },
-	decision: { title: "Decision", text: "An advisor needs a call. The game is paused and nothing costs reputation for waiting. The recommended choice is marked; Defer pushes it one day, once.", entry: "basics:advisors" },
+	decision: { title: "Decision", text: "An advisor needs a call. The game is paused and waiting costs nothing. Her recommended choice is marked, and she has an agenda. Defer pushes it one day, once.", entry: "basics:advisors" },
 	help: { title: "Help", text: "Turn help mode on or off. While it is on, hover any outlined part of the screen to see what it does. Press ? or F1.", entry: "basics:money" },
 	build: { title: "Build bar", text: "Pick a kind of thing to build: racks, power, cooling and more. One click opens its catalog. B opens the last one.", entry: "basics:power" },
 	maintenance: { title: "Upkeep", text: "Spare parts, bots busy out of total, broken racks waiting. Amber when parts run out or repairs queue; red when no bot can reach a broken rack. Click for Supplies.", entry: "basics:parts" },
@@ -29,7 +28,7 @@ export const HELP = {
 	"tab-contracts": { title: "Contracts (C)", text: "Jobs clients want done. Pick one, read what it pays and needs, then press Take job. This is how you earn money.", entry: "basics:contracts" },
 	"tab-research": { title: "Research (R)", text: "Spend research points on new machines, cooling and perks. Pick a branch, pick an item, press Start research. Points come from compute you deliver.", entry: "basics:research" },
 	"tab-automation": { title: "Automation (T)", text: "Standing orders so routine chores run themselves. Unlocked by research.", entry: "basics:automation" },
-	"tab-insights": { title: "Insights (I or F)", text: "Money in and out, uptime, reputation and why it changed, plus the map overlays. Details like PUE are folded away.", entry: "basics:money" },
+	"tab-insights": { title: "Insights (I or F)", text: "Money in and out, uptime and the audits, plus the map overlays. Details like PUE are folded away.", entry: "basics:money" },
 	"tab-handbook": { title: "Handbook (H)", text: "A gentle guide to running a datacenter, plus a lookup for machines, bots, research and jargon.", entry: "basics:money" },
 } as const satisfies Record<string, HelpItem>;
 

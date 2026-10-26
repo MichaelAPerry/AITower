@@ -58,14 +58,13 @@ describe("suggestions", () => {
 		expect(suggestions(view({ spareParts: 0, facilities: [rack(1, "failed")] }), content)[0]).toMatchObject({ id: "parts", action: { kind: "supplies" } });
 		expect(ids(view({ spareParts: 2, facilities: [rack(1, "failed")] }))).not.toContain("parts");
 	});
-	it("reputation falling → the latest cause, and the right panel", () => {
-		const log = [{ tick: 2900, delta: -3, cause: "daily-uptime", detail: "Uptime 91.2% vs target 95%" }];
-		const s = suggestions(view({ standingLog: log }), content).find((x) => x.id === "reputation");
-		expect(s?.text).toMatch(/Uptime 91\.2%/);
-		expect(s?.action).toMatchObject({ drawer: "insights" });
-		// old losses and gains are ignored
-		expect(ids(view({ standingLog: [{ tick: 10, delta: -3, cause: "job", detail: "x" }] }))).not.toContain("reputation");
-		expect(ids(view({ standingLog: [{ tick: 2900, delta: 2, cause: "job", detail: "x" }] }))).not.toContain("reputation");
+	it("committed to a tree while the Lattice is ahead → Cass warns, with the dossier", () => {
+		const soul = { sp: { synthetic: 400, biotech: 100, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, sealedOut: [], commitBlock: { synthetic: null, biotech: null, greentech: null } };
+		const s = suggestions(view({ soul, path: "biotech" }), content).find((x) => x.id === "lattice");
+		expect(s?.text).toMatch(/40% against 10%/);
+		expect(s?.action).toMatchObject({ kind: "dossier" });
+		expect(ids(view({ soul, path: null }))).not.toContain("lattice");
+		expect(ids(view({ soul: { ...soul, sp: { ...soul.sp, biotech: 500 } }, path: "biotech" }))).not.toContain("lattice");
 	});
 	it("cash running low → slow down, but never in a sandbox", () => {
 		expect(ids(view({ cash: 1000 }))).toContain("cash");

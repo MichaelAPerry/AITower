@@ -34,7 +34,7 @@ describe("decision card", () => {
 		expect(html.match(/adv-opt is-rec/g)?.length).toBe(1);
 		expect(html.match(/Recommended by Luci/g)?.length).toBe(1);
 		expect(html).toContain("−$120k");
-		expect(html).toContain("★+5");
+		expect(html).not.toContain("★");
 		expect(html).toContain("Defer one day");
 		expect(html).toContain("Luci Ferro");
 	});

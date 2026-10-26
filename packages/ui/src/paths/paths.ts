@@ -39,4 +39,4 @@ export function droughtChip(view: Pick<SimView, "drought">, content: ContentDB):
 	return { label: "WEATHER", value: "DARK CALM", title: `Dunkelflaute: no sun, no wind.${out}` };
 }
 
-export const SANDBOX_TITLE = "Sandbox: no bankruptcy and no Compute Authority shutdown. Audits still run.";
+export const SANDBOX_TITLE = "Sandbox: no bankruptcy. Audits still run.";

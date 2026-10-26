@@ -133,7 +133,6 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 					<th>Days</th>
 					<th>Grade</th>
 					<th className="num">Profit</th>
-					<th className="num">Reputation</th>
 					<th>Grant / fine</th>
 					<th>Remark</th>
 					<th />
@@ -154,7 +153,6 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 								</Stamp>
 							</td>
 							<td className={`num ${profit < 0 ? "is-neg-soft" : "is-pos"}`}>{fmtMoney(profit)}</td>
-							<td className="num">{signed(Math.round(r.standingDelta))}</td>
 							<td>{cashDeltaText(r.cashDelta)}</td>
 							<td className="ui-audits-remark" title={r.remark}>
 								{r.remark}

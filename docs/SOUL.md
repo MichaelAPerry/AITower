@@ -56,7 +56,7 @@ Points accrue hourly from compute that is actually running:
 | **The Lattice** (Synthetic) | Synthetic SP reaches 1000, on any path. | D-2 Synth |
 | **The Flesh Remembers** (Bio) | Bio SP reaches 1000 on the Bio path. | B-3 Bio |
 | **The Garden** (Green) | Green SP reaches 1000 on the Green path. | C-4 Green |
-| **Failure** | Bankruptcy, shutdown, or Absorbed (corruption ≥ 99%). | — |
+| **Failure** | Bankruptcy or Absorbed (corruption ≥ 99%). | — |
 
 - Each ending is a visual-novel scene over its art.
 - The advisor with the highest bond (at least 60) gets an epilogue line: the dating-sim payoff.
@@ -230,7 +230,7 @@ The full list of numbers is in `packages/content/src/data/facilities.json` (`sea
 
 1. **Shared early game:** Levels 1–2 are shared, and every tree's seal is decided there. Commitment opens at Level 3.
 2. **Mixing trees:** you may build anything, but you can commit to only one tree. Synthetic SP accrues from everything not on a tree line.
-3. **Failure:** bankruptcy, shutdown or Absorbed.
+3. **Failure:** bankruptcy or Absorbed (reputation and shutdown are removed).
 4. **SP milestones:** 1000 per tree. Story beats fire at 50% and 90%.
 5. **Levels vs SP:** Levels still gate equipment (the catalogue ladder). SP is the goal. Reaching Level 5 is not a win.
-6. **Reputation:** still in the game this round. Removing it (HANDOFF section 0) is the next block of work.
+6. **Reputation:** removed. Uptime is now only the target the quarterly audit grades (a cash grant or fine); it no longer gates Levels.

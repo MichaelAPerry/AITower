@@ -38,14 +38,14 @@ const FAKE_EVENTS: EventDef[] = [
 		advisor: "luci",
 		recommended: "comply",
 		title: "Form A-9: Surprise Inspection",
-		body: "An Inspector will visit tomorrow to count your cables. Complying is free; protesting costs 10 reputation.",
+		body: "An Inspector will visit tomorrow to count your cables. Complying is free; protesting costs 10 days of goodwill.",
 		weight: 1,
 		minTier: 1,
 		cooldownDays: 5,
 		choices: [
-			{ id: "bribe", label: "OFFER TEA", hint: "Pay $5k. Standing +0, no inspection.", outcome: "The Inspector enjoyed the tea.", effects: [] },
-			{ id: "comply", label: "COMPLY", hint: "Free. Standing −5 if uptime is under target.", outcome: "The Inspector counted 4,112 cables and left.", effects: [] },
-			{ id: "protest", label: "PROTEST", hint: "Standing −10. The Inspector notes your attitude.", outcome: "Your protest was received and shredded.", effects: [] },
+			{ id: "bribe", label: "OFFER TEA", hint: "Pay $5k. No inspection.", outcome: "The Inspector enjoyed the tea.", effects: [] },
+			{ id: "comply", label: "COMPLY", hint: "Free.", outcome: "The Inspector counted 4,112 cables and left.", effects: [] },
+			{ id: "protest", label: "PROTEST", hint: "The Inspector notes your attitude.", outcome: "Your protest was received and shredded.", effects: [] },
 		],
 	},
 ];
@@ -116,7 +116,6 @@ export function createFakeContent(): ContentDB {
 			thermal: { airCellHeatCapacity: 50, airConductance: 1, slabConductance: 0.3, envelopeConductance: 0.2, buoyancy: 0.2, rackEase: 0.05, rackDeltaC: 25, okC: 65, throttleC: 80, tripC: 92, tripHysteresisC: 8, minClock: 0.4, tripCooldownTicks: 30, coolantSupplyC: 30, hazardPerDegree: 0.1 },
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 4, offerIntervalTicks: 240, offerExpiryTicks: 720 },
 			tiers: { techs: [0, 2, 6, 14, 26], pflops: [0, 20, 80, 250, 1000], uptime: [0, 0.99, 0.995, 0.999, 0.9999], reward: [0, 100_000, 300_000, 1_000_000, 3_000_000] },
-			standing: { start: 50, dailyGood: 1, dailyBad: -3, dailyNearMiss: -1, dailyMissSpan: 0.05, jobFailed: -2, jobCompleted: 1 },
 			events: { intervalTicks: 720, graceTicks: 1440 },
 			research: { pointsPerPflopHour: 0.01, pointsPerJob: 5 },
 			clerk: { feeShare: 0.05 },
@@ -128,7 +127,7 @@ export function createFakeContent(): ContentDB {
 			ascension: { minTier: 5 },
 			endings: { absorbed: { corruption: 1 } },
 			soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, bondStart: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
-			audit: { periodDays: 7, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
+			audit: { periodDays: 7, cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
 		scenarios: FAKE_SCENARIOS,
 		lessons: [],
@@ -144,7 +143,7 @@ const lot = (id: string, name: string, extra: Partial<Scenario> = {}): Scenario 
 const FAKE_SCENARIOS: Record<string, Scenario> = {
 	starter: lot("starter", "Garage Cluster"),
 	brownfield: lot("brownfield", "Auction Lot", { description: "An old half-built tower, bought at auction with the debts attached. Starts at Clearance 2.", startingCash: 350_000, startTier: 2 }),
-	sandbox: lot("sandbox", "Test Lot", { description: "A fully funded test lot with no bankruptcy and no shutdown. Try anything once.", startingCash: 500_000_000, startTier: 5, sandbox: true }),
+	sandbox: lot("sandbox", "Test Lot", { description: "A fully funded test lot with no bankruptcy. Try anything once.", startingCash: 500_000_000, startTier: 5, sandbox: true }),
 };
 
 function buildView(content: ContentDB, scenarioId?: string): SimView {
@@ -202,8 +201,6 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		advisorTips: [],
 		lesson: null,
 		modifiers: [],
-		standing: 50,
-		standingLog: [],
 		uptimeTarget: 0.95,
 		tierNeed: { tier: 2, pflops: 20, uptime: 0.99, techs: 2, techsDone: 0 },
 		researchPoints: 42,
@@ -211,7 +208,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		clerk: { unlocked: false, policy: { enabled: false, kinds: ["training", "finetune", "inference"], minPayPerPflopHour: 0, maxPenalty: 0, allowLiquid: true }, acceptedTotal: 0 },
 		loan: { principal: 400_000, max: 6_000_000, dailyRate: 0.004 },
 		reports: [
-			{ quarter: 1, fromDay: 0, toDay: 6, revenue: 310_000, costs: 1_420_000, uptime: 0.981, pue: 1.52, jobsCompleted: 3, jobsFailed: 1, penalties: 25_000, grade: "D", standingDelta: -3, cashDelta: -20_000, remark: "The Ministry notes that construction is not, strictly speaking, a revenue stream." },
+			{ quarter: 1, fromDay: 0, toDay: 6, revenue: 310_000, costs: 1_420_000, uptime: 0.981, pue: 1.52, jobsCompleted: 3, jobsFailed: 1, penalties: 25_000, grade: "D", cashDelta: -20_000, remark: "The Ministry notes that construction is not, strictly speaking, a revenue stream." },
 		],
 		stats: { revenue: 2_120_000, pflopHours: 8_450, jobsCompleted: 21, jobsFailed: 2, peakPflops: 61.2, facilitiesBuilt: 47, componentFailures: 6, repairs: 5, decisionsMade: 3, researchPointsEarned: 42 },
 		nutrient: new Uint8Array(n),
@@ -365,8 +362,6 @@ export interface FakeStore extends GameStore {
 	seedSlot: ReturnType<typeof createFakeSaves>["seedSlot"];
 	/** Open a fake advisor decision from the fixture events (`eventId` default: heatwave). It never expires. */
 	issueDecision(eventId?: string): number;
-	/** Set Ministry standing (0..100). Reaching 0 triggers the shutdown game over, like the real sim. */
-	setStanding(standing: number): void;
 	addModifier(m: ModifierView): void;
 	/** End the game as the real sim would. */
 	triggerGameOver(kind: GameOverKind, ending?: EndingId): void;
@@ -423,7 +418,7 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 
 	const canPlace = (defId: string, floor: number, x: number): CommandResult => canPlaceFor(view, content, defId, floor, x);
 
-	// Decisions and standing, mimicking the sim: resolveDecision is queued and applied on the next advance().
+	// Decisions, mimicking the sim: resolveDecision is queued and applied on the next advance().
 	let nextDecision = 1;
 	const queued: { decisionId: number; choiceId: string }[] = [];
 	let queuedPath: AscensionPath | null = null;
@@ -460,13 +455,6 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			newView({ decision });
 			pushEvents([{ type: "decisionIssued", decisionId: decision.id, eventId: def.id }]);
 			return decision.id;
-		},
-		setStanding(standing) {
-			const next = Math.min(100, Math.max(0, standing));
-			const delta = next - view.standing;
-			newView({ standing: next });
-			if (delta !== 0) pushEvents([{ type: "standingChanged", standing: next, delta }]);
-			if (next <= 0 && !view.gameOver) store.triggerGameOver("shutdown");
 		},
 		addModifier: (m) => newView({ modifiers: [...view.modifiers, m] }),
 		triggerGameOver(kind, ending) {
@@ -525,7 +513,6 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 				jobsFailed: good ? 0 : 3,
 				penalties: good ? 0 : 90_000,
 				grade,
-				standingDelta: grade === "A" ? 4 : grade === "B" ? 2 : grade === "C" ? 0 : grade === "D" ? -3 : -6,
 				cashDelta: grade === "A" ? 62_000 : grade === "B" ? 24_800 : grade === "C" ? 0 : grade === "D" ? -29_000 : -73_000,
 				remark: good ? "The Ministry is, on balance, not displeased." : "The Ministry has filed your results under 'regrettable'.",
 			};

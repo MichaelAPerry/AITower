@@ -137,7 +137,7 @@ export function Hud({ store, content, title }: HudProps) {
 		{ ascension, audit: auditSheet, drawer: drawerCloser },
 	);
 
-	// Game over: shown once per game. Bankrupt and shutdown are final; victory can be dismissed (sandbox).
+	// Game over: shown once per game. Bankrupt and absorbed are final; victory can be dismissed (sandbox).
 	const gameOver = state.view.gameOver;
 	const over = titleOpen ? null : gameOverToShow(gameOver, dismissedOver);
 	overRef.current = !!over;

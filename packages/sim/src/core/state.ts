@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { AdvisorId, ContractSpec, SealedTree } from "@aitower/content";
-import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand, StandingLogEntry } from "../api";
+import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -372,10 +372,6 @@ export interface SimState {
 	advisorTips: string[];
 	/** Game day each event was last issued (cooldowns). */
 	lastIssuedDay: Record<string, number>;
-	/** 0..100; 0 ends the game ("shutdown"). */
-	standing: number;
-	/** Last 20 reputation changes with their causes, oldest first. */
-	standingLog: StandingLogEntry[];
 	gameOver: { kind: GameOverKind; tick: number; ending?: EndingId } | null;
 	// ── Research, clerk, credit, audits (snapshot v4) ──
 	/** Unspent research points (float). */
@@ -428,7 +424,7 @@ export interface SimState {
 	greenScore: number;
 	/** Synthetic score 0..1: uptime × share of delivered compute on top-tier racks. */
 	refinement: number;
-	/** Scenario sandbox: no bankruptcy, no shutdown (re-derived from the scenario on load). */
+	/** Scenario sandbox: no bankruptcy (re-derived from the scenario on load). */
 	sandbox: boolean;
 	/** Commands accepted by submit(), applied at the start of the next step. */
 	pending: SimCommand[];

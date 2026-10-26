@@ -70,7 +70,6 @@ export function AuditPaper({ report, onClose }: { report: QuarterReport; onClose
 					</div>
 				</div>
 				<p className="ui-audit-outcome">
-					<span className={report.standingDelta < 0 ? "is-bad" : report.standingDelta > 0 ? "is-good" : ""}>{out.standing}</span>
 					<span className={report.cashDelta < 0 ? "is-bad" : report.cashDelta > 0 ? "is-good" : ""}>{out.cash}</span>
 				</p>
 				<blockquote className="ui-audit-remark">{report.remark}</blockquote>

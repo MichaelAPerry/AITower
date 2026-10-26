@@ -343,7 +343,7 @@ describe("Finance tab", () => {
 });
 
 describe("Quarterly audit sheet", () => {
-	it("shows the figures, the big grade stamp, standing, cash change and remark", () => {
+	it("shows the figures, the big grade stamp, cash change and remark", () => {
 		const { store } = setup();
 		const r = store.fileQuarterReport("D");
 		const html = renderToString(<AuditSheet report={r} onClose={() => {}} />);
@@ -351,7 +351,6 @@ describe("Quarterly audit sheet", () => {
 		expect(html).toContain("QUARTER 2");
 		expect(html).toMatch(/ui-audit-stamp[^>]*>D</);
 		expect(html).toContain("stamp-red");
-		expect(html).toContain("Reputation −3");
 		expect(html).toContain("Fine −$29k");
 		expect(html).toContain("regrettable"); // the remark (React escapes its quotes)
 		expect(html).toContain("Uptime");

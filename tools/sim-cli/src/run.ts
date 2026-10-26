@@ -29,19 +29,15 @@ export function shouldAccept(offer: ContractView, v: SimView, content: ContentDB
 }
 
 
-/** Auto-player memo policy: the choice with the best direct cash outcome (ties: better standing, then first listed). */
+/** Auto-player memo policy: the choice with the best direct cash outcome (ties: first listed). */
 export function bestMemoChoice(content: ContentDB, eventId: string): string | null {
 	const def = content.events.find((e) => e.id === eventId);
 	if (!def) return null;
-	let best: { id: string; cash: number; standing: number } | null = null;
+	let best: { id: string; cash: number } | null = null;
 	for (const c of def.choices) {
 		let cash = 0;
-		let standing = 0;
-		for (const e of c.effects) {
-			if (e.type === "cash") cash += e.amount;
-			else if (e.type === "standing") standing += e.amount;
-		}
-		if (!best || cash > best.cash || (cash === best.cash && standing > best.standing)) best = { id: c.id, cash, standing };
+		for (const e of c.effects) if (e.type === "cash") cash += e.amount;
+		if (!best || cash > best.cash) best = { id: c.id, cash };
 	}
 	return best?.id ?? null;
 }
@@ -124,7 +120,8 @@ export interface DayRow {
 	maxRackC: number;
 	failures: number;
 	tier: number;
-	standing: number;
+	/** Synthetic Singularity points (the Lattice) at the end of the day. */
+	lattice: number;
 	/** Body-horror scalar 0..1 at the end of the day. */
 	corruption: number;
 	/** Facilities the Foreman has built so far. */
@@ -198,7 +195,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 			maxRackC: Number.isFinite(maxRackC) ? maxRackC : Number.NaN,
 			failures,
 			tier: v.tier,
-			standing: v.standing,
+			lattice: v.soul.sp.synthetic,
 			corruption: v.corruption,
 			built: totals.built,
 			racks: v.facilities.filter((f) => rackIds.has(f.defId)).length,
@@ -217,7 +214,7 @@ export function runHeadless(content: ContentDB, scenarioId: string, days: number
 const money = (n: number): string => `${n < 0 ? "-" : ""}$${Math.round(Math.abs(n)).toLocaleString("en-US")}`;
 
 export function formatTable(rows: DayRow[], auto = false): string {
-	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "standing", "corruption", "RP", "techs", "taxes", "memos", "over", ...(auto ? ["racks", "bots", "built"] : [])];
+	const head = ["day", "cash", "revenue", "energy", "penalties", "PUE", "uptime", "PFLOPS", "maxRackC", "fails", "tier", "lattice", "corruption", "RP", "techs", "taxes", "memos", "over", ...(auto ? ["racks", "bots", "built"] : [])];
 	const body = rows.map((r) => [
 		String(r.day),
 		money(r.cash),
@@ -230,7 +227,7 @@ export function formatTable(rows: DayRow[], auto = false): string {
 		Number.isNaN(r.maxRackC) ? "-" : r.maxRackC.toFixed(1),
 		String(r.failures),
 		String(r.tier),
-		r.standing.toFixed(0),
+		r.lattice.toFixed(0),
 		r.corruption.toFixed(2),
 		r.rp.toFixed(1),
 		String(r.techs),

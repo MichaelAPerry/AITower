@@ -247,7 +247,7 @@ describe("endings", () => {
 		expect(abs).toMatchObject({ heading: "ABSORBED", tone: "red", stamp: "ABSORBED" });
 		expect(overCopyFor(over("absorbed"), content).heading).toBe("ABSORBED"); // kind alone is enough
 	});
-	it("keeps the old copy for bankrupt, shutdown and a victory without an ending, and when content lacks the ending", () => {
+	it("keeps the old copy for bankrupt and a victory without an ending, and when content lacks the ending", () => {
 		expect(overCopyFor(over("bankrupt"), content).heading).toBe("NOTICE OF TERMINATION");
 		expect(overCopyFor(over("victory"), content).heading).toBe("COMMENDATION");
 		expect(overCopyFor(over("victory", "flesh"), { ...content, endings: [] }).heading).toBe("COMMENDATION");

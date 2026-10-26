@@ -17,7 +17,7 @@ const content = () =>
 	farmContent(
 		{
 			economy: { slaPenaltyFactor: 1.5, maxOffers: 3, offerIntervalTicks: 120, offerExpiryTicks: 900 },
-			audit: { periodDays: 2, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
+			audit: { periodDays: 2, cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 			tax: { profitShare: 0.1 },
 			events: { intervalTicks: 700, graceTicks: 600 },
 		},

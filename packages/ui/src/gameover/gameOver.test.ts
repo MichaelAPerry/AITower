@@ -30,12 +30,11 @@ describe("game-over notices", () => {
 		expect(gameOverToShow({ kind: "victory", tick: 200 }, old)).not.toBeNull();
 	});
 
-	it("bankrupt and shutdown are final, victory is not; each has its own heading and stamp", () => {
+	it("bankrupt and absorbed are final, victory is not; each has its own heading and stamp", () => {
 		expect(isFinal("bankrupt")).toBe(true);
-		expect(isFinal("shutdown")).toBe(true);
+		expect(isFinal("absorbed")).toBe(true);
 		expect(isFinal("victory")).toBe(false);
 		expect(OVER_COPY.bankrupt.heading).toBe("NOTICE OF TERMINATION");
-		expect(OVER_COPY.shutdown.heading).toBe("NOTICE OF TERMINATION");
 		expect(OVER_COPY.victory.heading).toBe("COMMENDATION");
 	});
 
@@ -60,11 +59,11 @@ describe("game-over notices", () => {
 		expect(lifetimeStats({ ...old, jobs: [job, job] }).find((r) => r.label === "Contracts completed")?.value).toBe("2");
 	});
 
-	it("the fake store ends the game like the sim: once, and standing 0 means shutdown", () => {
+	it("the fake store ends the game like the sim: once", () => {
 		const store = createFakeStore(createFakeContent());
-		store.setStanding(0);
-		expect(store.get().view.gameOver?.kind).toBe("shutdown");
+		store.triggerGameOver("bankrupt");
+		expect(store.get().view.gameOver?.kind).toBe("bankrupt");
 		store.triggerGameOver("victory");
-		expect(store.get().view.gameOver?.kind).toBe("shutdown");
+		expect(store.get().view.gameOver?.kind).toBe("bankrupt");
 	});
 });

@@ -32,7 +32,7 @@ if (q.get("saves") !== "0") {
 	store.seedSlot("auto", { name: "Autosave", savedAt: Date.now() - 3 * 3600_000, day: 11, cash: 1_103_200, tier: 2 });
 	store.seedSlot("slot1", { name: "Before the chiller", savedAt: Date.now() - 26 * 3600_000, day: 9, cash: 640_000, tier: 1 });
 }
-// Decision card and game-over states: ?decision=heatwave|audit (open decision) &hist=1 &standing=18 &mod=1 &over=bankrupt|shutdown|victory
+// Decision card and game-over states: ?decision=heatwave|audit (open decision) &hist=1 &mod=1 &over=bankrupt|victory|singularity|flesh|garden
 if (q.get("decision")) {
 	if (q.get("hist") === "1") {
 		const id = store.issueDecision("audit");
@@ -41,7 +41,6 @@ if (q.get("decision")) {
 	}
 	store.issueDecision(q.get("decision") === "audit" ? "audit" : "heatwave");
 }
-if (num("standing") !== null) store.setStanding(num("standing") as number);
 if (q.get("mod") === "1") {
 	const t = store.get().view.tick;
 	store.addModifier({ label: "Heatwave", kind: "ambient", value: 8, endsAt: t + 840 });
@@ -55,12 +54,12 @@ if (q.get("clerk")) {
 	if (q.get("clerk") === "on") store.dispatch({ type: "setClerk", policy: { ...store.get().view.clerk.policy, enabled: true, kinds: ["training", "inference"], allowLiquid: false, minPayPerPflopHour: 100 } });
 }
 if (num("rp") !== null) store.addResearchPoints((num("rp") as number) - store.get().view.researchPoints);
-// M3: ?bio=1 (wetware fixtures) &corr=0..1 corruption &asc=1 (Clearance 5, FORM A-5 due) &over=bankrupt|shutdown|victory|absorbed|living|clean
+// M3: ?bio=1 (wetware fixtures) &corr=0..1 corruption &asc=1 (Clearance 5, FORM A-5 due) &over=bankrupt|victory|absorbed|singularity|flesh|garden
 if (q.get("bio") === "1") store.seedBio();
 if (num("corr") !== null) store.setCorruption(num("corr") as number);
 if (q.get("asc") === "1") store.setTier(5);
 const over = q.get("over");
-if (over === "living" || over === "clean") store.triggerGameOver("victory", over === "living" ? "livingTower" : "cleanTower");
+if (over === "singularity" || over === "flesh" || over === "garden") store.triggerGameOver("victory", over);
 else if (over === "absorbed") store.triggerGameOver("absorbed", "absorbed");
 else if (over) store.triggerGameOver(over as "bankrupt");
 // M4: ?foreman=1 (Works Foreman hired) &auto=1 (parts + research orders on) &path=greentech|synthetic &score=0..1 &drought=1 &sandbox=1

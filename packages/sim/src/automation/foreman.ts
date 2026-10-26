@@ -8,7 +8,7 @@
  *                idle compute, or less than FOREMAN_IDLE_SHARE of the installed compute is idle.
  * Maintenance comes before growth (and rides on the `racks` toggle): between cooling and racks the Foreman adds a charger when the bots order wants more bots than
  * the docks hold, and a depot when the spare-parts stock is below its target and every depot is full. Racks wait while open work
- * orders outnumber the bots, the rolling uptime is under the current tier's target, standing is under FOREMAN_MIN_STANDING, the last closed day lost money, a rack runs above `okC` (cooling on) or a
+ * orders outnumber the bots, the rolling uptime is under the current tier's target, the last closed day lost money, a rack runs above `okC` (cooling on) or a
  * power net is short (power on).
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
  * Reach: only on slab a ground bot can path to by the real nav graph (see `reachableRuns`); with none reachable nothing is placed.
@@ -19,7 +19,7 @@ import { fmtKw, fmtUsd } from "./text";
 import { setForemanStatus } from "./status";
 import { acceptCheck, installedPflops } from "../compute/allocation";
 import type { TickCtx } from "../core/context";
-import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_MIN_STANDING, FOREMAN_RUNWAY_DAYS } from "../core/constants";
+import { FOREMAN_HEAT_MARGIN_C, FOREMAN_IDLE_SHARE, FOREMAN_RUNWAY_DAYS } from "../core/constants";
 import { cellCount, cellIdx } from "../core/grid";
 import type { Facility, SimState } from "../core/state";
 import { rebuildNetworks } from "../networks/rebuild";
@@ -241,7 +241,6 @@ function racksBlocker(r: Run): string | null {
 	if (state.workOrders.length > state.bots.length) return `Waiting: ${state.workOrders.length} repair jobs open for ${state.bots.length} bots, repairs first`;
 	const target = content.balance.tiers.uptime[state.tier - 1] ?? 0;
 	if (state.metrics.uptime < target) return `Waiting: uptime ${Math.round(state.metrics.uptime * 100)}% is under the ${Math.round(target * 100)}% target`;
-	if (state.standing < FOREMAN_MIN_STANDING) return `Waiting: Reputation ${Math.round(state.standing)} is under ${FOREMAN_MIN_STANDING}`;
 	const lastDay = state.ledger[state.ledger.length - 1];
 	if (lastDay && dayCosts(lastDay) > lastDay.revenue) return "Waiting: the last day closed in the red";
 	// Never grow into a shortage the Foreman is meant to be fixing: hot racks (cooling on) or a power net short of supply (power on).

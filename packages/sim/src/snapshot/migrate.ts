@@ -25,11 +25,13 @@
  *  - v10 → v11 (the Soul, docs/SOUL.md): Singularity points `sp`, secret `sealScar` / `sealResidue` (an old tower is scarred by
  *    what it already holds), advisor `bonds`, `objected`, `sealedOut`; `endingDays` goes; old path endings map onto the trees
  *    (livingTower / cleanTower → flesh, greenExemplar → garden, millionMinds → singularity).
+ *  - v11 → v12 (reputation removed): `standing`, `standingLog` and each report's `standingDelta` go; a "shutdown" game over
+ *    (reputation 0) is kept as a final "bankrupt" one.
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 11;
+export const SNAPSHOT_VERSION = 12;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -254,7 +256,16 @@ function migrateV10(state: RawState): RawState {
 	return state;
 }
 
-export const migrations: Record<number, StateMigration> = { 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** Reputation is gone. */
+function migrateV11(state: RawState): RawState {
+	delete state.standing;
+	delete state.standingLog;
+	if (Array.isArray(state.reports)) for (const r of state.reports) if (isObj(r)) delete r.standingDelta;
+	if (isObj(state.gameOver) && state.gameOver.kind === "shutdown") state.gameOver.kind = "bankrupt";
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

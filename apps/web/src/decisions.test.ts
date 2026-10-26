@@ -63,15 +63,14 @@ describe("advisor decisions pause the game", () => {
 		expect(later.some((e) => e.type === "decisionIssued")).toBe(true); // a day-cap-eligible roll goes through now
 	});
 
-	it("waiting costs no reputation: the clock does not run, and nothing in the log blames a decision", () => {
+	it("waiting costs nothing: the clock does not run while a decision is open", () => {
 		const store = make();
 		store.advance(100_000);
-		const rep = store.sim().view().standing;
+		const cash = store.sim().view().cash;
 		const tick = store.sim().view().tick;
 		store.advance(0);
-		expect(store.sim().view().standing).toBe(rep);
+		expect(store.sim().view().cash).toBe(cash);
 		expect(store.sim().view().tick).toBe(tick);
-		expect(store.sim().view().standingLog.some((e) => e.cause === "decision")).toBe(false);
 	});
 
 	it("a saved game with an open decision loads paused", async () => {

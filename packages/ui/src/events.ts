@@ -146,12 +146,6 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			const head = `Decided: ${label ?? ev.choiceId}`;
 			return { text: h ? `${head}. ${h.outcome}` : `${head}.`, severity: "info", toast: true };
 		}
-		case "standingChanged":
-			return {
-				text: `Reputation ${ev.delta >= 0 ? "rises" : "falls"} by ${Math.abs(ev.delta)} to ${ev.standing}`,
-				severity: ev.delta < 0 ? "warn" : "good",
-				toast: ev.delta <= -5 || ev.standing < 25,
-			};
 		case "gameOver":
 			return {
 				text: gameOverText(ev.kind, ev.ending, content, plain),
@@ -221,7 +215,7 @@ function gameOverText(kind: GameOverKind, ending: EndingId | undefined, content:
 		const title = ending ? content.endings?.find((e) => e.id === ending)?.title : undefined;
 		return title ? `COMMENDATION from the Compute Authority: ${title}` : "COMMENDATION from the Compute Authority";
 	}
-	return kind === "shutdown" ? "NOTICE OF TERMINATION: licence withdrawn, reputation is zero" : "NOTICE: foreclosed for insolvency";
+	return "NOTICE: foreclosed for insolvency";
 }
 
 /** Events too chatty for the alert feed. */

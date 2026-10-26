@@ -227,8 +227,6 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		advisorTips: [],
 		lesson: null,
 		modifiers: [],
-		standing: 50,
-		standingLog: [],
 		uptimeTarget: 0.95,
 		tierNeed: { tier: 2, pflops: 120, uptime: 0.93, techs: 2, techsDone: 0 },
 		researchPoints: 0,

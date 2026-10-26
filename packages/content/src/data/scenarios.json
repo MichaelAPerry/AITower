@@ -259,7 +259,7 @@
 	"sandbox": {
 		"id": "sandbox",
 		"name": "Sandbox Annex",
-		"description": "A fully funded test lot with no bankruptcy and no shutdown; audits are still filed, for the record. $500M and Level 5, for trying anything once. Research is still required.",
+		"description": "A fully funded test lot with no bankruptcy; audits are still filed, for the record. $500M and Level 5, for trying anything once. Research is still required.",
 		"width": 64,
 		"floorMin": -8,
 		"floorMax": 60,

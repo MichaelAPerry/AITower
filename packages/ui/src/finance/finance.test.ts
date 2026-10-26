@@ -59,7 +59,7 @@ describe("loans", () => {
 });
 
 describe("quarterly report", () => {
-	const r: QuarterReport = { quarter: 2, fromDay: 7, toDay: 13, revenue: 900_000, costs: 1_000_000, uptime: 0.9951, pue: 1.43, jobsCompleted: 12, jobsFailed: 2, penalties: 40_000, grade: "D", standingDelta: -3, cashDelta: -20_000, remark: "x" };
+	const r: QuarterReport = { quarter: 2, fromDay: 7, toDay: 13, revenue: 900_000, costs: 1_000_000, uptime: 0.9951, pue: 1.43, jobsCompleted: 12, jobsFailed: 2, penalties: 40_000, grade: "D", cashDelta: -20_000, remark: "x" };
 	it("lists the figures, marking a loss and failed jobs", () => {
 		const rows = reportRows(r);
 		expect(rows.find((x) => x.label === "Period")?.value).toBe("Days 7–13");
@@ -74,7 +74,7 @@ describe("quarterly report", () => {
 		expect(cashDeltaText(50_000)).toBe("Grant +$50k");
 		expect(cashDeltaText(-20_000)).toBe("Fine −$20k");
 		expect(cashDeltaText(0)).toBe("No grant or fine");
-		expect(auditOutcome(r)).toEqual({ standing: "Reputation −3", cash: "Fine −$20k" });
+		expect(auditOutcome(r)).toEqual({ cash: "Fine −$20k" });
 	});
 });
 

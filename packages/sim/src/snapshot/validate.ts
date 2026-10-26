@@ -136,11 +136,10 @@ function finiteDeep(v: unknown, path: string, depth = 0): void {
 }
 
 export function validateState(content: ContentDB, raw: RawState): SimState {
-	if (!Array.isArray(raw.standingLog)) raw.standingLog = []; // saves written before the reputation log
 	const s = fields(raw, {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
-		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextDecisionTick: "num", lastDecisionDay: "int", decisionGate: "bool", standing: "num", researchPoints: "num", clerkAccepted: "int",
+		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextDecisionTick: "num", lastDecisionDay: "int", decisionGate: "bool", researchPoints: "num", clerkAccepted: "int",
 		loanPrincipal: "num", nutrientNetCount: "int", contaminatedShare: "num", irreversible: "bool", corruption: "num",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
@@ -327,7 +326,7 @@ const STATS: Record<string, Kind> = {
 };
 const REPORT: Record<string, Kind> = {
 	quarter: "int", fromDay: "int", toDay: "int", revenue: "num", costs: "num", uptime: "num", pue: "num", jobsCompleted: "int", jobsFailed: "int",
-	penalties: "num", grade: "str", standingDelta: "num", cashDelta: "num", remark: "str",
+	penalties: "num", grade: "str", cashDelta: "num", remark: "str",
 };
 const AUDIT_DAY: Record<string, Kind> = { day: "int", uptime: "num", pue: "num", revenue: "num", costs: "num", penalties: "num" };
 
@@ -368,7 +367,7 @@ function validateManagement(content: ContentDB, s: Obj): void {
 }
 
 const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];
-const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory", "absorbed"];
+const GAME_OVER_KINDS = ["bankrupt", "victory", "absorbed"];
 const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
 const ADVISOR_KEYS = ["cass", "bea", "mel", "luci"];
 const SEALED = ["biotech", "greentech"];
@@ -423,8 +422,6 @@ function validateGreen(s: Obj): void {
 }
 
 function validateMinistry(content: ContentDB, s: Obj, nextDecision: number): void {
-	const standing = s.standing as number;
-	if (standing < 0 || standing > 100) fail(`standing ${standing} is outside 0..100`);
 	if (s.decision !== null) {
 		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string; subject?: unknown };
 		if (d.subject !== undefined && typeof d.subject !== "string") fail("decision.subject must be a string");
@@ -438,10 +435,6 @@ function validateMinistry(content: ContentDB, s: Obj, nextDecision: number): voi
 	array(s, "advisorTips").forEach((t, i) => {
 		if (typeof t !== "string") fail(`advisorTips[${i}] must be a string`);
 	});
-	array(s, "standingLog").forEach((h, i) => {
-		fields(h, { tick: "num", delta: "num", cause: "str", detail: "str" }, `standingLog[${i}]`);
-	});
-	if ((s.standingLog as unknown[]).length > 20) fail("standingLog is too long");
 	array(s, "modifiers").forEach((m, i) => {
 		const o = fields(m, { kind: "str", value: "num", endsAt: "num", label: "str" }, `modifiers[${i}]`);
 		if (!MODIFIER_KINDS.includes(o.kind as string)) fail(`modifiers[${i}].kind is invalid`);

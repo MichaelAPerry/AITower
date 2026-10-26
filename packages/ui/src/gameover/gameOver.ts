@@ -16,7 +16,7 @@ export const gameOverToShow = (go: SimView["gameOver"], dismissedKey: string | n
 /** The dismissed marker after the sim state changed: forgotten once there is no game-over (new game, or a save without one). */
 export const keepDismissed = (go: SimView["gameOver"], dismissedKey: string | null): string | null => (go ? dismissedKey : null);
 
-/** Only victory can be dismissed (play continues in the sandbox). Bankrupt and shutdown are final. */
+/** Only victory can be dismissed (play continues in the sandbox). Bankrupt and absorbed are final. */
 export const isFinal = (kind: GameOverKind): boolean => kind !== "victory";
 
 export interface OverCopy {
@@ -34,13 +34,6 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		stamp: "TERMINATED",
 		tone: "red",
 		lines: ["The Treasury has been below zero for a full day. Under the lending covenant, the premises, the racks and your position are foreclosed.", "The lender has taken possession."],
-	},
-	shutdown: {
-		heading: "NOTICE OF TERMINATION",
-		form: "LICENCE WITHDRAWN",
-		stamp: "SHUT DOWN",
-		tone: "red",
-		lines: ["Your reputation with the Authority has reached zero. The operating licence for this datacenter is withdrawn with immediate effect.", "Site access is revoked. Please return your badge."],
 	},
 	victory: {
 		heading: "COMMENDATION",
@@ -109,7 +102,7 @@ export function lifetimeStats(view: SimView): StatRow[] {
 	const head: StatRow[] = [
 		{ label: "Days in service", value: String(view.day) },
 		{ label: "Level reached", value: `Tier ${view.tier}` },
-		{ label: "Reputation", value: `${Math.round(view.standing)} / 100` },
+		...(view.soul ? [{ label: "The Lattice", value: `${Math.min(100, Math.floor((view.soul.sp.synthetic / view.soul.spTarget) * 100))}%` }] : []),
 		{ label: "Final treasury", value: fmtMoney(view.cash) },
 	];
 	const life = lifetimeRows(view.stats);

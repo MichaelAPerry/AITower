@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { loadContent } from "@aitower/content";
+import { type EventEffect, loadContent } from "@aitower/content";
 import { createSim, simFromSnapshot, TICKS_PER_DAY } from "@aitower/sim";
 import { makeContent } from "../../../packages/sim/src/test/fixture";
 import { allAutomation, AUTO_RESERVE, bestMemoChoice, formatTable, nextTech, PERMISSIVE_CLERK, runHeadless } from "./run";
@@ -52,7 +52,7 @@ describe("sim-cli runHeadless", () => {
 describe("sim-cli memo policy", () => {
 	it("bestMemoChoice picks the best direct cash outcome, then standing, then the first listed", () => {
 		const c = makeContent();
-		const choice = (id: string, effects: { type: "cash" | "standing"; amount: number }[]) => ({ id, label: id, hint: "", outcome: "", effects });
+		const choice = (id: string, effects: EventEffect[]) => ({ id, label: id, hint: "", outcome: "", effects });
 		c.events = [
 			{
 				id: "e",
@@ -64,23 +64,20 @@ describe("sim-cli memo policy", () => {
 				cooldownDays: 0,
 				advisor: "luci",
 				recommended: "x",
-				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("y", [{ type: "cash", amount: 50 }, { type: "standing", amount: -5 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }])],
+				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "bond", advisor: "luci", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }])],
 			},
 		];
 		expect(bestMemoChoice(c, "e")).toBe("z");
 		expect(bestMemoChoice(c, "nope")).toBeNull();
 	});
 
-	it("real content: memos arrive and are resolved by the auto-player; the run is deterministic and reports standing", () => {
+	it("real content: memos arrive and are resolved by the auto-player; the run is deterministic and reports the Lattice", () => {
 		const a = runHeadless(loadContent(), "starter", 8, 3);
 		const b = runHeadless(loadContent(), "starter", 8, 3);
 		expect(a.hash).toBe(b.hash);
 		expect(a.rows.at(-1)?.memos).toBeGreaterThanOrEqual(2);
-		for (const r of a.rows) {
-			expect(r.standing).toBeGreaterThanOrEqual(0);
-			expect(r.standing).toBeLessThanOrEqual(100);
-		}
-		expect(formatTable(a.rows)).toContain("standing");
+		for (const r of a.rows) expect(r.lattice).toBeGreaterThanOrEqual(0);
+		expect(formatTable(a.rows)).toContain("lattice");
 		expect(formatTable(a.rows)).toContain("corruption");
 		for (const r of a.rows) expect(r.corruption).toBe(0);
 	});
@@ -171,7 +168,6 @@ describe("sim-cli --auto", () => {
 			expect(auto.built).toBeGreaterThan(5);
 			expect(rows[29].racks).toBeGreaterThan(rows[0].racks + 5);
 			expect(rows[29].pflops).toBeGreaterThan(rows[0].pflops * 3);
-			expect(rows[29].standing).toBeGreaterThan(10);
 			const lastFive = rows.slice(-5).reduce((n, r) => n + r.uptime, 0) / 5; // one bad day (a failure burst) must not fail the run
 			expect(lastFive).toBeGreaterThan(0.9);
 			expect(rows[29].built).toBe(auto.built);
@@ -185,9 +181,8 @@ describe("sim-cli --auto", () => {
 	});
 });
 
-describe("reputation regression (M5b)", () => {
-	// Tier 4 used to ask for 99 % uptime, which a healthy tower never hit: every day cost 3 and reputation fell to 0.
-	it("an unattended tier-4 run (automation and Foreman on) for 10 days does not lose more than 10 reputation", { timeout: 120_000 }, async () => {
+describe("unattended tier-4 run", () => {
+	it("an unattended tier-4 run (automation and Foreman on) for 10 days does not end the game", { timeout: 120_000 }, async () => {
 		for (const seed of [1, 2]) {
 			await yieldToRunner();
 			const c = loadContent();
@@ -196,11 +191,8 @@ describe("reputation regression (M5b)", () => {
 			c.balance.tiers.techs = [0, 0, 0, 0, 0];
 			const { rows } = runHeadless(c, "brownfield", 10, seed, true);
 			expect(rows[0].tier, `seed ${seed}`).toBeGreaterThanOrEqual(4);
-			const start = c.balance.standing.start;
-			const low = Math.min(...rows.map((r) => r.standing));
-			expect(start - low, `seed ${seed} lowest ${low}`).toBeLessThanOrEqual(10);
-			expect(rows.at(-1)?.standing, `seed ${seed}: reputation should not trend down`).toBeGreaterThanOrEqual(start);
 			expect(rows.at(-1)?.gameOver).toBeNull();
 		}
 	});
 });
+

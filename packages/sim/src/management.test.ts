@@ -251,7 +251,7 @@ describe("quarterly audit", () => {
 		expect(auditScore({ uptime: 0, uptimeTarget: 1, pue: 2, jobsFailed: 5, revenue: 10, penalties: 5, profit: -5 })).toBe(100 - 30 - 40 - 20 - 10 - 20);
 	});
 
-	const auditContent = (period: number, over = {}) => farmContent({ audit: { periodDays: period, standingByGrade: [4, 2, 0, -3, -6], cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] }, ...over });
+	const auditContent = (period: number, over = {}) => farmContent({ audit: { periodDays: period, cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] }, ...over });
 
 	it("files a report at the midnight closing day k·period − 1: figures, effects, event, remark", () => {
 		const sim = newSim(auditContent(2), "farm");
@@ -259,7 +259,6 @@ describe("quarterly audit", () => {
 		const upt: number[] = [];
 		const pue: number[] = [];
 		const events: SimEvent[] = [];
-		const standing0 = sim.state.standing;
 		for (let t = sim.state.tick; t < 2 * 1440; t++) {
 			events.push(...sim.step());
 			if (t < 2 * 1440 - 1) {
@@ -283,9 +282,6 @@ describe("quarterly audit", () => {
 		expect(r.penalties).toBe(0);
 		expect(r.uptime).toBeCloseTo(upt.reduce((a, b) => a + b, 0) / upt.length, 2);
 		expect(r.pue).toBeCloseTo(pue.reduce((a, b) => a + b, 0) / pue.length, 2); // (the test misses the two ticks spent accepting the job)
-		expect(r.standingDelta).toBe(4);
-		expect(events).toContainEqual({ type: "standingChanged", standing: expect.any(Number), delta: 4 });
-		expect(sim.state.standing).toBeGreaterThanOrEqual(standing0 + 4 - 5); // includes daily / job standing changes
 		expect(r.remark.length).toBeGreaterThan(20);
 		// The next report is filed two days later only.
 		const more = runCollect(sim, 2 * 1440 - 1);
@@ -297,7 +293,7 @@ describe("quarterly audit", () => {
 	it("an idle loss-making farm grades C (100 − 20 loss − 10 PUE 1.62); one failed job at a profit sits exactly on the A boundary, two make it a B", () => {
 		const idle = newSim(auditContent(1), "farm");
 		run(idle, 1440);
-		expect(idle.state.reports[0]).toMatchObject({ grade: "C", standingDelta: 0, cashDelta: 0 });
+		expect(idle.state.reports[0]).toMatchObject({ grade: "C", cashDelta: 0 });
 		expect(Object.is(idle.state.reports[0].cashDelta, 0)).toBe(true);
 		const withFailures = (n: number) => {
 			const sim = newSim(auditContent(1), "farm");
@@ -316,7 +312,7 @@ describe("quarterly audit", () => {
 		expect(withFailures(2)).toMatchObject({ jobsFailed: 2, grade: "B" });
 	});
 
-	it("an E applies the fine as penalties and the standing hit", () => {
+	it("an E applies the fine as penalties", () => {
 		const sim = newSim(auditContent(1, { tiers: { pflops: [0, 1e9], uptime: [1.1, 1], reward: [0, 0] } }), "farm");
 		acceptSpec(sim, inference({ payout: 400_000, durationTicks: 720 }));
 		for (let i = 0; i < 3; i++) {
@@ -328,7 +324,6 @@ describe("quarterly audit", () => {
 		run(sim, 1440 - sim.state.tick);
 		const r = sim.state.reports[0];
 		expect(r.grade).toBe("E"); // 100 − 30 (uptime) − 30 (3 failures) − 20 (penalties > 10 % of revenue)
-		expect(r.standingDelta).toBe(-6);
 		expect(r.cashDelta).toBeCloseTo(-0.05 * r.revenue, 6);
 		expect(sim.state.ledger[0].penalties).toBeCloseTo(90_000 + 0.05 * r.revenue, 6); // the fine counts as penalties
 		expect(r.penalties).toBeCloseTo(90_000, 6); // …but is not part of the graded quarter

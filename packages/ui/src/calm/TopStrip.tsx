@@ -4,7 +4,6 @@ import { GrowthIndex } from "../bio/GrowthIndex";
 import { Icon, Lamp, Toggle } from "../components/common";
 import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
-import { StandingMeter } from "../status/Status";
 import { saveLamp } from "../menu/slots";
 import { SoulGauge } from "../soul/SoulGauge";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
@@ -14,7 +13,7 @@ import { clearanceProgress, fmtRateHour, maintenanceReadout, nextDrawer, perHour
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
 
 /**
- * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, reputation, then the badges that appear when they
+ * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, the Singularity bars, then the badges that appear when they
  * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, menu.
  */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
@@ -66,16 +65,15 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					</span>
 				</button>
 			)}
-			<div className="ui-clearance" data-tut="clearance" data-help="level" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}; uptime ${(cl.uptime * 100).toFixed(1)}% (needs ${(cl.uptimeNeed * 100).toFixed(1)}%)${cl.techs > 0 ? `; ${cl.techsDone} of ${cl.techs} research nodes done` : ""}` : "Top level reached"}>
+			<div className="ui-clearance" data-tut="clearance" data-help="level" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}${cl.techs > 0 ? `; ${cl.techsDone} of ${cl.techs} research nodes done` : ""}` : "Top level reached"}>
 				<span className="ui-label">
 					<span>LEVEL {cl.tier}</span>
-					<span className={cl.uptimeOk && cl.techsOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute · uptime ${cl.uptimeOk ? "ok" : "low"}${cl.techs > 0 && !cl.techsOk ? ` · research ${cl.techsDone}/${cl.techs}` : ""}` : "top"}</span>
+					<span className={cl.techsOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute${cl.techs > 0 && !cl.techsOk ? ` · research ${cl.techsDone}/${cl.techs}` : ""}` : "top"}</span>
 				</span>
 				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Level progress">
 					<i style={{ width: `${Math.round(cl.frac * 100)}%` }} />
 				</span>
 			</div>
-			<StandingMeter standing={view.standing} />
 			{view.sandbox && (
 				<div className="ui-chip ui-sandbox" title={SANDBOX_TITLE} role="status">
 					SANDBOX

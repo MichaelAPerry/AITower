@@ -116,11 +116,10 @@ describe("SystemMenu (server render)", () => {
 		expect(html).not.toContain("les-goal");
 	});
 
-	it("opens an advisor decision card with the recommended choice, effect chips and a defer button; the top bar shows standing", () => {
+	it("opens an advisor decision card with the recommended choice, effect chips and a defer button; the top bar shows the Singularity bars", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
 		store.issueDecision("heatwave");
-		store.setStanding(18);
 		store.addModifier({ label: "Heatwave", kind: "ambient", value: 8, endsAt: store.get().view.tick + 840 });
 		const html = renderToString(<Hud store={store} content={content} />);
 		expect(html).toContain("adv-card");
@@ -133,7 +132,7 @@ describe("SystemMenu (server render)", () => {
 		expect(html).toContain("Defer one day");
 		expect(html).toContain("game paused");
 		expect(html).not.toContain("AUTO-RESOLVES"); // decisions never expire
-		expect(html).toContain("tone-red"); // standing 18 is below 25
+		expect(html).toContain("soul-gauge");
 		expect(renderToString(<Drawer {...panelProps(store, content, { ui: { drawer: "insights" } })} />)).toContain("HEATWAVE +8 °C · 14h");
 	});
 	it("shows the advisor strip with four portraits and no decision card when nothing is pending", () => {
@@ -150,7 +149,6 @@ describe("SystemMenu (server render)", () => {
 		const content = createFakeContent();
 		for (const [kind, heading, buttons] of [
 			["bankrupt", "NOTICE OF TERMINATION", ["Load game", "New game"]],
-			["shutdown", "NOTICE OF TERMINATION", ["Load game", "New game"]],
 			["victory", "COMMENDATION", ["Continue in sandbox", "New game"]],
 		] as const) {
 			const store = createFakeStore(content);
@@ -165,7 +163,7 @@ describe("SystemMenu (server render)", () => {
 		expect(clean).not.toContain("ui-over-memo");
 	});
 
-	it("uses Compute Authority wording for decision, standing and game-over events", () => {
+	it("uses Compute Authority wording for decision and game-over events", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
 		const id = store.issueDecision("audit");
@@ -175,9 +173,7 @@ describe("SystemMenu (server render)", () => {
 		const resolved = describeEvent({ type: "decisionResolved", decisionId: id, eventId: "audit", choiceId: "comply" }, v, content);
 		expect(resolved).toMatchObject({ toast: true });
 		expect(resolved.text).toBe("Decided: COMPLY. The Inspector counted 4,112 cables and left.");
-		expect(describeEvent({ type: "standingChanged", standing: 42, delta: -8 }, v, content)).toMatchObject({ text: "Reputation falls by 8 to 42", severity: "warn", toast: true });
-		expect(describeEvent({ type: "standingChanged", standing: 51, delta: 1 }, v, content)).toMatchObject({ severity: "good", toast: false });
-		expect(describeEvent({ type: "gameOver", kind: "shutdown" }, v, content).text).toContain("NOTICE OF TERMINATION");
+		expect(describeEvent({ type: "gameOver", kind: "bankrupt" }, v, content).text).toContain("foreclosed");
 		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");
 	});
 

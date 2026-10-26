@@ -272,13 +272,13 @@ async function run(url) {
 		await game(() => window.aitower.store.setSpeed(0));
 		log("parts order on, AUTO lamp lit");
 
-		stage("5c2. Contracts and Insights: C shows the job board and Inspector, F opens Insights (one panel at a time), the reputation list is there, Esc closes");
+		stage("5c2. Contracts and Insights: C shows the job board and Inspector, F opens Insights (one panel at a time), the Singularity section is there, Esc closes");
 		await page.keyboard.press("c");
 		await page.locator('[data-drawer="contracts"] .pnl-insp').waitFor();
 		await page.keyboard.press("f");
 		await page.locator('[data-drawer="insights"]').waitFor();
 		assert((await page.locator("[data-drawer]").count()) === 1, "only one panel may be open at a time");
-		await page.locator("summary", { hasText: "Why did it change?" }).waitFor();
+		await page.locator('[aria-label="The Singularity"]').waitFor();
 		await page.keyboard.press("i"); // I toggles the same panel closed
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
 		log("Contracts (C), Insights (F and I), one panel at a time");
@@ -340,7 +340,6 @@ async function run(url) {
 		log("four advisors, Ask answer, tips off and on");
 
 		stage("5f. a decision pauses the game at 30x, waiting costs nothing, and answering it is a click");
-		const rep0 = await game(() => window.aitower.store.get().view.standing);
 		await page.keyboard.press("i"); // a drawer is open when the decision arrives: it must close (calm)
 		await page.locator('[data-drawer="insights"]').waitFor();
 		await game(() => window.aitower.store.setSpeed(30));
@@ -379,7 +378,7 @@ async function run(url) {
 		await page.locator(".adv-card").waitFor({ state: "detached" });
 		await game(() => window.aitower.store.setSpeed(0));
 		assert((await game(() => window.aitower.store.get().view.decision)) === null, "answering must clear the decision");
-		log(`decision answered; reputation ${rep0} -> ${await game(() => window.aitower.store.get().view.standing)} (daily uptime moves it, waiting does not)`);
+		log("decision answered");
 
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());

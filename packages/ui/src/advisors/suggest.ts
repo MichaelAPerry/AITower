@@ -5,7 +5,7 @@
  * Mirrors the NEXT logic (objective.ts / diagnose.ts) for the rules they share, and `dockPicks` for the hot-rack test.
  */
 import type { AdvisorId, ContentDB, FacilityDef } from "@aitower/content";
-import type { CellRef, FacilityView, SimView, StandingLogEntry } from "@aitower/sim";
+import type { CellRef, FacilityView, SimView } from "@aitower/sim";
 import { isBuildable } from "../build/catalog";
 import type { DrawerId } from "../calm/calm";
 import { clearanceProgress } from "../calm/calm";
@@ -24,6 +24,8 @@ export type AdvisorAction =
 	/** Open the Supplies tab of the catalog (spare parts). */
 	| { kind: "supplies"; focus?: CellRef }
 	| { kind: "drawer"; drawer: DrawerId; focus?: CellRef }
+	/** The advisors' dossier (bonds and what they trust you with). */
+	| { kind: "dossier" }
 	/** Open the Department of Research, on one node when `techId` is given. */
 	| { kind: "research"; techId?: string }
 	/** Open FORM A-5. */
@@ -72,30 +74,13 @@ export function hotRacks(view: SimView, content: ContentDB, confirmed?: Readonly
 	return view.facilities.filter((f) => rackIsHot(f, content) && (!confirmed || confirmed.has(f.id)));
 }
 
-/** The reputation drops of the last two game days, newest first. */
-export function recentLosses(view: SimView): StandingLogEntry[] {
-	const since = view.tick - 2 * 1440;
-	return view.standingLog.filter((e) => e.delta < 0 && e.tick >= since).reverse();
-}
-
-function reputation(view: SimView): Omit<Suggestion, "advisor" | "links"> | null {
-	const losses = recentLosses(view);
-	const last = losses[0];
-	if (!last) return null;
-	const total = Math.round(losses.reduce((s, e) => s + e.delta, 0));
-	const detail = last.detail.replace(/\.$/, "");
-	const lead = `Reputation slipped ${Math.abs(total)} point${Math.abs(total) === 1 ? "" : "s"} lately`;
-	const base = { id: "reputation", urgent: false, recommend: [] as string[] };
-	switch (last.cause) {
-		case "daily-uptime":
-			return { ...base, text: `${lead}: ${detail}. Insights shows where racks are down.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
-		case "job":
-			return { ...base, text: `${lead}: ${detail}. The Contracts panel shows what is late.`, cta: "Show me", action: { kind: "drawer", drawer: "contracts" } };
-		case "audit":
-			return { ...base, text: `${lead}: ${detail}. Insights has the audit under Money.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
-		default:
-			return { ...base, text: `${lead}: ${detail}. It came from a decision you made; Insights has the log.`, cta: "Show me", action: { kind: "drawer", drawer: "insights" } };
-	}
+/** Committed to Bio or Green while the Lattice (fed by every shared rack) is ahead: Cass says so. */
+function latticePull(view: SimView): Omit<Suggestion, "advisor" | "links"> | null {
+	const p = view.path;
+	const s = view.soul;
+	if (!s || (p !== "biotech" && p !== "greentech") || !(s.sp.synthetic > s.sp[p])) return null;
+	const pct = (n: number): number => Math.floor((n / s.spTarget) * 100);
+	return { id: "lattice", urgent: false, recommend: [], cta: "Dossier", action: { kind: "dossier" }, text: `The Lattice is ahead of your tree: ${pct(s.sp.synthetic)}% against ${pct(s.sp[p])}%. Every shared rack feeds it. Build on your own line, or it ends the world first.` };
 }
 
 const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
@@ -108,7 +93,7 @@ const META: Record<string, { advisor: AdvisorId; links: HandbookLink[] }> = {
 	uptime: { advisor: "bea", links: [{ label: "Uptime", entry: "ch:uptime" }] },
 	backup: { advisor: "bea", links: [{ label: "Power", entry: "ch:power" }] },
 	lift: { advisor: "cass", links: [{ label: "Lifts and bots", entry: "basics:lifts" }] },
-	reputation: { advisor: "luci", links: [{ label: "Reputation", entry: "basics:reputation" }] },
+	lattice: { advisor: "cass", links: [{ label: "Advisors", entry: "basics:advisors" }] },
 	idle: { advisor: "mel", links: [{ label: "Contracts", entry: "basics:contracts" }] },
 	research: { advisor: "mel", links: [{ label: "Research", entry: "basics:research" }] },
 	level: { advisor: "luci", links: [{ label: "Level", entry: "basics:level" }] },
@@ -220,9 +205,9 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 		});
 	}
 
-	// Reputation falling.
-	const rep = reputation(view);
-	if (rep) out.push(rep);
+	// The Lattice outrunning the committed tree.
+	const pull = latticePull(view);
+	if (pull) out.push(pull);
 
 	// Idle racks and an offer that fits.
 	const idle = racks.filter((f) => f.enabled && f.status === "idle");

@@ -287,8 +287,6 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		modifiers: state.modifiers
 			.filter((m) => m.endsAt > state.tick)
 			.map((m) => ({ label: m.label, kind: m.kind, value: m.value, endsAt: m.endsAt })),
-		standing: state.standing,
-		standingLog: state.standingLog.map((e) => ({ ...e })),
 		uptimeTarget: content.balance.tiers.uptime[state.tier - 1] ?? 0,
 		tierNeed: tierNeed(state, content),
 		researchPoints: state.researchPoints,

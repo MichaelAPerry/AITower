@@ -282,28 +282,13 @@ export interface Balance {
 		/** Offers expire after N ticks if not accepted. */
 		offerExpiryTicks: number;
 	};
-	/** Tier thresholds: tier n requires totalPflops ≥ pflops[n-1] AND uptime ≥ uptime[n-1] (rolling day). */
+	/** Tier thresholds: tier n requires totalPflops ≥ pflops[n-1] and techs[n-1] researched nodes. `uptime[n-1]` is that Level's operating target, which the quarterly audit grades (it is not a gate). */
 	tiers: {
 		pflops: number[];
 		uptime: number[];
 		reward: number[];
 		/** Minimum researched tech nodes to reach tier n (index n−1; 0 or absent = no research needed). */
 		techs?: number[];
-	};
-	/** Ministry standing (0..100). Reaching 0 ends the game ("shutdown"). */
-	standing: {
-		start: number;
-		/** Change per completed day with uptime ≥ the current tier's uptime target (+) or below it (−). */
-		dailyGood: number;
-		/** Daily change when the uptime target is missed by `dailyMissSpan` or more. */
-		dailyBad: number;
-		/** Daily change for a near miss (shortfall → 0); in between it scales linearly. */
-		dailyNearMiss: number;
-		/** Uptime shortfall (0..1) at which the daily change reaches `dailyBad`. */
-		dailyMissSpan: number;
-		/** Change on a missed training deadline / completed job. */
-		jobFailed: number;
-		jobCompleted: number;
 	};
 	/** Research points (RP): earned from delivered compute, spent on tech nodes. */
 	research: {
@@ -329,8 +314,6 @@ export interface Balance {
 	/** Quarterly audit: every `periodDays` the Ministry grades the facility (see `QuarterReport` in sim/api). */
 	audit: {
 		periodDays: number;
-		/** Standing change per grade A..E. */
-		standingByGrade: number[];
 		/** Cash grant (+) or fine (−) per grade A..E, as a share of the quarter's revenue. */
 		cashShareByGrade: number[];
 	};
@@ -663,7 +646,6 @@ export type EventCategory = "ministry" | "environmental" | "operational" | "clie
  */
 export type EventEffect =
 	| { type: "cash"; amount: number }
-	| { type: "standing"; amount: number }
 	/** Ambient temperature offset (heatwave / cold snap). */
 	| { type: "ambient"; deltaC: number; durationTicks: number }
 	/** Grid import capacity multiplier (brownout = 0.5, blackout = 0). */

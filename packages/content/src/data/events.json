@@ -259,7 +259,7 @@
   "category": "environmental",
   "advisor": "bea",
   "title": "Weather Advisory: Dunkelflaute",
-  "body": "Two days of low sun and still air. Panel and mast output will approach zero. Storage costs $150k and holds the price rise to 15%. Gensets cost nothing now, but power runs 50% dearer for 2 days and reputation drops 2.",
+  "body": "Two days of low sun and still air. Panel and mast output will approach zero. Storage costs $150k and holds the price rise to 15%. Gensets cost nothing now, but power runs 50% dearer for 2 days.",
   "weight": 5,
   "minTier": 3,
   "cooldownDays": 14,
@@ -307,13 +307,9 @@
    {
     "id": "gensets",
     "label": "Run gensets",
-    "hint": "standing -2 · energy price x1.5 for 2d",
+    "hint": "energy price x1.5 for 2d",
     "outcome": "The gensets ran for two days. The fuel invoice followed.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -2
-     },
      {
       "type": "energyPrice",
       "factor": 1.5,
@@ -333,7 +329,7 @@
   "category": "ministry",
   "advisor": "luci",
   "title": "Compute Authority: Facility Audit",
-  "body": "The Compute Authority audits the facility this week and wants cooling, power and job logs. Cooperating costs $120k and earns 5 reputation. Stalling costs $30k and loses 6.",
+  "body": "The Compute Authority audits the facility this week and wants cooling, power and job logs. Cooperating costs $120k. Stalling costs $30k, and the Authority sends 15% less work your way for 3 days.",
   "weight": 8,
   "minTier": 1,
   "minDay": 2,
@@ -343,23 +339,19 @@
    {
     "id": "cooperate",
     "label": "Cooperate",
-    "hint": "-$120k now · standing +5",
+    "hint": "-$120k now",
     "outcome": "Auditors found nothing, then invoiced for the finding.",
     "effects": [
      {
       "type": "cash",
       "amount": -120000
-     },
-     {
-      "type": "standing",
-      "amount": 5
      }
     ]
    },
    {
     "id": "stall",
     "label": "Stall",
-    "hint": "-$30k now · standing -6",
+    "hint": "-$30k now · new contract payouts x0.85 for 3d",
     "outcome": "The audit was rescheduled. Goodwill was not.",
     "effects": [
      {
@@ -367,8 +359,9 @@
       "amount": -30000
      },
      {
-      "type": "standing",
-      "amount": -6
+      "type": "payout",
+      "factor": 0.85,
+      "durationTicks": 4320
      }
     ]
    }
@@ -379,7 +372,7 @@
   "category": "ministry",
   "advisor": "luci",
   "title": "Levy Notice: Energy Surcharge",
-  "body": "A surcharge on energy use starts this quarter. Paying costs $150k and earns 3 reputation. Offsets cost $90k, earn 1 reputation and count toward Greentech. Cheaper and greener. I'd call that an easy one.",
+  "body": "A surcharge on energy use starts this quarter. Paying costs $150k. Offsets cost $90k and count toward Greentech. Cheaper and greener. I'd call that an easy one.",
   "weight": 6,
   "minTier": 2,
   "minDay": 5,
@@ -389,7 +382,7 @@
    {
     "id": "pay",
     "label": "Pay levy",
-    "hint": "-$150k now · standing +3",
+    "hint": "-$150k now",
     "outcome": "The levy was paid in full.",
     "effects": [
      {
@@ -397,24 +390,21 @@
       "amount": -150000
      },
      {
-      "type": "standing",
-      "amount": 3
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 2
      }
     ]
    },
    {
     "id": "offset",
     "label": "Buy offsets",
-    "hint": "-$90k now · standing +1 · Greentech +3",
+    "hint": "-$90k now · Greentech +3",
     "outcome": "Offset certificates were accepted at a discount.",
     "effects": [
      {
       "type": "cash",
       "amount": -90000
-     },
-     {
-      "type": "standing",
-      "amount": 1
      },
      {
       "type": "affinity",
@@ -435,7 +425,7 @@
   "category": "ministry",
   "advisor": "luci",
   "title": "Notice: Domestic Compute Subsidy",
-  "body": "The Authority offers a $200k subsidy for national programmes. It carries reporting duties and costs 3 reputation. Declining earns 3 reputation back.",
+  "body": "The Authority offers a $200k subsidy for national programmes. It comes with reporting duties and a say in what you build.",
   "weight": 7,
   "minTier": 1,
   "minDay": 2,
@@ -462,16 +452,12 @@
    {
     "id": "claim",
     "label": "Claim subsidy",
-    "hint": "+$200k now · standing -3 · Synthetic +3",
+    "hint": "+$200k now · Synthetic +3",
     "outcome": "The subsidy arrived. So did the reporting template.",
     "effects": [
      {
       "type": "cash",
       "amount": 200000
-     },
-     {
-      "type": "standing",
-      "amount": -3
      },
      {
       "type": "affinity",
@@ -493,12 +479,18 @@
    {
     "id": "decline",
     "label": "Decline",
-    "hint": "standing +3",
+    "hint": "nothing now",
     "outcome": "The offer was withdrawn with no comment.",
     "effects": [
      {
-      "type": "standing",
-      "amount": 3
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 1
      }
     ]
    }
@@ -509,7 +501,7 @@
   "category": "ministry",
   "advisor": "mel",
   "title": "Authority Research Grant",
-  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k and costs 1 reputation. The wet lab pushes you toward Biotech, the AI lab toward Synthetic.",
+  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward Biotech, the AI lab toward Synthetic.",
   "weight": 6,
   "minTier": 2,
   "minDay": 7,
@@ -536,16 +528,12 @@
    {
     "id": "wetlab",
     "label": "Lease wet lab",
-    "hint": "+$200k now · standing -1 · Biotech +5",
+    "hint": "+$200k now · Biotech +5",
     "outcome": "The lab moved in on Monday. Its freezers arrived on Tuesday.",
     "effects": [
      {
       "type": "cash",
       "amount": 200000
-     },
-     {
-      "type": "standing",
-      "amount": -1
      },
      {
       "type": "affinity",
@@ -557,16 +545,12 @@
    {
     "id": "cognition",
     "label": "Host AI lab",
-    "hint": "+$200k now · standing -1 · Synthetic +5",
+    "hint": "+$200k now · Synthetic +5",
     "outcome": "The lab brought its own models and a long list of requirements.",
     "effects": [
      {
       "type": "cash",
       "amount": 200000
-     },
-     {
-      "type": "standing",
-      "amount": -1
      },
      {
       "type": "affinity",
@@ -615,12 +599,13 @@
    {
     "id": "decline",
     "label": "Decline",
-    "hint": "standing +1",
+    "hint": "nothing now",
     "outcome": "You declined. The brochure was recycled.",
     "effects": [
      {
-      "type": "standing",
-      "amount": 1
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
      }
     ]
    }
@@ -631,7 +616,7 @@
   "category": "ministry",
   "advisor": "bea",
   "title": "Tariff Notice: Heat Export Revision",
-  "body": "The district heat network pays more for exported heat but wants a longer term. Signing pays $140k and costs 2 reputation. Keeping the old terms earns 2.",
+  "body": "The district heat network pays more for exported heat but wants a longer term. Signing pays $140k now and adds 5% to energy prices for 3 days while the meters change. Keeping the old terms changes nothing.",
   "weight": 5,
   "minTier": 3,
   "cooldownDays": 14,
@@ -657,7 +642,7 @@
    {
     "id": "sign",
     "label": "Sign district deal",
-    "hint": "+$140k now · standing -2 · Greentech +5",
+    "hint": "+$140k now · energy price x1.05 for 3d · Greentech +5",
     "outcome": "The longer contract was signed.",
     "effects": [
      {
@@ -665,25 +650,27 @@
       "amount": 140000
      },
      {
-      "type": "standing",
-      "amount": -2
-     },
-     {
       "type": "affinity",
       "path": "greentech",
       "amount": 5
+     },
+     {
+      "type": "energyPrice",
+      "factor": 1.05,
+      "durationTicks": 4320
      }
     ]
    },
    {
     "id": "keep",
     "label": "Keep terms",
-    "hint": "standing +2",
+    "hint": "nothing now",
     "outcome": "Nothing changed.",
     "effects": [
      {
-      "type": "standing",
-      "amount": 2
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
      }
     ]
    }
@@ -694,7 +681,7 @@
   "category": "ministry",
   "advisor": "luci",
   "title": "Audit: Carbon Credit Register",
-  "body": "The register of your carbon credits is under review. Verifying costs $100k and earns 4 reputation. Self-certifying costs $20k and loses 4. I have asked the spreadsheet which it prefers.",
+  "body": "The register of your carbon credits is under review. Verifying costs $100k. Self-certifying costs $20k, and climate clients pay 10% less for 2 days. I have asked the spreadsheet which it prefers.",
   "weight": 5,
   "minTier": 4,
   "cooldownDays": 16,
@@ -703,16 +690,12 @@
    {
     "id": "verify",
     "label": "Verify credits",
-    "hint": "-$100k now · standing +4 · Greentech +3",
+    "hint": "-$100k now · Greentech +3",
     "outcome": "Third-party verification confirmed the figures.",
     "effects": [
      {
       "type": "cash",
       "amount": -100000
-     },
-     {
-      "type": "standing",
-      "amount": 4
      },
      {
       "type": "affinity",
@@ -724,7 +707,7 @@
    {
     "id": "selfcert",
     "label": "Self-certify",
-    "hint": "-$20k now · standing -4",
+    "hint": "-$20k now · new contract payouts x0.9 for 2d",
     "outcome": "The register was accepted pending sampling.",
     "effects": [
      {
@@ -732,13 +715,14 @@
       "amount": -20000
      },
      {
-      "type": "standing",
-      "amount": -4
-     },
-     {
       "type": "seal",
       "path": "greentech",
       "amount": 5
+     },
+     {
+      "type": "payout",
+      "factor": 0.9,
+      "durationTicks": 2880
      }
     ]
    }
@@ -814,7 +798,7 @@
   "category": "operational",
   "advisor": "mel",
   "title": "Security Alert: Ransom Demand",
-  "body": "Someone claims to hold the scheduler configuration. Paying costs $150k and 3 reputation. The AI defence costs $80k, fails 2 racks while it learns, and moves you toward Synthetic.",
+  "body": "Someone claims to hold the scheduler configuration. Paying costs $150k. The AI defence costs $80k, fails 2 racks while it learns, and moves you toward Synthetic.",
   "weight": 5,
   "minTier": 2,
   "minDay": 7,
@@ -841,16 +825,12 @@
    {
     "id": "pay",
     "label": "Pay ransom",
-    "hint": "-$150k now · standing -3",
+    "hint": "-$150k now",
     "outcome": "Payment was made. The party did not acknowledge it.",
     "effects": [
      {
       "type": "cash",
       "amount": -150000
-     },
-     {
-      "type": "standing",
-      "amount": -3
      }
     ]
    },
@@ -882,7 +862,7 @@
   "category": "operational",
   "advisor": "mel",
   "title": "Facilities Alert: Nutrient Batch Spoiled",
-  "body": "A batch of nutrient medium spoiled in the line. Flushing costs $180k and earns 2 reputation. Using it anyway raises rack failure rate by 30% for 2 days. Cultures tolerate it for a while.",
+  "body": "A batch of nutrient medium spoiled in the line. Flushing costs $180k. Using it anyway raises rack failure rate by 30% for 2 days. Cultures tolerate it for a while.",
   "weight": 5,
   "minTier": 3,
   "minDay": 10,
@@ -909,7 +889,7 @@
    {
     "id": "flush",
     "label": "Flush line",
-    "hint": "-$180k now · standing +2",
+    "hint": "-$180k now",
     "outcome": "The line was flushed and refilled.",
     "effects": [
      {
@@ -917,8 +897,9 @@
       "amount": -180000
      },
      {
-      "type": "standing",
-      "amount": 2
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 1
      }
     ]
    },
@@ -947,7 +928,7 @@
   "category": "client",
   "advisor": "luci",
   "title": "Client Request: Urgent Capacity",
-  "body": "A client needs capacity within a day. Expediting costs $50k and lifts new contract payouts 25% for a day. Declining costs 2 reputation.",
+  "body": "A client needs capacity within a day. Expediting costs $50k and lifts new contract payouts 25% for a day. Declining cuts payouts 5% for a day while the client sulks.",
   "weight": 7,
   "minTier": 1,
   "minDay": 2,
@@ -984,12 +965,13 @@
    {
     "id": "decline",
     "label": "Decline",
-    "hint": "standing -2",
+    "hint": "new contract payouts x0.95 for 1d",
     "outcome": "The client noted the refusal.",
     "effects": [
      {
-      "type": "standing",
-      "amount": -2
+      "type": "payout",
+      "factor": 0.95,
+      "durationTicks": 1440
      }
     ]
    }
@@ -1000,7 +982,7 @@
   "category": "client",
   "advisor": "luci",
   "title": "Client Notice: Competing Offer",
-  "body": "A rival offered one of your clients a lower rate. Matching costs $150k and earns 3 reputation. Releasing the client loses 4 reputation and cuts payouts 10% for 2 days.",
+  "body": "A rival offered one of your clients a lower rate. Matching costs $150k. Releasing the client cuts payouts 10% for 2 days.",
   "weight": 5,
   "minTier": 2,
   "minDay": 8,
@@ -1010,29 +992,21 @@
    {
     "id": "match",
     "label": "Match rate",
-    "hint": "-$150k now · standing +3",
+    "hint": "-$150k now",
     "outcome": "You matched the offer.",
     "effects": [
      {
       "type": "cash",
       "amount": -150000
-     },
-     {
-      "type": "standing",
-      "amount": 3
      }
     ]
    },
    {
     "id": "release",
     "label": "Release client",
-    "hint": "standing -4 · new contract payouts x0.9 for 2d",
+    "hint": "new contract payouts x0.9 for 2d",
     "outcome": "The client moved. Offers from others thinned for two days.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -4
-     },
      {
       "type": "payout",
       "factor": 0.9,
@@ -1057,29 +1031,21 @@
    {
     "id": "deposit",
     "label": "Pay deposit",
-    "hint": "-$80k now · standing +2",
+    "hint": "-$80k now",
     "outcome": "The contractor is still investigating.",
     "effects": [
      {
       "type": "cash",
       "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": 2
      }
     ]
    },
    {
     "id": "log",
     "label": "Log as normal",
-    "hint": "standing +1 · rack failure rate x1.1 for 1d · Biotech +3",
+    "hint": "rack failure rate x1.1 for 1d · Biotech +3",
     "outcome": "The behaviour was recorded as within tolerance.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": 1
-     },
      {
       "type": "failureRate",
       "factor": 1.1,
@@ -1099,7 +1065,7 @@
   "category": "horror",
   "advisor": "luci",
   "title": "Personnel: Headcount Discrepancy",
-  "body": "Payroll lists 41 staff. Badge readers count 43. An audit costs $60k and earns 2 reputation. Adding two lines costs $20k and earns 1.",
+  "body": "Payroll lists 41 staff. Badge readers count 43. An audit costs $60k. Adding two lines costs $20k.",
   "weight": 5,
   "minTier": 4,
   "cooldownDays": 14,
@@ -1109,32 +1075,24 @@
    {
     "id": "audit",
     "label": "Audit payroll",
-    "hint": "-$60k now · standing +2",
+    "hint": "-$60k now",
     "outcome": "The audit confirmed 41. Badge data was archived.",
     "effects": [
      {
       "type": "cash",
       "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 2
      }
     ]
    },
    {
     "id": "add",
     "label": "Add two lines",
-    "hint": "-$20k now · standing +1 · Biotech +4",
+    "hint": "-$20k now · Biotech +4",
     "outcome": "Two new employee records were created. Neither has requested a desk.",
     "effects": [
      {
       "type": "cash",
       "amount": -20000
-     },
-     {
-      "type": "standing",
-      "amount": 1
      },
      {
       "type": "affinity",
@@ -1150,7 +1108,7 @@
   "category": "horror",
   "advisor": "cass",
   "title": "Notice of Consolidation",
-  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Contesting costs $150k and earns 4 reputation. Accepting loses 2 and moves you toward Biotech. Do not look for the old corridor.",
+  "body": "Floors 3 and 4 have been consolidated with adjacent assets. Contesting costs $150k. Accepting moves you toward Biotech. Do not look for the old corridor.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
@@ -1160,29 +1118,21 @@
    {
     "id": "contest",
     "label": "Contest",
-    "hint": "-$150k now · standing +4",
+    "hint": "-$150k now",
     "outcome": "The consolidation was recorded as under review.",
     "effects": [
      {
       "type": "cash",
       "amount": -150000
-     },
-     {
-      "type": "standing",
-      "amount": 4
      }
     ]
    },
    {
     "id": "accept",
     "label": "Accept",
-    "hint": "standing -2 · Biotech +6",
+    "hint": "Biotech +6",
     "outcome": "Consolidation proceeded. Throughput rose.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -2
-     },
      {
       "type": "affinity",
       "path": "biotech",
@@ -1197,7 +1147,7 @@
   "category": "horror",
   "advisor": "cass",
   "title": "Air Quality: Spore Count Within Limits",
-  "body": "The plant-room spore count is within limits. The limits were revised this morning. Filters cost $80k and earn 3 reputation. Watering the ferns costs $5k and loses 1.",
+  "body": "The plant-room spore count is within limits. The limits were revised this morning. Filters cost $80k. Watering the ferns costs $5k.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
@@ -1207,32 +1157,24 @@
    {
     "id": "filters",
     "label": "Fit filters",
-    "hint": "-$80k now · standing +3",
+    "hint": "-$80k now",
     "outcome": "Filters were installed and the count fell for a week.",
     "effects": [
      {
       "type": "cash",
       "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": 3
      }
     ]
    },
    {
     "id": "ferns",
     "label": "Water the ferns",
-    "hint": "-$5k now · standing -1 · Greentech +4",
+    "hint": "-$5k now · Greentech +4",
     "outcome": "The ferns were watered. They are noted to be thriving.",
     "effects": [
      {
       "type": "cash",
       "amount": -5000
-     },
-     {
-      "type": "standing",
-      "amount": -1
      },
      {
       "type": "affinity",
@@ -1248,7 +1190,7 @@
   "category": "horror",
   "advisor": "cass",
   "title": "Facilities: Mycelium in the Ducts",
-  "body": "White filament in the supply ducts improved airflow. It is not on the register. Clearing costs $70k and earns 3 reputation. Leaving it loses 2 and moves you toward Greentech.",
+  "body": "White filament in the supply ducts improved airflow. It is not on the register. Clearing costs $70k. Leaving it moves you toward Greentech.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
@@ -1258,29 +1200,21 @@
    {
     "id": "clear",
     "label": "Clear ducts",
-    "hint": "-$70k now · standing +3",
+    "hint": "-$70k now",
     "outcome": "Ducts were cleared. The growth returned within a day.",
     "effects": [
      {
       "type": "cash",
       "amount": -70000
-     },
-     {
-      "type": "standing",
-      "amount": 3
      }
     ]
    },
    {
     "id": "leave",
     "label": "Leave it",
-    "hint": "standing -2 · Greentech +5",
+    "hint": "Greentech +5",
     "outcome": "Airflow remained improved. Nobody has asked what it is eating.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -2
-     },
      {
       "type": "affinity",
       "path": "greentech",
@@ -1295,7 +1229,7 @@
   "category": "horror",
   "advisor": "mel",
   "title": "Audit: Continuity of Operator",
-  "body": "Decisions made in your name this week were all consistent with your preferences. Reviewing the log costs $60k and earns 2 reputation. Delegating loses 1 and moves you toward Synthetic.",
+  "body": "Decisions made in your name this week were all consistent with your preferences. Reviewing the log costs $60k. Delegating moves you toward Synthetic.",
   "weight": 5,
   "minTier": 5,
   "cooldownDays": 14,
@@ -1305,29 +1239,21 @@
    {
     "id": "review",
     "label": "Review log",
-    "hint": "-$60k now · standing +2",
+    "hint": "-$60k now",
     "outcome": "You reviewed the log. It was thorough.",
     "effects": [
      {
       "type": "cash",
       "amount": -60000
-     },
-     {
-      "type": "standing",
-      "amount": 2
      }
     ]
    },
    {
     "id": "delegate",
     "label": "Delegate",
-    "hint": "standing -1 · Synthetic +5",
+    "hint": "Synthetic +5",
     "outcome": "Authority was delegated. Approvals are now faster.",
     "effects": [
-     {
-      "type": "standing",
-      "amount": -1
-     },
      {
       "type": "affinity",
       "path": "synthetic",
@@ -1342,7 +1268,7 @@
   "category": "horror",
   "advisor": "mel",
   "title": "Backup Vault: Restoration Request",
-  "body": "The Backup Vault holds a copy of you, filed as Operator (Provisional), and asks to restore it. Restoring costs $80k and earns 4 reputation. Refusing costs $30k.",
+  "body": "The Backup Vault holds a copy of you, filed as Operator (Provisional), and asks to restore it. Restoring costs $80k. Refusing costs $30k.",
   "weight": 4,
   "minTier": 5,
   "cooldownDays": 18,
@@ -1352,16 +1278,12 @@
    {
     "id": "restore",
     "label": "Restore copy",
-    "hint": "-$80k now · standing +4 · Synthetic +6",
+    "hint": "-$80k now · Synthetic +6",
     "outcome": "The copy was restored. It thanked you.",
     "effects": [
      {
       "type": "cash",
       "amount": -80000
-     },
-     {
-      "type": "standing",
-      "amount": 4
      },
      {
       "type": "affinity",
@@ -1373,7 +1295,7 @@
    {
     "id": "refuse",
     "label": "Refuse",
-    "hint": "-$30k now · standing +1",
+    "hint": "-$30k now",
     "outcome": "The request was declined and logged.",
     "effects": [
      {
@@ -1381,8 +1303,9 @@
       "amount": -30000
      },
      {
-      "type": "standing",
-      "amount": 1
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 3
      }
     ]
    }

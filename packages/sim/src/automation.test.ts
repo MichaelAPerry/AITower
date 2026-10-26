@@ -720,7 +720,6 @@ describe("the Foreman", () => {
 			};
 			const on = { power: true, cooling: true };
 			expect(blocked(() => {})).toBe(5); // control
-			expect(blocked((s) => (s.state.standing = 10))).toBe(4);
 			expect(blocked((s) => s.state.ledger.push({ ...s.state.today, revenue: 0, penalties: 1_000 }))).toBe(4);
 			const okC = (s: SimImpl, v: number) => (s.content.balance.thermal = { ...s.content.balance.thermal, okC: v });
 			expect(blocked((s) => okC(s, 0), on)).toBe(4); // hot racks wait for a CRAH

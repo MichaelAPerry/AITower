@@ -1,6 +1,6 @@
 /**
  * The Goals card's ladder: an ordered list of concrete goals derived purely from the sim view.
- * Plain words on the surface ("Level", "Reputation", "PF compute"); the card shows the first few that are not done.
+ * Plain words on the surface ("Level", "PF compute"); the card shows the first few that are not done.
  */
 import type { ContentDB } from "@aitower/content";
 import type { SimView } from "@aitower/sim";

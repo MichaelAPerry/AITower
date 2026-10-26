@@ -27,7 +27,6 @@ import { addAffinity } from "../progression/affinity";
 import { addBond, addResidue, addSp, isSealed, sealOf } from "../progression/soul";
 import { commitPath } from "../bio/path";
 import { expireModifiers, modifierLabel } from "./modifiers";
-import { changeStanding } from "./standing";
 
 export const DECISION_HISTORY_LENGTH = 20;
 /** "Defer one day". */
@@ -212,9 +211,6 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 		case "cash":
 			if (e.amount >= 0) earn(state, e.amount);
 			else spend(state, "penalties", -e.amount);
-			break;
-		case "standing":
-			changeStanding(state, e.amount, events, "decision", title);
 			break;
 		case "ambient":
 			state.modifiers.push({ kind: "ambient", value: e.deltaC, endsAt: state.tick + e.durationTicks, label: modifierLabel("ambient", e.deltaC) });

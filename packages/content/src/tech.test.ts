@@ -272,7 +272,6 @@ describe("new trunk content", () => {
 		expect(b.tax.profitShare).toBeGreaterThanOrEqual(0.1);
 		expect(b.tax.profitShare).toBeLessThanOrEqual(0.15);
 		expect(b.audit.periodDays).toBe(7);
-		expect(b.audit.standingByGrade).toHaveLength(5);
 		expect(b.audit.cashShareByGrade).toHaveLength(5);
 	});
 });
@@ -372,12 +371,10 @@ describe("validateContent: research balance", () => {
 		expect(broken((db) => db.balance.tiers.pflops.push(5000) && db.balance.tiers.uptime.push(0.999) && db.balance.tiers.reward.push(1))).toMatch(/maxByTier: expected 6 entries/);
 	});
 
-	it("requires both audit grade arrays to have 5 entries, best grade first", () => {
-		expect(broken((db) => db.balance.audit.standingByGrade.pop())).toMatch(/standingByGrade: expected 5/);
+	it("requires the audit cash shares to have 5 entries, best grade first", () => {
 		expect(broken((db) => db.balance.audit.cashShareByGrade.push(0))).toMatch(/cashShareByGrade: expected 5/);
-		expect(broken((db) => (db.balance.audit.standingByGrade[2] = 99))).toMatch(/must not pay more/);
+		expect(broken((db) => (db.balance.audit.cashShareByGrade[2] = 0.5))).toMatch(/must not pay more/);
 		expect(broken((db) => (db.balance.audit.cashShareByGrade[0] = 3))).toMatch(/cashShareByGrade\[0\]/);
-		expect(broken((db) => (db.balance.audit.standingByGrade[4] = Number.NaN))).toMatch(/standingByGrade\[4\]/);
 	});
 
 	it("flags missing sections", () => {

@@ -6,7 +6,6 @@ import type { AuditGrade, QuarterReport } from "../api";
 import type { TickCtx } from "../core/context";
 import type { AuditTracker, SimState } from "../core/state";
 import { dayOf } from "../core/time";
-import { changeStanding } from "../ministry/standing";
 import { dayCosts, earn, spend } from "./ledger";
 
 export const MAX_REPORTS = 8;
@@ -122,8 +121,6 @@ export function closeAuditDay(ctx: TickCtx, tier: number): void {
 	const grade = gradeFor(auditScore({ uptime, uptimeTarget, pue, jobsFailed: a.jobsFailed, revenue, penalties, profit: revenue - costs }));
 	const gi = GRADES.indexOf(grade);
 
-	const standingBefore = state.standing;
-	changeStanding(state, cfg.standingByGrade[gi] ?? 0, events, "audit", `Quarterly audit: grade ${grade}`);
 	const cashDelta = (cfg.cashShareByGrade[gi] ?? 0) * revenue + 0; // + 0 turns -0 into 0
 	if (cashDelta > 0) earn(state, cashDelta);
 	else if (cashDelta < 0) spend(state, "penalties", -cashDelta);
@@ -140,7 +137,6 @@ export function closeAuditDay(ctx: TickCtx, tier: number): void {
 		jobsFailed: a.jobsFailed,
 		penalties,
 		grade,
-		standingDelta: state.standing - standingBefore,
 		cashDelta,
 		remark: REMARKS[grade],
 	};

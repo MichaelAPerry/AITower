@@ -6,7 +6,7 @@ import { TICKS_PER_DAY } from "../api";
 import type { TickCtx } from "../core/context";
 import { GREEN_SMOOTHING, GREEN_W_ENERGY, GREEN_W_HEAT, HISTORY_INTERVAL_TICKS, HISTORY_LENGTH, MIN_POWERED_SATISFACTION, TICKS_PER_HOUR, TOP_TIER_RACK } from "../core/constants";
 import { offersStep } from "../compute/offers";
-import { setGameOver } from "../ministry/standing";
+import { setGameOver } from "../progression/gameOver";
 import { getDef } from "../world/defs";
 import { sampleAudit } from "./audit";
 import { clerkStep } from "./clerk";

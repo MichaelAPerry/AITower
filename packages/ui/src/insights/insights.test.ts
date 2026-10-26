@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { moneyFlow, pueExplain, reputationTrend, reputationWhy, uptimeVerdict } from "./insights";
+import { moneyFlow, pueExplain, uptimeVerdict } from "./insights";
 
 const day = { day: 0, revenue: 6000, energy: 600, upkeep: 600, construction: 9999, penalties: 0 } as never;
 
@@ -18,18 +18,6 @@ describe("insights", () => {
 		const low = uptimeVerdict({ uptime: 0.9, uptimeTarget: 0.95, facilities });
 		expect(low).toMatchObject({ ok: false, tone: "bad", headline: "Uptime 90.0% · target 95%" });
 		expect(uptimeVerdict({ uptime: 1, uptimeTarget: 0, facilities }).target).toBeNull();
-	});
-
-	it("lists why reputation moved, newest first, in plain words", () => {
-		const standingLog = [
-			{ tick: 100, delta: 2, cause: "job", detail: "Finished A" },
-			{ tick: 700, delta: -4, cause: "daily-uptime", detail: "Uptime 91% vs target 95%" },
-		] as never;
-		const rows = reputationWhy({ standingLog });
-		expect(rows.map((r) => r.deltaText)).toEqual(["−4", "+2"]);
-		expect(rows[0].cause).toBe("Daily uptime check");
-		expect(reputationTrend({ standingLog, tick: 800 })).toMatchObject({ delta: -2, tone: "warn" });
-		expect(reputationTrend({ standingLog: [], tick: 800 }).text).toMatch(/Steady/);
 	});
 
 	it("explains PUE with the player's number", () => {

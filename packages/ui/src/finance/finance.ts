@@ -94,9 +94,9 @@ export function reportRows(r: QuarterReport): ReportRow[] {
 	];
 }
 
-/** Sheet headline numbers: Authority standing and cash change. */
-export function auditOutcome(r: QuarterReport): { standing: string; cash: string } {
-	return { standing: `Reputation ${signed(Math.round(r.standingDelta))}`, cash: cashDeltaText(r.cashDelta) };
+/** Sheet headline number: the grant or fine. */
+export function auditOutcome(r: QuarterReport): { cash: string } {
+	return { cash: cashDeltaText(r.cashDelta) };
 }
 
 // ─── Lifetime stats ──────────────────────────────────────────────────

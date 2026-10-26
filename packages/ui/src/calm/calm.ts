@@ -144,8 +144,6 @@ export function effectChip(e: EventEffect): string {
 	switch (e.type) {
 		case "cash":
 			return `${sign(e.amount)}${fmtMoney(Math.abs(e.amount))}`;
-		case "standing":
-			return `★${sign(e.amount)}${Math.abs(e.amount)}`;
 		case "ambient":
 			return `${sign(e.deltaC)}${Math.abs(e.deltaC)}°C`;
 		case "gridCap":

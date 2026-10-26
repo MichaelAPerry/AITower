@@ -9,7 +9,8 @@ import { leadingPath } from "../ascension/ascension";
 import { ModifierChips } from "../status/Status";
 import { PanelHead, PanelTabs } from "../panel/PanelShell";
 import { Telemetry } from "../calm/Panels";
-import { moneyFlow, pueExplain, reputationTrend, reputationWhy, uptimeVerdict } from "./insights";
+import { moneyFlow, pueExplain, uptimeVerdict } from "./insights";
+import { TREE_COLOR, TREE_LONG, treeBars } from "../soul/soul";
 
 const hourly = (n: number | null): string => (n === null ? "—" : `${fmtMoney(n)}/h`);
 
@@ -20,8 +21,6 @@ export function InsightsPanel(props: PanelProps) {
 	const tab = ui.insightsTab ?? "overview";
 	const flow = moneyFlow(view);
 	const up = uptimeVerdict(view);
-	const rep = reputationTrend(view);
-	const why = reputationWhy(view);
 	const supply = view.powerNets.reduce((s, n) => s + n.supplyKw, 0);
 	return (
 		<>
@@ -31,7 +30,7 @@ export function InsightsPanel(props: PanelProps) {
 				value={tab}
 				onPick={(t) => setUi({ insightsTab: t })}
 				tabs={[
-					{ id: "overview", label: "Overview", title: "Money, uptime and reputation at a glance" },
+					{ id: "overview", label: "Overview", title: "Money, uptime and the Singularity at a glance" },
 					{ id: "money", label: "Money details", title: "Daily accounts, loans and audits" },
 				]}
 			/>
@@ -68,34 +67,20 @@ export function InsightsPanel(props: PanelProps) {
 						<p className="ins-p">{up.sub} <Term id="uptime">Uptime</Term> is how much of the last day your racks were up and working. Customers hold you to it through an <Term id="sla">SLA</Term>.</p>
 					</section>
 
-					<section className="ins-card" aria-label="Reputation">
-						<h3 className="ins-h">Reputation</h3>
-						<p className="ins-big">
-							{Math.round(view.standing)} <span className="ins-of">out of 100</span>
-						</p>
-						<Meter value={view.standing / 100} tone={view.standing < 30 ? "error" : view.standing < 50 ? "warn" : "good"} height={8} />
-						<p className={`ins-p tone-${rep.tone}`}>{rep.text} Reaching 0 means you are shut down.</p>
-						<details className="ins-fold" open={rep.delta < 0}>
-							<summary>Why did it change?</summary>
-							{why.length === 0 ? (
-								<p className="ins-p">Nothing has moved it yet. Finish jobs and keep uptime high and it will climb.</p>
-							) : (
-								<ul className="ins-why">
-									{why.map((w) => (
-										<li key={w.key}>
-											<b className={w.delta < 0 ? "is-down" : "is-up"}>{w.deltaText}</b>
-											<span className="ins-why-t">
-												<span>
-													{w.cause}: {w.detail}
-												</span>
-												<span className="ins-when">{w.when}</span>
-											</span>
-										</li>
-									))}
-								</ul>
-							)}
-						</details>
-					</section>
+					{view.soul && (
+						<section className="ins-card" aria-label="The Singularity">
+							<h3 className="ins-h">The Singularity</h3>
+							{treeBars(view.soul, view.path).map((t) => (
+								<div key={t.tree} className="ins-tree" title={t.title}>
+									<span className="ins-k" style={{ color: TREE_COLOR[t.tree] }}>
+										{TREE_LONG[t.tree]} {t.state === "sealed" ? "· closed" : t.state === "dormant" ? "· not committed" : ""}
+									</span>
+									<Meter value={t.frac} tone={t.tree === "synthetic" ? "warn" : "good"} height={6} />
+								</div>
+							))}
+							<p className="ins-p">The first tree to fill ends the game. The Lattice fills from every rack that is not on the Bio or Green line, whatever you intend. Click the bars at the top for your advisors' dossier.</p>
+						</section>
+					)}
 
 					<details className="ins-fold ins-details">
 						<summary>Details for the curious</summary>

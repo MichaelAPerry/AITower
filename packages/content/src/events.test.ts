@@ -102,9 +102,6 @@ describe("events.json", () => {
 						case "cash":
 							expect(c.hint, w).toContain(money(fx.amount));
 							break;
-						case "standing":
-							expect(c.hint, w).toContain(`standing ${fx.amount >= 0 ? "+" : "-"}${Math.abs(fx.amount)}`);
-							break;
 						case "ambient":
 							expect(c.hint, w).toContain(`${fx.deltaC >= 0 ? "+" : "-"}${Math.abs(fx.deltaC)}°C`);
 							break;
@@ -132,17 +129,15 @@ describe("events.json", () => {
 		}
 	});
 
-	it("is a real trade-off: no choice is at least as good as every other on cash and standing with no extra cost", () => {
+	it("is a real trade-off: no choice is beaten on cash by another that has no other effect", () => {
 		const score = (effects: EventEffect[]) => {
 			let cash = 0;
-			let standing = 0;
 			let other = 0;
 			for (const f of effects) {
 				if (f.type === "cash") cash += f.amount;
-				else if (f.type === "standing") standing += f.amount;
 				else other++;
 			}
-			return { cash, standing, other };
+			return { cash, other };
 		};
 		for (const e of db.events) {
 			for (const c of e.choices) {
@@ -150,7 +145,7 @@ describe("events.json", () => {
 				const dominated = e.choices.some((o) => {
 					if (o === c) return false;
 					const t = score(o.effects);
-					return t.cash >= s.cash && t.standing >= s.standing && t.other === 0 && s.other === 0 && (t.cash > s.cash || t.standing > s.standing);
+					return t.cash > s.cash && t.other === 0 && s.other === 0;
 				});
 				expect(dominated, `${e.id}/${c.id} is strictly worse than another choice`).toBe(false);
 			}
@@ -185,7 +180,7 @@ describe("events.json", () => {
 		const tiers = db.balance.tiers.pflops.length;
 		for (const e of db.events) {
 			expect(e.minTier, e.id).toBeLessThanOrEqual(tiers);
-			for (const c of e.choices) for (const f of c.effects) if (f.type === "standing") expect(Math.abs(f.amount), e.id).toBeLessThanOrEqual(10);
+			for (const c of e.choices) for (const f of c.effects) if (f.type === "bond" || f.type === "seal") expect(Math.abs(f.amount), e.id).toBeLessThanOrEqual(12);
 		}
 	});
 });
@@ -233,7 +228,8 @@ describe("validateContent: events", () => {
 		const fx = (db: ContentDB): EventEffect[] => first(db).choices[0].effects;
 		expect(broken((db) => fx(db).push({ type: "teleport" } as never))).toMatch(/unknown effect type/);
 		expect(broken((db) => fx(db).push({ type: "cash", amount: Number.NaN }))).toMatch(/amount/);
-		expect(broken((db) => fx(db).push({ type: "standing", amount: 500 }))).toMatch(/amount/);
+		expect(broken((db) => fx(db).push({ type: "bond", advisor: "mel", amount: 500 }))).toMatch(/amount/);
+		expect(broken((db) => fx(db).push({ type: "standing", amount: 1 } as never))).toMatch(/unknown effect type/);
 		expect(broken((db) => fx(db).push({ type: "affinity", path: "nope" as never, amount: 3 }))).toMatch(/unknown path/);
 		expect(broken((db) => fx(db).push({ type: "affinity", path: "biotech", amount: -1 }))).toMatch(/amount/);
 		expect(broken((db) => fx(db).push({ type: "affinity", path: "biotech", amount: 3 }))).toBe("");
@@ -262,9 +258,7 @@ describe("validateContent: events", () => {
 		expect(broken((db) => (first(db).choices[0].hint = " "))).toMatch(/hint/);
 	});
 
-	it("flags bad standing/events balance", () => {
-		expect(broken((db) => (db.balance.standing.start = 0))).toMatch(/standing\.start/);
-		expect(broken((db) => (db.balance.standing.dailyBad = Number.NaN))).toMatch(/dailyBad/);
+	it("flags bad events balance", () => {
 		expect(broken((db) => (db.balance.events.intervalTicks = 0))).toMatch(/intervalTicks/);
 		expect(broken((db) => (db.balance.events.graceTicks = -1))).toMatch(/graceTicks/);
 	});

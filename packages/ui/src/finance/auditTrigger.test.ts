@@ -2,7 +2,7 @@ import type { QuarterReport, SimEvent } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
 import { auditToShow, createLogCursor } from "./auditTrigger";
 
-const rep = (quarter: number): QuarterReport => ({ quarter, fromDay: 0, toDay: 6, revenue: 1, costs: 1, uptime: 1, pue: 1.4, jobsCompleted: 0, jobsFailed: 0, penalties: 0, grade: "B", standingDelta: 0, cashDelta: 0, remark: "" });
+const rep = (quarter: number): QuarterReport => ({ quarter, fromDay: 0, toDay: 6, revenue: 1, costs: 1, uptime: 1, pue: 1.4, jobsCompleted: 0, jobsFailed: 0, penalties: 0, grade: "B", cashDelta: 0, remark: "" });
 const q = (tick: number, quarter: number) => ({ tick, event: { type: "quarterReport", quarter, grade: "B" } as SimEvent });
 const other = (tick: number) => ({ tick, event: { type: "newDay", day: 1 } as SimEvent });
 

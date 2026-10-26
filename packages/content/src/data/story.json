@@ -529,16 +529,12 @@
    {
     "id": "cert",
     "label": "Buy the certificate.",
-    "hint": "Bea recommends it. -$200k now · standing +3",
+    "hint": "Bea recommends it. -$200k now",
     "outcome": "The plaque was mounted by lunchtime. Bea was very quiet afterwards.",
     "effects": [
      {
       "type": "cash",
       "amount": -200000
-     },
-     {
-      "type": "standing",
-      "amount": 3
      },
      {
       "type": "seal",

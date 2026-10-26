@@ -242,7 +242,6 @@ describe("stingers", () => {
 		victory: { type: "gameOver", kind: "victory" },
 		absorbed: { type: "gameOver", kind: "absorbed" },
 		bankrupt: { type: "gameOver", kind: "bankrupt" },
-		shutdown: { type: "gameOver", kind: "shutdown" },
 	};
 	it("maps each trigger to its stinger", () => {
 		const m = (e: SimEvent) => stingerForEvent(e);
@@ -256,7 +255,7 @@ describe("stingers", () => {
 		expect(m(E.irreversible!)).toBe("irreversible");
 		expect(m(E.victory!)).toBe("victory");
 		expect(m(E.absorbed!)).toBe("absorbed");
-		expect([m(E.bankrupt!), m(E.shutdown!)]).toEqual(["tapeStop", "tapeStop"]);
+		expect(m(E.bankrupt!)).toBe("tapeStop");
 		expect(m(ev({ type: "newDay", day: 1 }))).toBeNull();
 		expect(m(ev({ type: "rackTripped", facilityId: 1 }))).toBeNull();
 	});
@@ -276,7 +275,7 @@ describe("stingers", () => {
 		expect(many.length).toBe(MAX_STINGERS_PER_UPDATE);
 		expect(many).toEqual(["irreversible", "fanfare"]);
 		expect(stingersForEvents([E.tierUp!, E.absorbed!, E.sprout!])).toEqual(["absorbed"]);
-		expect(stingersForEvents([E.tierUp!, E.shutdown!])).toEqual(["tapeStop"]);
+		expect(stingersForEvents([E.tierUp!, E.bankrupt!])).toEqual(["tapeStop"]);
 		expect(stingersForEvents([E.victory!, E.tierUp!])).toEqual(["victory", "fanfare"]);
 		expect(stingersForEvents([])).toEqual([]);
 	});
@@ -303,7 +302,7 @@ describe("stingers", () => {
 		expect(stingerDuration("tapeStop")).toBeCloseTo(1.8);
 	});
 	it("flows through the director, silent only for final endings", () => {
-		const frame = (gameOver: { kind: "victory" | "absorbed" | "shutdown"; tick: number } | null, events: SimEvent[]) => musicParams({ itKw: 0, minuteOfDay: 720, gameOver, corruption: 0 }, events, false);
+		const frame = (gameOver: { kind: "victory" | "absorbed" | "bankrupt"; tick: number } | null, events: SimEvent[]) => musicParams({ itKw: 0, minuteOfDay: 720, gameOver, corruption: 0 }, events, false);
 		const vic = frame({ kind: "victory", tick: 1 }, [E.victory!]);
 		expect(vic.silent).toBe(false);
 		expect(vic.level).toBe(1);

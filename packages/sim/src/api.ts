@@ -168,7 +168,6 @@ export type SimEvent =
 	| { type: "decisionIssued"; decisionId: number; eventId: string }
 	| { type: "decisionDeferred"; decisionId: number; until: number }
 	| { type: "decisionResolved"; decisionId: number; eventId: string; choiceId: string }
-	| { type: "standingChanged"; standing: number; delta: number }
 	/** `ending` is set for path endings (kind "victory", or "absorbed" for the secret one). */
 	| { type: "gameOver"; kind: GameOverKind; ending?: EndingId }
 	| { type: "researched"; techId: string }
@@ -381,24 +380,12 @@ export interface MetricSample {
 	maxRackC: number;
 }
 
-/** `absorbed`: the secret ending (the Ministry absorbed you); final like bankrupt/shutdown. */
-export type GameOverKind = "bankrupt" | "shutdown" | "victory" | "absorbed";
+/** `absorbed`: the secret ending (the tower absorbed you); final like bankrupt. */
+export type GameOverKind = "bankrupt" | "victory" | "absorbed";
 
 export type AuditGrade = "A" | "B" | "C" | "D" | "E";
 
 /** Quarterly Ministry audit (every `balance.audit.periodDays` days, filed at midnight). */
-/** What moved reputation: an advisor decision, a finished/failed job, the daily uptime check, or the quarterly audit. */
-export type StandingCause = "decision" | "job" | "daily-uptime" | "audit";
-
-export interface StandingLogEntry {
-	tick: number;
-	/** Applied change (after clamping to 0..100). */
-	delta: number;
-	cause: StandingCause;
-	/** Plain-language detail, e.g. "Uptime 91.2% vs target 95%". */
-	detail: string;
-}
-
 export interface QuarterReport {
 	quarter: number;
 	/** Days covered, inclusive. */
@@ -415,7 +402,6 @@ export interface QuarterReport {
 	jobsFailed: number;
 	penalties: number;
 	grade: AuditGrade;
-	standingDelta: number;
 	/** Grant (+) or fine (−) applied. */
 	cashDelta: number;
 	/** One dry Ministry sentence explaining the grade. */
@@ -574,11 +560,7 @@ export interface SimView {
 	/** The lesson this site runs (null in Free Build). */
 	lesson: LessonView | null;
 	modifiers: ModifierView[];
-	/** Ministry standing 0..100; 0 ⇒ gameOver "shutdown". */
-	standing: number;
-	/** Why reputation moved: the last 20 changes (oldest first), each with its cause. */
-	standingLog: StandingLogEntry[];
-	/** Rolling 24 h uptime the current tier asks for; a day below it costs reputation (more the further below). */
+	/** Rolling 24 h uptime target of the current Level (the quarterly audit grades against it). */
 	uptimeTarget: number;
 	/** What the next Level asks for (null at the top Level): installed PF, rolling uptime, researched nodes (techsDone counts the ones held now). */
 	tierNeed: { tier: number; pflops: number; uptime: number; techs: number; techsDone: number } | null;
@@ -610,7 +592,7 @@ export interface SimView {
 	refinement: number;
 	/** A Dunkelflaute (calm, dark spell) is in force. */
 	drought: boolean;
-	/** The scenario is a sandbox (no bankruptcy or shutdown). */
+	/** The scenario is a sandbox (no bankruptcy). */
 	sandbox: boolean;
 	automation: { policy: AutomationPolicy; foremanUnlocked: boolean; /** Why the Foreman skipped or queued each job at its last check ("Racks: Waiting: 160 kW needed, 110 kW free"). Empty before the first check after a load. */ foremanStatus: string[]; /** Placements per game-hour the Foreman is allowed now. */ foremanPerHour: number };
 	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
@@ -628,7 +610,7 @@ export interface SimView {
 	stats: LifetimeStats;
 	/**
 	 * Set once when the game ends. "victory" = reached the top tier (play may continue in sandbox: the sim keeps running).
-	 * "bankrupt" / "shutdown" are final; the sim keeps stepping but the UI should offer load / new game.
+	 * "bankrupt" and "absorbed" are final; the sim keeps stepping but the UI should offer load / new game.
 	 */
 	gameOver: { kind: GameOverKind; tick: number; ending?: EndingId } | null;
 }
