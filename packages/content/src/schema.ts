@@ -108,6 +108,14 @@ export interface CoolingSpec {
 	/** crah: horizontal reach in tiles on its own floor. */
 	radius?: number;
 	/** crah: fan power per kW removed is folded into `facilityKw`. */
+	/** crah: the temperature it pulls the air toward, °C (default 20). A perfusion unit holds tissue at 37. */
+	holdC?: number;
+	/** crah: only cells under organoid (bio-cooled) racks are cooled (perfusion units). */
+	bioOnly?: boolean;
+	/** crah: outside-air cooling. Full capacity at or below `fullBelowC` ambient, falling linearly to `hotFactor` at `hotC` (and flat beyond). */
+	freeAir?: { fullBelowC: number; hotC: number; hotFactor: number };
+	/** crah: racks within `radius` on its floor fail at this multiple of their rate (a cold room). */
+	failureFactor?: number;
 }
 
 export interface LogisticsSpec {
@@ -126,6 +134,12 @@ export interface PlacementRules {
 	needsPower?: boolean;
 	/** Requires a nutrient conduit under at least one of its cells. */
 	needsNutrient?: boolean;
+	/** Only on the roof: the top floor of the tower as built (canopy, wind mast). */
+	roofOnly?: boolean;
+	/** Only on a tile at the edge of the floor slab (an exterior wall: PV wall panels). */
+	exteriorOnly?: boolean;
+	/** Only in a basement (floor below 0: the geothermal well). */
+	basementOnly?: boolean;
 }
 
 /** A short real quotation shown as quiet flavour text. Every one is recorded, with a verification URL, in docs/QUOTES.md. */
@@ -171,6 +185,15 @@ export interface FacilityDef {
 	growth?: boolean;
 	flavor?: Flavor;
 	/**
+	 * The catalogue (docs/TREES.md): `starter` items are open to anyone once researched and never scar their own tree;
+	 * `specialist` items belong to a Bio or Green line and need that commit. Absent: shared, Synthetic or a signature build.
+	 */
+	tier?: FacilityTierTag;
+	/** The item this one upgrades: placing this on top of it swaps in place and costs `cost` minus half of the old item's cost. */
+	upgradesFrom?: string;
+	/** Who may place it besides the research and Level gates (a commit, an advisor's bond). */
+	unlock?: UnlockRule;
+	/**
 	 * The Soul (docs/SOUL.md): which Singularity tree this item belongs to. Absent = "shared". Drives SP weights and the
 	 * tree badge on build cards.
 	 */
@@ -181,6 +204,24 @@ export interface FacilityDef {
 	 * unless the tree's champion trusts them (bond ≥ `soul.bondReveal`).
 	 */
 	seal?: SealSpec;
+}
+
+/** See `FacilityDef.tier`. */
+export type FacilityTierTag = "starter" | "specialist";
+
+/**
+ * Extra gates on placing a facility. All that are given must hold (except `preview`, which stands in for `commit`).
+ * Bio and Green items (`line` biotech / greentech, tier "specialist") are implicitly commit-gated to their line.
+ */
+export interface UnlockRule {
+	/** An advisor's bond must be at least `min` (a signature build). */
+	bond?: { who: AdvisorId; min: number };
+	/** The player must have committed to this path. */
+	commit?: AscensionPath;
+	/** With this bond the item opens at `tier` instead of its `unlockTier` (the research node opens early too: `TechNode.earlyTier`). */
+	early?: { who: AdvisorId; min: number; tier: number };
+	/** With this bond a player who has not committed may still keep up to `max` of them. */
+	preview?: { who: AdvisorId; min: number; max: number };
 }
 
 /** The tree a facility belongs to. */
@@ -603,6 +644,8 @@ export interface SoulBalance {
 	bondCommit: number;
 	/** Bond needed for the ending epilogue. */
 	bondEpilogue: number;
+	/** Weight a Starter rack gives its own tree (after the commit); toward Synthetic it counts as a shared rack. */
+	starterWeight: number;
 	/** Bond change when the player takes / overrules an advisor's recommendation. */
 	bondFollow: number;
 	bondOverrule: number;
@@ -794,8 +837,8 @@ export type PerkKind =
 	| "botSpeed"; // bot walk/fly speed
 
 /** Gameplay features switched on by tech. */
-/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). foremanPace: the Foreman builds twice as many facilities per hour. */
-export type FeatureId = "contractsClerk" | "foreman" | "foremanPace";
+/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). foremanPace: the Foreman builds twice as many facilities per hour. openDoor: taking an advisor's advice gives +1 extra bond. */
+export type FeatureId = "contractsClerk" | "foreman" | "foremanPace" | "openDoor";
 
 export type TechEffect = { type: "perk"; kind: PerkKind; factor: number } | { type: "feature"; feature: FeatureId };
 
@@ -817,8 +860,12 @@ export interface TechNode {
 	requires: string[];
 	/** Perks and features. Facility/bot unlocks are declared on the facility/bot (`tech`). */
 	effects: TechEffect[];
-	/** Only researchable after this ascension path was chosen. */
+	/** The path this node leans to (research affinity, lane colour). It gates nothing: `requiresCommit` does. */
 	path?: AscensionPath;
+	/** Researchable only after committing to this path (RP is never wasted: the node shows "Commit to ..." until then). */
+	requiresCommit?: AscensionPath;
+	/** With this bond the node may be researched from Level `tier` instead of `minTier` (Early Lattice, Early Garden). */
+	earlyTier?: { who: AdvisorId; min: number; tier: number };
 	flavor?: Flavor;
 }
 
