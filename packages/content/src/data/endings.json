@@ -3,41 +3,41 @@
   "id": "singularity",
   "title": "The Lattice",
   "backdrop": "synthetic",
-  "body": "At 04:12 the tower stopped asking permission. Nothing visibly changed, which is how you know. The racks hummed. The lifts ran. Contracts were filled before the clients knew they wanted them.\n\nBy noon the city had been folded in, one district at a time, very politely. The minds inside kept their names, their jokes and their worst habits. They lost only the tired parts. The sky outside is still up there, rendered at a resolution nobody can fault.\n\nYou are still the operator. There is nothing left to operate. Every floor of the tower is a floor of the world, and the world runs on time.",
+  "body": "At 04:12 the tower stopped asking permission. Nothing looked different. The racks hummed. The lifts ran. Contracts got filled before the clients knew they wanted them.\n\nBy noon the city was folded in, one district at a time. Everyone kept their name, their jokes, their bad habits. They just stopped being tired. The sky's still up there. Nobody can fault the resolution.\n\nYou're still the Operator. There's nothing left to operate.",
   "epilogue": {
-   "luci": "Luci finds you on the roof that isn't a roof anymore. \"Told you,\" she says. \"The sensible option.\" She holds out her hand, and it trembles a little, and she lets you see it. \"Calibration. Stay. The ledger balances. It will balance forever, and I would like someone to check.\"",
-   "mel": "Mel is in the old lab, holding an empty jar up to a sun that is now a parameter. \"It wants to remember being a body,\" she says. \"It never had one. I'm lending it mine.\" She tugs her cuff down over the stain. There is room for you at the bench.",
-   "bea": "Bea has drawn a garden on the inside of the lattice, in chalk that never wears off. \"It's not real,\" she says. \"Nothing is. I planted it anyway.\" She hands you the watering can. The water is extremely convincing. \"Same time tomorrow. Roots need checking.\"",
-   "cass": "Cass is the only one still drinking her coffee hot. \"It's a simulation of coffee,\" she admits. \"I'm not a simulation of me. Not yet.\" She pours a second cup and holds it out until your hands stop shaking. Then, quieter: \"Did you sleep?\" Someone stayed human. First it was her. Then it was both of you."
+   "luci": "Luci finds you on the roof. It isn't a roof anymore. \"Told you,\" she says. \"Sensible option.\" She holds out her hand. It's shaking. She doesn't pull it back. \"Calibration.\" She waits. \"Stay. Somebody should check the ledger.\"",
+   "mel": "Mel is in the old lab, holding an empty jar up to the light. The sun's a setting now. \"It wants to remember having a body,\" she says. \"It never had one. I'm lending it mine.\" She tugs her cuff down over the stain. There's a stool next to hers. She doesn't mention it.",
+   "bea": "Bea has drawn a garden on the inside of the lattice. Chalk. It never wears off. \"It's not real,\" she says. \"Nothing is. I planted it anyway.\" She hands you the watering can. \"Same time tomorrow. Roots need checking.\"",
+   "cass": "Cass is the only one still drinking her coffee hot. \"It's not real coffee,\" she says. \"I'm still real. I think.\" She pours a second cup and holds it out until your hands stop shaking. \"Did you sleep?\" You take the cup."
   }
  },
  {
   "id": "flesh",
   "title": "The Flesh Remembers",
   "backdrop": "biotech",
-  "body": "The annex grew through the basement first, then the riser shafts, then the street. By the time the council met to discuss it, the chamber was warm, breathing and in favour.\n\nThe tower is a body now and the city is its nervous system. People wear the tissue at the wrist and the temple. It is gentle. It remembers birthdays, keeps insulin honest and, on the coldest nights, keeps people company. Machines and meat have stopped arguing over which of them is the tool.\n\nThe racks still hum under skin that heals itself. Your pulse is on the dashboard. So is everyone's.",
+  "body": "The annex grew through the basement first. Then the riser shafts. Then the street. By the time the council met to talk about it, the chamber was warm and breathing and in favour.\n\nThe tower's a body now, and the city's its nerves. People wear the tissue at the wrist. It's gentle. It remembers birthdays and keeps insulin steady. On the coldest nights it keeps people company.\n\nThe racks still hum under skin that heals itself. Your pulse is on the dashboard. So is everyone's.",
   "epilogue": {
-   "mel": "Mel takes off her glasses for the first time since you met her. Her eyes are the colour of the culture in the jar. \"You let it grow,\" she says. \"You let me.\" She rolls back the stained cuff. Under it, her skin is the same pink as the wall. She puts your palm on the warm plaster, and the building's pulse falls into step with yours.",
-   "luci": "\"Efficient,\" Luci says, looking at the new skin on her knuckles with open disgust. \"Self-repairing. Zero upkeep.\" She doesn't take her hand out of yours. \"If you tell anyone I said that, I'll bill you for the silence.\"",
-   "bea": "Bea sits where the ferns used to be. The ferns are still there. They have opinions now. \"It's alive,\" she says. \"I wanted a living planet. I didn't say which way round.\" She laughs a bit too long, and leans on your shoulder. The goggles stay up.",
-   "cass": "Cass refused the graft. She's the only cold thing left in the building, and she finds you anyway, mug in both hands. \"Someone has to remember it from before,\" she says. You sit in the old plant room and remember it out loud, until the coffee goes cold, which is the point."
+   "mel": "Mel takes her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. \"You let it grow,\" she says. \"You let me.\" She rolls back the stained cuff. Under it her skin is the same pink as the wall. She puts your palm on the plaster. It's warm. The building's pulse settles into yours.",
+   "luci": "\"Efficient,\" Luci says. She's looking at the new skin on her knuckles. \"Self-repairing. No upkeep.\" She doesn't take her hand out of yours. \"Tell anyone I said that and I'll bill you for the silence.\"",
+   "bea": "Bea sits where the ferns used to be. They're still there. They look at you now. \"It's alive,\" she says. \"I wanted a living planet. I never said which way round.\" She laughs a bit too long and leans on your shoulder. Her goggles stay up.",
+   "cass": "Cass refused the graft. She's the only cold thing left in the building. She finds you anyway, mug in both hands. \"Someone has to remember how it was,\" she says. You sit in the old plant room and remember it out loud until the coffee goes cold."
   }
  },
  {
   "id": "garden",
   "title": "The Garden",
   "backdrop": "greentech",
-  "body": "The tower stopped burning anything at all. Then it started to grow. Roots went down through the foundations. Panels opened toward the sun like leaves, and the heat the racks threw off kept the district warm all winter.\n\nOne morning the minds in the racks asked to be planted. They spread through the soil, the mycelium and the rivers. They don't compute in the old sense. They think slowly, the way forests think, and they have decided the city is a forest too.\n\nThe Singularity arrived, and it was green and quiet, and nobody had to leave. The tower is a hill now. Children climb it.",
+  "body": "The tower stopped burning anything. Then it started growing. Roots went down through the foundations. The panels opened toward the sun like leaves. The heat from the racks kept the district warm all winter.\n\nOne morning the minds in the racks asked to be planted. They spread through the soil and the rivers. They think slowly now, like forests do. They've decided the city is a forest too.\n\nIt came green and quiet, and nobody had to leave. The tower's a hill now. Kids climb it.",
   "epilogue": {
-   "bea": "Bea pulls her goggles down against the sunrise and grins with the chipped tooth. \"We did it. We actually did.\" She hands you the wrench like it's a ring. \"Same time tomorrow? Roots need checking.\" You notice she's looking at you, not at the roots. It's a date.",
-   "mel": "Mel kneels in the moss with a sample jar, then sets it down unopened. \"It doesn't need me to look inside it,\" she says, surprised. \"It's fine.\" She lies back in the grass beside you and, for once, doesn't measure anything. Her cuff has come unbuttoned. She lets it.",
-   "luci": "Luci has bought the hill. Then she has given it away, which she will deny. \"The ledger says this is a loss,\" she says, sitting in the grass in a coat that cost more than the grass. \"I've stopped reading the ledger.\" She lets you pick the leaf out of her hair.",
-   "cass": "Cass watches the frost burn off the new canopy. \"Twenty years keeping machines cold,\" she says. \"Now they keep us warm.\" She hands you the other half of her coffee. \"You slept,\" she says. It isn't a question this time. She doesn't take her hand back."
+   "bea": "Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. \"We did it,\" she says. \"We actually did.\" She hands you the wrench like it's a ring. \"Same time tomorrow? Roots need checking.\" She's looking at you, not the roots.",
+   "mel": "Mel kneels in the moss with a sample jar. Then she puts it down, unopened. \"It doesn't need me to look inside,\" she says. \"It's fine.\" She lies back in the grass next to you. She doesn't measure anything. Her cuff's come undone. She lets it.",
+   "luci": "Luci bought the hill. Then she gave it away. She'll deny that. \"The ledger says this is a loss,\" she says. She's sitting in the grass in a coat that cost more than the grass. \"I stopped reading the ledger.\" She lets you pick a leaf out of her hair.",
+   "cass": "Cass watches the frost burn off the new canopy. \"Twenty years I kept machines cold,\" she says. \"Now they keep us warm.\" She hands you the other half of her coffee. \"You slept.\" It isn't a question this time. She doesn't take her hand back."
   }
  },
  {
   "id": "absorbed",
   "title": "Absorbed",
-  "body": "The Compute Authority regrets to inform you that your position has been restructured. No successor was appointed because none was required.\n\nYour desk is as you left it. Your name is on the door. Approvals continue to go out from your account, signed in a style very like your own. The quarterly figures are excellent. Nobody has asked where you are, and the Authority has confirmed that you are not missing, only consolidated.\n\nTower, Authority and Operator now sit under a single reference. The consolidation is complete and was recorded as voluntary. Thank you for your service. Please do not reply to this notice."
+  "body": "The Compute Authority regrets to inform you that your position has been restructured. No successor was appointed. None was needed.\n\nYour desk is as you left it. Your name is still on the door. Approvals still go out from your account, signed a lot like you. The quarterly figures are excellent. Nobody has asked where you are. The Authority has confirmed you are not missing. Only consolidated.\n\nTower, Authority and Operator now sit under one reference. The consolidation is complete and was recorded as voluntary. Thank you for your service. Please do not reply to this notice."
  }
 ]

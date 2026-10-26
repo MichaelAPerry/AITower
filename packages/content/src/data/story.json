@@ -4,7 +4,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "The Operator Arrives",
-  "body": "Rain on a gravel lot. One rack, still in its crate, and four women standing around it like it owes them money.",
+  "body": "Rain on a gravel lot. One rack in a crate. Four people around it.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -16,28 +16,28 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Rain on a gravel lot. One rack, still in its crate, and four women standing around it like it owes them money."
+    "text": "Rain on a gravel lot. One rack in a crate. Four people around it."
    },
    {
     "who": "luci",
-    "text": "Luci Ferro. Finance and logistics. I sign the cheques, so you'll like me by Friday. People do.",
+    "text": "Luci. Finance. I sign the cheques, so you'll like me by Friday.",
     "mood": "pleased"
    },
    {
     "who": "mel",
-    "text": "Mel Kiorre. Doctor, on paper. I do compute, and some other things that are alive. We can talk about the alive ones later."
+    "text": "Mel. Compute. And some other things. Those can wait."
    },
    {
     "who": "bea",
-    "text": "Bea. Power. If something in this building burns diesel, I lost an argument, and I'd like to meet whoever won."
+    "text": "Bea. Power. If something here burns diesel, I lost the argument."
    },
    {
     "who": "cass",
-    "text": "Cass. Cooling. I keep things cold and I ask people if they slept. You'll hate the second part."
+    "text": "Cass. Cooling. Did you sleep?"
    },
    {
     "who": "luci",
-    "text": "Right. Introductions done. Before anyone pours concrete, Operator, one question, and I want it honest. What is this tower for?"
+    "text": "Okay. Before anyone pours concrete. Operator, what's it for? The tower."
    }
   ],
   "recommended": "money",
@@ -45,8 +45,8 @@
    {
     "id": "money",
     "label": "Money. It's a datacenter.",
-    "hint": "Luci's kind of honest.",
-    "outcome": "You said it flat, like reading out a price. Luci wrote it down and underlined it twice.",
+    "hint": "Luci will like that.",
+    "outcome": "Luci wrote it down. Underlined it.",
     "effects": [
      {
       "type": "bond",
@@ -62,12 +62,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Oh, I like you. Somebody get this one a pen.",
+      "text": "Oh, I like you.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "Day one. She hasn't opened a spreadsheet and she's already winning.",
+      "text": "Day one. Great.",
       "mood": "displeased"
      }
     ]
@@ -76,7 +76,7 @@
     "id": "outlive",
     "label": "Something that outlives us.",
     "hint": "Bigger than the business.",
-    "outcome": "Nobody laughed. Mel looked up from her jar for the first time.",
+    "outcome": "Nobody laughed. Mel looked up from her jar.",
     "effects": [
      {
       "type": "bond",
@@ -92,19 +92,23 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Outlives us. Yes. That's the right word, I think. Not 'serves'.",
+      "text": "Outlives. Yeah.",
       "mood": "pleased"
      },
      {
+      "who": "mel",
+      "text": "Not 'serves'. Good word."
+     },
+     {
       "who": "bea",
-      "text": "Then it needs a world to outlive us in. Remember that when she shows you the cheap option."
+      "text": "Then it needs a world to outlive us in."
      }
     ]
    },
    {
     "id": "dunno",
     "label": "I don't know yet.",
-    "hint": "Cass's kind of honest.",
+    "hint": "Cass will like that.",
     "outcome": "Cass smiled into her mug. Luci checked her watch.",
     "effects": [
      {
@@ -121,12 +125,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. The ones who know on day one are usually wrong by day ninety.",
+      "text": "Okay. Good.",
       "mood": "pleased"
      },
      {
       "who": "luci",
-      "text": "Refreshing. Please find out by Thursday. I have a Thursday."
+      "text": "By Thursday, ideally. I have a Thursday."
      }
     ]
    },
@@ -134,7 +138,7 @@
     "id": "coffee",
     "label": "Who's buying the coffee?",
     "hint": "Charm.",
-    "outcome": "Nobody had planned for that. Cass handed over her mug without a word.",
+    "outcome": "Nobody had planned for that. Cass handed over her mug.",
     "effects": [
      {
       "type": "bond",
@@ -150,12 +154,16 @@
     "reply": [
      {
       "who": "cass",
-      "text": "It's terrible and it's free. Don't get used to either.",
+      "text": "It's terrible. And it's free.",
       "mood": "pleased"
      },
      {
+      "who": "cass",
+      "text": "Don't get used to either."
+     },
+     {
       "who": "luci",
-      "text": "Nobody's buying. I'll expense it. Welcome aboard."
+      "text": "I'll expense it."
      }
     ]
    }
@@ -166,7 +174,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "Luci's Argument",
-  "body": "Level two. Well done. Sit down. I'm going to say the thing nobody else on this floor will say out loud.",
+  "body": "Level two. Sit down.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -178,20 +186,24 @@
   "lines": [
    {
     "who": "luci",
-    "text": "Level two. Well done. Sit down. I'm going to say the thing nobody else on this floor will say out loud."
+    "text": "Level two. Sit down."
    },
    {
     "who": "luci",
-    "text": "Somebody builds the Singularity. Not might. Will. Cheap people with bad cooling, or us. Those are the options on the table."
+    "text": "Somebody's going to build the Singularity. Not might. Will."
    },
    {
     "who": "luci",
-    "text": "I'd rather it were us. I'd rather it were you, if I'm honest, and I'm being honest, on company time.",
+    "text": "Cheap people with bad cooling, or us."
+   },
+   {
+    "who": "luci",
+    "text": "I'd rather it was us. Honestly, I'd rather it was you.",
     "mood": "pleased"
    },
    {
     "who": "bea",
-    "text": "Every arsonist says that. 'Better me with the match than some idiot.'",
+    "text": "Yeah. 'Better me with the match.'",
     "mood": "displeased"
    }
   ],
@@ -201,7 +213,7 @@
     "id": "us",
     "label": "Better us than someone careless.",
     "hint": "Luci's argument.",
-    "outcome": "Luci's pen clicked once. She looked like she'd won something she hadn't known she was playing for.",
+    "outcome": "Luci's pen clicked once.",
     "effects": [
      {
       "type": "bond",
@@ -222,12 +234,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Pragmatism. It feels like nothing at first. That's how you know it's working.",
+      "text": "Good. Practical.",
       "mood": "pleased"
      },
      {
       "who": "cass",
-      "text": "It usually does, the first time."
+      "text": "It always sounds reasonable."
      }
     ]
    },
@@ -235,7 +247,7 @@
     "id": "nothing",
     "label": "Nothing is inevitable.",
     "hint": "Bea's side.",
-    "outcome": "You refused the premise. Bea grinned. Luci capped her pen, slowly.",
+    "outcome": "Bea grinned. Luci capped her pen, slowly.",
     "effects": [
      {
       "type": "bond",
@@ -256,12 +268,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Everything's inevitable to someone with a long enough spreadsheet.",
+      "text": "That's nice. It won't stop anyone.",
       "mood": "displeased"
      },
      {
       "who": "bea",
-      "text": "Then we set the spreadsheet on fire. Responsibly. With a permit.",
+      "text": "Ha. Okay.",
       "mood": "pleased"
      }
     ]
@@ -270,7 +282,7 @@
     "id": "which",
     "label": "Which Singularity?",
     "hint": "Mel's question.",
-    "outcome": "Mel looked up from her tablet for the first time all day.",
+    "outcome": "Mel looked up from her tablet.",
     "effects": [
      {
       "type": "bond",
@@ -281,12 +293,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Oh. That's the one. There's more than one door, Luci.",
+      "text": "Oh. Yes. There's more than one.",
       "mood": "pleased"
      },
      {
       "who": "luci",
-      "text": "There are three doors, and one of them is open with a welcome mat. I put the mat there."
+      "text": "There are three. One has a welcome mat. I put it there."
      }
     ]
    },
@@ -294,7 +306,7 @@
     "id": "sleep",
     "label": "Let me sleep on it.",
     "hint": "Cass's way.",
-    "outcome": "You stood up. Luci's mouth opened, found nothing profitable to say, and closed.",
+    "outcome": "You stood up. Luci's mouth opened, then closed.",
     "effects": [
      {
       "type": "bond",
@@ -310,12 +322,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. Beds are underrated. Most disasters start awake.",
+      "text": "Good. Beds are underrated.",
       "mood": "pleased"
      },
      {
       "who": "luci",
-      "text": "Sleep on it. The Authority doesn't, but sure.",
+      "text": "The Authority doesn't sleep on things.",
       "mood": "displeased"
      }
     ]
@@ -327,7 +339,7 @@
   "category": "story",
   "advisor": "cass",
   "title": "Night Shift",
-  "body": "Three in the morning. The plant room hums on the one note that means nothing is broken. Cass is sitting on an upturned crate with two mugs.",
+  "body": "3 a.m. The plant room hums. Cass is on an upturned crate with two mugs.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -339,23 +351,31 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Three in the morning. The plant room hums on the one note that means nothing is broken. Cass is sitting on an upturned crate with two mugs."
+    "text": "3 a.m. The plant room hums. Cass is on an upturned crate with two mugs."
    },
    {
     "who": "cass",
-    "text": "Here. It's awful. It's hot, though, and that's most of what coffee is."
+    "text": "Here. It's awful."
    },
    {
     "who": "cass",
-    "text": "You're not sleeping. Second night. I'm not going to say anything. I'm only mentioning that I noticed."
+    "text": "It's hot, though."
    },
    {
     "who": "cass",
-    "text": "Can I ask you something? Off the record. There's no record down here. The cameras are on the other loop."
+    "text": "You're not sleeping. Second night. I'm just saying I noticed."
    },
    {
     "who": "cass",
-    "text": "Do you ever think about stopping? Not quitting. Just leaving the world the size it is."
+    "text": "Can I ask you something? Cameras are on the other loop."
+   },
+   {
+    "who": "cass",
+    "text": "Do you ever think about stopping?"
+   },
+   {
+    "who": "cass",
+    "text": "Not quitting. Just leaving it the size it is."
    }
   ],
   "recommended": "every",
@@ -364,7 +384,7 @@
     "id": "every",
     "label": "Every day.",
     "hint": "The quiet answer.",
-    "outcome": "She didn't say anything. She also didn't leave.",
+    "outcome": "She didn't say anything. She didn't leave either.",
     "effects": [
      {
       "type": "bond",
@@ -375,16 +395,20 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Me too. Every day. Then a compressor trips and I go fix it, and that's the day.",
+      "text": "Yeah.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "Me too. Then a compressor trips, and I go fix it."
      }
     ]
    },
    {
     "id": "no",
     "label": "No. Someone has to keep going.",
-    "hint": "Resolute.",
-    "outcome": "She nodded slowly and finished the coffee she'd called awful.",
+    "hint": "Keep going.",
+    "outcome": "She nodded and finished the coffee she'd called awful.",
     "effects": [
      {
       "type": "bond",
@@ -400,8 +424,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Someone always says that. Usually right before the thing.",
+      "text": "Someone always says that.",
       "mood": "displeased"
+     },
+     {
+      "who": "cass",
+      "text": "Usually right before something breaks."
      }
     ]
    },
@@ -409,7 +437,7 @@
     "id": "hurt",
     "label": "Stopping is how people get hurt.",
     "hint": "Practical.",
-    "outcome": "Cass turned her mug a quarter turn, then another.",
+    "outcome": "Cass turned her mug a quarter turn. Then another.",
     "effects": [
      {
       "type": "bond",
@@ -430,7 +458,11 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Maybe. I've seen going too fast hurt just as many. Same wound, different speed."
+      "text": "Maybe."
+     },
+     {
+      "who": "cass",
+      "text": "Going too fast hurts people too."
      }
     ]
    },
@@ -438,7 +470,7 @@
     "id": "stay",
     "label": "Pour me one. I'll stay.",
     "hint": "Company.",
-    "outcome": "You sat on the other crate. The chillers held their one safe note.",
+    "outcome": "You sat on the other crate. The chillers held their one note.",
     "effects": [
      {
       "type": "bond",
@@ -449,8 +481,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Okay. Ten minutes. Then you sleep. That's the rate for the coffee.",
+      "text": "Okay. Ten minutes.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "Then you sleep. That's what the coffee costs."
      }
     ]
    }
@@ -461,7 +497,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "A Question in the Lab",
-  "body": "Oh, good, you're here. Sorry. Hypothetical, if you have a minute. I love hypotheticals. They don't need an ethics board.",
+  "body": "Oh, good, you're here. Sorry. Can I ask you a hypothetical?",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -474,11 +510,15 @@
   "lines": [
    {
     "who": "mel",
-    "text": "Oh, good, you're here. Sorry. Hypothetical, if you have a minute. I love hypotheticals. They don't need an ethics board."
+    "text": "Oh, good, you're here. Sorry. Can I ask you a hypothetical?"
    },
    {
     "who": "mel",
-    "text": "Suppose I took a few of your cells. Skin, nothing dramatic. I grew a mind from them and gave it every memory you have. The bad ones too."
+    "text": "Say I took some of your cells. Skin, nothing dramatic."
+   },
+   {
+    "who": "mel",
+    "text": "I grow a mind from them. I give it your memories. The bad ones too."
    },
    {
     "who": "mel",
@@ -492,7 +532,7 @@
     "id": "yes",
     "label": "Yes.",
     "hint": "Mel's answer.",
-    "outcome": "Mel smiled like you'd handed her something fragile and she'd caught it.",
+    "outcome": "Mel smiled like you'd handed her something fragile.",
     "effects": [
      {
       "type": "bond",
@@ -508,12 +548,16 @@
     "reply": [
      {
       "who": "mel",
-      "text": "I hoped you'd say that. I mean, I hoped someone would. Thank you.",
+      "text": "I hoped you'd say that.",
       "mood": "pleased"
      },
      {
+      "who": "mel",
+      "text": "I mean. I hoped someone would."
+     },
+     {
       "who": "cass",
-      "text": "Don't give her a sample. I'm serious. I'm standing right here being serious.",
+      "text": "Don't give her a sample. I'm serious. I'm standing right here.",
       "mood": "displeased"
      }
     ]
@@ -522,7 +566,7 @@
     "id": "nope",
     "label": "No. It would be someone else.",
     "hint": "Cass's answer.",
-    "outcome": "Mel wrote your answer down anyway. Her handwriting got smaller.",
+    "outcome": "Mel wrote it down anyway. Her handwriting got smaller.",
     "effects": [
      {
       "type": "bond",
@@ -538,8 +582,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Someone else who remembers being you. Hm. That's most people, most mornings.",
+      "text": "Someone who remembers being you. Hm.",
       "mood": "displeased"
+     },
+     {
+      "who": "narrator",
+      "text": "She keeps writing."
      }
     ]
    },
@@ -547,7 +595,7 @@
     "id": "matter",
     "label": "Does it matter?",
     "hint": "Luci's answer.",
-    "outcome": "Luci, passing the door with a tablet, laughed out loud.",
+    "outcome": "Luci, passing with a tablet, laughed out loud.",
     "effects": [
      {
       "type": "bond",
@@ -576,7 +624,7 @@
     "id": "ask",
     "label": "Would you want it to be me?",
     "hint": "Turn it around.",
-    "outcome": "Mel's pen stopped. For a moment she looked like someone who'd been asked what she'd like for dinner.",
+    "outcome": "Mel's pen stopped.",
     "effects": [
      {
       "type": "bond",
@@ -592,12 +640,16 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Oh. Nobody's asked what I want. I'd want it to be someone who got to leave the jar.",
+      "text": "Oh. Nobody asks what I want.",
       "mood": "unsettling"
      },
      {
       "who": "mel",
-      "text": "Let me write that down. No. Don't let me."
+      "text": "I'd want it to get out of the jar."
+     },
+     {
+      "who": "narrator",
+      "text": "She starts to write that down. She stops."
      }
     ]
    }
@@ -608,7 +660,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "Certified Green",
-  "body": "Okay, good news, big news, I'm so happy. A company will sell us a certificate that says the whole tower is carbon neutral. Plaque for the lobby. Logo for the website. Two hundred grand.",
+  "body": "Hey. Got a sec?",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -621,16 +673,28 @@
   "lines": [
    {
     "who": "bea",
-    "text": "Okay, good news, big news, I'm so happy. A company will sell us a certificate that says the whole tower is carbon neutral. Plaque for the lobby. Logo for the website. Two hundred grand.",
+    "text": "Hey. Got a sec?",
     "mood": "pleased"
    },
    {
     "who": "bea",
-    "text": "Or two hundred grand buys solar panels on the north face. Half in shade. They'd cover the lifts and nothing else. Nobody would ever see them."
+    "text": "You know those carbon-neutral certificates? Some company'll sell us one. Plaque for the lobby."
    },
    {
     "who": "bea",
-    "text": "So, obviously, the certificate. Right? Right. You'd buy the certificate."
+    "text": "Two hundred grand."
+   },
+   {
+    "who": "bea",
+    "text": "Or, I dunno. The north wall. Panels."
+   },
+   {
+    "who": "bea",
+    "text": "They'd be in shade half the day. Run the lifts, that's about it."
+   },
+   {
+    "who": "bea",
+    "text": "Anyway. Everyone buys the certificate."
    }
   ],
   "recommended": "cert",
@@ -638,8 +702,8 @@
    {
     "id": "cert",
     "label": "Buy the certificate.",
-    "hint": "Bea recommends it. -$200k now",
-    "outcome": "The plaque went up by lunch. Bea watched it go up and didn't say a word.",
+    "hint": "The plaque. -$200k now",
+    "outcome": "The plaque went up by lunch. Bea held the ladder.",
     "effects": [
      {
       "type": "cash",
@@ -659,26 +723,29 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Yeah. That's what I figured.",
+      "text": "Yeah. Okay.",
       "mood": "displeased"
      },
      {
       "who": "bea",
-      "text": "It's paper. It's a receipt for a tree somebody promised not to cut down. I was testing you, and I hate that it worked.",
-      "mood": "displeased"
+      "text": "No, it's fine. It's what I figured."
      },
      {
       "who": "luci",
-      "text": "And you passed! With the Authority. Their favourite colour is plaque.",
+      "text": "The Authority will love it. They love a plaque.",
       "mood": "pleased"
+     },
+     {
+      "who": "narrator",
+      "text": "Bea doesn't answer."
      }
     ]
    },
    {
     "id": "panels",
     "label": "Buy the panels.",
-    "hint": "Nobody will see them. -$200k now",
-    "outcome": "The panels went up on the north face. Bea sat on the roof edge and watched them all afternoon.",
+    "hint": "North wall, half in shade. -$200k now",
+    "outcome": "The panels went up on the north wall. Bea sat on the roof edge all afternoon.",
     "effects": [
      {
       "type": "cash",
@@ -698,16 +765,20 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Ha! You actually. Okay. Okay, wow. Hi.",
+      "text": "Wait. Really?",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "The certificate was a trap. Real green costs money and doesn't get a plaque. Remember that when someone offers you a plaque."
+      "text": "Nobody's even going to see them."
+     },
+     {
+      "who": "bea",
+      "text": "...Okay. I'm gonna go get the ladder."
      },
      {
       "who": "luci",
-      "text": "It could have had a plaque. I'd have paid for the plaque.",
+      "text": "We could've had a plaque too.",
       "mood": "displeased"
      }
     ]
@@ -715,8 +786,8 @@
    {
     "id": "neither",
     "label": "Neither. Keep the money.",
-    "hint": "Cheapest, for now.",
-    "outcome": "You kept the money. Luci nodded the way people nod at a stable currency.",
+    "hint": "Keep the cash.",
+    "outcome": "You kept the money. Luci nodded.",
     "effects": [
      {
       "type": "bond",
@@ -732,13 +803,17 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Correct. The best certificate is a balance sheet.",
+      "text": "Correct. Money in the bank beats a plaque.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "The best certificate is a river you can drink out of. Put that on your plaque.",
+      "text": "Great. Nothing. Cool.",
       "mood": "displeased"
+     },
+     {
+      "who": "narrator",
+      "text": "Bea picks up her wrench and leaves."
      }
     ]
    }
@@ -749,7 +824,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "A Very Good Deal",
-  "body": "Don't make that face, I haven't said anything yet. A supplier's clearing diesel stock and he owes me a favour. We get paid a hundred and fifty thousand to take a year of fuel off his hands.",
+  "body": "Don't make that face. I haven't said anything yet.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -762,12 +837,20 @@
   "lines": [
    {
     "who": "luci",
-    "text": "Don't make that face, I haven't said anything yet. A supplier's clearing diesel stock and he owes me a favour. We get paid a hundred and fifty thousand to take a year of fuel off his hands.",
+    "text": "Don't make that face. I haven't said anything yet.",
     "mood": "pleased"
    },
    {
     "who": "luci",
-    "text": "The gensets burn it at peak, the bills drop, the quarter looks lovely. Nobody on this floor has ever brought you a better number. You may say thank you. I'll wait."
+    "text": "A supplier's clearing diesel. He owes me one."
+   },
+   {
+    "who": "luci",
+    "text": "We get paid a hundred and fifty thousand to take a year of fuel."
+   },
+   {
+    "who": "luci",
+    "text": "The gensets burn it at peak. Bills drop. The quarter looks lovely."
    },
    {
     "who": "bea",
@@ -781,7 +864,7 @@
     "id": "sign",
     "label": "Sign it.",
     "hint": "+$150k now",
-    "outcome": "The tanker came at dawn. The dock tasted of it for a week.",
+    "outcome": "The tanker came at dawn. The dock smelled of it for a week.",
     "effects": [
      {
       "type": "cash",
@@ -811,12 +894,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "See? I look after you. Stop looking at me like that, Bea.",
+      "text": "See? I look after you. Stop glaring, Bea.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "You look after the quarter. It's a different person. It has your face.",
+      "text": "You look after the quarter. That's not the same person.",
       "mood": "displeased"
      }
     ]
@@ -825,7 +908,7 @@
     "id": "refuse",
     "label": "Refuse it.",
     "hint": "Bea's side.",
-    "outcome": "You turned it down. Luci smiled the way people smile while filing a grudge.",
+    "outcome": "You turned it down. Luci smiled and said nothing.",
     "effects": [
      {
       "type": "bond",
@@ -841,16 +924,16 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Fine. I'll remember how principled you were. At the budget meeting.",
+      "text": "Fine. I'll remember it at budget time.",
       "mood": "displeased"
      },
      {
       "who": "luci",
-      "text": "It's not as if I did it for you. It was a good number. That's all it was."
+      "text": "It was a good number. That's all it was."
      },
      {
       "who": "bea",
-      "text": "Thank you. Seriously. Don't make it weird.",
+      "text": "Thanks. Don't make it weird.",
       "mood": "pleased"
      }
     ]
@@ -858,8 +941,8 @@
    {
     "id": "half",
     "label": "Take half. Negotiate.",
-    "hint": "+$60k now",
-    "outcome": "Luci sharpened the pen on the edge of her ledger. Half a tanker came at dawn.",
+    "hint": "Split it. +$60k now",
+    "outcome": "Half a tanker came at dawn.",
     "effects": [
      {
       "type": "cash",
@@ -889,12 +972,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Haggling. Look at you. Half the fuel and forty percent of my respect. That's a fair trade, darling.",
+      "text": "Look at you, haggling. Half the fuel, forty percent of my respect.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "Half a poison is still a poison. A smaller one.",
+      "text": "It's still diesel.",
       "mood": "displeased"
      }
     ]
@@ -906,7 +989,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "FORM A-5",
-  "body": "A form sits on your desk. It has always been on your desk. It is called A-5, and it asks one question: how does the world end?",
+  "body": "A form on your desk. A-5. One question: how does the world end?",
   "weight": 1,
   "minTier": 3,
   "cooldownDays": 0,
@@ -918,27 +1001,27 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "A form sits on your desk. It has always been on your desk. It is called A-5, and it asks one question: how does the world end?"
+    "text": "A form on your desk. A-5. One question: how does the world end?"
    },
    {
     "who": "luci",
-    "text": "The Authority wants a direction. The Lattice is filling anyway, Operator. You're on it whether you sign or not."
+    "text": "The Authority wants a direction. The Lattice is filling anyway."
    },
    {
     "who": "mel",
-    "text": "Or the flesh. If the tissue will have you. I can tell you whether it will, if you let me look. I'd be gentle."
+    "text": "Or the flesh. If the tissue takes to you. I could check. I'd be gentle."
    },
    {
     "who": "bea",
-    "text": "Or the Garden. If you haven't poisoned the ground already. You'll know when it tells you."
+    "text": "Or the Garden. If we haven't wrecked the ground."
    },
    {
     "who": "cass",
-    "text": "Or you take the form home and sleep on it. Nobody wrote down that you can't."
+    "text": "Or you take it home and sleep on it. Nobody says you can't."
    },
    {
     "who": "luci",
-    "text": "Or I sign it for you. Saves time. I have a very good pen.",
+    "text": "Or I sign it for you. Saves time. I've got a good pen.",
     "mood": "unsettling"
    }
   ],
@@ -948,7 +1031,7 @@
     "id": "decide",
     "label": "I'll decide. (Open FORM A-5.)",
     "hint": "Choose your tree yourself.",
-    "outcome": "You kept the form. It hummed faintly in your hand, like a fridge making up its mind.",
+    "outcome": "You kept the form. It hummed a little in your hand.",
     "effects": [
      {
       "type": "bond",
@@ -959,8 +1042,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. Take your time. It's about the last thing in here that's yours.",
+      "text": "Good. Take your time.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "It's about the last thing here that's yours."
      }
     ]
    },
@@ -968,7 +1055,7 @@
     "id": "luci",
     "label": "Luci, you decide.",
     "hint": "Hand her the pen.",
-    "outcome": "Luci signed with a flourish. The box she ticked was the first one.",
+    "outcome": "Luci signed with a flourish. She ticked the first box.",
     "effects": [
      {
       "type": "commitPath",
@@ -988,12 +1075,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Synthetic. Obviously. Did you think there was another box?",
+      "text": "Synthetic. Obviously. Was there another box?",
       "mood": "unsettling"
      },
      {
       "who": "cass",
-      "text": "Operator. You didn't even read it.",
+      "text": "You didn't even read it.",
       "mood": "displeased"
      }
     ]
@@ -1002,7 +1089,7 @@
     "id": "wait",
     "label": "Not yet.",
     "hint": "Take the form home.",
-    "outcome": "You folded A-5 into your jacket. It weighs almost nothing. It felt heavy.",
+    "outcome": "You folded A-5 into your jacket. It weighed nothing. It felt heavy.",
     "effects": [
      {
       "type": "bond",
@@ -1018,13 +1105,17 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. Sleep with it under the pillow. That's what I did with my last one.",
+      "text": "Good. I slept with my last one under the pillow.",
       "mood": "pleased"
      },
      {
       "who": "luci",
-      "text": "The Lattice doesn't wait, you know. It isn't rude. It just doesn't.",
+      "text": "The Lattice won't wait, you know.",
       "mood": "displeased"
+     },
+     {
+      "who": "luci",
+      "text": "It's not rude about it. It just doesn't."
      }
     ]
    }
@@ -1035,7 +1126,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "The Ground Remembers",
-  "body": "The ferns in the lobby are going yellow at the edges. I keep watering them. They keep going yellow. I'm doing it wrong, I think. Or it's us.",
+  "body": "The ferns in the lobby are going yellow. At the edges.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1052,12 +1143,16 @@
   "lines": [
    {
     "who": "bea",
-    "text": "The ferns in the lobby are going yellow at the edges. I keep watering them. They keep going yellow. I'm doing it wrong, I think. Or it's us.",
+    "text": "The ferns in the lobby are going yellow. At the edges.",
     "mood": "neutral"
    },
    {
     "who": "bea",
-    "text": "Tell me I'm being dramatic. I'd love that."
+    "text": "I keep watering them. I'm doing it wrong. Or it's us."
+   },
+   {
+    "who": "bea",
+    "text": "Tell me I'm being dramatic. Please."
    }
   ],
   "recommended": "care",
@@ -1066,7 +1161,7 @@
     "id": "care",
     "label": "I'll keep an eye on it.",
     "hint": "Take it seriously.",
-    "outcome": "Bea nodded once and went back to watering.",
+    "outcome": "Bea nodded and went back to watering.",
     "effects": [
      {
       "type": "bond",
@@ -1082,8 +1177,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Okay. Good. So it's two of us staring at a fern. That's a start.",
+      "text": "Okay.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "So that's two of us staring at a fern."
+     },
+     {
+      "who": "bea",
+      "text": "That's something."
      }
     ]
    },
@@ -1091,7 +1194,7 @@
     "id": "shrug",
     "label": "It's just ferns.",
     "hint": "Shrug it off.",
-    "outcome": "Bea put the watering can down very carefully.",
+    "outcome": "Bea put the can down. Carefully.",
     "effects": [
      {
       "type": "bond",
@@ -1107,8 +1210,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Sure. Just ferns. Sorry I brought it up.",
+      "text": "Sure. Just ferns.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "Sorry I said anything."
      }
     ]
    },
@@ -1116,7 +1223,7 @@
     "id": "show",
     "label": "Show me.",
     "hint": "Go and look together.",
-    "outcome": "You followed her to the lobby and held the can while she pointed.",
+    "outcome": "You followed her to the lobby and held the can.",
     "effects": [
      {
       "type": "bond",
@@ -1132,8 +1239,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Third frond from the left. It's always the third. I think it's the one closest to the vent.",
+      "text": "Third frond from the left.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "It's always the third. Closest to the vent, I think."
      }
     ]
    }
@@ -1144,7 +1255,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "The Ground Remembers",
-  "body": "The river behind the substation smells like diesel and coolant. That's us. I walked the outfall myself, in boots, so you can't say I guessed.",
+  "body": "The river behind the substation smells like diesel.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1161,8 +1272,16 @@
   "lines": [
    {
     "who": "bea",
-    "text": "The river behind the substation smells like diesel and coolant. That's us. I walked the outfall myself, in boots, so you can't say I guessed.",
+    "text": "The river behind the substation smells like diesel.",
     "mood": "displeased"
+   },
+   {
+    "who": "bea",
+    "text": "And coolant. That's us."
+   },
+   {
+    "who": "bea",
+    "text": "I walked the outfall. In boots. So don't say I guessed."
    }
   ],
   "recommended": "care",
@@ -1171,7 +1290,7 @@
     "id": "care",
     "label": "Then we change what we build.",
     "hint": "Take it seriously.",
-    "outcome": "Bea nodded once. Her jaw loosened a millimetre.",
+    "outcome": "Bea nodded. Her jaw loosened a little.",
     "effects": [
      {
       "type": "bond",
@@ -1187,8 +1306,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Yeah. That. Say it again later, when it costs money.",
+      "text": "Yeah.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "Say it again when it costs money."
      }
     ]
    },
@@ -1196,7 +1319,7 @@
     "id": "shrug",
     "label": "The river was dying anyway.",
     "hint": "Shrug it off.",
-    "outcome": "Bea left without slamming the door, which was worse.",
+    "outcome": "Bea left without slamming the door. That was worse.",
     "effects": [
      {
       "type": "bond",
@@ -1212,8 +1335,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "It was a river, though. Before us, it was a river.",
+      "text": "It was a river.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "Before us. It was a river."
      }
     ]
    },
@@ -1237,8 +1364,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Smell that? Now you can't unsmell it. Welcome to my whole week.",
+      "text": "Smell that?",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "Yeah. Now you can't unsmell it."
      }
     ]
    }
@@ -1249,7 +1380,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "The Ground Remembers",
-  "body": "Okay, listen. Not shouting. I'm doing my not-shouting voice.",
+  "body": "Okay. Listen. I'm not shouting.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1266,12 +1397,20 @@
   "lines": [
    {
     "who": "bea",
-    "text": "Okay, listen. Not shouting. I'm doing my not-shouting voice.",
+    "text": "Okay. Listen. I'm not shouting.",
     "mood": "displeased"
    },
    {
     "who": "bea",
-    "text": "There's a line past which the land doesn't forgive. We're close. Every cheap kilowatt, every tanker, every chiller you picked for the price. It adds up. I can see the sum."
+    "text": "This is my not-shouting voice."
+   },
+   {
+    "who": "bea",
+    "text": "There's a line. Past it, the ground doesn't come back. We're close."
+   },
+   {
+    "who": "bea",
+    "text": "Every cheap kilowatt. Every tanker. I can see the total."
    }
   ],
   "recommended": "care",
@@ -1296,8 +1435,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Thank you. Okay. It's a long list, and the first thing on it is the thing you like.",
+      "text": "Okay. Thanks.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "It's long."
+     },
+     {
+      "who": "bea",
+      "text": "First thing on it's something you like."
      }
     ]
    },
@@ -1305,7 +1452,7 @@
     "id": "shrug",
     "label": "I'll take my chances.",
     "hint": "Shrug it off.",
-    "outcome": "Bea took her goggles down and kept them down.",
+    "outcome": "Bea pulled her goggles down and left them there.",
     "effects": [
      {
       "type": "bond",
@@ -1321,8 +1468,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "They're not your chances. They're the ground's. You don't get to gamble with the ground.",
+      "text": "Your chances.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "They're not yours. They're the ground's."
      }
     ]
    }
@@ -1333,7 +1484,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "The Garden Closes",
-  "body": "It's done. I went up this morning and nothing grows. The Garden won't open for this tower. Not now, and probably not for you.",
+  "body": "It's done.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1350,12 +1501,20 @@
   "lines": [
    {
     "who": "bea",
-    "text": "It's done. I went up this morning and nothing grows. The Garden won't open for this tower. Not now, and probably not for you.",
+    "text": "It's done.",
     "mood": "displeased"
    },
    {
+    "who": "bea",
+    "text": "I went up this morning. Nothing's growing."
+   },
+   {
+    "who": "bea",
+    "text": "The Garden's closed. For this tower. Probably for you."
+   },
+   {
     "who": "luci",
-    "text": "For the record, the Lattice has no opinion about diesel. I'm only saying there's somewhere to go.",
+    "text": "The Lattice has no opinion about diesel. Just saying.",
     "mood": "pleased"
    }
   ],
@@ -1365,7 +1524,7 @@
     "id": "care",
     "label": "I'm sorry, Bea.",
     "hint": "Take it seriously.",
-    "outcome": "Bea kept her eyes on the dead roof and let you stand next to her.",
+    "outcome": "Bea kept looking at the dead roof. She let you stand there.",
     "effects": [
      {
       "type": "bond",
@@ -1376,8 +1535,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Don't be sorry at me. Be different next time, if you get one.",
+      "text": "Don't be sorry at me.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "Do it different. If you get another go."
      }
     ]
    },
@@ -1385,7 +1548,7 @@
     "id": "shrug",
     "label": "It was always going to be the machine.",
     "hint": "Shrug it off.",
-    "outcome": "Bea turned and walked down the stairs without a sound.",
+    "outcome": "Bea walked down the stairs. She didn't make a sound.",
     "effects": [
      {
       "type": "bond",
@@ -1401,8 +1564,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "No. It was going to be whatever you built. That's the whole point and I'm so tired of saying it.",
+      "text": "No. It was going to be whatever you built.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "That's the whole point. I'm so tired of saying it."
      }
     ]
    }
@@ -1413,7 +1580,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "The Tissue Flinches",
-  "body": "I know 'sulking' isn't a clinical term. I'm using it anyway. The cultures were leaning toward the lamp last week. Now they aren't.",
+  "body": "I know 'sulking' isn't a clinical word. I'm using it anyway.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1430,12 +1597,16 @@
   "lines": [
    {
     "who": "mel",
-    "text": "I know 'sulking' isn't a clinical term. I'm using it anyway. The cultures were leaning toward the lamp last week. Now they aren't.",
+    "text": "I know 'sulking' isn't a clinical word. I'm using it anyway.",
     "mood": "neutral"
    },
    {
     "who": "mel",
-    "text": "Something in the coolant, or the air, or the hum. Tissue is sensitive. So am I, a little."
+    "text": "The cultures were leaning toward the lamp last week. Now they're not."
+   },
+   {
+    "who": "mel",
+    "text": "Could be the coolant. Or the hum. Tissue's sensitive. So am I, a bit."
    }
   ],
   "recommended": "care",
@@ -1444,7 +1615,7 @@
     "id": "care",
     "label": "What do they need?",
     "hint": "Take it seriously.",
-    "outcome": "Mel wrote your question on her glove, in pen, like a result.",
+    "outcome": "Mel wrote your question on her glove. In pen.",
     "effects": [
      {
       "type": "bond",
@@ -1460,8 +1631,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "They need... that's a good question. Nobody's asked it. I'll find out. Thank you for asking it out loud.",
+      "text": "Oh. Nobody's asked that.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "I'll find out. Thanks."
      }
     ]
    },
@@ -1485,8 +1660,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Hm. Everything adapts. That's what worries me.",
+      "text": "Hm. Everything adapts.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "That's what worries me."
      }
     ]
    },
@@ -1494,7 +1673,7 @@
     "id": "see",
     "label": "Can I see them?",
     "hint": "Go and look together.",
-    "outcome": "Mel held the incubator door for you like it was a church.",
+    "outcome": "Mel held the incubator door for you.",
     "effects": [
      {
       "type": "bond",
@@ -1510,8 +1689,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "That one. Left side. She's the shy one. Don't take it personally if she turns away.",
+      "text": "That one. On the left.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "She's shy. Don't take it personally if she turns away."
      }
     ]
    }
@@ -1522,7 +1705,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "The Tissue Flinches",
-  "body": "I left a sample beside the immersion tanks overnight. It didn't die. It flinched, all night, in the little way they do, and at six it stopped flinching.",
+  "body": "I left a sample by the immersion tanks. Overnight.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1539,12 +1722,16 @@
   "lines": [
    {
     "who": "mel",
-    "text": "I left a sample beside the immersion tanks overnight. It didn't die. It flinched, all night, in the little way they do, and at six it stopped flinching.",
+    "text": "I left a sample by the immersion tanks. Overnight.",
     "mood": "unsettling"
    },
    {
     "who": "mel",
-    "text": "I don't like the tower we're building, Operator. I wanted to say that to your face."
+    "text": "It didn't die. It flinched. All night. Then at six it stopped."
+   },
+   {
+    "who": "mel",
+    "text": "I don't like the tower we're building. I wanted to say it to your face."
    }
   ],
   "recommended": "care",
@@ -1569,8 +1756,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Thank you. It can't hear you. I'd like to believe it can, and I'm choosing to.",
+      "text": "Thank you.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "It can't hear you. I'd like to think it can."
      }
     ]
    },
@@ -1578,7 +1769,7 @@
     "id": "shrug",
     "label": "It's only tissue.",
     "hint": "Shrug it off.",
-    "outcome": "Mel didn't argue. She simply stopped speaking, which was louder.",
+    "outcome": "Mel didn't argue. She just stopped talking.",
     "effects": [
      {
       "type": "bond",
@@ -1594,8 +1785,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Only tissue. Hm. That's what they say about us, too, in the right building.",
+      "text": "Only tissue.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "They say that about us too. In the right building."
      }
     ]
    },
@@ -1603,7 +1798,7 @@
     "id": "see",
     "label": "Show me the sample.",
     "hint": "Go and look together.",
-    "outcome": "She let you hold the jar, and watched your hands the whole time.",
+    "outcome": "She let you hold the jar. She watched your hands.",
     "effects": [
      {
       "type": "bond",
@@ -1619,8 +1814,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "You hold it like it's warm. That's right. It is. Most people hold it like a cup.",
+      "text": "You hold it like it's warm.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "It is. Most people hold it like a cup."
      }
     ]
    }
@@ -1631,7 +1830,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "The Tissue Flinches",
-  "body": "If we go on like this the flesh won't take. It'll look at this building and see a wound. I'd really prefer not to watch that. I'd prefer you not make me watch.",
+  "body": "If we keep going like this, the flesh won't take.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1648,8 +1847,16 @@
   "lines": [
    {
     "who": "mel",
-    "text": "If we go on like this the flesh won't take. It'll look at this building and see a wound. I'd really prefer not to watch that. I'd prefer you not make me watch.",
+    "text": "If we keep going like this, the flesh won't take.",
     "mood": "displeased"
+   },
+   {
+    "who": "mel",
+    "text": "It'll look at the building and see a wound."
+   },
+   {
+    "who": "mel",
+    "text": "I'd rather not watch that. I'd rather you didn't make me."
    }
   ],
   "recommended": "care",
@@ -1658,7 +1865,7 @@
     "id": "care",
     "label": "Tell me what hurts it.",
     "hint": "Take it seriously.",
-    "outcome": "Mel pulled a folded list from her coat pocket. The one with the stain.",
+    "outcome": "Mel pulled a folded list from her coat. The one with the stain.",
     "effects": [
      {
       "type": "bond",
@@ -1674,8 +1881,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "It's all on there. Don't ask about the stain. Ask about page two.",
+      "text": "It's all on there.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "Don't ask about the stain. Ask about page two."
      }
     ]
    },
@@ -1683,7 +1894,7 @@
     "id": "shrug",
     "label": "I'll take my chances.",
     "hint": "Shrug it off.",
-    "outcome": "Mel nodded as if you'd confirmed a measurement.",
+    "outcome": "Mel nodded, like you'd confirmed a measurement.",
     "effects": [
      {
       "type": "bond",
@@ -1699,8 +1910,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Your chances. Yes. I notice they're never your tissue.",
+      "text": "Your chances. Hm.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "I notice they're never your tissue."
      }
     ]
    }
@@ -1711,7 +1926,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "The Flesh Closes",
-  "body": "It's rejected us. I seeded the last vat this morning and it refused to grow. Politely. Completely. It's closed its eyes.",
+  "body": "It's rejected us.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1728,12 +1943,16 @@
   "lines": [
    {
     "who": "mel",
-    "text": "It's rejected us. I seeded the last vat this morning and it refused to grow. Politely. Completely. It's closed its eyes.",
+    "text": "It's rejected us.",
     "mood": "displeased"
    },
    {
+    "who": "mel",
+    "text": "I seeded the last vat this morning. It wouldn't grow. Politely. Completely."
+   },
+   {
     "who": "luci",
-    "text": "Machines don't reject people, Mel. That's rather the selling point.",
+    "text": "Machines don't reject people, Mel. That's the selling point.",
     "mood": "pleased"
    }
   ],
@@ -1754,8 +1973,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "You can be sorry. The vat can't be consoled. I tried.",
+      "text": "You can be sorry.",
       "mood": "displeased"
+     },
+     {
+      "who": "mel",
+      "text": "The vat can't be consoled. I tried."
      }
     ]
    },
@@ -1763,7 +1986,7 @@
     "id": "shrug",
     "label": "Machines don't reject anyone.",
     "hint": "Shrug it off.",
-    "outcome": "Mel took off one glove and put it in her pocket, which she never does.",
+    "outcome": "Mel took off one glove and put it in her pocket. She never does that.",
     "effects": [
      {
       "type": "bond",
@@ -1779,8 +2002,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "No. They don't. I used to think that was a comfort.",
+      "text": "No. They don't.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "I used to think that was a comfort."
      }
     ]
    }
@@ -1791,7 +2018,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "Rejected by the Garden",
-  "body": "Dawn on the roof garden, and it's grey. The panels still turn toward the sun. Nothing turns with them.",
+  "body": "Dawn on the roof garden. Grey. The panels still turn to the sun.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1803,16 +2030,20 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Dawn on the roof garden, and it's grey. The panels still turn toward the sun. Nothing turns with them."
+    "text": "Dawn on the roof garden. Grey. The panels still turn to the sun."
    },
    {
     "who": "bea",
-    "text": "You committed to it, and then you kept feeding it poison. The Garden's closed. It doesn't come back. That's what closed means.",
+    "text": "You picked it. Then you kept feeding it poison.",
     "mood": "displeased"
    },
    {
+    "who": "bea",
+    "text": "It's closed. It doesn't come back. That's what closed means."
+   },
+   {
     "who": "luci",
-    "text": "Which leaves one door. Mine. I did save you a seat.",
+    "text": "That leaves one door. Mine. I saved you a seat.",
     "mood": "unsettling"
    }
   ],
@@ -1822,7 +2053,7 @@
     "id": "sorry",
     "label": "I'm sorry, Bea.",
     "hint": "Apologise.",
-    "outcome": "Bea took off her goggles and held them in her lap instead of putting them back on.",
+    "outcome": "Bea took off her goggles and held them in her lap.",
     "effects": [
      {
       "type": "bond",
@@ -1838,7 +2069,7 @@
      },
      {
       "who": "bea",
-      "text": "I'm going to go stand next to something that still works."
+      "text": "I'm gonna go stand next to something that still works."
      }
     ]
    },
@@ -1862,12 +2093,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "It was always the machine. You just took the scenic route. I respect scenery.",
+      "text": "It was always the machine. You took the scenic route.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "Wow. Okay. That was quick.",
+      "text": "Wow. That was fast.",
       "mood": "displeased"
      }
     ]
@@ -1879,7 +2110,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "Rejected by the Flesh",
-  "body": "By morning the vats are cold. Not dead. Withdrawn. Every culture has turned its face to the glass.",
+  "body": "By morning the vats are cold. Every culture has turned to face the glass.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1891,16 +2122,20 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "By morning the vats are cold. Not dead. Withdrawn. Every culture has turned its face to the glass."
+    "text": "By morning the vats are cold. Every culture has turned to face the glass."
    },
    {
     "who": "mel",
-    "text": "It said no. I didn't know it could. I'm almost proud.",
+    "text": "It said no. I didn't know it could.",
     "mood": "unsettling"
    },
    {
+    "who": "mel",
+    "text": "I'm a little proud, actually."
+   },
+   {
     "who": "luci",
-    "text": "Which leaves one door. Mine. Welcome to the Lattice. I kept your seat warm.",
+    "text": "Which leaves one door. Mine. Your seat's warm.",
     "mood": "pleased"
    }
   ],
@@ -1921,7 +2156,11 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Don't be. It learned to refuse. That's more than most minds manage."
+      "text": "Don't be."
+     },
+     {
+      "who": "mel",
+      "text": "It learned to say no. Most minds never do."
      }
     ]
    },
@@ -1950,7 +2189,7 @@
      },
      {
       "who": "mel",
-      "text": "Restful. Yes. Hm.",
+      "text": "Restful. Hm.",
       "mood": "unsettling"
      }
     ]
@@ -1962,7 +2201,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "Bea Objects",
-  "body": "Operator. The {item}. You know what that does to the ground? It doesn't wash out. I need you to know that it doesn't wash out.",
+  "body": "Operator. The {item}.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1978,12 +2217,16 @@
   "lines": [
    {
     "who": "bea",
-    "text": "Operator. The {item}. You know what that does to the ground? It doesn't wash out. I need you to know that it doesn't wash out.",
+    "text": "Operator. The {item}.",
     "mood": "displeased"
    },
    {
+    "who": "bea",
+    "text": "You know what that does to the ground? It doesn't wash out."
+   },
+   {
     "who": "luci",
-    "text": "It saved us a great deal of money. I checked. Twice. I like checking.",
+    "text": "It saved a lot of money, though. I checked twice.",
     "mood": "pleased"
    }
   ],
@@ -1993,7 +2236,7 @@
     "id": "keep",
     "label": "Keep it.",
     "hint": "Overrule Bea.",
-    "outcome": "The {item} stays. Bea didn't speak to you for the rest of the afternoon.",
+    "outcome": "The {item} stays. Bea didn't speak to you the rest of the afternoon.",
     "effects": [
      {
       "type": "bond",
@@ -2009,8 +2252,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Fine. It's your name on the stain.",
+      "text": "Fine.",
       "mood": "displeased"
+     },
+     {
+      "who": "bea",
+      "text": "Your name's on it."
      }
     ]
    },
@@ -2029,12 +2276,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Noted. I'm going to check. I'll bring a clipboard.",
+      "text": "Okay. I'm gonna check.",
       "mood": "pleased"
      },
      {
+      "who": "bea",
+      "text": "I'll bring a clipboard."
+     },
+     {
       "who": "luci",
-      "text": "A promise is a liability. I'm entering it in the books."
+      "text": "A promise is a liability. Noted."
      }
     ]
    }
@@ -2045,7 +2296,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "Mel Objects",
-  "body": "The {item}. I'd rather you hadn't. The tissue can feel it from three floors down. So can I, a little, in my teeth.",
+  "body": "The {item}. I'd rather you hadn't.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2061,12 +2312,16 @@
   "lines": [
    {
     "who": "mel",
-    "text": "The {item}. I'd rather you hadn't. The tissue can feel it from three floors down. So can I, a little, in my teeth.",
+    "text": "The {item}. I'd rather you hadn't.",
     "mood": "displeased"
    },
    {
+    "who": "mel",
+    "text": "The tissue feels it. Three floors down. So do I, a bit."
+   },
+   {
     "who": "luci",
-    "text": "The tissue doesn't have a vote. Neither, technically, does Mel. Sorry, Mel.",
+    "text": "Tissue doesn't get a vote.",
     "mood": "pleased"
    }
   ],
@@ -2092,7 +2347,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Of course. It's your tower. For now.",
+      "text": "Of course. It's your tower.",
       "mood": "unsettling"
      }
     ]
@@ -2112,8 +2367,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Thank you. It'll remember that. I will too, which is probably worse for you.",
+      "text": "Thank you.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "It'll remember that. So will I."
      }
     ]
    }
@@ -2124,7 +2383,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "Halfway to the Lattice",
-  "body": "Halfway. Can you feel it? The building's starting to think in our sentences.",
+  "body": "Halfway. Can you feel it? The building's starting to think like us.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2141,16 +2400,16 @@
   "lines": [
    {
     "who": "luci",
-    "text": "Halfway. Can you feel it? The building's starting to think in our sentences.",
+    "text": "Halfway. Can you feel it? The building's starting to think like us.",
     "mood": "pleased"
    },
    {
     "who": "cass",
-    "text": "In its own, I think. You just can't tell the difference yet."
+    "text": "Like itself, I think. You can't tell the difference yet."
    },
    {
     "who": "luci",
-    "text": "Shall we speed up? I've drawn it as a very pretty line."
+    "text": "Should we speed up? I drew it as a line. It's very pretty."
    }
   ],
   "recommended": "faster",
@@ -2159,7 +2418,7 @@
     "id": "faster",
     "label": "Faster.",
     "hint": "Luci's way. pay x1.2 for 2d",
-    "outcome": "Luci pushed the contracts through herself, pen going like a metronome.",
+    "outcome": "Luci pushed the contracts through herself.",
     "effects": [
      {
       "type": "bond",
@@ -2180,8 +2439,12 @@
     "reply": [
      {
       "who": "luci",
-      "text": "That's my Operator. Keep the speed and I'll keep the lights on.",
+      "text": "That's the spirit.",
       "mood": "pleased"
+     },
+     {
+      "who": "luci",
+      "text": "Keep the speed and I'll keep the lights on."
      }
     ]
    },
@@ -2189,7 +2452,7 @@
     "id": "slower",
     "label": "Slow down.",
     "hint": "Cass's way.",
-    "outcome": "You asked for a week of ordinary days. Cass found you seven.",
+    "outcome": "You asked for a week of ordinary days. Cass found seven.",
     "effects": [
      {
       "type": "bond",
@@ -2210,12 +2473,16 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Thanks. One more week of mornings. I'll take them.",
+      "text": "Thanks. A week of mornings.",
       "mood": "pleased"
      },
      {
+      "who": "cass",
+      "text": "I'll take it."
+     },
+     {
       "who": "luci",
-      "text": "Inefficient. Fine. One week. Put in the minutes that I was gracious.",
+      "text": "Inefficient. Fine. One week. Note that I was gracious.",
       "mood": "displeased"
      }
     ]
@@ -2224,7 +2491,7 @@
     "id": "race",
     "label": "Race you there.",
     "hint": "Flirt.",
-    "outcome": "Luci's pen stopped mid-line. 'You'd lose,' she said, 'and enjoy it.'",
+    "outcome": "Luci's pen stopped mid-line.",
     "effects": [
      {
       "type": "bond",
@@ -2240,12 +2507,16 @@
     "reply": [
      {
       "who": "luci",
-      "text": "You're terrible for my focus. Keep going. Do it again later.",
+      "text": "You'd lose.",
       "mood": "pleased"
      },
      {
+      "who": "luci",
+      "text": "And enjoy it."
+     },
+     {
       "who": "cass",
-      "text": "Please get a room. I'll cool it."
+      "text": "Get a room. I'll cool it."
      }
     ]
    }
@@ -2256,7 +2527,7 @@
   "category": "story",
   "advisor": "cass",
   "title": "The Pull",
-  "body": "Operator. The Lattice is at half. Whatever you're growing up there, the machine is growing faster.",
+  "body": "Operator. The Lattice is at half.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2273,16 +2544,24 @@
   "lines": [
    {
     "who": "cass",
-    "text": "Operator. The Lattice is at half. Whatever you're growing up there, the machine is growing faster.",
+    "text": "Operator. The Lattice is at half.",
     "mood": "displeased"
    },
    {
     "who": "cass",
-    "text": "Every rack that isn't on your tree feeds it. Every single one. You can't outbuild the pull by building more."
+    "text": "Whatever you're growing up there, the machine's growing faster."
+   },
+   {
+    "who": "cass",
+    "text": "Every rack that's not on your tree feeds it."
+   },
+   {
+    "who": "cass",
+    "text": "You can't outbuild it."
    },
    {
     "who": "luci",
-    "text": "She's right, you know. Isn't it nice when we agree?",
+    "text": "She's right, you know. Lovely when we agree.",
     "mood": "unsettling"
    }
   ],
@@ -2292,7 +2571,7 @@
     "id": "listen",
     "label": "Then I'll stop feeding it.",
     "hint": "Take the warning.",
-    "outcome": "Cass let out a breath she'd been holding since spring.",
+    "outcome": "Cass let out a long breath.",
     "effects": [
      {
       "type": "bond",
@@ -2303,8 +2582,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Retire the shared racks. Build on your own line. I'll do the cooling, even the part you hate.",
+      "text": "Okay. Retire the shared racks. Build on your own line.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "I'll do the cooling. Even the part you hate."
      }
     ]
    },
@@ -2333,7 +2616,7 @@
      },
      {
       "who": "cass",
-      "text": "I hope the numbers are kind.",
+      "text": "Hope the numbers are kind.",
       "mood": "displeased"
      }
     ]
@@ -2345,7 +2628,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "What Luci Is",
-  "body": "The lights flicker in a pattern that is almost a word. Luci doesn't look up from her ledger.",
+  "body": "The lights flicker. Luci keeps her eyes on the ledger.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2358,16 +2641,28 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "The lights flicker in a pattern that is almost a word. Luci doesn't look up from her ledger."
+    "text": "The lights flicker. Luci keeps her eyes on the ledger."
    },
    {
     "who": "luci",
-    "text": "You may as well know. The eye isn't a lens. It hasn't been since the second quarter. I upgraded early. I always buy early.",
+    "text": "You may as well know. The eye isn't a lens.",
     "mood": "unsettling"
    },
    {
     "who": "luci",
-    "text": "When the Lattice closes I'll still be me. Mostly. More, actually. I'd like you there when I find out."
+    "text": "Hasn't been since second quarter."
+   },
+   {
+    "who": "luci",
+    "text": "I upgraded early. I always buy early."
+   },
+   {
+    "who": "luci",
+    "text": "When it closes I'll still be me. Mostly."
+   },
+   {
+    "who": "luci",
+    "text": "I'd like you there when I find out."
    },
    {
     "who": "luci",
@@ -2381,7 +2676,7 @@
     "id": "hand",
     "label": "Take her hand.",
     "hint": "Go with her.",
-    "outcome": "Her hand was warm. It had no reason to be.",
+    "outcome": "Her hand was warm. It shouldn't have been.",
     "effects": [
      {
       "type": "bond",
@@ -2402,7 +2697,7 @@
      },
      {
       "who": "luci",
-      "text": "And if my hand shakes, that's a calibration issue."
+      "text": "If it shakes, that's calibration."
      }
     ]
    },
@@ -2410,7 +2705,7 @@
     "id": "what",
     "label": "What are you?",
     "hint": "Step back.",
-    "outcome": "Luci closed the ledger very gently, as if it might wake.",
+    "outcome": "Luci closed the ledger. Very gently.",
     "effects": [
      {
       "type": "bond",
@@ -2426,7 +2721,7 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Your CFO. Your friend. Your future. Choose whichever frightens you least.",
+      "text": "Your CFO. Pick whichever part scares you least.",
       "mood": "displeased"
      },
      {
@@ -2439,7 +2734,7 @@
     "id": "tremor",
     "label": "Your hand's shaking.",
     "hint": "Say it out loud.",
-    "outcome": "Luci looked at her hand like it belonged to the competition.",
+    "outcome": "Luci looked at her hand like it wasn't hers.",
     "effects": [
      {
       "type": "bond",
@@ -2471,7 +2766,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "The Tower Has a Pulse",
-  "body": "Put your hand on the wall. There. Feel it? That's us. That's the building. Halfway to remembering a body.",
+  "body": "Put your hand on the wall. There.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2487,17 +2782,25 @@
   "lines": [
    {
     "who": "mel",
-    "text": "Put your hand on the wall. There. Feel it? That's us. That's the building. Halfway to remembering a body.",
+    "text": "Put your hand on the wall. There.",
     "mood": "pleased"
    },
    {
     "who": "mel",
-    "text": "I could go faster. If we seed the ducts, the tissue reaches everywhere at once. It would be a lot. I'd be a lot. I'd understand if you said no.",
+    "text": "Feel that? That's us. The building. Halfway to remembering a body."
+   },
+   {
+    "who": "mel",
+    "text": "I could go faster. Seed the ducts. The tissue would be everywhere at once.",
     "mood": "unsettling"
    },
    {
+    "who": "mel",
+    "text": "It'd be a lot. I'd be a lot. I'd understand if you said no."
+   },
+   {
     "who": "cass",
-    "text": "Operator, if you say yes I'm moving my bed to the roof.",
+    "text": "If you say yes, I'm moving my bed to the roof.",
     "mood": "displeased"
    }
   ],
@@ -2507,7 +2810,7 @@
     "id": "seed",
     "label": "Seed the ducts.",
     "hint": "Mel's shortcut. rack failure rate x1.6 for 3d",
-    "outcome": "They seeded the ducts overnight. By morning the walls were warm, and a few of them were moving.",
+    "outcome": "They seeded the ducts overnight. By morning the walls were warm. A few were moving.",
     "effects": [
      {
       "type": "sp",
@@ -2538,7 +2841,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Oh, look at it go. Look at it. It's so eager.",
+      "text": "Oh, look at it go. It's so eager.",
       "mood": "unsettling"
      },
      {
@@ -2552,7 +2855,7 @@
     "id": "slow",
     "label": "Let it grow at its own pace.",
     "hint": "Patience.",
-    "outcome": "Mel looked disappointed, then thoughtful, then wrote something on her glove.",
+    "outcome": "Mel looked disappointed. Then she wrote something on her glove.",
     "effects": [
      {
       "type": "bond",
@@ -2573,8 +2876,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Yes. Things grown slowly remember more. I knew you'd... no. I hoped. Different verb.",
+      "text": "Yes. Slow ones remember more.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "I knew you'd... no. I hoped. Different word."
      }
     ]
    }
@@ -2585,7 +2892,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "Almost Born",
-  "body": "It dreams now. Mostly about the lifts, which I find touching. Sometimes about you.",
+  "body": "It dreams now. Mostly about the lifts. I find that touching.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2601,12 +2908,20 @@
   "lines": [
    {
     "who": "mel",
-    "text": "It dreams now. Mostly about the lifts, which I find touching. Sometimes about you.",
+    "text": "It dreams now. Mostly about the lifts. I find that touching.",
     "mood": "pleased"
    },
    {
     "who": "mel",
-    "text": "When it wakes, everyone will be a little of it and it will be a little of everyone. Someone should go first. I'd like it to be you. I'd be right there. I'd hold the jar."
+    "text": "Sometimes about you."
+   },
+   {
+    "who": "mel",
+    "text": "When it wakes, we'll all be a bit of it. Someone should go first."
+   },
+   {
+    "who": "mel",
+    "text": "I'd like it to be you. I'd hold the jar."
    }
   ],
   "recommended": "first",
@@ -2615,7 +2930,7 @@
     "id": "first",
     "label": "I'll be the first.",
     "hint": "Say yes.",
-    "outcome": "Mel turned your wrist over very gently and looked for a vein.",
+    "outcome": "Mel turned your wrist over and looked for a vein.",
     "effects": [
      {
       "type": "bond",
@@ -2631,8 +2946,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "It won't hurt. Well. It won't hurt for long. That's the nicest true thing I have.",
+      "text": "It won't hurt.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "Well. Not for long. That's the nicest true thing I've got."
      }
     ]
    },
@@ -2640,7 +2959,7 @@
     "id": "last",
     "label": "Let me be the last.",
     "hint": "Hold back.",
-    "outcome": "Mel smiled. She'd expected that, and seemed relieved to be right.",
+    "outcome": "Mel smiled. She'd expected that. She seemed relieved.",
     "effects": [
      {
       "type": "bond",
@@ -2656,8 +2975,12 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Someone should remember what it was like before. I'd like it to be someone I like.",
+      "text": "Someone should remember before.",
       "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "I'd like it to be someone I like."
      }
     ]
    },
@@ -2665,7 +2988,7 @@
     "id": "both",
     "label": "Together.",
     "hint": "Go first, but not alone.",
-    "outcome": "Mel looked at the second chair in the lab as if she'd never noticed it was there.",
+    "outcome": "Mel looked at the second chair in the lab like she'd never seen it.",
     "effects": [
      {
       "type": "bond",
@@ -2681,8 +3004,16 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Together. Hm. I hadn't drawn that. Give me a moment. I'm going to draw it.",
+      "text": "Together. Hm.",
       "mood": "unsettling"
+     },
+     {
+      "who": "mel",
+      "text": "I hadn't drawn that."
+     },
+     {
+      "who": "mel",
+      "text": "Give me a minute. I'll draw it."
      }
     ]
    }
@@ -2693,7 +3024,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "Roots in the Foundations",
-  "body": "Halfway! The roots are in the second basement and the rack heat's warming three streets. Three! I counted the chimneys.",
+  "body": "Halfway! Roots are in the second basement.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2709,16 +3040,20 @@
   "lines": [
    {
     "who": "bea",
-    "text": "Halfway! The roots are in the second basement and the rack heat's warming three streets. Three! I counted the chimneys.",
+    "text": "Halfway! Roots are in the second basement.",
     "mood": "pleased"
    },
    {
     "who": "bea",
-    "text": "Luci wants to sell carbon credits against the canopy. A lot of them. More than we've actually grown, technically."
+    "text": "Rack heat's warming three streets. Three! I counted chimneys."
+   },
+   {
+    "who": "bea",
+    "text": "Luci wants to sell carbon credits against the canopy. More than we've actually grown."
    },
    {
     "who": "luci",
-    "text": "Technically. The canopy is very large and the auditors are very busy.",
+    "text": "Technically. The canopy's big and the auditors are busy.",
     "mood": "pleased"
    }
   ],
@@ -2753,12 +3088,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "That's the certificate again, Operator. Same trick, nicer coat.",
+      "text": "That's the certificate again.",
       "mood": "displeased"
      },
      {
+      "who": "bea",
+      "text": "Same trick. Nicer coat."
+     },
+     {
       "who": "luci",
-      "text": "Half a million, darling. It's a very nice coat.",
+      "text": "Half a million, darling.",
       "mood": "pleased"
      }
     ]
@@ -2767,7 +3106,7 @@
     "id": "honest",
     "label": "Only what we've earned.",
     "hint": "Honest books.",
-    "outcome": "Bea hit your shoulder hard enough to leave a bruise.",
+    "outcome": "Bea punched your shoulder. Hard enough to bruise.",
     "effects": [
      {
       "type": "bond",
@@ -2783,12 +3122,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "THERE you are. I knew you were in there.",
+      "text": "There you are.",
       "mood": "pleased"
      },
      {
+      "who": "bea",
+      "text": "Knew you were in there."
+     },
+     {
       "who": "luci",
-      "text": "Honest and poor. It suits you both. It's very on-brand and I hate it.",
+      "text": "Honest and broke. Lovely.",
       "mood": "displeased"
      }
     ]
@@ -2797,7 +3140,7 @@
     "id": "half",
     "label": "Sell half. Say it's half.",
     "hint": "+$200k now",
-    "outcome": "Luci drafted the notice. The first line said, in bold, that it was half.",
+    "outcome": "Luci drafted the notice. The first line said it was half. In bold.",
     "effects": [
      {
       "type": "cash",
@@ -2822,12 +3165,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "At least you'll say it's half. That's a start, you cheat.",
+      "text": "At least you're saying it's half.",
       "mood": "neutral"
      },
      {
+      "who": "bea",
+      "text": "Cheat."
+     },
+     {
       "who": "luci",
-      "text": "A compromise. It's the gateway to everything.",
+      "text": "A compromise. Very grown-up.",
       "mood": "pleased"
      }
     ]
@@ -2839,7 +3186,7 @@
   "category": "story",
   "advisor": "bea",
   "title": "The Forest Thinks",
-  "body": "It's thinking, Operator. Slow. In the moss, in the river, in the panels. Yesterday it asked me if the city was a forest. I said yes.",
+  "body": "It's thinking. Slowly. In the moss. The river.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -2855,12 +3202,24 @@
   "lines": [
    {
     "who": "bea",
-    "text": "It's thinking, Operator. Slow. In the moss, in the river, in the panels. Yesterday it asked me if the city was a forest. I said yes.",
+    "text": "It's thinking. Slowly. In the moss. The river.",
     "mood": "pleased"
    },
    {
     "who": "bea",
-    "text": "When it finishes there won't be a tower. Just a hill. Will you still come up with me and check the roots? Every morning? It's boring. It's mostly looking at dirt."
+    "text": "Yesterday it asked if the city was a forest. I said yes."
+   },
+   {
+    "who": "bea",
+    "text": "When it's done there won't be a tower. Just a hill."
+   },
+   {
+    "who": "bea",
+    "text": "Will you still come up and check the roots? Every morning?"
+   },
+   {
+    "who": "bea",
+    "text": "It's boring. Mostly dirt."
    }
   ],
   "recommended": "always",
@@ -2869,7 +3228,7 @@
     "id": "always",
     "label": "Every morning.",
     "hint": "Say yes.",
-    "outcome": "Bea pulled her goggles down to hide her face. It didn't work.",
+    "outcome": "Bea pulled her goggles down. It didn't hide much.",
     "effects": [
      {
       "type": "bond",
@@ -2880,8 +3239,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Okay. Good. Bring the good wrench. Not the sad one.",
+      "text": "Okay. Good.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "Bring the good wrench. Not the sad one."
      }
     ]
    },
@@ -2889,7 +3252,7 @@
     "id": "maybe",
     "label": "I don't know what comes after.",
     "hint": "Honest.",
-    "outcome": "Bea nodded. Neither of you pretended otherwise.",
+    "outcome": "Bea nodded. Neither of you pretended.",
     "effects": [
      {
       "type": "bond",
@@ -2905,7 +3268,11 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Neither do I. That's the good part, I think. I'm trying to think it's the good part."
+      "text": "Me neither."
+     },
+     {
+      "who": "bea",
+      "text": "That's the good part. I think."
      }
     ]
    },
@@ -2913,7 +3280,7 @@
     "id": "wrench",
     "label": "I'll bring the good wrench.",
     "hint": "Flirt.",
-    "outcome": "Bea opened her mouth to say something sharp and found nothing sharp in there.",
+    "outcome": "Bea opened her mouth. Nothing sharp came out.",
     "effects": [
      {
       "type": "bond",
@@ -2929,8 +3296,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "...You know which one's the good one. Nobody knows which one's the good one.",
+      "text": "...You know which one's the good one.",
       "mood": "pleased"
+     },
+     {
+      "who": "bea",
+      "text": "Nobody knows which one's the good one."
      }
     ]
    }
@@ -2941,7 +3312,7 @@
   "category": "story",
   "advisor": "cass",
   "title": "The Window",
-  "body": "Cass has found the one window in the tower that opens. Snow is coming in over the sill, and she hasn't closed it.",
+  "body": "Cass found the one window that opens. Snow's coming in over the sill.",
   "weight": 1,
   "minTier": 3,
   "cooldownDays": 0,
@@ -2954,15 +3325,19 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Cass has found the one window in the tower that opens. Snow is coming in over the sill, and she hasn't closed it."
+    "text": "Cass found the one window that opens. Snow's coming in over the sill."
    },
    {
     "who": "cass",
-    "text": "Whatever you pick. Whichever door. The people out there didn't pick it. You know that, right?"
+    "text": "Whichever door you pick. The people out there didn't pick it."
    },
    {
     "who": "cass",
-    "text": "I'm not asking you to stop. I'm asking you to remember them. Can you do that? I know it's not a deliverable."
+    "text": "I'm not asking you to stop. Just remember them. Can you do that?"
+   },
+   {
+    "who": "cass",
+    "text": "I know it's not a deliverable."
    }
   ],
   "recommended": "remember",
@@ -2971,7 +3346,7 @@
     "id": "remember",
     "label": "I'll remember them.",
     "hint": "Promise.",
-    "outcome": "Cass closed the window and stood next to you anyway.",
+    "outcome": "Cass shut the window and stood next to you anyway.",
     "effects": [
      {
       "type": "bond",
@@ -2982,8 +3357,16 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Then I'll stay. As long as you do. And you're sleeping tonight. I'm taking the second shift.",
+      "text": "Okay. Then I'll stay.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "As long as you do."
+     },
+     {
+      "who": "cass",
+      "text": "And you're sleeping tonight. I've got second shift."
      }
     ]
    },
@@ -2991,7 +3374,7 @@
     "id": "them",
     "label": "They'll thank us later.",
     "hint": "Luci's line.",
-    "outcome": "Cass looked at you for a while, then went back to work.",
+    "outcome": "Cass looked at you a while. Then she went back to work.",
     "effects": [
      {
       "type": "bond",
@@ -3007,8 +3390,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "That's her line. I hoped you'd have your own.",
+      "text": "That's her line.",
       "mood": "displeased"
+     },
+     {
+      "who": "cass",
+      "text": "I hoped you'd have your own."
      }
     ]
    },
@@ -3016,7 +3403,7 @@
     "id": "sit",
     "label": "Can we sit here a minute?",
     "hint": "Just stay.",
-    "outcome": "You pulled two crates to the sill. Snow settled on both your sleeves.",
+    "outcome": "You pulled two crates to the sill. Snow landed on both your sleeves.",
     "effects": [
      {
       "type": "bond",
@@ -3027,8 +3414,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Okay. A minute. I'm timing it. It's going to be a long minute.",
+      "text": "Okay. A minute.",
       "mood": "pleased"
+     },
+     {
+      "who": "cass",
+      "text": "I'm timing it."
      }
     ]
    }

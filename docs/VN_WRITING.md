@@ -1,5 +1,16 @@
 # VN writing rules and voice sheets
 
+**Read `docs/VN_SAMPLE.md` first. It is the bar.** The owner judged the first two rewrites "stilted and strange", like a machine wrote them. Those eight rules override everything below where they conflict:
+
+1. Short lines, mostly under 12 words, one thought each.
+2. Contractions and spoken grammar. Fragments are fine.
+3. Subtext, not explanation. Nobody names their own feeling.
+4. No zingers. At most one sharp line per scene, usually Luci's. No aphorisms, no fortune-cookie metaphors, no "X, and I hate that Y".
+5. Mundane detail: ladders, mugs, the lift, lunch.
+6. People react to the last thing said, sometimes sideways or not at all.
+7. Silence and action carry it. Use a narrator line ("Bea doesn't answer.") instead of a speech.
+8. Read it aloud. If a person wouldn't say it to a coworker, cut it.
+
 How the story text in `packages/content/src/data/story.json`, `endings.json` and `lessons.json` is written, and why. Read this before editing any line of dialogue.
 
 ## Sources, and what I could and could not reach
@@ -26,7 +37,7 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 5. **Specific beats abstract.** "The river smells of diesel" beats "the environment is suffering". One concrete object per scene (a fern, a pen, a glove, a mug).
 
 ### Length and pace
-6. **Short lines.** The dialogue box holds about two lines. Aim for one idea and 8 to 28 words per line; 40 is the ceiling. No monologues (Gabmag). Break long thoughts across speakers or a beat.
+6. **Short lines.** The dialogue box holds about two lines. Aim for one idea and under 12 words per line; 14 is the soft ceiling and 20 the hard one (narrator scene-setters may run a little longer). No monologues (Gabmag). Break long thoughts across speakers or a beat.
 7. **Scene shape: 3 to 6 lines, then a choice.** The first choice arrives by click 7 or earlier (itch.io: inciting incident inside 100 clicks; this game has 27 scenes, so each scene must earn its place within 10).
 8. **Cut filler** (Kim). If a line is not a want, a reveal, a joke or a turn, delete it. Realistic filler is still filler.
 9. **Narration is a spice.** The art shows the room and the portrait shows the face, so narration appears only to set a scene at its start, or to land a beat the art cannot (Lemmasoft narration threads). The narrator never states a feeling. It states an object doing something.
@@ -62,7 +73,7 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 ## Voice sheets
 
 ### Luci Ferro, CFO, champion of the Lattice
-- **Sentence shape.** Fast. Compound sentences that end on a number or a sting. Rhythm is a sales pitch: setup, setup, price. Rhetorical tag questions. Financial words for every feeling (retention, liability, asset, ledger).
+- **Sentence shape.** Quick and light. Short sentences, a number now and then. She is selling even when she's being nice. Money words, but not for every line (retention, ledger).
 - **Tics.** Calls you "Operator", and "darling" only when she is scheming or flustered. "For the record." Prices things. Answers sentiment with arithmetic. Uses the pen.
 - **Wants.** The Singularity, because it is the one thing that has no downside she can see. She wants *you* to be there when it closes, and she has a business reason ready for that.
 - **Hides.** She is already partly synthetic and does not know where the edge is. She is afraid that after the Lattice closes she will be the same, and no one will be able to tell.
@@ -70,8 +81,8 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 - **Arc.** Intro (charming armour) → "Level 2" (the pitch, and *I'd rather it were you*) → diesel deal (a favour that is also a trap, and she sulks when refused) → Form A-5 (offers to sign for you) → halfway (warm, flirting through pace) → ninety (the eye, the shaking hand, "retention strategy") → epilogue (she lets you see the shake).
 - **Motifs.** Gold pen. Ledger. Gold eye. "Stay."
 - **Samples.**
-  - "A hundred and fifty thousand for a year of fuel. Nobody on this floor has ever brought you a better number. You may say thank you. I'll wait."
-  - "That isn't sentimental. It's a retention strategy."
+  - "We get paid a hundred and fifty thousand to take a year of fuel."
+  - "...That isn't sentimental. It's a retention strategy." (the motif; use it once, late)
 
 ### Dr. Mel Kiorre, compute and wetware, champion of the Flesh
 - **Sentence shape.** Soft, mid-length, hedged ("a little", "I think", "sort of"), with the horror delivered in the same calm register as the small talk. She asks permission for terrible things and apologizes in advance for the weather. Clinical vocabulary applied to feelings (sulking cultures, a sample that flinched).
@@ -82,11 +93,11 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 - **Arc.** Intro (shy, strange) → the hypothetical (are you me?) → the cultures sulk (tenderness for tissue) → they flinch (she says what she dislikes about the tower, to your face) → they reject (grief, a kind of pride) → ducts (the monstrous offer, delivered politely) → ninety (asks you to go first, holds your wrist) → epilogue (she takes her glasses off).
 - **Motifs.** The glove. The stain on the cuff. The jar. "It".
 - **Samples.**
-  - "I know 'sulking' isn't a clinical term. I'm using it anyway. They were leaning toward the lamp last week."
-  - "It won't hurt. Well. It won't hurt for long. That's the nicest true thing I have."
+  - "I know 'sulking' isn't a clinical word. I'm using it anyway."
+  - "It won't hurt. Well. Not for long."
 
 ### Bea Altasar, power, champion of the Garden
-- **Sentence shape.** Short. Punchy. Fragments. Jokes that are also accusations. Verbs from trade work (weld, torque, bleed, ground). When she is moved she gets *shorter*, not longer. Capitals for emphasis, at most one word per scene.
+- **Sentence shape.** Short. Fragments. She'd rather joke than explain. Verbs from trade work (weld, torque, bleed, ground). When she is moved she gets *shorter*, not longer. Capitals for emphasis, at most one word per scene.
 - **Tics.** "Okay. Okay." (resetting). "Right." "Hi." as a greeting to a good idea. Calls things "it" and then names them. Mild swearing: "hell", "crap".
 - **Wants.** A machine that belongs to the planet instead of eating it. She wants to be able to say the green things she builds are not a lie.
 - **Hides.** She is afraid that "green" is a paint job, that she has helped paint it, and that she loves the machine as much as the ground.
@@ -94,8 +105,8 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 - **Arc.** Intro (a joke with a threat in it) → the certificate (she sets a trap, because she needs to know if you can tell) → the diesel deal (she says "Don't.") → ferns (she deflects) → river (she is furious) → seventy-five (she gets quieter; "I'm doing my not-shouting voice") → closed (grief delivered flat) → fifty and ninety on the Green path (a bruise on your shoulder, then a question she is scared to ask).
 - **Motifs.** The wrench. The goggles ("down" means hiding). The ferns. "Bring the good wrench."
 - **Samples.**
-  - "It's paper. It's a receipt for a tree somebody promised not to cut down. I was testing you, and I hate that it worked."
-  - "Okay, listen. Not shouting. I'm doing my not-shouting voice."
+  - "Hey. Got a sec? You know those carbon-neutral certificates?" (and, after you buy it: "Yeah. Okay.")
+  - "Okay. Listen. I'm not shouting. This is my not-shouting voice."
 
 ### Cass Parr, cooling and facilities, the human voice
 - **Sentence shape.** Short, dry, plain. Sentences end early. Questions more than statements. Humour so low-key it could be missed. She uses an object (the mug, the window) where another character would use an adjective.
@@ -106,7 +117,7 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 - **Arc.** Intro (the second job: asks if you slept) → night shift (the off-record question) → the hypothetical (stands in the lab, flatly forbids it) → the pull (she is the one who says it is too fast) → the window (asks you to remember them; offers to take the second shift) → epilogue (stays human, hands you the mug).
 - **Motifs.** The mug of terrible coffee. "Did you sleep?" The one window that opens. Frost.
 - **Samples.**
-  - "Me too. Every day. Then a compressor trips and I go fix it, and that's the day."
+  - "Me too. Then a compressor trips, and I go fix it."
   - "That's her line. I hoped you'd have your own."
 
 ---

@@ -55,11 +55,12 @@
      },
      "handbook": "ch:power",
      "say": [
-      "Bea. Power. Welcome to the hall. One job today: two racks, a full day, nothing goes dark.",
-      "Racks tab in the build bar, pick the AC-1, drop it on the glowing slot. Everything else is locked till it's in. Don't touch the rest. I mean it."
+      "Bea. Power. Welcome to the hall. Two racks, one full day, nothing goes dark. That's the job.",
+      "Racks tab in the build bar. Grab the AC-1, drop it on the glowing slot. Rest is locked till it's in."
      ],
      "after": [
-      "Hear that? 40 kW, flat out. A {{kw|kW}} is a rate: how hard something pulls right now. The bar at the top is the whole hall, 93 kW, against a feeder that gives 120. Remember the 120. I will quiz you."
+      "Hear that? That's 40 kW, flat out. A {{kw|kW}} is a rate. How hard something's pulling right now.",
+      "Top bar's the whole hall. 93 kW, on a feeder that gives 120. Remember the 120."
      ],
      "pause": true
     },
@@ -86,12 +87,15 @@
      },
      "handbook": "ch:power",
      "say": [
-      "{{capacity|Capacity}} is the most a supply can give. This feeder tops out at 120 kW. The hall burns 53 before a single rack works (air handler, lift, the intake itself). One rack takes it to 93. Put the second one in and watch the bar."
+      "{{capacity|Capacity}} is the most a supply can give. This feeder tops out at 120 kW.",
+      "The hall burns 53 before any rack works. Air handler, lift, the intake. One rack takes it to 93.",
+      "Put the second one in. Watch the bar."
      ],
      "afterBeat": "trip",
      "after": [
-      "And there it goes. Two racks want 133 kW, the feeder gives 120, and the breaker does what breakers do. Load over capacity is a blackout. Every time. The whole job is keeping capacity above load, with {{headroom|headroom}} to spare.",
-      "Power overlay's on so you can see the net. Next part, I hate: a generator."
+      "And there it goes. Two racks want 133 kW. The feeder gives 120. Breaker trips.",
+      "Load over capacity is a blackout. Every time. Keep capacity above load, with {{headroom|headroom}} to spare.",
+      "Power overlay's on so you can see the net. Next bit I hate. A generator."
      ],
      "pause": true
     },
@@ -120,10 +124,12 @@
      "handbook": "ch:power",
      "say": [
       "Power tab. Diesel Genset. Glowing slot. It starts itself when the grid can't keep up.",
-      "A {{genset|generator}} adds capacity: 120 from the feeder, plus 800 from the diesel. It also adds smoke, and smoke doesn't wash out. Today it's the right tool. Later I'll show you better ones, and you'll feel bad."
+      "A {{genset|generator}} adds capacity. 120 from the feeder, plus 800 from the diesel. And smoke. Smoke doesn't wash out.",
+      "Today it's the right tool. Later I'll show you better ones."
      ],
      "after": [
-      "That gap between what you can supply and what you're using is {{headroom|headroom}}. Loads of it now. Hold both racks flat out for one game day and you pass."
+      "See the gap between what you can supply and what you're using? That's {{headroom|headroom}}. Loads of it now.",
+      "Hold both racks flat out for one game day and you pass."
      ],
      "pause": false
     },
@@ -143,7 +149,8 @@
      ],
      "handbook": "ch:power",
      "say": [
-      "Let the clock run. Keep headroom above 10% all day and don't let anything go dark. I'll watch the meter. And the exhaust."
+      "Let the clock run. Keep headroom above 10% all day. Nothing goes dark.",
+      "I'll watch the meter. And the exhaust."
      ]
     }
    ],
@@ -246,7 +253,7 @@
    ],
    "next": "Where the Heat Goes",
    "bonus": 50000,
-   "outro": "Two racks, a whole day, lights on. Okay. That's good. Next time I'll show you power that doesn't come out of a tank. Find me when you want to know where all this heat goes. Cass will be there. She'll ask if you slept."
+   "outro": "Two racks, a whole day, lights on. Okay. Good. Next time I'll show you power that doesn't come out of a tank. When you want to know where all the heat goes, find Cass. She'll ask if you slept."
   }
  ]
 }
