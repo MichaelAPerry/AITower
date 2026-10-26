@@ -11,7 +11,7 @@
  * Pause: the sim itself never blocks. The clock owner (the app's store/loop) holds the clock while a decision is open, which
  * keeps the sim a pure function of (seed, commands): the same commands give the same game however fast it is played.
  */
-import type { ContentDB, EventChoice, EventDef, EventEffect } from "@aitower/content";
+import { type ContentDB, type EventChoice, type EventDef, type EventEffect, SEALED_TREES } from "@aitower/content";
 import type { SimEvent } from "../api";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import { stockParts } from "../commands/operations";
@@ -24,6 +24,8 @@ import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
 import { addAffinity } from "../progression/affinity";
+import { addBond, addResidue, addSp, isSealed, sealOf } from "../progression/soul";
+import { commitPath } from "../bio/path";
 import { expireModifiers, modifierLabel } from "./modifiers";
 import { changeStanding } from "./standing";
 
@@ -46,7 +48,7 @@ const bioGate = (state: SimState, e: EventDef): boolean => (e.minCorruption === 
 function eligible(state: SimState, content: ContentDB): EventDef[] {
 	const day = dayOf(state.tick);
 	return content.events.filter((e) => {
-		if (e.scriptedDay !== undefined) return false; // scripted events are never picked randomly
+		if (e.scriptedDay !== undefined || e.category === "story") return false; // scripted events and story scenes are never picked randomly
 		if (!bioGate(state, e)) return false;
 		if (state.tier < e.minTier) return false;
 		if (e.maxTier !== undefined && state.tier > e.maxTier) return false;
@@ -56,8 +58,9 @@ function eligible(state: SimState, content: ContentDB): EventDef[] {
 	});
 }
 
-function openDecision(state: SimState, e: EventDef, events: SimEvent[]): void {
+function openDecision(state: SimState, e: EventDef, events: SimEvent[], subject?: string): void {
 	const decision: Decision = { id: state.nextId.decision++, eventId: e.id, issuedAt: state.tick, deferred: false, hiddenUntil: 0 };
+	if (subject !== undefined) decision.subject = subject;
 	state.decision = decision;
 	state.lastIssuedDay[e.id] = dayOf(state.tick);
 	state.lastDecisionDay = dayOf(state.tick);
@@ -79,6 +82,62 @@ function issueScripted(ctx: TickCtx): void {
 		state.scriptedIssued.push(e.id);
 		openDecision(state, e, events);
 		return;
+	}
+}
+
+/** Ticks a story scene waits after the last answered decision, so scenes do not arrive back to back. */
+export const STORY_SPACING_TICKS = 120;
+
+/** Does a story scene's trigger (and its level, day and path conditions) hold now? Objection scenes are issued separately. */
+export function storyHolds(state: SimState, content: ContentDB, e: EventDef): boolean {
+	const t = e.trigger;
+	if (!t || t.kind === "objection") return false;
+	if (state.tier < e.minTier || (e.maxTier !== undefined && state.tier > e.maxTier)) return false;
+	if (dayOf(state.tick) < (e.minDay ?? 0)) return false;
+	if (e.whenPath && !e.whenPath.includes(state.path)) return false;
+	switch (t.kind) {
+		case "tick":
+			return state.tick >= t.atLeast;
+		case "tier":
+			return state.tier >= t.atLeast;
+		case "sp":
+			return state.sp[t.path] >= t.atLeast * content.balance.soul.spTarget;
+		case "seal":
+			return sealOf(state, t.path) >= t.atLeast;
+		case "sealedOut":
+			return state.sealedOut.includes(t.path);
+	}
+}
+
+/**
+ * Story scenes (docs/SOUL.md): each is issued once, in file order, as soon as it holds. Then objections: the first placed item
+ * that scars a tree by `soul.objectionScar` or more draws its champion's objection, once per item. Lessons have no story.
+ */
+function issueStory(ctx: TickCtx): void {
+	const { state, content, events } = ctx;
+	if (state.decision || state.lesson) return;
+	const last = state.decisionHistory.at(-1);
+	if (last && state.tick - last.tick < STORY_SPACING_TICKS) return;
+	for (const e of content.events) {
+		if (e.category !== "story" || state.scriptedIssued.includes(e.id) || !storyHolds(state, content, e)) continue;
+		state.scriptedIssued.push(e.id);
+		openDecision(state, e, events);
+		return;
+	}
+	const s = content.balance.soul;
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (!d.seal) continue;
+		for (const tree of SEALED_TREES) {
+			if ((d.seal[tree] ?? 0) < s.objectionScar) continue;
+			const key = `${tree}:${d.id}`;
+			if (state.objected.includes(key)) continue;
+			state.objected.push(key);
+			const ev = content.events.find((x) => x.trigger?.kind === "objection" && x.trigger.path === tree);
+			if (!ev || isSealed(state, content, tree) || (ev.whenPath && !ev.whenPath.includes(state.path))) continue;
+			openDecision(state, ev, events, d.id);
+			return;
+		}
 	}
 }
 
@@ -113,6 +172,8 @@ export function decisionStep(ctx: TickCtx): void {
 		if (!eventDef(content, d.eventId)) state.decision = null; // unknown event (stale save): drop silently
 		return;
 	}
+	issueStory(ctx);
+	if (state.decision) return;
 	issueScripted(ctx);
 	if (state.decision) return;
 	const eb = content.balance.events;
@@ -172,6 +233,18 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 		case "affinity":
 			addAffinity(state, e.path, e.amount);
 			break;
+		case "seal":
+			addResidue(state, e.path, e.amount);
+			break;
+		case "bond":
+			addBond(state, e.advisor, e.amount);
+			break;
+		case "commitPath":
+			commitPath(state, e.path, events);
+			break;
+		case "sp":
+			addSp(state, e.path, e.amount);
+			break;
 	}
 }
 
@@ -179,6 +252,9 @@ function resolveNow(state: SimState, content: ContentDB, d: Decision, def: Event
 	state.decision = null;
 	state.stats.decisionsMade++;
 	for (const e of choice.effects) applyEffect(state, content, e, events, def.title);
+	// Taking an advisor's recommendation warms her to you; overruling her cools her a little.
+	const sb = content.balance.soul;
+	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow : sb.bondOverrule);
 	state.decisionHistory.push({ decisionId: d.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick });
 	if (state.decisionHistory.length > DECISION_HISTORY_LENGTH) state.decisionHistory.splice(0, state.decisionHistory.length - DECISION_HISTORY_LENGTH);
 	events.push({ type: "decisionResolved", decisionId: d.id, eventId: def.id, choiceId: choice.id });

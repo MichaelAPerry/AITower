@@ -149,9 +149,7 @@ const GREEN = new Set(["solar", "wind", "heat_export", "carbon"]);
 const onPath = (p: AscensionPath, d: FacilityDef): boolean => !d.growth && (p === "biotech" ? d.category === "bio" || BIO.has(d.kind) || !!d.rack?.bio : p === "greentech" ? GREEN.has(d.kind) : d.kind === "rack" && d.unlockTier >= 4 && !d.rack?.bio);
 
 function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
-	const e = c.balance.endings;
-	const gx = e.greenExemplar ?? { minScore: 0.7, pflops: 3000 };
-	const mm = e.millionMinds ?? { minScore: 0.85, pflops: 3600 };
+	const target = c.balance.soul?.spTarget ?? 1000;
 	const gear = Object.values(c.facilities)
 		.filter((d) => onPath(p, d))
 		.sort((a, b) => a.unlockTier - b.unlockTier)
@@ -160,24 +158,24 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	const unlocks = `Machines: ${list(gear, 5)}. Research: ${list(researchNodes, 3)}.`;
 	const text: Record<AscensionPath, { earn: string; win: string; risk: string }> = {
 		biotech: {
-			earn: "Leanings grow when you pick Biotech answers in advisor decisions, research the Wetware steps, and keep nutrient plants and organoid cabinets running.",
-			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. A Living Tower needs ${e.livingTower.pflops} PF with lots of growth. A Clean Tower needs ${e.cleanTower.pflops} PF with very little. Choose one and stay with it.`,
-			risk: "Growth spreads if you do not contain it. Sterile bays and quarantine locks cost money and keep it tidy. The Ministry will say it is under control.",
+			earn: "Commit to The Flesh at Level 3, once Dr. Mel Kiorre trusts you. From then on, running organoid racks earn Bio Singularity points.",
+			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. The Flesh Remembers at ${target} Bio points. Every rack not on the Bio line feeds the Lattice instead, so build on your own line.`,
+			risk: "Growth spreads if you do not contain it, and at 99% corruption the tower absorbs you. Some machines hurt the tissue. Mel will tell you which ones, once she trusts you.",
 		},
 		greentech: {
-			earn: "Leanings grow when you pick Greentech answers in advisor decisions, research the sun, wind and heat steps, and keep panels, masts and heat links running.",
-			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Reach ${pct(gx.minScore)} with ${gx.pflops} PF to be an exemplar. Sell waste heat (heat reuse) and grow algae for carbon credits.`,
+			earn: "Commit to The Garden at Level 3, once Bea Altasar trusts you. From then on, compute earns Green Singularity points, scaled by your Green Score.",
+			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Green-line racks earn the most. The Garden opens at ${target} Green points. Sell waste heat (heat reuse) and grow algae for carbon credits.`,
 			risk: `Some days are dark and still. Weather-dependent supply drops to ${pct(c.balance.green.droughtFactor)} for ${c.balance.green.droughtHours} hours. Keep a genset ready and a UPS charged.`,
 		},
 		synthetic: {
-			earn: "Leanings grow when you pick Synthetic answers in advisor decisions, research the Continuity steps, and run the newest top-tier racks.",
-			win: `Your Refinement is uptime multiplied by the share of compute on top-tier racks. Reach ${pct(mm.minScore)} with ${mm.pflops} PF. Cool lattice racks on a cryo loop. Keep everything running behind monitors and a backup vault.`,
-			risk: "One long outage hurts twice, because Refinement counts uptime. The minds are polite and dislike being switched off.",
+			earn: "The default. Every running rack that is not on the Bio or Green line feeds the Lattice, and the Synthetic line feeds it twice over.",
+			win: `The Lattice closes at ${target} Synthetic points. Cool lattice racks on a cryo loop, and keep everything running behind monitors and a backup vault.`,
+			risk: "The Lattice fills even while you build toward another tree. Watch its bar.",
 		},
 	};
 	const t = text[p];
 	const blocks: Block[] = [
-		{ h: "How you earn it", p: `${t.earn} Your Ascension form shows the share for each path.` },
+		{ h: "How you earn it", p: `${t.earn} Your Singularity bars show each tree's progress.` },
 		{ h: "What it unlocks", p: unlocks },
 		{ h: "How to score high", p: t.win },
 		{ h: "Risks", p: t.risk },

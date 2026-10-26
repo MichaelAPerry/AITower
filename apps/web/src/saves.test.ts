@@ -1,11 +1,10 @@
-import { loadContent } from "@aitower/content";
 import { createSim } from "@aitower/sim";
 import { describe, expect, it, vi } from "vitest";
 import { createMemoryBackend } from "./saveBackend";
 import { LEGACY_AUTOSAVE_KEY, SCENARIO, createGameStore } from "./store";
-import { memoryStorage } from "./testUtils";
+import { contentWithoutStory, memoryStorage } from "./testUtils";
 
-const content = loadContent();
+const content = contentWithoutStory();
 
 function setup(storageInit: Record<string, string> = {}) {
 	const backend = createMemoryBackend();

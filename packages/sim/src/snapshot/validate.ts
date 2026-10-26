@@ -369,7 +369,9 @@ function validateManagement(content: ContentDB, s: Obj): void {
 
 const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureRate"];
 const GAME_OVER_KINDS = ["bankrupt", "shutdown", "victory", "absorbed"];
-const ENDINGS = ["livingTower", "cleanTower", "absorbed", "greenExemplar", "millionMinds"];
+const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
+const ADVISOR_KEYS = ["cass", "bea", "mel", "luci"];
+const SEALED = ["biotech", "greentech"];
 const PATHS = ["biotech", "greentech", "synthetic"];
 
 /** Contamination share, corruption, path, ending counters (snapshot v5). */
@@ -379,8 +381,25 @@ function validateBiotech(s: Obj): void {
 	if (share < 0 || share > 1) fail("contaminatedShare is outside 0..1");
 	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
 	if (s.path !== null && !PATHS.includes(s.path as string)) fail("path is invalid");
-	const d = fields(s.endingDays, { livingTower: "int", cleanTower: "int", greenExemplar: "int", millionMinds: "int" }, "endingDays");
-	for (const k of Object.keys(d)) if ((d[k] as number) < 0) fail("endingDays must not be negative");
+	validateSoul(s);
+}
+
+/** Singularity points, seals, bonds, objections, lock-outs (snapshot v11). */
+function validateSoul(s: Obj): void {
+	const nonNeg = (o: Obj, where: string): void => {
+		for (const k of Object.keys(o)) if (!((o[k] as number) >= 0)) fail(`${where}.${k} must not be negative`);
+	};
+	nonNeg(fields(s.sp, { synthetic: "num", biotech: "num", greentech: "num" }, "sp"), "sp");
+	nonNeg(fields(s.sealScar, { biotech: "num", greentech: "num" }, "sealScar"), "sealScar");
+	nonNeg(fields(s.sealResidue, { biotech: "num", greentech: "num" }, "sealResidue"), "sealResidue");
+	const b = fields(s.bonds, { cass: "num", bea: "num", mel: "num", luci: "num" }, "bonds");
+	for (const k of ADVISOR_KEYS) if (!((b[k] as number) >= 0 && (b[k] as number) <= 100)) fail(`bonds.${k} is outside 0..100`);
+	array(s, "objected").forEach((x, i) => {
+		if (typeof x !== "string") fail(`objected[${i}] must be a string`);
+	});
+	array(s, "sealedOut").forEach((x, i) => {
+		if (!SEALED.includes(x as string)) fail(`sealedOut[${i}] is invalid`);
+	});
 }
 
 /** Automation, weather, scores, sandbox flag (snapshot v6). */
@@ -407,7 +426,8 @@ function validateMinistry(content: ContentDB, s: Obj, nextDecision: number): voi
 	const standing = s.standing as number;
 	if (standing < 0 || standing > 100) fail(`standing ${standing} is outside 0..100`);
 	if (s.decision !== null) {
-		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string };
+		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string; subject?: unknown };
+		if (d.subject !== undefined && typeof d.subject !== "string") fail("decision.subject must be a string");
 		if (!content.events.some((e) => e.id === d.eventId)) fail(`decision uses unknown event '${d.eventId}'`);
 		checkIds([d], nextDecision, "decision");
 	}

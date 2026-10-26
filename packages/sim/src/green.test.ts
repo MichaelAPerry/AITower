@@ -2,8 +2,6 @@
 import type { Balance, ContentDB, Scenario } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimEvent } from "./api";
-import { endingsStep } from "./bio/path";
-import type { TickCtx } from "./core/context";
 import { GREEN_SMOOTHING } from "./core/constants";
 import { changeStanding } from "./ministry/standing";
 import { daylight } from "./green/weather";
@@ -421,95 +419,6 @@ describe("refinement", () => {
 	});
 });
 
-describe("endings greenExemplar and millionMinds", () => {
-	const E = { greenExemplar: { minScore: 0.6, pflops: 10, days: 2 }, millionMinds: { minScore: 0.7, pflops: 10, days: 3 } };
-	const ctxOf = (sim: SimImpl): TickCtx & { events: SimEvent[] } => ({ state: sim.state, content: sim.content, events: [], scratch: undefined as never });
-	const day = (sim: SimImpl): SimEvent[] => {
-		const ctx = ctxOf(sim);
-		endingsStep(ctx);
-		return ctx.events;
-	};
-	const setup = (path: "greentech" | "synthetic" | null) => {
-		const sim = newSim(content([], { endings: { ...balance.endings, ...E } }), "empty");
-		sim.state.path = path;
-		sim.state.metrics.pflops = 50;
-		return sim;
-	};
-
-	it("greenExemplar: path greentech, score and PFLOPS held for N consecutive daily checks", () => {
-		const sim = setup("greentech");
-		sim.state.greenScore = 0.9;
-		expect(day(sim)).toEqual([]);
-		expect(sim.state.endingDays.greenExemplar).toBe(1);
-		expect(sim.view().endingProgress).toEqual({ ending: "greenExemplar", days: 1, needed: 2 });
-		sim.state.greenScore = 0.3; // a bad day resets the count
-		day(sim);
-		expect(sim.state.endingDays.greenExemplar).toBe(0);
-		sim.state.greenScore = 0.9;
-		day(sim);
-		expect(sim.state.gameOver).toBeNull();
-		const ev = day(sim);
-		expect(ev).toContainEqual({ type: "gameOver", kind: "victory", ending: "greenExemplar" });
-		expect(sim.state.gameOver).toMatchObject({ kind: "victory", ending: "greenExemplar" });
-	});
-
-	it("needs the PFLOPS too, and the right path", () => {
-		const low = setup("greentech");
-		low.state.greenScore = 1;
-		low.state.metrics.pflops = 9.9;
-		day(low);
-		expect(low.state.endingDays.greenExemplar).toBe(0);
-		const wrong = setup("synthetic");
-		wrong.state.greenScore = 1;
-		day(wrong);
-		expect(wrong.state.endingDays.greenExemplar).toBe(0);
-		const none = setup(null);
-		none.state.greenScore = 1;
-		none.state.refinement = 1;
-		day(none);
-		expect(none.state.endingDays).toMatchObject({ greenExemplar: 0, millionMinds: 0 });
-		expect(none.view().endingProgress).toBeNull();
-	});
-
-	it("millionMinds: path synthetic, refinement and PFLOPS held for N days", () => {
-		const sim = setup("synthetic");
-		sim.state.refinement = 0.8;
-		day(sim);
-		day(sim);
-		expect(sim.state.gameOver).toBeNull();
-		expect(sim.view().endingProgress).toEqual({ ending: "millionMinds", days: 2, needed: 3 });
-		const ev = day(sim);
-		expect(ev).toContainEqual({ type: "gameOver", kind: "victory", ending: "millionMinds" });
-		const low = setup("synthetic");
-		low.state.refinement = 0.69;
-		day(low);
-		expect(low.state.endingDays.millionMinds).toBe(0);
-	});
-
-	it("skips an ending whose balance entry is absent", () => {
-		const sim = newSim(content([], { endings: { ...balance.endings } }), "empty");
-		sim.state.path = "greentech";
-		sim.state.greenScore = 1;
-		sim.state.metrics.pflops = 1e9;
-		for (let i = 0; i < 5; i++) day(sim);
-		expect(sim.state.endingDays.greenExemplar).toBe(0);
-		expect(sim.state.gameOver).toBeNull();
-		expect(sim.view().endingProgress).toBeNull();
-		sim.state.path = "synthetic";
-		sim.state.refinement = 1;
-		for (let i = 0; i < 5; i++) day(sim);
-		expect(sim.state.endingDays.millionMinds).toBe(0);
-		expect(sim.state.gameOver).toBeNull();
-	});
-
-	it("runs from the real day-end step (progressionStep)", () => {
-		const sim = newSim(content([], { endings: { ...balance.endings, greenExemplar: { minScore: 0, pflops: 0, days: 1 } } }), "empty");
-		sim.state.path = "greentech";
-		run(sim, 1440);
-		expect(sim.state.gameOver).toMatchObject({ kind: "victory", ending: "greenExemplar" });
-	});
-});
-
 describe("scenarios", () => {
 	const custom = scenario("custom", { startingCash: 123_456, startTier: 3, sandbox: true });
 	const plain = scenario("plain", {});
@@ -633,16 +542,16 @@ describe("snapshot v6", () => {
 		snap.version = 5;
 		const s = snap.state;
 		for (const k of ["automation", "wind", "droughtUntil", "greenScore", "refinement", "sandbox"]) delete s[k];
-		delete s.endingDays.greenExemplar;
-		delete s.endingDays.millionMinds;
+		for (const k of ["sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
+		s.endingDays = { livingTower: 0, cleanTower: 0 };
 		delete s.rng.weather;
 		for (const k of ["ringGreenKwh", "ringHeatKwh", "greenKw", "heatExportKw"]) delete s.metrics[k];
 		for (const j of s.jobs) delete j.unreported;
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(10);
-		expect(base().snapshot().version).toBe(10);
+		expect(SNAPSHOT_VERSION).toBe(11);
+		expect(base().snapshot().version).toBe(11);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -664,7 +573,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(10);
+		expect(loaded.snapshot().version).toBe(11);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);
@@ -708,10 +617,11 @@ describe("snapshot v6", () => {
 		expect(bad((s) => (s.automation.parts.keep = -1))).toMatch(/^Invalid save:.*automation/);
 		expect(bad((s) => (s.automation.research.branches = ["nope"]))).toMatch(/^Invalid save:.*automation/);
 		expect(bad((s) => (s.automation = null))).toMatch(/^Invalid save:.*automation/);
-		expect(bad((s) => (s.endingDays.millionMinds = -1))).toMatch(/^Invalid save:.*endingDays/);
+		expect(bad((s) => (s.sp.synthetic = -1))).toMatch(/^Invalid save:.*sp/);
+		expect(bad((s) => (s.bonds.luci = 101))).toMatch(/^Invalid save:.*bonds/);
 		expect(bad((s) => delete s.rng.weather)).toMatch(/^Invalid save:.*rng/);
 		expect(bad((s) => (s.metrics.ringGreenKwh.v = [1, 2]))).toMatch(/^Invalid save:/);
-		expect(bad((s) => (s.gameOver = { kind: "victory", tick: 1, ending: "millionMinds" }))).toBe("");
+		expect(bad((s) => (s.gameOver = { kind: "victory", tick: 1, ending: "singularity" }))).toBe("");
 	});
 });
 

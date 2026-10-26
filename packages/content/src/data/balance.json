@@ -144,31 +144,11 @@
   "nutrientPrice": 2
  },
  "ascension": {
-  "minTier": 5
+  "minTier": 3
  },
  "endings": {
-  "livingTower": {
-   "minCorruption": 0.75,
-   "pflops": 2000,
-   "days": 3
-  },
-  "cleanTower": {
-   "maxCorruption": 0.3,
-   "pflops": 1500,
-   "days": 7
-  },
   "absorbed": {
    "corruption": 0.99
-  },
-  "greenExemplar": {
-   "minScore": 0.7,
-   "pflops": 3000,
-   "days": 4
-  },
-  "millionMinds": {
-   "minScore": 0.85,
-   "pflops": 3600,
-   "days": 5
   }
  },
  "green": {
@@ -185,5 +165,38 @@
  "events": {
   "intervalTicks": 3600,
   "graceTicks": 1440
+ },
+ "soul": {
+  "spTarget": 1000,
+  "spPerPflopHour": 0.0014,
+  "spWeights": {
+   "synthetic": {
+    "shared": 1,
+    "synthetic": 2,
+    "greentech": 0.25,
+    "biotech": 0
+   },
+   "biotech": {
+    "biotech": 1.5
+   },
+   "greentech": {
+    "shared": 0.5,
+    "greentech": 2.5
+   }
+  },
+  "sealMax": 100,
+  "residuePerDay": 0.03,
+  "objectionScar": 10,
+  "bondStart": {
+   "cass": 20,
+   "bea": 20,
+   "mel": 20,
+   "luci": 30
+  },
+  "bondReveal": 40,
+  "bondCommit": 50,
+  "bondEpilogue": 60,
+  "bondFollow": 3,
+  "bondOverrule": -1
  }
 }

@@ -1,12 +1,11 @@
-import { loadContent } from "@aitower/content";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createMemoryBackend } from "./saveBackend";
 import { DECISION_GAP_MS, createGameStore } from "./store";
-import { memoryStorage } from "./testUtils";
+import { contentWithoutStory, memoryStorage } from "./testUtils";
 
 /** Decisions every few ticks, so one opens quickly. The store must hold the clock when it does. */
 function make(backend = createMemoryBackend()) {
-	const content = loadContent();
+	const content = contentWithoutStory();
 	content.balance.events = { intervalTicks: 10, graceTicks: 0 };
 	content.events = content.events.filter((e) => e.scriptedDay === undefined); // the scripted day-2 event is exempt from the real-time gate
 	return createGameStore(content, null, null, { backend, storage: memoryStorage(), prefersReducedMotion: false });

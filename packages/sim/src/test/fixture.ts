@@ -135,7 +135,8 @@ export const balance: Balance = {
 	green: { heatPrice: 3, creditPrice: 40, droughtChancePerDay: 0.08, droughtFactor: 0.1, droughtHours: 18 },
 	automation: { partsBatch: 5, foremanPerHour: 1 },
 	ascension: { minTier: 5 },
-	endings: { livingTower: { minCorruption: 0.8, pflops: 2000, days: 3 }, cleanTower: { maxCorruption: 0.1, pflops: 2000, days: 7 }, absorbed: { corruption: 1 } },
+	endings: { absorbed: { corruption: 1 } },
+	soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, bondStart: { cass: 50, bea: 50, mel: 50, luci: 50 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
 };
 
 /** Deterministic, tiny contract generator (rng only). */

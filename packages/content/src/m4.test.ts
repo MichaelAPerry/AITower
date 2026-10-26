@@ -195,8 +195,8 @@ describe("M4 content (bundled)", () => {
 			const g = db.paths.find((p) => p.id === "greentech")!;
 			const s = db.paths.find((p) => p.id === "synthetic")!;
 			expect(g.available && s.available).toBe(true);
-			expect(g.description).toMatch(/Dunkelflaute/);
-			expect(s.description).toMatch(/Refinement/);
+			expect(g.description).toMatch(/green score/);
+			expect(s.description).toMatch(/default/i);
 		});
 
 		it("adds two climate clients", () => {
@@ -209,7 +209,7 @@ describe("M4 content (bundled)", () => {
 		});
 
 		it("has real two- or three-paragraph endings for the two new paths, with no gore", () => {
-			for (const id of ["greenExemplar", "millionMinds"]) {
+			for (const id of ["garden", "singularity"]) {
 				const e = db.endings.find((x) => x.id === id)!;
 				expect(e.body, id).not.toMatch(/placeholder/i);
 				const n = e.body.split("\n\n").length;
@@ -296,27 +296,16 @@ describe("M4 content (bundled)", () => {
 			expect(db.balance.automation.foremanPerHour).toBeGreaterThanOrEqual(1);
 		});
 
-		it("makes the Greentech ending reachable: score below the 0.7 + 0.3 ceiling, a streak likely to survive a drought", () => {
-			const e = db.balance.endings.greenExemplar!;
-			const g = db.balance.green;
-			expect(e.minScore).toBeLessThanOrEqual(0.75);
-			expect(e.minScore).toBeGreaterThan(0.5);
-			expect(e.pflops).toBeLessThanOrEqual(db.balance.tiers.pflops[4]);
-			// Chance that no Dunkelflaute starts during the streak: better than even odds, so a patient player gets there.
-			expect((1 - g.droughtChancePerDay) ** (e.days + 1)).toBeGreaterThan(0.7);
-			// Ten photonic cabinets deliver the PFLOPS while drawing about 400 kW.
-			const photonic = Math.ceil(e.pflops / f.rack_photonic.rack!.pflops);
-			expect(photonic).toBeLessThanOrEqual(12);
-		});
-
-		it("makes the Synthetic ending reachable with a handful of lattice cabinets", () => {
-			const e = db.balance.endings.millionMinds!;
-			expect(e.minScore).toBeLessThanOrEqual(0.9);
-			expect(e.minScore).toBeGreaterThan(0.5);
-			const lattices = Math.ceil(e.pflops / f.rack_mind_lattice.rack!.pflops);
-			expect(lattices).toBeLessThanOrEqual(8);
-			expect(f.rack_mind_lattice.unlockTier).toBeGreaterThanOrEqual(4); // counts as top-tier for refinement
-			expect(e.pflops).toBeGreaterThan(db.balance.tiers.pflops[3]);
+		it("tunes the Soul: Synthetic is the easy default, Bio and Green ask for trust", () => {
+			const so = db.balance.soul;
+			expect(so.spWeights.synthetic.shared).toBeGreaterThan(0);
+			expect(so.spWeights.synthetic.synthetic).toBeGreaterThan(so.spWeights.synthetic.shared ?? 0);
+			expect(so.spWeights.synthetic.biotech ?? 0).toBe(0);
+			expect(so.bondCommit).toBeGreaterThan(Math.max(...Object.values(so.bondStart)));
+			// A Level-5 tower of 3000 PF of synthetic-line compute reaches the Lattice within about a week.
+			const days = so.spTarget / (3000 * (so.spWeights.synthetic.synthetic ?? 0) * so.spPerPflopHour * 24);
+			expect(days).toBeGreaterThan(3);
+			expect(days).toBeLessThan(12);
 		});
 	});
 });
@@ -363,7 +352,7 @@ describe("validateContent: M4 rules", () => {
 	});
 
 	it("checks that a path node comes at or after the ascension clearance", () => {
-		expect(broken((db) => (db.tech.find((n) => n.id === "canopy_array")!.minTier = 4))).toMatch(/path node cannot come before/);
+		expect(broken((db) => (db.tech.find((n) => n.id === "canopy_array")!.minTier = 2))).toMatch(/path node cannot come before/);
 	});
 
 	it("checks the green and automation balance", () => {
@@ -378,11 +367,11 @@ describe("validateContent: M4 rules", () => {
 		expect(broken((db) => delete (db.balance as { automation?: unknown }).automation)).toMatch(/balance.automation: missing/);
 	});
 
-	it("checks the Greentech and Synthetic ending numbers (and lets them be absent)", () => {
-		expect(broken((db) => (db.balance.endings.greenExemplar!.minScore = 1.2))).toMatch(/greenExemplar.minScore/);
-		expect(broken((db) => (db.balance.endings.greenExemplar!.days = 0))).toMatch(/greenExemplar.days/);
-		expect(broken((db) => (db.balance.endings.millionMinds!.pflops = 0))).toMatch(/millionMinds.pflops/);
-		expect(broken((db) => delete db.balance.endings.millionMinds)).toBe("");
+	it("checks the Soul balance", () => {
+		expect(broken((db) => (db.balance.soul.spTarget = 0))).toMatch(/spTarget/);
+		expect(broken((db) => (db.balance.soul.bondCommit = 120))).toMatch(/bondCommit/);
+		expect(broken((db) => delete (db.balance.soul.spWeights as Partial<typeof db.balance.soul.spWeights>).greentech)).toMatch(/spWeights.greentech/);
+		expect(broken((db) => delete (db.balance as { soul?: unknown }).soul)).toMatch(/balance.soul: missing/);
 	});
 
 	it("gates horror memos by corruption except on the greentech and synthetic paths", () => {
@@ -392,8 +381,8 @@ describe("validateContent: M4 rules", () => {
 		expect(broken((db) => (db.events.find((e) => e.id === "g_mycelium_ducts")!.path = "biotech"))).toMatch(/corruption-gated/);
 	});
 
-	it("requires both new endings to have text", () => {
-		expect(broken((db) => (db.endings = db.endings.filter((e) => e.id !== "millionMinds")))).toMatch(/missing "millionMinds"/);
-		expect(broken((db) => (db.endings.find((e) => e.id === "greenExemplar")!.body = ""))).toMatch(/greenExemplar/);
+	it("requires every Singularity ending to have text", () => {
+		expect(broken((db) => (db.endings = db.endings.filter((e) => e.id !== "singularity")))).toMatch(/missing "singularity"/);
+		expect(broken((db) => (db.endings.find((e) => e.id === "garden")!.body = ""))).toMatch(/garden/);
 	});
 });

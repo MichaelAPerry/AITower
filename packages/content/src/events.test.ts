@@ -5,7 +5,9 @@ import type { ContentDB, EventDef, EventEffect } from "./schema";
 const money = (a: number): string => `${a >= 0 ? "+" : "-"}$${Math.abs(a) / 1000}k`;
 
 describe("events.json", () => {
-	const db = loadContent();
+	const all = loadContent();
+	// Memos only; story scenes (story.json) have their own tests in story.test.ts.
+	const db = { ...all, events: all.events.filter((e) => e.category !== "story") };
 
 	it("has about two dozen memos with 7 horror memos, every memo having exactly two choices", () => {
 		const by = (c: string): number => db.events.filter((e) => e.category === c).length;
@@ -43,7 +45,7 @@ describe("events.json", () => {
 	});
 
 	it("validates (unique ids, defaults, effects, durations, weights)", () => {
-		expect(validateContent(db)).toEqual([]);
+		expect(validateContent(all)).toEqual([]);
 	});
 
 	it("covers the required scenarios", () => {
@@ -113,7 +115,11 @@ describe("events.json", () => {
 							expect(c.hint, w).toContain(`${fx.count >= 0 ? "+" : "-"}${Math.abs(fx.count)} spare parts`);
 							break;
 						case "affinity":
-							break; // the hint names the lean in words; no fixed format
+						case "seal":
+						case "bond":
+						case "sp":
+						case "commitPath":
+							break; // the hint names the lean in words; the Soul's effects are secret
 						case "gridCap":
 							expect(c.hint, w).toMatch(fx.factor === 0 ? /grid offline/ : new RegExp(`x${fx.factor}\\b`));
 							break;
@@ -153,13 +159,13 @@ describe("events.json", () => {
 
 	it("every decision has an owner advisor, a recommended choice and a short, number-bearing body", () => {
 		for (const e of db.events) {
-			expect(["cass", "bea", "mel", "lucien"], e.id).toContain(e.advisor);
+			expect(["cass", "bea", "mel", "luci"], e.id).toContain(e.advisor);
 			expect(e.choices.some((c) => c.id === e.recommended), e.id).toBe(true);
 			expect(e.body.split(/\s+/).length, e.id).toBeLessThanOrEqual(45);
 			expect(e.body, e.id).toMatch(/\d/);
 			expect(e).not.toHaveProperty("timeoutTicks");
 		}
-		for (const a of ["cass", "bea", "mel", "lucien"]) expect(db.events.filter((e) => e.advisor === a).length, a).toBeGreaterThanOrEqual(3);
+		for (const a of ["cass", "bea", "mel", "luci"]) expect(db.events.filter((e) => e.advisor === a).length, a).toBeGreaterThanOrEqual(3);
 	});
 
 	it("MAGI votes: Cass, Bea and Mel each vote with a line, on a handful of multi-area decisions", () => {

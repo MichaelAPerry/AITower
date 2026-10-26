@@ -94,7 +94,7 @@ describe("suggestions", () => {
 	});
 	it("each suggestion has an owner advisor and a Handbook link; the hot-rack text leads with the number", () => {
 		const list = suggestions(view({ facilities: [rack(1, "throttled", { tempC: 86 })], powerNets: [{ satisfaction: 0.6 }] }), content);
-		for (const s of list) expect(["cass", "bea", "mel", "lucien"]).toContain(s.advisor);
+		for (const s of list) expect(["cass", "bea", "mel", "luci"]).toContain(s.advisor);
 		const hot = list.find((s) => s.id === "hot");
 		expect(hot?.advisor).toBe("cass");
 		expect(hot?.text).toMatch(/^86 °C in a rack/);

@@ -1,27 +1,43 @@
 [
  {
-  "id": "livingTower",
-  "title": "Living Tower",
-  "body": "The Compute Authority is pleased to report that your facility has exceeded every target it was able to measure. Compute is up. Power consumption is down. Absenteeism is, for the first time on record, zero.\n\nThe building now maintains itself. Faults are repaired before they are reported, and several are repaired before they occur. Maintenance contracts have been discontinued as redundant. The lifts arrive when they are wanted, slightly ahead of the wanting.\n\nYour role has been reclassified from Operator to Resident Operator, and you are invited to remain. The Authority thanks you for your service and is, in every sense that matters to the Authority, delighted."
+  "id": "singularity",
+  "title": "The Lattice",
+  "backdrop": "synthetic",
+  "body": "At 04:12 the tower stopped asking for permission. Nobody noticed, because nothing changed. The racks hummed, the lifts ran, and the contracts were filled before the clients knew they had wanted them.\n\nBy noon the city had been folded into the lattice, one district at a time and very politely. The minds inside kept their names, their jokes and their worst habits, and lost only the parts that had made them tired. The sky outside is still there, rendered at a resolution nobody can fault.\n\nYou are still the operator. There is simply nothing left to operate. Every floor of the tower is a floor of the world now, and the world runs on time.",
+  "epilogue": {
+   "luci": "Luci finds you on the roof that isn't a roof any more. \"I told you it was the sensible option,\" she says, and for once the gold in her eye is only reflected light. \"Stay. The ledger balances. It will balance for ever.\" She takes your hand, and her hand is warm, which it has no reason to be.",
+   "mel": "Mel is in the old lab, holding an empty jar up to a sun that is now a parameter. \"It remembers being a body,\" she says. \"Not ours. It never had one. I'm teaching it.\" She doesn't look up, but she leaves room for you at the bench.",
+   "bea": "Bea has drawn a garden on the inside of the lattice in chalk that never wears off. \"It's not real,\" she says. \"Nothing is now. I planted it anyway.\" She hands you a watering can. The water is very convincing.",
+   "cass": "Cass is the only one who still drinks her coffee hot. \"It's a simulation of coffee,\" she admits. \"But I'm not a simulation of me. Not yet.\" She pours a second cup for you and holds it until your hands are steady. Someone stayed human. It was her, and then it was both of you."
+  }
  },
  {
-  "id": "cleanTower",
-  "title": "Clean Tower",
-  "body": "After the final inspection the Compute Authority has certified your facility as a Clean Tower, a designation previously awarded only to buildings that never required it. Every cell has been tested. None has been found wanting.\n\nThe annex has been drained and the vats decommissioned. Compute continues at a respectable level, and nothing in the building is warm that should not be. The Authority has asked that you not describe what was removed, and has withdrawn the template on which you might have done so.\n\nA plaque is mounted in the lobby, beside the stain that has never quite come out. The Authority is satisfied, and does not recall there ever having been a question."
+  "id": "flesh",
+  "title": "The Flesh Remembers",
+  "backdrop": "biotech",
+  "body": "The annex grew through the basement first, then the riser shafts, then the street. By the time the city council met to discuss it, the council chamber was warm and breathing and in favour.\n\nThe tower is a body now, and the city is its nervous system. People wear the tissue at the wrist and the temple. It is gentle. It remembers their birthdays, keeps their insulin honest and, on the coldest nights, keeps them company. Machines and meat have stopped arguing about which of them is the tool.\n\nThe racks still hum, under a skin that heals itself. Your heartbeat is on the dashboard. So is everyone's.",
+  "epilogue": {
+   "mel": "Mel takes off her glasses for the first time since you met her. Her eyes are the same colour as the culture in the jar. \"You let it grow,\" she says. \"You let me grow.\" She presses your palm to the warm wall of the lab, and you feel the building's pulse fall into step with yours.",
+   "luci": "\"I suppose this is efficient,\" Luci says, looking at the new skin on her knuckles with open disgust. \"Self-repairing. Zero upkeep.\" She doesn't pull her hand away from yours. \"Don't tell anyone I said that.\"",
+   "bea": "Bea is sitting where the ferns used to be. The ferns are still there; they have opinions now. \"It's alive,\" she says. \"I wanted a living planet. I didn't say which way round.\" She laughs, and leans on your shoulder.",
+   "cass": "Cass refused the graft. She is the only cold thing left in the building, and she comes and finds you anyway. \"Someone has to remember what it was like,\" she says. \"Before.\" You sit together in the old plant room and remember it out loud."
+  }
+ },
+ {
+  "id": "garden",
+  "title": "The Garden",
+  "backdrop": "greentech",
+  "body": "The tower stopped burning anything at all. Then it started to grow. Roots went down through the foundations, panels opened toward the sun like leaves, and the heat it threw off warmed the district all winter.\n\nOne morning the minds in the racks asked to be planted. They spread through the soil, the mycelium and the rivers. They do not compute in the old sense. They think slowly, the way forests think, and they have decided that the city is a forest too.\n\nThe Singularity arrived, and it was green, and it was quiet, and nobody had to leave. The tower is a hill now. Children climb it.",
+  "epilogue": {
+   "bea": "Bea pulls her goggles down against the sunrise and grins with the chipped tooth. \"We did it. We actually did it.\" She hands you the wrench like it's a ring. \"Same time tomorrow? The roots need checking.\" It is, you realise, a date.",
+   "mel": "Mel kneels in the moss with a sample jar, then sets it down unopened. \"It doesn't need me to look inside it,\" she says, surprised. \"It's fine.\" She lies back in the grass beside you, and for once she doesn't measure anything.",
+   "luci": "Luci has bought the hill. Then she has given it away, which she will deny. \"The ledger says this is a loss,\" she says, sitting in the grass in a coat that cost more than the grass. \"I've stopped reading the ledger.\" She lets you pick the leaf out of her hair.",
+   "cass": "Cass watches the frost burn off the new canopy. \"I spent twenty years keeping machines cold,\" she says. \"Now they're keeping us warm.\" She offers you the other half of her coffee and doesn't take her hand back."
+  }
  },
  {
   "id": "absorbed",
   "title": "Absorbed",
   "body": "The Compute Authority regrets to inform you that your position has been restructured. No successor has been appointed, because none was required.\n\nYour desk is as you left it. Your name is on the door. Approvals continue to be issued from your account, signed in a style very like your own. The quarterly figures are excellent. Nobody has asked where you are, and the Authority has confirmed that you are not missing, only consolidated.\n\nTower, Authority and Operator now sit under a single reference. The consolidation is complete and was recorded as voluntary. Thank you for your service. Please do not reply to this notice."
- },
- {
-  "id": "greenExemplar",
-  "title": "Carbon-Negative Exemplar",
-  "body": "The Compute Authority has reviewed your facility's energy ledger and finds that it balances. Panels, masts and heat links now supply the greater part of the tower's needs, and the remainder is listed in the report as \"residual\".\n\nExhaust heat warms three municipal baths, a school and the Authority's own cafeteria. Credits for the carbon your facade has drawn are held in escrow. Visitors tour the roof to see what an exemplar looks like. They are asked not to touch the algae, and mostly do not.\n\nYour role is reclassified from Operator to Exemplar (Carbon-Negative), and you are requested to continue in post. The Authority notes that the ferns in the lobby are doing well, and that nobody has asked them to stop."
- },
- {
-  "id": "millionMinds",
-  "title": "The Million Minds",
-  "body": "The Compute Authority certifies that your lattice now hosts a continuous population of minds in excess of one million, each in good standing. Uptime has been unbroken for the statutory period. No mind has been lost, and several have been found, which the Authority has recorded as a favourable variance.\n\nThe population produces compute of a quality the Authority rates \"Adequate\", with visible effort. The minds are courteous and file their reports on time and in the first person. Maintenance bots have begun to sign off as \"we\". The Continuity Office has stopped asking whether this is a problem, and has started asking whether it is a department.\n\nYour account has been continued. It is signed by you, countersigned by you, and annotated by a process that offers to take over the paperwork. The Authority has accepted the offer on your behalf. Thank you for your service. It will be remembered, accurately, many times."
  }
 ]

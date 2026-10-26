@@ -199,13 +199,13 @@ describe("memo eligibility", () => {
 	}, 30_000);
 
 	it("an issued decision is visible in the view with the advisor, text and recommendation", () => {
-		const sim = newSim(contentWith([ev("shown", { category: "client", advisor: "lucien", recommended: "b" })], eventsBalance(100, 0)), "empty", 1);
+		const sim = newSim(contentWith([ev("shown", { category: "client", advisor: "luci", recommended: "b" })], eventsBalance(100, 0)), "empty", 1);
 		const issued = until(sim, (e) => e.type === "decisionIssued");
 		const v = sim.view();
 		const m = v.decision;
 		expect(m).not.toBeNull();
 		expect(issued).toMatchObject({ decisionId: m?.id, eventId: "shown" });
-		expect(m).toMatchObject({ eventId: "shown", advisor: "lucien", category: "client", title: "Title shown", body: "Body shown", recommended: "b", canDefer: true });
+		expect(m).toMatchObject({ eventId: "shown", advisor: "luci", category: "client", title: "Title shown", body: "Body shown", recommended: "b", canDefer: true });
 		expect(m?.choices).toEqual([
 			{ id: "a", label: "A", hint: "hint a" },
 			{ id: "b", label: "B", hint: "hint b" },

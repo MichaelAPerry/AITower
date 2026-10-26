@@ -712,7 +712,7 @@ describe("choosePath and gates", () => {
 	it("rejects below the minimum tier, unknown or unavailable paths and a second choice; emits pathChosen", () => {
 		const sim = lab();
 		const early = sim.submit({ type: "choosePath", path: "biotech" });
-		expect(early).toEqual({ ok: false, reason: "requires Clearance 5" });
+		expect(early).toEqual({ ok: false, reason: "requires Level 5" });
 		sim.state.tier = 5;
 		sim.invalidateProjection();
 		expect(sim.submit({ type: "choosePath", path: "nope" as "biotech" }).ok).toBe(false);
@@ -774,7 +774,7 @@ describe("choosePath and gates", () => {
 });
 
 describe("endings", () => {
-	const E = { livingTower: { minCorruption: 0.8, pflops: 0, days: 2 }, cleanTower: { maxCorruption: 0.1, pflops: 0, days: 2 }, absorbed: { corruption: 0.5 } };
+	const E = { absorbed: { corruption: 0.5 } };
 	const biotech = (over: Partial<Balance> = {}, corruption = 0.9, tier = 1): SimImpl => {
 		const sim = lab({ endings: E, ...over });
 		sim.state.path = "biotech";
@@ -790,53 +790,11 @@ describe("endings", () => {
 		return out;
 	};
 
-	it("livingTower: path biotech, corruption ≥ min for `days` consecutive daily checks ⇒ victory", () => {
-		const sim = biotech();
-		const first = dayEnd(sim);
-		expect(count(first, "gameOver")).toBe(0);
-		expect(sim.view().endingProgress).toEqual({ ending: "livingTower", days: 1, needed: 2 });
-		const second = dayEnd(sim);
-		expect(second).toContainEqual({ type: "gameOver", kind: "victory", ending: "livingTower" });
-		expect(sim.view().gameOver).toMatchObject({ kind: "victory", ending: "livingTower" });
-	});
-
-	it("a failed daily check resets the count; no path ⇒ no ending", () => {
-		const sim = biotech();
-		dayEnd(sim);
-		sim.state.corruption = 0.5;
-		dayEnd(sim);
-		expect(sim.state.endingDays.livingTower).toBe(0);
-		expect(sim.view().gameOver).toBeNull();
-		const nopath = biotech();
-		nopath.state.path = null;
-		dayEnd(nopath);
-		dayEnd(nopath);
-		dayEnd(nopath);
-		expect(nopath.view().gameOver).toBeNull();
-		expect(nopath.view().endingProgress).toBeNull();
-	});
-
-	it("cleanTower: corruption ≤ max for `days` ⇒ victory with ending cleanTower", () => {
-		const sim = biotech({}, 0);
-		dayEnd(sim);
-		expect(sim.view().endingProgress).toMatchObject({ ending: "cleanTower", days: 1 });
-		expect(dayEnd(sim)).toContainEqual({ type: "gameOver", kind: "victory", ending: "cleanTower" });
-	});
-
-	it("both endings also need the organoid PFLOPS", () => {
-		const sim = biotech({ endings: { ...E, cleanTower: { ...E.cleanTower, pflops: 5 } } }, 0);
-		dayEnd(sim);
-		dayEnd(sim);
-		dayEnd(sim);
-		expect(sim.view().gameOver).toBeNull();
-		expect(sim.state.endingDays.cleanTower).toBe(0);
-	});
-
 	it("absorbed: tier ≥ minTier and corruption ≥ threshold ⇒ final gameOver absorbed, on any path", () => {
 		const lowTier = biotech({}, 1, 4);
 		dayEnd(lowTier);
 		expect(lowTier.view().gameOver?.kind).not.toBe("absorbed");
-		const sim = biotech({ endings: { ...E, livingTower: { ...E.livingTower, days: 99 } } }, 1, 5);
+		const sim = biotech({}, 1, 5);
 		sim.state.path = null;
 		const ev = dayEnd(sim);
 		expect(ev).toContainEqual({ type: "gameOver", kind: "absorbed", ending: "absorbed" });
@@ -912,7 +870,7 @@ describe("snapshot v5", () => {
 		expect(snap.version).toBe(SNAPSHOT_VERSION);
 		const s = snap.state;
 		snap.version = 4;
-		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "endingDays"]) delete s[k];
+		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
 		delete s.rng.growth;
 		delete s.metrics.organoidPflops;
 		for (const f of s.facilities) for (const k of ["nutrientNet", "nutrientSat", "noNutrient", "tooCold", "grown", "recoverAt"]) delete f[k];
@@ -936,7 +894,7 @@ describe("snapshot v5", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Record<string, any> };
 		const s = snap.state;
 		snap.version = 4;
-		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "endingDays"]) delete s[k];
+		for (const k of ["nutrient", "nutrientNetOf", "contamination", "nutrientNetCount", "nutrientNets", "contaminatedShare", "irreversible", "corruption", "path", "sp", "sealScar", "sealResidue", "bonds", "objected", "sealedOut"]) delete s[k];
 		delete s.rng.growth;
 		delete s.metrics.organoidPflops;
 		for (const f of s.facilities) for (const k of ["nutrientNet", "nutrientSat", "noNutrient", "tooCold", "grown", "recoverAt"]) delete f[k];

@@ -195,6 +195,8 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			return { text: ev.what === "parts" ? `Stores bought ${ev.count} spare part${ev.count === 1 ? "" : "s"}` : `Stores bought ${ev.count} bot${ev.count === 1 ? "" : "s"}`, severity: "info", toast: false };
 		case "droughtStarted":
 			return { text: "Dunkelflaute: calm and dark. Solar and wind output has collapsed until it passes", severity: "warn", toast: true };
+		case "sealedOut":
+			return { text: `${ev.path === "biotech" ? "The Flesh" : "The Garden"} has rejected the tower. You are on the Singularity now`, severity: "warn", toast: true };
 		case "droughtEnded":
 			return { text: "The Dunkelflaute has passed. Solar and wind are back", severity: "good", toast: false };
 		case "contaminationIrreversible": {

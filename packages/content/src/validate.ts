@@ -2,7 +2,7 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { AscensionPath, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
+import type { AdvisorId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -46,7 +46,7 @@ const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
 	carbon: ["green"],
 };
 const PATHS: AscensionPath[] = ["biotech", "greentech", "synthetic"];
-const ENDINGS = ["livingTower", "cleanTower", "absorbed", "greenExemplar", "millionMinds"];
+const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
 const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
@@ -162,6 +162,11 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	str(p, `${w}.name`, d.name);
 	str(p, `${w}.description`, d.description);
 	validateFlavor(p, w, d.flavor);
+	if (d.line !== undefined && !["shared", "synthetic", "biotech", "greentech"].includes(d.line)) p.push(`${w}.line: unknown tree line "${d.line}"`);
+	for (const [t, v] of Object.entries(d.seal ?? {})) {
+		if (!SEALED.includes(t)) p.push(`${w}.seal.${t}: only biotech or greentech can be sealed`);
+		num(p, `${w}.seal.${t}`, v, { min: -50, max: 50 });
+	}
 	if (!(d.kind in KIND_CATEGORY)) {
 		p.push(`${w}.kind: unknown kind "${d.kind}"`);
 		return;
@@ -380,7 +385,7 @@ function validateLessons(p: Problems, db: ContentDB): void {
 		str(p, `${w}.title`, l.title);
 		str(p, `${w}.goal`, l.goal);
 		str(p, `${w}.learned`, l.learned);
-		if (!["cass", "bea", "mel", "lucien"].includes(l.advisor)) p.push(`${w}.advisor: unknown advisor`);
+		if (!["cass", "bea", "mel", "luci"].includes(l.advisor)) p.push(`${w}.advisor: unknown advisor`);
 		const sc = db.scenarios?.[l.scenario];
 		if (!sc) p.push(`${w}.scenario: unknown scenario '${l.scenario}'`);
 		else if (sc.lesson !== l.id) p.push(`${w}.scenario: scenario '${l.scenario}' must name lesson '${l.id}'`);
@@ -512,8 +517,42 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	}
 }
 
-const ADVISORS = ["cass", "bea", "mel", "lucien"];
-const EVENT_CATEGORIES = ["ministry", "environmental", "operational", "client", "horror"];
+const ADVISORS = ["cass", "bea", "mel", "luci"];
+const EVENT_CATEGORIES = ["ministry", "environmental", "operational", "client", "horror", "story"];
+const SEALED = ["biotech", "greentech"];
+const MOODS = ["neutral", "pleased", "displeased", "unsettling"];
+
+function validateLines(p: Problems, w: string, lines: unknown): void {
+	if (!Array.isArray(lines) || lines.length === 0) return void p.push(`${w}: expected a non-empty array of lines`);
+	lines.forEach((l: SceneLine, i) => {
+		if (l?.who !== "narrator" && !ADVISORS.includes(l?.who)) p.push(`${w}[${i}].who: unknown speaker "${String(l?.who)}"`);
+		str(p, `${w}[${i}].text`, l?.text);
+		if (l?.mood !== undefined && !MOODS.includes(l.mood)) p.push(`${w}[${i}].mood: unknown mood "${l.mood}"`);
+	});
+}
+
+function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
+	switch (t?.kind) {
+		case "tick":
+		case "tier":
+			num(p, `${w}.atLeast`, t.atLeast, { min: 0, int: true });
+			break;
+		case "sp":
+			if (!PATHS.includes(t.path)) p.push(`${w}.path: unknown path`);
+			num(p, `${w}.atLeast`, t.atLeast, { gt: 0, max: 1 });
+			break;
+		case "seal":
+			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
+			num(p, `${w}.atLeast`, t.atLeast, { gt: 0 });
+			break;
+		case "sealedOut":
+		case "objection":
+			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
+			break;
+		default:
+			p.push(`${w}.kind: unknown trigger "${String((t as { kind?: unknown })?.kind)}"`);
+	}
+}
 const ID_RE = /^[a-z0-9_]+$/;
 
 function validateEffect(p: Problems, w: string, e: EventEffect): void {
@@ -553,6 +592,21 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path "${(e as { path: unknown }).path}"`);
 			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: 0 });
 			break;
+		case "seal":
+			if (!SEALED.includes((e as { path: string }).path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
+			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
+			break;
+		case "bond":
+			if (!ADVISORS.includes((e as { advisor: string }).advisor)) p.push(`${w}.advisor: unknown advisor`);
+			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
+			break;
+		case "sp":
+			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
+			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -500, max: 500 });
+			break;
+		case "commitPath":
+			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
+			break;
 		default:
 			p.push(`${w}.type: unknown effect type ${JSON.stringify(t)}`);
 	}
@@ -570,6 +624,7 @@ function validateEventChoice(p: Problems, w: string, c: EventChoice): void {
 	c.effects.forEach((e, i) => {
 		validateEffect(p, `${w}.effects[${i}]`, e);
 	});
+	if (c.reply !== undefined) validateLines(p, `${w}.reply`, c.reply);
 }
 
 function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, seen: Set<string>): void {
@@ -594,6 +649,13 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 	if (e.path !== undefined && !PATHS.includes(e.path)) p.push(`${w}.path: unknown path "${e.path}"`);
 	if (e.scriptedDay !== undefined) num(p, `${w}.scriptedDay`, e.scriptedDay, { min: 0, int: true });
 	if (!ADVISORS.includes(e.advisor)) p.push(`${w}.advisor: unknown advisor "${e.advisor}"`);
+	if (e.category === "story") {
+		if (e.trigger === undefined) p.push(`${w}.trigger: story scenes need a trigger`);
+		else validateTrigger(p, `${w}.trigger`, e.trigger);
+		if (e.lines !== undefined) validateLines(p, `${w}.lines`, e.lines);
+	} else if (e.trigger !== undefined) p.push(`${w}.trigger: only story scenes have triggers`);
+	if (e.whenPath !== undefined && (!Array.isArray(e.whenPath) || e.whenPath.some((x) => x !== null && !PATHS.includes(x)))) p.push(`${w}.whenPath: expected paths or null`);
+	if (e.backdrop !== undefined && e.backdrop !== "title" && !PATHS.includes(e.backdrop)) p.push(`${w}.backdrop: unknown backdrop`);
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
 		p.push(`${w}.choices: at least one choice required`);
 		return;
@@ -704,19 +766,28 @@ function validateBioBalance(p: Problems, db: ContentDB): void {
 	else num(p, "balance.ascension.minTier", b.ascension.minTier, { min: 1, max: Math.max(1, tierCount), int: true });
 	validateGreenBalance(p, b);
 	const e = b.endings;
-	if (!e?.livingTower || !e.cleanTower || !e.absorbed) {
-		p.push("balance.endings: livingTower, cleanTower and absorbed are required");
-		return;
+	if (!e?.absorbed) p.push("balance.endings: absorbed is required");
+	else num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
+	validateSoul(p, b);
+}
+
+function validateSoul(p: Problems, b: ContentDB["balance"]): void {
+	const s = b.soul;
+	if (!s) return void p.push("balance.soul: missing");
+	num(p, "balance.soul.spTarget", s.spTarget, { gt: 0 });
+	num(p, "balance.soul.spPerPflopHour", s.spPerPflopHour, { gt: 0 });
+	num(p, "balance.soul.sealMax", s.sealMax, { gt: 0 });
+	num(p, "balance.soul.residuePerDay", s.residuePerDay, { min: 0, max: 1 });
+	num(p, "balance.soul.objectionScar", s.objectionScar, { gt: 0 });
+	for (const k of ["bondReveal", "bondCommit", "bondEpilogue"] as const) num(p, `balance.soul.${k}`, s[k], { min: 0, max: 100 });
+	num(p, "balance.soul.bondFollow", s.bondFollow, { min: 0, max: 20 });
+	num(p, "balance.soul.bondOverrule", s.bondOverrule, { min: -20, max: 0 });
+	for (const a of ADVISORS) num(p, `balance.soul.bondStart.${a}`, s.bondStart?.[a as AdvisorId], { min: 0, max: 100 });
+	for (const path of PATHS) {
+		const w = s.spWeights?.[path];
+		if (!w) p.push(`balance.soul.spWeights.${path}: missing`);
+		else for (const [k, v] of Object.entries(w)) num(p, `balance.soul.spWeights.${path}.${k}`, v, { min: 0 });
 	}
-	num(p, "balance.endings.livingTower.minCorruption", e.livingTower.minCorruption, { gt: 0, max: 1 });
-	num(p, "balance.endings.livingTower.pflops", e.livingTower.pflops, { gt: 0 });
-	num(p, "balance.endings.livingTower.days", e.livingTower.days, { min: 1, int: true });
-	num(p, "balance.endings.cleanTower.maxCorruption", e.cleanTower.maxCorruption, { min: 0, max: 1 });
-	num(p, "balance.endings.cleanTower.pflops", e.cleanTower.pflops, { gt: 0 });
-	num(p, "balance.endings.cleanTower.days", e.cleanTower.days, { min: 1, int: true });
-	num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
-	if (e.cleanTower.maxCorruption >= e.livingTower.minCorruption) p.push("balance.endings: cleanTower.maxCorruption must be below livingTower.minCorruption");
-	if (e.absorbed.corruption <= e.livingTower.minCorruption) p.push("balance.endings: absorbed.corruption must be above livingTower.minCorruption");
 }
 
 function validateGreenBalance(p: Problems, b: ContentDB["balance"]): void {
@@ -732,14 +803,6 @@ function validateGreenBalance(p: Problems, b: ContentDB["balance"]): void {
 	else {
 		num(p, "balance.automation.partsBatch", b.automation.partsBatch, { min: 1, int: true });
 		num(p, "balance.automation.foremanPerHour", b.automation.foremanPerHour, { min: 1, int: true });
-	}
-	const e = b.endings;
-	for (const id of ["greenExemplar", "millionMinds"] as const) {
-		const x = e?.[id];
-		if (x === undefined) continue;
-		num(p, `balance.endings.${id}.minScore`, x.minScore, { gt: 0, max: 1 });
-		num(p, `balance.endings.${id}.pflops`, x.pflops, { gt: 0 });
-		num(p, `balance.endings.${id}.days`, x.days, { min: 1, int: true });
 	}
 }
 
@@ -769,6 +832,11 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			seen.add(d.id);
 			str(p, `${w}.title`, d.title);
 			str(p, `${w}.body`, d.body);
+			if (d.backdrop !== undefined && !PATHS.includes(d.backdrop)) p.push(`${w}.backdrop: unknown path`);
+			for (const [a, t] of Object.entries(d.epilogue ?? {})) {
+				if (!ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
+				str(p, `${w}.epilogue.${a}`, t);
+			}
 		});
 		for (const id of ENDINGS) if (!seen.has(id)) p.push(`endings: missing "${id}"`);
 	}

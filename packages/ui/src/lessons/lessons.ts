@@ -15,7 +15,7 @@ export const ROADMAP: { n: number; id: string; title: string; concept: string; a
 	{ n: 1, id: "first_watt", title: "First Watt", concept: "Power: kW is a rate, capacity is a ceiling.", advisor: "bea" },
 	{ n: 2, id: "where_the_heat_goes", title: "Where the Heat Goes", concept: "Heat: all power becomes heat; air handlers have a limit.", advisor: "cass" },
 	{ n: 3, id: "things_break", title: "Things Break", concept: "Reliability: failure rate, spares, repair time, N+1.", advisor: "cass" },
-	{ n: 4, id: "follow_the_money", title: "Follow the Money", concept: "CAPEX vs OPEX, upkeep, energy price, contract margins.", advisor: "lucien" },
+	{ n: 4, id: "follow_the_money", title: "Follow the Money", concept: "CAPEX vs OPEX, upkeep, energy price, contract margins.", advisor: "luci" },
 	{ n: 5, id: "grow_without_melting", title: "Grow Without Melting", concept: "Density: floor space, power per rack, AC-1 to LC-2.", advisor: "cass" },
 	{ n: 6, id: "pick_a_path", title: "Pick a Path", concept: "Trade-offs: efficiency vs risk. Wetware, Green, Synthetic.", advisor: "mel" },
 ];

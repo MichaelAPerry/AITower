@@ -11,7 +11,7 @@ import "./advisors.css";
 
 const CATEGORY: Record<string, string> = { ministry: "Compute Authority", environmental: "Weather and grid", operational: "Operations", client: "Clients", horror: "Unfiled" };
 
-/** The MAGI vote: Cass, Bea and Mel each back the recommended option or not, in a line; Lucien then names the price. */
+/** The MAGI vote: Cass, Bea and Mel each back the recommended option or not, in a line; Luci then names the price. */
 export function MagiVote({ decision, content }: { decision: DecisionView; content: ContentDB }) {
 	const votes = decision.votes;
 	if (!votes) return null;
@@ -34,10 +34,10 @@ export function MagiVote({ decision, content }: { decision: DecisionView; conten
 						</span>
 					</li>
 				))}
-				<li className="is-price" style={{ ["--adv" as string]: ADVISORS.lucien.color }}>
-					<Portrait id="lucien" size={26} />
+				<li className="is-price" style={{ ["--adv" as string]: ADVISORS.luci.color }}>
+					<Portrait id="luci" size={26} />
 					<span className="adv-vote-line">
-						<b>Lucien</b> <em>Price</em> {priceLine(content, decision, fmtMoney)}
+						<b>Luci</b> <em>Price</em> {priceLine(content, decision, fmtMoney)}
 					</span>
 				</li>
 			</ul>
@@ -54,7 +54,7 @@ export const DECISION_ARTICLE: Record<AdvisorId, { id: string; label: string }> 
 	cass: { id: "ch:heat", label: "Heat and cooling" },
 	bea: { id: "ch:power", label: "Power and backup" },
 	mel: { id: "ch:what", label: "What is a datacenter" },
-	lucien: { id: "ch:money", label: "Money" },
+	luci: { id: "ch:money", label: "Money" },
 };
 
 export function DecisionCard({ store, content, state, onHandbook }: { store: GameStore; content: ContentDB; state: GameState; onHandbook?: (id: string) => void }) {

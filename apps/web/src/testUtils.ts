@@ -1,3 +1,4 @@
+import { type ContentDB, loadContent } from "@aitower/content";
 import type { AudioEngine, RenderOptions, Renderer } from "@aitower/shared";
 import type { KeyValueStorage } from "./saveBackend";
 
@@ -44,4 +45,11 @@ export function fakeRenderer() {
 		destroy: () => {},
 	} satisfies Renderer;
 	return { renderer, options };
+}
+
+/** The bundled content without story scenes (they pause the clock at their own moments; most app tests are about something else). */
+export function contentWithoutStory(): ContentDB {
+	const c = loadContent();
+	c.events = c.events.filter((e) => e.category !== "story");
+	return c;
 }

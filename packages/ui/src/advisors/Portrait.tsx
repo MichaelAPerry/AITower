@@ -18,7 +18,7 @@ export function Portrait({ id, size = 44, talking = false }: { id: AdvisorId; si
 	);
 }
 
-const SKIN = { cass: "#d9a27a", bea: "#8d5a3c", mel: "#e8c29c", lucien: "#d8b9a6" } as const;
+const SKIN = { cass: "#d9a27a", bea: "#8d5a3c", mel: "#e8c29c", luci: "#d8b9a6" } as const;
 const INK = "#1b1712";
 
 /** Shared face: two eyes and a mouth line; `smile` curves it. */
@@ -79,14 +79,14 @@ const BODY: Record<AdvisorId, React.ReactNode> = {
 			<path d="M23.5 21 h1" stroke={INK} strokeWidth="0.9" />
 		</>
 	),
-	// Lucien: courteous, faintly threatening. Slicked hair, dark suit, violet tie, thin smile.
-	lucien: (
+	// Luci: courteous, faintly threatening. Slicked hair, dark suit, violet tie, thin smile.
+	luci: (
 		<>
 			<path d="M4 50 q2 -14 20 -15 q18 1 20 15z" fill="#23202b" />
 			<path d="M18 36 l6 6 l6 -6 l1 14 h-14z" fill="#e9e6ef" />
 			<path d="M24 41 l-2 3 l2 6 l2 -6z" fill="var(--adv)" />
-			<rect x="19" y="30" width="10" height="7" rx="3" fill={SKIN.lucien} />
-			<Face skin={SKIN.lucien} smile={0.8} />
+			<rect x="19" y="30" width="10" height="7" rx="3" fill={SKIN.luci} />
+			<Face skin={SKIN.luci} smile={0.8} />
 			<path d="M15.6 19 q1 -10 8.4 -10 q8 0 8.4 10 q-3 -6 -8.4 -6 q-5.4 0 -8.4 6z" fill="#14121a" />
 			<path d="M19 18 h4 M25 18 h4" stroke={INK} strokeWidth="1" strokeLinecap="round" />
 		</>

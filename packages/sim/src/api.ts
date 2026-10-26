@@ -9,9 +9,9 @@
  * Time: 1 tick = 1 game-minute, 1440 ticks per day. Day 0 starts at 06:00
  * (tick 0 ⇒ minuteOfDay 360).
  */
-import type { AscensionPath, ContentDB, ContractSpec, EndingId, JobKind, TechBranch } from "@aitower/content";
+import type { AdvisorId, AscensionPath, ContentDB, ContractSpec, EndingId, JobKind, SealedTree, TechBranch } from "@aitower/content";
 
-export type { AscensionPath, EndingId, JobKind };
+export type { AdvisorId, AscensionPath, EndingId, JobKind, SealedTree };
 
 export const TICKS_PER_DAY = 1440;
 export const START_MINUTE_OF_DAY = 360;
@@ -188,7 +188,9 @@ export type SimEvent =
 	| { type: "autoBuilt"; facilityId: number }
 	| { type: "autoBought"; what: "parts" | "bot"; count: number }
 	| { type: "droughtStarted" }
-	| { type: "droughtEnded" };
+	| { type: "droughtEnded" }
+	/** The committed tree's seal reached `soul.sealMax`: the path fell back to synthetic. */
+	| { type: "sealedOut"; path: SealedTree };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -434,6 +436,24 @@ export interface LifetimeStats {
 	researchPointsEarned: number;
 }
 
+/**
+ * The Soul (docs/SOUL.md). `seal` holds the secret numbers: the UI must only show them as far as the champion's bond
+ * allows (`bondReveal`), and as the commit sheet's words ("open", "scarred", "closed").
+ */
+export interface SoulView {
+	sp: Record<AscensionPath, number>;
+	spTarget: number;
+	seal: Record<SealedTree, number>;
+	sealMax: number;
+	bonds: Record<AdvisorId, number>;
+	bondReveal: number;
+	bondCommit: number;
+	bondEpilogue: number;
+	sealedOut: SealedTree[];
+	/** Why committing to each tree is blocked now (ignoring Level and an existing path), or null. */
+	commitBlock: Record<AscensionPath, string | null>;
+}
+
 export interface DecisionView {
 	id: number;
 	eventId: string;
@@ -441,7 +461,14 @@ export interface DecisionView {
 	category: import("@aitower/content").EventCategory;
 	title: string;
 	body: string;
-	choices: { id: string; label: string; hint: string }[];
+	choices: { id: string; label: string; hint: string; /** Story scenes: what the advisors say back after this choice. */ reply?: import("@aitower/content").SceneLine[] }[];
+	/** Story scenes: the dialogue before the choice (`{item}` already replaced). */
+	lines?: import("@aitower/content").SceneLine[];
+	/** Story scenes: backdrop and caption box. */
+	backdrop?: AscensionPath | "title";
+	location?: string;
+	/** Objection scenes: the facility the scene is about. */
+	subject?: { defId: string; name: string };
 	/** The advisor's recommended choice id. */
 	recommended: string;
 	/** MAGI vote (Cass, Bea, Mel) when the decision spans several areas. */
@@ -588,8 +615,8 @@ export interface SimView {
 	automation: { policy: AutomationPolicy; foremanUnlocked: boolean; /** Why the Foreman skipped or queued each job at its last check ("Racks: Waiting: 160 kW needed, 110 kW free"). Empty before the first check after a load. */ foremanStatus: string[]; /** Placements per game-hour the Foreman is allowed now. */ foremanPerHour: number };
 	/** PFLOPS currently delivered by organoid (`cooling: "bio"`) racks. */
 	organoidPflops: number;
-	/** Days the leading ending's condition has held (for the UI's progress line), or 0. */
-	endingProgress: { ending: EndingId; days: number; needed: number } | null;
+	/** Singularity points, seals and bonds (docs/SOUL.md). */
+	soul: SoulView;
 	/** Unspent research points. */
 	researchPoints: number;
 	/** Researched tech ids, in research order. */

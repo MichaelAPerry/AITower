@@ -83,12 +83,12 @@ describe("biotech content (bundled)", () => {
 		}
 	});
 
-	it("has Clearance 5 and the ascension rule", () => {
+	it("has five Levels and opens the tree commitment at Level 3", () => {
 		const b = db.balance;
 		expect(b.tiers.pflops).toHaveLength(5);
 		expect(b.tiers.pflops[4]).toBeGreaterThan(b.tiers.pflops[3]);
 		expect(b.loans.maxByTier).toHaveLength(5);
-		expect(b.ascension.minTier).toBe(5);
+		expect(b.ascension.minTier).toBe(3);
 	});
 
 	it("offers all three paths, each with a real description (Greentech and Synthetic arrived in M4)", () => {
@@ -99,14 +99,22 @@ describe("biotech content (bundled)", () => {
 		}
 	});
 
-	it("has the three biotech endings of two or three paragraphs, with no gore words", () => {
-		const bio = ["livingTower", "cleanTower", "absorbed"];
-		expect(db.endings.map((e) => e.id).slice(0, 3)).toEqual(bio);
-		for (const e of db.endings.filter((x) => bio.includes(x.id))) {
+	it("has three Singularity endings and Absorbed, of two or three paragraphs, with no gore words", () => {
+		expect(db.endings.map((e) => e.id)).toEqual(["singularity", "flesh", "garden", "absorbed"]);
+		for (const e of db.endings) {
 			const n = e.body.split("\n\n").length;
 			expect(n, e.id).toBeGreaterThanOrEqual(2);
 			expect(n, e.id).toBeLessThanOrEqual(3);
-			expect(e.body, e.id).not.toMatch(/\b(blood|gore|corpse|flesh|scream|body|bodies|eyes|face)\b/i);
+			expect(e.body, e.id).not.toMatch(/\b(blood|gore|corpse|scream)\b/i);
+		}
+	});
+
+	it("each Singularity ending has its tree's art and an epilogue for every advisor", () => {
+		const art = { singularity: "synthetic", flesh: "biotech", garden: "greentech" } as const;
+		for (const [id, tree] of Object.entries(art)) {
+			const e = db.endings.find((x) => x.id === id);
+			expect(e?.backdrop, id).toBe(tree);
+			expect(Object.keys(e?.epilogue ?? {}).sort(), id).toEqual(["bea", "cass", "luci", "mel"]);
 		}
 	});
 
@@ -153,13 +161,9 @@ describe("biotech content (bundled)", () => {
 		expect(Math.max(...run(4, 1, 7))).toBeGreaterThan(0.3);
 	});
 
-	it("endings balance: the three outcomes are ordered and reachable", () => {
-		const e = db.balance.endings;
-		expect(e.cleanTower.maxCorruption).toBeLessThan(e.livingTower.minCorruption);
-		expect(e.livingTower.minCorruption).toBeLessThan(e.absorbed.corruption);
-		const neuralPits = Math.ceil(e.livingTower.pflops / (f.neural_pit.rack?.pflops as number));
-		expect(neuralPits).toBeLessThanOrEqual(5);
-		expect(e.livingTower.pflops).toBeLessThanOrEqual(db.balance.tiers.pflops[4]);
+	it("Absorbed sits at the top of the corruption scale", () => {
+		expect(db.balance.endings.absorbed.corruption).toBeGreaterThan(0.9);
+		expect(db.balance.endings.absorbed.corruption).toBeLessThanOrEqual(1);
 	});
 });
 
@@ -247,8 +251,6 @@ describe("validateContent: M3 rules", () => {
 		expect(broken((db) => (db.balance.bio.decay = 2))).toMatch(/decay/);
 		expect(broken((db) => (db.balance.bio.diffusion = 0.4))).toMatch(/stable/);
 		expect(broken((db) => (db.balance.bio.growthThreshold = 0.1))).toMatch(/growthThreshold/);
-		expect(broken((db) => (db.balance.endings.livingTower.days = 0))).toMatch(/days/);
-		expect(broken((db) => (db.balance.endings.cleanTower.maxCorruption = 0.9))).toMatch(/cleanTower\.maxCorruption must be below/);
-		expect(broken((db) => (db.balance.endings.absorbed.corruption = 0.5))).toMatch(/absorbed\.corruption must be above/);
+		expect(broken((db) => (db.balance.endings.absorbed.corruption = 0))).toMatch(/absorbed\.corruption/);
 	});
 });

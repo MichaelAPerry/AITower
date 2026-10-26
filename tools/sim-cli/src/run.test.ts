@@ -62,7 +62,7 @@ describe("sim-cli memo policy", () => {
 				weight: 1,
 				minTier: 1,
 				cooldownDays: 0,
-				advisor: "lucien",
+				advisor: "luci",
 				recommended: "x",
 				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("y", [{ type: "cash", amount: 50 }, { type: "standing", amount: -5 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }, { type: "standing", amount: 1 }])],
 			},

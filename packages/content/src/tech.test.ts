@@ -392,7 +392,7 @@ describe("validateContent: research balance", () => {
 describe("research lanes (bundled)", () => {
 	const db = loadContent();
 	const LANES = ["adm", "log", "pow", "cool", "comp", "wet", "green", "syn"];
-	const ADVISORS = ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Lucien Ferro"];
+	const ADVISORS = ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Luci Ferro"];
 
 	it("every tech has a lane that has metadata, and lines only appear in cooling and compute", () => {
 		for (const n of db.tech) {

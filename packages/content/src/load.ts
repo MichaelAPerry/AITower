@@ -6,7 +6,10 @@ import { generateContract } from "./contracts";
 import balance from "./data/balance.json";
 import bots from "./data/bots.json";
 import clients from "./data/clients.json";
-import events from "./data/events.json";
+import eventsFile from "./data/events.json";
+import story from "./data/story.json";
+/** Story scenes (docs/SOUL.md) are decisions too; they live in their own file for writing. */
+const events = [...eventsFile, ...story];
 import facilities from "./data/facilities.json";
 import lift from "./data/lift.json";
 import scenarios from "./data/scenarios.json";

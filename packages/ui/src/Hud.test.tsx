@@ -141,7 +141,7 @@ describe("SystemMenu (server render)", () => {
 		const store = createFakeStore(content);
 		const html = renderToString(<Hud store={store} content={content} />);
 		expect(html).not.toContain("adv-card");
-		for (const n of ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Lucien Ferro"]) expect(html).toContain(`Ask ${n}`);
+		for (const n of ["Cass Parr", "Bea Altasar", "Dr. Mel Kiorre", "Luci Ferro"]) expect(html).toContain(`Ask ${n}`);
 		expect(html).not.toContain("UNIT-7");
 		expect(html).not.toContain("ui-inbox");
 	});

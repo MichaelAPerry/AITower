@@ -170,7 +170,25 @@ export interface FacilityDef {
 	 */
 	growth?: boolean;
 	flavor?: Flavor;
+	/**
+	 * The Soul (docs/SOUL.md): which Singularity tree this item belongs to. Absent = "shared". Drives SP weights and the
+	 * tree badge on build cards.
+	 */
+	line?: TreeLine;
+	/**
+	 * Secret numbers. Placing it adds the positive values to that tree's permanent scar; while it runs it adds
+	 * value × `soul.residuePerDay` per day to the tree's residue (negative values clean residue). Hidden from the player
+	 * unless the tree's champion trusts them (bond ≥ `soul.bondReveal`).
+	 */
+	seal?: SealSpec;
 }
+
+/** The tree a facility belongs to. */
+export type TreeLine = "shared" | "synthetic" | "biotech" | "greentech";
+/** The two trees that can be sealed (Synthetic never closes). */
+export type SealedTree = "biotech" | "greentech";
+export const SEALED_TREES: readonly SealedTree[] = ["biotech", "greentech"];
+export type SealSpec = Partial<Record<SealedTree, number>>;
 
 export interface BotDef {
 	id: string;
@@ -343,21 +361,15 @@ export interface Balance {
 		/** $ per nutrient unit supplied. */
 		nutrientPrice: number;
 	};
-	/** Ascension: the path is chosen at `minTier` (Clearance), once, and never changes. */
+	/** Ascension: the path is chosen at `minTier` (Level), once. A sealed tree throws the player back onto Synthetic. */
 	ascension: { minTier: number };
-	/** Path endings (biotech in M3). Each must hold continuously for `days` days. */
+	/** Failure endings that are not bankruptcy or shutdown. */
 	endings: {
-		/** Embrace: corruption ≥ minCorruption and organoid PFLOPS ≥ pflops. */
-		livingTower: { minCorruption: number; pflops: number; days: number };
-		/** Resist: corruption ≤ maxCorruption and organoid PFLOPS ≥ pflops. */
-		cleanTower: { maxCorruption: number; pflops: number; days: number };
-		/** Secret: corruption reaches this (any path, at Clearance ≥ ascension.minTier). */
+		/** Absorbed: corruption reaches this (any path, at Level ≥ ascension.minTier). */
 		absorbed: { corruption: number };
-		/** Greentech: path green, green score ≥ minScore and Σ delivered PFLOPS ≥ pflops, for `days` days. */
-		greenExemplar?: { minScore: number; pflops: number; days: number };
-		/** Synthetic: path synthetic, refinement ≥ minScore and Σ delivered PFLOPS ≥ pflops, for `days` days. */
-		millionMinds?: { minScore: number; pflops: number; days: number };
 	};
+	/** The Soul (docs/SOUL.md): Singularity points, secret seal numbers and advisor bonds. */
+	soul: SoulBalance;
 	/** Greentech economy (M4). */
 	green: {
 		/** $ per kWh of heat sold by heat exporters. */
@@ -581,9 +593,59 @@ export interface LessonDef {
 
 // ─── Advisor decisions (events) ───────────────────────────────────────
 
-/** The four advisors: Cass Parr (Facilities, Cooling), Bea Altasar (Power, Green), Dr. Mel Kiorre (Compute, Wetware, Synthetic), Lucien Ferro (CFO). */
-export type AdvisorId = "cass" | "bea" | "mel" | "lucien";
-export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "lucien"];
+/** The four advisors: Cass Parr (Facilities, Cooling), Bea Altasar (Power, Green), Dr. Mel Kiorre (Compute, Wetware, Synthetic), Luci Ferro (CFO). */
+export type AdvisorId = "cass" | "bea" | "mel" | "luci";
+/** Each tree's champion: she argues for it, and her bond gates committing to it. */
+export const CHAMPION: Record<AscensionPath, AdvisorId> = { synthetic: "luci", biotech: "mel", greentech: "bea" };
+
+/** Tuning for Singularity points, seals and bonds. */
+export interface SoulBalance {
+	/** SP that ends the game with that tree. */
+	spTarget: number;
+	/** SP per PFLOPS-hour of weighted running compute (before seal scaling). */
+	spPerPflopHour: number;
+	/** Weight of each rack line toward each tree's SP. Bio and Green only count after committing to them; Green is also × green score. */
+	spWeights: Record<AscensionPath, Partial<Record<TreeLine, number>>>;
+	/** A tree is sealed at this seal (scar + residue). */
+	sealMax: number;
+	/** Running facilities add seal × this per day to residue. */
+	residuePerDay: number;
+	/** A placed facility whose seal for a tree is at least this draws an objection from the tree's champion (once per item). */
+	objectionScar: number;
+	/** Starting bond per advisor (0..100). */
+	bondStart: Record<AdvisorId, number>;
+	/** Bond at which the champion reveals her tree's secret numbers on build cards. */
+	bondReveal: number;
+	/** Bond needed to commit to the champion's tree. */
+	bondCommit: number;
+	/** Bond needed for the ending epilogue. */
+	bondEpilogue: number;
+	/** Bond change when the player takes / overrules an advisor's recommendation. */
+	bondFollow: number;
+	bondOverrule: number;
+}
+
+/** One line of a visual-novel scene. */
+export interface SceneLine {
+	who: AdvisorId | "narrator";
+	text: string;
+	/** Portrait expression (default neutral). */
+	mood?: "neutral" | "pleased" | "displeased" | "unsettling";
+}
+
+/**
+ * When a story scene (category "story") is issued: once, as soon as it holds and no other decision is pending.
+ * `tick` and `day` are absolute; `sp` is a share of `soul.spTarget`; `seal` an absolute seal value; `sealedOut` fires when the
+ * committed tree was sealed; `objection` scenes are issued by the sim for a placed item (see `SoulBalance.objectionScar`).
+ */
+export type StoryTrigger =
+	| { kind: "tick"; atLeast: number }
+	| { kind: "tier"; atLeast: number }
+	| { kind: "sp"; path: AscensionPath; atLeast: number }
+	| { kind: "seal"; path: SealedTree; atLeast: number }
+	| { kind: "sealedOut"; path: SealedTree }
+	| { kind: "objection"; path: SealedTree };
+export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
 export interface EventVote {
@@ -593,7 +655,7 @@ export interface EventVote {
 	line: string;
 }
 
-export type EventCategory = "ministry" | "environmental" | "operational" | "client" | "horror";
+export type EventCategory = "ministry" | "environmental" | "operational" | "client" | "horror" | "story";
 
 /**
  * Effects are applied by the sim when the player resolves a decision. Waiting never applies anything.
@@ -616,7 +678,15 @@ export type EventEffect =
 	| { type: "failRacks"; count: number }
 	| { type: "spareParts"; count: number }
 	/** Nudge the tower toward an ascension path (affinity points; see SimView.affinity). */
-	| { type: "affinity"; path: AscensionPath; amount: number };
+	| { type: "affinity"; path: AscensionPath; amount: number }
+	/** Hidden: add to a tree's seal residue (negative cleans it). Never shown as a chip. */
+	| { type: "seal"; path: SealedTree; amount: number }
+	/** Hidden: change an advisor's bond. Never shown as a chip. */
+	| { type: "bond"; advisor: AdvisorId; amount: number }
+	/** Commit to a tree, as FORM A-5 would (ignored if a path is already chosen). The trap in "Luci, you decide". */
+	| { type: "commitPath"; path: AscensionPath }
+	/** Add (or remove) Singularity points of a tree directly (Mel's shortcuts, Cass's slow week). */
+	| { type: "sp"; path: AscensionPath; amount: number };
 
 export interface EventChoice {
 	/** Stable id, e.g. "approve" | "deny" | "file". */
@@ -628,6 +698,8 @@ export interface EventChoice {
 	/** Text shown after resolving. */
 	outcome: string;
 	effects: EventEffect[];
+	/** Story scenes: what the advisors say back after this choice (pushback, approval). */
+	reply?: SceneLine[];
 }
 
 export interface EventDef {
@@ -656,9 +728,18 @@ export interface EventDef {
 	 * minTier/maxTier). Never picked randomly.
 	 */
 	scriptedDay?: number;
+	/** Story scenes: when the scene is issued (see `StoryTrigger`). */
+	trigger?: StoryTrigger;
+	/** Story scenes: only while the committed path is one of these (null = no path yet). */
+	whenPath?: (AscensionPath | null)[];
+	/** Story scenes: the dialogue before the choice. `{item}` is replaced by the subject facility's name. */
+	lines?: SceneLine[];
+	/** Story scenes: the backdrop (a tree floor) and the caption box text. */
+	backdrop?: AscensionPath | "title";
+	location?: string;
 	/** The advisor's recommended choice id (marked on the card). */
 	recommended: string;
-	/** MAGI vote (Cass, Bea, Mel, in that order) when the decision touches more than one specialist area. Lucien then names the price. */
+	/** MAGI vote (Cass, Bea, Mel, in that order) when the decision touches more than one specialist area. Luci then names the price. */
 	votes?: EventVote[];
 	choices: EventChoice[];
 }
@@ -683,7 +764,7 @@ export interface LaneDef {
 	path?: AscensionPath;
 	/** Lane colour (hex). */
 	color: string;
-	/** Advisor who sells the lane: Cass Parr, Bea Altasar, Dr. Mel Kiorre or Lucien Ferro. */
+	/** Advisor who sells the lane: Cass Parr, Bea Altasar, Dr. Mel Kiorre or Luci Ferro. */
 	advisor: string;
 	/** What the lane is for, in a few words. */
 	identity: string;
@@ -696,14 +777,18 @@ export interface LaneDef {
 export type AscensionPath = "biotech" | "greentech" | "synthetic";
 
 /** Ending ids (see `Balance.endings`). */
-export type EndingId = "livingTower" | "cleanTower" | "absorbed" | "greenExemplar" | "millionMinds";
+export type EndingId = "singularity" | "flesh" | "garden" | "absorbed";
 
 /** Text of an ending, shown on the game-over sheet. */
 export interface EndingDef {
 	id: EndingId;
 	title: string;
-	/** Ministry prose, paragraphs separated by "\n\n". */
+	/** Prose, paragraphs separated by "\n\n". */
 	body: string;
+	/** The tree whose floor art is shown (absent = the dark failure screen). */
+	backdrop?: AscensionPath;
+	/** Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). */
+	epilogue?: Partial<Record<AdvisorId, string>>;
 }
 
 /** An ascension path as offered at Clearance `balance.ascension.minTier`. */

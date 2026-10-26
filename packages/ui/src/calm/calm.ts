@@ -162,16 +162,28 @@ export function effectChip(e: EventEffect): string {
 			return `${sign(e.count)}${Math.abs(e.count)} parts`;
 		case "affinity":
 			return `${pathLabel(e.path)} ${sign(e.amount)}${Math.abs(e.amount)}`;
+		// The Soul's effects are secret or narrative: never a chip.
+		case "seal":
+		case "bond":
+		case "sp":
+		case "commitPath":
+			return "";
 	}
 }
 
 /** The chip as React content: affinity effects get a path-coloured pill, everything else plain text. */
 export function chipParts(effects: readonly EventEffect[]): { text: string; path?: AscensionPath }[] {
-	return effects.map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectChip(e) }));
+	return visibleEffects(effects).map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectChip(e) }));
 }
 
 /** The compact consequence of a choice: its effects joined with " · ", or "no effect". */
-export const choiceChips = (effects: readonly EventEffect[]): string => (effects.length ? effects.map(effectChip).join(" · ") : "no effect");
+export const choiceChips = (effects: readonly EventEffect[]): string => {
+	const v = visibleEffects(effects);
+	return v.length ? v.map(effectChip).join(" · ") : "no effect";
+};
+
+/** Effects the player may see as chips (seal, bond, SP and commit effects are hidden). */
+export const visibleEffects = (effects: readonly EventEffect[]): EventEffect[] => effects.filter((e) => effectChip(e) !== "");
 
 // ─── Ticker ───────────────────────────────────────────────────────────────
 

@@ -101,17 +101,17 @@ function reputation(view: SimView): Omit<Suggestion, "advisor" | "links"> | null
 const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
 
 const META: Record<string, { advisor: AdvisorId; links: HandbookLink[] }> = {
-	cash: { advisor: "lucien", links: [{ label: "How money works", entry: "basics:money" }] },
+	cash: { advisor: "luci", links: [{ label: "How money works", entry: "basics:money" }] },
 	parts: { advisor: "cass", links: [{ label: "Spare parts", entry: "basics:parts" }] },
 	hot: { advisor: "cass", links: [{ label: "Cooling and heat", entry: "ch:heat" }] },
 	power: { advisor: "bea", links: [{ label: "Power", entry: "ch:power" }] },
 	uptime: { advisor: "bea", links: [{ label: "Uptime", entry: "ch:uptime" }] },
 	backup: { advisor: "bea", links: [{ label: "Power", entry: "ch:power" }] },
 	lift: { advisor: "cass", links: [{ label: "Lifts and bots", entry: "basics:lifts" }] },
-	reputation: { advisor: "lucien", links: [{ label: "Reputation", entry: "basics:reputation" }] },
+	reputation: { advisor: "luci", links: [{ label: "Reputation", entry: "basics:reputation" }] },
 	idle: { advisor: "mel", links: [{ label: "Contracts", entry: "basics:contracts" }] },
 	research: { advisor: "mel", links: [{ label: "Research", entry: "basics:research" }] },
-	level: { advisor: "lucien", links: [{ label: "Level", entry: "basics:level" }] },
+	level: { advisor: "luci", links: [{ label: "Level", entry: "basics:level" }] },
 };
 
 /** All suggestions that apply to this view, most important first. Empty when the tower is fine. */
@@ -270,7 +270,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 			});
 		}
 	}
-	return out.map((o) => ({ ...o, ...(META[o.id] ?? { advisor: "lucien" as AdvisorId, links: [] }) }));
+	return out.map((o) => ({ ...o, ...(META[o.id] ?? { advisor: "luci" as AdvisorId, links: [] }) }));
 }
 
 /** Def ids for the catalog's "Recommended" row: from every applying suggestion, in rank order, at most `max`. */

@@ -4,7 +4,7 @@
  */
 import type { AdvisorId, ContentDB, EventEffect } from "@aitower/content";
 import type { DecisionView } from "@aitower/sim";
-import { effectChip } from "../calm/calm";
+import { effectChip, visibleEffects } from "../calm/calm";
 
 export interface AdvisorInfo {
 	id: AdvisorId;
@@ -24,10 +24,10 @@ export const ADVISORS: Record<AdvisorId, AdvisorInfo> = {
 	cass: { id: "cass", name: "Cass Parr", first: "Cass", role: "Facilities and Cooling", areas: "Air, liquid and immersion cooling, repairs, logistics", color: "#e8955a", motto: "The racks are fine. The room they are in is the problem." },
 	bea: { id: "bea", name: "Bea Altasar", first: "Bea", role: "Power Engineer", areas: "Grid, backup, storage, green power", color: "#f0d24a", motto: "I do not predict outages. I schedule my disappointment." },
 	mel: { id: "mel", name: "Dr. Mel Kiorre", first: "Mel", role: "Compute and Wetware", areas: "Racks, tissue, synthetic minds", color: "#5fd0a0", motto: "Everything is within tolerance. I define tolerance." },
-	lucien: { id: "lucien", name: "Lucien Ferro", first: "Lucien", role: "CFO and Authority Liaison", areas: "Money, contracts, reputation", color: "#a98bff", motto: "I have asked the spreadsheet, and it declined to comment." },
+	luci: { id: "luci", name: "Luci Ferro", first: "Luci", role: "CFO and Authority Liaison", areas: "Money, contracts, reputation", color: "#a98bff", motto: "I have asked the spreadsheet, and it declined to comment." },
 };
 
-export const ADVISOR_ORDER: readonly AdvisorId[] = ["cass", "bea", "mel", "lucien"];
+export const ADVISOR_ORDER: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** Which advisor sells a research lane (data/lanes.json names them in full). */
 export const advisorOfLane = (laneAdvisor: string): AdvisorId | undefined => ADVISOR_ORDER.find((id) => ADVISORS[id].name === laneAdvisor);
@@ -62,7 +62,7 @@ export const effectsOf = (content: ContentDB, d: Pick<DecisionView, "eventId">, 
 /** The cash a choice takes (positive) or pays (negative), in dollars. */
 export const cashCost = (effects: readonly EventEffect[]): number => effects.reduce((s, e) => (e.type === "cash" ? s - e.amount : s), 0);
 
-/** Lucien's line: what the recommended option costs, set against the alternative. */
+/** Luci's line: what the recommended option costs, set against the alternative. */
 export function priceLine(content: ContentDB, d: DecisionView, fmtMoney: (n: number) => string): string {
 	const rec = d.choices.find((c) => c.id === d.recommended);
 	const other = d.choices.find((c) => c.id !== d.recommended);
@@ -92,4 +92,4 @@ export function effectText(e: EventEffect): string {
 
 /** Chips for one choice, in order, with affinity effects flagged for a path-coloured pill. */
 export const choiceChipList = (effects: readonly EventEffect[]): { text: string; path?: "biotech" | "greentech" | "synthetic" }[] =>
-	effects.map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectText(e) }));
+	visibleEffects(effects).map((e) => (e.type === "affinity" ? { text: effectChip(e), path: e.path } : { text: effectText(e) }));

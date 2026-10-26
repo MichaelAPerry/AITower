@@ -139,9 +139,9 @@ function statusLine(advisor: AdvisorId, view: SimView, content: ContentDB): Line
 			const idle = racks.filter((f) => f.enabled && f.status === "idle").length;
 			return { ...base, id: "ask:mel", links: [{ label: "Contracts", entry: "basics:contracts" }], text: `${fmtNum(view.pflops)} PF running across ${racks.length} rack${racks.length === 1 ? "" : "s"}, ${idle} idle. ${view.offers.length} contract${view.offers.length === 1 ? "" : "s"} on offer.` };
 		}
-		case "lucien": {
+		case "luci": {
 			const rep = Math.round(view.standing);
-			return { ...base, id: "ask:lucien", links: [{ label: "How money works", entry: "basics:money" }], text: `Cash ${fmtMoney(view.cash)}, reputation ${rep} of 100${view.loan.principal > 0 ? `, loan ${fmtMoney(view.loan.principal)}` : ""}. I have asked the spreadsheet how it feels; it declined to comment.` };
+			return { ...base, id: "ask:luci", links: [{ label: "How money works", entry: "basics:money" }], text: `Cash ${fmtMoney(view.cash)}, reputation ${rep} of 100${view.loan.principal > 0 ? `, loan ${fmtMoney(view.loan.principal)}` : ""}. I have asked the spreadsheet how it feels; it declined to comment.` };
 		}
 	}
 }

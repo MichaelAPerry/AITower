@@ -2,9 +2,9 @@
  * Read-only SimView. Grid typed arrays are the live state arrays (reused, don't mutate);
  * entity arrays are rebuilt small each call.
  */
-import type { BotDef, ContentDB } from "@aitower/content";
+import type { BotDef, ContentDB, SceneLine } from "@aitower/content";
 import { currentStepIndex, lessonAllowed, lessonMetrics } from "../lesson/lesson";
-import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, WorkOrderView } from "../api";
+import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
 import { createNav, type Nav, reachableRuns, runAtTile } from "../logistics/routing";
@@ -13,7 +13,7 @@ import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
 import { loanMax } from "../economy/credit";
 import { facilityContamination } from "../bio/index";
-import { leadingEnding } from "../bio/path";
+import { commitBlock, sealOf } from "../progression/soul";
 import { eventDef } from "../ministry/decisions";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, serviceTile } from "../world/defs";
@@ -74,18 +74,42 @@ function decisionView(state: SimState, content: ContentDB): DecisionView | null 
 	if (!d || d.hiddenUntil > 0) return null;
 	const def = eventDef(content, d.eventId);
 	if (!def) return null;
-	return {
+	const name = d.subject !== undefined && Object.hasOwn(content.facilities, d.subject) ? content.facilities[d.subject].name : undefined;
+	const sub = (t: string): string => (name === undefined ? t : t.replaceAll("{item}", name));
+	const lines = (ls: readonly SceneLine[] | undefined): SceneLine[] | undefined => ls?.map((l) => ({ ...l, text: sub(l.text) }));
+	const v: DecisionView = {
 		id: d.id,
 		eventId: d.eventId,
 		advisor: def.advisor,
 		category: def.category,
 		title: def.title,
-		body: def.body,
-		choices: def.choices.map((c) => ({ id: c.id, label: c.label, hint: c.hint })),
+		body: sub(def.body),
+		choices: def.choices.map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
 		recommended: def.recommended,
 		votes: def.votes?.map((v) => ({ ...v })),
 		issuedAt: d.issuedAt,
-		canDefer: !d.deferred,
+		canDefer: !d.deferred && def.category !== "story",
+	};
+	if (def.lines) v.lines = lines(def.lines);
+	if (def.backdrop) v.backdrop = def.backdrop;
+	if (def.location) v.location = def.location;
+	if (name !== undefined && d.subject !== undefined) v.subject = { defId: d.subject, name };
+	return v;
+}
+
+function soulView(state: SimState, content: ContentDB): SoulView {
+	const s = content.balance.soul;
+	return {
+		sp: { ...state.sp },
+		spTarget: s.spTarget,
+		seal: { biotech: sealOf(state, "biotech"), greentech: sealOf(state, "greentech") },
+		sealMax: s.sealMax,
+		bonds: { ...state.bonds },
+		bondReveal: s.bondReveal,
+		bondCommit: s.bondCommit,
+		bondEpilogue: s.bondEpilogue,
+		sealedOut: [...state.sealedOut],
+		commitBlock: { synthetic: null, biotech: commitBlock(state, content, "biotech"), greentech: commitBlock(state, content, "greentech") },
 	};
 }
 
@@ -206,7 +230,7 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		irreversible: state.irreversible,
 		path: state.path,
 		organoidPflops: m.organoidPflops,
-		endingProgress: leadingEnding(state, content.balance.endings),
+		soul: soulView(state, content),
 		affinity: affinityShares(state),
 		pathScore: state.path === "greentech" ? state.greenScore : state.path === "synthetic" ? state.refinement : state.corruption,
 		greenScore: state.greenScore,

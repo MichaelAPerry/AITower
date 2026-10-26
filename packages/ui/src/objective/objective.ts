@@ -190,13 +190,15 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 /** True for problems (broken, too hot, no power, the red, a decision due); the Goals card carries plain progress. */
 export const isProblem = (o: Objective): boolean => o.tone === "alert" || o.action === "ascension" || o.title.includes("lift access") || o.title.startsWith("No offer fits");
 
-/** "Living Tower: 2 of 3 days" for the ending the tower is closest to; null when none (the secret ending is never announced). */
+/** "The Lattice: 34%" for the tree closest to its Singularity; null before any SP. */
 export function endingLine(view: SimView, content: ContentDB): string | null {
-	const p = view.endingProgress;
-	if (!p || p.ending === "absorbed") return null;
-	const title = content.endings?.find((e) => e.id === p.ending)?.title ?? p.ending;
-	const days = Math.min(Math.floor(p.days), p.needed);
-	return `${title}: ${days} of ${p.needed} day${p.needed === 1 ? "" : "s"}`;
+	const s = view.soul;
+	if (!s) return null;
+	const ids = { synthetic: "singularity", biotech: "flesh", greentech: "garden" } as const;
+	const best = (["synthetic", "biotech", "greentech"] as const).reduce((a, b) => (s.sp[b] > s.sp[a] ? b : a));
+	if (!(s.sp[best] > 0)) return null;
+	const title = content.endings?.find((e) => e.id === ids[best])?.title ?? best;
+	return `${title}: ${Math.min(100, Math.floor((s.sp[best] / s.spTarget) * 100))}%`;
 }
 
 /** Today's money so far: what came in, what went out, and on what. */

@@ -29,6 +29,7 @@ import { stepLifts } from "./logistics/lifts";
 import { rebuildNetworks } from "./networks/rebuild";
 import { powerSolve } from "./power/powerSolve";
 import { affinityStep } from "./progression/affinity";
+import { soulStep } from "./progression/soul";
 import { progressionStep } from "./progression/tier";
 import { advanceTime } from "./progression/time";
 import { reliabilityStep } from "./reliability/reliabilityStep";
@@ -146,6 +147,7 @@ export class SimImpl implements Sim {
 		jobStanding(ctx); //  9c standing from this tick's job outcomes
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		affinityStep(ctx); //  9e hourly path affinity from running facilities
+		soulStep(ctx); //  9f hourly seal residue, Singularity points, lock-out, wins
 		progressionStep(ctx); // 10
 		lessonStep(ctx); // 10b lesson beats, steps, success
 		advanceTime(ctx); // 11

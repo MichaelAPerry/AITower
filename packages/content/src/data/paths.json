@@ -1,20 +1,20 @@
 [
  {
   "id": "biotech",
-  "name": "Biotech",
+  "name": "The Flesh",
   "available": true,
-  "description": "Cultured tissue computes at about three times the PFLOPS per kW of any cabinet in the catalogue. Feed the annex, hold the tanks at 37 °C and output climbs quickly, along with contamination, mutations and unregistered assets. Embrace it for the Living Tower, or hold the line with sterile bays and quarantine locks for the Clean Tower. The Compute Authority describes the tissue as fully under control, and has stopped saying by whom."
+  "description": "Grow the computer. Organoids compute at three times the PFLOPS per kW of any cabinet, fed and held at 37 °C. Bio Singularity points come only from tissue. Contamination climbs with output, and at 99% corruption the tower absorbs you. Needs Dr. Mel Kiorre's trust, and a tower the flesh will accept."
  },
  {
   "id": "greentech",
-  "name": "Greentech",
+  "name": "The Garden",
   "available": true,
-  "description": "Sun, wind and waste heat, accounted for to the last kilowatt-hour. Fit panels, raise masts on the upper floors, sell exhaust heat to the district network and grow algae on the facade for carbon credits. Your Green Score rises with the share of power from the weather and the heat you sell, and falls through a Dunkelflaute, when the sky is dark and the air is still, so keep a generator warm. The ferns in the lobby are doing better than expected."
+  "description": "Let the machine belong to the planet. Sun, wind and sold heat feed your green score, and Green Singularity points come from green-line racks and, at half weight, from the rest, both scaled by that score. A dark, still week costs you. Needs Bea Altasar's trust, and a tower the land will forgive."
  },
  {
   "id": "synthetic",
-  "name": "Synthetic Mind",
+  "name": "The Singularity",
   "available": true,
-  "description": "Hosted minds, continuity audits and a lattice with persistent memory. Cool Mind Lattice racks on a cryo loop, keep every process alive through a brownout behind Continuity Monitors and a Backup Vault, and raise your Refinement: uptime multiplied by the share of compute on top-tier racks. The minds are courteous, productive and file their own paperwork. Ethics review has confirmed they are permitted to exist, and has asked that you stop asking who approved that."
+  "description": "The default. Every rack that is not on another tree feeds the Lattice, and the Synthetic line feeds it twice over. Nothing is closed to you and nothing is asked of you. Luci Ferro will handle the paperwork."
  }
 ]

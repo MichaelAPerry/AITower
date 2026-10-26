@@ -22,11 +22,14 @@
  *    dropped), `memoHistory` → `decisionHistory`, `nextMemoTick` → `nextDecisionTick`, `nextId.memo` → `nextId.decision`,
  *    `stats.memosAnswered` → `decisionsMade`, standing cause "memo" → "decision"; new `lastDecisionDay`, `decisionGate`, `advisorTips`.
  *  - v9 → v10 (M6.4 lessons): `lesson` (null for every earlier game).
+ *  - v10 → v11 (the Soul, docs/SOUL.md): Singularity points `sp`, secret `sealScar` / `sealResidue` (an old tower is scarred by
+ *    what it already holds), advisor `bonds`, `objected`, `sealedOut`; `endingDays` goes; old path endings map onto the trees
+ *    (livingTower / cleanTower → flesh, greenExemplar → garden, millionMinds → singularity).
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 10;
+export const SNAPSHOT_VERSION = 11;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -236,7 +239,22 @@ function migrateV9(state: RawState): RawState {
 	return state;
 }
 
-export const migrations: Record<number, StateMigration> = { 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** The Soul. Scars are rebuilt from the facilities the tower already holds (the content table is passed in by `load`). */
+function migrateV10(state: RawState): RawState {
+	if (!isObj(state.sp)) state.sp = { synthetic: 0, biotech: 0, greentech: 0 };
+	if (!isObj(state.sealScar)) state.sealScar = { biotech: 0, greentech: 0 };
+	if (!isObj(state.sealResidue)) state.sealResidue = { biotech: 0, greentech: 0 };
+	if (!isObj(state.bonds)) state.bonds = { cass: 20, bea: 20, mel: 20, luci: 30 };
+	else if (typeof state.bonds.luci !== "number") state.bonds.luci = 30;
+	if (!Array.isArray(state.objected)) state.objected = [];
+	if (!Array.isArray(state.sealedOut)) state.sealedOut = [];
+	delete state.endingDays;
+	const MAP: Record<string, string> = { livingTower: "flesh", cleanTower: "flesh", greenExemplar: "garden", millionMinds: "singularity" };
+	if (isObj(state.gameOver) && typeof state.gameOver.ending === "string" && Object.hasOwn(MAP, state.gameOver.ending)) state.gameOver.ending = MAP[state.gameOver.ending];
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

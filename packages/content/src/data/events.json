@@ -244,6 +244,11 @@
       "type": "affinity",
       "path": "synthetic",
       "amount": 3
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 2
      }
     ]
    }
@@ -313,6 +318,11 @@
       "type": "energyPrice",
       "factor": 1.5,
       "durationTicks": 2880
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 6
      }
     ]
    }
@@ -321,7 +331,7 @@
  {
   "id": "surprise_audit",
   "category": "ministry",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Compute Authority: Facility Audit",
   "body": "The Compute Authority audits the facility this week and wants cooling, power and job logs. Cooperating costs $120k and earns 5 reputation. Stalling costs $30k and loses 6.",
   "weight": 8,
@@ -367,14 +377,14 @@
  {
   "id": "energy_levy",
   "category": "ministry",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Levy Notice: Energy Surcharge",
-  "body": "A surcharge on energy use starts this quarter. Paying costs $150k and earns 3 reputation. Offsets cost $90k, earn 1 reputation and count toward Greentech.",
+  "body": "A surcharge on energy use starts this quarter. Paying costs $150k and earns 3 reputation. Offsets cost $90k, earn 1 reputation and count toward Greentech. Cheaper and greener. I'd call that an easy one.",
   "weight": 6,
   "minTier": 2,
   "minDay": 5,
   "cooldownDays": 12,
-  "recommended": "pay",
+  "recommended": "offset",
   "choices": [
    {
     "id": "pay",
@@ -410,6 +420,11 @@
       "type": "affinity",
       "path": "greentech",
       "amount": 3
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 4
      }
     ]
    }
@@ -418,7 +433,7 @@
  {
   "id": "compute_subsidy",
   "category": "ministry",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Notice: Domestic Compute Subsidy",
   "body": "The Authority offers a $200k subsidy for national programmes. It carries reporting duties and costs 3 reputation. Declining earns 3 reputation back.",
   "weight": 7,
@@ -461,6 +476,16 @@
      {
       "type": "affinity",
       "path": "synthetic",
+      "amount": 3
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 3
+     },
+     {
+      "type": "seal",
+      "path": "biotech",
       "amount": 3
      }
     ]
@@ -547,6 +572,11 @@
       "type": "affinity",
       "path": "synthetic",
       "amount": 5
+     },
+     {
+      "type": "seal",
+      "path": "biotech",
+      "amount": 4
      }
     ]
    }
@@ -662,7 +692,7 @@
  {
   "id": "carbon_credit_audit",
   "category": "ministry",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Audit: Carbon Credit Register",
   "body": "The register of your carbon credits is under review. Verifying costs $100k and earns 4 reputation. Self-certifying costs $20k and loses 4. I have asked the spreadsheet which it prefers.",
   "weight": 5,
@@ -704,6 +734,11 @@
      {
       "type": "standing",
       "amount": -4
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 5
      }
     ]
    }
@@ -910,7 +945,7 @@
  {
   "id": "client_rush",
   "category": "client",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Client Request: Urgent Capacity",
   "body": "A client needs capacity within a day. Expediting costs $50k and lifts new contract payouts 25% for a day. Declining costs 2 reputation.",
   "weight": 7,
@@ -938,6 +973,11 @@
       "type": "affinity",
       "path": "synthetic",
       "amount": 2
+     },
+     {
+      "type": "seal",
+      "path": "greentech",
+      "amount": 2
      }
     ]
    },
@@ -958,7 +998,7 @@
  {
   "id": "client_poach",
   "category": "client",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Client Notice: Competing Offer",
   "body": "A rival offered one of your clients a lower rate. Matching costs $150k and earns 3 reputation. Releasing the client loses 4 reputation and cuts payouts 10% for 2 days.",
   "weight": 5,
@@ -1057,7 +1097,7 @@
  {
   "id": "h_headcount",
   "category": "horror",
-  "advisor": "lucien",
+  "advisor": "luci",
   "title": "Personnel: Headcount Discrepancy",
   "body": "Payroll lists 41 staff. Badge readers count 43. An audit costs $60k and earns 2 reputation. Adding two lines costs $20k and earns 1.",
   "weight": 5,

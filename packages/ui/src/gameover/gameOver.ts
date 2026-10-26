@@ -61,12 +61,10 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 
 /** The frame (form number, stamp, tone) printed around an ending's own text. `plain` is the wording at horrorIntensity "off". */
 const ENDING_FRAME: Record<EndingId, { form: string; stamp: string; tone: "red" | "green"; plainForm: string; plainStamp: string }> = {
-	livingTower: { form: "ASSET CERTIFICATION", stamp: "CERTIFIED", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
-	cleanTower: { form: "SANITARY COMMENDATION", stamp: "COMMENDED", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
+	singularity: { form: "SYNTHETIC SINGULARITY", stamp: "THE LATTICE", tone: "green", plainForm: "SYNTHETIC SINGULARITY", plainStamp: "THE LATTICE" },
+	flesh: { form: "BIO SINGULARITY", stamp: "THE FLESH", tone: "green", plainForm: "BIO SINGULARITY", plainStamp: "THE FLESH" },
+	garden: { form: "GREEN SINGULARITY", stamp: "THE GARDEN", tone: "green", plainForm: "GREEN SINGULARITY", plainStamp: "THE GARDEN" },
 	absorbed: { form: "ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "TAKEOVER", plainStamp: "TAKEN OVER" },
-	// M4 placeholders (M4-T3 may reword).
-	greenExemplar: { form: "CARBON-NEGATIVE EXEMPLAR", stamp: "EXEMPLARY", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
-	millionMinds: { form: "CONTINUITY CERTIFIED", stamp: "CONTINUOUS", tone: "green", plainForm: "DISTINGUISHED SERVICE", plainStamp: "COMMENDED" },
 };
 
 /** The ending shown for a game-over: `ending` when set, else the secret one for kind "absorbed", else none. */

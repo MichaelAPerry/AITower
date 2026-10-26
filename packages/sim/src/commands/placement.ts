@@ -1,4 +1,5 @@
 /** Facility placement rules (also exposed as the pure `canPlace`). */
+import { scarOnPlace } from "../progression/soul";
 import { lessonBlocksPlace } from "../lesson/lesson";
 import { cellIdx, inBounds } from "../core/grid";
 import { techGate } from "../research/research";
@@ -47,6 +48,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	if (p.needsNutrient && !hasNutrient) return reject("needs a nutrient conduit under it");
 	return accept(d.cost, (events) => {
 		addFacility(s, ctx.content, defId, floor, x);
+		scarOnPlace(s, d);
 		if (!opts.ignoreTier) s.stats.facilitiesBuilt++;
 		events.push({ type: "built", what: "facility", floor, x });
 	});

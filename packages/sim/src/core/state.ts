@@ -3,7 +3,7 @@
  * (including RNG streams and queued commands); nothing persistent is kept elsewhere.
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
-import type { ContractSpec } from "@aitower/content";
+import type { AdvisorId, ContractSpec, SealedTree } from "@aitower/content";
 import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand, StandingLogEntry } from "../api";
 import type { RngState } from "./rng";
 
@@ -184,6 +184,8 @@ export interface Decision {
 	deferred: boolean;
 	/** Hidden (deferred) until this tick; 0 = open now. */
 	hiddenUntil: number;
+	/** Story objections: the facility def the scene is about (its name replaces `{item}`). */
+	subject?: string;
 }
 
 export interface DecisionRecord {
@@ -400,8 +402,19 @@ export interface SimState {
 	corruption: number;
 	/** Chosen ascension path. */
 	path: AscensionPath | null;
-	/** Consecutive daily checks each path ending's condition has held. */
-	endingDays: { livingTower: number; cleanTower: number; greenExemplar: number; millionMinds: number };
+	// ── The Soul (snapshot v11, docs/SOUL.md) ──
+	/** Singularity points per tree; the first to `soul.spTarget` ends the game. */
+	sp: { synthetic: number; biotech: number; greentech: number };
+	/** Secret numbers: the permanent part of each tree's seal (from placing facilities). */
+	sealScar: Record<SealedTree, number>;
+	/** Secret numbers: the cleanable part (from running facilities and decisions; ≥ 0). */
+	sealResidue: Record<SealedTree, number>;
+	/** Advisor bonds 0..100. */
+	bonds: Record<AdvisorId, number>;
+	/** Objections already raised, as "tree:defId". */
+	objected: string[];
+	/** Trees that rejected the player after they committed to them (the path then fell back to synthetic). */
+	sealedOut: SealedTree[];
 	// ── Automation, greentech, scenarios (snapshot v6) ──
 	/** Standing orders (research / parts / bots / Foreman). */
 	automation: AutomationPolicy;

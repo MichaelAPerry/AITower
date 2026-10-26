@@ -35,6 +35,7 @@ describe("scripted events", () => {
 	});
 	it("real content: first_heat_alarm arrives at 09:00 on day 2", () => {
 		const content = loadContent();
+		content.events = content.events.filter((e) => e.category !== "story"); // story scenes would hold the decision slot
 		const def = content.events.find((e) => e.scriptedDay !== undefined);
 		expect(def).toBeDefined();
 		const sim = createSim(content, "starter", 1) as SimImpl;
