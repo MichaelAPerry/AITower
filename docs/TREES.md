@@ -1,6 +1,6 @@
 # AI Tower: the three catalogues (design spec, for owner approval)
 
-Status: proposal. No game code or data has changed. Numbers are on the scale of `facilities.json` today (cost in $, kW, PFLOPS, width in tiles). Where this spec changes an existing number it says so.
+Status: implemented (snapshot v13). Section 5.2 records the final numbers and the deviations from this spec. Numbers are on the scale of `facilities.json` today (cost in $, kW, PFLOPS, width in tiles). Where this spec changes an existing number it says so.
 
 ## 0. Rules this spec sets
 
@@ -367,3 +367,19 @@ Checked against `balance.json` (spTarget 1000, spPerPflopHour 0.0014, bondStart 
 | Combined-Cycle Block, SMR | Gas plant with a stack; a small domed reactor block with a warning stripe. |
 | Luci's Rate Card | Grid intake in crimson and gold. |
 | Ice Thermal Battery (Cass) | Insulated white tank with frost and an ice-blue light. |
+
+## 5.2 As implemented: final balance and deviations
+
+Scripted per-tree policy (`npx tsx tools/sim-cli/src/soulRun.ts starter 75 1,2,3 all`), days to 1000 SP:
+
+| tree | seed 1 | seed 2 | seed 3 | mean | target |
+|--|--|--|--|--|--|
+| Synthetic | 24.6 | 29.6 | 28.3 | 27.5 | 25 |
+| Bio-commit | 38.6 | 38.4 | 34.0 | 37.0 | 38 |
+| Green-commit | 52.7 | 45.0 | 46.6 | 48.1 | 44 |
+
+All nine runs are within 20% of target. The After-hours visit does not exist yet, so the player script adds +3 bond/day to the tree's advisor.
+
+Tuned knobs: `spPerPflopHour` 0.0017; `spWeights.synthetic.synthetic` 2.5; `spWeights.synthetic.greentech` 0; `spWeights.greentech.greentech` 3.4; `starterWeight` 0.5; several RP costs (wind_permit 9500, cryo_core_dossier 28000, event_array 8000, photonic_bench 30000, photonic_mesh 32000).
+
+Deviations: microgrid_bea is solar only (no storage); ice_store is a plain 800 kW air handler (no time shift); cold_room is a 60 kW handler with failureFactor 0.8; fuel_cell is width 4 and nutrient_tank_s width 2 (art width minimums); perfusion units are bioOnly handlers with holdC 37 (cool only cells under organoid racks); OC-1 preview waives the tech gate; early tiers use `unlock.early` / `TechNode.earlyTier`; tech `path` no longer gates anything (`requiresCommit` does); `upgradeFacility` takes an optional `defId` where several targets exist. New flavor quotes were written from memory and not network-verified.

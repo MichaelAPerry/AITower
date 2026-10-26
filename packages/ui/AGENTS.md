@@ -179,3 +179,6 @@ C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). 
   (title New game / Restart induction / game-over New game) with the game paused; Esc, Enter, Space, click or Skip end it; reduced motion shows all lines at once and waits. `Hud` resumes at 1x afterwards unless the induction runs.
 - Fake store: `scenarios` (starter, brownfield, sandbox), `newGame(seed, scenarioId)`, `setAutomation`, `unlockForeman`, `patchView`. Harness: `?foreman=1 &auto=1 &path=greentech|synthetic &score= &drought=1 &sandbox=1`.
 - Tests: `m4.test.tsx`. e2e `5c` presses T, switches the parts order on and checks the AUTO lamp and that it survives save/load.
+
+### Catalogue redesign (docs/TREES.md)
+Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgradeCost`); sim placement goes through progression/access.ts, `upgradeFacility` in commands/upgrade.ts, snapshot v13 (migrateV12, `bondGiven`). UI reads the same `access()` for tags and lock reasons. Balance: `tools/sim-cli/src/soulRun.ts [scenario] [days] [seeds] [synthetic|biotech|greentech|all]` with the scripted player in player.ts.

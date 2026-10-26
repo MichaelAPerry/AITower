@@ -77,18 +77,18 @@ export const PRIORITY: Record<Tree, string[]> = {
 		"desk_fan_standard",
 		"batch_cards",
 		"rear_door_drawings",
-		"economizer",
-		"substation_licence",
+		"reading_room",
+		"pit_crew",
 		"inference_foundry",
+		"solar_charter",
+		"economizer",
+		"event_array",
 		"chilled_loop",
 		"district_heat_accord",
-		"solar_charter",
-		"event_array",
 		"wind_permit",
 		"canopy_array",
 		"adiabatic_cooling",
 		"photonic_bench",
-		"reading_room",
 		"hydrogen_cell",
 		"photonic_mesh",
 	],
@@ -562,18 +562,26 @@ export class Player {
 		const bays = Object.values(this.content.facilities).filter((c) => c.kind === "sterilizer" && !c.bio?.cullsGrowths && this.usable(c, v)).sort((a, b) => a.cost - b.cost);
 		const bay = bays[0];
 		if (!bay) return;
-		const reach = bay.bio?.radius ?? 4;
+		const radius = bay.bio?.radius ?? 4;
+		type Cover = { floor: number; x0: number; x1: number; r: number };
+		const covers: Cover[] = v.facilities
+			.filter((s) => this.content.facilities[s.defId].kind === "sterilizer")
+			.map((s) => ({ floor: s.floor, x0: s.x, x1: s.x + s.width - 1, r: this.content.facilities[s.defId].bio?.radius ?? 0 }));
+		const reaches = (c: Cover, r: { floor: number; x: number; width: number }): boolean => c.floor === r.floor && Math.max(0, r.x - c.x1, c.x0 - (r.x + r.width - 1)) <= c.r;
 		const bios = v.facilities.filter((f) => this.content.facilities[f.defId].rack?.cooling === "bio" && !f.grown);
-		for (const r of bios) {
-			const covered = v.facilities.some((s) => {
-				const sd = this.content.facilities[s.defId];
-				return sd.kind === "sterilizer" && s.floor === r.floor && Math.max(0, r.x - (s.x + s.width - 1), s.x - (r.x + r.width - 1)) <= (sd.bio?.radius ?? 0);
-			});
-			if (!covered && bay.cost <= budget) {
-				if (this.place(v, occ, bay, [r.floor], (s) => Math.abs(s.x - r.x))) return;
-			}
+		let ordered = 0;
+		// One bay at a time, placed where it reaches the most racks that nothing cleans yet.
+		while (ordered < 2 && bay.cost <= Math.max(budget, this.remaining * 0.5)) {
+			const bare = bios.filter((r) => !covers.some((c) => reaches(c, r)));
+			if (bare.length === 0) break;
+			const floor = bare[0].floor;
+			const here = bare.filter((r) => r.floor === floor);
+			const gain = (x: number): number => here.filter((r) => reaches({ floor, x0: x, x1: x + bay.width - 1, r: radius }, r)).length;
+			const spot = this.place(v, occ, bay, [floor], (s) => -gain(s.x) * 100 + Math.abs(s.x - here[0].x));
+			if (!spot) break;
+			covers.push({ floor, x0: spot.x, x1: spot.x + bay.width - 1, r: radius });
+			ordered++;
 		}
-		void reach;
 		if (v.facilities.some((f) => f.grown)) {
 			const cull = Object.values(this.content.facilities).find((c) => c.bio?.cullsGrowths && this.usable(c, v));
 			if (cull && !v.facilities.some((f) => f.defId === cull.id) && cull.cost <= budget) this.place(v, occ, cull, this.hallFloors(v), (s) => s.x);
@@ -643,17 +651,22 @@ export class Player {
 		}
 	}
 
-	/** Idle compute that is also the weakest: sell back the worst rack when a much better one exists (the demolish refund is 50%). */
+	/**
+	 * Sell back the weakest racks. A training job takes at most 8 racks, the first idle ones in build order, so a hall with many
+	 * weak old racks at the front cannot start the big offers (and a Singularity bar fed by shared racks gains nothing from them).
+	 * Retire a rack that is idle and under 40% of the strongest one, once at least 8 strong racks stand; the demolish refund is 50%.
+	 */
 	private retire(v: SimView, best: FacilityDef | null): void {
-		if (!best) return;
-		const bv = this.value(best, v);
-		const worst = v.facilities
-			.filter((f) => !f.grown && isRack(this.content.facilities[f.defId]) && f.jobId === null)
-			.map((f) => ({ f, val: this.value(this.content.facilities[f.defId], v) }))
-			.filter((o) => o.val < 0.55 * bv)
-			.sort((a, b) => a.val - b.val)
-			.slice(0, 2);
-		for (const o of worst) if (this.submit({ type: "demolish", floor: o.f.floor, x: o.f.x })) this.log.push(`retire ${o.f.defId}`);
+		const racks = v.facilities.filter((f) => !f.grown && isRack(this.content.facilities[f.defId]));
+		const pf = (f: { defId: string }): number => this.content.facilities[f.defId].rack?.pflops ?? 0;
+		const top = racks.reduce((m, f) => Math.max(m, pf(f)), 0);
+		const strong = racks.filter((f) => pf(f) >= 0.4 * top).length;
+		const bv = best ? this.value(best, v) : 0;
+		const weak = racks
+			.filter((f) => f.jobId === null && pf(f) < 0.4 * top && (strong >= 8 || this.value(this.content.facilities[f.defId], v) < 0.4 * bv))
+			.sort((a, b) => pf(a) - pf(b) || a.id - b.id)
+			.slice(0, 3);
+		for (const f of weak) if (this.submit({ type: "demolish", floor: f.floor, x: f.x })) this.log.push(`retire ${f.defId}`);
 	}
 
 	private savingHours = 0;
@@ -681,7 +694,7 @@ export class Player {
 		let left = budget;
 		this.ensureStorage(v, occ, left * 0.25);
 		this.greenPower(v, occ, left * 0.6);
-		if (v.tier >= 3) this.cleanHall(v, occ, left * 0.2);
+		if (v.tier >= 3 && this.tree === "biotech") this.cleanHall(v, occ, left * 0.4);
 		// Saving: when a much better rack exists but is not affordable yet, do not spend on the lesser one.
 		const best = this.pickRack(v, Number.POSITIVE_INFINITY);
 		const now = this.pickRack(v, left);
@@ -690,7 +703,7 @@ export class Player {
 		const saving = wantSave && this.savingHours <= 150;
 		if (saving) return;
 		this.upgrades(v, occ, left * 0.5);
-		if (saturated) this.retire(v, best);
+		this.retire(v, best);
 		for (let i = 0; i < 4 && !saturated; i++) {
 			const d = this.pickRack(v, left);
 			if (!d) break;

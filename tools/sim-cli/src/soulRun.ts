@@ -50,6 +50,7 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 	// Standing orders: spare parts and bots only. Research, building and the commit are the player's.
 	const orders = allAutomation(false);
 	orders.research.enabled = false;
+	orders.bots = { enabled: true, racksPerBot: 6, maxBots: 12 };
 	sim.submit({ type: "setAutomation", policy: orders });
 	const target = content.balance.soul.spTarget;
 	let lastTier = 1;

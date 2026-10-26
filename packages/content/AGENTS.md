@@ -53,3 +53,6 @@ Game data, validation and the contract generator. Depends on nothing.
 - `facilities.json`: every facility has a `line` (absent = shared) and secret `seal` numbers for biotech/greentech (positive scars, negative heals).
 - `story.json`: the story scenes (category `story`, `trigger`, `whenPath`, `lines`, per-choice `reply`, `backdrop`, `location`), merged into `events` by `load.ts`.
 - `balance.soul`: SP target and weights, seal max and residue rate, objection threshold, bond start and gates. Reputation (`balance.standing`) was removed.
+
+### Catalogue redesign (docs/TREES.md)
+Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgradeCost`); sim placement goes through progression/access.ts, `upgradeFacility` in commands/upgrade.ts, snapshot v13 (migrateV12, `bondGiven`). UI reads the same `access()` for tags and lock reasons. Balance: `tools/sim-cli/src/soulRun.ts [scenario] [days] [seeds] [synthetic|biotech|greentech|all]` with the scripted player in player.ts.

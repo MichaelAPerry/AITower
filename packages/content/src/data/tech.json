@@ -1115,7 +1115,7 @@
   "branch": "compute",
   "lane": "green",
   "minTier": 5,
-  "cost": 42000,
+  "cost": 30000,
   "requires": [
    "event_array",
    "canopy_array"
@@ -1542,7 +1542,7 @@
   "branch": "compute",
   "lane": "green",
   "minTier": 4,
-  "cost": 12000,
+  "cost": 8000,
   "requires": [
    "inference_foundry"
   ],
@@ -1622,7 +1622,7 @@
   "branch": "compute",
   "lane": "green",
   "minTier": 5,
-  "cost": 40000,
+  "cost": 32000,
   "requires": [
    "photonic_bench"
   ],

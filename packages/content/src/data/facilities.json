@@ -369,7 +369,8 @@
   },
   "seal": {
    "greentech": 1
-  }
+  },
+  "upgradesFrom": "rack_air_gpu"
  },
  "rack_dlc_gpu2": {
   "id": "rack_dlc_gpu2",
@@ -2627,7 +2628,6 @@
    "costPerKwh": 2
   },
   "placement": {
-   "maxFloor": -1,
    "needsPower": true,
    "basementOnly": true
   },
