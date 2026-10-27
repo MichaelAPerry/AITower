@@ -6,7 +6,7 @@ import { StampBtn } from "../menu/parts";
 import { auditOutcome, gradeTone, reportRows } from "./finance";
 
 /**
- * QUARTERLY AUDIT: a modal paper sheet with the figures, a big grade stamp, the standing and cash change and the
+ * QUARTERLY INSPECTION: a modal paper sheet with the figures, a big grade stamp, the standing and cash change and the
  * Compute Authority's remark. It does not pause the game. Closes with the button or Esc.
  */
 export function AuditSheet({ report, onClose }: { report: QuarterReport; onClose: () => void }) {
@@ -47,11 +47,11 @@ export function AuditPaper({ report, onClose }: { report: QuarterReport; onClose
 	return (
 			<article className="ui-audit" role="dialog" aria-modal="true" aria-labelledby="audit-title">
 				<header className="ui-audit-head">
-					<span>COMPUTE AUTHORITY · FACILITY AUDIT</span>
+					<span>FACILITY INSPECTION</span>
 					<span>QUARTER {report.quarter}</span>
 				</header>
 				<h2 className="ui-audit-title" id="audit-title">
-					QUARTERLY AUDIT
+					QUARTERLY INSPECTION
 				</h2>
 				<div className="ui-audit-main">
 					<dl className="ui-audit-figs">
@@ -74,7 +74,7 @@ export function AuditPaper({ report, onClose }: { report: QuarterReport; onClose
 				</p>
 				<blockquote className="ui-audit-remark">{report.remark}</blockquote>
 				<footer className="ui-audit-acts">
-					<StampBtn tone="green" rest="Close" hot="Closed" onClick={onClose} title="Close the audit sheet (Esc)" />
+					<StampBtn tone="green" rest="Close" hot="Closed" onClick={onClose} title="Close the inspection (Esc)" />
 				</footer>
 			</article>
 	);

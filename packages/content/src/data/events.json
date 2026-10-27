@@ -328,8 +328,8 @@
   "id": "surprise_audit",
   "category": "ministry",
   "advisor": "luci",
-  "title": "Compute Authority: Facility Audit",
-  "body": "The Compute Authority audits the facility this week and wants cooling, power and job logs. Cooperating costs $120k. Stalling costs $30k, and the Authority sends 15% less work your way for 3 days.",
+  "title": "Facility Inspection",
+  "body": "An inspector arrives this week and wants cooling, power and job logs. Cooperating costs $120k. Stalling costs $30k, and new contract payouts drop 15% for 3 days.",
   "weight": 8,
   "minTier": 1,
   "minDay": 2,
@@ -340,7 +340,7 @@
     "id": "cooperate",
     "label": "Cooperate",
     "hint": "-$120k now",
-    "outcome": "Auditors found nothing, then invoiced for the finding.",
+    "outcome": "The inspector found nothing, then billed you for the visit.",
     "effects": [
      {
       "type": "cash",
@@ -352,7 +352,7 @@
     "id": "stall",
     "label": "Stall",
     "hint": "-$30k now · new contract payouts x0.85 for 3d",
-    "outcome": "The audit was rescheduled. Goodwill was not.",
+    "outcome": "The inspection was rescheduled. Goodwill was not.",
     "effects": [
      {
       "type": "cash",

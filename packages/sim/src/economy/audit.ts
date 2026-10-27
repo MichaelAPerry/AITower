@@ -24,13 +24,13 @@ const GRADES: readonly AuditGrade[] = ["A", "B", "C", "D", "E"];
 
 export const emptyAudit = (): AuditTracker => ({ samples: 0, uptimeSum: 0, pueSum: 0, days: [], jobsCompleted: 0, jobsFailed: 0 });
 
-/** One dry sentence per grade. */
+/** One plain sentence per grade: what uptime did and what the inspection pays or fines. */
 export const REMARKS: Record<AuditGrade, string> = {
-	A: "The Ministry has reviewed your quarter and, after some effort, found nothing to object to; this has been noted as unusual.",
-	B: "Performance is satisfactory, which is the highest praise this office is authorised to issue.",
-	C: "The quarter meets the minimum, and the Ministry reminds you that the minimum is a floor, not a destination.",
-	D: "The Ministry is disappointed, and has prepared a form to record that disappointment.",
-	E: "The quarter is hereby classified as an incident; please do not repeat it, and consider framing the correspondence.",
+	A: "Uptime beat target all quarter and nothing was faulted. The inspection pays a bonus.",
+	B: "Uptime held near target. The inspection pays a small bonus.",
+	C: "Uptime just met the minimum. No pay and no fine.",
+	D: "Uptime fell short of target. The inspection fines you.",
+	E: "Uptime was well below target. The inspection fines you heavily.",
 };
 
 export interface AuditInputs {

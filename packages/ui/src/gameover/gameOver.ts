@@ -40,7 +40,7 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		form: "DISTINGUISHED SERVICE",
 		stamp: "COMMENDED",
 		tone: "green",
-		lines: ["You have reached the highest level the Compute Authority grants. The Compute Authority has noted the result.", "The datacenter may continue to operate in the sandbox, without further inspection."],
+		lines: ["You reached the highest Level. The inspectors have noted the result.", "The datacenter may keep running in the sandbox, with no further inspections."],
 	},
 	// Fallback only: the sheet shows the text of content.endings (see `overCopyFor`).
 	absorbed: {
@@ -48,7 +48,7 @@ export const OVER_COPY: Record<GameOverKind, OverCopy> = {
 		form: "ASSET RECLASSIFICATION",
 		stamp: "ABSORBED",
 		tone: "red",
-		lines: ["The facility and its operator are now Compute Authority assets.", "No further correspondence is required."],
+		lines: ["The facility and its operator have been taken over.", "Game over."],
 	},
 };
 

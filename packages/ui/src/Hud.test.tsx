@@ -149,7 +149,7 @@ describe("SystemMenu (server render)", () => {
 		const content = createFakeContent();
 		for (const [kind, heading, buttons] of [
 			["bankrupt", "NOTICE OF TERMINATION", ["Load game", "New game"]],
-			["victory", "COMMENDATION", ["Continue in sandbox", "New game"]],
+			["victory", "Victory", ["Continue in sandbox", "New game"]],
 		] as const) {
 			const store = createFakeStore(content);
 			store.triggerGameOver(kind);
@@ -174,7 +174,7 @@ describe("SystemMenu (server render)", () => {
 		expect(resolved).toMatchObject({ toast: true });
 		expect(resolved.text).toBe("Decided: COMPLY. The Inspector counted 4,112 cables and left.");
 		expect(describeEvent({ type: "gameOver", kind: "bankrupt" }, v, content).text).toContain("foreclosed");
-		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("COMMENDATION");
+		expect(describeEvent({ type: "gameOver", kind: "victory" }, v, content).text).toContain("Victory");
 	});
 
 	it("the Goals card points at an offer the starter site can serve (no liquid cooling, no stored data first)", () => {

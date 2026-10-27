@@ -274,7 +274,7 @@ describe("Finance tab", () => {
 		const seen: unknown[] = [];
 		const tree = FinanceTab(panelProps(store, content, { setUi: (p) => seen.push(p) }));
 		click(findButton(tree, /Credit Facility/));
-		click(findButton(tree, /Audits/));
+		click(findButton(tree, /Inspections/));
 		click(findButton(tree, /Record/));
 		expect(seen).toEqual([{ financeTab: "credit" }, { financeTab: "audits" }, { financeTab: "record" }]);
 	});
@@ -324,7 +324,7 @@ describe("Finance tab", () => {
 		const tree = AuditsSection(panelProps(store, content, { openAudit: (r) => (shown = r) }));
 		const html = renderToString(<AuditsSection {...panelProps(store, content)} />);
 		expect(html.indexOf("Quarter 2")).toBeLessThan(html.indexOf("Quarter 1"));
-		const opens = findAll(tree, (el) => el.props.title === "Open this audit sheet again");
+		const opens = findAll(tree, (el) => el.props.title === "Open this inspection again");
 		expect(opens).toHaveLength(2);
 		click(opens[1]);
 		expect((shown as QuarterReport | null)?.quarter).toBe(1);
@@ -333,7 +333,7 @@ describe("Finance tab", () => {
 		const { content, store } = setup();
 		const empty = { ...store.get().view, reports: [] };
 		const props = { ...panelProps(store, content), state: { ...store.get(), view: empty } };
-		expect(renderToString(<AuditsSection {...props} />)).toContain("No quarterly audit yet");
+		expect(renderToString(<AuditsSection {...props} />)).toContain("No inspection yet");
 	});
 	it("lifetime stats are in the Record section", () => {
 		const { content, store } = setup();
@@ -342,12 +342,12 @@ describe("Finance tab", () => {
 	});
 });
 
-describe("Quarterly audit sheet", () => {
+describe("Quarterly inspection sheet", () => {
 	it("shows the figures, the big grade stamp, cash change and remark", () => {
 		const { store } = setup();
 		const r = store.fileQuarterReport("D");
 		const html = renderToString(<AuditSheet report={r} onClose={() => {}} />);
-		expect(html).toContain("QUARTERLY AUDIT");
+		expect(html).toContain("QUARTERLY INSPECTION");
 		expect(html).toContain("QUARTER 2");
 		expect(html).toMatch(/ui-audit-stamp[^>]*>D</);
 		expect(html).toContain("stamp-red");
@@ -382,7 +382,7 @@ describe("event wording", () => {
 		expect(describeEvent({ type: "loanRepaid", amount: 250_000 }, v, content).text).toContain("Credit Facility: $250k repaid");
 		const r = store.fileQuarterReport("B");
 		const q = describeEvent({ type: "quarterReport", quarter: r.quarter, grade: "B" }, store.get().view, content);
-		expect(q.text).toBe(`Quarterly audit ${r.quarter}: grade B. ${r.remark}`);
+		expect(q.text).toBe(`Quarterly inspection ${r.quarter}: uptime grade B. ${r.remark}`);
 		expect(q.severity).toBe("good");
 		expect(describeEvent({ type: "quarterReport", quarter: 9, grade: "C" }, v, content).severity).toBe("info");
 		expect(describeEvent({ type: "quarterReport", quarter: 9, grade: "E" }, v, content).severity).toBe("warn");

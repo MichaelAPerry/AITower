@@ -14,7 +14,7 @@ export function LedgerSection({ state }: PanelProps) {
 	const today = state.view.day;
 	return (
 		<table className="ui-table ui-ledger">
-			<caption>COMPUTE AUTHORITY · DAILY LEDGER</caption>
+			<caption>DAILY LEDGER</caption>
 			<thead>
 				<tr>
 					<th>Day</th>
@@ -23,7 +23,7 @@ export function LedgerSection({ state }: PanelProps) {
 					<th className="num">Upkeep</th>
 					<th className="num">Construction</th>
 					<th className="num">Penalties</th>
-					<th className="num" title="Authority levy on the day's profit, charged at midnight">
+					<th className="num" title="Levy on the day's profit, charged at midnight">
 						Taxes
 					</th>
 					<th className="num" title="Interest on the Credit Facility loan">
@@ -118,12 +118,12 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 	const rows = [...state.view.reports].reverse();
 	if (!rows.length) {
 		const days = content.balance?.audit?.periodDays;
-		return <div className="ui-empty ui-pad">No quarterly audit yet. The Compute Authority audits every {days ? `${days} days` : "few days"}, graded A to E on uptime, failed jobs, penalties, PUE and profit.</div>;
+		return <div className="ui-empty ui-pad">No inspection yet. An inspector grades uptime every {days ? `${days} days` : "few days"}, from A to E, and pays or fines cash.</div>;
 	}
 	return (
 		<div className="ui-form ui-audits">
 			<div className="ui-form-head">
-				<span>QUARTERLY AUDITS</span>
+				<span>QUARTERLY INSPECTIONS</span>
 				<span>NEWEST FIRST</span>
 			</div>
 			<table className="ui-table">
@@ -158,7 +158,7 @@ export function AuditsSection({ content, state, openAudit }: PanelProps) {
 								{r.remark}
 							</td>
 							<td className="actions">
-								<button type="button" className="ui-btn ui-mini" onClick={() => openAudit(r)} title="Open this audit sheet again">
+								<button type="button" className="ui-btn ui-mini" onClick={() => openAudit(r)} title="Open this inspection again">
 									Open
 								</button>
 							</td>
@@ -194,7 +194,7 @@ export function RecordSection({ state }: PanelProps) {
 const SECTIONS: { id: FinanceSection; label: string; title: string }[] = [
 	{ id: "ledger", label: "Ledger", title: "Daily accounts" },
 	{ id: "credit", label: "Credit Facility", title: "Take or repay a loan" },
-	{ id: "audits", label: "Audits", title: "Quarterly Compute Authority audits" },
+	{ id: "audits", label: "Inspections", title: "Quarterly inspections: uptime grades, cash paid or fined" },
 	{ id: "record", label: "Record", title: "Lifetime statistics" },
 ];
 

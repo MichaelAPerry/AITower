@@ -219,7 +219,7 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "quarterReport": {
 			const r = view.reports?.find((r) => r.quarter === ev.quarter);
-			return { text: `Quarterly audit ${ev.quarter}: grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
+			return { text: `Quarterly inspection ${ev.quarter}: uptime grade ${ev.grade}${r ? `. ${r.remark}` : ""}`, severity: gradeSeverity(ev.grade), toast: false };
 		}
 	}
 }
@@ -228,7 +228,7 @@ function gameOverText(kind: GameOverKind, ending: EndingId | undefined, content:
 	if (kind === "absorbed") return plain ? "The Compute Authority has taken over the facility: game over" : "NOTICE: the facility has been reclassified as a Compute Authority asset";
 	if (kind === "victory") {
 		const title = ending ? content.endings?.find((e) => e.id === ending)?.title : undefined;
-		return title ? `COMMENDATION from the Compute Authority: ${title}` : "COMMENDATION from the Compute Authority";
+		return title ? `Victory: ${title}` : "Victory";
 	}
 	return "NOTICE: foreclosed for insolvency";
 }

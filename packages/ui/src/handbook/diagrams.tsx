@@ -87,7 +87,7 @@ const PICS: Record<DiagramId, { label: string; body: React.ReactNode }> = {
 				<path d="M300 32v38" className="pr-ln is-warn" />
 				<T x={300} y={26} c="is-warn">target</T>
 				<T x={160} y={56} c="is-on">up and working</T>
-				<T x={180} y={96} c="is-dim">over the target: a good audit</T>
+				<T x={180} y={96} c="is-dim">over the target: a good inspection</T>
 			</>
 		),
 	},
