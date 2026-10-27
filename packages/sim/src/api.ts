@@ -171,6 +171,7 @@ export type SimEvent =
 	| { type: "jobCompleted"; jobId: number; payout: number }
 	| { type: "jobFailed"; jobId: number; penalty: number }
 	| { type: "jobRolledBack"; jobId: number; lostWork: number }
+	| { type: "jobStalledStorage"; jobId: number; needTB: number; capacityTB: number }
 	| { type: "liftArrived"; liftId: number; floor: number }
 	| { type: "tierUp"; tier: number; reward: number }
 	| { type: "newDay"; day: number }
@@ -530,6 +531,10 @@ export interface LessonView {
 
 export interface SimView {
 	tick: number;
+	/** TB of datasets the active jobs need (every queued, running or stalled job). */
+	storageNeedTB?: number;
+	/** TB of powered, healthy storage racks (Storage Arrays and Tape Libraries). */
+	storageCapacityTB?: number;
 	day: number;
 	/** 0..1439 */
 	minuteOfDay: number;

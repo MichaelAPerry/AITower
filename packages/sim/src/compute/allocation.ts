@@ -55,7 +55,7 @@ export function storageCapacityTB(state: SimState, content: ContentDB): number {
  * Jobs (oldest first) whose datasets fit in storage; the newest that don't fit stall and give up
  * their racks. Returns the set of job ids allowed to run and updates `state.storageUtil`.
  */
-export function applyStorageLimit(state: SimState, content: ContentDB): Set<number> {
+export function applyStorageLimit(state: SimState, content: ContentDB, events?: SimEvent[]): Set<number> {
 	const cap = storageCapacityTB(state, content);
 	const ok = new Set<number>();
 	let used = 0;
@@ -65,7 +65,11 @@ export function applyStorageLimit(state: SimState, content: ContentDB): Set<numb
 		if (need <= 0 || used + need <= cap) {
 			used += need;
 			ok.add(job.id);
-		} else releaseJobRacks(state, job);
+		} else {
+			// Announced once, on the move into a storage stall (a stalled job is not stalled again).
+			if (events && job.status !== "stalled") events.push({ type: "jobStalledStorage", jobId: job.id, needTB: need, capacityTB: cap });
+			releaseJobRacks(state, job);
+		}
 	}
 	state.storageUtil = cap > 0 ? Math.min(1, used / cap) : 0;
 	return ok;

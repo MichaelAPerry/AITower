@@ -72,7 +72,7 @@ function deliveredBy(state: SimState, job: Job): number {
 export function computeStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	releaseBadRacks(state, events);
-	const runnable = applyStorageLimit(state, content);
+	const runnable = applyStorageLimit(state, content, events);
 	state.metrics.pflops = updateRackClocks(ctx);
 	if (state.metrics.pflops > state.stats.peakPflops) state.stats.peakPflops = state.metrics.pflops;
 	const rpPerPflopHour = content.balance.research.pointsPerPflopHour * perk(state, content, "researchRate");

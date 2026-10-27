@@ -128,6 +128,8 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			return { text: `${job(ev.jobId)} completed · +${fmtMoney(ev.payout)}`, severity: "good", toast: false };
 		case "jobFailed":
 			return { text: `${job(ev.jobId)} failed · penalty ${fmtMoney(ev.penalty)}`, severity: "error", toast: true };
+		case "jobStalledStorage":
+			return { text: "Job stalled: not enough storage. Build a Storage Array or Tape Library.", severity: "warn", toast: true };
 		case "jobRolledBack":
 			return { text: `${job(ev.jobId)} rolled back to checkpoint`, severity: "warn", toast: false };
 		case "liftArrived":
@@ -247,6 +249,8 @@ export function eventKey(ev: SimEvent): string {
 			return `${ev.type}:${ev.facilityId}`;
 		case "commandRejected":
 			return `rej:${ev.reason}`;
+		case "jobStalledStorage":
+			return "stall:storage";
 		default:
 			return JSON.stringify(ev);
 	}

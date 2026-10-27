@@ -7,6 +7,7 @@ import { currentStepIndex, lessonAllowed, lessonMetrics } from "../lesson/lesson
 import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
+import { isActive, storageCapacityTB } from "../compute/allocation";
 import { createNav, type Nav, reachableRuns, runAtTile } from "../logistics/routing";
 import type { Bot, SimState } from "../core/state";
 import { GensetMode } from "../core/state";
@@ -270,6 +271,8 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		})),
 		coolantNets: state.coolantNets.map((n) => ({ ...n })),
 		offers: state.offers.map((o) => ({ ...o.spec, id: o.id, expiresAt: o.expiresAt })),
+		storageNeedTB: state.jobs.reduce((tb, j) => (isActive(j) ? tb + j.spec.storageTB : tb), 0),
+		storageCapacityTB: storageCapacityTB(state, content),
 		jobs,
 		workOrders: upkeep.orders,
 		maintenance: upkeep.summary,

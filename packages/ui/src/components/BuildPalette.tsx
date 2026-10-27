@@ -71,6 +71,13 @@ export function lockText(def: FacilityDef, view: SimView, content: ContentDB): s
 	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
 }
 
+/** Storage racks (Storage Array, Tape Library) say how much dataset the running jobs need against what the racks hold. */
+export function storageNote(def: FacilityDef | undefined, view: SimView): string | null {
+	if (!def?.rack || !(def.rack.storageTB > 0) || def.rack.pflops > 0) return null;
+	const tb = (n: number) => `${Math.round(n).toLocaleString("en-US")} TB`;
+	return `Jobs need storage: ${tb(view.storageNeedTB ?? 0)} in use of ${tb(view.storageCapacityTB ?? 0)}`;
+}
+
 /** A tab's rows: unlocked first, each group by unlock tier, then cost. */
 export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategory): FacilityDef[] {
 	return Object.values(content.facilities)
@@ -91,7 +98,7 @@ export function treeHidden(def: FacilityDef, view: SimView): boolean {
 }
 
 /** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
-function Card({ item, picked, poor, lock, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; lock?: string; onPick: () => void; onHover: (key: string | null) => void }) {
+function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; lock?: string; note?: string | null; onPick: () => void; onHover: (key: string | null) => void }) {
 	const d = item.def;
 	return (
 		<button
@@ -112,6 +119,7 @@ function Card({ item, picked, poor, lock, onPick, onHover, plain }: { plain?: bo
 			<span className="bld-name">{item.name}</span>
 			{item.tier?.output && <OutputBar t={item.tier} />}
 			{item.tier?.note && <span className="bld-note">{item.tier.note}</span>}
+			{note && <span className="bld-note">{note}</span>}
 			{lock ? <span className="bld-lock">{lock}</span> : <span className={`bld-cost ${poor ? "is-short" : ""}`}>{item.costText}</span>}
 		</button>
 	);
@@ -142,7 +150,7 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 	};
 	// Called as a plain function (no hooks), so tests can walk the returned element tree.
 	const card = (item: CatalogItem, plain = false) =>
-		Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, lock: item.def ? accessLocked(item.def, view, content)?.short : undefined, onPick: () => pick(item), onHover: hover });
+		Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, lock: item.def ? accessLocked(item.def, view, content)?.short : undefined, note: storageNote(item.def, view), onPick: () => pick(item), onHover: hover });
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];

@@ -137,6 +137,18 @@ describe("jobs", () => {
 		expect(ja?.rackIds).toHaveLength(0);
 	});
 
+	it("announces a storage stall once, when the job moves into it, and reports need against capacity", () => {
+		const sim = newSim(noOffers(), "farm");
+		const a = acceptSpec(sim, training({ work: 1000, storageTB: 1500 }));
+		run(sim, 3);
+		const store = sim.state.facilities.find((f) => f.defId === "rack_storage");
+		if (!store) throw new Error("no storage rack");
+		const events = [...exec(sim, { type: "setEnabled", facilityId: store.id, enabled: false }), ...run(sim, 3)];
+		expect(events.filter((e) => e.type === "jobStalledStorage")).toEqual([{ type: "jobStalledStorage", jobId: a, needTB: 1500, capacityTB: 0 }]);
+		expect(sim.view().storageNeedTB).toBe(1500);
+		expect(sim.view().storageCapacityTB).toBe(0);
+	});
+
 	it("refuses contracts the idle racks cannot start, with a reason that names the shortfall", () => {
 		const sim = newSim(noOffers(), "farm");
 		sim.step();
