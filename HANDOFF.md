@@ -33,11 +33,19 @@ The full spec is in `docs/SOUL.md`, the look is in `docs/STYLE_PC98.md`, and the
 
 Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal` numbers in `facilities.json`. Headless trace: `npx tsx tools/sim-cli/src/soulRun.ts starter 80`. In dev builds, `window.__aitower` exposes the sim for poking.
 
+### Done since (Oct 27)
+- **Catalogue rebuilt per tree** (`docs/TREES.md`): Shared, Starter (anyone), Specialist (commit only), Synthetic lines; upgrades in place; advisor signature builds; snapshot v13. Balance verified with `soulRun.ts` (Synthetic 27.5 / Bio 37 / Green 48 days, targets 25 / 38 / 44).
+- **Dialogue rewritten** to `docs/VN_SAMPLE.md` (the bar) and `docs/VN_WRITING.md` (voice sheets).
+- **Dating systems** (all nine): after-hours visits, bond stages, milestone scenes, gifts, rivalry, confession and route lock, texts, memories. Snapshot v14.
+- Ending paintings appear only on ending screens. Quotes checked in `docs/QUOTES_CHECK.md`.
+
 ### Next, in order
-1. Tune from the owner playtest.
-2. **More expressions and scenes:** Bea has no "unsettling" face (her displeased face is reused); write mid-game arcs per advisor.
-3. **Catalogue identity:** per-tree racks and coolers so each line feels distinct. Synthetic and Green still have few items of their own.
-4. **Lessons 2+** for the new loop.
+1. Owner playtest; fix bugs first.
+2. **Art from the owner** (requested only after scenes exist): rack sprites (`docs/TREES.md` section 7), mid-game scene backgrounds and "tender" expressions (`docs/VN_WRITING.md`, "Dating systems as built"). Placeholders are tinted existing sprites and the plain indigo stage.
+3. Simplified items to finish: Bea's microgrid has no storage; Cass's ice store doesn't time-shift.
+4. Lessons 2+ for the new loop.
+
+**How to work:** Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
 
 The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, at the root and in `docs/`.
 
