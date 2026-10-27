@@ -17,7 +17,7 @@ export function nextOfferDelay(state: SimState, content: ContentDB): number {
 export function offersStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	const eco = content.balance.economy;
-	if (state.offers.some((o) => o.expiresAt <= state.tick)) {
+	if (!state.sandbox && state.offers.some((o) => o.expiresAt <= state.tick)) { // sandbox offers never expire
 		state.offers = state.offers.filter((o) => {
 			if (o.expiresAt > state.tick) return true;
 			events.push({ type: "contractExpired", contractId: o.id });

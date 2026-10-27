@@ -259,7 +259,7 @@
 	"sandbox": {
 		"id": "sandbox",
 		"name": "Sandbox Annex",
-		"description": "A fully funded test lot with no bankruptcy; audits are still filed, for the record. $500M and Level 5, for trying anything once. Research is still required.",
+		"description": "The standard starter lot with $500M and Level 5, for trying anything once. It starts paused, with no deadlines and no failures. No bankruptcy; audits are still filed, for the record.",
 		"width": 64,
 		"floorMin": -8,
 		"floorMax": 60,
@@ -270,27 +270,17 @@
 			[
 				-1,
 				4,
-				59
+				43
 			],
 			[
 				0,
 				0,
-				63
+				47
 			],
 			[
 				1,
 				4,
-				59
-			],
-			[
-				2,
-				4,
-				59
-			],
-			[
-				3,
-				4,
-				59
+				43
 			]
 		],
 		"facilities": [
@@ -300,57 +290,32 @@
 				"x": 6
 			},
 			{
-				"defId": "grid_tie",
-				"floor": -1,
-				"x": 10
-			},
-			{
-				"defId": "genset",
-				"floor": -1,
-				"x": 14
-			},
-			{
-				"defId": "ups_battery",
-				"floor": -1,
-				"x": 18
-			},
-			{
-				"defId": "chiller",
-				"floor": 1,
-				"x": 22
-			},
-			{
-				"defId": "cdu",
-				"floor": 1,
-				"x": 27
-			},
-			{
 				"defId": "bot_charger",
 				"floor": 0,
-				"x": 30
+				"x": 26
 			},
 			{
 				"defId": "parts_depot",
 				"floor": 0,
-				"x": 33
+				"x": 29
 			},
 			{
-				"defId": "rack_dlc_gpu",
+				"defId": "rack_air_gpu",
 				"floor": 1,
 				"x": 6
 			},
 			{
-				"defId": "rack_dlc_gpu",
+				"defId": "rack_air_gpu",
 				"floor": 1,
 				"x": 8
 			},
 			{
-				"defId": "rack_dlc_gpu",
+				"defId": "rack_air_gpu",
 				"floor": 1,
 				"x": 10
 			},
 			{
-				"defId": "rack_dlc_gpu",
+				"defId": "rack_air_gpu",
 				"floor": 1,
 				"x": 12
 			},
@@ -363,11 +328,6 @@
 				"defId": "rack_storage",
 				"floor": 1,
 				"x": 16
-			},
-			{
-				"defId": "rack_storage",
-				"floor": 1,
-				"x": 18
 			}
 		],
 		"conduits": [
@@ -375,54 +335,36 @@
 				"power",
 				-1,
 				4,
-				59
+				43
 			],
 			[
 				"power",
 				0,
 				4,
-				59
+				43
 			],
 			[
 				"power",
 				1,
 				4,
-				59
-			],
-			[
-				"power",
-				2,
-				4,
-				59
-			],
-			[
-				"power",
-				3,
-				4,
-				59
-			],
-			[
-				"coolant",
-				1,
-				4,
-				59
+				43
 			]
 		],
 		"lifts": [
 			{
-				"x": 40,
+				"x": 24,
 				"floorMin": -1,
-				"floorMax": 3
+				"floorMax": 1
 			}
 		],
 		"bots": [
 			{
 				"defId": "rover",
 				"floor": 0,
-				"x": 30
+				"x": 26
 			}
 		],
-		"spareParts": 10
+		"spareParts": 4
 	},
 	"lesson_first_watt": {
 		"id": "lesson_first_watt",

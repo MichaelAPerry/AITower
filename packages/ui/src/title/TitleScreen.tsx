@@ -35,6 +35,8 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 	const cards = content ? scenarioCards(content) : [];
 	const [picked, setPicked] = useState<string | null>(null);
 	const scenarioId = content ? validScenario(content, picked) : undefined;
+	// A sandbox site opens paused (the crawl ends without starting the clock).
+	const sandboxPick = !!scenarioId && !!content?.scenarios?.[scenarioId]?.sandbox;
 	const lessonOne = content?.lessons?.[0];
 	const lessonProgress = loadLessonProgress();
 	const lessonDone = lessonOne ? lessonProgress.done[lessonOne.id] !== undefined : false;
@@ -73,7 +75,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 			} else openMenu("lessons");
 		} else if (item === "new") {
 			startGame(store, { kind: "new", scenarioId, crawl: true });
-			onStart({ newGame: true, run: true });
+			onStart({ newGame: true, run: !sandboxPick });
 		} else openMenu(item);
 	};
 

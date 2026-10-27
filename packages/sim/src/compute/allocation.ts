@@ -201,10 +201,10 @@ export function acceptCheck(
 		const parts = [busy ? `${busy} busy with current jobs` : "", offline ? `${offline} offline (unpowered, failed, tripped or uncooled)` : ""].filter(Boolean);
 		return { ok: false, reason: `no idle racks${parts.length ? `: ${parts.join(", ")}` : ""}` };
 	} else {
-		// Would it finish in time on the racks it gets now? Otherwise it is a guaranteed missed-deadline penalty.
+		// Would it finish in time on the racks it gets now? Otherwise it is a guaranteed missed-deadline penalty (sandbox has no deadlines).
 		const needHours = trainPflops > 0 ? spec.work / trainPflops : Number.POSITIVE_INFINITY;
 		const haveHours = (spec.durationTicks * margin.deadline) / TICKS_PER_HOUR;
-		if (needHours > haveHours) {
+		if (!state.sandbox && needHours > haveHours) {
 			const h = (n: number) => `${Math.ceil(n)} h`;
 			return { ok: false, reason: `too slow for the deadline: your idle racks (${pf(trainPflops)}) need about ${h(needHours)}, the deadline allows ${h(spec.durationTicks / TICKS_PER_HOUR)}` };
 		}

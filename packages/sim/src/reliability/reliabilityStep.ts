@@ -67,7 +67,7 @@ export function reliabilityStep(ctx: TickCtx): void {
 			f.recoverAt = -1;
 			events.push({ type: "rackRecovered", facilityId: f.id });
 		}
-		if (!f.enabled || f.failed) continue;
+		if (!f.enabled || f.failed || state.sandbox) continue; // sandbox racks never fail
 		if (d.kind !== "rack") continue;
 		const cold = anyColdRoom ? coldRoomFactor(state, content, f) : 1;
 		if (nextRandom(state.rng, "reliability") < rackHazard(content, f, factor * cold, facilityContamination(state, f))) {

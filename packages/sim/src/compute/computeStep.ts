@@ -128,7 +128,7 @@ export function computeStep(ctx: TickCtx): void {
 				events.push({ type: "jobCompleted", jobId: job.id, payout: job.spec.payout });
 				continue;
 			}
-			if (state.tick >= job.deadline) {
+			if (!state.sandbox && state.tick >= job.deadline) {
 				spend(state, "penalties", job.spec.penalty);
 				finish(state, job, "failed");
 				recordJobOutcome(state, "failed");
