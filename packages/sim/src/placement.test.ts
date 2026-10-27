@@ -1,3 +1,4 @@
+import { loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { CommandResult } from "./api";
 import { exec, facilityOf, makeContent, newSim, rowCells, run } from "./test/fixture";
@@ -116,5 +117,21 @@ describe("networks", () => {
 		expect(sim.submit({ type: "buildConduit", layer: "power", cells: [{ x: 0, floor: 1 }] }).ok).toBe(false);
 		exec(sim, { type: "buildConduit", layer: "power", cells: [{ x: 0, floor: 0 }, { x: 0, floor: 1 }, { x: 0, floor: 2 }] });
 		expect(sim.state.powerNetCount).toBe(1);
+	});
+});
+
+describe("growths are never placed by hand", () => {
+	it("the place command and canPlace refuse every growth in the shipped catalogue, whatever the Level", () => {
+		const content = loadContent();
+		const growths = Object.values(content.facilities).filter((d) => d.growth).map((d) => d.id);
+		expect(growths.sort()).toEqual(["growth_cyst", "growth_lobe", "growth_mass"]);
+		const scenario = Object.values(content.scenarios).find((s) => !s.lesson)?.id ?? "empty";
+		const sim = newSim(content, scenario);
+		const before = sim.state.facilities.length;
+		for (const defId of growths) {
+			expect(reasonOf(sim.canPlace(defId, 0, 0))).toBe("growths cannot be built");
+			expect(reasonOf(sim.submit({ type: "place", defId, floor: 0, x: 0 }))).toBe("growths cannot be built");
+		}
+		expect(sim.state.facilities).toHaveLength(before);
 	});
 });

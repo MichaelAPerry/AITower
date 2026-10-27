@@ -1412,9 +1412,9 @@
   ],
   "effects": [],
   "flavor": {
-   "quote": "One sometimes finds what one is not looking for.",
-   "author": "Alexander Fleming",
-   "source": "Quoted in The Life of Sir Alexander Fleming, 1959"
+   "quote": "Science knows no country, because knowledge belongs to humanity, and is the torch which illuminates the world.",
+   "author": "Louis Pasteur",
+   "source": "Quoted in René Dubos, Louis Pasteur: Free Lance of Science, 1960"
   }
  },
  {
@@ -1432,9 +1432,9 @@
   "requiresCommit": "biotech",
   "path": "biotech",
   "flavor": {
-   "quote": "It is what we think we know already that often prevents us from learning.",
-   "author": "Claude Bernard",
-   "source": "An Introduction to the Study of Experimental Medicine, 1865"
+   "quote": "Hope is the thing with feathers",
+   "author": "Emily Dickinson",
+   "source": "The Complete Poems, ed. Thomas H. Johnson, 1960"
   }
  },
  {
@@ -1452,9 +1452,9 @@
   "requiresCommit": "biotech",
   "path": "biotech",
   "flavor": {
-   "quote": "Food is the moral right of all who are born into this world.",
-   "author": "Norman Borlaug",
-   "source": "Nobel Lecture, 11 December 1970"
+   "quote": "Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.",
+   "author": "King James Bible",
+   "source": "Matthew 4:4 (KJV, 1611)"
   }
  },
  {
@@ -1472,9 +1472,9 @@
   "requiresCommit": "biotech",
   "path": "biotech",
   "flavor": {
-   "quote": "All things are poison and nothing is without poison; the dosage alone makes it so a thing is not a poison.",
+   "quote": "All things are poison, and nothing is without poison; but the dose makes it clear that a thing is not a poison.",
    "author": "Paracelsus",
-   "source": "Third Defense, 1538"
+   "source": "Third Defense, Septem Defensiones, 1538"
   }
  },
  {
@@ -1492,9 +1492,9 @@
   "requiresCommit": "biotech",
   "path": "biotech",
   "flavor": {
-   "quote": "There is grandeur in this view of life",
-   "author": "Charles Darwin",
-   "source": "On the Origin of Species, 1859"
+   "quote": "The clearest way into the Universe is through a forest wilderness.",
+   "author": "John Muir",
+   "source": "John of the Mountains, 1938 (journal, July 1890)"
   }
  },
  {
@@ -1550,9 +1550,9 @@
   "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
-   "quote": "The best way to predict the future is to invent it.",
-   "author": "Alan Kay",
-   "source": "Meeting at Xerox PARC, 1971"
+   "quote": "The purpose of computing is insight, not numbers.",
+   "author": "Richard Hamming",
+   "source": "Numerical Methods for Scientists and Engineers, 1962, Preface"
   }
  },
  {
@@ -1570,9 +1570,9 @@
   "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
-   "quote": "Nothing is too wonderful to be true, if it be consistent with the laws of nature.",
+   "quote": "There is no more open door by which you can enter into the study of natural philosophy",
    "author": "Michael Faraday",
-   "source": "Diary, 19 March 1849"
+   "source": "The Chemical History of a Candle, 1860"
   }
  },
  {
@@ -1592,7 +1592,7 @@
   "flavor": {
    "quote": "To travel hopefully is a better thing than to arrive",
    "author": "Robert Louis Stevenson",
-   "source": "Virginibus Puerisque, 1881"
+   "source": "El Dorado, Virginibus Puerisque, 1881"
   }
  },
  {
@@ -1610,9 +1610,9 @@
   "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
-   "quote": "Down, down, down. Would the fall NEVER come to an end!",
+   "quote": "Down, down, down. Would the fall never come to an end?",
    "author": "Lewis Carroll",
-   "source": "Alice's Adventures in Wonderland, ch. 1"
+   "source": "Alice's Adventures in Wonderland, ch. 1, 1865"
   }
  },
  {
@@ -1630,9 +1630,9 @@
   "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
-   "quote": "I have heard articulate speech produced by sunlight!",
-   "author": "Alexander Graham Bell",
-   "source": "Letter to his father, 26 February 1880"
+   "quote": "There's a certain Slant of light",
+   "author": "Emily Dickinson",
+   "source": "The Complete Poems, ed. Thomas H. Johnson, 1960"
   }
  },
  {
@@ -1649,9 +1649,9 @@
   "effects": [],
   "path": "synthetic",
   "flavor": {
-   "quote": "The energy of the universe is constant. The entropy of the universe tends to a maximum.",
+   "quote": "heat everywhere manifests a tendency to equalize existing differences of temperature",
    "author": "Rudolf Clausius",
-   "source": "On the Second Law of Thermodynamics, 1865"
+   "source": "Fourth Memoir, 1854"
   }
  },
  {
@@ -1690,7 +1690,7 @@
   "flavor": {
    "quote": "We nuclear people have made a Faustian bargain with society.",
    "author": "Alvin Weinberg",
-   "source": "Social Institutions and Nuclear Energy, Science, 7 July 1972"
+   "source": "Social Institutions and Nuclear Energy, Science, 7 July 1972, p. 33"
   }
  }
 ]

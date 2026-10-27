@@ -2248,9 +2248,9 @@
    "biotech": -2
   },
   "flavor": {
-   "quote": "The constancy of the internal environment is the condition for a free and independent life.",
-   "author": "Claude Bernard",
-   "source": "Lectures on the Phenomena of Life Common to Animals and Plants, 1878"
+   "quote": "For the life of the flesh is in the blood",
+   "author": "King James Bible",
+   "source": "Leviticus 17:11 (KJV, 1611)"
   }
  },
  "perfusion_manifold": {
@@ -2390,9 +2390,9 @@
   },
   "tier": "specialist",
   "flavor": {
-   "quote": "We may lay it down as an incontestable axiom, that, in all the operations of art and nature, nothing is created",
+   "quote": "We may lay it down as an incontestible axiom, that, in all the operations of art and nature, nothing is created;",
    "author": "Antoine Lavoisier",
-   "source": "Elements of Chemistry, 1790 (tr. Kerr)"
+   "source": "Elements of Chemistry, 1790, p. 226"
   }
  },
  "rack_neuromorphic2": {
@@ -2428,9 +2428,9 @@
    "greentech": -3
   },
   "flavor": {
-   "quote": "We may hope that machines will eventually compete with men in all purely intellectual fields.",
+   "quote": "I do not see why it should not enter any one of the fields normally covered by the human intellect",
    "author": "Alan Turing",
-   "source": "Computing Machinery and Intelligence, Mind, 1950"
+   "source": "The Times, 11 June 1949 (The Mechanical Brain)"
   }
  },
  "rack_photonic2": {
@@ -2465,9 +2465,9 @@
   },
   "tier": "specialist",
   "flavor": {
-   "quote": "Are not the Rays of Light very small Bodies emitted from shining Substances?",
-   "author": "Isaac Newton",
-   "source": "Opticks, Query 29, 1704"
+   "quote": "Nature isn't classical, dammit, and if you want to make a simulation of nature, you'd better make it quantum mechanical",
+   "author": "Richard Feynman",
+   "source": "Simulating Physics with Computers, International Journal of Theoretical Physics, 1982"
   }
  },
  "crah_econ": {
@@ -2535,9 +2535,9 @@
    "greentech": -3
   },
   "flavor": {
-   "quote": "Everybody talks about the weather, but nobody does anything about it.",
-   "author": "Charles Dudley Warner",
-   "source": "Editorial, Hartford Courant, 24 August 1897 (often credited to Mark Twain)"
+   "quote": "There is at present in the material world a universal tendency to the dissipation of mechanical energy.",
+   "author": "Lord Kelvin",
+   "source": "On a Universal Tendency in Nature to the Dissipation of Mechanical Energy, 1852"
   }
  },
  "fuel_cell": {
@@ -2673,7 +2673,7 @@
    "greentech": 16
   },
   "flavor": {
-   "quote": "A cynic is a man who knows the price of everything and the value of nothing.",
+   "quote": "A man who knows the price of everything and the value of nothing.",
    "author": "Oscar Wilde",
    "source": "Lady Windermere's Fan, act 3, 1892"
   }
