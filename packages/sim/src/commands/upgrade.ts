@@ -20,7 +20,7 @@ export function upgradeOptions(ctx: PlanCtx, facilityId: number): { def: Facilit
 }
 
 /** Anchor columns to try for a footprint of width `w` replacing one of width `old` at `x`: same left edge, then growing to the left. */
-function anchors(x: number, old: number, w: number): number[] {
+export function anchors(x: number, old: number, w: number): number[] {
 	const out = [x];
 	for (let shift = 1; shift <= Math.max(0, w - old); shift++) out.push(x - shift);
 	return out;

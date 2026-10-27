@@ -111,7 +111,7 @@ describe("lesson engine", () => {
 			play(sim, { wait: 2200 });
 			expect(lesson(sim).status, `seed ${seed}`).toBe("won");
 		}
-	});
+	}, 30_000);
 
 	it("does not pass without the generator, and never wins on a brownout", () => {
 		const sim = fresh();

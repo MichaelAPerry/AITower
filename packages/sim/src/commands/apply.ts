@@ -5,7 +5,6 @@ import { lessonBlocksCommand } from "../lesson/lesson";
 import { planSetClerk } from "../economy/clerk";
 import { planRepayLoan, planTakeLoan } from "../economy/credit";
 import { spend } from "../economy/ledger";
-import { planChoosePath } from "../bio/path";
 import { planSetAutomation } from "../automation/policy";
 import { planResearch } from "../research/research";
 import { planDemolish } from "./demolish";
@@ -17,10 +16,10 @@ import {
 	planDeclineContract,
 	planSetEnabled,
 } from "./operations";
-import { planGiveGift, planReplyMessage, planVisitAdvisor } from "../ministry/dating";
 import { planDeferDecision, planDecisionGate, planMarkTip, planResolveDecision } from "../ministry/decisions";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
+import { planRetrofit } from "./retrofit";
 import { planUpgrade } from "./upgrade";
 import { normalizeCommand } from "./shape";
 import { planConduit, planLift, planSlab } from "./structure";
@@ -93,15 +92,6 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 		case "markTip":
 			plan = planMarkTip(ctx, cmd.tipId);
 			break;
-		case "visitAdvisor":
-			plan = planVisitAdvisor(ctx, cmd.advisor);
-			break;
-		case "giveGift":
-			plan = planGiveGift(ctx, cmd.advisor, cmd.facilityId);
-			break;
-		case "replyMessage":
-			plan = planReplyMessage(ctx, cmd.msgId, cmd.tap);
-			break;
 		case "research":
 			plan = planResearch(ctx, cmd.techId);
 			break;
@@ -114,14 +104,14 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 		case "repayLoan":
 			plan = planRepayLoan(ctx, cmd.amount);
 			break;
-		case "choosePath":
-			plan = planChoosePath(ctx, cmd.path);
-			break;
 		case "setAutomation":
 			plan = planSetAutomation(ctx, cmd.policy);
 			break;
 		case "upgradeFacility":
 			plan = planUpgrade(ctx, cmd.facilityId, cmd.defId);
+			break;
+		case "retrofit":
+			plan = planRetrofit(ctx, cmd.facilityId, cmd.tree);
 			break;
 		default:
 			return reject("unknown command type");

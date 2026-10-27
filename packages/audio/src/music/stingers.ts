@@ -71,7 +71,7 @@ export const STINGER_NOTES: Record<Exclude<StingerId, "tapeStop">, StingerNote[]
 		...chord(0.8, "rhodes", [53, 56, 60, 63], 1.6, 0.5),
 		...[53, 56, 60, 68].map((midi) => n(0.8, "pad", midi, 1.8, 0.45)),
 	],
-	// Path chosen: a solemn, slowly swelling lydian chord and three deliberate bells.
+	// A deep rung (3-4) reached: a solemn, slowly swelling lydian chord and three deliberate bells.
 	pathChosen: [
 		n(0, "pluck", 38, 1.2, 0.8),
 		...[50, 57, 62, 66, 69].map((midi, i) => n(0.05 + i * 0.02, "pad", midi, 3.4, 0.6)),
@@ -175,8 +175,9 @@ export function stingerForEvent(e: SimEvent, intensity: HorrorIntensity = "full"
 		case "quarterReport":
 			id = GOOD_GRADES.has(e.grade) ? "auditGood" : "auditBad";
 			break;
-		case "pathChosen":
-			id = "pathChosen";
+		case "retrofitted":
+			// Only the deep rungs get the solemn chord; every rack gets retrofitted.
+			if (e.rung >= 3) id = "pathChosen";
 			break;
 		case "growthSprouted":
 			id = "sprout";
@@ -194,6 +195,7 @@ export function stingerForEvent(e: SimEvent, intensity: HorrorIntensity = "full"
 		default:
 			return null;
 	}
+	if (id === null) return null;
 	if (intensity === "off" && HORROR_STINGERS.has(id)) return id === "absorbed" ? "tapeStop" : null;
 	return id;
 }

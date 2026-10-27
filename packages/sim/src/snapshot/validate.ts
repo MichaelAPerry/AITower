@@ -370,20 +370,17 @@ const MODIFIER_KINDS = ["ambient", "gridCap", "energyPrice", "payout", "failureR
 const GAME_OVER_KINDS = ["bankrupt", "victory", "absorbed"];
 const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
 const ADVISOR_KEYS = ["cass", "bea", "mel", "luci"];
-const SEALED = ["biotech", "greentech"];
-const PATHS = ["biotech", "greentech", "synthetic"];
 
-/** Contamination share, corruption, path, ending counters (snapshot v5). */
+/** Contamination share, corruption, ending counters (snapshot v5). */
 function validateBiotech(s: Obj): void {
 	const share = s.contaminatedShare as number;
 	const corruption = s.corruption as number;
 	if (share < 0 || share > 1) fail("contaminatedShare is outside 0..1");
 	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
-	if (s.path !== null && !PATHS.includes(s.path as string)) fail("path is invalid");
 	validateSoul(s);
 }
 
-/** Singularity points, seals, bonds, objections, lock-outs (snapshot v11). */
+/** Singularity points, seals, bonds, objections (snapshot v11). */
 function validateSoul(s: Obj): void {
 	const nonNeg = (o: Obj, where: string): void => {
 		for (const k of Object.keys(o)) if (!((o[k] as number) >= 0)) fail(`${where}.${k} must not be negative`);
@@ -395,32 +392,6 @@ function validateSoul(s: Obj): void {
 	for (const k of ADVISOR_KEYS) if (!((b[k] as number) >= 0 && (b[k] as number) <= 100)) fail(`bonds.${k} is outside 0..100`);
 	array(s, "objected").forEach((x, i) => {
 		if (typeof x !== "string") fail(`objected[${i}] must be a string`);
-	});
-	array(s, "sealedOut").forEach((x, i) => {
-		if (!SEALED.includes(x as string)) fail(`sealedOut[${i}] is invalid`);
-	});
-	array(s, "bondGiven").forEach((x, i) => {
-		if (typeof x !== "string") fail(`bondGiven[${i}] must be a string`);
-	});
-	validateDating(s);
-}
-
-/** The dating systems (snapshot v14): route, flags, After-hours, gifts, inbox. */
-function validateDating(s: Obj): void {
-	if (s.route !== null && !ADVISOR_KEYS.includes(s.route as string)) fail("route is invalid");
-	for (const key of ["flags", "afterSeen", "gifted", "messageSeen"]) {
-		array(s, key).forEach((x, i) => {
-			if (typeof x !== "string") fail(`${key}[${i}] must be a string`);
-		});
-	}
-	if (!Number.isInteger(s.afterHoursDay)) fail("afterHoursDay must be an integer");
-	if (!Number.isInteger(s.messageDay)) fail("messageDay must be an integer");
-	const inbox = array(s, "inbox");
-	if (inbox.length > 40) fail("inbox is too long");
-	inbox.forEach((m, i) => {
-		const o = fields(m, { msgId: "str", tick: "num" }, `inbox[${i}]`);
-		if (!ADVISOR_KEYS.includes(o.from as string)) fail(`inbox[${i}].from is invalid`);
-		if (o.tapped !== null && !Number.isInteger(o.tapped)) fail(`inbox[${i}].tapped must be null or an integer`);
 	});
 }
 

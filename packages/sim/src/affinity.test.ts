@@ -98,7 +98,6 @@ describe("path affinity", () => {
 		];
 		c.facilities.rack_top.tech = "t_unlock";
 		const sim = newSim(c, "empty");
-		sim.state.path = "greentech";
 		giveRp(sim, 100);
 		exec(sim, { type: "research", techId: "t_path" });
 		exec(sim, { type: "research", techId: "t_wet" });

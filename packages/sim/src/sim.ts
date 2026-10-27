@@ -14,7 +14,6 @@ import { ambientAt } from "./core/time";
 import { automationStep } from "./automation/automationStep";
 import { lessonStep } from "./lesson/lesson";
 import { weatherStep } from "./green/weather";
-import { datingStep } from "./ministry/dating";
 import { decisionStep } from "./ministry/decisions";
 import { ambientOffset } from "./ministry/modifiers";
 import { contaminationStep } from "./bio/contamination";
@@ -144,7 +143,6 @@ export class SimImpl implements Sim {
 		corruptionStep(ctx); //  8e
 		economyStep(ctx); //  9 (incl. contract offers)
 		decisionStep(ctx); //  9b modifiers expire, a decision is issued / comes back from deferral
-		datingStep(ctx); //  9c noon text from an advisor
 		automationStep(ctx); //  9d hourly standing orders (research, parts, bots, Foreman)
 		affinityStep(ctx); //  9e hourly path affinity from running facilities
 		soulStep(ctx); //  9f hourly seal residue, Singularity points, lock-out, wins

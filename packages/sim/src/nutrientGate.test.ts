@@ -7,9 +7,9 @@ import type { SimCommand } from "./api";
 describe("nutrient piping is gated by the research that unlocks the nutrient plant", () => {
 	it("rejects nutrient conduit before that research and accepts it after", () => {
 		const content = loadContent();
-		// The earliest, cheapest nutrient research: the Starter's Culture Bench, which needs no commit.
+		// The earliest nutrient research: the Wetware Annex, which also opens the OC-1 and the nutrient plant at Level 2.
 		const tech = conduitTech(content, "nutrient");
-		expect(tech).toBe("culture_bench");
+		expect(tech).toBe("wetware_annex");
 		const sim = createSim(content, "starter", 1) as SimImpl;
 		sim.step();
 		const cmd: SimCommand = { type: "buildConduit", layer: "nutrient", cells: [{ x: 10, floor: 0 }] };

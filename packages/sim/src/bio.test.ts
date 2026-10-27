@@ -8,7 +8,7 @@ import { findById } from "./core/grid";
 import { rackHazard } from "./reliability/reliabilityStep";
 import { type SimImpl, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";
 import { balance, exec, facilityOf, makeContent, newSim, rowCells, run } from "./test/fixture";
-import { count, giveRp, NO_OFFERS, pushOffer, QUIET_EVENTS, training } from "./test/m2b";
+import { count, NO_OFFERS, pushOffer, QUIET_EVENTS, training } from "./test/m2b";
 import { addBot, addFacility } from "./world/entities";
 import { failRack } from "./reliability/reliabilityStep";
 import { organoidBand } from "./thermal/rackThermal";
@@ -708,41 +708,8 @@ describe("corruption", () => {
 	});
 });
 
-describe("choosePath and gates", () => {
-	it("rejects below the minimum tier, unknown or unavailable paths and a second choice; emits pathChosen", () => {
-		const sim = lab();
-		const early = sim.submit({ type: "choosePath", path: "biotech" });
-		expect(early).toEqual({ ok: false, reason: "requires Level 5" });
-		sim.state.tier = 5;
-		sim.invalidateProjection();
-		expect(sim.submit({ type: "choosePath", path: "nope" as "biotech" }).ok).toBe(false);
-		const soon = sim.submit({ type: "choosePath", path: "greentech" });
-		expect(!soon.ok && soon.reason).toMatch(/not available/);
-		expect(sim.submit({ type: "choosePath", path: "synthetic" }).ok).toBe(false); // not in content.paths
-		expect(sim.submit({ type: "choosePath", path: 3 as unknown as "biotech" }).ok).toBe(false);
-		expect(sim.view().path).toBeNull();
-		const ev = exec(sim, { type: "choosePath", path: "biotech" });
-		expect(ev).toContainEqual({ type: "pathChosen", path: "biotech" });
-		expect(sim.view().path).toBe("biotech");
-		const again = sim.submit({ type: "choosePath", path: "biotech" });
-		expect(again.ok).toBe(false);
-		expect(sim.canBuild({ type: "choosePath", path: "greentech" }).ok).toBe(false);
-	});
-
-	it("a path tech node cannot be researched before its path is chosen", () => {
-		const sim = lab({}, (c) => {
-			c.tech.push({ id: "bio_t", name: "Bio Tech", description: "", branch: "wetware", minTier: 1, cost: 1, requires: [], effects: [], requiresCommit: "biotech" });
-		});
-		giveRp(sim, 10);
-		const r = sim.submit({ type: "research", techId: "bio_t" });
-		expect(!r.ok && r.reason).toMatch(/Commit to The Flesh/);
-		sim.state.tier = 5;
-		sim.invalidateProjection();
-		exec(sim, { type: "choosePath", path: "biotech" });
-		expect(sim.submit({ type: "research", techId: "bio_t" }).ok).toBe(true);
-	});
-
-	it("events honour path and minCorruption", () => {
+describe("event gates", () => {
+	it("events honour the leading tree and minCorruption", () => {
 		const ev = (id: string, extra: Partial<EventDef>): EventDef => ({
 			id, category: "horror", title: id, body: "", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "a",
 			choices: [{ id: "a", label: "A", hint: "", outcome: "", effects: [] }], ...extra,
@@ -765,7 +732,9 @@ describe("choosePath and gates", () => {
 		expect([...issued(a)]).toEqual(["plain"]);
 		const b = mk();
 		b.state.tier = 5;
-		exec(b, { type: "choosePath", path: "biotech" });
+		place(b, "organoid_rack", 10);
+		// The test organoid rack now stands for a Bio rack: the tower's leading tree.
+		Object.assign(b.content.facilities.organoid_rack, { line: "biotech", rung: 1 });
 		b.state.corruption = 0.6;
 		const got = issued(b, 1440 * 25);
 		expect(got.has("pathy")).toBe(true);
@@ -777,7 +746,6 @@ describe("endings", () => {
 	const E = { absorbed: { corruption: 0.5 } };
 	const biotech = (over: Partial<Balance> = {}, corruption = 0.9, tier = 1): SimImpl => {
 		const sim = lab({ endings: E, ...over });
-		sim.state.path = "biotech";
 		sim.state.tier = tier;
 		sim.state.corruption = corruption;
 		sim.invalidateProjection();
@@ -795,7 +763,6 @@ describe("endings", () => {
 		dayEnd(lowTier);
 		expect(lowTier.view().gameOver?.kind).not.toBe("absorbed");
 		const sim = biotech({}, 1, 5);
-		sim.state.path = null;
 		const ev = dayEnd(sim);
 		expect(ev).toContainEqual({ type: "gameOver", kind: "absorbed", ending: "absorbed" });
 		expect(sim.view().gameOver).toEqual({ kind: "absorbed", tick: 1439, ending: "absorbed" });
@@ -804,7 +771,6 @@ describe("endings", () => {
 
 	it("reaching the top tier never sets victory", () => {
 		const sim = lab({ tiers: { pflops: [0, 1], uptime: [0, 0], reward: [0, 0] } });
-		sim.state.path = null;
 		run(sim, 2 * 1440);
 		expect(sim.view().gameOver).toBeNull();
 	});
@@ -841,7 +807,6 @@ describe("snapshot v5", () => {
 		exec(sim, { type: "place", defId: "grid_tie", floor: 0, x: 0 }, { type: "place", defId: "nutrient_plant", floor: 0, x: 40 });
 		exec(sim, { type: "place", defId: "organoid_rack", floor: 0, x: 10 }, { type: "place", defId: "bioreactor", floor: 0, x: 14 }, { type: "place", defId: "bot_charger", floor: 0, x: 30 });
 		addBot(sim.state, "rover", 0, 12, facilityOf(sim, "bot_charger").id);
-		sim.state.path = null;
 		return sim;
 	};
 
@@ -876,7 +841,6 @@ describe("snapshot v5", () => {
 		for (const f of s.facilities) for (const k of ["nutrientNet", "nutrientSat", "noNutrient", "tooCold", "grown", "recoverAt"]) delete f[k];
 		for (const b of s.bots) for (const k of ["trait", "exposure"]) delete b[k];
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.state.path).toBeNull();
 		expect(loaded.state.nutrient.length).toBe(loaded.state.slab.length);
 		expect(loaded.state.rng.growth).toBe(sim.state.rng.growth); // mixSeed(seed, 4), same as at creation
 		expect(loaded.snapshot().version).toBe(SNAPSHOT_VERSION);
@@ -920,7 +884,6 @@ describe("snapshot v5", () => {
 		};
 		expect(bad((s) => (s.contamination.v[3] = 2))).toMatch(/^Invalid save:.*contamination/);
 		expect(bad((s) => (s.corruption = 1.5))).toMatch(/^Invalid save:.*corruption/);
-		expect(bad((s) => (s.path = "nope"))).toMatch(/^Invalid save:.*path/);
 		expect(bad((s) => (s.bots[0].trait = "winged"))).toMatch(/^Invalid save:.*trait/);
 		expect(bad((s) => (s.nutrientNetOf.v[0] = 99))).toMatch(/^Invalid save:.*nutrientNetOf/);
 		expect(bad((s) => (s.gameOver = { kind: "victory", tick: 1, ending: "nope" }))).toMatch(/^Invalid save:.*ending/);

@@ -3,8 +3,9 @@
  * built slab whose cells all carry a power conduit (it never builds slab, floors or conduits). Priority per placement:
  *   1. power   — a grid tie or genset (the cheapest unit that covers the shortfall, else the biggest) on a net whose satisfaction is below 1;
  *   2. cooling — the best CRAH within reach of the hottest rack above `thermal.okC`;
- *   3. racks   — the best-value rack (PFLOPS per $) that is unlocked, affordable and supported: air anywhere, liquid/immersion
- *                where a coolant loop has spare capacity for its liquid share, organoid where a nutrient line has spare supply; when no offer fits the
+ *   3. racks   — grows the tower with the best-value BASE rack (PFLOPS per $) that is unlocked, affordable and supported, and retrofits
+ *                base racks toward the Synthetic tree (docs/REFRAME.md) wherever the next rung is open, affordable and its coolant is there: one
+ *                retrofit for each base rack it builds once the tower has more base racks than Synthetic ones; when no offer fits the
  *                idle compute, or less than FOREMAN_IDLE_SHARE of the installed compute is idle.
  * Maintenance comes before growth (and rides on the `racks` toggle): between cooling and racks the Foreman adds a charger when the bots order wants more bots than
  * the docks hold, and a depot when the spare-parts stock is below its target and every depot is full. Racks wait while open work
@@ -13,7 +14,7 @@
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
  * Reach: only on slab a ground bot can path to by the real nav graph (see `reachableRuns`); with none reachable nothing is placed.
  */
-import { facilityTier, rackLine, TIER_ORDER, type ContentDB, type FacilityDef } from "@aitower/content";
+import { facilityTier, isBaseRack, rackLine, retrofitCost, retrofitTarget, TIER_ORDER, treeOf, type ContentDB, type FacilityDef } from "@aitower/content";
 import type { ForemanTierCap } from "../api";
 import { fmtKw, fmtUsd } from "./text";
 import { setForemanStatus } from "./status";
@@ -331,9 +332,12 @@ function rackCandidates(r: Run): FacilityDef[] {
 	const line = p.rackLine ?? "auto";
 	const base = Object.values(content.facilities).filter((d) => isComputeRack(d) && buildable(r.ctx, d) && allowed(r, d, p.rackCap));
 	if (line === "auto") return base.sort((a, b) => rackValue(b) - rackValue(a) || (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0) || byId(a, b));
-	return base
+	const onLine = base
 		.filter((d) => facilityTier(d, content).tier !== "path" && rackLine(d) === line)
 		.sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0) || a.cost - b.cost || byId(a, b));
+	// Liquid racks are not built from scratch (they are retrofits): the liquid line then means base racks that the Foreman retrofits.
+	if (line === "liquid" && onLine.length === 0) return base.sort((a, b) => rackValue(b) - rackValue(a) || (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0) || byId(a, b));
+	return onLine;
 }
 
 /** Why a rack could not go down, and which support item would fix it. */
@@ -482,6 +486,75 @@ function placeSupport(r: Run, b: Block): FacilityDef | null {
 	return null;
 }
 
+/**
+ * Retrofit the weakest rack that can take its next Synthetic rung now: the plan must pass (Level, research, a coolant conduit
+ * under it, funds), the coolant loop must have spare capacity for the liquid share and the power net headroom for the extra draw.
+ * When only the coolant is short, the missing chiller or CDU is queued instead. Returns true when it did something.
+ */
+function tryRetrofit(r: Run): boolean {
+	const { state, content } = r.ctx;
+	const line = state.automation.foreman.rackLine ?? "auto";
+	if (line === "air" || line === "immersion") return false;
+	const racks = realRacks(r)
+		.filter((f) => f.enabled && !f.failed && !f.grown)
+		.sort((a, b) => (getDef(content, a.defId).rack?.pflops ?? 0) - (getDef(content, b.defId).rack?.pflops ?? 0) || a.id - b.id);
+	for (const f of racks) {
+		const from = getDef(content, f.defId);
+		const target = retrofitTarget(content, from, "synthetic");
+		if (!target) continue;
+		const to = target.to;
+		const cost = retrofitCost(content, from, to);
+		if (state.cash - cost < r.reserve) continue;
+		const rk = to.rack;
+		if (!rk) continue;
+		const dLiquid = rk.powerKw * rk.liquidFraction - (from.rack ? from.rack.powerKw * from.rack.liquidFraction : 0);
+		const dPower = rk.powerKw + to.facilityKw - ((from.rack?.powerKw ?? 0) + from.facilityKw);
+		const probe = planNormalized(r.ctx, { type: "retrofit", facilityId: f.id, tree: "synthetic" });
+		if (!probe.ok) continue; // including "needs a coolant conduit under it": the Foreman never lays conduit
+		const p = state.automation.foreman;
+		if (p.power && dPower > 0) {
+			const net = state.powerNets.find((q) => q.id === lowestNet(r, state.powerNetOf, f.floor, f.x, f.width));
+			if (net && net.supplyKw - net.demandKw - (r.powerUsed.get(net.id) ?? 0) < dPower) continue;
+		}
+		if (dLiquid > 0) {
+			const net = state.coolantNets.find((q) => q.id === lowestNet(r, state.coolantNetOf, f.floor, f.x, f.width));
+			const spare = net ? net.capacityKw - net.loadKw - (r.coolUsed.get(net.id) ?? 0) : 0;
+			if (!net || spare < dLiquid) {
+				if (net && p.cooling) {
+					const sup = placeSupport(r, { text: "", support: { kind: "coolant", net: net.id, shortKw: dLiquid - spare } });
+					if (sup) {
+						r.notes.racks = `Racks: Next: ${sup.name}, then retrofit ${from.name} to ${to.name}`;
+						return true;
+					}
+				}
+				continue;
+			}
+			r.coolUsed.set(net.id, (r.coolUsed.get(net.id) ?? 0) + dLiquid);
+		}
+		if (!runCommand(r.ctx, { type: "retrofit", facilityId: f.id, tree: "synthetic" })) continue;
+		r.ctx.events.push({ type: "autoBuilt", facilityId: state.nextId.facility - 1 });
+		rebuildNetworks(r.ctx);
+		r.racksPlaced++;
+		r.addedPflops += (rk.pflops ?? 0) - (from.rack?.pflops ?? 0);
+		r.notes.racks = `Racks: Retrofitted ${from.name} to ${to.name}`;
+		return true;
+	}
+	return false;
+}
+
+/** Base racks versus Synthetic tree racks standing: the Foreman retrofits once there are more of the former. */
+function wantsRetrofit(r: Run): boolean {
+	const { content } = r.ctx;
+	let base = 0;
+	let tree = 0;
+	for (const f of realRacks(r)) {
+		const d = getDef(content, f.defId);
+		if (isBaseRack(d)) base++;
+		else if (treeOf(d) === "synthetic") tree++;
+	}
+	return base > tree;
+}
+
 function tryRacks(r: Run): boolean {
 	const { state } = r.ctx;
 	const p = state.automation.foreman;
@@ -490,6 +563,7 @@ function tryRacks(r: Run): boolean {
 		r.notes.racks = `Racks: ${wait}`;
 		return false;
 	}
+	if (wantsRetrofit(r) && tryRetrofit(r)) return true;
 	const line = p.rackLine ?? "auto";
 	const candidates = rackCandidates(r);
 	if (candidates.length === 0) {

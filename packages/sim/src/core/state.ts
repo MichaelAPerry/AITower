@@ -4,7 +4,7 @@
  * Entity arrays are kept sorted by ascending id (ids are monotonic, never reused).
  */
 import type { AdvisorId, ContractSpec, SealedTree } from "@aitower/content";
-import type { AscensionPath, AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
+import type { AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -186,14 +186,6 @@ export interface Decision {
 	hiddenUntil: number;
 	/** Story objections: the facility def the scene is about (its name replaces `{item}`). */
 	subject?: string;
-}
-
-/** One text in the inbox. The words live in `ContentDB.messages[msgId]`. */
-export interface InboxMessage {
-	msgId: string;
-	from: AdvisorId;
-	tick: number;
-	tapped: number | null;
 }
 
 export interface DecisionRecord {
@@ -404,9 +396,7 @@ export interface SimState {
 	irreversible: boolean;
 	/** Body-horror scalar 0..1. */
 	corruption: number;
-	/** Chosen ascension path. */
-	path: AscensionPath | null;
-	// ── The Soul (snapshot v11, docs/SOUL.md) ──
+	// ── The Soul (docs/SOUL.md, docs/REFRAME.md) ──
 	/** Singularity points per tree; the first to `soul.spTarget` ends the game. */
 	sp: { synthetic: number; biotech: number; greentech: number };
 	/** Secret numbers: the permanent part of each tree's seal (from placing facilities). */
@@ -417,27 +407,6 @@ export interface SimState {
 	bonds: Record<AdvisorId, number>;
 	/** Objections already raised, as "tree:defId". */
 	objected: string[];
-	/** Trees that rejected the player after they committed to them (the path then fell back to synthetic). */
-	sealedOut: SealedTree[];
-	/** Bond rewards for building already paid (snapshot v13): "starter:<tree>" and "sig:<defId>". */
-	bondGiven: string[];
-	// ── The dating systems (snapshot v14, docs/VN_WRITING.md) ──
-	/** The locked route (the confession was accepted): her epilogue closes the ending. Null until then. */
-	route: AdvisorId | null;
-	/** Memory flags set by story choices (ids from `ContentDB.memories`), oldest first, no duplicates. */
-	flags: string[];
-	/** Game day of the last After-hours visit (-1 = never): one visit per day. */
-	afterHoursDay: number;
-	/** After-hours scenes already played (so a pool does not repeat until it runs dry). */
-	afterSeen: string[];
-	/** Gifts already given, "advisor:defId". */
-	gifted: string[];
-	/** The inbox: advisor texts, newest last. `tapped` is the index of the reply the player sent (null = not answered). */
-	inbox: InboxMessage[];
-	/** Game day the last text arrived (-1 = none): at most one a day. */
-	messageDay: number;
-	/** Texts already sent, by id. */
-	messageSeen: string[];
 	// ── Automation, greentech, scenarios (snapshot v6) ──
 	/** Standing orders (research / parts / bots / Foreman). */
 	automation: AutomationPolicy;

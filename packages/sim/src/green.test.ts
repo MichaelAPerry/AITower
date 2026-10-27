@@ -1,8 +1,9 @@
 /** M4-T1: greentech and synthetic mechanics, scenarios, `earned` events, snapshot v6. */
-import type { Balance, ContentDB, Scenario } from "@aitower/content";
+import { type Balance, type ContentDB, loadContent, type Scenario } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import { GREEN_SMOOTHING } from "./core/constants";
 import { daylight } from "./green/weather";
+import { addFacility } from "./world/entities";
 import { type SimImpl, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";
 import { balance, exec, facilityOf, makeContent, newSim, run, scenario } from "./test/fixture";
 import { acceptSpec, farmContent, inference, NO_OFFERS, QUIET_EVENTS, training } from "./test/m2b";
@@ -345,18 +346,27 @@ describe("greenScore", () => {
 		expect(grey.view().greenScore).toBe(0);
 	});
 
-	it("is pathScore for the greentech path; corruption for biotech, or with no path", () => {
+	it("pathScore follows the tower's leading tree: green score, refinement, or corruption for the Flesh and with no tree rack", () => {
 		const sim = newSim(content(), "empty");
 		sim.state.greenScore = 0.4;
 		sim.state.refinement = 0.7;
 		sim.state.corruption = 0.2;
-		expect(sim.view().pathScore).toBe(0.2); // no path yet
-		sim.state.path = "biotech";
-		expect(sim.view().pathScore).toBe(0.2);
-		sim.state.path = "greentech";
+		const real = loadContent().facilities;
+		const rack = (defId: string, x: number): void => {
+			sim.content.facilities[defId] = real[defId];
+			addFacility(sim.state, sim.content, defId, 0, x);
+		};
+		expect(sim.view().path).toBeNull();
+		expect(sim.view().pathScore).toBe(0.2); // no tree rack yet
+		rack("rack_neuromorphic", 4);
+		expect(sim.view().path).toBe("greentech");
 		expect(sim.view().pathScore).toBe(0.4);
-		sim.state.path = "synthetic";
+		rack("rack_dlc_gpu", 8);
+		expect(sim.view().path).toBe("synthetic");
 		expect(sim.view().pathScore).toBe(0.7);
+		rack("rack_organoid_3", 12);
+		expect(sim.view().path).toBe("biotech");
+		expect(sim.view().pathScore).toBe(0.2);
 	});
 });
 
@@ -536,8 +546,8 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(14);
-		expect(base().snapshot().version).toBe(14);
+		expect(SNAPSHOT_VERSION).toBe(15);
+		expect(base().snapshot().version).toBe(15);
 	});
 
 	it("round-trips weather, scores and the policy exactly", () => {
@@ -559,7 +569,7 @@ describe("snapshot v6", () => {
 		const snap = JSON.parse(JSON.stringify(sim.snapshot())) as { version: number; state: Raw };
 		strip(snap);
 		const loaded = simFromSnapshot(sim.content, snap as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(14);
+		expect(loaded.snapshot().version).toBe(15);
 		expect(loaded.hash()).toBe(sim.hash());
 		expect(loaded.view().automation.policy.foreman.reserve).toBe(1_000_000);
 		run(sim, 1500);

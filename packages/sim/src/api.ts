@@ -50,12 +50,6 @@ export type SimCommand =
 	| { type: "deferDecision"; decisionId: number }
 	/** App-side pacing: while closed no new decision is issued (the app closes it for 3 real minutes after each one). */
 	| { type: "decisionGate"; open: boolean }
-	/** After hours: spend the evening with one advisor (once per game day). She earns bond; a short scene opens as a decision. */
-	| { type: "visitAdvisor"; advisor: AdvisorId }
-	/** Give an owned item to the advisor who likes (or dislikes) it; once per advisor and item. */
-	| { type: "giveGift"; advisor: AdvisorId; facilityId: number }
-	/** One-tap reply to a text in the inbox (`tap` = index of the reply, -1 = leave it). */
-	| { type: "replyMessage"; msgId: string; tap: number }
 	/** Remember an advisor tip as shown, so it never fires again in this game. */
 	| { type: "markTip"; tipId: string }
 	/** Spend research points on a tech node (prerequisites researched, tier ≥ minTier, enough RP). */
@@ -66,15 +60,20 @@ export type SimCommand =
 	| { type: "takeLoan"; amount: number }
 	/** Repay principal (up to what is owed and what cash allows). */
 	| { type: "repayLoan"; amount: number }
-	/** Commit to an ascension path (tier ≥ balance.ascension.minTier, path available, not chosen before). Irreversible. */
-	| { type: "choosePath"; path: AscensionPath }
 	/** Replace the automation standing orders (the Foreman part needs the `foreman` feature researched). */
 	| { type: "setAutomation"; policy: AutomationPolicy }
 	/**
 	 * Swap a facility in place for the next item down its tree (`FacilityDef.upgradesFrom`): costs the new item minus 50% of the old
 	 * one. `defId` picks the target when the facility upgrades to more than one item (default: the first one the player may build).
 	 */
-	| { type: "upgradeFacility"; facilityId: number; defId?: string };
+	| { type: "upgradeFacility"; facilityId: number; defId?: string }
+	/**
+	 * Retrofit a rack in place toward a tree (docs/REFRAME.md): a base rack, or a rack of another tree, becomes rung 1 of `tree`;
+	 * a rack of `tree` becomes its next rung. Same tiles, the tree's sprite. Costs the new rack minus 50% of the old one (a rack of
+	 * another tree counts as a plain AC-1). Needs the rung's Level and research, the new rack's site (coolant or nutrient conduit),
+	 * and a tree that is not closed (seal below `soul.sealMax`).
+	 */
+	| { type: "retrofit"; facilityId: number; tree: AscensionPath };
 
 /**
  * Standing orders, each independently toggled. Checked once per game-hour, deterministic, and paid like the player would
@@ -188,7 +187,6 @@ export type SimEvent =
 	| { type: "loanRepaid"; amount: number }
 	/** A quarterly audit was filed; the report is `view.reports.at(-1)`. */
 	| { type: "quarterReport"; quarter: number; grade: AuditGrade }
-	| { type: "pathChosen"; path: AscensionPath }
 	/** The sim grew a facility (a growth) on contaminated slab. */
 	| { type: "growthSprouted"; facilityId: number }
 	| { type: "botMutated"; botId: number; trait: BotTrait }
@@ -200,14 +198,8 @@ export type SimEvent =
 	| { type: "autoBought"; what: "parts" | "bot"; count: number }
 	| { type: "droughtStarted" }
 	| { type: "droughtEnded" }
-	/** The committed tree's seal reached `soul.sealMax`: the path fell back to synthetic. */
-	| { type: "sealedOut"; path: SealedTree }
-	/** The player stayed late with an advisor (the scene, if any, is the open decision). */
-	| { type: "visited"; advisor: AdvisorId }
-	/** A gift was given; `liked` says how she took it (the line is in `ContentDB.gifts`). */
-	| { type: "gifted"; advisor: AdvisorId; defId: string; liked: boolean }
-	| { type: "messageReceived"; from: AdvisorId; msgId: string }
-	| { type: "messageAnswered"; from: AdvisorId; msgId: string };
+	/** A rack was retrofitted in place toward a tree. */
+	| { type: "retrofitted"; facilityId: number; tree: AscensionPath; rung: number };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 
@@ -440,9 +432,33 @@ export interface LifetimeStats {
 	researchPointsEarned: number;
 }
 
+/** The Trees panel's numbers for one tree (docs/REFRAME.md). */
+export interface TreeView {
+	tree: AscensionPath;
+	sp: number;
+	/** SP a day at the compute delivered right now (weight and factor included). */
+	spPerDay: number;
+	/** Days to `spTarget` at that rate, or null when the rate is 0. */
+	daysToWin: number | null;
+	/** Highest rung held by a rack of this tree (0 = none). */
+	rung: number;
+	/** Racks of this tree standing, and the PFLOPS they deliver now / have installed. */
+	racks: number;
+	pflops: number;
+	installedPflops: number;
+	/** Multiplier on the tree's racks now: 1 for the Lattice, 1 − seal for the Flesh, green speed × (1 − seal) for the Garden. 0 when closed. */
+	factor: number;
+	/** Seal 0..sealMax (the Lattice has none: null). */
+	seal: number | null;
+	/** Seal reached `sealMax`: no new retrofits, and its racks stop scoring. */
+	closed: boolean;
+	/** The racks and buildings that scar this tree most (top 3), counting what stands now. */
+	hurting: { defId: string; name: string; count: number; seal: number }[];
+}
+
 /**
- * The Soul (docs/SOUL.md). `seal` holds the secret numbers: the UI must only show them as far as the champion's bond
- * allows (`bondReveal`), and as the commit sheet's words ("open", "scarred", "closed").
+ * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, the seal meters and the bonds. The seal is hidden per item but
+ * shown in total; the three `trees` carry everything the Trees panel needs.
  */
 export interface SoulView {
 	sp: Record<AscensionPath, number>;
@@ -450,25 +466,10 @@ export interface SoulView {
 	seal: Record<SealedTree, number>;
 	sealMax: number;
 	bonds: Record<AdvisorId, number>;
-	bondReveal: number;
-	bondCommit: number;
 	bondEpilogue: number;
-	sealedOut: SealedTree[];
-	/** Why committing to each tree is blocked now (ignoring Level and an existing path), or null. */
-	commitBlock: Record<AscensionPath, string | null>;
-	// ── The dating systems ──
-	/** The locked route (the confession was accepted), or null. */
-	route: AdvisorId | null;
-	/** Memory flags set by the player's choices, oldest first (the dossier words them from `ContentDB.memories`). */
-	flags: string[];
-	/** An After-hours visit is possible now (once per game day, no decision open), or the reason it is not. */
-	afterHours: { available: boolean; reason: string | null };
-	/** The inbox, newest last: who texted, the text id, and the reply sent (null = not answered). */
-	inbox: { msgId: string; from: AdvisorId; tick: number; tapped: number | null }[];
-	/** Owned items an advisor has a taste for that were not given yet. */
-	giftable: { advisor: AdvisorId; defId: string; facilityId: number; liked: boolean }[];
-	/** Gifts already given, "advisor:defId". */
-	gifted: string[];
+	trees: Record<AscensionPath, TreeView>;
+	/** The green score 0..1, its two parts, and the Green speed it gives (`greenFloor` + the rest × score). */
+	green: { score: number; cleanPower: number; heatShare: number; speed: number };
 }
 
 export interface DecisionView {

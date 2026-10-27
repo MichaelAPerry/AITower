@@ -1,13 +1,16 @@
 /**
- * The Soul (docs/SOUL.md): Singularity points, the secret seal numbers and advisor bonds.
+ * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, the secret seal numbers and advisor bonds.
  *
- *  - SP: hourly, every running rack adds its delivered PFLOPS × the line weight × `spPerPflopHour` to each tree. Synthetic always
- *    accrues; Bio and Green only after committing to them, scaled by (1 − seal/sealMax), Green also by the green score.
+ *  - SP: hourly, every running TREE rack (a rack retrofitted down a tree; base racks are neutral) adds its delivered PFLOPS ×
+ *    `spPerPflopHour` × the tree's weight × the tree's factor to its own tree only:
+ *      Synthetic  factor 1;
+ *      Bio        factor 1 − bio seal;
+ *      Green      factor (greenFloor + (1 − greenFloor) × green score) × (1 − green seal).
  *  - Seal = scar (placing an item, permanent) + residue (running items, decisions; cleanable, never below 0).
- *  - A committed Bio/Green tree whose seal reaches `sealMax` rejects the player: the path falls back to Synthetic.
- *  - The first tree to `spTarget` wins (the committed tree is checked first).
+ *  - At `sealMax` a tree is closed: no new retrofits to it, and its racks stop scoring (the factor is 0).
+ *  - The first tree to `spTarget` wins. There is no commit and no bond gate: bonds only change scenes and the epilogue.
  */
-import { type AdvisorId, type AscensionPath, CHAMPION, type ContentDB, type FacilityDef, SEALED_TREES, type SealedTree, type TreeLine } from "@aitower/content";
+import { type AdvisorId, type AscensionPath, type ContentDB, type FacilityDef, SEALED_TREES, type SealedTree, treeOf, TREES } from "@aitower/content";
 import type { TickCtx } from "../core/context";
 import { TICKS_PER_HOUR } from "../core/constants";
 import { GensetMode, type SimState } from "../core/state";
@@ -15,14 +18,15 @@ import { minuteOfDay } from "../core/time";
 import { setGameOver } from "./gameOver";
 import { getDef } from "../world/defs";
 
-export const lineOf = (d: FacilityDef): TreeLine => d.line ?? "shared";
-
 export const sealOf = (state: SimState, tree: SealedTree): number => state.sealScar[tree] + state.sealResidue[tree];
 
 /** 0..1, 1 = sealed. */
 export const sealShare = (state: SimState, content: ContentDB, tree: SealedTree): number => Math.min(1, sealOf(state, tree) / content.balance.soul.sealMax);
 
 export const isSealed = (state: SimState, content: ContentDB, tree: SealedTree): boolean => sealOf(state, tree) >= content.balance.soul.sealMax;
+
+/** A closed tree takes no new retrofits and its racks stop scoring. The Lattice never closes. */
+export const isClosed = (state: SimState, content: ContentDB, tree: AscensionPath): boolean => tree !== "synthetic" && isSealed(state, content, tree);
 
 export function addBond(state: SimState, advisor: AdvisorId, amount: number): void {
 	if (!Number.isFinite(amount) || !(advisor in state.bonds)) return;
@@ -47,14 +51,17 @@ export function scarOnPlace(state: SimState, d: FacilityDef): void {
 	}
 }
 
-/** Why the player may not commit to `path` right now, or null. */
-export function commitBlock(state: SimState, content: ContentDB, path: AscensionPath): string | null {
-	if (path === "synthetic") return null;
-	const s = content.balance.soul;
-	if (state.sealedOut.includes(path) || isSealed(state, content, path)) return `${path === "biotech" ? "The Flesh" : "The Garden"} is closed to this tower`;
-	const champ = CHAMPION[path];
-	if (state.bonds[champ] < s.bondCommit) return `needs ${champ === "mel" ? "Dr. Mel Kiorre" : "Bea Altasar"}'s trust (bond ${s.bondCommit})`;
-	return null;
+/** The Green speed factor from the green score alone: half speed on any power, full speed on clean power. */
+export const greenSpeed = (state: SimState, content: ContentDB): number => {
+	const f = content.balance.soul.greenFloor;
+	return f + (1 - f) * state.greenScore;
+};
+
+/** The factor a tree's racks score at right now (0 when the tree is closed). */
+export function treeFactor(state: SimState, content: ContentDB, tree: AscensionPath): number {
+	if (tree === "synthetic") return 1;
+	const open = 1 - sealShare(state, content, tree);
+	return tree === "greentech" ? greenSpeed(state, content) * open : open;
 }
 
 /** A facility counts as running for the soul when enabled and not failed; a genset only while it runs. */
@@ -64,55 +71,79 @@ function running(d: FacilityDef, f: SimState["facilities"][number]): boolean {
 	return true;
 }
 
-/** Hourly: seal residue from running facilities, SP accrual, lock-out, and the three wins. */
+/** Delivered PFLOPS of the tree racks right now, by tree. */
+export function treePflops(state: SimState, content: ContentDB): Record<AscensionPath, number> {
+	const pf: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	for (const f of state.facilities) {
+		if (f.pflops <= 0) continue;
+		const t = treeOf(getDef(content, f.defId));
+		if (t) pf[t] += f.pflops;
+	}
+	return pf;
+}
+
+/** SP a day each tree earns at the current delivered compute, weight and factor. */
+export function spRates(state: SimState, content: ContentDB): Record<AscensionPath, number> {
+	const s = content.balance.soul;
+	const pf = treePflops(state, content);
+	const out: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	for (const t of TREES) out[t] = pf[t] * s.spPerPflopHour * 24 * s.spWeights[t] * treeFactor(state, content, t);
+	return out;
+}
+
+/** The highest rung of each tree that the tower holds a rack at (0 = none). */
+export function rungsHeld(state: SimState, content: ContentDB): Record<AscensionPath, number> {
+	const out: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		const t = treeOf(d);
+		if (t && !f.grown && (d.rung ?? 0) > out[t]) out[t] = d.rung ?? 0;
+	}
+	return out;
+}
+
+/** The tree with the most installed tree-rack compute (ties and none: null). It only colours the world and the music. */
+export function leadingTree(state: SimState, content: ContentDB): AscensionPath | null {
+	const pf: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		const t = treeOf(d);
+		if (t && !f.grown) pf[t] += d.rack?.pflops ?? 0;
+	}
+	let best: AscensionPath | null = null;
+	for (const t of TREES) if (pf[t] > 0 && (best === null || pf[t] > pf[best])) best = t;
+	if (best !== null && TREES.some((t) => t !== best && pf[t] === pf[best as AscensionPath])) return null;
+	return best;
+}
+
+/** Hourly: seal residue from running facilities, SP accrual, and the three wins. */
 export function soulStep(ctx: TickCtx): void {
-	const { state, content, events } = ctx;
+	const { state, content } = ctx;
 	if (minuteOfDay(state.tick) % TICKS_PER_HOUR !== 0 || state.gameOver) return;
 	const s = content.balance.soul;
-	const w = s.spWeights;
 	const resid: Record<SealedTree, number> = { biotech: 0, greentech: 0 };
-	const pf: Record<TreeLine, number> = { shared: 0, synthetic: 0, biotech: 0, greentech: 0 };
-	/** Starter racks score like shared racks for Synthetic, and `starterWeight` for their own tree after the commit. */
-	const starter: Record<SealedTree, number> = { biotech: 0, greentech: 0 };
+	const pf: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.seal && running(d, f)) for (const t of SEALED_TREES) resid[t] += d.seal[t] ?? 0;
 		if (d.kind !== "rack" || f.pflops <= 0) continue;
-		if (d.tier === "starter" && (d.line === "biotech" || d.line === "greentech")) {
-			pf.shared += f.pflops;
-			starter[d.line] += f.pflops;
-		} else pf[lineOf(d)] += f.pflops;
+		const t = treeOf(d);
+		if (t) pf[t] += f.pflops;
 	}
+	// Points first, at the seal the hour started with; then what the running buildings do to the seal.
+	for (const t of TREES) addSp(state, t, pf[t] * s.spPerPflopHour * s.spWeights[t] * treeFactor(state, content, t));
 	for (const t of SEALED_TREES) addResidue(state, t, (resid[t] * s.residuePerDay) / 24);
-
-	const sum = (path: AscensionPath): number => {
-		let n = 0;
-		for (const [line, k] of Object.entries(w[path])) n += pf[line as TreeLine] * (k ?? 0);
-		return n * s.spPerPflopHour;
-	};
-	addSp(state, "synthetic", sum("synthetic"));
-	// A Starter rack sits in the shared bucket (so Synthetic counts it at 1). For its own tree it counts only after the commit, at
-	// `starterWeight`; the tree's shared weight (Green's 0.5) is taken back out so it is not counted twice.
-	const own = (path: SealedTree): number => sum(path) + (starter[path] * s.starterWeight - (starter.biotech + starter.greentech) * (w[path].shared ?? 0)) * s.spPerPflopHour;
-	if (state.path === "biotech") addSp(state, "biotech", own("biotech") * (1 - sealShare(state, content, "biotech")));
-	if (state.path === "greentech") addSp(state, "greentech", own("greentech") * state.greenScore * (1 - sealShare(state, content, "greentech")));
-
-	// Lock-out: the committed tree rejects a tower that sealed it.
-	const p = state.path;
-	if ((p === "biotech" || p === "greentech") && isSealed(state, content, p)) {
-		state.path = "synthetic";
-		if (!state.sealedOut.includes(p)) state.sealedOut.push(p);
-		events.push({ type: "sealedOut", path: p });
-	}
 	soulWins(ctx);
 }
 
-/** The first tree at its target ends the game; the committed tree is checked before Synthetic. */
+const ENDING_OF: Record<AscensionPath, "singularity" | "flesh" | "garden"> = { synthetic: "singularity", biotech: "flesh", greentech: "garden" };
+
+/** The first tree at its target ends the game; if two cross in the same hour, the one furthest past it wins. */
 export function soulWins(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	const target = content.balance.soul.spTarget;
 	if (state.gameOver) return;
-	if (state.path === "biotech" && state.sp.biotech >= target) setGameOver(state, "victory", events, "flesh");
-	else if (state.path === "greentech" && state.sp.greentech >= target) setGameOver(state, "victory", events, "garden");
-	else if (state.sp.synthetic >= target) setGameOver(state, "victory", events, "singularity");
+	let win: AscensionPath | null = null;
+	for (const t of TREES) if (state.sp[t] >= target && (win === null || state.sp[t] > state.sp[win])) win = t;
+	if (win) setGameOver(state, "victory", events, ENDING_OF[win]);
 }

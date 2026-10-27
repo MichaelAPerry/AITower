@@ -1,11 +1,10 @@
-/** The three catalogues (docs/TREES.md): placement gating, upgrades, commit-gated research, the Foreman, snapshot v13, on the real content. */
-import { type ContentDB, loadContent } from "@aitower/content";
+/** The catalogue (docs/TREES.md, docs/REFRAME.md): placement sites, upgrades of support items, research without commits, the Foreman, snapshot v15, on the real content. */
+import { type ContentDB, loadContent, isRetrofitOnly } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimCommand } from "./api";
 import { TICKS_PER_DAY } from "./api";
 import { type SimImpl, createSim, simFromSnapshot } from "./sim";
-import { soulStep } from "./progression/soul";
-import { REMOVED_FACILITIES, REMOVED_TECH } from "./snapshot/migrate";
+import { REMOVED_TECH_V15, SOLD_FACILITIES, SWAPPED_FACILITIES } from "./snapshot/migrate";
 import { addFacility } from "./world/entities";
 import { exec } from "./test/fixture";
 
@@ -38,103 +37,23 @@ const can = (s: SimImpl, defId: string, floor: number, x: number): string | null
 const FREE = 20;
 
 describe("who may place what", () => {
-	it("a Synthetic item opens on the default path, and closes to new building once the player commits to Bio or Green", () => {
+	it("Level and research are the only gates: no commit, no bond, no path", () => {
 		const s = start();
-		research(s, "chilled_loop", "desk_fan_standard");
-		s.state.sealScar.biotech = 0;
-		// Coolant plant: the loop must exist for a liquid rack; check the line rule on a rack that needs none by using the chiller's gate instead.
+		s.state.bonds = { cass: 0, bea: 0, mel: 0, luci: 0 };
+		expect(can(s, "grid_tie_lucy", 0, 36)).toBe("requires tier 3");
 		level(s, 3);
-		expect(can(s, "rack_dlc_gpu", 1, FREE)).toMatch(/coolant/); // allowed in principle: only the site is missing
-		s.state.path = "greentech";
-		expect(can(s, "rack_dlc_gpu", 1, FREE)).toMatch(/belongs to The Lattice, closed to new building once you commit to The Garden/);
-		s.state.path = "synthetic";
-		expect(can(s, "rack_dlc_gpu", 1, FREE)).toMatch(/coolant/);
-	});
-
-	it("Specialist items need the commit to their tree, Starter items only the research", () => {
-		const s = start();
-		level(s, 3);
-		research(s, "inference_foundry", "event_array", "culture_media", "culture_bench", "wetware_annex");
-		// The Starter Neuromorphic Rack (NM-1) is open to the default path.
-		expect(can(s, "rack_neuromorphic", 1, FREE)).toBeNull();
-		// The Specialist NM-2 and the Bio line are not, until the commit.
-		level(s, 4);
-		expect(can(s, "rack_neuromorphic2", 1, FREE)).toBe("Commit to The Garden");
-		s.state.path = "greentech";
-		expect(can(s, "rack_neuromorphic2", 1, FREE)).toBeNull();
-		expect(can(s, "organoid_incubator", 1, FREE)).toBe("Commit to The Flesh"); // wrong tree
-		// Bio starters stay open to everyone.
-		expect(can(s, "rack_culture_s", 1, FREE)).toMatch(/nutrient conduit/); // allowed in principle: the pipe is missing
-	});
-
-	it("a Starter set pays its champion one bond point, once, and never scars its own tree", () => {
-		const s = start();
-		level(s, 3);
-		research(s, "inference_foundry", "culture_media", "culture_bench", "economizer", "solar_charter", "desk_fan_standard");
-		const mel = s.state.bonds.mel;
-		const bea = s.state.bonds.bea;
-		const scar = { ...s.state.sealScar };
-		exec(s, { type: "place", defId: "rack_neuromorphic", floor: 1, x: FREE });
-		exec(s, { type: "place", defId: "rack_neuromorphic", floor: 1, x: FREE + 2 });
-		expect(s.state.bonds.bea).toBe(bea + 1); // once, not twice
-		expect(s.state.bonds.mel).toBe(mel);
-		// NM-1 scars neither tree (-1 / -2).
-		expect(s.state.sealScar).toEqual(scar);
-		expect(s.state.bondGiven).toEqual(["starter:greentech"]);
-	});
-
-	it("a Signature build needs the bond; the first one placed pays +1", () => {
-		const s = start();
-		level(s, 3);
-		s.state.bonds.luci = 39;
-		expect(can(s, "grid_tie_lucy", 0, 36)).toBe("needs Luci's bond 40");
-		s.state.bonds.luci = 40;
+		expect(can(s, "grid_tie_lucy", 0, 36)).toMatch(/requires research: /);
+		research(s, "substation_licence", "offpeak_petition", "rate_card");
 		expect(can(s, "grid_tie_lucy", 0, 36)).toBeNull();
 		exec(s, { type: "place", defId: "grid_tie_lucy", floor: 0, x: 36 });
-		expect(s.state.bonds.luci).toBe(41);
-		expect(s.state.sealScar.greentech).toBeGreaterThanOrEqual(14 + 16); // the catch
-		// Mel's Cortex needs her bond 70 and the commit.
-		research(s, "tissue_scaffolds");
-		level(s, 5);
-		s.state.bonds.mel = 70;
-		expect(can(s, "rack_organoid_3m", 1, FREE)).toBe("Commit to The Flesh");
-		s.state.bonds.mel = 69;
-		s.state.path = "biotech";
-		expect(can(s, "rack_organoid_3m", 1, FREE)).toBe("needs Mel's bond 70");
-	});
-
-	it("Mel's bond 40 lets an uncommitted player keep two OC-1 cabinets, no more", () => {
-		const s = start();
-		level(s, 3);
-		expect(can(s, "organoid_incubator", 1, FREE)).toBe("Commit to The Flesh");
-		s.state.bonds.mel = 40;
-		// The preview waives the commit and its research; only the site is checked now.
-		expect(can(s, "organoid_incubator", 1, FREE)).toMatch(/nutrient conduit/);
-		for (let k = 0; k < 2; k++) {
-			s.state.facilities.push({ ...s.state.facilities[0], id: 9000 + k, defId: "organoid_incubator" });
-		}
-		s.invalidateProjection();
-		expect(can(s, "organoid_incubator", 1, FREE)).toBe("Commit to The Flesh (the 2 preview units are built)");
-	});
-
-	it("Early Lattice and Early Garden: Luci's and Bea's bond 60 open the Level 5 racks at Level 4", () => {
-		const s = start();
-		level(s, 4);
-		research(s, "cryo_core_dossier");
-		expect(can(s, "rack_mind_lattice", 1, FREE)).toBe("requires tier 5");
-		s.state.bonds.luci = 60;
-		research(s, "tower_hydraulics", "manifold_blade", "chilled_loop", "cold_plate_gen3", "rear_door_drawings", "desk_fan_standard", "batch_cards");
-		research(s, "mind_lattice_dossier"); // researched here by hand; the bond lowers its Level too (see below)
-		expect(can(s, "rack_mind_lattice", 1, FREE)).toMatch(/coolant/); // the Level gate is open
-		const node = s.content.tech.find((t) => t.id === "mind_lattice_dossier");
-		expect(node?.earlyTier).toEqual({ who: "luci", min: 60, tier: 4 });
+		expect(s.state.bonds.luci).toBe(0); // no bond reward for building it
+		expect(s.state.sealScar.greentech).toBeGreaterThanOrEqual(10 + 16); // the catch
 	});
 
 	it("roof, exterior-wall and basement sites", () => {
 		const s = start();
 		level(s, 5);
-		research(s, "solar_charter", "canopy_array", "geothermal_charter");
-		s.state.path = "greentech";
+		research(s, "neuromorphic_bench", "canopy_array", "geothermal_charter");
 		// PV walls: only at the edge of a floor.
 		expect(can(s, "solar_skin", 1, FREE)).toMatch(/exterior wall/);
 		expect(can(s, "solar_skin", 1, 40)).toBeNull();
@@ -150,36 +69,28 @@ describe("who may place what", () => {
 	});
 });
 
-describe("research behind the commit", () => {
-	it("a Specialist node cannot be researched before the commit and says what to do; a Starter node can", () => {
+describe("research has no commit", () => {
+	it("the Bio, Green and Synthetic nodes are all open to Level, prerequisites and points alone", () => {
 		const s = start();
 		level(s, 3);
 		s.state.researchPoints = 1e6;
-		research(s, "culture_media", "desk_fan_standard");
-		expect(s.submit({ type: "research", techId: "culture_bench" })).toEqual({ ok: true });
-		s.step();
-		const blocked = s.submit({ type: "research", techId: "wetware_annex" });
-		expect(blocked).toEqual({ ok: false, reason: "Commit to The Flesh to research" });
-		s.state.path = "greentech";
-		expect(s.submit({ type: "research", techId: "wetware_annex" })).toEqual({ ok: false, reason: "Commit to The Flesh to research" });
-		s.state.path = "biotech";
-		s.invalidateProjection();
-		s.step();
-		expect(s.submit({ type: "research", techId: "wetware_annex" })).toEqual({ ok: true });
+		research(s, "culture_media", "desk_fan_standard", "batch_cards", "chilled_loop");
+		for (const id of ["wetware_annex", "neuromorphic_bench"]) {
+			expect(s.submit({ type: "research", techId: id }), id).toEqual({ ok: true });
+			s.step();
+		}
+		expect(s.submit({ type: "research", techId: "event_array" })).toEqual({ ok: true });
 	});
 
-	it("the Synthetic nodes need no commit, and the bond opens two nodes a Level early", () => {
+	it("an advisor's bond does not open nodes early any more", () => {
 		const s = start();
 		level(s, 4);
 		s.state.researchPoints = 1e6;
+		s.state.bonds.luci = 100;
 		research(s, "tower_hydraulics", "manifold_blade", "chilled_loop", "cold_plate_gen3", "rear_door_drawings", "desk_fan_standard", "batch_cards");
 		expect(s.submit({ type: "research", techId: "cryo_core_dossier" })).toEqual({ ok: true });
-		expect(s.submit({ type: "research", techId: "mind_lattice_dossier" })).toEqual({ ok: false, reason: "requires Clearance 5" });
-		s.state.bonds.luci = 60;
-		s.invalidateProjection();
 		s.step();
-		research(s, "cryo_core_dossier");
-		expect(s.submit({ type: "research", techId: "mind_lattice_dossier" })).toEqual({ ok: true });
+		expect(s.submit({ type: "research", techId: "mind_lattice_dossier" })).toEqual({ ok: false, reason: "requires Clearance 5" });
 	});
 });
 
@@ -203,6 +114,15 @@ describe("upgradeFacility", () => {
 		expect(s.state.facilities.find((f) => f.defId === "rack_air_gpu2" && f.x === x && f.floor === floor)).toBeDefined();
 	});
 
+	it("never carries a rack to a tree rack: that is the retrofit's job", () => {
+		const s = start();
+		level(s, 5);
+		research(s, "chilled_loop", "desk_fan_standard", "batch_cards", "rear_door_drawings", "inference_foundry");
+		const ac3 = rackAt(s, "rack_air_gpu") as NonNullable<ReturnType<typeof rackAt>>;
+		expect(s.submit({ type: "upgradeFacility", facilityId: ac3.id, defId: "rack_dlc_gpu" })).toMatchObject({ ok: false });
+		for (const d of Object.values(s.content.facilities)) if (isRetrofitOnly(d)) expect(d.upgradesFrom, d.id).toBeUndefined();
+	});
+
 	it("is refused for lack of research, Level, an upgrade path or funds, with the plain reason", () => {
 		const s = start();
 		const old = rackAt(s, "rack_air_gpu") as NonNullable<ReturnType<typeof rackAt>>;
@@ -223,7 +143,6 @@ describe("upgradeFacility", () => {
 		const s = start();
 		level(s, 3);
 		research(s, "batch_cards", "rear_door_drawings", "desk_fan_standard", "inference_foundry");
-		// AC-3 (2 wide) -> IA-1 (2 wide) keeps its tiles; to test growth use the Battery Bank (3) -> Battery Hall (5).
 		research(s, "accumulator_charter", "flywheel_patent", "surge_memo");
 		exec(s, { type: "place", defId: "ups_battery", floor: 0, x: 2 });
 		const ups = rackAt(s, "ups_battery") as NonNullable<ReturnType<typeof rackAt>>;
@@ -241,34 +160,6 @@ describe("upgradeFacility", () => {
 		expect(s.submit({ type: "upgradeFacility", facilityId: boxed.id })).toMatchObject({ ok: false, reason: expect.stringMatching(/does not fit here/) });
 	});
 
-	it("a Specialist upgrade needs the commit, and the upgrade scars the new item like a placement", () => {
-		const s = start();
-		level(s, 4);
-		research(s, "inference_foundry", "event_array");
-		exec(s, { type: "place", defId: "rack_neuromorphic", floor: 1, x: FREE });
-		const nm1 = rackAt(s, "rack_neuromorphic") as NonNullable<ReturnType<typeof rackAt>>;
-		expect(s.submit({ type: "upgradeFacility", facilityId: nm1.id })).toEqual({ ok: false, reason: "Commit to The Garden" });
-		s.state.path = "greentech";
-		s.invalidateProjection();
-		const scar = s.state.sealScar.greentech;
-		expect(exec(s, { type: "upgradeFacility", facilityId: nm1.id })).toBeDefined();
-		expect(rackAt(s, "rack_neuromorphic2")).toBeDefined();
-		expect(s.state.sealScar.greentech).toBe(scar); // NM-2 is -1 / -3: it cleans, never scars
-	});
-
-	it("is deterministic: the same orders give the same state hash", () => {
-		const run = (): string => {
-			const s = start();
-			level(s, 2);
-			research(s, "batch_cards", "rear_door_drawings", "desk_fan_standard");
-			const old = rackAt(s, "rack_air_gpu") as NonNullable<ReturnType<typeof rackAt>>;
-			exec(s, { type: "upgradeFacility", facilityId: old.id });
-			for (let t = 0; t < 300; t++) s.step();
-			return s.hash();
-		};
-		expect(run()).toBe(run());
-	});
-
 	it("rejects a malformed command without throwing", () => {
 		const s = start();
 		const bad = [{ type: "upgradeFacility" }, { type: "upgradeFacility", facilityId: "x" }, { type: "upgradeFacility", facilityId: 1, defId: 7 }];
@@ -276,61 +167,16 @@ describe("upgradeFacility", () => {
 	});
 });
 
-describe("Starter racks and the Singularity points", () => {
-	/** SP that a lone rack of `defId`, delivering 100 PFLOPS, adds to each tree in one hourly step at the given path. */
-	const sp = (defId: string, path: "biotech" | "greentech" | "synthetic" | null): Record<string, number> => {
-		const s = start(quiet());
-		s.state.facilities = s.state.facilities.filter((f) => s.content.facilities[f.defId].kind !== "rack");
-		s.state.path = path;
-		s.state.greenScore = 1;
-		s.state.sealScar = { biotech: 0, greentech: 0 };
-		s.state.sealResidue = { biotech: 0, greentech: 0 };
-		const f = addFacility(s.state, s.content, defId, 1, 30);
-		f.pflops = 100;
-		s.state.tick = 0; // 06:00, an hourly sample
-		s.state.sp = { synthetic: 0, biotech: 0, greentech: 0 };
-		soulStep({ state: s.state, content: s.content, events: [], scratch: undefined as never });
-		return { ...s.state.sp };
-	};
-
-	it("a Starter rack scores 1 to Synthetic and 0.5 to its own tree after the commit, nothing to the other tree", () => {
-		const k = loadContent().balance.soul.spPerPflopHour;
-		const green = sp("rack_neuromorphic", "greentech");
-		expect(green.synthetic).toBeCloseTo(100 * k, 9);
-		expect(green.greentech).toBeCloseTo(100 * 0.5 * k, 4); // x (1 - seal)
-		const bio = sp("rack_culture_s", "biotech");
-		expect(bio.synthetic).toBeCloseTo(100 * k, 9);
-		expect(bio.biotech).toBeCloseTo(100 * 0.5 * k, 4);
-		// A Bio starter does not feed a Green tower, and a shared rack still feeds Green at its table weight.
-		expect(sp("rack_culture_s", "greentech").greentech).toBe(0);
-		expect(sp("rack_air_gpu", "greentech").greentech).toBeCloseTo(100 * 0.5 * k, 4);
-		// Before the commit only the Lattice counts.
-		const none = sp("rack_neuromorphic", null);
-		expect(none.greentech).toBe(0);
-		expect(none.synthetic).toBeCloseTo(100 * k, 9);
-	});
-
-	it("the Green line feeds the Lattice nothing and a Synthetic rack counts at the Synthetic weight", () => {
-		const k = loadContent().balance.soul.spPerPflopHour;
-		const w = loadContent().balance.soul.spWeights;
-		expect(sp("rack_neuromorphic2", "synthetic").synthetic).toBe(0);
-		expect(sp("rack_dlc_gpu", "synthetic").synthetic).toBeCloseTo(100 * (w.synthetic.synthetic ?? 0) * k, 9);
-	});
-});
-
-describe("the Foreman builds only what the player may place", () => {
+describe("the Foreman builds base racks and retrofits toward Synthetic", () => {
 	/** A tower with the Foreman on (a small reserve), work coming in (the harness accepts every offer) and bots and parts on. */
-	const foremanRun = (path: "greentech" | "biotech" | null, research: string[], days: number, seed: number): { s: SimImpl; placed: string[]; c: ContentDB } => {
+	const foremanRun = (research_: string[], days: number, seed: number, tier = 4): { s: SimImpl; placed: string[]; ev: string[]; c: ContentDB } => {
 		const c = quiet((x) => {
 			x.balance.events.intervalTicks = 1e9;
 		});
 		const s = createSim(c, "starter", seed) as SimImpl;
 		s.state.cash = 80_000_000;
-		s.state.tier = path === null ? 4 : 5;
-		s.state.path = path;
-		s.state.bonds.mel = 100;
-		s.state.bonds.bea = 100;
-		research_(s, ["contracts_clerk", "works_foreman", "standing_orders_binder", ...research]);
+		s.state.tier = tier;
+		research(s, "contracts_clerk", "works_foreman", "standing_orders_binder", ...research_);
 		const p = structuredClone(s.view().automation.policy);
 		p.foreman.enabled = true;
 		p.foreman.reserve = 0;
@@ -338,40 +184,64 @@ describe("the Foreman builds only what the player may place", () => {
 		p.bots = { enabled: true, racksPerBot: 6, maxBots: 8 };
 		exec(s, { type: "setAutomation", policy: p });
 		const placed: string[] = [];
+		const ev: string[] = [];
 		for (let t = 0; t < days * TICKS_PER_DAY; t++) {
 			for (const e of s.step()) {
 				if (e.type === "contractOffered") s.submit({ type: "acceptContract", contractId: e.contractId });
 				if (e.type === "autoBuilt") placed.push(s.state.facilities.find((f) => f.id === e.facilityId)?.defId ?? "");
+				if (e.type === "retrofitted") ev.push(`${e.tree}:${e.rung}`);
 			}
 		}
-		return { s, placed, c };
+		return { s, placed, ev, c };
 	};
-	const research_ = (s: SimImpl, ids: string[]): void => research(s, ...ids);
+	const tech = ["desk_fan_standard", "batch_cards", "rear_door_drawings", "inference_foundry", "high_capacity_air", "rear_door_exchanger", "substation_licence", "gas_concession"];
 
-	it("grows a Synthetic tower on the default path, and never places a Bio or Green Specialist", () => {
-		const { s, placed, c } = foremanRun(null, ["desk_fan_standard", "batch_cards", "rear_door_drawings", "inference_foundry", "culture_media", "culture_bench", "solar_charter", "economizer", "high_capacity_air", "rear_door_exchanger", "substation_licence", "gas_concession"], 8, 3);
+	it("grows a tower with base racks, and never places a tree rack from scratch", { timeout: 60_000 }, () => {
+		const { s, placed, c } = foremanRun(tech, 8, 3);
 		expect(placed.length).toBeGreaterThan(6);
-		for (const id of placed) expect(c.facilities[id].tier === "specialist", id).toBe(false);
+		for (const id of placed) expect(isRetrofitOnly(c.facilities[id]), id).toBe(false);
 		const racks = s.state.facilities.filter((f) => c.facilities[f.defId].kind === "rack" && c.facilities[f.defId].rack?.pflops).length;
 		expect(racks).toBeGreaterThan(4); // the starter's four plus what it grew
 	});
 
-	it("a committed Green tower never gets the Synthetic line from the Foreman, and a committed Bio tower never the Green one", () => {
-		const all = ["desk_fan_standard", "batch_cards", "rear_door_drawings", "chilled_loop", "tower_hydraulics", "cold_plate_gen3", "manifold_blade", "inference_foundry", "gas_concession", "substation_licence", "high_capacity_air", "rear_door_exchanger", "event_array", "economizer", "solar_charter", "canopy_array", "culture_media", "culture_bench", "wetware_annex"];
-		for (const path of ["greentech", "biotech"] as const) {
-			const { placed, c } = foremanRun(path, all, 6, 5);
-			expect(placed.length, path).toBeGreaterThan(3);
-			for (const id of placed) {
-				const d = c.facilities[id];
-				expect(d.line === "synthetic", `${path}: ${id}`).toBe(false);
-				if (path === "biotech") expect(d.line === "greentech" && d.tier !== "starter", `${path}: ${id}`).toBe(false);
-				if (path === "greentech") expect(d.line === "biotech" && d.tier !== "starter", `${path}: ${id}`).toBe(false);
+	it("retrofits toward Synthetic where the next rung is open and the coolant pipe is under the rack, and only there", { timeout: 60_000 }, () => {
+		const c = quiet((x) => {
+			x.balance.events.intervalTicks = 1e9;
+		});
+		const s = createSim(c, "starter", 3) as SimImpl;
+		s.state.cash = 80_000_000;
+		s.state.tier = 3;
+		research(s, "contracts_clerk", "works_foreman", "standing_orders_binder", ...tech, "chilled_loop");
+		// Piped floor with a loop that has room: a chiller and a CDU beside the racks.
+		for (let x = 4; x <= 43; x++) s.state.coolant[(1 - s.state.floorMin) * s.state.width + x] = 1;
+		for (let x = 4; x <= 43; x++) s.state.coolant[(0 - s.state.floorMin) * s.state.width + x] = 1;
+		s.state.netsDirty = true;
+		addFacility(s.state, s.content, "chiller", 0, 30);
+		addFacility(s.state, s.content, "cdu", 0, 36);
+		s.invalidateProjection();
+		const p = structuredClone(s.view().automation.policy);
+		p.foreman.enabled = true;
+		p.foreman.reserve = 0;
+		exec(s, { type: "setAutomation", policy: p });
+		const rungs: string[] = [];
+		for (let t = 0; t < 6 * TICKS_PER_DAY; t++) {
+			for (const e of s.step()) {
+				if (e.type === "contractOffered") s.submit({ type: "acceptContract", contractId: e.contractId });
+				if (e.type === "retrofitted") rungs.push(`${e.tree}:${e.rung}`);
 			}
 		}
+		expect(rungs.length).toBeGreaterThan(0);
+		for (const r of rungs) expect(r.startsWith("synthetic:"), r).toBe(true);
+		expect(s.state.facilities.some((f) => f.defId === "rack_dlc_gpu")).toBe(true);
+	});
+
+	it("without a pipe under any rack it keeps growing with base racks and retrofits nothing", { timeout: 60_000 }, () => {
+		const { ev } = foremanRun([...tech, "chilled_loop"], 6, 5, 3);
+		expect(ev).toEqual([]);
 	});
 });
 
-describe("snapshot v13", () => {
+describe("snapshot v15", () => {
 	/** Put an old-shaped facility on the lot: `defId` and `width` as an older save held them. */
 	const inject = (s: SimImpl, defId: string, floor: number, x: number, width: number): ReturnType<typeof addFacility> => {
 		const f = addFacility(s.state, s.content, "rack_air_gpu", floor, x);
@@ -380,66 +250,72 @@ describe("snapshot v13", () => {
 		f.width = width;
 		return f;
 	};
+	/** The save as a v14 game wrote it: with the commit, dating and bond state the reframe drops. */
 	const save = (s: SimImpl): { version: number; state: Record<string, unknown> } => {
 		const snap = JSON.parse(JSON.stringify(s.snapshot())) as { version: number; state: Record<string, unknown> };
-		snap.version = 12;
-		delete snap.state.bondGiven;
+		snap.version = 14;
+		Object.assign(snap.state, { path: "greentech", route: "bea", sealedOut: ["biotech"], bondGiven: ["starter:greentech"], flags: ["intro_dunno"], afterHoursDay: 3, afterSeen: ["ah_cass_1"], gifted: ["bea:solar_skin"], inbox: [], messageDay: 2, messageSeen: ["m1"] });
 		return snap;
 	};
 
-	it("maps removed facility ids, refunds removed research and keeps scars", () => {
+	it("drops the commit, the route and all the dating state, and keeps the points, the seals and the bonds", () => {
 		const c = loadContent();
 		const s = createSim(c, "starter", 2) as SimImpl;
-		inject(s, "rack_air_gpu3", 1, 30, 2); // the retired AC-4
-		inject(s, "rack_imm_gpu", 1, 34, 3); // the cut IM-1
-		s.state.techResearched.push("hot_aisle", "ministry_liaison", "wetware_annex");
-		const rp = s.state.researchPoints;
-		const scar = { ...s.state.sealScar };
+		s.state.sp.greentech = 321;
+		s.state.sealResidue.biotech = 7;
+		s.state.bonds.mel = 66;
 		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
-		expect(loaded.snapshot().version).toBeGreaterThanOrEqual(13);
-		const ids = loaded.state.facilities.map((f) => f.defId);
-		expect(ids).not.toContain("rack_air_gpu3");
-		expect(ids).not.toContain("rack_imm_gpu");
-		expect(ids).toContain(REMOVED_FACILITIES.rack_air_gpu3);
-		expect(ids).toContain(REMOVED_FACILITIES.rack_imm_gpu);
-		expect(loaded.state.techResearched).not.toContain("hot_aisle");
-		expect(loaded.state.techResearched).not.toContain("ministry_liaison");
-		expect(loaded.state.techResearched).toContain("culture_bench"); // granted with the Annex that now comes after it
-		expect(loaded.state.researchPoints).toBeCloseTo(rp + REMOVED_TECH.hot_aisle + REMOVED_TECH.ministry_liaison, 5);
-		expect(loaded.state.sealScar).toEqual(scar); // scars and residue are left alone
-		expect(loaded.state.bondGiven).toEqual([]);
-		for (let t = 0; t < 200; t++) loaded.step();
+		expect(loaded.snapshot().version).toBe(15);
+		for (const k of ["path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in loaded.state, k).toBe(false);
+		expect(loaded.state.sp.greentech).toBe(321);
+		expect(loaded.state.sealResidue.biotech).toBe(7);
+		expect(loaded.state.bonds.mel).toBe(66);
+		for (let t = 0; t < 100; t++) loaded.step();
 	});
 
-	it("refits the Vault Immersion Tank to three tiles and the Mind Lattice to three, or sells it back when boxed in", () => {
+	it("maps the cut racks to the nearest rung on the same tiles and sells the Nutrient Tank back", () => {
 		const c = loadContent();
 		const s = createSim(c, "starter", 2) as SimImpl;
 		s.state.cash = 1_000_000;
-		const tank = inject(s, "rack_imm_gpu3", 1, 30, 4);
-		const roomy = inject(s, "rack_mind_lattice", 1, 20, 2); // x 22 is free: it widens
-		const boxed = inject(s, "rack_mind_lattice", 1, 38, 2);
-		inject(s, "rack_storage", 1, 40, 2); // ...x 40 is taken: it cannot
+		inject(s, "rack_culture_s", 1, 20, 2); // OC-0 -> OC-1
+		inject(s, "rack_imm_gpu2", 1, 24, 3); // IM-2 -> LC-4 (two tiles: the third is freed)
+		inject(s, "rack_imm_gpu3", 1, 28, 3); // IM-3 -> ML-1
+		inject(s, "rack_organoid_3m", 1, 32, 3); // Mel's Cortex -> OC-3
+		const tank = inject(s, "nutrient_tank_s", 1, 36, 2);
 		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
-		const at = (f: { floor: number; x: number }, k = 0): number => loaded.state.facilityAt[(f.floor - loaded.state.floorMin) * loaded.state.width + f.x + k];
-		const t = loaded.state.facilities.find((f) => f.id === tank.id);
-		expect(t?.width).toBe(3);
-		expect(at(tank, 3)).toBe(-1); // the fourth tile is free again
-		const r = loaded.state.facilities.find((f) => f.id === roomy.id);
-		expect(r?.width).toBe(3);
-		expect(at(roomy, 2)).toBe(roomy.id);
-		expect(loaded.state.facilities.some((f) => f.id === boxed.id)).toBe(false);
-		expect(at(boxed, 0)).toBe(-1);
-		expect(loaded.state.cash).toBeGreaterThanOrEqual(1_000_000 + 8_000_000 - 1);
-		for (let t2 = 0; t2 < 100; t2++) loaded.step();
+		const ids = loaded.state.facilities.map((f) => f.defId);
+		for (const gone of Object.keys(SWAPPED_FACILITIES).concat(Object.keys(SOLD_FACILITIES))) expect(ids, gone).not.toContain(gone);
+		const at = (x: number) => loaded.state.facilities.find((f) => f.floor === 1 && f.x === x);
+		expect(at(20)?.defId).toBe("organoid_incubator");
+		expect(at(24)?.defId).toBe("rack_dlc_gpu3");
+		expect(at(24)?.width).toBe(2);
+		expect(loaded.state.facilityAt[(1 - loaded.state.floorMin) * loaded.state.width + 26]).toBe(-1);
+		expect(at(28)?.defId).toBe("rack_mind_lattice");
+		expect(at(32)?.defId).toBe("rack_organoid_3");
+		expect(at(36)).toBeUndefined();
+		expect(loaded.state.facilityAt[(1 - loaded.state.floorMin) * loaded.state.width + 36]).toBe(-1);
+		expect(loaded.state.facilities.some((f) => f.id === tank.id)).toBe(false);
+		expect(loaded.state.cash).toBeGreaterThanOrEqual(1_000_000 + SOLD_FACILITIES.nutrient_tank_s - 1);
+		for (let t = 0; t < 200; t++) loaded.step();
 	});
 
-	it("a current save round-trips with bondGiven and hashes the same after load", () => {
+	it("refunds the research nodes that folded into their rung", () => {
+		const c = loadContent();
+		const s = createSim(c, "starter", 2) as SimImpl;
+		s.state.techResearched.push("culture_bench", "economizer", "wetware_annex");
+		const rp = s.state.researchPoints;
+		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
+		expect(loaded.state.techResearched).not.toContain("culture_bench");
+		expect(loaded.state.techResearched).not.toContain("economizer");
+		expect(loaded.state.techResearched).toContain("wetware_annex");
+		expect(loaded.state.researchPoints).toBeCloseTo(rp + REMOVED_TECH_V15.culture_bench + REMOVED_TECH_V15.economizer, 5);
+	});
+
+	it("a current save round-trips and hashes the same after load", () => {
 		const c = loadContent();
 		const s = createSim(c, "starter", 4) as SimImpl;
-		s.state.bondGiven.push("starter:biotech");
 		for (let t = 0; t < 120; t++) s.step();
 		const back = simFromSnapshot(c, JSON.parse(JSON.stringify(s.snapshot()))) as SimImpl;
 		expect(back.hash()).toBe(s.hash());
-		expect(back.state.bondGiven).toEqual(["starter:biotech"]);
 	});
 });

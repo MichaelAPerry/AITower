@@ -135,7 +135,7 @@ export const balance: Balance = {
 	automation: { partsBatch: 5, foremanPerHour: 1 },
 	ascension: { minTier: 5 },
 	endings: { absorbed: { corruption: 1 } },
-	soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, starterWeight: 0.5, bondStart: { cass: 50, bea: 50, mel: 50, luci: 50 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1, afterHoursBond: 3, giftLiked: 4, giftDisliked: -3, messageBond: 1, confessionBond: 60, confessionTier: 4 },
+	soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: 2, biotech: 1.5, greentech: 2.5 }, greenFloor: 0.5, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, bondStart: { cass: 50, bea: 50, mel: 50, luci: 50 }, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
 };
 
 /** Deterministic, tiny contract generator (rng only). */
@@ -229,9 +229,6 @@ export function makeContent(extraScenarios: Scenario[] = [], balanceOverride: Pa
 		tech: JSON.parse(JSON.stringify(tech)) as TechNode[],
 		paths: [],
 		endings: [],
-		gifts: [],
-		messages: [],
-		memories: [],
 		structure: {
 			slabPerTile: 2_000,
 			basementSlabPerTile: 5_000,

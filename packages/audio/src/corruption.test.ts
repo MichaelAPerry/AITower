@@ -235,7 +235,7 @@ describe("stingers", () => {
 		auditB: { type: "quarterReport", quarter: 1, grade: "B" },
 		auditC: { type: "quarterReport", quarter: 1, grade: "C" },
 		auditE: { type: "quarterReport", quarter: 1, grade: "E" },
-		path: { type: "pathChosen", path: "biotech" },
+		path: { type: "retrofitted", facilityId: 1, tree: "biotech", rung: 3 },
 		sprout: { type: "growthSprouted", facilityId: 1 },
 		mutated: { type: "botMutated", botId: 1, trait: "fleshed" },
 		irreversible: { type: "contaminationIrreversible" },

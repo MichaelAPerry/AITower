@@ -2,9 +2,9 @@
  * Read-only SimView. Grid typed arrays are the live state arrays (reused, don't mutate);
  * entity arrays are rebuilt small each call.
  */
-import type { BotDef, ContentDB, SceneLine } from "@aitower/content";
+import { type AscensionPath, type BotDef, type ContentDB, type SceneLine, SEALED_TREES, treeOf, TREES } from "@aitower/content";
 import { currentStepIndex, lessonAllowed, lessonMetrics } from "../lesson/lesson";
-import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, WorkOrderView } from "../api";
+import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, TreeView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
 import { isActive, storageCapacityTB } from "../compute/allocation";
@@ -14,9 +14,8 @@ import { GensetMode } from "../core/state";
 import { dayOf, energyPriceAt, minuteOfDay } from "../core/time";
 import { loanMax } from "../economy/credit";
 import { facilityContamination } from "../bio/index";
-import { commitBlock, sealOf } from "../progression/soul";
-import { choiceAvailable, eventDef } from "../ministry/decisions";
-import { giftable, visitBlock } from "../ministry/dating";
+import { greenSpeed, isClosed, leadingTree, rungsHeld, sealOf, spRates, treeFactor, treePflops } from "../progression/soul";
+import { eventDef } from "../ministry/decisions";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
@@ -86,7 +85,7 @@ function decisionView(state: SimState, content: ContentDB): DecisionView | null 
 		category: def.category,
 		title: def.title,
 		body: sub(def.body),
-		choices: def.choices.filter((c) => choiceAvailable(state, c)).map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
+		choices: def.choices.map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
 		recommended: def.recommended,
 		votes: def.votes?.map((v) => ({ ...v })),
 		issuedAt: d.issuedAt,
@@ -99,25 +98,81 @@ function decisionView(state: SimState, content: ContentDB): DecisionView | null 
 	return v;
 }
 
+const sumRing = (a: Float64Array): number => {
+	let t = 0;
+	for (let i = 0; i < a.length; i++) t += a[i];
+	return t;
+};
+
 function soulView(state: SimState, content: ContentDB): SoulView {
 	const s = content.balance.soul;
+	const m = state.metrics;
+	const rates = spRates(state, content);
+	const pf = treePflops(state, content);
+	const rungs = rungsHeld(state, content);
+	const racks: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	const installed: Record<AscensionPath, number> = { synthetic: 0, biotech: 0, greentech: 0 };
+	const sources: Record<string, { defId: string; name: string; count: number; seal: number; tree: AscensionPath }> = {};
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		const t = treeOf(d);
+		if (t && !f.grown) {
+			racks[t]++;
+			installed[t] += d.rack?.pflops ?? 0;
+		}
+		for (const tree of SEALED_TREES) {
+			const v = d.seal?.[tree] ?? 0;
+			if (v <= 0 || f.grown) continue;
+			const key = `${tree}:${d.id}`;
+			let e = sources[key];
+			if (!e) {
+				e = { defId: d.id, name: d.name, count: 0, seal: 0, tree };
+				sources[key] = e;
+			}
+			e.count++;
+			e.seal += v;
+		}
+	}
+	const trees = {} as Record<AscensionPath, TreeView>;
+	for (const tree of TREES) {
+		const sealed = tree !== "synthetic";
+		const closed = isClosed(state, content, tree);
+		const hurting = Object.values(sources)
+			.filter((e) => e.tree === tree)
+			.sort((a, b) => b.seal - a.seal || (a.defId < b.defId ? -1 : 1))
+			.slice(0, 3)
+			.map(({ defId, name, count, seal }) => ({ defId, name, count, seal }));
+		trees[tree] = {
+			tree,
+			sp: state.sp[tree],
+			spPerDay: rates[tree],
+			daysToWin: rates[tree] > 0 ? Math.max(0, (s.spTarget - state.sp[tree]) / rates[tree]) : null,
+			rung: rungs[tree],
+			racks: racks[tree],
+			pflops: pf[tree],
+			installedPflops: installed[tree],
+			factor: closed ? 0 : treeFactor(state, content, tree),
+			seal: sealed ? sealOf(state, tree as "biotech" | "greentech") : null,
+			closed,
+			hurting,
+		};
+	}
+	const totalKwh = sumRing(m.ringTotalKwh);
+	const itKwh = sumRing(m.ringItKwh);
 	return {
 		sp: { ...state.sp },
 		spTarget: s.spTarget,
 		seal: { biotech: sealOf(state, "biotech"), greentech: sealOf(state, "greentech") },
 		sealMax: s.sealMax,
 		bonds: { ...state.bonds },
-		bondReveal: s.bondReveal,
-		bondCommit: s.bondCommit,
 		bondEpilogue: s.bondEpilogue,
-		sealedOut: [...state.sealedOut],
-		commitBlock: { synthetic: null, biotech: commitBlock(state, content, "biotech"), greentech: commitBlock(state, content, "greentech") },
-		route: state.route,
-		flags: [...state.flags],
-		afterHours: { available: visitBlock(state) === null, reason: visitBlock(state) },
-		inbox: state.inbox.map((m) => ({ ...m })),
-		giftable: giftable(state, content),
-		gifted: [...state.gifted],
+		trees,
+		green: {
+			score: state.greenScore,
+			cleanPower: totalKwh > 0 ? Math.min(1, sumRing(m.ringGreenKwh) / totalKwh) : 0,
+			heatShare: itKwh > 0 ? Math.min(1, sumRing(m.ringHeatKwh) / itKwh) : 0,
+			speed: greenSpeed(state, content),
+		},
 	};
 }
 
@@ -236,11 +291,14 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		corruption: state.corruption,
 		contaminatedShare: state.contaminatedShare,
 		irreversible: state.irreversible,
-		path: state.path,
+		path: leadingTree(state, content),
 		organoidPflops: m.organoidPflops,
 		soul: soulView(state, content),
 		affinity: affinityShares(state),
-		pathScore: state.path === "greentech" ? state.greenScore : state.path === "synthetic" ? state.refinement : state.corruption,
+		pathScore: ((): number => {
+			const lead = leadingTree(state, content);
+			return lead === "greentech" ? state.greenScore : lead === "synthetic" ? state.refinement : state.corruption;
+		})(),
 		greenScore: state.greenScore,
 		refinement: state.refinement,
 		drought: isDrought(state),

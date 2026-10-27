@@ -1,5 +1,5 @@
 /** Shared helpers of the automation orders. */
-import type { FacilityDef } from "@aitower/content";
+import { type FacilityDef, isRetrofitOnly } from "@aitower/content";
 import type { SimCommand } from "../api";
 import { planNormalized } from "../commands/apply";
 import type { TickCtx } from "../core/context";
@@ -15,7 +15,7 @@ export function runCommand(ctx: TickCtx, cmd: SimCommand): boolean {
 	return true;
 }
 
-/** Buildable now: the Level, research, commit and bond rules pass (the Foreman only builds what the player may place), not a growth. */
+/** Buildable now: the Level and research rules pass (the Foreman only builds what the player may place), not a growth, not a tree rack (those come from retrofits). */
 export function buildable(ctx: TickCtx, d: FacilityDef): boolean {
-	return !d.growth && !d.retired && placeBlock(ctx.state, ctx.content, d) === null;
+	return !d.growth && !d.retired && !isRetrofitOnly(d) && placeBlock(ctx.state, ctx.content, d) === null;
 }

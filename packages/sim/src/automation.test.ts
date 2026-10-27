@@ -235,18 +235,7 @@ describe("research order", () => {
 		expect(d.state.techResearched).toEqual([]);
 	});
 
-	it("respects prerequisites, clearance and the path gate (the same plan as the command)", () => {
-		const c = content();
-		c.tech.push({ id: "t_green", name: "Green", description: "", branch: "power", minTier: 1, cost: 1, requires: [], effects: [], requiresCommit: "greentech" });
-		const sim = newSim(c, "lot");
-		giveRp(sim, 1000);
-		setPolicy(sim, (p) => (p.research = { enabled: true, branches: ["power"] }));
-		run(sim, 200);
-		expect(sim.state.techResearched).toEqual([]); // not committed
-		sim.state.path = "greentech";
-		sim.invalidateProjection();
-		run(sim, 61);
-		expect(sim.state.techResearched).toEqual(["t_green"]);
+	it("respects prerequisites and clearance (the same plan as the command)", () => {
 		const t2 = newSim(content(), "lot");
 		giveRp(t2, 1000);
 		setPolicy(t2, (p) => (p.research = { enabled: true, branches: ["administration"] }));
@@ -622,7 +611,6 @@ describe("the Foreman", () => {
 			exec(sim, { type: "buildConduit", layer: "nutrient", cells: rowCells(0, 20, 40) });
 			exec(sim, { type: "place", defId: "nutrient_plant", floor: 0, x: 22 });
 			run(sim, 2); // the plant's supply is solved from the next tick on
-			sim.state.path = "biotech"; // path items are only built automatically once that path is chosen
 			foreman(sim, { power: false, cooling: false });
 
 			expect(placed(sim, "organoid_rack")).toHaveLength(1);
@@ -876,7 +864,7 @@ describe("the Foreman follows the ladder", () => {
 		expect(placed(sim, "rack_dlc_adv")).toHaveLength(0);
 	});
 
-	it("never builds path items unless that path was chosen", () => {
+	it("never builds a tree rack from scratch: those come from retrofits", () => {
 		const sim = mk(3);
 		on(sim, { power: false, cooling: false });
 		expect(sim.state.facilities.some((f) => f.defId === "organoid_rack")).toBe(false);

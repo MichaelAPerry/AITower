@@ -1,6 +1,6 @@
 /** Facility placement rules (also exposed as the pure `canPlace`). */
-import type { FacilityDef } from "@aitower/content";
-import { bondOnBuild, placeBlock } from "../progression/access";
+import { type FacilityDef, isRetrofitOnly } from "@aitower/content";
+import { placeBlock } from "../progression/access";
 import { scarOnPlace } from "../progression/soul";
 import { lessonBlocksPlace } from "../lesson/lesson";
 import { cellIdx, inBounds } from "../core/grid";
@@ -53,10 +53,7 @@ export function siteBlock(s: SimState, d: FacilityDef, floor: number, x: number,
 /** What placing `d` does to the world beyond adding it: scars, bond rewards, statistics. */
 export function afterPlace(s: SimState, d: FacilityDef, ignoreTier: boolean): void {
 	scarOnPlace(s, d);
-	if (!ignoreTier) {
-		s.stats.facilitiesBuilt++;
-		bondOnBuild(s, d);
-	}
+	if (!ignoreTier) s.stats.facilitiesBuilt++;
 }
 
 export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number, opts: PlaceOptions = {}): Plan {
@@ -69,6 +66,7 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	}
 	if (d.growth && !opts.ignoreTier) return reject("growths cannot be built");
 	if (d.retired && !opts.ignoreTier) return reject(`${d.name} is no longer built`);
+	if (isRetrofitOnly(d) && !opts.ignoreTier) return reject(`${d.name} is reached by retrofitting a rack, not built from scratch`);
 	// Out-of-bounds first (the tier and research messages assume a legal tile).
 	if (!inBounds(s, x, floor) || !inBounds(s, x + d.width - 1, floor)) return reject("out of bounds");
 	if (!opts.ignoreTier) {
