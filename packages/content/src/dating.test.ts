@@ -63,7 +63,10 @@ describe("route scenes", () => {
 			expect(e.choices.map((c) => c.id)).toEqual(["accept", "defer", "refuse"]);
 			const routes = e.choices.filter((c) => c.effects.some((f) => f.type === "route"));
 			expect(routes.map((c) => c.id)).toEqual(["accept"]);
-			const bond = (id: string): number => e.choices.find((c) => c.id === id)?.effects.find((f) => f.type === "bond" && f.advisor === e.advisor && true)?.amount ?? 0;
+			const bond = (id: string): number => {
+				const f = e.choices.find((c) => c.id === id)?.effects.find((x) => x.type === "bond" && x.advisor === e.advisor);
+				return f?.type === "bond" ? f.amount : 0;
+			};
 			expect(bond("accept")).toBeGreaterThan(0);
 			expect(bond("defer")).toBeLessThan(0);
 			expect(bond("refuse")).toBeLessThan(bond("defer"));

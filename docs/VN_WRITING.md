@@ -135,7 +135,7 @@ How the story text in `packages/content/src/data/story.json`, `endings.json` and
 
 ## Dating systems proposal
 
-Proposals only. Nothing below is implemented, and the owner approves before any of it is. The text rewrite already added a fourth "extra" option to about a third of the scenes (a flirt, a "show me", a "sit a minute"), using only existing `bond`, `seal`, `sp` and `cash` effects. Everything here goes further. Files named are where the work would land (`story.json` = `packages/content/src/data/story.json`; sim = `packages/sim/src/progression/soul.ts` and the decision pipeline; UI = `packages/ui/src/vn/` and `packages/ui/src/advisors/`).
+**Status: all nine are implemented (snapshot v14); see "Dating systems as built" at the end of this file.** The text below is the original proposal. The text rewrite already added a fourth "extra" option to about a third of the scenes (a flirt, a "show me", a "sit a minute"), using only existing `bond`, `seal`, `sp` and `cash` effects. Everything here goes further. Files named are where the work would land (`story.json` = `packages/content/src/data/story.json`; sim = `packages/sim/src/progression/soul.ts` and the decision pipeline; UI = `packages/ui/src/vn/` and `packages/ui/src/advisors/`).
 
 1. **After-hours: choose who to visit.** Once per game day (or every N ticks), a small "After hours" card offers two or three advisors who are free. The player picks one and gets a short two-to-four line scene with a single choice (no tree consequences, only bond and a tiny seal nudge). *Changes:* bond growth becomes player-driven, not just a side-effect of decisions. *Touches:* a new `StoryTrigger` kind `{ kind: "afterHours" }` in `schema.ts`, an issuer in the decision queue (sim), a card in the UI, and about 6 to 8 short visits per advisor in `story.json` (a pool, weighted by bond tier so nothing repeats).
 2. **Bond tiers with named stages.** Label bond bands (Colleague 0-29, Friend 30-49, Close 50-69, Devoted 70-100) per advisor. Scenes can require a stage, so intimacy lines only appear once earned. *Touches:* a `minBond: { advisor, atLeast }` condition on story scenes (schema and sim issuer), a bond-stage label on the advisor dossier (UI).
@@ -148,3 +148,28 @@ Proposals only. Nothing below is implemented, and the owner approves before any 
 9. **Memory: a visible log of what each advisor remembers.** A "she remembers" list on the dossier (three lines, built from flags the player's choices set, such as "You took her side on the diesel deal"). This also makes callbacks (rule 20) possible without conditional text. *Touches:* flags written by story effects (a new `flag` effect in `schema.ts` and sim) and the dossier panel (UI).
 
 **Suggested order if the owner approves only a few:** 2 and 7 are cheap and make every existing scene better; 3 and 6 give the dating-sim spine; 1 and 4 give the player agency between scenes; 5, 8 and 9 are polish.
+
+
+---
+
+## Dating systems as built
+
+1. **After hours.** `visitAdvisor` command, once per game day (button AFTER HOURS in the dock above the advisor strip). +3 bond (`soul.afterHoursBond`), then a scene from her pool of six in `story.json` (`trigger: afterHours`), banded by `minBond` / `maxBond`; unseen scenes of her stage first, then unseen earlier-stage ones (unless `staged`), then the one seen longest ago. No random stream. The first answer of every visit adds nothing, so the pace is exactly +3 a day. Visits are `quiet` and do not spend the day's decision slot.
+2. **Stages.** `bondStage()` in content: Colleague 0-29, Friend 30-49, Close 50-69, Devoted 70-100. Scenes use `minBond` / `maxBond`; the dossier shows the stage.
+3. **Milestones.** `ms_<advisor>_40/60/80`, gated by `minBond` plus a day/Level floor.
+4. **Gifts.** `data/gifts.json`: Luci likes IA-1 and dislikes the Algae Facade; Mel likes NT-1 and dislikes OA-400; Bea likes the Heat Recovery Unit and dislikes the Diesel Genset; Cass likes the CDU and dislikes the Gas Turbine. `giveGift`, once per advisor and item, +4 / -3 and a toast line. A "Give it to her" prompt appears when such an item is placed. The dossier names her tastes at Friend (likes) and Close (dislikes).
+5. **Rivals.** `rv_*`, six scenes with `bondGap` (the neglected advisor speaks once another is 20+ above her).
+6. **Confession.** `st_confess_<advisor>` (trigger `confession`): Level 4 (`soul.confessionTier`), top bond at 60+ (`soul.confessionBond`), once. Accept sets `route` (first lock only); defer -3; refuse -10 (+4 Cass). `EndingScene` closes on the route's epilogue (even below 60) and adds a `routeAck` line from the closest other advisor.
+7. **Earned options.** `EventChoice.minBond`: nine options on existing scenes appear only when her bond is high enough (the view hides them, the sim refuses them).
+8. **Texts.** `data/messages.json`, 24 texts in stage bands. One a day at noon from a rotating sender, inbox of six, one-tap replies +1 (`replyMessage`; -1 = leave it).
+9. **Memory.** `flag` effect and `data/memories.json`; the dossier lists her last three. Gifts and the confession set flags too.
+
+Quiet scenes (`quiet: true`) give no follow / overrule bond and do not use up the day's operational decision.
+
+### Art wishes (nothing new was drawn; mid-game scenes use the plain stage)
+No mid-game scene uses the ending paintings. Scenes that would want a background or a still:
+- Cass: `ah_cass_5` (the cot in B2), `ah_cass_6` and `st_confess_cass` (the F7 window, frost), `ms_cass_80` (the cold room door), `ms_cass_40` (plant room at 03:00).
+- Bea: `ah_bea_5` and `ms_bea_40` (night roof, black panels), `ah_bea_6` (white root through the foundation seam), `st_confess_bea` (roof at dawn).
+- Mel: `ms_mel_40` and `ah_mel_3` (the cold store, frosted racks), `ah_mel_6` and `ms_mel_80` (lab at night, the second stool with a cushion).
+- Luci: `ms_luci_40` and `ms_luci_80` (the ledger room, spines of gold and red), `ms_luci_60` (the dark server floor), `ah_luci_4` (a close-up of the gold eye).
+- Expressions: a "tender" face for each advisor (Bea and Mel especially) for the Devoted and confession scenes.

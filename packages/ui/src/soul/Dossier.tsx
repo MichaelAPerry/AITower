@@ -1,9 +1,9 @@
-import type { AdvisorId } from "@aitower/content";
+import type { AdvisorId, ContentDB } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
 import { ADVISOR_ORDER, ADVISOR_TREE, ADVISORS } from "../advisors/advisors";
 import { FullPortrait } from "../advisors/Portrait";
-import { revealedSeal, sealWords, TREE_COLOR, TREE_LONG } from "./soul";
+import { memoriesFor, revealedSeal, sealWords, stageName, tasteFor, TREE_COLOR, TREE_LONG } from "./soul";
 import "./soul.css";
 
 const BLURB: Record<AdvisorId, string> = {
@@ -14,7 +14,7 @@ const BLURB: Record<AdvisorId, string> = {
 };
 
 /** The four advisors as dossier cards (portrait, role, bond), and the hidden numbers each trusts you with. */
-export function Dossier({ view, onClose }: { view: Pick<SimView, "soul" | "path">; onClose: () => void }) {
+export function Dossier({ view, content, onClose }: { view: Pick<SimView, "soul" | "path">; content: Pick<ContentDB, "memories" | "gifts" | "facilities">; onClose: () => void }) {
 	const root = useRef<HTMLDivElement>(null);
 	useEffect(() => root.current?.focus(), []);
 	const soul = view.soul;
@@ -35,6 +35,8 @@ export function Dossier({ view, onClose }: { view: Pick<SimView, "soul" | "path"
 					const tree = ADVISOR_TREE[id];
 					const bond = soul.bonds[id];
 					const seen = revealedSeal(soul, id);
+					const remembers = memoriesFor(soul.flags, content, id);
+					const taste = tasteFor(content, id, bond);
 					return (
 						<article key={id} className="soul-card" style={{ ["--adv" as string]: a.color }} data-advisor={id}>
 							<div className="soul-card-art">
@@ -54,6 +56,13 @@ export function Dossier({ view, onClose }: { view: Pick<SimView, "soul" | "path"
 										</dd>
 									</div>
 									<div>
+										<dt>STAGE</dt>
+										<dd data-stage={id}>
+											{stageName(bond)}
+											{soul.route === id ? " · Your route" : ""}
+										</dd>
+									</div>
+									<div>
 										<dt>SERVES</dt>
 										<dd style={{ color: tree ? TREE_COLOR[tree] : "var(--text)" }}>{tree ? TREE_LONG[tree] : "No tree. You."}</dd>
 									</div>
@@ -64,6 +73,16 @@ export function Dossier({ view, onClose }: { view: Pick<SimView, "soul" | "path"
 										</div>
 									)}
 								</dl>
+								<div className="soul-card-memory">
+									<b>SHE REMEMBERS</b>
+									{remembers.length === 0 ? <p>Nothing yet.</p> : <ul>{remembers.map((t) => <li key={t}>{t}</li>)}</ul>}
+								</div>
+								{(taste.likes || taste.dislikes) && (
+									<p className="soul-card-taste">
+										{taste.likes ? `Likes: ${taste.likes}. ` : ""}
+										{taste.dislikes ? `Dislikes: ${taste.dislikes}.` : ""}
+									</p>
+								)}
 								<p className="soul-card-secret">
 									{id === "luci"
 										? "“The numbers? Darling, the only number is the price.”"

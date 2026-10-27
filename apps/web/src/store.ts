@@ -249,6 +249,8 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		},
 		dispatch(cmd) {
 			const r = sim.submit(cmd);
+			// Staying late opens its scene at once, and the clock must not run under it (the scene is not announced as a decision).
+			if (r.ok && cmd.type === "visitAdvisor" && state.speed !== 0) state = { ...state, speed: 0 };
 			// While paused, apply at once: otherwise an accepted contract or a placed cabinet would sit invisibly in the
 			// queue until the clock runs (and the induction keeps the clock stopped while you work).
 			if (r.ok && state.speed === 0) {

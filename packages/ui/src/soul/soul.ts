@@ -1,5 +1,5 @@
 /** Pure helpers for the Soul HUD (docs/SOUL.md): the three Singularity bars and what each advisor's trust reveals. */
-import type { AdvisorId, AscensionPath, SealedTree } from "@aitower/content";
+import { type AdvisorId, type AscensionPath, bondStage, type ContentDB, type SealedTree } from "@aitower/content";
 import type { SoulView } from "@aitower/sim";
 
 export const TREE_NAME: Record<AscensionPath, string> = { synthetic: "LATTICE", biotech: "FLESH", greentech: "GARDEN" };
@@ -72,3 +72,29 @@ export function champLine(soul: SoulView, tree: AscensionPath): string {
 	if (soul.bonds[champ] < soul.bondCommit) return tree === "biotech" ? `${who}: “I don't know you well enough to let you in. Not yet.”` : `${who}: “Prove you mean it. Then ask me again.”`;
 	return tree === "biotech" ? `${who}: “The tissue is ${words}. It will have you. So will I.”` : `${who}: “The ground is ${words}. We can still do this. Together.”`;
 }
+
+// ─── The dating side ──────────────────────────────────────────────────────────
+
+
+/** "Friend", "Close"... for a bond. */
+export const stageName = (bond: number): string => bondStage(bond).name;
+
+/** What `advisor` remembers about you, newest first, at most `max` lines (from the flags your choices set). */
+export function memoriesFor(flags: readonly string[], content: Pick<ContentDB, "memories">, advisor: AdvisorId, max = 3): string[] {
+	const out: string[] = [];
+	for (let i = flags.length - 1; i >= 0 && out.length < max; i--) {
+		const m = content.memories.find((x) => x.flag === flags[i] && x.advisor === advisor);
+		if (m) out.push(m.text);
+	}
+	return out;
+}
+
+/** Her taste in gifts, shown as she warms to you: liked at Friend (30), disliked at Close (50). Names only, never the numbers. */
+export function tasteFor(content: Pick<ContentDB, "gifts" | "facilities">, advisor: AdvisorId, bond: number): { likes: string | null; dislikes: string | null } {
+	const g = content.gifts.find((x) => x.advisor === advisor);
+	if (!g) return { likes: null, dislikes: null };
+	return { likes: bond >= 30 ? (content.facilities[g.liked]?.name ?? null) : null, dislikes: bond >= 50 ? (content.facilities[g.disliked]?.name ?? null) : null };
+}
+
+/** Texts not yet answered. */
+export const unreadCount = (soul: Pick<SoulView, "inbox">): number => soul.inbox.filter((m) => m.tapped === null).length;

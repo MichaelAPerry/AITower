@@ -128,5 +128,8 @@ The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, 
 2. Tune `balance.soul` and the seal numbers.
 3. Then the "Next" list in section 0.
 
+### Dating systems (snapshot v14)
+After hours, bond stages, route milestones, gifts, rivals, confession and route, earned options, texts and memory flags are in. Spec and art wishes: `docs/VN_WRITING.md` ("Dating systems as built"). Code: `ministry/dating.ts`, `ministry/decisions.ts` (`conditionsHold`, `quiet`), UI `soul/DatingDock.tsx`, `soul/Dossier.tsx`, `gameover/EndingScene.tsx`. Data: `story.json`, `gifts.json`, `messages.json`, `memories.json`.
+
 ### Catalogue redesign (docs/TREES.md)
 Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgradeCost`); sim placement goes through progression/access.ts, `upgradeFacility` in commands/upgrade.ts, snapshot v13 (migrateV12, `bondGiven`). UI reads the same `access()` for tags and lock reasons. Balance: `tools/sim-cli/src/soulRun.ts [scenario] [days] [seeds] [synthetic|biotech|greentech|all]` with the scripted player in player.ts.

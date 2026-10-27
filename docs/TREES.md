@@ -378,7 +378,7 @@ Scripted per-tree policy (`npx tsx tools/sim-cli/src/soulRun.ts starter 75 1,2,3
 | Bio-commit | 38.6 | 38.4 | 34.0 | 37.0 | 38 |
 | Green-commit | 52.7 | 45.0 | 46.6 | 48.1 | 44 |
 
-All nine runs are within 20% of target. The After-hours visit does not exist yet, so the player script adds +3 bond/day to the tree's advisor.
+All nine runs are within 20% of target. The After-hours visit is now real (`visitAdvisor`, +3 bond a day, VN_WRITING.md "Dating systems as built"); the player script uses it and the numbers above are the runs with it (no balance change was needed). Quiet relationship scenes must not spend the day's decision slot: when they did, one Green seed lost the race to the Lattice.
 
 Tuned knobs: `spPerPflopHour` 0.0017; `spWeights.synthetic.synthetic` 2.5; `spWeights.synthetic.greentech` 0; `spWeights.greentech.greentech` 3.4; `starterWeight` 0.5; several RP costs (wind_permit 9500, cryo_core_dossier 28000, event_array 8000, photonic_bench 30000, photonic_mesh 32000).
 

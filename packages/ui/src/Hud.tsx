@@ -20,6 +20,7 @@ import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { DecisionCard } from "./advisors/DecisionCard";
+import { DatingDock } from "./soul/DatingDock";
 import { Dossier } from "./soul/Dossier";
 import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
@@ -252,11 +253,12 @@ export function Hud({ store, content, title }: HudProps) {
 				<div className="ui-right">
 					{ui.paletteOpen && (!inLesson || ui.buildHover) ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
+				{!titleOpen && !crawl && !over && !lesson.active && state.view.soul && <DatingDock store={store} content={content} state={state} />}
 				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} teacher={lesson.teacher} teacherAdvisor={lesson.advisor} />}
 				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />
 				<Drawer {...props} />
 			</div>
-			{ui.dossier && !titleOpen && !over && <Dossier view={state.view} onClose={() => setUi({ dossier: false })} />}
+			{ui.dossier && !titleOpen && !over && <Dossier view={state.view} content={content} onClose={() => setUi({ dossier: false })} />}
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
 			{ascensionOpen && !titleOpen && !over && (
 				<AscensionSheet

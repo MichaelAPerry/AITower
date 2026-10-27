@@ -380,6 +380,31 @@ async function run(url) {
 		assert((await game(() => window.aitower.store.get().view.decision)) === null, "answering must clear the decision");
 		log("decision answered");
 
+		stage("5g. dating side: After hours opens a scene with the clock held, then is spent for the day; Texts opens an inbox");
+		assert((await page.locator("[data-after-hours]").isEnabled()), "After hours is open on a fresh day");
+		const bondBefore = await game(() => window.aitower.store.get().view.soul.bonds.cass);
+		await game(() => window.aitower.store.setSpeed(1));
+		await page.locator("[data-after-hours]").click();
+		await page.locator('[data-visit="cass"]').click();
+		await page.locator(".vn-stage").waitFor();
+		assert((await game(() => window.aitower.store.get().speed)) === 0, "a visit must hold the clock");
+		const visitId = await page.locator(".vn-stage").getAttribute("data-scene");
+		assert(/^ah_cass_/.test(visitId ?? ""), `the visit is one of Cass's scenes (${visitId})`);
+		await page.locator(".vn-stage").focus();
+		for (let k = 0; k < 80 && (await page.locator(".vn-stage").count()) > 0; k++) {
+			await page.keyboard.press("Enter");
+			await page.waitForTimeout(60);
+		}
+		assert((await page.locator(".vn-stage").count()) === 0, "the visit scene ends after its lines, a choice and the replies");
+		assert((await game(() => window.aitower.store.get().view.soul.bonds.cass)) >= bondBefore + 3, "the visit earns at least +3 bond");
+		assert(await page.locator("[data-after-hours]").isDisabled(), "After hours is spent for the day");
+		await page.locator("[data-texts]").click();
+		await page.locator('[data-panel="texts"]').waitFor();
+		await page.keyboard.press("Escape");
+		await page.locator('[data-panel="texts"]').waitFor({ state: "detached" });
+		await game(() => window.aitower.store.setSpeed(0));
+		log("After hours and Texts");
+
 		stage("6. save to slot 1, reload, load slot 1, assert the rack count survived");
 		const hashBefore = await game(() => window.aitower.store.sim().hash());
 		const saved = await game(() => window.aitower.store.saveTo("slot1", "e2e"));
