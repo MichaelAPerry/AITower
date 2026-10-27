@@ -185,7 +185,7 @@
  {
   "id": "cold_plate_gen3",
   "name": "Cold-Plate Generation 3",
-  "description": "Machined cold plates rated for 160 kW per cabinet. Unlocks the LC-3 Cold-Plate Rack: 230 PFLOPS at 160 kW.",
+  "description": "Machined cold plates rated for 160 kW per cabinet. Rung 2 of The Lattice: unlocks the LC-3 Cold-Plate Rack (230 PFLOPS at 160 kW).",
   "branch": "compute",
   "lane": "comp",
   "line": "liquid",
@@ -224,7 +224,7 @@
  {
   "id": "manifold_blade",
   "name": "Blade Manifold Architecture",
-  "description": "Rack-scale blades that blind-mate to the coolant manifold. Unlocks the LC-4 Blade Rack: 420 PFLOPS at 240 kW.",
+  "description": "Rack-scale blades that blind-mate to the coolant manifold. Rung 3 of The Lattice: unlocks the LC-4 Blade Rack (420 PFLOPS at 240 kW).",
   "branch": "compute",
   "lane": "comp",
   "line": "liquid",
@@ -291,7 +291,7 @@
  {
   "id": "chilled_loop",
   "name": "Chilled-Water Loop Design",
-  "description": "Pump curves and loop balancing, done properly. CRAH, chiller and CDU capacity +5%. Unlocks the LC-2 Liquid-Cooled Rack, the Coolant Distribution Unit and the Chiller CH-600; without it a tower stays on air.",
+  "description": "Pump curves and loop balancing, done properly. CRAH, chiller and CDU capacity +5%. Rung 1 of The Lattice: unlocks retrofitting racks to the LC-2 Liquid-Cooled Rack, plus the Coolant Distribution Unit and the Chiller CH-600; without it a tower stays on air.",
   "branch": "cooling",
   "lane": "cool",
   "line": "liquid",
@@ -360,7 +360,7 @@
   "minTier": 4,
   "cost": 13000,
   "requires": [
-   "economizer"
+   "event_array"
   ],
   "effects": [
    {
@@ -374,34 +374,7 @@
    "author": "Katherine Johnson",
    "source": "Interview remarks, as collected by Wikiquote"
   },
-  "requiresCommit": "greentech",
   "path": "greentech"
- },
- {
-  "id": "two_phase_immersion",
-  "name": "Two-Phase Immersion",
-  "description": "Boiling fluid and a condenser coil. Not a spectator sport. Rack failure rate -5%. Unlocks the IM-2 Two-Phase Immersion Tank: 560 PFLOPS at 300 kW.",
-  "branch": "cooling",
-  "lane": "cool",
-  "line": "immersion",
-  "minTier": 4,
-  "cost": 15000,
-  "requires": [
-   "manifold_blade",
-   "tower_hydraulics"
-  ],
-  "effects": [
-   {
-    "type": "perk",
-    "kind": "failureRate",
-    "factor": 0.95
-   }
-  ],
-  "flavor": {
-   "quote": "The energy of the universe is constant. The entropy of the universe tends to a maximum.",
-   "author": "Rudolf Clausius",
-   "source": "Ninth Memoir, 1865"
-  }
  },
  {
   "id": "surge_memo",
@@ -702,13 +675,13 @@
  {
   "id": "wetware_annex",
   "name": "Wetware Annex Programme",
-  "description": "A new annex off the plant room, with a floor drain and a risk assessment. Needs the commit to The Flesh. Unlocks the OC-1 Organoid Cabinet and the Nutrient Medium Plant.",
+  "description": "A new annex off the plant room, with a floor drain and a risk assessment. Rung 1 of The Flesh: unlocks retrofitting racks to the OC-1 Organoid Cabinet, plus the Perfusion Bath PB-60 and the Nutrient Medium Plant it needs.",
   "branch": "wetware",
   "lane": "wet",
-  "minTier": 3,
-  "cost": 4200,
+  "minTier": 2,
+  "cost": 3200,
   "requires": [
-   "culture_bench"
+   "culture_media"
   ],
   "effects": [],
   "flavor": {
@@ -716,7 +689,6 @@
    "author": "Mary Shelley",
    "source": "Frankenstein, ch. 5"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
@@ -725,8 +697,8 @@
   "description": "Gowning, wash-down and a laminated chart. Unlocks the Sterile Bay.",
   "branch": "wetware",
   "lane": "wet",
-  "minTier": 4,
-  "cost": 12000,
+  "minTier": 3,
+  "cost": 7000,
   "requires": [
    "wetware_annex"
   ],
@@ -736,7 +708,6 @@
    "author": "Grace Hopper",
    "source": "Time, 16 April 1984"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
@@ -756,7 +727,6 @@
    "author": "Ken Thompson",
    "source": "Unix and Beyond: An Interview with Ken Thompson, 1999"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
@@ -776,7 +746,6 @@
    "author": "William Shakespeare",
    "source": "Macbeth, act 5, scene 5"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
@@ -796,7 +765,6 @@
    "author": "Norbert Wiener",
    "source": "Cybernetics, 1948, p. 132"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
@@ -817,20 +785,18 @@
    "author": "W. Edwards Deming",
    "source": "Quality, Productivity and Competitive Position, 1982"
   },
-  "requiresCommit": "biotech",
   "path": "biotech"
  },
  {
   "id": "neural_pit_dossier",
   "name": "Neural Vat Dossier",
-  "description": "Forty pages, none of them dated. Unlocks the OC-4 Neural Vat: 460 PFLOPS per vat.",
+  "description": "Forty pages, none of them dated. Rung 4 of The Flesh: unlocks the OC-4 Neural Vat (850 PFLOPS from 110 kW) and the Vascular Plant VP-1000.",
   "branch": "wetware",
   "lane": "wet",
   "minTier": 5,
-  "cost": 42000,
+  "cost": 70000,
   "requires": [
-   "tissue_scaffolds",
-   "quarantine_doctrine"
+   "tissue_scaffolds"
   ],
   "effects": [],
   "path": "biotech",
@@ -838,17 +804,16 @@
    "quote": "Beware, for I am fearless and therefore powerful.",
    "author": "Mary Shelley",
    "source": "Frankenstein, ch. 20"
-  },
-  "requiresCommit": "biotech"
+  }
  },
  {
   "id": "tissue_scaffolds",
   "name": "Tissue Scaffolds",
-  "description": "Lattices that keep the tissue where it was put. Rack failure rate -7%. Unlocks the OC-3 Perfused Cortex and Mel's Cortex.",
+  "description": "Lattices that keep the tissue where it was put. Rack failure rate -7%. Rung 3 of The Flesh: unlocks the OC-3 Perfused Cortex (520 PFLOPS) and the Nutrient Works NW-60.",
   "branch": "wetware",
   "lane": "wet",
-  "minTier": 5,
-  "cost": 20000,
+  "minTier": 4,
+  "cost": 26000,
   "requires": [
    "organoid_vats"
   ],
@@ -864,8 +829,7 @@
    "quote": "The web is more a social creation than a technical one.",
    "author": "Tim Berners-Lee",
    "source": "Weaving the Web, 1999"
-  },
-  "requiresCommit": "biotech"
+  }
  },
  {
   "id": "asset_register",
@@ -890,8 +854,7 @@
    "quote": "Rather little mechanism, and lots of blank sheets.",
    "author": "Alan Turing",
    "source": "Computing Machinery and Intelligence, Mind, 1950"
-  },
-  "requiresCommit": "biotech"
+  }
  },
  {
   "id": "works_foreman",
@@ -945,24 +908,6 @@
   }
  },
  {
-  "id": "solar_charter",
-  "name": "Solar Charter",
-  "description": "Roof and wall rights for photovoltaics. Unlocks the PV Wall Panels 150 kW: 150 kW at noon on a clear day, nothing at night.",
-  "branch": "power",
-  "lane": "green",
-  "minTier": 3,
-  "cost": 3400,
-  "requires": [
-   "substation_licence"
-  ],
-  "effects": [],
-  "flavor": {
-   "quote": "The best way to predict the future is to invent it.",
-   "author": "Alan Kay",
-   "source": "Meeting at Xerox PARC, 1971"
-  }
- },
- {
   "id": "wind_permit",
   "name": "Wind Mast Permit",
   "description": "Planning consent for a mast on an upper floor. Unlocks the Wind Mast WM-300: up to 300 kW, on the third floor or above.",
@@ -979,7 +924,6 @@
    "author": "Andrew Tanenbaum",
    "source": "Computer Networks, 2nd ed., p. 254"
   },
-  "requiresCommit": "greentech",
   "path": "greentech"
  },
  {
@@ -1017,7 +961,6 @@
    "author": "Richard Hamming",
    "source": "You and Your Research, 1986"
   },
-  "requiresCommit": "greentech",
   "path": "greentech"
  },
  {
@@ -1029,8 +972,8 @@
   "minTier": 4,
   "cost": 16000,
   "requires": [
-   "solar_charter",
-   "wind_permit"
+   "wind_permit",
+   "neuromorphic_bench"
   ],
   "effects": [],
   "path": "greentech",
@@ -1038,8 +981,7 @@
    "quote": "Great cities are not like towns, only larger. They are not like suburbs, only denser.",
    "author": "Jane Jacobs",
    "source": "The Death and Life of Great American Cities, 1961, p. 30"
-  },
-  "requiresCommit": "greentech"
+  }
  },
  {
   "id": "heat_pipeline_franchise",
@@ -1058,8 +1000,7 @@
    "quote": "The power of the Web is in its universality.",
    "author": "Tim Berners-Lee",
    "source": "W3C accessibility page"
-  },
-  "requiresCommit": "greentech"
+  }
  },
  {
   "id": "carbon_capture_dossier",
@@ -1078,8 +1019,7 @@
    "quote": "The “control of nature” is a phrase conceived in arrogance",
    "author": "Rachel Carson",
    "source": "Silent Spring, 1962"
-  },
-  "requiresCommit": "greentech"
+  }
  },
  {
   "id": "green_ledger",
@@ -1105,20 +1045,18 @@
    "quote": "The cost of a thing is the amount of what I will call life which is required to be exchanged for it",
    "author": "Henry David Thoreau",
    "source": "Walden, 1854"
-  },
-  "requiresCommit": "greentech"
+  }
  },
  {
   "id": "photonic_bench",
   "name": "Photonic Bench Study",
-  "description": "An optical bench and a long qualification run. Unlocks the PH-1 Photonic Rack: 480 PFLOPS from 40 kW.",
+  "description": "An optical bench and a long qualification run. Rung 3 of The Garden: unlocks the PH-1 Photonic Rack (300 PFLOPS from 40 kW).",
   "branch": "compute",
   "lane": "green",
-  "minTier": 5,
-  "cost": 30000,
+  "minTier": 4,
+  "cost": 26000,
   "requires": [
-   "event_array",
-   "canopy_array"
+   "event_array"
   ],
   "effects": [],
   "path": "greentech",
@@ -1126,13 +1064,7 @@
    "quote": "Any sufficiently advanced technology is indistinguishable from magic.",
    "author": "Arthur C. Clarke",
    "source": "Profiles of the Future, rev. ed., 1973"
-  },
-  "earlyTier": {
-   "who": "bea",
-   "min": 60,
-   "tier": 4
-  },
-  "requiresCommit": "greentech"
+  }
  },
  {
   "id": "cryo_core_dossier",
@@ -1195,7 +1127,7 @@
  {
   "id": "mind_lattice_dossier",
   "name": "Mind Lattice Dossier",
-  "description": "A specification for a rack that would prefer to be called a resident. Unlocks the ML-1 Mind Lattice Rack: 700 PFLOPS from 220 kW. Research points earned +10%, from the register of every hosted process.",
+  "description": "A specification for a rack that would prefer to be called a resident. Rung 4 of The Lattice: unlocks the ML-1 Mind Lattice Rack (1,400 PFLOPS from 520 kW). Research points earned +10%, from the register of every hosted process.",
   "branch": "compute",
   "lane": "syn",
   "minTier": 5,
@@ -1216,11 +1148,6 @@
    "quote": "The stuff of the world is mind-stuff.",
    "author": "Arthur Eddington",
    "source": "The Nature of the Physical World, 1928"
-  },
-  "earlyTier": {
-   "who": "luci",
-   "min": 60,
-   "tier": 4
   }
  },
  {
@@ -1252,7 +1179,7 @@
  {
   "id": "culture_media",
   "name": "Culture Media Procurement",
-  "description": "A standing order for broth, agar and a lockable fridge. Rack failure rate -3%. Required before the Wetware Annex.",
+  "description": "Sterile media, in a standing order. Rack failure rate -3%.",
   "branch": "wetware",
   "lane": "wet",
   "minTier": 2,
@@ -1312,15 +1239,16 @@
  },
  {
   "id": "immersion_vault",
-  "name": "Immersion Vault Study",
-  "description": "A sealed hall, a very large tank and an insurer who asked to be removed from the thread. Unlocks the IM-3 Vault Immersion Tank and CDU Hall 6 MW.",
+  "name": "Facility CDU Skid",
+  "description": "A skid-mounted coolant distribution hall for a whole floor. Unlocks the CDU Hall 6 MW.",
   "branch": "cooling",
   "lane": "cool",
   "line": "immersion",
   "minTier": 5,
   "cost": 30000,
   "requires": [
-   "two_phase_immersion"
+   "manifold_blade",
+   "tower_hydraulics"
   ],
   "effects": [],
   "flavor": {
@@ -1356,13 +1284,13 @@
  {
   "id": "organoid_vats",
   "name": "Organoid Vat Programme",
-  "description": "Cabinets scaled up to vats, with the same drain. Unlocks the OC-2 Organoid Vat Bank: 300 PFLOPS from 45 kW.",
+  "description": "Cabinets scaled up to vats, with the same drain. Rung 2 of The Flesh: unlocks the OC-2 Organoid Vat Bank (300 PFLOPS from 45 kW) and the Perfusion Manifold PM-250.",
   "branch": "wetware",
   "lane": "wet",
-  "minTier": 4,
-  "cost": 18000,
+  "minTier": 3,
+  "cost": 8000,
   "requires": [
-   "sterile_protocols"
+   "wetware_annex"
   ],
   "effects": [],
   "path": "biotech",
@@ -1370,8 +1298,7 @@
    "quote": "Look on my works ye Mighty, and despair!",
    "author": "Percy Bysshe Shelley",
    "source": "Ozymandias, The Examiner, 1818"
-  },
-  "requiresCommit": "biotech"
+  }
  },
  {
   "id": "synaptic_mesh",
@@ -1396,111 +1323,12 @@
    "quote": "I am large, I contain multitudes.",
    "author": "Walt Whitman",
    "source": "Song of Myself, Leaves of Grass"
-  },
-  "requiresCommit": "biotech"
- },
- {
-  "id": "culture_bench",
-  "name": "Culture Bench",
-  "description": "A bench with a laminar hood and a warm shelf. Unlocks the OC-0 Culture Rack and the NT-1 Nutrient Tank (Starters: anyone may build them), and lets you lay nutrient pipe.",
-  "branch": "wetware",
-  "lane": "wet",
-  "minTier": 3,
-  "cost": 2400,
-  "requires": [
-   "culture_media"
-  ],
-  "effects": [],
-  "flavor": {
-   "quote": "Science knows no country, because knowledge belongs to humanity, and is the torch which illuminates the world.",
-   "author": "Louis Pasteur",
-   "source": "Quoted in René Dubos, Louis Pasteur: Free Lance of Science, 1960"
-  }
- },
- {
-  "id": "perfusion_baths",
-  "name": "Perfusion Baths",
-  "description": "Water baths held at 37 °C. Needs the commit to The Flesh. Unlocks the Perfusion Bath PB-60.",
-  "branch": "wetware",
-  "lane": "wet",
-  "minTier": 3,
-  "cost": 6000,
-  "requires": [
-   "wetware_annex"
-  ],
-  "effects": [],
-  "requiresCommit": "biotech",
-  "path": "biotech",
-  "flavor": {
-   "quote": "Hope is the thing with feathers",
-   "author": "Emily Dickinson",
-   "source": "The Complete Poems, ed. Thomas H. Johnson, 1960"
-  }
- },
- {
-  "id": "nutrient_works",
-  "name": "Nutrient Works",
-  "description": "Fermenter tanks and a broth pipe rack. Needs the commit to The Flesh. Unlocks the Nutrient Works NW-60.",
-  "branch": "wetware",
-  "lane": "wet",
-  "minTier": 4,
-  "cost": 12000,
-  "requires": [
-   "wetware_annex"
-  ],
-  "effects": [],
-  "requiresCommit": "biotech",
-  "path": "biotech",
-  "flavor": {
-   "quote": "Man shall not live by bread alone, but by every word that proceedeth out of the mouth of God.",
-   "author": "King James Bible",
-   "source": "Matthew 4:4 (KJV, 1611)"
-  }
- },
- {
-  "id": "perfusion_manifold",
-  "name": "Perfusion Manifold",
-  "description": "A bioreactor heat-exchange loop. Needs the commit to The Flesh. Unlocks the Perfusion Manifold PM-250.",
-  "branch": "wetware",
-  "lane": "wet",
-  "minTier": 4,
-  "cost": 14000,
-  "requires": [
-   "perfusion_baths"
-  ],
-  "effects": [],
-  "requiresCommit": "biotech",
-  "path": "biotech",
-  "flavor": {
-   "quote": "All things are poison, and nothing is without poison; but the dose makes it clear that a thing is not a poison.",
-   "author": "Paracelsus",
-   "source": "Third Defense, Septem Defensiones, 1538"
-  }
- },
- {
-  "id": "vascular_plant",
-  "name": "Vascular Plant",
-  "description": "An industrial bioprocess thermal plant. Needs the commit to The Flesh. Unlocks the Vascular Plant VP-1000.",
-  "branch": "wetware",
-  "lane": "wet",
-  "minTier": 5,
-  "cost": 28000,
-  "requires": [
-   "perfusion_manifold"
-  ],
-  "effects": [],
-  "requiresCommit": "biotech",
-  "path": "biotech",
-  "flavor": {
-   "quote": "The clearest way into the Universe is through a forest wilderness.",
-   "author": "John Muir",
-   "source": "John of the Mountains, 1938 (journal, July 1890)"
   }
  },
  {
   "id": "biogas_digester",
   "name": "Biogas Digester",
-  "description": "An anaerobic digestion plant. Needs the commit to The Flesh. Unlocks the Biogas Digester BG-2000.",
+  "description": "An anaerobic digestion plant. Unlocks the Biogas Digester BG-2000.",
   "branch": "wetware",
   "lane": "wet",
   "minTier": 5,
@@ -1509,7 +1337,6 @@
    "bioreactor_permit"
   ],
   "effects": [],
-  "requiresCommit": "biotech",
   "path": "biotech",
   "flavor": {
    "quote": "We abuse land because we regard it as a commodity belonging to us.",
@@ -1518,36 +1345,17 @@
   }
  },
  {
-  "id": "economizer",
-  "name": "Economizer Permit",
-  "description": "A louvre on the roof and a permit to open it. Unlocks the OA-400 Outside-Air Economizer (a Starter: anyone may build it).",
-  "branch": "cooling",
-  "lane": "green",
-  "minTier": 3,
-  "cost": 2200,
-  "requires": [
-   "desk_fan_standard"
-  ],
-  "effects": [],
-  "flavor": {
-   "quote": "Into each life some rain must fall",
-   "author": "Henry Wadsworth Longfellow",
-   "source": "The Rainy Day, 1842"
-  }
- },
- {
   "id": "event_array",
   "name": "Event-Driven Arrays",
-  "description": "Spiking arrays for sparse work. Needs the commit to The Garden. Unlocks the NM-2 Event-Driven Array.",
+  "description": "Spiking arrays for sparse work. Rung 2 of The Garden: unlocks the NM-2 Event-Driven Array (150 PFLOPS from 28 kW) and the AD-1500 Adiabatic Unit.",
   "branch": "compute",
   "lane": "green",
-  "minTier": 4,
+  "minTier": 3,
   "cost": 8000,
   "requires": [
-   "inference_foundry"
+   "neuromorphic_bench"
   ],
   "effects": [],
-  "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
    "quote": "The purpose of computing is insight, not numbers.",
@@ -1558,16 +1366,15 @@
  {
   "id": "hydrogen_cell",
   "name": "Hydrogen Fuel Cells",
-  "description": "Hydrogen in place of diesel. Needs the commit to The Garden. Unlocks the Hydrogen Fuel-Cell FC-1000.",
+  "description": "Hydrogen in place of diesel. Unlocks the Hydrogen Fuel-Cell FC-1000.",
   "branch": "power",
   "lane": "green",
   "minTier": 4,
   "cost": 14000,
   "requires": [
-   "solar_charter"
+   "neuromorphic_bench"
   ],
   "effects": [],
-  "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
    "quote": "There is no more open door by which you can enter into the study of natural philosophy",
@@ -1578,7 +1385,7 @@
  {
   "id": "iron_air_charter",
   "name": "Iron-Air Charter",
-  "description": "Slow, cheap, long-lived batteries. Needs the commit to The Garden. Unlocks the Iron-Air Store IA-20.",
+  "description": "Slow, cheap, long-lived batteries. Unlocks the Iron-Air Store IA-20.",
   "branch": "power",
   "lane": "green",
   "minTier": 5,
@@ -1587,7 +1394,6 @@
    "hydrogen_cell"
   ],
   "effects": [],
-  "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
    "quote": "To travel hopefully is a better thing than to arrive",
@@ -1598,7 +1404,7 @@
  {
   "id": "geothermal_charter",
   "name": "Geothermal Charter",
-  "description": "A drilling licence and a very deep hole. Needs the commit to The Garden. Unlocks the Geothermal Well GW-2000.",
+  "description": "A drilling licence and a very deep hole. Unlocks the Geothermal Well GW-2000.",
   "branch": "power",
   "lane": "green",
   "minTier": 5,
@@ -1607,7 +1413,6 @@
    "iron_air_charter"
   ],
   "effects": [],
-  "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
    "quote": "Down, down, down. Would the fall never come to an end?",
@@ -1618,16 +1423,15 @@
  {
   "id": "photonic_mesh",
   "name": "Photonic Mesh",
-  "description": "Chip-to-chip light. Needs the commit to The Garden. Unlocks the PH-2 Photonic Mesh.",
+  "description": "Chip-to-chip light. Rung 4 of The Garden: unlocks the PH-2 Photonic Mesh (600 PFLOPS from 70 kW) and the Adiabatic Chiller CH-5000.",
   "branch": "compute",
   "lane": "green",
   "minTier": 5,
-  "cost": 32000,
+  "cost": 70000,
   "requires": [
    "photonic_bench"
   ],
   "effects": [],
-  "requiresCommit": "greentech",
   "path": "greentech",
   "flavor": {
    "quote": "There's a certain Slant of light",
@@ -1691,6 +1495,99 @@
    "quote": "We nuclear people have made a Faustian bargain with society.",
    "author": "Alvin Weinberg",
    "source": "Social Institutions and Nuclear Energy, Science, 7 July 1972, p. 33"
+  }
+ },
+ {
+  "id": "neuromorphic_bench",
+  "name": "Neuromorphic Bench",
+  "description": "Spiking-neuron boards on a test bench, a roof permit and a louvre. Rung 1 of The Garden: unlocks retrofitting racks to the NM-1 Neuromorphic Rack (50 PFLOPS from 12 kW), plus the PV Wall Panels 150 kW and the OA-400 Outside-Air Economizer.",
+  "branch": "compute",
+  "lane": "green",
+  "minTier": 2,
+  "cost": 3200,
+  "requires": [
+   "batch_cards"
+  ],
+  "effects": [],
+  "path": "greentech",
+  "flavor": {
+   "quote": "The best way to predict the future is to invent it.",
+   "author": "Alan Kay",
+   "source": "Meeting at Xerox PARC, 1971"
+  }
+ },
+ {
+  "id": "rate_card",
+  "name": "Rate Card Negotiation",
+  "description": "Luci reads the tariff schedule aloud, and then reads the footnotes. Unlocks Luci's Rate Card: a 9 MW grid intake at a quarter off.",
+  "branch": "power",
+  "lane": "pow",
+  "minTier": 3,
+  "cost": 3600,
+  "requires": [
+   "substation_licence"
+  ],
+  "effects": [],
+  "flavor": {
+   "quote": "The energy of the universe is constant. The entropy of the universe tends to a maximum.",
+   "author": "Rudolf Clausius",
+   "source": "Ninth Memoir, 1865"
+  }
+ },
+ {
+  "id": "leaf_bolt",
+  "name": "Leaf-Bolt Microgrid",
+  "description": "Panels and a controller in one cabinet, drawn on a napkin. Unlocks Bea's Leaf-Bolt Microgrid: 600 kW of solar in one block.",
+  "branch": "power",
+  "lane": "green",
+  "minTier": 3,
+  "cost": 3800,
+  "requires": [
+   "substation_licence"
+  ],
+  "effects": [],
+  "flavor": {
+   "quote": "The clearest way into the Universe is through a forest wilderness.",
+   "author": "John Muir",
+   "source": "John of the Mountains, 1938 (journal, July 1890)"
+  }
+ },
+ {
+  "id": "ice_battery",
+  "name": "Ice Thermal Storage",
+  "description": "Chill water when power is cheap, spend it when it is not. Unlocks Cass's Ice Thermal Battery: an 800 kW air handler.",
+  "branch": "cooling",
+  "lane": "cool",
+  "line": "air",
+  "minTier": 3,
+  "cost": 3000,
+  "requires": [
+   "rear_door_exchanger"
+  ],
+  "effects": [],
+  "flavor": {
+   "quote": "Into each life some rain must fall",
+   "author": "Henry Wadsworth Longfellow",
+   "source": "The Rainy Day, 1842"
+  }
+ },
+ {
+  "id": "cold_room_spec",
+  "name": "Cold Room Specification",
+  "description": "A room kept cold on purpose. Unlocks Cass's Cold Room: a 60 kW air handler that cuts the failure rate of racks near it by 20%.",
+  "branch": "cooling",
+  "lane": "cool",
+  "line": "air",
+  "minTier": 4,
+  "cost": 9000,
+  "requires": [
+   "ice_battery"
+  ],
+  "effects": [],
+  "flavor": {
+   "quote": "All things are poison, and nothing is without poison; but the dose makes it clear that a thing is not a poison.",
+   "author": "Paracelsus",
+   "source": "Third Defense, Septem Defensiones, 1538"
   }
  }
 ]

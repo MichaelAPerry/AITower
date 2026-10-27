@@ -2,19 +2,16 @@
  {
   "id": "biotech",
   "name": "The Flesh",
-  "available": true,
-  "description": "Grow the computer. Organoids compute at three times the PFLOPS per kW of any cabinet, fed and held at 37 °C. Bio Singularity points come only from tissue. Contamination climbs with output, and at 99% corruption the tower absorbs you. Needs Dr. Mel Kiorre's trust, and a tower the flesh will accept."
+  "description": "Grow the computer. Retrofit racks down the Bio ladder, from the Organoid Cabinet to the Neural Vat. Each rack holds a lot of compute for little power, but the tissue must be fed, held at 37 °C and kept clean. Bio points come only from Bio racks, scaled by how open the Flesh still is. At seal 100 it closes. At 99% corruption the tower absorbs you."
  },
  {
   "id": "greentech",
   "name": "The Garden",
-  "available": true,
-  "description": "Let the machine belong to the planet. Sun, wind and sold heat feed your green score, and Green Singularity points come from green-line racks and, at half weight, from the rest, both scaled by that score. A dark, still week costs you. Needs Bea Altasar's trust, and a tower the land will forgive."
+  "description": "Let the machine belong to the planet. Retrofit racks down the Green ladder, from the Neuromorphic Rack to the Photonic Mesh. Green racks run on air and sip power, and they earn half speed on any power and full speed on clean power. Sun, wind and sold heat raise the green score. At seal 100 it closes."
  },
  {
   "id": "synthetic",
   "name": "The Singularity",
-  "available": true,
-  "description": "The default. Every rack that is not on another tree feeds the Lattice, and the Synthetic line feeds it twice over. Nothing is closed to you and nothing is asked of you. Luci Ferro will handle the paperwork."
+  "description": "The cheapest and fastest. Retrofit racks down the Synthetic ladder, from the Liquid Rack to the Mind Lattice. Nothing is asked of you but cooling and power, and the Lattice never closes. Everything it builds scars the Flesh and the Garden."
  }
 ]

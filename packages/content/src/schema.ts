@@ -185,14 +185,12 @@ export interface FacilityDef {
 	growth?: boolean;
 	flavor?: Flavor;
 	/**
-	 * The catalogue (docs/TREES.md): `starter` items are open to anyone once researched and never scar their own tree;
-	 * `specialist` items belong to a Bio or Green line and need that commit. Absent: shared, Synthetic or a signature build.
+	 * The reframe (docs/REFRAME.md): the rung of a tree rack, 1..4. A rung rack is never placed from the menu: it is reached by
+	 * retrofitting a base rack (or the previous rung of its tree) in place. Absent on base racks and on everything that is not a tree rack.
 	 */
-	tier?: FacilityTierTag;
-	/** The item this one upgrades: placing this on top of it swaps in place and costs `cost` minus half of the old item's cost. */
+	rung?: number;
+	/** The item this one upgrades: placing this on top of it swaps in place and costs `cost` minus half of the old item's cost. Support items only: racks retrofit. */
 	upgradesFrom?: string;
-	/** Who may place it besides the research and Level gates (a commit, an advisor's bond). */
-	unlock?: UnlockRule;
 	/**
 	 * The Soul (docs/SOUL.md): which Singularity tree this item belongs to. Absent = "shared". Drives SP weights and the
 	 * tree badge on build cards.
@@ -204,24 +202,6 @@ export interface FacilityDef {
 	 * unless the tree's champion trusts them (bond ≥ `soul.bondReveal`).
 	 */
 	seal?: SealSpec;
-}
-
-/** See `FacilityDef.tier`. */
-export type FacilityTierTag = "starter" | "specialist";
-
-/**
- * Extra gates on placing a facility. All that are given must hold (except `preview`, which stands in for `commit`).
- * Bio and Green items (`line` biotech / greentech, tier "specialist") are implicitly commit-gated to their line.
- */
-export interface UnlockRule {
-	/** An advisor's bond must be at least `min` (a signature build). */
-	bond?: { who: AdvisorId; min: number };
-	/** The player must have committed to this path. */
-	commit?: AscensionPath;
-	/** With this bond the item opens at `tier` instead of its `unlockTier` (the research node opens early too: `TechNode.earlyTier`). */
-	early?: { who: AdvisorId; min: number; tier: number };
-	/** With this bond a player who has not committed may still keep up to `max` of them. */
-	preview?: { who: AdvisorId; min: number; max: number };
 }
 
 /** The tree a facility belongs to. */
@@ -619,18 +599,20 @@ export interface LessonDef {
 
 /** The four advisors: Cass Parr (Facilities, Cooling), Bea Altasar (Power, Green), Dr. Mel Kiorre (Compute, Wetware, Synthetic), Luci Ferro (CFO). */
 export type AdvisorId = "cass" | "bea" | "mel" | "luci";
-/** Each tree's champion: she argues for it, and her bond gates committing to it. */
+/** Each tree's champion: she argues for it and speaks when it reaches a new rung. */
 export const CHAMPION: Record<AscensionPath, AdvisorId> = { synthetic: "luci", biotech: "mel", greentech: "bea" };
 
-/** Tuning for Singularity points, seals and bonds. */
+/** Tuning for Singularity points, seals and bonds (docs/REFRAME.md). */
 export interface SoulBalance {
 	/** SP that ends the game with that tree. */
 	spTarget: number;
-	/** SP per PFLOPS-hour of weighted running compute (before seal scaling). */
+	/** SP per PFLOPS-hour of a tree rack's delivered compute, before the tree's weight and factor. */
 	spPerPflopHour: number;
-	/** Weight of each rack line toward each tree's SP. Bio and Green only count after committing to them; Green is also × green score. */
-	spWeights: Record<AscensionPath, Partial<Record<TreeLine, number>>>;
-	/** A tree is sealed at this seal (scar + residue). */
+	/** What one PFLOPS of each tree's racks is worth. Base racks score for no tree. */
+	spWeights: Record<AscensionPath, number>;
+	/** Green racks earn this share of full speed on any power; the rest scales with the green score. */
+	greenFloor: number;
+	/** A tree is sealed at this seal (scar + residue): no new retrofits, its racks stop scoring. */
 	sealMax: number;
 	/** Running facilities add seal × this per day to residue. */
 	residuePerDay: number;
@@ -638,42 +620,11 @@ export interface SoulBalance {
 	objectionScar: number;
 	/** Starting bond per advisor (0..100). */
 	bondStart: Record<AdvisorId, number>;
-	/** Bond at which the champion reveals her tree's secret numbers on build cards. */
-	bondReveal: number;
-	/** Bond needed to commit to the champion's tree. */
-	bondCommit: number;
-	/** Bond needed for the ending epilogue. */
+	/** Bond needed for the ending epilogue (the advisor with the highest bond at this level or more). */
 	bondEpilogue: number;
-	/** Weight a Starter rack gives its own tree (after the commit); toward Synthetic it counts as a shared rack. */
-	starterWeight: number;
 	/** Bond change when the player takes / overrules an advisor's recommendation. */
 	bondFollow: number;
 	bondOverrule: number;
-	/** Bond the advisor you visit After hours earns (once per game day). */
-	afterHoursBond: number;
-	/** Bond change for a gift she likes / dislikes (once per item). */
-	giftLiked: number;
-	giftDisliked: number;
-	/** Bond for a one-tap reply to her message. */
-	messageBond: number;
-	/** The confession asks the top-bond advisor at this bond or more, once the tower reaches `confessionTier`. */
-	confessionBond: number;
-	confessionTier: number;
-}
-
-/** Named bond stages (docs/VN_WRITING.md, dating proposal 2). The first number of each stage is its lower bound. */
-export type BondStage = "colleague" | "friend" | "close" | "devoted";
-export const BOND_STAGES: readonly { id: BondStage; name: string; from: number }[] = [
-	{ id: "colleague", name: "Colleague", from: 0 },
-	{ id: "friend", name: "Friend", from: 30 },
-	{ id: "close", name: "Close", from: 50 },
-	{ id: "devoted", name: "Devoted", from: 70 },
-];
-/** The stage a bond (0..100) is in: Colleague 0-29, Friend 30-49, Close 50-69, Devoted 70-100. */
-export function bondStage(bond: number): { id: BondStage; name: string; from: number } {
-	let st = BOND_STAGES[0];
-	for (const x of BOND_STAGES) if (bond >= x.from) st = x;
-	return st;
 }
 
 /** One line of a visual-novel scene. */
@@ -685,21 +636,11 @@ export interface SceneLine {
 }
 
 /**
- * When a story scene (category "story") is issued: once, as soon as it holds and no other decision is pending.
- * `tick` and `day` are absolute; `sp` is a share of `soul.spTarget`; `seal` an absolute seal value; `sealedOut` fires when the
- * committed tree was sealed; `objection` scenes are issued by the sim for a placed item (see `SoulBalance.objectionScar`).
+ * When a story scene (category "story") is issued: once, as soon as it holds and no other decision is pending. `tick` is absolute;
+ * `rung` fires the first time the tower holds a rack of that tree at that rung or higher; `objection` scenes are issued by the sim
+ * for a placed item (see `SoulBalance.objectionScar`).
  */
-export type StoryTrigger =
-	| { kind: "tick"; atLeast: number }
-	| { kind: "tier"; atLeast: number }
-	| { kind: "sp"; path: AscensionPath; atLeast: number }
-	| { kind: "seal"; path: SealedTree; atLeast: number }
-	| { kind: "sealedOut"; path: SealedTree }
-	| { kind: "objection"; path: SealedTree }
-	/** After-hours visits: issued only by the `visitAdvisor` command (never by the story queue). Weighted by bond stage. */
-	| { kind: "afterHours" }
-	/** The confession (docs/VN_WRITING.md, proposal 6): issued once the tower reaches `soul.confessionTier`, to the top-bond advisor at `soul.confessionBond`+. */
-	| { kind: "confession" };
+export type StoryTrigger = { kind: "tick"; atLeast: number } | { kind: "tier"; atLeast: number } | { kind: "rung"; tree: AscensionPath; rung: number } | { kind: "objection"; path: SealedTree };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
@@ -737,14 +678,8 @@ export type EventEffect =
 	| { type: "seal"; path: SealedTree; amount: number }
 	/** Hidden: change an advisor's bond. Never shown as a chip. */
 	| { type: "bond"; advisor: AdvisorId; amount: number }
-	/** Commit to a tree, as FORM A-5 would (ignored if a path is already chosen). The trap in "Luci, you decide". */
-	| { type: "commitPath"; path: AscensionPath }
 	/** Add (or remove) Singularity points of a tree directly (Mel's shortcuts, Cass's slow week). */
-	| { type: "sp"; path: AscensionPath; amount: number }
-	/** Hidden: remember a fact about the player (an id from `data/memories.json`). Shown on the dossier as "She remembers". */
-	| { type: "flag"; id: string }
-	/** Lock the route: this advisor's epilogue closes the ending. Only the first lock counts. */
-	| { type: "route"; advisor: AdvisorId };
+	| { type: "sp"; path: AscensionPath; amount: number };
 
 export interface EventChoice {
 	/** Stable id, e.g. "approve" | "deny" | "file". */
@@ -758,8 +693,6 @@ export interface EventChoice {
 	effects: EventEffect[];
 	/** Story scenes: what the advisors say back after this choice (pushback, approval). */
 	reply?: SceneLine[];
-	/** An earned option: it is only offered once this advisor's bond is at least `atLeast`. */
-	minBond?: { advisor: AdvisorId; atLeast: number };
 }
 
 export interface EventDef {
@@ -790,20 +723,6 @@ export interface EventDef {
 	scriptedDay?: number;
 	/** Story scenes: when the scene is issued (see `StoryTrigger`). */
 	trigger?: StoryTrigger;
-	/** Story scenes: only while the committed path is one of these (null = no path yet). */
-	whenPath?: (AscensionPath | null)[];
-	/** Story scenes: only once this advisor's bond is at least `atLeast` (a stage: 30 Friend, 50 Close, 70 Devoted). */
-	minBond?: { advisor: AdvisorId; atLeast: number };
-	/** Story scenes: only while this advisor's bond is below `below` (After-hours pools use it to stay in a stage). */
-	maxBond?: { advisor: AdvisorId; below: number };
-	/** Story scenes (rivals): only while `high`'s bond is at least `atLeast` above `low`'s. */
-	bondGap?: { high: AdvisorId; low: AdvisorId; atLeast: number };
-	/** Story scenes: only once no route is locked / or this one is. `true` = only while the route is still open. */
-	routeOpen?: boolean;
-	/** Story scenes: answering never adds the follow / overrule bond (After-hours visits, the confession). */
-	quiet?: boolean;
-	/** After-hours visits: the scene belongs to its stage only. By default a visit of a lower stage may be replayed as filler once the current stage's scenes are all seen; a staged one never is. */
-	staged?: boolean;
 	/** Story scenes: the dialogue before the choice. `{item}` is replaced by the subject facility's name. */
 	lines?: SceneLine[];
 	/** Story scenes: the backdrop (a tree floor) and the caption box text. */
@@ -861,45 +780,13 @@ export interface EndingDef {
 	backdrop?: AscensionPath;
 	/** Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). */
 	epilogue?: Partial<Record<AdvisorId, string>>;
-	/** With a locked route: one line from each of the other advisors, who noticed whom you chose. Keyed by the one who speaks. */
-	routeAck?: Partial<Record<AdvisorId, string>>;
 }
 
-/** A gift an advisor likes and one she dislikes (docs/VN_WRITING.md, proposal 4). Once per item. */
-export interface GiftDef {
-	advisor: AdvisorId;
-	liked: string;
-	disliked: string;
-	/** The line (toast) when she gets the liked / disliked item. */
-	likedLine: string;
-	dislikedLine: string;
-}
-
-/** A one-line text from an advisor (proposal 8). `taps` are the one-tap replies; each earns `soul.messageBond`. */
-export interface MessageDef {
-	id: string;
-	from: AdvisorId;
-	text: string;
-	/** Stage band, like story scenes. */
-	minBond?: number;
-	maxBond?: number;
-	taps: { label: string; back: string }[];
-}
-
-/** What an advisor remembers: a flag set by a story choice, worded for the dossier (proposal 9). */
-export interface MemoryDef {
-	flag: string;
-	advisor: AdvisorId;
-	text: string;
-}
-
-/** An ascension path as offered at Clearance `balance.ascension.minTier`. */
+/** A tree: its name and what it is about (the Trees panel and the Handbook). */
 export interface PathDef {
 	id: AscensionPath;
 	name: string;
 	description: string;
-	/** False = shown as "coming soon" and cannot be chosen. */
-	available: boolean;
 }
 
 /** Permanent multipliers granted by researched tech; they stack multiplicatively. */
@@ -937,12 +824,8 @@ export interface TechNode {
 	requires: string[];
 	/** Perks and features. Facility/bot unlocks are declared on the facility/bot (`tech`). */
 	effects: TechEffect[];
-	/** The path this node leans to (research affinity, lane colour). It gates nothing: `requiresCommit` does. */
+	/** The tree this node leans to (research affinity, lane colour). It gates nothing. */
 	path?: AscensionPath;
-	/** Researchable only after committing to this path (RP is never wasted: the node shows "Commit to ..." until then). */
-	requiresCommit?: AscensionPath;
-	/** With this bond the node may be researched from Level `tier` instead of `minTier` (Early Lattice, Early Garden). */
-	earlyTier?: { who: AdvisorId; min: number; tier: number };
 	flavor?: Flavor;
 }
 
@@ -962,8 +845,5 @@ export interface ContentDB {
 	lanes?: LaneDef[];
 	paths: PathDef[];
 	endings: EndingDef[];
-	gifts: GiftDef[];
-	messages: MessageDef[];
-	memories: MemoryDef[];
 	generateContract: ContractGenerator;
 }

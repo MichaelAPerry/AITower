@@ -154,20 +154,11 @@
   "spTarget": 1000,
   "spPerPflopHour": 0.0017,
   "spWeights": {
-   "synthetic": {
-    "shared": 1,
-    "synthetic": 2.5,
-    "greentech": 0,
-    "biotech": 0
-   },
-   "biotech": {
-    "biotech": 1.5
-   },
-   "greentech": {
-    "shared": 0.5,
-    "greentech": 3.4
-   }
+   "synthetic": 2.5,
+   "biotech": 1.5,
+   "greentech": 3.4
   },
+  "greenFloor": 0.5,
   "sealMax": 100,
   "residuePerDay": 0.03,
   "objectionScar": 10,
@@ -177,17 +168,8 @@
    "mel": 20,
    "luci": 30
   },
-  "bondReveal": 40,
-  "bondCommit": 50,
   "bondEpilogue": 60,
   "bondFollow": 3,
-  "bondOverrule": -1,
-  "afterHoursBond": 3,
-  "giftLiked": 4,
-  "giftDisliked": -3,
-  "messageBond": 1,
-  "confessionBond": 60,
-  "confessionTier": 4,
-  "starterWeight": 0.5
+  "bondOverrule": -1
  }
 }

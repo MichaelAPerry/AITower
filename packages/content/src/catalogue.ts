@@ -1,116 +1,77 @@
 /**
- * Who may place what (docs/TREES.md). Pure and shared by the sim (which enforces it) and the UI (which says why an item is
- * locked), so the two never disagree. It reads only the facility definition and a small slice of the game state.
+ * Racks retrofit down three trees (docs/REFRAME.md). Pure and shared by the sim (which enforces it) and the UI (which says what a
+ * rack can become and why not), so the two never disagree.
  *
- *   Shared     : everyone.
- *   Starter    : research only, any path ("feet wet" Bio and Green items; they never scar their own tree).
- *   Specialist : a Bio or Green line; needs the commit to that path.
- *   Synthetic  : the default path; closes to new placement once the player commits to Bio or Green.
- *   Signature  : an advisor's bond opens it (some also need the commit).
+ *   Base rack  : AC-1, AC-3, IA-1. Neutral: it scores for no tree.
+ *   Tree rack  : four rungs per tree (`FacilityDef.rung`, one per Level 2-5). Reached only by retrofitting a rack in place.
+ *   Retrofit   : a base rack becomes rung 1 of the chosen tree; a tree rack advances one rung within its own tree; switching trees
+ *                goes back to rung 1 of the other tree. Cost = new rack cost − 50 % of the old rack's cost (a rack of another tree
+ *                is valued as the plain base rack, so there is no refund trick).
  */
-import type { AdvisorId, AscensionPath, ContentDB, FacilityDef, TechNode } from "./schema";
+import type { AdvisorId, AscensionPath, ContentDB, FacilityDef } from "./schema";
 
-export type CatalogueGroup = "shared" | "starter" | "specialist" | "synthetic" | "signature";
-
-export const GROUP_LABEL: Record<CatalogueGroup, string> = { shared: "Shared", starter: "Starter", specialist: "Specialist", synthetic: "Synthetic", signature: "Signature" };
-
+export const TREES: readonly AscensionPath[] = ["synthetic", "biotech", "greentech"];
+export const TREE_RUNGS = 4;
 export const TREE_NAME: Record<AscensionPath, string> = { synthetic: "The Lattice", biotech: "The Flesh", greentech: "The Garden" };
+/** The branch names the player sees on the Retrofit buttons. */
+export const BRANCH_NAME: Record<AscensionPath, string> = { synthetic: "Synthetic", biotech: "Bio", greentech: "Green" };
 export const ADVISOR_NAME: Record<AdvisorId, string> = { luci: "Luci", mel: "Mel", bea: "Bea", cass: "Cass" };
 
-export function catalogueGroup(d: FacilityDef): CatalogueGroup {
-	if (d.unlock?.bond) return "signature";
-	if (d.tier === "starter") return "starter";
-	if (d.tier === "specialist") return "specialist";
-	if (d.line === "synthetic") return "synthetic";
-	return "shared";
+/** The rack a rack of another tree is valued as when it switches trees. */
+export const SWITCH_BASE_ID = "rack_air_gpu";
+/** The share of the old rack's cost that comes off a retrofit (the demolish refund). */
+export const RETROFIT_REFUND = 0.5;
+
+/** A tree rack is reached only by retrofitting; it is not in the build menu and cannot be placed. */
+export const isRetrofitOnly = (d: FacilityDef): boolean => d.rung !== undefined;
+
+/** A base rack: a compute rack that belongs to no tree (AC-1, AC-3, IA-1). */
+export const isBaseRack = (d: FacilityDef): boolean => d.kind === "rack" && !!d.rack && d.rack.pflops > 0 && !d.growth && !d.retired && d.rung === undefined && (d.line === undefined || d.line === "shared");
+
+/** Can this rack be retrofitted at all (a base rack or a tree rack)? */
+export const isRetrofittable = (d: FacilityDef): boolean => !d.growth && !d.retired && (d.rung !== undefined || isBaseRack(d));
+
+/** The tree a rack scores for, or null (a base rack, or anything that is not a tree rack). */
+export const treeOf = (d: FacilityDef): AscensionPath | null => (d.rung !== undefined && (d.line === "synthetic" || d.line === "biotech" || d.line === "greentech") ? d.line : null);
+
+/** The rack at `rung` of `tree`, if the content has one. */
+export function treeRack(content: Pick<ContentDB, "facilities">, tree: AscensionPath, rung: number): FacilityDef | undefined {
+	return Object.values(content.facilities).find((d) => d.line === tree && d.rung === rung && !d.retired && !d.growth);
 }
 
-/** The slice of the game state the rules read. */
-export interface AccessCtx {
-	/** The committed path (null before the commit; Synthetic is the default path). */
-	path: AscensionPath | null;
-	tier: number;
-	bonds: Record<AdvisorId, number>;
-	/** Trees that rejected the player (sealed out). */
-	sealedOut?: readonly AscensionPath[];
-	/** How many of a facility the tower holds (for previews). */
-	owned?: (defId: string) => number;
-}
-
-export type AccessKind = "commit" | "bond" | "closed";
-
-export interface AccessBlock {
-	kind: AccessKind;
-	/** Short chip text: "Commit to The Garden", "Bea's bond 60". */
-	short: string;
-	/** A full sentence for the placement refusal. */
-	text: string;
-}
-
-export interface Access {
-	block: AccessBlock | null;
-	/** The Level this item opens at for this player (an advisor's bond may open it early). */
-	tier: number;
-	/** A preview stands in for the commit; the research gate is waived with it. */
-	preview: boolean;
-}
-
-/** The path a specialist item needs, or null. */
-export function commitFor(d: FacilityDef): AscensionPath | null {
-	if (d.unlock?.commit) return d.unlock.commit;
-	if (d.tier === "specialist" && (d.line === "biotech" || d.line === "greentech")) return d.line;
-	return null;
-}
-
-export const bondText = (who: AdvisorId, min: number): string => `${ADVISOR_NAME[who]}'s bond ${min}`;
-
-/** The Level `d` opens at for this player: its `unlockTier`, or the early Level when the advisor's bond allows it. */
-export function effectiveTier(d: FacilityDef, ctx: Pick<AccessCtx, "bonds">): number {
-	const e = d.unlock?.early;
-	return e && ctx.bonds[e.who] >= e.min ? Math.min(d.unlockTier, e.tier) : d.unlockTier;
-}
-
-/** Commit, bond and line rules for placing `d` (research and cash are checked elsewhere). The Level is reported, not enforced here. */
-export function access(d: FacilityDef, ctx: AccessCtx): Access {
-	const tier = effectiveTier(d, ctx);
-	const none = (preview = false): Access => ({ block: null, tier, preview });
-	const u = d.unlock;
-	if (u?.bond && ctx.bonds[u.bond.who] < u.bond.min) {
-		const short = bondText(u.bond.who, u.bond.min);
-		return { block: { kind: "bond", short, text: `needs ${short}` }, tier, preview: false };
+/** The four rungs of a tree, in order (missing rungs are skipped). */
+export function treeLadder(content: Pick<ContentDB, "facilities">, tree: AscensionPath): FacilityDef[] {
+	const out: FacilityDef[] = [];
+	for (let r = 1; r <= TREE_RUNGS; r++) {
+		const d = treeRack(content, tree, r);
+		if (d) out.push(d);
 	}
-	const need = commitFor(d);
-	if (need && ctx.path !== need) {
-		const p = u?.preview;
-		if (p && ctx.bonds[p.who] >= p.min && (ctx.owned?.(d.id) ?? 0) < p.max) return none(true);
-		if (ctx.sealedOut?.includes(need)) return { block: { kind: "closed", short: `${TREE_NAME[need]} is closed`, text: `${TREE_NAME[need]} has closed its door on this tower` }, tier, preview: false };
-		const short = `Commit to ${TREE_NAME[need]}`;
-		const text = p && ctx.bonds[p.who] >= p.min ? `${short} (the ${p.max} preview units are built)` : short;
-		return { block: { kind: "commit", short, text }, tier, preview: false };
+	return out;
+}
+
+/** What retrofitting `from` toward `tree` makes: the next rung of its own tree, or rung 1 for a base rack or a rack of another tree. Null at the top. */
+export function retrofitTarget(content: Pick<ContentDB, "facilities">, from: FacilityDef, tree: AscensionPath): { to: FacilityDef; switching: boolean } | null {
+	if (!isRetrofittable(from)) return null;
+	const own = treeOf(from);
+	if (own === tree) {
+		const to = treeRack(content, tree, (from.rung ?? 0) + 1);
+		return to ? { to, switching: false } : null;
 	}
-	// The Lattice line closes to new placement once the player commits to Bio or Green.
-	if (d.line === "synthetic" && (ctx.path === "biotech" || ctx.path === "greentech")) {
-		const short = `Closed: you chose ${TREE_NAME[ctx.path]}`;
-		return { block: { kind: "closed", short, text: `${d.name} belongs to ${TREE_NAME.synthetic}, closed to new building once you commit to ${TREE_NAME[ctx.path]}` }, tier, preview: false };
-	}
-	return none();
+	const to = treeRack(content, tree, 1);
+	return to ? { to, switching: own !== null } : null;
 }
 
-/** Why a tech node cannot be researched for lack of a commit, or null. */
-export function researchCommitBlock(node: TechNode, path: AscensionPath | null): string | null {
-	return node.requiresCommit && path !== node.requiresCommit ? `Commit to ${TREE_NAME[node.requiresCommit]} to research` : null;
+/** Retrofit price: the new rack's cost minus half the old rack's (a rack of another tree counts as a plain AC-1), never below 0. */
+export function retrofitCost(content: Pick<ContentDB, "facilities">, from: FacilityDef, to: FacilityDef): number {
+	const own = treeOf(from);
+	const basis = own !== null && own !== treeOf(to) ? (content.facilities[SWITCH_BASE_ID]?.cost ?? 0) : from.cost;
+	return Math.max(0, to.cost - RETROFIT_REFUND * basis);
 }
 
-/** The Level a node opens at for this player (the bond may open it early). */
-export function nodeTier(node: TechNode, bonds: Record<AdvisorId, number>): number {
-	const e = node.earlyTier;
-	return e && bonds[e.who] >= e.min ? Math.min(node.minTier, e.tier) : node.minTier;
-}
-
-/** Facilities that upgrade directly from `defId`, by id. */
+/** Facilities that upgrade directly from `defId`, by id (support items; racks retrofit instead). */
 export function upgradesTo(content: Pick<ContentDB, "facilities">, defId: string): FacilityDef[] {
 	return Object.values(content.facilities)
-		.filter((d) => d.upgradesFrom === defId && !d.growth && !d.retired)
+		.filter((d) => d.upgradesFrom === defId && !d.growth && !d.retired && d.rung === undefined)
 		.sort((a, b) => (a.id < b.id ? -1 : 1));
 }
 

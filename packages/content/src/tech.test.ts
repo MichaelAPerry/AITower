@@ -75,8 +75,7 @@ describe("tech tree (bundled)", () => {
 	});
 
 	it("gates every new facility and bot behind a node of the same or a lower tier", () => {
-		// Signature builds are opened by an advisor's bond, not by research.
-		const ungated = ["rack_air_gpu", "rack_storage", "crah_unit", "grid_tie", "genset", "ups_battery", "parts_depot", "bot_charger", "grid_tie_lucy", "microgrid_bea", "ice_store", "cold_room"];
+		const ungated = ["rack_air_gpu", "rack_storage", "crah_unit", "grid_tie", "genset", "ups_battery", "parts_depot", "bot_charger"];
 		for (const id of ungated) expect(db.facilities[id].tech, id).toBeUndefined();
 		const nodeUses = new Map<string, number>();
 		for (const d of Object.values(db.facilities)) {
@@ -125,8 +124,8 @@ describe("tech tree (bundled)", () => {
 				expect(days, n.id).toBeLessThanOrEqual(10);
 			}
 		}
-		// The trunk keeps its 60-90 days; the optional wetware branch adds 30-50 more.
-		expect(total).toBeGreaterThanOrEqual(60);
+		// The trunk keeps its 55-90 days; the optional wetware branch adds 30-50 more.
+		expect(total).toBeGreaterThanOrEqual(55);
 		expect(total).toBeLessThanOrEqual(90);
 		expect(wetware).toBeGreaterThanOrEqual(30);
 		expect(wetware).toBeLessThanOrEqual(50);
@@ -162,9 +161,9 @@ describe("tier research gate (balance.tiers.techs)", () => {
 			})).toMatch(/techs\[1\]/);
 	});
 
-	it("keeps liquid cooling behind the Chilled Loop node and drops the retired and cut ids (docs/TREES.md section 6)", () => {
+	it("keeps liquid cooling behind the Chilled Loop node and drops the retired and cut ids", () => {
 		for (const id of ["rack_dlc_gpu", "cdu", "chiller"]) expect(db.facilities[id].tech, id).toBe("chilled_loop");
-		for (const gone of ["rack_air_gpu3", "rack_imm_gpu"]) expect(db.facilities[gone], gone).toBeUndefined();
+		for (const gone of ["rack_air_gpu3", "rack_imm_gpu", "rack_imm_gpu2", "rack_imm_gpu3", "rack_culture_s", "nutrient_tank_s", "rack_organoid_3m"]) expect(db.facilities[gone], gone).toBeUndefined();
 		for (const gone of ["neuromorphic_cards", "identity_register", "hot_aisle", "dielectric_handbook", "ministry_liaison", "procurement_committee"]) expect(db.tech.some((n) => n.id === gone), gone).toBe(false);
 		// The hot aisle's +5% cooling folded into the rear-door exchanger.
 		expect(db.tech.find((n) => n.id === "rear_door_exchanger")?.effects).toContainEqual({ type: "perk", kind: "coolingCapacity", factor: 1.05 });
@@ -189,8 +188,8 @@ describe("new trunk content", () => {
 	};
 
 	it("adds about 20 facilities and 2 bots", () => {
-		expect(trunk.length).toBe(28);
-		expect(racks.length).toBe(9);
+		expect(trunk.length).toBe(27);
+		expect(racks.length).toBe(8);
 		const kinds = (k: string): number => Object.values(f).filter((d) => d.kind === k).length;
 		expect(kinds("grid_tie")).toBeGreaterThanOrEqual(3);
 		expect(kinds("ups")).toBeGreaterThanOrEqual(3);
@@ -198,15 +197,10 @@ describe("new trunk content", () => {
 		expect(Object.keys(db.bots).sort()).toEqual(["drone", "fleet", "lifter", "rover"]);
 	});
 
-	it("has at least two air, two DLC and two immersion racks, one inference rack and one bigger storage array", () => {
+	it("has at least three air and three DLC racks, one inference rack and one bigger storage array", () => {
 		const by = (m: string): number => racks.filter((d) => d.rack!.cooling === m && d.rack!.pflops > 0).length;
 		expect(by("air")).toBeGreaterThanOrEqual(3);
 		expect(by("dlc")).toBeGreaterThanOrEqual(3);
-		expect(by("immersion")).toBeGreaterThanOrEqual(1);
-		for (const d of [...racks, f.rack_imm_gpu3].filter((x) => x.rack!.cooling === "immersion")) {
-			expect(d.rack!.liquidFraction).toBeCloseTo(0.95, 5);
-			expect(d.placement?.needsCoolant).toBe(true);
-		}
 		const perKw = (id: string): number => f[id].rack!.pflops / f[id].rack!.powerKw;
 		const best = Math.max(...racks.filter((d) => d.rack!.cooling === "air").map((d) => d.id).filter((id) => id !== "rack_infer").map(perKw));
 		expect(perKw("rack_infer")).toBeGreaterThan(best * 1.5);
@@ -222,7 +216,6 @@ describe("new trunk content", () => {
 		}
 		expect(f.rack_dlc_gpu3.rack!.pflops).toBeGreaterThan(f.rack_dlc_gpu2.rack!.pflops);
 		expect(f.rack_dlc_gpu2.rack!.pflops).toBeGreaterThan(f.rack_dlc_gpu.rack!.pflops);
-		expect(f.rack_imm_gpu3.rack!.pflops).toBeGreaterThan(f.rack_imm_gpu2.rack!.pflops);
 	});
 
 	it("keeps liquid racks 1.0-1.9x the PFLOPS per $ of the best air rack available at their tier", () => {
@@ -417,7 +410,7 @@ describe("research lanes (bundled)", () => {
 			expect(l.pitch, l.id).not.toContain("\n");
 			expect(l.color).toMatch(/^#[0-9a-f]{6}$/i);
 		}
-		expect(db.tech.length).toBe(79);
+		expect(db.tech.length).toBe(76);
 	});
 
 	it("validation rejects an unknown lane, a missing lane entry and a line outside cooling and compute", () => {

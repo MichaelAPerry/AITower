@@ -25,8 +25,6 @@ describe("facility tier", () => {
 		expect(tier("chiller_tower").tier).toBe("advanced");
 		expect(tier("genset_gas").tier).toBe("advanced");
 		expect(tier("rack_dlc_gpu3").tier).toBe("frontier");
-		expect(tier("rack_imm_gpu2").tier).toBe("frontier");
-		expect(tier("rack_imm_gpu3").tier).toBe("frontier");
 		expect(tier("grid_tie_4").tier).toBe("frontier");
 	});
 	it("puts path-gated items on their path at any Level", () => {
@@ -44,7 +42,7 @@ describe("facility tier", () => {
 	});
 	it("computes the output bar against the best of its kind", () => {
 		expect(outputShare(content.facilities.rack_mind_lattice, content)).toBe(1);
-		expect(outputShare(content.facilities.rack_imm_gpu3, content)).toBeCloseTo(800 / 1400, 5);
+		expect(outputShare(content.facilities.rack_dlc_gpu3, content)).toBeCloseTo(420 / 1400, 5);
 		const ac1 = outputShare(content.facilities.rack_air_gpu, content) as number;
 		expect(ac1).toBeGreaterThan(0);
 		expect(ac1).toBeLessThan(0.05);
@@ -55,7 +53,6 @@ describe("facility tier", () => {
 		expect(tierNote(content.facilities.rack_dlc_gpu2)).toBeUndefined();
 		expect(rackLine(content.facilities.rack_air_gpu)).toBe("air");
 		expect(rackLine(content.facilities.rack_dlc_gpu)).toBe("liquid");
-		expect(rackLine(content.facilities.rack_imm_gpu2)).toBe("immersion");
 		expect(rackLine(content.facilities.rack_storage)).toBeNull();
 	});
 });

@@ -2,7 +2,7 @@
  "rack_air_gpu": {
   "id": "rack_air_gpu",
   "name": "AC-1 Air-Cooled Rack",
-  "description": "Four 8-GPU servers in an air-cooled cabinet. Around 40 kW per cabinet is where air cooling stops scaling. Needs an air handler within reach.",
+  "description": "Four 8-GPU servers in an air-cooled cabinet. Around 40 kW per cabinet is where air cooling stops scaling. Needs an air handler within reach. A base rack: it scores for no tree until you retrofit it.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -28,14 +28,12 @@
    "author": "Charles Babbage",
    "source": "Passages from the Life of a Philosopher, 1864"
   },
-  "seal": {
-   "greentech": 1
-  }
+  "seal": {}
  },
  "rack_dlc_gpu": {
   "id": "rack_dlc_gpu",
   "name": "LC-2 Liquid-Cooled Rack",
-  "description": "A 72-GPU NVLink cabinet with cold plates on every die, drawing about 120 kW. Roughly 80% of its heat leaves through the coolant loop, so it must be plumbed into one.",
+  "description": "A 72-GPU NVLink cabinet with cold plates on every die, drawing about 120 kW. Roughly 80% of its heat leaves through the coolant loop, so it must be plumbed into one. Rung 1 of The Lattice: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -43,8 +41,8 @@
   "upkeepPerDay": 4000,
   "unlockTier": 2,
   "facilityKw": 0,
-  "color": "#a8987a",
-  "accent": "#c06a3b",
+  "color": "#2f5f86",
+  "accent": "#6fd3ff",
   "rack": {
    "cooling": "dlc",
    "powerKw": 120,
@@ -68,7 +66,7 @@
    "greentech": 2
   },
   "line": "synthetic",
-  "upgradesFrom": "rack_air_gpu2"
+  "rung": 1
  },
  "rack_storage": {
   "id": "rack_storage",
@@ -340,7 +338,7 @@
  "rack_air_gpu2": {
   "id": "rack_air_gpu2",
   "name": "AC-3 Rear-Door Rack",
-  "description": "Eight-GPU trays behind a water-cooled rear door that scrubs the exhaust before it reaches the aisle. 55 kW and 42 PFLOPS per cabinet, but it needs an air handler that can keep up.",
+  "description": "Eight-GPU trays behind a water-cooled rear door that scrubs the exhaust before it reaches the aisle. 55 kW and 42 PFLOPS per cabinet, but it needs an air handler that can keep up. A base rack: it scores for no tree until you retrofit it.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -367,15 +365,13 @@
    "author": "Edsger W. Dijkstra",
    "source": "EWD249, 1970"
   },
-  "seal": {
-   "greentech": 1
-  },
+  "seal": {},
   "upgradesFrom": "rack_air_gpu"
  },
  "rack_dlc_gpu2": {
   "id": "rack_dlc_gpu2",
   "name": "LC-3 Cold-Plate Rack",
-  "description": "A 160 kW cabinet with cold plates on every die and 82% of its heat carried off by the coolant loop: 230 PFLOPS per cabinet. Needs a loop with a CDU and chiller sized for 131 kW per rack.",
+  "description": "A 160 kW cabinet with cold plates on every die and 82% of its heat carried off by the coolant loop: 230 PFLOPS per cabinet. Needs a loop with a CDU and chiller sized for 131 kW per rack. Rung 2 of The Lattice: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -383,8 +379,8 @@
   "upkeepPerDay": 6000,
   "unlockTier": 3,
   "facilityKw": 0,
-  "color": "#9c8c70",
-  "accent": "#d4733f",
+  "color": "#2f5f86",
+  "accent": "#6fd3ff",
   "rack": {
    "cooling": "dlc",
    "powerKw": 160,
@@ -408,12 +404,12 @@
    "biotech": 6,
    "greentech": 3
   },
-  "upgradesFrom": "rack_dlc_gpu"
+  "rung": 2
  },
  "rack_dlc_gpu3": {
   "id": "rack_dlc_gpu3",
   "name": "LC-4 Blade Rack",
-  "description": "Rack-scale blades on blind-mate manifolds, 85% liquid-cooled: 240 kW and 420 PFLOPS per cabinet, the best ratio of the liquid line. Needs a 204 kW share of coolant capacity.",
+  "description": "Rack-scale blades on blind-mate manifolds, 85% liquid-cooled: 240 kW and 420 PFLOPS per cabinet, the best ratio of the liquid line. Needs a 204 kW share of coolant capacity. Rung 3 of The Lattice: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -421,8 +417,8 @@
   "upkeepPerDay": 11000,
   "unlockTier": 4,
   "facilityKw": 0,
-  "color": "#8f8068",
-  "accent": "#e8844a",
+  "color": "#2f5f86",
+  "accent": "#6fd3ff",
   "rack": {
    "cooling": "dlc",
    "powerKw": 240,
@@ -446,50 +442,12 @@
    "biotech": 8,
    "greentech": 4
   },
-  "upgradesFrom": "rack_dlc_gpu2"
- },
- "rack_imm_gpu2": {
-  "id": "rack_imm_gpu2",
-  "name": "IM-2 Two-Phase Immersion Tank",
-  "description": "A boiling-fluid immersion tank. 300 kW and 560 PFLOPS per tank, 95% of the heat taken by the condenser coil.",
-  "kind": "rack",
-  "category": "rack",
-  "width": 3,
-  "cost": 4800000,
-  "upkeepPerDay": 12000,
-  "unlockTier": 4,
-  "facilityKw": 0,
-  "color": "#5f6563",
-  "accent": "#ffd84a",
-  "rack": {
-   "cooling": "immersion",
-   "powerKw": 300,
-   "liquidFraction": 0.95,
-   "pflops": 560,
-   "storageTB": 0,
-   "failurePerDay": 0.18
-  },
-  "placement": {
-   "needsPower": true,
-   "needsCoolant": true
-  },
-  "tech": "two_phase_immersion",
-  "flavor": {
-   "quote": "Heat is not matter, but some kind of motion among the particles of matter.",
-   "author": "Lord Kelvin",
-   "source": "On Mechanical Antecedents of Motion, Heat and Light, 1854"
-  },
-  "line": "synthetic",
-  "seal": {
-   "biotech": 16,
-   "greentech": 14
-  },
-  "upgradesFrom": "rack_dlc_gpu3"
+  "rung": 3
  },
  "rack_infer": {
   "id": "rack_infer",
   "name": "IA-1 Inference Accelerator",
-  "description": "Fixed-function inference cards: 95 PFLOPS from only 36 kW, so 2.6 PFLOPS per kW, five times the AC-1. Air-cooled and light on the electricity bill, though it costs $1.1M.",
+  "description": "Fixed-function inference cards: 95 PFLOPS from only 36 kW, so 2.6 PFLOPS per kW, five times the AC-1. Air-cooled and light on the electricity bill, though it costs $1.1M. A base rack: it scores for no tree until you retrofit it.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
@@ -516,9 +474,7 @@
    "author": "Claude Shannon",
    "source": "Omni, August 1987"
   },
-  "seal": {
-   "greentech": 1
-  },
+  "seal": {},
   "upgradesFrom": "rack_air_gpu2"
  },
  "rack_storage2": {
@@ -863,7 +819,7 @@
    "needsPower": true,
    "needsCoolant": true
   },
-  "tech": "adiabatic_cooling",
+  "tech": "photonic_mesh",
   "flavor": {
    "quote": "Unix was small, and you could go through it line by line and understand exactly how it worked.",
    "author": "Ken Thompson",
@@ -873,7 +829,6 @@
   "seal": {
    "greentech": -4
   },
-  "tier": "specialist",
   "upgradesFrom": "crah_adiabatic"
  },
  "depot_big": {
@@ -938,7 +893,7 @@
   "width": 3,
   "cost": 1100000,
   "upkeepPerDay": 2200,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 25,
   "color": "#6d7a58",
   "accent": "#b7c26a",
@@ -959,9 +914,7 @@
   "seal": {
    "biotech": -6,
    "greentech": 2
-  },
-  "tier": "specialist",
-  "upgradesFrom": "nutrient_tank_s"
+  }
  },
  "sterile_bay": {
   "id": "sterile_bay",
@@ -972,7 +925,7 @@
   "width": 2,
   "cost": 900000,
   "upkeepPerDay": 1800,
-  "unlockTier": 4,
+  "unlockTier": 3,
   "facilityKw": 30,
   "color": "#d9d2bd",
   "accent": "#8fd0c4",
@@ -992,8 +945,7 @@
   "line": "biotech",
   "seal": {
    "biotech": 3
-  },
-  "tier": "specialist"
+  }
  },
  "culling_room": {
   "id": "culling_room",
@@ -1025,8 +977,7 @@
   "line": "biotech",
   "seal": {
    "biotech": 6
-  },
-  "tier": "specialist"
+  }
  },
  "quarantine_lock": {
   "id": "quarantine_lock",
@@ -1051,7 +1002,6 @@
    "source": "Email on distributed systems, 1987"
   },
   "line": "biotech",
-  "tier": "specialist",
   "seal": {}
  },
  "bioreactor": {
@@ -1088,22 +1038,21 @@
   "seal": {
    "biotech": -10,
    "greentech": -4
-  },
-  "tier": "specialist"
+  }
  },
  "organoid_incubator": {
   "id": "organoid_incubator",
   "name": "OC-1 Organoid Cabinet",
-  "description": "A cabinet of cultured tissue on a nutrient drip, computing 135 PFLOPS from only 24 kW: 5.6 PFLOPS per kW, three times the best air or liquid rack. It must be held at 37 °C within 1 °C, and fed 3 units of nutrient medium a tick. It sheds contamination while it works.",
+  "description": "A cabinet of cultured tissue on a nutrient drip, computing 135 PFLOPS from only 24 kW: 5.6 PFLOPS per kW, three times the best air or liquid rack. It must be held at 37 °C within 1 °C, and fed 3 units of nutrient medium a tick. It sheds contamination while it works. Rung 1 of The Flesh: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "bio",
   "width": 2,
   "cost": 2400000,
   "upkeepPerDay": 5000,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 0,
-  "color": "#b9a88f",
-  "accent": "#c98a86",
+  "color": "#7a2a3c",
+  "accent": "#ff4f6d",
   "rack": {
    "cooling": "bio",
    "powerKw": 24,
@@ -1132,15 +1081,7 @@
   "seal": {
    "biotech": -8
   },
-  "tier": "specialist",
-  "upgradesFrom": "rack_culture_s",
-  "unlock": {
-   "preview": {
-    "who": "mel",
-    "min": 40,
-    "max": 2
-   }
-  }
+  "rung": 1
  },
  "dna_vault": {
   "id": "dna_vault",
@@ -1183,13 +1124,12 @@
   "seal": {
    "biotech": -5
   },
-  "tier": "specialist",
   "upgradesFrom": "rack_storage2"
  },
  "neural_pit": {
   "id": "neural_pit",
   "name": "OC-4 Neural Vat",
-  "description": "A whole organ in a pit: 850 PFLOPS from 110 kW, 7.7 PFLOPS per kW. Held at 37 °C within 1 °C, and fed 12 units of nutrient a tick. Contamination follows it home.",
+  "description": "A whole organ in a pit: 850 PFLOPS from 110 kW, 7.7 PFLOPS per kW. Held at 37 °C within 1 °C, and fed 12 units of nutrient a tick. Contamination follows it home. Rung 4 of The Flesh: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "bio",
   "width": 4,
@@ -1197,8 +1137,8 @@
   "upkeepPerDay": 24000,
   "unlockTier": 5,
   "facilityKw": 0,
-  "color": "#7a5f5a",
-  "accent": "#d99a94",
+  "color": "#7a2a3c",
+  "accent": "#ff4f6d",
   "rack": {
    "cooling": "bio",
    "powerKw": 110,
@@ -1228,8 +1168,7 @@
    "biotech": -12,
    "greentech": 2
   },
-  "tier": "specialist",
-  "upgradesFrom": "rack_organoid_3"
+  "rung": 4
  },
  "growth_mass": {
   "id": "growth_mass",
@@ -1348,7 +1287,7 @@
   "width": 4,
   "cost": 450000,
   "upkeepPerDay": 300,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 0,
   "color": "#3c4f5e",
   "accent": "#d9b44a",
@@ -1359,7 +1298,7 @@
    "needsPower": true,
    "exteriorOnly": true
   },
-  "tech": "solar_charter",
+  "tech": "neuromorphic_bench",
   "flavor": {
    "quote": "A far better way, however, to obtain power would be to avail ourselves of the sun's rays",
    "author": "Nikola Tesla",
@@ -1369,8 +1308,7 @@
   "seal": {
    "biotech": -1,
    "greentech": -6
-  },
-  "tier": "starter"
+  }
  },
  "solar_canopy": {
   "id": "solar_canopy",
@@ -1403,7 +1341,6 @@
    "biotech": -1,
    "greentech": -10
   },
-  "tier": "specialist",
   "upgradesFrom": "solar_skin"
  },
  "wind_mast": {
@@ -1435,8 +1372,7 @@
   "line": "greentech",
   "seal": {
    "greentech": -8
-  },
-  "tier": "specialist"
+  }
  },
  "heat_exchanger": {
   "id": "heat_exchanger",
@@ -1467,8 +1403,7 @@
   "line": "greentech",
   "seal": {
    "greentech": -3
-  },
-  "tier": "starter"
+  }
  },
  "heat_pipeline": {
   "id": "heat_pipeline",
@@ -1500,7 +1435,6 @@
   "seal": {
    "greentech": -12
   },
-  "tier": "specialist",
   "upgradesFrom": "heat_exchanger"
  },
  "algae_facade": {
@@ -1532,8 +1466,7 @@
   "seal": {
    "biotech": -2,
    "greentech": -8
-  },
-  "tier": "specialist"
+  }
  },
  "carbon_capture": {
   "id": "carbon_capture",
@@ -1564,22 +1497,21 @@
   "seal": {
    "greentech": -14
   },
-  "tier": "specialist",
   "upgradesFrom": "algae_facade"
  },
  "rack_neuromorphic": {
   "id": "rack_neuromorphic",
   "name": "NM-1 Neuromorphic Rack",
-  "description": "Boards of spiking-neuron silicon that compute only when something happens. Delivers 50 PFLOPS from only 12 kW of air-cooled draw, 4.2 PFLOPS per kW. Failures are rare and brief.",
+  "description": "Boards of spiking-neuron silicon that compute only when something happens. Delivers 50 PFLOPS from only 12 kW of air-cooled draw, 4.2 PFLOPS per kW. Failures are rare and brief. Rung 1 of The Garden: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
   "cost": 800000,
   "upkeepPerDay": 3000,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 0,
-  "color": "#a9b3a0",
-  "accent": "#8fd6a2",
+  "color": "#3f6e2e",
+  "accent": "#9be564",
   "rack": {
    "cooling": "air",
    "powerKw": 12,
@@ -1591,7 +1523,7 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "inference_foundry",
+  "tech": "neuromorphic_bench",
   "flavor": {
    "quote": "When we talk mathematics, we may be discussing a secondary language built on the primary language of the nervous system.",
    "author": "John von Neumann",
@@ -1602,21 +1534,21 @@
    "biotech": -1,
    "greentech": -2
   },
-  "tier": "starter"
+  "rung": 1
  },
  "rack_photonic": {
   "id": "rack_photonic",
   "name": "PH-1 Photonic Rack",
-  "description": "Optical matrix multipliers on glass: 300 PFLOPS from only 40 kW of air-cooled draw, 7.5 PFLOPS per kW. The light is the computer.",
+  "description": "Optical matrix multipliers on glass: 300 PFLOPS from only 40 kW of air-cooled draw, 7.5 PFLOPS per kW. The light is the computer. Rung 3 of The Garden: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
   "cost": 4500000,
   "upkeepPerDay": 7500,
-  "unlockTier": 5,
+  "unlockTier": 4,
   "facilityKw": 0,
-  "color": "#b8c4b6",
-  "accent": "#7be0c3",
+  "color": "#3f6e2e",
+  "accent": "#9be564",
   "rack": {
    "cooling": "air",
    "powerKw": 40,
@@ -1638,15 +1570,7 @@
   "seal": {
    "greentech": -4
   },
-  "tier": "specialist",
-  "upgradesFrom": "rack_neuromorphic2",
-  "unlock": {
-   "early": {
-    "who": "bea",
-    "min": 60,
-    "tier": 4
-   }
-  }
+  "rung": 3
  },
  "cryo_core": {
   "id": "cryo_core",
@@ -1685,7 +1609,7 @@
  "rack_mind_lattice": {
   "id": "rack_mind_lattice",
   "name": "ML-1 Mind Lattice Rack",
-  "description": "The whole floor behaving as one machine: 1,400 PFLOPS from 520 kW of liquid-cooled load, 2.7 PFLOPS per kW. The end of the Lattice line. It is not a rack so much as a decision.",
+  "description": "The whole floor behaving as one machine: 1,400 PFLOPS from 520 kW of liquid-cooled load, 2.7 PFLOPS per kW. The end of the Lattice line. It is not a rack so much as a decision. Rung 4 of The Lattice: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 3,
@@ -1693,8 +1617,8 @@
   "upkeepPerDay": 22000,
   "unlockTier": 5,
   "facilityKw": 0,
-  "color": "#8d8fa8",
-  "accent": "#b9a6ff",
+  "color": "#2f5f86",
+  "accent": "#6fd3ff",
   "rack": {
    "cooling": "dlc",
    "powerKw": 520,
@@ -1718,14 +1642,7 @@
    "biotech": 24,
    "greentech": 8
   },
-  "upgradesFrom": "rack_imm_gpu3",
-  "unlock": {
-   "early": {
-    "who": "luci",
-    "min": 60,
-    "tier": 4
-   }
-  }
+  "rung": 4
  },
  "continuity_monitor": {
   "id": "continuity_monitor",
@@ -1830,57 +1747,19 @@
   },
   "upgradesFrom": "grid_tie_3"
  },
- "rack_imm_gpu3": {
-  "id": "rack_imm_gpu3",
-  "name": "IM-3 Vault Immersion Tank",
-  "description": "The densest immersion tank: 800 PFLOPS from 380 kW in a vault of sealed, boiling fluorocarbon. Three tiles wide, 2.1 PFLOPS per kW. Dear, loud with PFAS and worth it.",
-  "kind": "rack",
-  "category": "rack",
-  "width": 3,
-  "cost": 6500000,
-  "upkeepPerDay": 16000,
-  "unlockTier": 5,
-  "facilityKw": 0,
-  "color": "#5f6563",
-  "accent": "#ffd84a",
-  "rack": {
-   "cooling": "immersion",
-   "powerKw": 380,
-   "liquidFraction": 0.95,
-   "pflops": 800,
-   "storageTB": 0,
-   "failurePerDay": 0.16
-  },
-  "placement": {
-   "needsPower": true,
-   "needsCoolant": true
-  },
-  "tech": "immersion_vault",
-  "flavor": {
-   "quote": "If people do not believe that mathematics is simple, it is only because they do not realize how complicated life is.",
-   "author": "John von Neumann",
-   "source": "Remark at the 1947 ACM meeting, as recounted by Franz Alt, CACM, July 1972"
-  },
-  "line": "synthetic",
-  "seal": {
-   "biotech": 18,
-   "greentech": 16
-  },
-  "upgradesFrom": "rack_imm_gpu2"
- },
  "rack_organoid_2": {
   "id": "rack_organoid_2",
   "name": "OC-2 Organoid Vat Bank",
-  "description": "A bank of cultured tissue in a single vat. 300 PFLOPS from 45 kW: 6.7 PFLOPS per kW. Held at 37 °C within 1 °C, fed 5 units of nutrient medium a tick. Sheds contamination faster than the OC-1, as vats do.",
+  "description": "A bank of cultured tissue in a single vat. 300 PFLOPS from 45 kW: 6.7 PFLOPS per kW. Held at 37 °C within 1 °C, fed 5 units of nutrient medium a tick. Sheds contamination faster than the OC-1, as vats do. Rung 2 of The Flesh: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "bio",
   "width": 3,
   "cost": 4500000,
   "upkeepPerDay": 9000,
-  "unlockTier": 4,
+  "unlockTier": 3,
   "facilityKw": 0,
-  "color": "#b9a88f",
-  "accent": "#c98a86",
+  "color": "#7a2a3c",
+  "accent": "#ff4f6d",
   "rack": {
    "cooling": "bio",
    "powerKw": 45,
@@ -1909,13 +1788,12 @@
   "seal": {
    "biotech": -10
   },
-  "tier": "specialist",
-  "upgradesFrom": "organoid_incubator"
+  "rung": 2
  },
  "cdu_hall": {
   "id": "cdu_hall",
   "name": "CDU Hall 6 MW",
-  "description": "A facility-scale coolant distribution skid on frosted pipework. Moves 6,000 kW of heat for 40 kW of pumping, for the immersion halls.",
+  "description": "A facility-scale coolant distribution skid on frosted pipework. Moves 6,000 kW of heat for 40 kW of pumping, for a whole floor of liquid racks.",
   "kind": "cdu",
   "category": "cooling",
   "width": 5,
@@ -2048,94 +1926,19 @@
    "source": "Address to the National Association of Science Writers, 16 September 1954"
   }
  },
- "rack_culture_s": {
-  "id": "rack_culture_s",
-  "name": "OC-0 Culture Rack",
-  "description": "A lab cell-culture incubator on a bench-top feed: 40 PFLOPS from 8 kW of cultured tissue. Held at 37 °C within 1 °C and fed 2 units of nutrient a tick. A Starter: anyone may build it, and it teaches the shape of the Flesh.",
-  "kind": "rack",
-  "category": "bio",
-  "width": 2,
-  "cost": 900000,
-  "upkeepPerDay": 2200,
-  "unlockTier": 3,
-  "facilityKw": 0,
-  "color": "#c9bfae",
-  "accent": "#e9a9b5",
-  "rack": {
-   "cooling": "bio",
-   "powerKw": 8,
-   "liquidFraction": 0,
-   "pflops": 40,
-   "storageTB": 0,
-   "failurePerDay": 0.3,
-   "bio": {
-    "targetC": 37,
-    "toleranceC": 1,
-    "nutrientUse": 2,
-    "contamination": 0.0012
-   }
-  },
-  "placement": {
-   "needsPower": true,
-   "needsNutrient": true
-  },
-  "tech": "culture_bench",
-  "line": "biotech",
-  "tier": "starter",
-  "seal": {
-   "greentech": 1
-  },
-  "flavor": {
-   "quote": "In the fields of observation chance favours only the prepared mind.",
-   "author": "Louis Pasteur",
-   "source": "Lecture at the University of Lille, 7 December 1854"
-  }
- },
- "nutrient_tank_s": {
-  "id": "nutrient_tank_s",
-  "name": "NT-1 Nutrient Tank",
-  "description": "A waist-high bench bioreactor of media. Supplies 6 units a tick to its pipe net, enough for two OC-0 racks. A Starter: anyone may build it.",
-  "kind": "nutrient",
-  "category": "bio",
-  "width": 2,
-  "cost": 250000,
-  "upkeepPerDay": 600,
-  "unlockTier": 3,
-  "facilityKw": 2,
-  "color": "#6d7a58",
-  "accent": "#b7c26a",
-  "placement": {
-   "needsPower": true,
-   "needsNutrient": true
-  },
-  "bio": {
-   "nutrientCapacity": 6
-  },
-  "tech": "culture_bench",
-  "line": "biotech",
-  "tier": "starter",
-  "seal": {
-   "greentech": 1
-  },
-  "flavor": {
-   "quote": "Tell me what you eat, and I will tell you what you are.",
-   "author": "Jean Anthelme Brillat-Savarin",
-   "source": "Physiologie du gout, 1825"
-  }
- },
  "rack_organoid_3": {
   "id": "rack_organoid_3",
   "name": "OC-3 Perfused Cortex",
-  "description": "Vascularised tissue scaffolds on a perfusion loop: 520 PFLOPS from 70 kW, 7.4 PFLOPS per kW. Held at 37 °C within 1 °C, fed 7 units of nutrient a tick and a contamination risk to match.",
+  "description": "Vascularised tissue scaffolds on a perfusion loop: 520 PFLOPS from 70 kW, 7.4 PFLOPS per kW. Held at 37 °C within 1 °C, fed 7 units of nutrient a tick and a contamination risk to match. Rung 3 of The Flesh: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "bio",
   "width": 3,
   "cost": 7500000,
   "upkeepPerDay": 14000,
-  "unlockTier": 5,
+  "unlockTier": 4,
   "facilityKw": 0,
-  "color": "#b78f8a",
-  "accent": "#e0707a",
+  "color": "#7a2a3c",
+  "accent": "#ff4f6d",
   "rack": {
    "cooling": "bio",
    "powerKw": 70,
@@ -2156,8 +1959,6 @@
   },
   "tech": "tissue_scaffolds",
   "line": "biotech",
-  "tier": "specialist",
-  "upgradesFrom": "rack_organoid_2",
   "seal": {
    "biotech": -11,
    "greentech": 2
@@ -2166,58 +1967,8 @@
    "quote": "Any man could, if he were so inclined, be the sculptor of his own brain.",
    "author": "Santiago Ramon y Cajal",
    "source": "Advice for a Young Investigator, 1897"
-  }
- },
- "rack_organoid_3m": {
-  "id": "rack_organoid_3m",
-  "name": "Mel's Cortex",
-  "description": "Mel's own cabinet of the Perfused Cortex: 600 PFLOPS from 70 kW, 15% more than the OC-3, and it sheds twice the contamination. She is very proud of it. She does not say why it glows.",
-  "kind": "rack",
-  "category": "bio",
-  "width": 3,
-  "cost": 7500000,
-  "upkeepPerDay": 14000,
-  "unlockTier": 5,
-  "facilityKw": 0,
-  "color": "#a88fb4",
-  "accent": "#c39bff",
-  "rack": {
-   "cooling": "bio",
-   "powerKw": 70,
-   "liquidFraction": 0,
-   "pflops": 600,
-   "storageTB": 0,
-   "failurePerDay": 0.34,
-   "bio": {
-    "targetC": 37,
-    "toleranceC": 1,
-    "nutrientUse": 7,
-    "contamination": 0.012
-   }
   },
-  "placement": {
-   "needsPower": true,
-   "needsNutrient": true
-  },
-  "tech": "tissue_scaffolds",
-  "line": "biotech",
-  "tier": "specialist",
-  "unlock": {
-   "bond": {
-    "who": "mel",
-    "min": 70
-   },
-   "commit": "biotech"
-  },
-  "seal": {
-   "biotech": -11,
-   "greentech": 2
-  },
-  "flavor": {
-   "quote": "Facts do not cease to exist because they are ignored.",
-   "author": "Aldous Huxley",
-   "source": "Proper Studies, 1927"
-  }
+  "rung": 3
  },
  "perfusion_bath": {
   "id": "perfusion_bath",
@@ -2228,7 +1979,7 @@
   "width": 2,
   "cost": 500000,
   "upkeepPerDay": 800,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 4,
   "color": "#b9a3a3",
   "accent": "#e58a96",
@@ -2241,8 +1992,7 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "perfusion_baths",
-  "tier": "specialist",
+  "tech": "wetware_annex",
   "line": "biotech",
   "seal": {
    "biotech": -2
@@ -2262,7 +2012,7 @@
   "width": 3,
   "cost": 1600000,
   "upkeepPerDay": 1900,
-  "unlockTier": 4,
+  "unlockTier": 3,
   "facilityKw": 12,
   "color": "#b9a3a3",
   "accent": "#e58a96",
@@ -2275,13 +2025,12 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "perfusion_manifold",
+  "tech": "organoid_vats",
   "line": "biotech",
   "upgradesFrom": "perfusion_bath",
   "seal": {
    "biotech": -3
   },
-  "tier": "specialist",
   "flavor": {
    "quote": "The heart of animals is the foundation of their life, the sovereign of everything within them, the sun of their microcosm",
    "author": "William Harvey",
@@ -2310,13 +2059,12 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "vascular_plant",
+  "tech": "neural_pit_dossier",
   "line": "biotech",
   "upgradesFrom": "perfusion_manifold",
   "seal": {
    "biotech": -4
   },
-  "tier": "specialist",
   "flavor": {
    "quote": "When we try to pick out anything by itself, we find it hitched to everything else in the universe.",
    "author": "John Muir",
@@ -2343,14 +2091,13 @@
   "bio": {
    "nutrientCapacity": 60
   },
-  "tech": "nutrient_works",
+  "tech": "tissue_scaffolds",
   "line": "biotech",
   "upgradesFrom": "nutrient_plant",
   "seal": {
    "biotech": -8,
    "greentech": 3
   },
-  "tier": "specialist",
   "flavor": {
    "quote": "If you wish to make an apple pie from scratch, you must first invent the universe.",
    "author": "Carl Sagan",
@@ -2388,7 +2135,6 @@
    "biotech": -12,
    "greentech": -6
   },
-  "tier": "specialist",
   "flavor": {
    "quote": "We may lay it down as an incontestible axiom, that, in all the operations of art and nature, nothing is created;",
    "author": "Antoine Lavoisier",
@@ -2398,16 +2144,16 @@
  "rack_neuromorphic2": {
   "id": "rack_neuromorphic2",
   "name": "NM-2 Event-Driven Array",
-  "description": "A mesh of spiking arrays that draw almost nothing for sparse work: 150 PFLOPS from 28 kW of air-cooled load, 5.4 PFLOPS per kW.",
+  "description": "A mesh of spiking arrays that draw almost nothing for sparse work: 150 PFLOPS from 28 kW of air-cooled load, 5.4 PFLOPS per kW. Rung 2 of The Garden: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 2,
   "cost": 2100000,
   "upkeepPerDay": 5500,
-  "unlockTier": 4,
+  "unlockTier": 3,
   "facilityKw": 0,
-  "color": "#a2b79a",
-  "accent": "#6fe08a",
+  "color": "#3f6e2e",
+  "accent": "#9be564",
   "rack": {
    "cooling": "air",
    "powerKw": 28,
@@ -2421,8 +2167,6 @@
   },
   "tech": "event_array",
   "line": "greentech",
-  "tier": "specialist",
-  "upgradesFrom": "rack_neuromorphic",
   "seal": {
    "biotech": -1,
    "greentech": -3
@@ -2431,12 +2175,13 @@
    "quote": "I do not see why it should not enter any one of the fields normally covered by the human intellect",
    "author": "Alan Turing",
    "source": "The Times, 11 June 1949 (The Mechanical Brain)"
-  }
+  },
+  "rung": 2
  },
  "rack_photonic2": {
   "id": "rack_photonic2",
   "name": "PH-2 Photonic Mesh",
-  "description": "A chip-to-chip optical fabric behind glass: 600 PFLOPS from 70 kW of air-cooled load, 8.6 PFLOPS per kW, the best in the game. Three tiles wide and the lowest PFLOPS per tile of the trees.",
+  "description": "A chip-to-chip optical fabric behind glass: 600 PFLOPS from 70 kW of air-cooled load, 8.6 PFLOPS per kW, the best in the game. Three tiles wide and the lowest PFLOPS per tile of the trees. Rung 4 of The Garden: you get it by retrofitting a rack, and it scores only for that tree.",
   "kind": "rack",
   "category": "rack",
   "width": 3,
@@ -2444,8 +2189,8 @@
   "upkeepPerDay": 13000,
   "unlockTier": 5,
   "facilityKw": 0,
-  "color": "#c8d3d6",
-  "accent": "#7fe3ff",
+  "color": "#3f6e2e",
+  "accent": "#9be564",
   "rack": {
    "cooling": "air",
    "powerKw": 70,
@@ -2459,27 +2204,26 @@
   },
   "tech": "photonic_mesh",
   "line": "greentech",
-  "upgradesFrom": "rack_photonic",
   "seal": {
    "greentech": -5
   },
-  "tier": "specialist",
   "flavor": {
    "quote": "Nature isn't classical, dammit, and if you want to make a simulation of nature, you'd better make it quantum mechanical",
    "author": "Richard Feynman",
    "source": "Simulating Physics with Computers, International Journal of Theoretical Physics, 1982"
-  }
+  },
+  "rung": 4
  },
  "crah_econ": {
   "id": "crah_econ",
   "name": "OA-400 Outside-Air Economizer",
-  "description": "A louvred roof box that brings cool outside air in. Removes up to 400 kW within 6 tiles at 18 °C outside or colder, falling to 40% at 27 °C. Free cooling when the weather helps, almost none when it does not. A Starter: anyone may build it.",
+  "description": "A louvred roof box that brings cool outside air in. Removes up to 400 kW within 6 tiles at 18 °C outside or colder, falling to 40% at 27 °C. Free cooling when the weather helps, almost none when it does not.",
   "kind": "crah",
   "category": "cooling",
   "width": 3,
   "cost": 350000,
   "upkeepPerDay": 500,
-  "unlockTier": 3,
+  "unlockTier": 2,
   "facilityKw": 6,
   "color": "#a4b0a0",
   "accent": "#9be0b0",
@@ -2495,8 +2239,7 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "economizer",
-  "tier": "starter",
+  "tech": "neuromorphic_bench",
   "line": "greentech",
   "seal": {
    "greentech": -2
@@ -2516,7 +2259,7 @@
   "width": 4,
   "cost": 2600000,
   "upkeepPerDay": 3200,
-  "unlockTier": 4,
+  "unlockTier": 3,
   "facilityKw": 20,
   "color": "#8fa8a6",
   "accent": "#a8f0e0",
@@ -2527,8 +2270,7 @@
   "placement": {
    "needsPower": true
   },
-  "tech": "adiabatic_cooling",
-  "tier": "specialist",
+  "tech": "event_array",
   "upgradesFrom": "crah_econ",
   "line": "greentech",
   "seal": {
@@ -2563,7 +2305,6 @@
    "needsPower": true
   },
   "tech": "hydrogen_cell",
-  "tier": "specialist",
   "upgradesFrom": "genset",
   "line": "greentech",
   "seal": {
@@ -2597,7 +2338,6 @@
    "needsPower": true
   },
   "tech": "iron_air_charter",
-  "tier": "specialist",
   "upgradesFrom": "ups_bank_big",
   "line": "greentech",
   "seal": {
@@ -2632,7 +2372,6 @@
    "basementOnly": true
   },
   "tech": "geothermal_charter",
-  "tier": "specialist",
   "line": "greentech",
   "seal": {
    "greentech": -14
@@ -2663,12 +2402,6 @@
    "maxFloor": 0,
    "needsPower": true
   },
-  "unlock": {
-   "bond": {
-    "who": "luci",
-    "min": 40
-   }
-  },
   "seal": {
    "greentech": 16
   },
@@ -2676,7 +2409,8 @@
    "quote": "A man who knows the price of everything and the value of nothing.",
    "author": "Oscar Wilde",
    "source": "Lady Windermere's Fan, act 3, 1892"
-  }
+  },
+  "tech": "rate_card"
  },
  "microgrid_bea": {
   "id": "microgrid_bea",
@@ -2699,12 +2433,6 @@
    "exteriorOnly": true
   },
   "line": "greentech",
-  "unlock": {
-   "bond": {
-    "who": "bea",
-    "min": 40
-   }
-  },
   "seal": {
    "biotech": -1,
    "greentech": -12
@@ -2713,7 +2441,8 @@
    "quote": "A thing is right when it tends to preserve the integrity, stability, and beauty of the biotic community.",
    "author": "Aldo Leopold",
    "source": "A Sand County Almanac, 1949"
-  }
+  },
+  "tech": "leaf_bolt"
  },
  "ice_store": {
   "id": "ice_store",
@@ -2735,18 +2464,13 @@
   "placement": {
    "needsPower": true
   },
-  "unlock": {
-   "bond": {
-    "who": "cass",
-    "min": 40
-   }
-  },
   "seal": {},
   "flavor": {
    "quote": "One must have a mind of winter",
    "author": "Wallace Stevens",
    "source": "The Snow Man, Harmonium, 1923"
-  }
+  },
+  "tech": "ice_battery"
  },
  "cold_room": {
   "id": "cold_room",
@@ -2769,17 +2493,12 @@
   "placement": {
    "needsPower": true
   },
-  "unlock": {
-   "bond": {
-    "who": "cass",
-    "min": 70
-   }
-  },
   "seal": {},
   "flavor": {
    "quote": "After great pain, a formal feeling comes.",
    "author": "Emily Dickinson",
    "source": "Poem 341, c. 1862"
-  }
+  },
+  "tech": "cold_room_spec"
  }
 }

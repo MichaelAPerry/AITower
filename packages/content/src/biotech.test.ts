@@ -20,7 +20,7 @@ describe("biotech content (bundled)", () => {
 		expect(validateContent(db)).toEqual([]);
 	});
 
-	it("has the fifteen wetware facilities (Starter, Specialist and Mel's signature cortex), eight of them racks, each gated by wetware tech", () => {
+	it("has the twelve wetware facilities, five of them racks, each gated by wetware tech", () => {
 		expect(player.map((d) => d.id).sort()).toEqual([
 			"biogas_digester",
 			"bioreactor",
@@ -28,17 +28,14 @@ describe("biotech content (bundled)", () => {
 			"dna_vault",
 			"neural_pit",
 			"nutrient_plant",
-			"nutrient_tank_s",
 			"nutrient_works",
 			"organoid_incubator",
 			"quarantine_lock",
-			"rack_culture_s",
 			"rack_organoid_2",
 			"rack_organoid_3",
-			"rack_organoid_3m",
 			"sterile_bay",
 		]);
-		expect(player.filter((d) => d.rack)).toHaveLength(7);
+		expect(player.filter((d) => d.rack)).toHaveLength(5);
 		const byId = new Map(db.tech.map((n) => [n.id, n]));
 		for (const d of player) {
 			const node = byId.get(d.tech as string);
@@ -64,18 +61,13 @@ describe("biotech content (bundled)", () => {
 		expect(f.dna_vault.rack?.storageTB).toBeGreaterThan(f.rack_storage2.rack?.storageTB as number);
 	});
 
-	it("incubators unlock at the Wetware Annex tier 3 (commit only); the neural pit needs Clearance 5 and a commit node", () => {
-		expect(f.organoid_incubator.unlockTier).toBe(3);
-		expect(f.nutrient_plant.unlockTier).toBe(3);
+	it("incubators unlock at the Wetware Annex at Level 2, with the nutrient plant; the neural pit needs Clearance 5", () => {
+		expect(f.organoid_incubator.unlockTier).toBe(2);
+		expect(f.nutrient_plant.unlockTier).toBe(2);
 		expect(f.neural_pit.unlockTier).toBe(5);
-		const node = db.tech.find((n) => n.id === f.neural_pit.tech);
-		expect(node?.requiresCommit).toBe("biotech");
-		expect(db.tech.find((n) => n.id === "wetware_annex")?.minTier).toBe(3);
-		expect(db.tech.find((n) => n.id === "wetware_annex")?.requiresCommit).toBe("biotech");
+		expect(db.tech.find((n) => n.id === f.neural_pit.tech)?.minTier).toBe(5);
+		expect(db.tech.find((n) => n.id === "wetware_annex")?.minTier).toBe(2);
 		expect(db.tech.filter((n) => n.branch === "wetware").length).toBeGreaterThanOrEqual(8);
-		// Every node that needs the commit comes at or after the commit Level, and the Starter nodes need none.
-		for (const n of db.tech.filter((x) => x.requiresCommit === "biotech")) expect(n.minTier, n.id).toBeGreaterThanOrEqual(db.balance.ascension.minTier);
-		for (const id of ["culture_media", "culture_bench"]) expect(db.tech.find((n) => n.id === id)?.requiresCommit, id).toBeUndefined();
 	});
 
 	it("has free, unreliable, unbuildable growths", () => {
@@ -111,8 +103,8 @@ describe("biotech content (bundled)", () => {
 		expect(b.ascension.minTier).toBe(3);
 	});
 
-	it("offers all three paths, each with a real description (Greentech and Synthetic arrived in M4)", () => {
-		expect(db.paths.map((p) => [p.id, p.available])).toEqual([["biotech", true], ["greentech", true], ["synthetic", true]]);
+	it("describes all three trees", () => {
+		expect(db.paths.map((p) => p.id)).toEqual(["biotech", "greentech", "synthetic"]);
 		for (const p of db.paths) {
 			expect(p.description.length).toBeGreaterThan(200);
 			expect(p.description.toLowerCase()).not.toContain("coming soon");
@@ -264,7 +256,6 @@ describe("validateContent: M3 rules", () => {
 	it("checks clients, paths, endings and balance", () => {
 		expect(broken((db) => (db.clients.find((c) => c.needsBio)!.needsLiquid = true))).toMatch(/mutually exclusive/);
 		expect(broken((db) => db.paths.pop())).toMatch(/missing "synthetic"/);
-		expect(broken((db) => { for (const p of db.paths) p.available = false; })).toMatch(/at least one path/);
 		expect(broken((db) => { db.endings = db.endings.filter((e) => e.id !== "absorbed"); })).toMatch(/missing "absorbed"/);
 		expect(broken((db) => (db.endings[0].body = ""))).toMatch(/body/);
 		expect(broken((db) => (db.balance.ascension.minTier = 9))).toMatch(/minTier/);

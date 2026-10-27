@@ -158,28 +158,30 @@ function validateGreen(p: Problems, w: string, d: FacilityDef): void {
 	if (d.kind === "carbon") num(p, `${w}.creditsPerDay`, g.creditsPerDay, { gt: 0 });
 }
 
-/** Catalogue fields (docs/TREES.md): tier, unlock, line consistency. `upgradesFrom` is checked against the whole table in `validateUpgrades`. */
+/** Rung fields (docs/REFRAME.md): a rung rack is a compute rack of a tree, one rung per Level 2-5, unique per tree. */
 function validateCatalogue(p: Problems, w: string, d: FacilityDef): void {
-	if (d.tier !== undefined && d.tier !== "starter" && d.tier !== "specialist") p.push(`${w}.tier: expected "starter" or "specialist", got ${JSON.stringify(d.tier)}`);
-	const treeLine = d.line === "biotech" || d.line === "greentech";
-	if (!d.growth && treeLine && d.tier === undefined && !d.unlock?.bond) p.push(`${w}.tier: a ${d.line} item must be a "starter" or a "specialist" (or a signature build)`);
-	if (d.tier !== undefined && !treeLine) p.push(`${w}.tier: only Bio and Green line items have a tier`);
-	const u = d.unlock;
-	if (u === undefined) return;
-	if (typeof u !== "object" || u === null) return void p.push(`${w}.unlock: expected an object`);
-	const who = (k: string, v: { who: AdvisorId; min: number } | undefined): void => {
-		if (v === undefined) return;
-		if (!ADVISORS.includes(v.who)) p.push(`${w}.unlock.${k}.who: unknown advisor "${v.who}"`);
-		num(p, `${w}.unlock.${k}.min`, v.min, { min: 1, max: 100 });
-	};
-	who("bond", u.bond);
-	who("early", u.early);
-	who("preview", u.preview);
-	if (u.commit !== undefined && !["biotech", "greentech"].includes(u.commit)) p.push(`${w}.unlock.commit: only biotech or greentech can be committed to`);
-	if (u.early) num(p, `${w}.unlock.early.tier`, u.early.tier, { min: 1, max: d.unlockTier, int: true });
-	if (u.preview) num(p, `${w}.unlock.preview.max`, u.preview.max, { min: 1, int: true });
-	if (d.tier === "starter" && u.commit) p.push(`${w}.unlock.commit: a starter is open to anyone`);
-	if (u.preview && !(d.tier === "specialist" || u.commit)) p.push(`${w}.unlock.preview: only a specialist (commit-gated) item has a preview`);
+	if (d.rung === undefined) {
+		if (d.kind === "rack" && d.rack && d.rack.pflops > 0 && !d.growth && (d.line === "synthetic" || d.line === "biotech" || d.line === "greentech")) p.push(`${w}.rung: a ${d.line} compute rack needs a rung (1-4) or it can never be built`);
+		return;
+	}
+	num(p, `${w}.rung`, d.rung, { min: 1, max: 4, int: true });
+	if (d.kind !== "rack") p.push(`${w}.rung: only racks have a rung`);
+	if (d.line !== "synthetic" && d.line !== "biotech" && d.line !== "greentech") p.push(`${w}.rung: a rung rack must belong to a tree`);
+	if (d.upgradesFrom !== undefined) p.push(`${w}.upgradesFrom: a rung rack is retrofitted, not upgraded`);
+	if (isNum(d.rung) && isNum(d.unlockTier) && d.unlockTier !== d.rung + 1) p.push(`${w}.unlockTier: rung ${d.rung} opens at Level ${d.rung + 1}`);
+}
+
+/** Each tree has exactly one rack per rung, and every rung rack is gated by research. */
+function validateRungs(p: Problems, db: ContentDB): void {
+	const seen = new Map<string, string>();
+	for (const [key, d] of Object.entries(db.facilities ?? {})) {
+		if (d.rung === undefined) continue;
+		const k = `${d.line}:${d.rung}`;
+		if (seen.has(k)) p.push(`facilities.${key}.rung: ${seen.get(k)} is already rung ${d.rung} of ${d.line}`);
+		seen.set(k, key);
+		if (d.tech === undefined) p.push(`facilities.${key}.tech: a rung rack needs its research node`);
+	}
+	for (const tree of PATHS) for (let r = 1; r <= 4; r++) if (!seen.has(`${tree}:${r}`)) p.push(`facilities: ${tree} has no rack at rung ${r}`);
 }
 
 /** `upgradesFrom` must name another real, non-retired item and never go back down the Levels or loop. */
@@ -601,18 +603,10 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 		case "tier":
 			num(p, `${w}.atLeast`, t.atLeast, { min: 0, int: true });
 			break;
-		case "sp":
-			if (!PATHS.includes(t.path)) p.push(`${w}.path: unknown path`);
-			num(p, `${w}.atLeast`, t.atLeast, { gt: 0, max: 1 });
+		case "rung":
+			if (!PATHS.includes(t.tree)) p.push(`${w}.tree: unknown tree`);
+			num(p, `${w}.rung`, t.rung, { min: 1, max: 4, int: true });
 			break;
-		case "seal":
-			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
-			num(p, `${w}.atLeast`, t.atLeast, { gt: 0 });
-			break;
-		case "afterHours":
-		case "confession":
-			break;
-		case "sealedOut":
 		case "objection":
 			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
 			break;
@@ -668,15 +662,6 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
 			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -500, max: 500 });
 			break;
-		case "commitPath":
-			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
-			break;
-		case "flag":
-			if (typeof (e as { id: unknown }).id !== "string" || !ID_RE.test((e as { id: string }).id)) p.push(`${w}.id: a flag id uses lowercase letters, digits and underscores`);
-			break;
-		case "route":
-			if (!ADVISORS.includes((e as { advisor: string }).advisor)) p.push(`${w}.advisor: unknown advisor`);
-			break;
 		default:
 			p.push(`${w}.type: unknown effect type ${JSON.stringify(t)}`);
 	}
@@ -695,10 +680,6 @@ function validateEventChoice(p: Problems, w: string, c: EventChoice): void {
 		validateEffect(p, `${w}.effects[${i}]`, e);
 	});
 	if (c.reply !== undefined) validateLines(p, `${w}.reply`, c.reply);
-	if (c.minBond !== undefined) {
-		if (!ADVISORS.includes(c.minBond.advisor)) p.push(`${w}.minBond.advisor: unknown advisor`);
-		num(p, `${w}.minBond.atLeast`, c.minBond.atLeast, { min: 1, max: 100 });
-	}
 }
 
 function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, seen: Set<string>): void {
@@ -728,19 +709,6 @@ function validateEvent(p: Problems, i: number, e: EventDef, tierCount: number, s
 		else validateTrigger(p, `${w}.trigger`, e.trigger);
 		if (e.lines !== undefined) validateLines(p, `${w}.lines`, e.lines);
 	} else if (e.trigger !== undefined) p.push(`${w}.trigger: only story scenes have triggers`);
-	if (e.minBond !== undefined) {
-		if (!ADVISORS.includes(e.minBond.advisor)) p.push(`${w}.minBond.advisor: unknown advisor`);
-		num(p, `${w}.minBond.atLeast`, e.minBond.atLeast, { min: 1, max: 100 });
-	}
-	if (e.maxBond !== undefined) {
-		if (!ADVISORS.includes(e.maxBond.advisor)) p.push(`${w}.maxBond.advisor: unknown advisor`);
-		num(p, `${w}.maxBond.below`, e.maxBond.below, { min: 1, max: 101 });
-	}
-	if (e.bondGap !== undefined) {
-		if (!ADVISORS.includes(e.bondGap.high) || !ADVISORS.includes(e.bondGap.low) || e.bondGap.high === e.bondGap.low) p.push(`${w}.bondGap: two different advisors required`);
-		num(p, `${w}.bondGap.atLeast`, e.bondGap.atLeast, { min: 1, max: 100 });
-	}
-	if (e.whenPath !== undefined && (!Array.isArray(e.whenPath) || e.whenPath.some((x) => x !== null && !PATHS.includes(x)))) p.push(`${w}.whenPath: expected paths or null`);
 	if (e.backdrop !== undefined && e.backdrop !== "title" && !PATHS.includes(e.backdrop)) p.push(`${w}.backdrop: unknown backdrop`);
 	if (!Array.isArray(e.choices) || e.choices.length < 1) {
 		p.push(`${w}.choices: at least one choice required`);
@@ -859,22 +827,12 @@ function validateSoul(p: Problems, b: ContentDB["balance"]): void {
 	num(p, "balance.soul.sealMax", s.sealMax, { gt: 0 });
 	num(p, "balance.soul.residuePerDay", s.residuePerDay, { min: 0, max: 1 });
 	num(p, "balance.soul.objectionScar", s.objectionScar, { gt: 0 });
-	num(p, "balance.soul.starterWeight", s.starterWeight, { min: 0, max: 5 });
-	for (const k of ["bondReveal", "bondCommit", "bondEpilogue"] as const) num(p, `balance.soul.${k}`, s[k], { min: 0, max: 100 });
+	num(p, "balance.soul.greenFloor", s.greenFloor, { min: 0, max: 1 });
+	num(p, "balance.soul.bondEpilogue", s.bondEpilogue, { min: 0, max: 100 });
 	num(p, "balance.soul.bondFollow", s.bondFollow, { min: 0, max: 20 });
 	num(p, "balance.soul.bondOverrule", s.bondOverrule, { min: -20, max: 0 });
-	num(p, "balance.soul.afterHoursBond", s.afterHoursBond, { min: 0, max: 20 });
-	num(p, "balance.soul.giftLiked", s.giftLiked, { min: 0, max: 20 });
-	num(p, "balance.soul.giftDisliked", s.giftDisliked, { min: -20, max: 0 });
-	num(p, "balance.soul.messageBond", s.messageBond, { min: 0, max: 20 });
-	num(p, "balance.soul.confessionBond", s.confessionBond, { min: 1, max: 100 });
-	num(p, "balance.soul.confessionTier", s.confessionTier, { min: 1, max: 10, int: true });
 	for (const a of ADVISORS) num(p, `balance.soul.bondStart.${a}`, s.bondStart?.[a as AdvisorId], { min: 0, max: 100 });
-	for (const path of PATHS) {
-		const w = s.spWeights?.[path];
-		if (!w) p.push(`balance.soul.spWeights.${path}: missing`);
-		else for (const [k, v] of Object.entries(w)) num(p, `balance.soul.spWeights.${path}.${k}`, v, { min: 0 });
-	}
+	for (const path of PATHS) num(p, `balance.soul.spWeights.${path}`, s.spWeights?.[path], { gt: 0 });
 }
 
 function validateGreenBalance(p: Problems, b: ContentDB["balance"]): void {
@@ -904,10 +862,8 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			seen.add(d.id);
 			str(p, `${w}.name`, d.name);
 			str(p, `${w}.description`, d.description);
-			if (typeof d.available !== "boolean") p.push(`${w}.available: expected a boolean`);
 		});
 		for (const id of PATHS) if (!seen.has(id)) p.push(`paths: missing "${id}"`);
-		if (!db.paths.some((d) => d.available)) p.push("paths: at least one path must be available");
 	}
 	if (!Array.isArray(db.endings)) p.push("endings: expected an array");
 	else {
@@ -923,10 +879,6 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			for (const [a, t] of Object.entries(d.epilogue ?? {})) {
 				if (!ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
 				str(p, `${w}.epilogue.${a}`, t);
-			}
-			for (const [a, t] of Object.entries(d.routeAck ?? {})) {
-				if (!ADVISORS.includes(a)) p.push(`${w}.routeAck.${a}: unknown advisor`);
-				str(p, `${w}.routeAck.${a}`, t);
 			}
 		});
 		for (const id of ENDINGS) if (!seen.has(id)) p.push(`endings: missing "${id}"`);
@@ -990,15 +942,6 @@ function validateTech(p: Problems, db: ContentDB): void {
 			});
 		if (!Array.isArray(n.requires)) p.push(`${w}.requires: expected an array`);
 		if (n.path !== undefined && !PATHS.includes(n.path)) p.push(`${w}.path: unknown path "${n.path}"`);
-		if (n.requiresCommit !== undefined && !SEALED.includes(n.requiresCommit)) p.push(`${w}.requiresCommit: only biotech or greentech can be committed to`);
-		if (n.requiresCommit !== undefined && isNum(db.balance?.ascension?.minTier) && isNum(n.minTier) && n.minTier < db.balance.ascension.minTier) p.push(`${w}.minTier: a commit node cannot come before the commit (Clearance ${db.balance.ascension.minTier})`);
-		if (n.earlyTier !== undefined) {
-			if (!ADVISORS.includes(n.earlyTier.who)) p.push(`${w}.earlyTier.who: unknown advisor "${n.earlyTier.who}"`);
-			num(p, `${w}.earlyTier.min`, n.earlyTier.min, { min: 1, max: 100 });
-			num(p, `${w}.earlyTier.tier`, n.earlyTier.tier, { min: 1, max: n.minTier, int: true });
-		}
-		const ascend = db.balance?.ascension?.minTier;
-		if (n.path !== undefined && isNum(ascend) && isNum(n.minTier) && n.minTier < ascend) p.push(`${w}.minTier: a path node cannot come before the path is chosen (Clearance ${ascend})`);
 	});
 	for (const n of byId.values()) {
 		if (!Array.isArray(n.requires)) continue;
@@ -1040,61 +983,6 @@ function validateTech(p: Problems, db: ContentDB): void {
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
 const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 2, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
 
-/** Gifts, messages and memories (the dating systems), and that every `flag` effect names a memory. */
-function validateDating(p: Problems, db: ContentDB): void {
-	const gifts = db.gifts;
-	if (!Array.isArray(gifts)) p.push("gifts: expected an array");
-	else {
-		const who = new Set<string>();
-		gifts.forEach((g, i) => {
-			const w = `gifts[${i}] (${g?.advisor})`;
-			if (!ADVISORS.includes(g.advisor)) p.push(`${w}.advisor: unknown advisor`);
-			if (who.has(g.advisor)) p.push(`${w}: one gift entry per advisor`);
-			who.add(g.advisor);
-			for (const k of ["liked", "disliked"] as const) if (!Object.hasOwn(db.facilities, g[k])) p.push(`${w}.${k}: unknown facility "${g[k]}"`);
-			if (g.liked === g.disliked) p.push(`${w}: liked and disliked must differ`);
-			str(p, `${w}.likedLine`, g.likedLine);
-			str(p, `${w}.dislikedLine`, g.dislikedLine);
-		});
-		for (const a of ADVISORS) if (!who.has(a)) p.push(`gifts: missing "${a}"`);
-	}
-	const memories = db.memories;
-	const flags = new Set<string>();
-	if (!Array.isArray(memories)) p.push("memories: expected an array");
-	else
-		memories.forEach((m, i) => {
-			const w = `memories[${i}] (${m?.flag})`;
-			if (typeof m.flag !== "string" || !ID_RE.test(m.flag)) p.push(`${w}.flag: use lowercase letters, digits and underscores`);
-			if (flags.has(m.flag)) p.push(`${w}: duplicate flag`);
-			flags.add(m.flag);
-			if (!ADVISORS.includes(m.advisor)) p.push(`${w}.advisor: unknown advisor`);
-			str(p, `${w}.text`, m.text);
-		});
-	const messages = db.messages;
-	if (!Array.isArray(messages)) p.push("messages: expected an array");
-	else {
-		const ids = new Set<string>();
-		messages.forEach((m, i) => {
-			const w = `messages[${i}] (${m?.id})`;
-			str(p, `${w}.id`, m.id);
-			if (ids.has(m.id)) p.push(`${w}: duplicate id`);
-			ids.add(m.id);
-			if (!ADVISORS.includes(m.from)) p.push(`${w}.from: unknown advisor`);
-			str(p, `${w}.text`, m.text);
-			if (m.minBond !== undefined) num(p, `${w}.minBond`, m.minBond, { min: 1, max: 100 });
-			if (m.maxBond !== undefined) num(p, `${w}.maxBond`, m.maxBond, { min: 1, max: 101 });
-			if (!Array.isArray(m.taps) || m.taps.length < 1 || m.taps.length > 3) p.push(`${w}.taps: one to three replies`);
-			else
-				m.taps.forEach((t, k) => {
-					str(p, `${w}.taps[${k}].label`, t.label);
-					str(p, `${w}.taps[${k}].back`, t.back);
-				});
-		});
-	}
-	for (const e of db.events ?? [])
-		for (const c of e.choices ?? [])
-			for (const f of c.effects ?? []) if (f.type === "flag" && !flags.has(f.id)) p.push(`events ${e.id}: flag "${f.id}" has no entry in memories`);
-}
 
 export function validateContent(db: ContentDB): string[] {
 	const p: Problems = [];
@@ -1177,7 +1065,7 @@ export function validateContent(db: ContentDB): string[] {
 	validateUpgrades(p, db);
 	validateBioBalance(p, db);
 	validatePathsAndEndings(p, db);
-	validateDating(p, db);
+	validateRungs(p, db);
 
 	const scenarios = db.scenarios ?? {};
 	if (Object.keys(scenarios).length === 0) p.push("scenarios: none defined");

@@ -16,7 +16,7 @@ export const M4_FACILITIES = [
 ];
 
 export const GREEN_TECH = [
-	"solar_charter",
+	"neuromorphic_bench",
 	"wind_permit",
 	"district_heat_accord",
 	"algae_licence",
@@ -33,7 +33,7 @@ export const AUTOMATION_TECH = ["works_foreman", "standing_orders_binder"];
 
 /** Tree restructure (balance audit 7b): shared L5 nodes, the second biotech nodes, culture media and the fleet bot. */
 export const V2_TECH = ["culture_media", "fleet_command", "grid_autonomy", "immersion_vault", "authority_charter", "organoid_vats", "synaptic_mesh"];
-export const V2_FACILITIES = ["grid_tie_4", "rack_imm_gpu3", "rack_organoid_2"];
+export const V2_FACILITIES = ["grid_tie_4", "rack_organoid_2"];
 
 export const M4_TECH = [...GREEN_TECH, ...SYNTH_TECH, ...AUTOMATION_TECH];
 
@@ -43,10 +43,7 @@ export const V3_FACILITIES = [
 	"cryo_plant",
 	"genset_cc",
 	"reactor_smr",
-	"rack_culture_s",
-	"nutrient_tank_s",
 	"rack_organoid_3",
-	"rack_organoid_3m",
 	"perfusion_bath",
 	"perfusion_manifold",
 	"vascular_plant",
@@ -67,13 +64,7 @@ export const V3_FACILITIES = [
 	"chiller_free",
 ];
 export const V3_TECH = [
-	"culture_bench",
-	"perfusion_baths",
-	"nutrient_works",
-	"perfusion_manifold",
-	"vascular_plant",
 	"biogas_digester",
-	"economizer",
 	"event_array",
 	"hydrogen_cell",
 	"iron_air_charter",
@@ -82,4 +73,8 @@ export const V3_TECH = [
 	"combined_cycle",
 	"cryo_plant",
 	"reactor_licence",
+	"rate_card",
+	"leaf_bolt",
+	"ice_battery",
+	"cold_room_spec",
 ];

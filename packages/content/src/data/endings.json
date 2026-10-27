@@ -9,12 +9,6 @@
    "mel": "Mel is in the old lab, holding an empty jar up to the light. The sun's a setting now. \"It wants to remember having a body,\" she says. \"It never had one. I'm lending it mine.\" She tugs her cuff down over the stain. There's a stool next to hers. She doesn't mention it.",
    "bea": "Bea has drawn a garden on the inside of the lattice. Chalk. It never wears off. \"It's not real,\" she says. \"Nothing is. I planted it anyway.\" She hands you the watering can. \"Same time tomorrow. Roots need checking.\"",
    "cass": "Cass is the only one still drinking her coffee hot. \"It's not real coffee,\" she says. \"I'm still real. I think.\" She pours a second cup and holds it out until your hands stop shaking. \"Did you sleep?\" You take the cup."
-  },
-  "routeAck": {
-   "luci": "Luci doesn't look up from the ledger. \"I know who you chose,\" she says. \"I checked.\" She turns a page with nothing on it.",
-   "mel": "Mel waves from the far end of the old lab. \"I know,\" she mouths. She holds a jar up to the light, like a toast.",
-   "bea": "Bea drops a rag and picks it up again. \"Saw you two,\" she says. \"Don't make it weird.\"",
-   "cass": "Cass lifts her mug to the room. \"To whoever it is,\" she says. \"I noticed. I'm glad.\""
   }
  },
  {
@@ -27,12 +21,6 @@
    "luci": "\"Efficient,\" Luci says. She's looking at the new skin on her knuckles. \"Self-repairing. No upkeep.\" She doesn't take her hand out of yours. \"Tell anyone I said that and I'll bill you for the silence.\"",
    "bea": "Bea sits where the ferns used to be. They're still there. They look at you now. \"It's alive,\" she says. \"I wanted a living planet. I never said which way round.\" She laughs a bit too long and leans on your shoulder. Her goggles stay up.",
    "cass": "Cass refused the graft. She's the only cold thing left in the building. She finds you anyway, mug in both hands. \"Someone has to remember how it was,\" she says. You sit in the old plant room and remember it out loud until the coffee goes cold."
-  },
-  "routeAck": {
-   "luci": "Luci watches the pink light climb the wall. \"I know who you chose,\" she says. \"I'd have billed for the advice.\" She doesn't smile. She almost does.",
-   "mel": "Mel peels off one glove and holds up a hand. \"I know,\" she says, quietly. \"It's a good result. For all of us.\"",
-   "bea": "Bea sits on the edge of a warm bed of ferns. \"Heard,\" she says. \"I'm fine. The ferns are fine.\"",
-   "cass": "Cass is the only cold thing in the room. \"I'm glad,\" she says. She means it, and puts her mug down to show it."
   }
  },
  {
@@ -45,12 +33,6 @@
    "mel": "Mel kneels in the moss with a sample jar. Then she puts it down, unopened. \"It doesn't need me to look inside,\" she says. \"It's fine.\" She lies back in the grass next to you. She doesn't measure anything. Her cuff's come undone. She lets it.",
    "luci": "Luci bought the hill. Then she gave it away. She'll deny that. \"The ledger says this is a loss,\" she says. She's sitting in the grass in a coat that cost more than the grass. \"I stopped reading the ledger.\" She lets you pick a leaf out of her hair.",
    "cass": "Cass watches the frost burn off the new canopy. \"Twenty years I kept machines cold,\" she says. \"Now they keep us warm.\" She hands you the other half of her coffee. \"You slept.\" It isn't a question this time. She doesn't take her hand back."
-  },
-  "routeAck": {
-   "luci": "Luci stands in the new grass with her shoes in her hand. \"I know who you picked,\" she says. \"I've stopped keeping score.\"",
-   "mel": "Mel is lying in the moss with her eyes shut. \"I know,\" she says to the sky. \"It's nice. Truly.\"",
-   "bea": "Bea wipes her hands on her trousers. \"Saw you two,\" she says. \"About time. Roots needed company.\"",
-   "cass": "Cass watches the frost burn off the canopy. \"Whoever it is,\" she says. \"Good. I noticed.\""
   }
  },
  {

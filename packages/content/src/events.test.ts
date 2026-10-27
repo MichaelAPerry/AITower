@@ -115,9 +115,6 @@ describe("events.json", () => {
 						case "seal":
 						case "bond":
 						case "sp":
-						case "commitPath":
-						case "flag":
-						case "route":
 							break; // the hint names the lean in words; the Soul's effects are secret
 						case "gridCap":
 							expect(c.hint, w).toMatch(fx.factor === 0 ? /grid offline/ : new RegExp(`x${fx.factor}\\b`));

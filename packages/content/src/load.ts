@@ -17,9 +17,6 @@ import lessonsFile from "./data/lessons.json";
 const lessons = lessonsFile.lessons;
 import structure from "./data/structure.json";
 import endings from "./data/endings.json";
-import gifts from "./data/gifts.json";
-import memories from "./data/memories.json";
-import messages from "./data/messages.json";
 import paths from "./data/paths.json";
 import lanes from "./data/lanes.json";
 import tech from "./data/tech.json";
@@ -35,7 +32,7 @@ export { validateContent } from "./validate";
  */
 export function loadContent(): ContentDB {
 	// JSON imports widen string unions to `string`; validateContent checks the real shapes.
-	const raw = structuredClone({ facilities, bots, clients, structure, lift, balance, scenarios, lessons, events, tech, lanes, paths, endings, gifts, messages, memories }) as unknown as Omit<
+	const raw = structuredClone({ facilities, bots, clients, structure, lift, balance, scenarios, lessons, events, tech, lanes, paths, endings }) as unknown as Omit<
 		ContentDB,
 		"generateContract"
 	>;

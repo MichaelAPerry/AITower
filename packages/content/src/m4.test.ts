@@ -131,35 +131,25 @@ describe("M4 content (bundled)", () => {
 			}
 		});
 
-		it("has a Greentech branch of about 8 nodes: T3 Starter basics and commit-only Specialist nodes from T3 to T5", () => {
+		it("has a Greentech branch of about 8 nodes, none of them behind a commit", () => {
 			expect(GREEN_TECH.length).toBeGreaterThanOrEqual(8);
-			const path = GREEN_TECH.filter((id) => byTech.get(id)!.path === "greentech");
+			const path = GREEN_TECH.filter((id) => byTech.get(id)?.path === "greentech");
 			expect(path.length).toBeGreaterThanOrEqual(6);
-			for (const id of path) {
-				expect(byTech.get(id)!.requiresCommit, id).toBe("greentech");
-				expect(byTech.get(id)!.minTier, id).toBeGreaterThanOrEqual(3);
-			}
-			const basics = GREEN_TECH.filter((id) => byTech.get(id)!.path === undefined);
-			expect(basics.length).toBeGreaterThanOrEqual(2);
-			for (const id of basics) {
-				expect(byTech.get(id)!.minTier, id).toBe(3);
-				expect(byTech.get(id)!.requiresCommit, id).toBeUndefined();
-			}
-			for (const id of ["canopy_array", "heat_pipeline_franchise", "carbon_capture_dossier", "photonic_bench"]) expect(byTech.get(id)!.path, id).toBe("greentech");
+			for (const id of GREEN_TECH) expect((byTech.get(id) as { requiresCommit?: unknown }).requiresCommit, id).toBeUndefined();
+			for (const id of ["neuromorphic_bench", "canopy_array", "heat_pipeline_franchise", "carbon_capture_dossier", "photonic_bench"]) expect(byTech.get(id)?.path, id).toBe("greentech");
 		});
 
-		it("has 5 Synthetic nodes, all T4 or T5, tagged Synthetic and open to anyone on the default path", () => {
+		it("has 5 Synthetic nodes, all T4 or T5, tagged Synthetic and open to anyone", () => {
 			expect(SYNTH_TECH).toHaveLength(5);
 			for (const id of SYNTH_TECH) {
 				expect(byTech.get(id)!.path, id).toBe("synthetic");
-				expect(byTech.get(id)!.requiresCommit, id).toBeUndefined();
 				expect(byTech.get(id)!.minTier, id).toBeGreaterThanOrEqual(4);
 			}
 			// + Combined-Cycle, Cryo Plant and Reactor Licence (docs/TREES.md).
 			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(8);
 		});
 
-		it("T3 basics take 1-3 days of typical output and path nodes 2.5-8 days", () => {
+		it("Level-3 nodes take 1-3 days of typical output and the rest 2.5-8 days", () => {
 			for (const id of M4_TECH) {
 				const n = byTech.get(id)!;
 				if (AUTOMATION_TECH.includes(id)) continue;
@@ -202,9 +192,8 @@ describe("M4 content (bundled)", () => {
 		it("offers all three paths with strong descriptions", () => {
 			const g = db.paths.find((p) => p.id === "greentech")!;
 			const s = db.paths.find((p) => p.id === "synthetic")!;
-			expect(g.available && s.available).toBe(true);
 			expect(g.description).toMatch(/green score/);
-			expect(s.description).toMatch(/default/i);
+			expect(s.description).toMatch(/cheapest/i);
 		});
 
 		it("adds two climate clients", () => {
@@ -304,14 +293,15 @@ describe("M4 content (bundled)", () => {
 			expect(db.balance.automation.foremanPerHour).toBeGreaterThanOrEqual(1);
 		});
 
-		it("tunes the Soul: Synthetic is the easy default, Bio and Green ask for trust", () => {
+		it("tunes the Soul: each tree has a weight, Green runs at half speed without clean power", () => {
 			const so = db.balance.soul;
-			expect(so.spWeights.synthetic.shared).toBeGreaterThan(0);
-			expect(so.spWeights.synthetic.synthetic).toBeGreaterThan(so.spWeights.synthetic.shared ?? 0);
-			expect(so.spWeights.synthetic.biotech ?? 0).toBe(0);
-			expect(so.bondCommit).toBeGreaterThan(Math.max(...Object.values(so.bondStart)));
-			// A Level-5 tower of 3000 PF of synthetic-line compute reaches the Lattice within about a week.
-			const days = so.spTarget / (3000 * (so.spWeights.synthetic.synthetic ?? 0) * so.spPerPflopHour * 24);
+			for (const w of Object.values(so.spWeights)) expect(w).toBeGreaterThan(0);
+			expect(so.spWeights.greentech).toBeGreaterThan(so.spWeights.synthetic);
+			expect(so.spWeights.synthetic).toBeGreaterThan(so.spWeights.biotech);
+			expect(so.greenFloor).toBe(0.5);
+			expect(so.bondEpilogue).toBe(60);
+			// A Level-5 tower of 3000 PF of Synthetic racks reaches the Lattice within about a week.
+			const days = so.spTarget / (3000 * so.spWeights.synthetic * so.spPerPflopHour * 24);
 			expect(days).toBeGreaterThan(3);
 			expect(days).toBeLessThan(12);
 		});
@@ -359,10 +349,6 @@ describe("validateContent: M4 rules", () => {
 		expect(broken((db) => (db.scenarios.brownfield.facilities[0].x = 54))).toMatch(/brownfield/);
 	});
 
-	it("checks that a path node comes at or after the ascension clearance", () => {
-		expect(broken((db) => (db.tech.find((n) => n.id === "canopy_array")!.minTier = 2))).toMatch(/path node cannot come before/);
-	});
-
 	it("checks the green and automation balance", () => {
 		expect(broken((db) => (db.balance.green.heatPrice = -1))).toMatch(/heatPrice/);
 		expect(broken((db) => (db.balance.green.creditPrice = -1))).toMatch(/creditPrice/);
@@ -377,7 +363,7 @@ describe("validateContent: M4 rules", () => {
 
 	it("checks the Soul balance", () => {
 		expect(broken((db) => (db.balance.soul.spTarget = 0))).toMatch(/spTarget/);
-		expect(broken((db) => (db.balance.soul.bondCommit = 120))).toMatch(/bondCommit/);
+		expect(broken((db) => (db.balance.soul.bondEpilogue = 120))).toMatch(/bondEpilogue/);
 		expect(broken((db) => delete (db.balance.soul.spWeights as Partial<typeof db.balance.soul.spWeights>).greentech)).toMatch(/spWeights.greentech/);
 		expect(broken((db) => delete (db.balance as { soul?: unknown }).soul)).toMatch(/balance.soul: missing/);
 	});
