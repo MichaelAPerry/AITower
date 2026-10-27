@@ -102,6 +102,22 @@ describe("tool controller", () => {
 		expect(h.tool()).toEqual({ kind: "place", defId: "genset" });
 	});
 
+	it("place: clicking an already-placed device selects it instead of building (tool stays held)", () => {
+		const h = harness({ kind: "place", defId: "genset" });
+		h.ev("down", 6, 0); // grid tie (facility 1) spans x6..7
+		expect(h.sent).toEqual([]);
+		expect(h.sel()).toEqual({ kind: "facility", id: 1 });
+		expect(h.tool()).toEqual({ kind: "place", defId: "genset" });
+	});
+
+	it("right click (down and up on one cell) drops the build tool", () => {
+		const h = harness({ kind: "place", defId: "genset" });
+		h.ev("down", 20, 1, 2);
+		h.ev("up", 20, 1, 2);
+		expect(h.tool()).toEqual({ kind: "select" });
+		expect(h.sent).toEqual([]);
+	});
+
 	it("slab: drag right→left emits a normalised buildSlab", () => {
 		const h = harness({ kind: "slab" });
 		h.ev("down", 30, 1);

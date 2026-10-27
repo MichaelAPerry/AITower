@@ -117,6 +117,8 @@ export class Input {
 	private down(e: PointerEvent): void {
 		if (e.button === 1 || e.button === 2) {
 			e.preventDefault();
+			// Right click is also a cell event (down/up on one cell = "drop the tool"); a pan just moves the camera.
+			if (e.button === 2) this.emit("down", e, this.cellAt(e), 2);
 			this.drag = { id: e.pointerId, ...this.local(e) };
 			this.canvas.setPointerCapture?.(e.pointerId);
 			return;
@@ -147,6 +149,7 @@ export class Input {
 	}
 
 	private up(e: PointerEvent): void {
+		if (e.button === 2) this.emit("up", e, this.cellAt(e), 2);
 		if (this.drag && this.drag.id === e.pointerId && e.button !== 0) {
 			this.drag = null;
 			this.canvas.releasePointerCapture?.(e.pointerId);

@@ -162,6 +162,14 @@ export function createToolController(store: GameStore, content: ContentDB, opts:
 					store.setSelection(pickAt(view, cell));
 					return;
 				}
+				// A device already on the cell is selected (inspector), never built over, whichever build tool is held.
+				if (tool.kind !== "demolish") {
+					const hit = pickAt(view, cell);
+					if (hit?.kind === "facility") {
+						store.setSelection(hit);
+						return;
+					}
+				}
 				if (tool.kind === "place") {
 					if (send({ type: "place", defId: tool.defId, floor: cell.floor, x: cell.x })) {
 						// Stay in place mode; refresh the ghost (the cell is now occupied).
