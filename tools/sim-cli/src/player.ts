@@ -68,13 +68,16 @@ export const PRIORITY: Record<Tree, string[]> = {
 		"desk_fan_standard",
 		"batch_cards",
 		"neuromorphic_bench",
+		"chilled_loop",
+		"district_heat_accord",
 		"rear_door_drawings",
 		"substation_licence",
 		"reading_room",
 		"pit_crew",
-		"district_heat_accord",
 		"event_array",
 		"wind_permit",
+		"flywheel_patent",
+		"accumulator_charter",
 		"canopy_array",
 		"photonic_bench",
 		"hydrogen_cell",
@@ -549,20 +552,35 @@ export class Player {
 	private greenPower(v: SimView, occ: Uint8Array, budget: number): void {
 		if (this.tree !== "greentech" || this.opts.noClean) return;
 		const itKw = this.installedKw(v);
-		const hx = Object.values(this.content.facilities).find((d) => d.kind === "heat_export" && this.usable(d, v) && d.cost <= budget);
+		const hx = Object.values(this.content.facilities).find((d) => d.kind === "heat_export" && this.usable(d, v));
 		const hxCount = v.facilities.filter((f) => this.content.facilities[f.defId].kind === "heat_export").length;
-		if (hx && itKw > 200 && hxCount < Math.min(2, Math.ceil(itKw / 700))) {
+		if (hx && itKw > 200 && hxCount < Math.min(6, Math.ceil(itKw / 300))) {
+			// One recovery unit per hall floor, beside the racks that make the most heat there.
 			const racks = v.facilities.filter((f) => this.content.facilities[f.defId].kind === "rack");
-			const floor = racks.length ? racks.reduce((m, f) => (f.floor > m ? f.floor : m), 1) : 1;
-			if (this.place(v, occ, hx, [floor], (s) => s.x)) return;
+			const withHx = new Set(v.facilities.filter((f) => this.content.facilities[f.defId].kind === "heat_export").map((f) => f.floor));
+			const byFloor = new Map<number, number>();
+			for (const r of racks) if (!withHx.has(r.floor)) byFloor.set(r.floor, (byFloor.get(r.floor) ?? 0) + 1);
+			const floors = [...byFloor.entries()].sort((a, b) => b[1] - a[1]).map(([fl]) => fl);
+			if (floors.length) {
+				if (hx.cost > budget) return; // save up for it: exported heat is a third of the score
+				for (const fl of floors) {
+					const here = racks.filter((r) => r.floor === fl);
+					const gain = (x: number): number => here.filter((r) => Math.abs(r.x - x) <= 8).length;
+					if (this.place(v, occ, hx, [fl], (s) => -gain(s.x) * 100 + s.x)) return;
+				}
+			}
 		}
+		if (process.env.SOULDEBUG && !hx) this.log.push(`nohx(itKw=${Math.round(itKw)} tech=${v.techResearched.includes('district_heat_accord')} bud=${Math.round(budget)})`);
 		let gen = 0;
 		for (const f of v.facilities) {
 			const d = this.content.facilities[f.defId];
 			if (d.kind === "solar" || d.kind === "wind") gen += d.power?.capacityKw ?? 0;
 		}
 		const load = Math.max(v.totalKw, itKw * 1.25);
-		if (v.greenScore >= 0.55 || gen >= 1.8 * load) return;
+		const bank = Object.values(this.content.facilities).find((d) => d.id === "ups_bank_big" && this.usable(d, v) && d.cost <= budget);
+		const banks = v.facilities.filter((f) => f.defId === "ups_bank_big").length;
+		if (bank && gen > 400 && banks < Math.min(4, Math.ceil(gen / 700)) && this.place(v, occ, bank, this.hallFloors(v), (s) => s.x)) return;
+		if (v.greenScore >= 0.7 || gen >= 2.2 * load) return;
 		const avg = (d: FacilityDef): number => (d.power?.capacityKw ?? 1) * (d.kind === "wind" ? 0.6 : 0.37);
 		const defs = Object.values(this.content.facilities)
 			.filter((d) => (d.kind === "solar" || d.kind === "wind") && this.usable(d, v) && d.id !== "microgrid_bea" && d.cost <= budget)

@@ -1084,7 +1084,7 @@
    },
    {
     "who": "bea",
-    "text": "But they only run at half speed on grid power. Full speed needs clean power. Solar, wind."
+    "text": "But they crawl on grid power. Full speed needs clean power. Solar, wind."
    },
    {
     "who": "bea",
@@ -1120,7 +1120,7 @@
    {
     "id": "racks",
     "label": "Retrofit more racks first.",
-    "hint": "More Green racks, still at half speed.",
+    "hint": "More Green racks, still slow without clean power.",
     "outcome": "You said racks first. Bea shrugged.",
     "effects": [
      {
@@ -1259,7 +1259,7 @@
    },
    {
     "who": "bea",
-    "text": "Then your Green racks drop to half speed. All of them."
+    "text": "Then your Green racks slow to a crawl. All of them."
    },
    {
     "who": "bea",

@@ -21,7 +21,7 @@ describe("Trees panel", () => {
 		}
 		expect(cards[1].next).toMatch(/research/i);
 		expect(cards[0].seal).toBeNull();
-		expect(cards[2].factor[0]).toMatch(/Clean power/);
+		expect(cards[2].factor[0]).toMatch(/clean power/);
 	});
 	it("renders the three columns and a close path", () => {
 		const html = renderToString(<TreesPanel view={view()} content={content} onClose={() => {}} />);

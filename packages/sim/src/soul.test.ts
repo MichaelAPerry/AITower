@@ -129,7 +129,7 @@ describe("Singularity points: each tree scores only its own racks", () => {
 		expect(s.state.sp.greentech).toBe(0);
 	});
 
-	it("Green: (0.5 + 0.5 × green score) × (1 − green seal): half speed on any power, full on clean", () => {
+	it("Green: (floor + (1 − floor) × green score) × (1 − green seal): slow on any power, full on clean", () => {
 		const green = (score: number, seal = 0): number => {
 			const s = bare();
 			rackAt(s, "rack_neuromorphic", 100);
@@ -139,10 +139,11 @@ describe("Singularity points: each tree scores only its own racks", () => {
 			expect(s.state.sp.synthetic).toBe(0);
 			return s.state.sp.greentech / (100 * so(s).spWeights.greentech * so(s).spPerPflopHour);
 		};
-		expect(green(0)).toBeCloseTo(0.5, 9); // never stuck at zero
+		const fl = so(bare()).greenFloor;
+		expect(green(0)).toBeCloseTo(fl, 9); // never stuck at zero
 		expect(green(1)).toBeCloseTo(1, 9);
-		expect(green(0.12)).toBeCloseTo(0.5 + 0.5 * 0.12, 9);
-		expect(green(0.5, 20)).toBeCloseTo((0.5 + 0.25) * 0.8, 9);
+		expect(green(0.12)).toBeCloseTo(fl + (1 - fl) * 0.12, 9);
+		expect(green(0.5, 20)).toBeCloseTo((fl + (1 - fl) * 0.5) * 0.8, 9);
 	});
 
 	it("a tree's racks score nothing for the others, and a mixed tower scores each in its own tree", () => {
@@ -169,7 +170,7 @@ describe("Singularity points: each tree scores only its own racks", () => {
 		const v = s.view().soul;
 		expect(v.trees.biotech).toMatchObject({ closed: true, factor: 0, seal: 100 });
 		expect(v.trees.synthetic).toMatchObject({ closed: false, factor: 1, seal: null });
-		expect(v.green.speed).toBe(0.5);
+		expect(v.green.speed).toBe(s.content.balance.soul.greenFloor);
 		hourly(s);
 		expect(s.state.sp.biotech).toBe(0);
 		expect(s.state.sp.synthetic).toBeGreaterThan(0);

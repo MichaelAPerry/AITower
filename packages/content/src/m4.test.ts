@@ -293,12 +293,12 @@ describe("M4 content (bundled)", () => {
 			expect(db.balance.automation.foremanPerHour).toBeGreaterThanOrEqual(1);
 		});
 
-		it("tunes the Soul: each tree has a weight, Green runs at half speed without clean power", () => {
+		it("tunes the Soul: each tree has a weight, Green is slow without clean power", () => {
 			const so = db.balance.soul;
 			for (const w of Object.values(so.spWeights)) expect(w).toBeGreaterThan(0);
 			expect(so.spWeights.greentech).toBeGreaterThan(so.spWeights.synthetic);
 			expect(so.spWeights.synthetic).toBeGreaterThan(so.spWeights.biotech);
-			expect(so.greenFloor).toBe(0.5);
+			expect(so.greenFloor).toBeLessThanOrEqual(0.2);
 			expect(so.bondEpilogue).toBe(60);
 			// A Level-5 tower of 3000 PF of Synthetic racks reaches the Lattice within about a week.
 			const days = so.spTarget / (3000 * so.spWeights.synthetic * so.spPerPflopHour * 24);

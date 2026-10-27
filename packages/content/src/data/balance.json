@@ -156,9 +156,9 @@
   "spWeights": {
    "synthetic": 2.5,
    "biotech": 1.5,
-   "greentech": 3.4
+   "greentech": 4.4
   },
-  "greenFloor": 0.5,
+  "greenFloor": 0.15,
   "sealMax": 100,
   "residuePerDay": 0.03,
   "objectionScar": 10,

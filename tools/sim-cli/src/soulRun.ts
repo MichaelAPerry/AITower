@@ -26,7 +26,7 @@ export interface TreeRun {
 	commitDay: number | null;
 	/** Day Level 2 / 3 / 4 / 5 were reached. */
 	levelDays: (number | null)[];
-	final: { pf: number; sp: Record<AscensionPath, number>; seal: Record<"biotech" | "greentech", number>; greenScore: number; cash: number };
+	final: { pf: number; sp: Record<AscensionPath, number>; seal: Record<"biotech" | "greentech", number>; greenScore: number; greenAvg: number; cash: number };
 	rows: string[];
 	/** The finished game, for inspection. */
 	sim?: ReturnType<typeof createSim>;
@@ -47,7 +47,7 @@ export const HEADER = "day tier     PF  SPsyn  SPbio  SPgrn sealG sealB  bonds(c
 export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, seed: number, days: number, onRow?: (row: string) => void, opts: { noClean?: boolean } = {}): TreeRun {
 	const sim = createSim(content, scenario, seed);
 	const player = new Player(sim, content, tree, { noClean: opts.noClean });
-	const run: TreeRun = { tree, seed, daysTo1000: null, over: null, commitDay: null, levelDays: [null, null, null, null], final: { pf: 0, sp: { synthetic: 0, biotech: 0, greentech: 0 }, seal: { biotech: 0, greentech: 0 }, greenScore: 0, cash: 0 }, rows: [] };
+	const run: TreeRun = { tree, seed, daysTo1000: null, over: null, commitDay: null, levelDays: [null, null, null, null], final: { pf: 0, sp: { synthetic: 0, biotech: 0, greentech: 0 }, seal: { biotech: 0, greentech: 0 }, greenScore: 0, greenAvg: 0, cash: 0 }, rows: [] };
 	// Standing orders: spare parts and bots only. Research, building and retrofits are the player's.
 	const orders = allAutomation(false);
 	orders.research.enabled = false;
@@ -56,6 +56,8 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 	const target = content.balance.soul.spTarget;
 	let lastTier = 1;
 	let started = false;
+	let gsSum = 0;
+	let gsDays = 0;
 	for (let day = 0; day < days; day++) {
 		for (let t = 0; t < TICKS_PER_DAY; t++) {
 			const events = sim.step();
@@ -93,11 +95,15 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 			const inst = v.facilities.reduce((n, f) => n + (content.facilities[f.defId].rack?.pflops ?? 0), 0);
 			const busy = v.facilities.filter((f) => f.jobId !== null).reduce((n, f) => n + (content.facilities[f.defId].rack?.pflops ?? 0), 0);
 			const st = (sim as unknown as { state: { sealScar: { greentech: number; biotech: number }; sealResidue: { greentech: number; biotech: number } } }).state;
-			row += `  scarG=${st.sealScar.greentech.toFixed(0)} resG=${st.sealResidue.greentech.toFixed(0)} inst=${inst} busy=${busy} jobs=${v.jobs.filter((j) => j.status === "running").length} offers=${v.offers.length} $${(v.cash / 1e6).toFixed(2)}M racks=${v.facilities.filter((f) => content.facilities[f.defId].kind === "rack").length} sat=${sat} bad=${hot} rp=${v.researchPoints.toFixed(0)} techs=${v.techResearched.length} | ${player.log.splice(0).join(" ")}`;
+			row += ` clean=${v.soul.green.cleanPower.toFixed(2)} heat=${v.soul.green.heatShare.toFixed(2)} gen=${v.facilities.filter((f) => ['solar', 'wind'].includes(content.facilities[f.defId].kind)).length} hx=${v.facilities.filter((f) => content.facilities[f.defId].kind === 'heat_export').length} scarG=${st.sealScar.greentech.toFixed(0)} resG=${st.sealResidue.greentech.toFixed(0)} inst=${inst} busy=${busy} jobs=${v.jobs.filter((j) => j.status === "running").length} offers=${v.offers.length} $${(v.cash / 1e6).toFixed(2)}M racks=${v.facilities.filter((f) => content.facilities[f.defId].kind === "rack").length} sat=${sat} bad=${hot} rp=${v.researchPoints.toFixed(0)} techs=${v.techResearched.length} | ${player.log.splice(0).join(" ")}`;
+		}
+		if (started) {
+			gsSum += v.greenScore;
+			gsDays++;
 		}
 		run.rows.push(row);
 		onRow?.(row);
-		run.final = { pf: v.pflops, sp: { ...v.soul.sp }, seal: { ...v.soul.seal }, greenScore: v.greenScore, cash: v.cash };
+		run.final = { pf: v.pflops, sp: { ...v.soul.sp }, seal: { ...v.soul.seal }, greenScore: v.greenScore, greenAvg: gsDays ? gsSum / gsDays : 0, cash: v.cash };
 		if (v.gameOver) {
 			run.over = `${v.gameOver.kind}${v.gameOver.ending ? ` ${v.gameOver.ending}` : ""}`;
 			break;
@@ -108,13 +114,13 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 }
 
 function summary(runs: TreeRun[]): string {
-	const lines = ["tree       seed  days>=1000  target  vs target   1st rack  L2 L3 L4 L5   PF@end  SPsyn SPbio SPgrn  greenScore  over"];
+	const lines = ["tree       seed  days>=1000  target  vs target   1st rack  L2 L3 L4 L5   PF@end  SPsyn SPbio SPgrn  greenScore  greenAvg  over"];
 	for (const r of runs) {
 		const days = r.daysTo1000;
 		const t = TARGET_DAYS[r.tree];
 		const pct = days === null ? "never" : `${days <= t * 1.2 && days >= t * 0.8 ? "OK" : "OUT"} ${(((days - t) / t) * 100).toFixed(0).padStart(4)}%`;
 		lines.push(
-			`${r.tree.padEnd(10)} ${String(r.seed).padStart(4)}  ${days === null ? "   -   " : days.toFixed(1).padStart(7)}     ${String(t).padStart(4)}  ${pct.padEnd(10)} ${(r.commitDay === null ? "-" : String(r.commitDay)).padStart(6)}  ${r.levelDays.map((d) => (d === null ? "-" : String(d)).padStart(2)).join(" ")}  ${r.final.pf.toFixed(0).padStart(7)} ${r.final.sp.synthetic.toFixed(0).padStart(6)} ${r.final.sp.biotech.toFixed(0).padStart(5)} ${r.final.sp.greentech.toFixed(0).padStart(5)}  ${r.final.greenScore.toFixed(2).padStart(9)}   ${r.over ?? "-"}`,
+			`${r.tree.padEnd(10)} ${String(r.seed).padStart(4)}  ${days === null ? "   -   " : days.toFixed(1).padStart(7)}     ${String(t).padStart(4)}  ${pct.padEnd(10)} ${(r.commitDay === null ? "-" : String(r.commitDay)).padStart(6)}  ${r.levelDays.map((d) => (d === null ? "-" : String(d)).padStart(2)).join(" ")}  ${r.final.pf.toFixed(0).padStart(7)} ${r.final.sp.synthetic.toFixed(0).padStart(6)} ${r.final.sp.biotech.toFixed(0).padStart(5)} ${r.final.sp.greentech.toFixed(0).padStart(5)}  ${r.final.greenScore.toFixed(2).padStart(9)}  ${r.final.greenAvg.toFixed(2).padStart(8)}   ${r.over ?? "-"}`,
 		);
 	}
 	for (const tree of ["synthetic", "biotech", "greentech"] as Tree[]) {

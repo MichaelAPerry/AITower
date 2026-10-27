@@ -107,7 +107,10 @@ function factorLines(soul: SoulView, tv: TreeView): string[] {
 	const sealMul = 1 - Math.min(1, (tv.seal ?? 0) / soul.sealMax);
 	if (tv.tree === "biotech") return [`Seal ${Math.round(tv.seal ?? 0)} → Flesh speed ×${sealMul.toFixed(2)}.`];
 	const g = soul.green;
-	const lines = [`Clean power ${pct(g.cleanPower)} → Garden speed ×${g.speed.toFixed(2)}${g.speed < 0.95 ? ": add PV or wind" : ""}`];
+	const lines = [
+		`Green score ${g.score.toFixed(2)} (clean power ${pct(g.cleanPower)}, heat sold ${pct(g.heatShare)}) → Garden speed ×${g.speed.toFixed(2)}`,
+		g.score < 0.6 ? "Add PV or wind, batteries and heat export to speed it up." : "Clean power is carrying the Garden.",
+	];
 	if (sealMul < 1) lines.push(`Seal ${Math.round(tv.seal ?? 0)} takes it down to ×${(g.speed * sealMul).toFixed(2)}.`);
 	return lines;
 }
