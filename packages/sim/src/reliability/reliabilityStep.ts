@@ -54,10 +54,20 @@ export function coldRoomFactor(state: SimState, content: ContentDB, rack: Facili
 	return best;
 }
 
+/** Whether any facility is a cold room, cached per state against the layout (topology revision, facility count, content). */
+const coldRoomCache = new WeakMap<SimState, { rev: number; count: number; content: ContentDB; any: boolean }>();
+function hasColdRoom(state: SimState, content: ContentDB): boolean {
+	const c = coldRoomCache.get(state);
+	if (c && c.rev === state.topologyRev && c.count === state.facilities.length && c.content === content) return c.any;
+	const any = state.facilities.some((f) => getDef(content, f.defId).cooling?.failureFactor !== undefined);
+	coldRoomCache.set(state, { rev: state.topologyRev, count: state.facilities.length, content, any });
+	return any;
+}
+
 export function reliabilityStep(ctx: TickCtx): void {
 	const { state, content, events } = ctx;
 	const factor = modFactor(state, "failureRate") * perk(state, content, "failureRate");
-	const anyColdRoom = state.facilities.some((c) => getDef(content, c.defId).cooling?.failureFactor !== undefined);
+	const anyColdRoom = hasColdRoom(state, content);
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (f.grown && f.failed && f.recoverAt >= 0 && state.tick >= f.recoverAt) {

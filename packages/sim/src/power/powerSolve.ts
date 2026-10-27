@@ -35,11 +35,17 @@ export function powerSolve(ctx: TickCtx): void {
 		b.liftKw = 0;
 	}
 
+	const offNet: Facility[] = [];
+	const racks: Facility[] = [];
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
+		if (d.kind === "rack") racks.push(f);
 		f.busy = isComputeRack(d) && f.jobId >= 0 && f.enabled && !f.failed && !f.tripped;
-		f.demandKw = facilityDemandKw(state, content, f);
-		if (f.powerNet < 0 || d.growth) continue;
+		f.demandKw = facilityDemandKw(state, content, f, d);
+		if (f.powerNet < 0 || d.growth) {
+			offNet.push(f);
+			continue;
+		}
 		const b = buckets[f.powerNet];
 		b.loads.push(f);
 		if (d.kind === "grid_tie") b.grids.push(f);
@@ -241,22 +247,19 @@ export function powerSolve(ctx: TickCtx): void {
 	}
 
 	// Facilities off-net, or not needing power.
+	for (const f of offNet) {
+		if (needsPower(getDef(content, f.defId))) {
+			f.sat = 0;
+			f.powerKw = 0;
+		} else {
+			f.sat = 1;
+			f.powerKw = 0;
+		}
+	}
 	let itKw = 0;
-	for (const f of state.facilities) {
-		const d = getDef(content, f.defId);
-		if (f.powerNet < 0 || d.growth) {
-			if (needsPower(d)) {
-				f.sat = 0;
-				f.powerKw = 0;
-			} else {
-				f.sat = 1;
-				f.powerKw = 0;
-			}
-		}
-		if (d.kind === "rack") {
-			f.heatKw = f.powerKw; // all electrical draw becomes heat
-			itKw += f.powerKw;
-		}
+	for (const f of racks) {
+		f.heatKw = f.powerKw; // all electrical draw becomes heat
+		itKw += f.powerKw;
 	}
 	for (const lift of state.lifts) lift.sat = lift.powerNet >= 0 ? nets[lift.powerNet].satisfaction : 0;
 

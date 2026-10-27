@@ -54,6 +54,8 @@ interface Run {
 	addedPflops: number;
 	/** Slab runs bots can reach (computed on first use; the Foreman builds no lifts or slab, so it holds for the run). */
 	reach?: Set<number> | null;
+	/** Floors holding a rack, cached against the facility count (racks are only ever added during a run; retrofits keep their floor). */
+	rackFloors?: { count: number; floors: number[] };
 }
 
 /** Floors with at least one slab run a ground bot can path to (every floor when a flying bot exists). */
@@ -98,8 +100,15 @@ function realRacks(r: Run): Facility[] {
  */
 function findSpot(r: Run, d: FacilityDef, floors: number[], spotOk: (floor: number, x: number) => boolean): { floor: number; x: number } | null {
 	const { state } = r.ctx;
-	const rackFloors = [...new Set(realRacks(r).map((k) => k.floor))];
-	const near = (floor: number): number => (rackFloors.length === 0 ? Math.abs(floor) : Math.min(...rackFloors.map((k) => Math.abs(k - floor))));
+	if (r.rackFloors === undefined || r.rackFloors.count !== state.facilities.length) r.rackFloors = { count: state.facilities.length, floors: [...new Set(realRacks(r).map((k) => k.floor))] };
+	const rackFloors = r.rackFloors.floors;
+	const nearOf = new Map<number, number>();
+	for (const floor of floors) {
+		let best = rackFloors.length === 0 ? Math.abs(floor) : Infinity;
+		for (const k of rackFloors) best = Math.min(best, Math.abs(k - floor));
+		nearOf.set(floor, best);
+	}
+	const near = (floor: number): number => nearOf.get(floor) as number;
 	if (r.reach === undefined) r.reach = reachableRuns(state, r.ctx.content, r.ctx.scratch.nav);
 	const reach = r.reach;
 	const nav = r.ctx.scratch.nav;

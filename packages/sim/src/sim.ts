@@ -88,6 +88,14 @@ export class SimImpl implements Sim {
 		const norm = normalizeCommand(cmd);
 		if (!norm.ok) return { ok: false, reason: norm.reason };
 		try {
+			if (!this.projected && this.state.pending.length === 0) {
+				// Nothing queued, so the real state is the projection: validate in place and queue. The deep copy is only made
+				// if a second command or a canBuild call needs it (projection() then replays this one), not for every lone command.
+				const plan = planNormalized({ state: this.state, content: this.content }, norm.cmd);
+				if (!plan.ok) return toResult(plan);
+				this.state.pending.push(norm.cmd);
+				return { ok: true };
+			}
 			const p = this.projection();
 			const plan = planNormalized({ state: p, content: this.content }, norm.cmd);
 			if (!plan.ok) return toResult(plan);

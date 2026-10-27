@@ -19,6 +19,15 @@ export const inBounds = (g: GridDims, x: number, floor: number): boolean =>
 export function findById<T extends { id: number }>(arr: T[], id: number): T | undefined {
 	let lo = 0;
 	let hi = arr.length - 1;
+	if (hi < 0) return undefined;
+	// Ids are strictly increasing integers, so `id` can sit no further right than `id - first`; with no removals that is exactly where it is.
+	const guess = id - arr[0].id;
+	if (guess < 0) return undefined;
+	if (guess <= hi) {
+		const g = arr[guess];
+		if (g.id === id) return g;
+		hi = guess;
+	}
 	while (lo <= hi) {
 		const mid = (lo + hi) >> 1;
 		const v = arr[mid].id;

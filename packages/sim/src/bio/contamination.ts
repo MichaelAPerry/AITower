@@ -26,6 +26,17 @@ export function contaminationStep(ctx: TickCtx): void {
 	const n = w * h;
 	const C = state.contamination;
 	const slab = state.slab;
+	// Nothing emits and nothing is contaminated: every pass below would write zeros back (diffusion of zeros, decay of
+	// zero, the share stays 0, `irreversible` needs a positive share), so skip them. Exactly equivalent, and the common
+	// case for a tower without organoids.
+	if (idx.emitters.length === 0) {
+		let clean = true;
+		for (let i = 0; i < n; i++) if (C[i] !== 0) { clean = false; break; }
+		if (clean) {
+			state.contaminatedShare = 0;
+			return;
+		}
+	}
 	const next = scratch.tempB;
 	const mask = idx.mask;
 	mask.fill(0);

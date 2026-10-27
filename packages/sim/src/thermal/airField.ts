@@ -4,6 +4,7 @@
  * Rack air heat is added, then CRAHs pull cells within their radius toward 20 °C (never below).
  */
 import type { TickCtx } from "../core/context";
+import type { Facility } from "../core/state";
 import { CRAH_TARGET_C, HEAT_EXPORT_FLOOR_C, MAX_LINK_COUPLING, SECONDS_PER_TICK, TICKS_PER_HOUR } from "../core/constants";
 import { cellIdx, floorCount } from "../core/grid";
 import { earn } from "../economy/ledger";
@@ -69,10 +70,17 @@ export function airFieldStep(ctx: TickCtx): void {
 		}
 	}
 
-	// Rack heat into air.
+	// Rack heat into air (one pass also picks out the CRAHs and heat exporters, in id order, for the two sinks below).
+	const crahs: Facility[] = [];
+	const exporters: Facility[] = [];
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
-		if (d.kind !== "rack" || f.heatKw <= 0) continue;
+		if (d.kind !== "rack") {
+			if (d.kind === "crah") crahs.push(f);
+			else if (d.kind === "heat_export") exporters.push(f);
+			continue;
+		}
+		if (f.heatKw <= 0) continue;
 		const lf = d.rack?.liquidFraction ?? 0;
 		const airKw = f.noCoolant ? f.heatKw : f.heatKw * (1 - lf);
 		const dT = (airKw / f.width) * perKj;
@@ -86,9 +94,8 @@ export function airFieldStep(ctx: TickCtx): void {
 	// organoid racks and only down to its `holdC` (37 °C); an economizer (`freeAir`) loses capacity as the outside warms.
 	const coolingPerk = perk(state, content, "coolingCapacity");
 	let bioCells: Uint8Array | null = null;
-	for (const f of state.facilities) {
+	for (const f of crahs) {
 		const d = getDef(content, f.defId);
-		if (d.kind !== "crah") continue;
 		f.heatKw = 0;
 		if (!f.enabled) continue;
 		const cs = d.cooling;
@@ -123,9 +130,8 @@ export function airFieldStep(ctx: TickCtx): void {
 	// District-heat exporters (after the CRAHs): remove up to `green.exportKw` (× power satisfaction) from the warm cells in
 	// reach, never below HEAT_EXPORT_FLOOR_C, and sell the heat at `green.heatPrice` per kWh.
 	let exportedKw = 0;
-	for (const f of state.facilities) {
+	for (const f of exporters) {
 		const d = getDef(content, f.defId);
-		if (d.kind !== "heat_export") continue;
 		f.heatKw = 0;
 		const capKw = (d.green?.exportKw ?? 0) * powerFactor(f.sat);
 		if (!f.enabled || capKw <= 0) continue;
