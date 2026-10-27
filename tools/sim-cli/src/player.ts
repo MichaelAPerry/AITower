@@ -1,18 +1,18 @@
 /**
- * A scripted "competent player" for balance runs (docs/TREES.md section 5): it builds, researches, commits and answers decisions
+ * A scripted "competent player" for balance runs (docs/REFRAME.md): it builds, researches, retrofits and answers decisions
  * through the public command API only, so nothing it does is something a player could not do by hand. One policy per tree:
  *
- *   synthetic : the default path. Liquid and immersion halls, plant on the basement floor, gas and grid power.
- *   biotech   : shared racks to Level 3, commit to The Flesh, then organoid halls with nutrient, sterile bays and perfusion.
- *   greentech : shared racks to Level 3, commit to The Garden, then neuromorphic / photonic halls with PV, wind and heat export.
- *
- * Bond pace: once a game day the player stays late with the tree's champion (the real `visitAdvisor` command: +3 bond, then the
- * scene's first choice, a warm +1), which is the pace the balance in docs/TREES.md section 5.1 depends on.
+ *   synthetic : base racks, retrofitted down the Lattice; CDU and chiller plant on the basement floor, gas and grid power.
+ *   biotech   : base racks, retrofitted down the Flesh; nutrient plant and perfusion baths, sterile bays.
+ *   greentech : base racks, retrofitted down the Garden; PV and wind to lift the green score (`noClean` skips them).
  */
 import {
-	access,
 	CHAMPION,
 	facilityNeedsPower,
+	isBaseRack,
+	isRetrofittable,
+	retrofitCost,
+	retrofitTarget,
 	type AdvisorId,
 	type AscensionPath,
 	type ContentDB,
@@ -26,7 +26,7 @@ import { AUTO_ACCEPT_MARGIN, bestMemoChoice, PERMISSIVE_CLERK, shouldAccept } fr
 export type Tree = AscensionPath;
 
 /** Research the policy wants first, in order; anything not listed is bought cheapest-first when the list is blocked. */
-const SHARED_START = ["contracts_clerk", "desk_fan_standard", "batch_cards", "rear_door_drawings", "substation_licence", "reading_room", "tape_silo"];
+const _SHARED_START = ["contracts_clerk", "desk_fan_standard", "batch_cards", "rear_door_drawings", "substation_licence", "reading_room", "tape_silo"];
 export const PRIORITY: Record<Tree, string[]> = {
 	synthetic: [
 		"contracts_clerk",
@@ -35,59 +35,47 @@ export const PRIORITY: Record<Tree, string[]> = {
 		"batch_cards",
 		"rear_door_drawings",
 		"substation_licence",
-		"inference_foundry",
 		"cold_plate_gen3",
 		"reading_room",
 		"tower_hydraulics",
 		"gas_concession",
 		"rear_door_exchanger",
 		"manifold_blade",
-		"two_phase_immersion",
 		"feeder_treaty",
 		"cryo_core_dossier",
-		"immersion_vault",
 		"mind_lattice_dossier",
 		"grid_autonomy",
 	],
 	biotech: [
 		"contracts_clerk",
 		"desk_fan_standard",
+		"culture_media",
+		"wetware_annex",
 		"batch_cards",
 		"rear_door_drawings",
-		"culture_media",
-		"culture_bench",
 		"substation_licence",
-		"wetware_annex",
 		"reading_room",
-		"inference_foundry",
 		"sterile_protocols",
-		"perfusion_baths",
 		"organoid_vats",
-		"nutrient_works",
 		"quarantine_doctrine",
 		"tissue_scaffolds",
-		"perfusion_manifold",
 		"bioreactor_permit",
 		"dna_archive_charter",
 		"neural_pit_dossier",
-		"vascular_plant",
 	],
 	greentech: [
 		"contracts_clerk",
 		"desk_fan_standard",
 		"batch_cards",
+		"neuromorphic_bench",
 		"rear_door_drawings",
+		"substation_licence",
 		"reading_room",
 		"pit_crew",
-		"inference_foundry",
-		"solar_charter",
-		"economizer",
-		"event_array",
-		"chilled_loop",
 		"district_heat_accord",
+		"event_array",
 		"wind_permit",
 		"canopy_array",
-		"adiabatic_cooling",
 		"photonic_bench",
 		"hydrogen_cell",
 		"photonic_mesh",
@@ -108,13 +96,12 @@ interface Spot {
 export class Player {
 	/** What the policy built, for the report. */
 	readonly log: string[] = [];
-	private day = -1;
 
 	constructor(
 		private readonly sim: Sim,
 		private readonly content: ContentDB,
 		readonly tree: Tree,
-		private readonly opts: { reserveDays?: number } = {},
+		private readonly opts: { reserveDays?: number; noClean?: boolean } = {},
 	) {}
 
 	// ─── Reading the world ──────────────────────────────────────────────────────────────────────────────────────
@@ -158,12 +145,11 @@ export class Player {
 		return d.cost + Math.max(0, seal ?? 0) * SCAR_COST[this.tree];
 	}
 
-	/** May the player place `d` now (Level, research, commit, bond rules; cash aside)? */
+	/** May the player have `d` now (Level and research; cash aside)? Tree racks come from retrofits, never from the menu. */
 	usable(d: FacilityDef, v: SimView): boolean {
 		if (d.growth || d.retired) return false;
-		const acc = access(d, { path: v.path, tier: v.tier, bonds: v.soul.bonds, sealedOut: v.soul.sealedOut, owned: (id) => v.facilities.filter((f) => f.defId === id).length });
-		if (acc.block || acc.tier > v.tier) return false;
-		return acc.preview || d.tech === undefined || this.researched(v).has(d.tech);
+		if (d.unlockTier > v.tier) return false;
+		return d.tech === undefined || this.researched(v).has(d.tech);
 	}
 
 	private occupancy(v: SimView): Uint8Array {
@@ -282,16 +268,13 @@ export class Player {
 
 	// ─── Decisions and research ────────────────────────────────────────────────────────────────────────────────
 
-	/** The choice a trusting, careful player makes: advisors she trusts first, never a commit to the wrong tree, no new seal on her own tree. */
+	/** The choice a trusting, careful player makes: advisors she trusts first, no new seal on her own tree. */
 	chooseDecision(def: EventDef): string {
-		// After-hours visits, route scenes and the confession are not advice: the script takes the first, ordinary answer.
-		if (def.quiet) return def.choices[0].id;
 		const champ: AdvisorId = CHAMPION[this.tree];
 		const score = (c: EventDef["choices"][number]): number => {
 			let s = 0;
 			for (const e of c.effects) {
 				if (e.type === "cash") s += e.amount;
-				if (e.type === "commitPath" && e.path !== this.tree) s -= 1e9;
 				if (e.type === "seal" && e.path === this.tree) s -= e.amount * 3e4;
 				if (e.type === "sp") s += (e.path === this.tree ? 1 : e.path === "synthetic" ? -0.3 : 0) * e.amount * 5e4;
 				if (e.type === "bond" && e.advisor === champ) s += e.amount * 5e4;
@@ -304,13 +287,7 @@ export class Player {
 
 	private research(v: SimView): void {
 		const done = this.researched(v);
-		const bonds = v.soul.bonds;
-		const open = (n: TechNode): boolean => {
-			if (done.has(n.id) || !n.requires.every((r) => done.has(r))) return false;
-			if (n.requiresCommit && v.path !== n.requiresCommit) return false;
-			const tier = n.earlyTier && bonds[n.earlyTier.who] >= n.earlyTier.min ? Math.min(n.minTier, n.earlyTier.tier) : n.minTier;
-			return v.tier >= tier;
-		};
+		const open = (n: TechNode): boolean => !done.has(n.id) && n.requires.every((r) => done.has(r)) && v.tier >= n.minTier;
 		const byId = new Map(this.content.tech.map((n) => [n.id, n]));
 		const mine = PRIORITY[this.tree].map((id) => byId.get(id)).filter((n): n is TechNode => !!n && open(n));
 		const need = v.tierNeed;
@@ -320,7 +297,7 @@ export class Player {
 		let pick = mine[0];
 		// Waiting on an expensive node while the next Level wants more nodes: fill with the cheapest open ones.
 		if (!pick || (v.researchPoints < pick.cost && short)) {
-			const cheap = this.content.tech.filter((n) => open(n) && !(n.requiresCommit && n.requiresCommit !== this.tree)).sort((a, b) => a.cost - b.cost);
+			const cheap = this.content.tech.filter((n) => open(n)).sort((a, b) => a.cost - b.cost);
 			if (!pick) pick = cheap[0];
 			else if (cheap[0] && cheap[0].cost <= v.researchPoints) pick = cheap[0];
 		}
@@ -330,40 +307,17 @@ export class Player {
 		}
 	}
 
-	private commit(v: SimView): void {
-		if (this.tree === "synthetic" || v.path !== null || v.tier < this.content.balance.ascension.minTier) return;
-		if (v.soul.commitBlock[this.tree] === null) this.submit({ type: "choosePath", path: this.tree });
-	}
-
 	// ─── Racks ─────────────────────────────────────────────────────────────────────────────────────────────────
 
-	/** Value of a rack to this policy: PFLOPS (revenue 0.5 + Singularity weight for the tree it is chasing) per dollar with its plant. */
-	private value(d: FacilityDef, v: SimView): number {
-		const w = this.content.balance.soul;
-		const line = d.line ?? "shared";
-		const starter = d.tier === "starter";
-		const committed = v.path === this.tree && this.tree !== "synthetic";
-		let sp: number;
-		if (committed) {
-			const table = w.spWeights[this.tree];
-			sp = starter && line === this.tree ? w.starterWeight : (table[line] ?? 0);
-			if (this.tree === "greentech") sp *= 0.55; // the green score, as played
-			sp -= 0.25 * (w.spWeights.synthetic[starter ? "shared" : line] ?? 0); // it also feeds the Lattice
-		} else sp = w.spWeights.synthetic[starter ? "shared" : line] ?? 0;
-		return ((d.rack?.pflops ?? 0) * (0.5 + Math.max(0, sp))) / (this.priced(d) * coolMult(d) + 1);
+	/** Value of a base rack: PFLOPS per dollar with its air plant (tree racks come from retrofits). */
+	private value(d: FacilityDef): number {
+		return (d.rack?.pflops ?? 0) / (this.priced(d) * coolMult(d) + 1);
 	}
 
+	/** The base rack to build: the best PFLOPS per dollar that the Level and research allow. */
 	private pickRack(v: SimView, budget: number): FacilityDef | null {
-		let cands = Object.values(this.content.facilities).filter((d) => isRack(d) && this.usable(d, v));
-		// A committed Bio / Green tower builds its own line (shared racks only scar it and feed the Lattice) once it has one.
-		if (this.tree !== "synthetic" && v.path === this.tree) {
-			// ...and until it has one a Green tower builds nothing new (every shared item scars it; the research is first in line).
-			// Bio is not scarred by shared racks, so it keeps growing on them meanwhile.
-			const own = cands.filter((d) => d.line === this.tree);
-			if (own.length || this.tree === "greentech") cands = own;
-		}
-		const afford = cands.filter((d) => d.cost * 1.3 <= budget);
-		return afford.sort((a, b) => this.value(b, v) - this.value(a, v))[0] ?? null;
+		const cands = Object.values(this.content.facilities).filter((d) => isRack(d) && isBaseRack(d) && this.usable(d, v) && d.cost * 1.3 <= budget);
+		return cands.sort((a, b) => this.value(b) - this.value(a))[0] ?? null;
 	}
 
 	private airCapacity(v: SimView, floor: number): { cap: number; load: number } {
@@ -450,8 +404,8 @@ export class Player {
 	}
 
 	/** Air handlers for the heat `d` adds to `floor`; true when capacity is there (or was just ordered). */
-	private ensureAir(v: SimView, occ: Uint8Array, d: FacilityDef, floor: number, budget: number): boolean {
-		const heat = d.rack ? d.rack.powerKw * (1 - d.rack.liquidFraction) + d.facilityKw : 0;
+	private ensureAir(v: SimView, occ: Uint8Array, d: FacilityDef, floor: number, budget: number, heatOverride?: number): boolean {
+		const heat = heatOverride ?? (d.rack ? d.rack.powerKw * (1 - d.rack.liquidFraction) + d.facilityKw : 0);
 		if (heat <= 0) return true;
 		const { cap, load } = this.airCapacity(v, floor);
 		const pend = this.pending.air.get(floor) ?? 0;
@@ -460,7 +414,7 @@ export class Player {
 			return true;
 		}
 		const defs = Object.values(this.content.facilities)
-			.filter((c) => c.kind === "crah" && !c.cooling?.bioOnly && c.cooling?.failureFactor === undefined && !c.unlock?.bond && this.usable(c, v) && c.cost <= budget)
+			.filter((c) => c.kind === "crah" && !c.cooling?.bioOnly && c.cooling?.failureFactor === undefined && c.id !== "ice_store" && this.usable(c, v) && c.cost <= budget)
 			.sort((a, b) => this.priced(a) / ((a.cooling?.capacityKw ?? 1) * (a.cooling?.freeAir ? 0.6 : 1)) - this.priced(b) / ((b.cooling?.capacityKw ?? 1) * (b.cooling?.freeAir ? 0.6 : 1)));
 		// The cheapest per kW whose reach covers a good share of the floor.
 		const racks = v.facilities.filter((f) => f.floor === floor && this.content.facilities[f.defId].kind === "rack");
@@ -534,7 +488,8 @@ export class Player {
 			.filter((c) => c.kind === "nutrient" && this.usable(c, v) && c.cost <= budget)
 			.sort((a, b) => b.cost / (b.bio?.nutrientCapacity ?? 1) - a.cost / (a.bio?.nutrientCapacity ?? 1));
 		const best = defs.sort((a, b) => a.cost / (a.bio?.nutrientCapacity ?? 1) - b.cost / (b.bio?.nutrientCapacity ?? 1))[0];
-		if (best) this.place(v, occ, best, this.plantFloors(v), (s) => s.x + (s.floor === -1 ? 0 : 100));
+		// One plant at a time; its supply counts at once, so a second rack in the same hour does not order a second plant.
+		if (best && this.place(v, occ, best, this.plantFloors(v), (s) => s.x + (s.floor === -1 ? 0 : 100))) this.pending.nutrient -= best.bio?.nutrientCapacity ?? 0;
 		return false;
 	}
 
@@ -592,7 +547,7 @@ export class Player {
 
 	/** Green: heat export and panels / masts until the green score is where a careful gardener keeps it. */
 	private greenPower(v: SimView, occ: Uint8Array, budget: number): void {
-		if (this.tree !== "greentech" || v.path !== "greentech") return;
+		if (this.tree !== "greentech" || this.opts.noClean) return;
 		const itKw = this.installedKw(v);
 		const hx = Object.values(this.content.facilities).find((d) => d.kind === "heat_export" && this.usable(d, v) && d.cost <= budget);
 		const hxCount = v.facilities.filter((f) => this.content.facilities[f.defId].kind === "heat_export").length;
@@ -610,7 +565,7 @@ export class Player {
 		if (v.greenScore >= 0.55 || gen >= 1.8 * load) return;
 		const avg = (d: FacilityDef): number => (d.power?.capacityKw ?? 1) * (d.kind === "wind" ? 0.6 : 0.37);
 		const defs = Object.values(this.content.facilities)
-			.filter((d) => (d.kind === "solar" || d.kind === "wind") && this.usable(d, v) && !d.unlock?.bond && d.cost <= budget)
+			.filter((d) => (d.kind === "solar" || d.kind === "wind") && this.usable(d, v) && d.id !== "microgrid_bea" && d.cost <= budget)
 			.sort((a, b) => a.cost / avg(a) - b.cost / avg(b));
 		const floorsAll = this.floorsWithSlab(v);
 		const roof = floorsAll.at(-1) ?? 1;
@@ -622,56 +577,54 @@ export class Player {
 		if (defs.length && this.remaining > 400_000) this.addFloor(v, "up");
 	}
 
-	private upgrades(v: SimView, occ: Uint8Array, budget: number): void {
-		void occ;
+	/**
+	 * Retrofit racks toward this policy's tree, best added tree-compute per dollar first. A rack goes only where its plant is ready:
+	 * pipe on its floor, loop or nutrient capacity, air for its heat, power for its draw (each ordered here when short).
+	 */
+	private retrofits(v: SimView, occ: Uint8Array, budget: number): void {
 		let left = budget;
 		let n = 0;
-		const racks = v.facilities
-			.filter((f) => !f.grown && isRack(this.content.facilities[f.defId]))
-			.sort((a, b) => (this.content.facilities[a.defId].rack?.pflops ?? 0) - (this.content.facilities[b.defId].rack?.pflops ?? 0));
-		for (const f of racks) {
+		const rows: { f: SimView["facilities"][number]; from: FacilityDef; to: FacilityDef; price: number; gain: number }[] = [];
+		for (const f of v.facilities) {
 			const from = this.content.facilities[f.defId];
-			const targets = Object.values(this.content.facilities)
-				.filter((d) => d.upgradesFrom === from.id && isRack(d) && this.usable(d, v) && this.value(d, v) >= this.value(from, v))
-				// A committed Bio / Green tower stops scarring its own tree: it only upgrades along its own line.
-				.filter((d) => this.tree === "synthetic" || v.path !== this.tree || d.line === this.tree)
-				.sort((a, b) => this.value(b, v) - this.value(a, v));
-			for (const to of targets) {
-				const price = Math.max(0, to.cost - 0.5 * from.cost);
-				if (price * 1.2 > left || price > this.remaining || n >= 2) continue;
-				// Only where its plant is there: a liquid rack needs its loop to have room, which `canBuild` knows nothing about.
-				if (to.rack && to.rack.liquidFraction > 0 && from.rack?.liquidFraction === 0) continue;
-				const cmd: SimCommand = { type: "upgradeFacility", facilityId: f.id, defId: to.id };
-				if (this.ok(cmd) && this.submit(cmd)) {
-					left -= price;
-					this.remaining -= price;
-					n++;
-					this.log.push(`upgrade ${from.id}->${to.id}`);
-					break;
-				}
+			if (f.grown || !isRetrofittable(from)) continue;
+			const t = retrofitTarget(this.content, from, this.tree);
+			if (!t || !this.usable(t.to, v)) continue;
+			const sameTree = !t.switching && from.line === this.tree;
+			rows.push({ f, from, to: t.to, price: retrofitCost(this.content, from, t.to), gain: (t.to.rack?.pflops ?? 0) - (sameTree ? (from.rack?.pflops ?? 0) : 0) });
+		}
+		rows.sort((a, b) => b.gain / (b.price + 1) - a.gain / (a.price + 1) || a.f.id - b.f.id);
+		for (const { f, from, to, price } of rows) {
+			if (n >= 3) break;
+			if (price * 1.15 > left || price > this.remaining) continue;
+			const rk = to.rack;
+			if (!rk) continue;
+			const dLiquid = rk.powerKw * rk.liquidFraction - (from.rack ? from.rack.powerKw * from.rack.liquidFraction : 0);
+			const dPower = rk.powerKw + to.facilityKw - ((from.rack?.powerKw ?? 0) + from.facilityKw);
+			const dAir = rk.powerKw * (1 - rk.liquidFraction) + to.facilityKw - ((from.rack ? from.rack.powerKw * (1 - from.rack.liquidFraction) : 0) + from.facilityKw);
+			// The pipe under it, on the whole floor, before anything else.
+			const need = to.placement?.needsCoolant ? "coolant" : to.placement?.needsNutrient ? "nutrient" : null;
+			if (need && !this.floorHasLayer(v, f.floor, need)) {
+				this.pipeHall(v, need, this.plantFloors(v)[0] ?? 0, f.floor);
+				continue;
+			}
+			if (dPower > 0 && !this.ensurePower(v, occ, dPower, left * 0.5)) continue;
+			if (dAir > 0 && !this.ensureAir(v, occ, to, f.floor, left * 0.4, dAir)) continue;
+			if (dLiquid > 0 && !this.ensureCoolant(v, occ, { ...to, rack: { ...rk, powerKw: dLiquid / Math.max(rk.liquidFraction, 0.01), liquidFraction: Math.max(rk.liquidFraction, 0.01) } }, left * 0.5)) continue;
+			if (rk.cooling === "bio" && !this.ensureNutrient(v, occ, to, left * 0.4)) continue;
+			const cmd: SimCommand = { type: "retrofit", facilityId: f.id, tree: this.tree };
+			if (this.ok(cmd) && this.submit(cmd)) {
+				left -= price;
+				this.remaining -= price;
+				n++;
+				this.log.push(`retrofit ${from.id}->${to.id}`);
+			} else if (process.env.SOULDEBUG) {
+				const why = this.sim.canBuild(cmd);
+				this.log.push(`retrofit #${f.id} refused: ${why.ok ? "(submit)" : why.reason}`);
 			}
 		}
 	}
 
-	/**
-	 * Sell back the weakest racks. A training job takes at most 8 racks, the first idle ones in build order, so a hall with many
-	 * weak old racks at the front cannot start the big offers (and a Singularity bar fed by shared racks gains nothing from them).
-	 * Retire a rack that is idle and under 40% of the strongest one, once at least 8 strong racks stand; the demolish refund is 50%.
-	 */
-	private retire(v: SimView, best: FacilityDef | null): void {
-		const racks = v.facilities.filter((f) => !f.grown && isRack(this.content.facilities[f.defId]));
-		const pf = (f: { defId: string }): number => this.content.facilities[f.defId].rack?.pflops ?? 0;
-		const top = racks.reduce((m, f) => Math.max(m, pf(f)), 0);
-		const strong = racks.filter((f) => pf(f) >= 0.4 * top).length;
-		const bv = best ? this.value(best, v) : 0;
-		const weak = racks
-			.filter((f) => f.jobId === null && pf(f) < 0.4 * top && (strong >= 8 || this.value(this.content.facilities[f.defId], v) < 0.4 * bv))
-			.sort((a, b) => pf(a) - pf(b) || a.id - b.id)
-			.slice(0, 3);
-		for (const f of weak) if (this.submit({ type: "demolish", floor: f.floor, x: f.x })) this.log.push(`retire ${f.defId}`);
-	}
-
-	private savingHours = 0;
 	/** Cash this hour's orders may still spend (cash minus the reserve, less what is already queued). */
 	private remaining = 0;
 
@@ -683,59 +636,40 @@ export class Player {
 		if (v.gameOver) return;
 		this.pending = { power: 0, air: new Map(), liquid: 0, nutrient: 0 };
 		this.research(v);
-		this.commit(v);
 		const occ = this.occupancy(v);
 		const budget = v.cash - this.reserve(v);
 		this.remaining = budget;
 		if (budget <= 0) return;
-		// Idle compute is dead money: do not build more while a quarter of it waits for work.
-		const racks = v.facilities.filter((f) => isRack(this.content.facilities[f.defId]) && f.enabled);
-		const installed = racks.reduce((s, f) => s + (this.content.facilities[f.defId].rack?.pflops ?? 0), 0);
-		const idle = racks.filter((f) => f.jobId === null && f.status !== "failed").reduce((s, f) => s + (this.content.facilities[f.defId].rack?.pflops ?? 0), 0);
-		const saturated = installed > 0 && idle / installed > 0.3;
 		let left = budget;
 		this.ensureStorage(v, occ, left * 0.25);
 		this.greenPower(v, occ, left * 0.6);
 		if (v.tier >= 3 && this.tree === "biotech") this.cleanHall(v, occ, left * 0.4);
-		// Saving: when a much better rack exists but is not affordable yet, do not spend on the lesser one.
-		const best = this.pickRack(v, Number.POSITIVE_INFINITY);
-		const now = this.pickRack(v, left);
-		const wantSave = !!best && (!now || this.value(best, v) > 1.35 * this.value(now, v)) && left > 0.2 * best.cost * 1.4;
-		this.savingHours = wantSave ? this.savingHours + 1 : 0;
-		const saving = wantSave && this.savingHours <= 150;
-		if (saving) return;
-		this.upgrades(v, occ, left * 0.5);
-		this.retire(v, best);
-		for (let i = 0; i < 4 && !saturated; i++) {
+		// Retrofits first: they are where the Singularity points come from. Base racks fill the tower and pay the bills.
+		this.retrofits(v, occ, left * 0.8);
+		const racks = v.facilities.filter((f) => isRack(this.content.facilities[f.defId]) && f.enabled);
+		const installed = racks.reduce((s, f) => s + (this.content.facilities[f.defId].rack?.pflops ?? 0), 0);
+		const idle = racks.filter((f) => f.jobId === null && f.status !== "failed").reduce((s, f) => s + (this.content.facilities[f.defId].rack?.pflops ?? 0), 0);
+		const saturated = installed > 0 && idle / installed > 0.3;
+		// Base racks waiting for their rung: keep a few, not a warehouse of them.
+		const waiting = v.facilities.filter((f) => !f.grown && isBaseRack(this.content.facilities[f.defId])).length;
+		const waitCap = this.tree === "synthetic" ? 5 : 4;
+		left = Math.min(left, this.remaining);
+		for (let i = 0; i < 4 && !saturated && waiting + i < waitCap + (v.tier <= 1 ? 4 : 0); i++) {
 			const d = this.pickRack(v, left);
 			if (!d) break;
-			if (best && this.value(d, v) < 0.6 * this.value(best, v)) break; // not worth building while the good ones wait on cash or room
 			const floor = this.prepareFloor(v, occ, d, left);
 			if (floor === null) break;
 			if (!this.ensurePower(v, occ, (d.rack?.powerKw ?? 0) + d.facilityKw, left * 0.5)) break;
 			if (!this.ensureAir(v, occ, d, floor, left * 0.4)) break;
-			if (d.rack?.cooling === "dlc" || d.rack?.cooling === "immersion") if (!this.ensureCoolant(v, occ, d, left * 0.5)) break;
-			if (d.rack?.cooling === "bio") if (!this.ensureNutrient(v, occ, d, left * 0.4)) break;
 			const racksHere = v.facilities.filter((f) => f.floor === floor && this.content.facilities[f.defId].kind === "rack");
 			const mid = racksHere.length ? racksHere.reduce((s, f) => s + f.x, 0) / racksHere.length : 20;
-			const s = this.place(v, occ, d, [floor], (p) => Math.abs(p.x - mid));
-			if (!s) break;
+			const s2 = this.place(v, occ, d, [floor], (p) => Math.abs(p.x - mid));
+			if (!s2) break;
 			left -= d.cost;
 			if (left < d.cost * 0.3) break;
 		}
 		// Spare parts and bots through the standing orders (set once), the clerk once it exists.
 		if (v.clerk.unlocked && !v.clerk.policy.enabled) this.submit({ type: "setClerk", policy: PERMISSIVE_CLERK });
-	}
-
-	/** Called at the start of each game day: the After-hours visit with the tree's champion, through the real command. */
-	dayStart(day: number): void {
-		if (day === this.day) return;
-		this.day = day;
-		const r = this.sim.submit({ type: "visitAdvisor", advisor: CHAMPION[this.tree] });
-		if (!r.ok) return; // a decision is open, or the lesson forbids it: skip today
-		this.sim.flush();
-		const d = this.sim.view().decision;
-		if (d) this.submit({ type: "resolveDecision", decisionId: d.id, choiceId: d.choices[0].id });
 	}
 
 	/** Accept an offer the way the harness always does (clerk off) or leave it to the clerk. */

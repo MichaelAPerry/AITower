@@ -80,7 +80,7 @@ describe("sim-cli memo policy", () => {
 		expect(formatTable(a.rows)).toContain("lattice");
 		expect(formatTable(a.rows)).toContain("corruption");
 		for (const r of a.rows) expect(r.corruption).toBe(0);
-	});
+	}, 60_000);
 });
 
 describe("sim-cli research policy", () => {

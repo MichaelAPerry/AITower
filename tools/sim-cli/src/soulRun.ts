@@ -1,19 +1,19 @@
 /**
  * npx tsx tools/sim-cli/src/soulRun.ts [scenario=starter] [days=60] [seeds=1] [policy=foreman]
  *
- * Prints the Soul once per day (SP, seals, bonds, path). `policy`:
- *   foreman    the old run: every standing order on, the Foreman builds (no tree policy);
- *   synthetic | biotech | greentech   the scripted player of tools/sim-cli/src/player.ts for that tree;
- *   all        the three trees, summarised as days to the SP target (docs/TREES.md section 5 targets: 25 / 38 / 44).
- * `seeds` is one seed or a comma list ("1,2,3"). Bond pace: the scripted policy adds +3 bond a day to the tree's champion (the
- * After-hours visit does not exist in the sim yet).
+ * Prints the Soul once per day (SP, seals, bonds, leading tree). `policy`:
+ *   foreman    every standing order on, the Foreman builds and retrofits toward Synthetic (no tree policy);
+ *   synthetic | biotech | greentech   the scripted player of tools/sim-cli/src/player.ts for that tree (base racks, retrofitted down it);
+ *   greennoclean   the Green player that builds no solar or wind (Green racks at the floor speed);
+ *   all        the three trees, summarised as days to the SP target (docs/REFRAME.md targets: 25 / 38 / 40).
+ * `seeds` is one seed or a comma list ("1,2,3").
  */
 import { type AscensionPath, type ContentDB, loadContent } from "@aitower/content";
 import { createSim, TICKS_PER_DAY, type SimView } from "@aitower/sim";
 import { allAutomation, AUTO_ACCEPT_MARGIN, bestMemoChoice, PERMISSIVE_CLERK, runHeadless, shouldAccept } from "./run";
 import { Player, type Tree } from "./player";
 
-export const TARGET_DAYS: Record<Tree, number> = { synthetic: 25, biotech: 38, greentech: 44 };
+export const TARGET_DAYS: Record<Tree, number> = { synthetic: 25, biotech: 40, greentech: 38 };
 
 export interface TreeRun {
 	tree: Tree;
@@ -22,7 +22,7 @@ export interface TreeRun {
 	daysTo1000: number | null;
 	/** The game over, if any, e.g. "victory singularity" or "bankrupt". */
 	over: string | null;
-	/** Day of the commit (null for Synthetic or never). */
+	/** Day the first rack of the tree was retrofitted (null if never). */
 	commitDay: number | null;
 	/** Day Level 2 / 3 / 4 / 5 were reached. */
 	levelDays: (number | null)[];
@@ -37,27 +37,27 @@ const r1 = (n: number): string => n.toFixed(1).padStart(7);
 export function rowOf(v: SimView): string {
 	const s = v.soul;
 	const b = s.bonds;
-	return `${String(v.day).padStart(3)} ${String(v.tier).padStart(4)} ${r1(v.pflops)} ${r1(s.sp.synthetic)} ${r1(s.sp.biotech)} ${r1(s.sp.greentech)} ${r1(s.seal.greentech).slice(1)} ${r1(s.seal.biotech).slice(1)}  ${[b.cass, b.bea, b.mel, b.luci].map((x) => String(Math.round(x)).padStart(3)).join("/")}  ${v.path ?? "-"} ${v.gameOver ? `GAME OVER ${v.gameOver.kind} ${v.gameOver.ending ?? ""}` : ""}`;
+	const rung = (t: AscensionPath): number => s.trees[t].rung;
+	return `${String(v.day).padStart(3)} ${String(v.tier).padStart(4)} ${r1(v.pflops)} ${r1(s.sp.synthetic)} ${r1(s.sp.biotech)} ${r1(s.sp.greentech)} ${r1(s.seal.greentech).slice(1)} ${r1(s.seal.biotech).slice(1)}  ${[b.cass, b.bea, b.mel, b.luci].map((x) => String(Math.round(x)).padStart(3)).join("/")}  ${rung("synthetic")}/${rung("biotech")}/${rung("greentech")} gs=${v.greenScore.toFixed(2)} ${v.gameOver ? `GAME OVER ${v.gameOver.kind} ${v.gameOver.ending ?? ""}` : ""}`;
 }
 
-export const HEADER = "day tier     PF  SPsyn  SPbio  SPgrn sealG sealB  bonds(c/b/m/l)  path";
+export const HEADER = "day tier     PF  SPsyn  SPbio  SPgrn sealG sealB  bonds(c/b/m/l)  rungs(s/b/g)";
 
 /** One scripted game of `tree` for up to `days` days. */
-export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, seed: number, days: number, onRow?: (row: string) => void): TreeRun {
+export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, seed: number, days: number, onRow?: (row: string) => void, opts: { noClean?: boolean } = {}): TreeRun {
 	const sim = createSim(content, scenario, seed);
-	const player = new Player(sim, content, tree);
+	const player = new Player(sim, content, tree, { noClean: opts.noClean });
 	const run: TreeRun = { tree, seed, daysTo1000: null, over: null, commitDay: null, levelDays: [null, null, null, null], final: { pf: 0, sp: { synthetic: 0, biotech: 0, greentech: 0 }, seal: { biotech: 0, greentech: 0 }, greenScore: 0, cash: 0 }, rows: [] };
-	// Standing orders: spare parts and bots only. Research, building and the commit are the player's.
+	// Standing orders: spare parts and bots only. Research, building and retrofits are the player's.
 	const orders = allAutomation(false);
 	orders.research.enabled = false;
 	orders.bots = { enabled: true, racksPerBot: 6, maxBots: 12 };
 	sim.submit({ type: "setAutomation", policy: orders });
 	const target = content.balance.soul.spTarget;
 	let lastTier = 1;
-	let pathSeen = false;
+	let started = false;
 	for (let day = 0; day < days; day++) {
 		for (let t = 0; t < TICKS_PER_DAY; t++) {
-			if (t === 720) player.dayStart(day); // After hours: the evening visit, once a day
 			const events = sim.step();
 			for (const e of events) {
 				if (e.type === "contractOffered") {
@@ -77,8 +77,8 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 					for (let l = lastTier + 1; l <= v.tier; l++) if (l >= 2 && l <= 5) run.levelDays[l - 2] = day + 1;
 					lastTier = v.tier;
 				}
-				if (!pathSeen && v.path !== null) {
-					pathSeen = true;
+				if (!started && v.soul.trees[tree].racks > 0) {
+					started = true;
 					run.commitDay = day + 1;
 				}
 				const sp = v.soul.sp[tree];
@@ -108,7 +108,7 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 }
 
 function summary(runs: TreeRun[]): string {
-	const lines = ["tree       seed  days>=1000  target  vs target   commit  L2 L3 L4 L5   PF@end  SPsyn SPbio SPgrn  greenScore  over"];
+	const lines = ["tree       seed  days>=1000  target  vs target   1st rack  L2 L3 L4 L5   PF@end  SPsyn SPbio SPgrn  greenScore  over"];
 	for (const r of runs) {
 		const days = r.daysTo1000;
 		const t = TARGET_DAYS[r.tree];
@@ -133,13 +133,14 @@ function main(argv: string[]): void {
 		runHeadless(c, scenario, Number(days), seeds[0], true, (v) => console.log(rowOf(v)));
 		return;
 	}
-	const trees: Tree[] = policy === "all" ? ["synthetic", "biotech", "greentech"] : [policy as Tree];
+	const noClean = policy === "greennoclean";
+	const trees: Tree[] = policy === "all" ? ["synthetic", "biotech", "greentech"] : noClean ? ["greentech"] : [policy as Tree];
 	const runs: TreeRun[] = [];
 	for (const tree of trees) {
 		for (const seed of seeds) {
 			const verbose = policy !== "all" && seeds.length === 1;
 			if (verbose) console.log(HEADER);
-			const r = scriptedRun(c, scenario, tree, seed, Number(days), verbose ? (row) => console.log(row) : undefined);
+			const r = scriptedRun(c, scenario, tree, seed, Number(days), verbose ? (row) => console.log(row) : undefined, { noClean });
 			runs.push(r);
 			if (policy === "all") console.error(`${tree} seed ${seed}: ${r.daysTo1000?.toFixed(1) ?? "never"} days`);
 		}
