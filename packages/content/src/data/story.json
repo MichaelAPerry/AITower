@@ -3925,13 +3925,7 @@
     "label": "Sure. What's it say?",
     "hint": "Sit with her.",
     "outcome": "You sat on the floor with your back to the pipe. It hummed through your coat.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4032,13 +4026,7 @@
     "label": "Is it the sensor or the chiller?",
     "hint": "Ask the real question.",
     "outcome": "She tapped the clipboard. Under 'cause' she'd written a question mark.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4141,13 +4129,7 @@
     "label": "Give me the fork.",
     "hint": "Share.",
     "outcome": "She slid the box across. The rice was cold. You finished it.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4258,13 +4240,7 @@
     "label": "Show me the noise.",
     "hint": "Listen with her.",
     "outcome": "You put your ear to the steel. It was cold. She watched your face, not the lift.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4371,13 +4347,7 @@
     "label": "Sit.",
     "hint": "Sit with her.",
     "outcome": "The cot sagged toward the middle. Neither of you did anything about that.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4488,13 +4458,7 @@
     "label": "I'll stay.",
     "hint": "Stay till it melts.",
     "outcome": "The frost went from the edges in. You watched it the whole way.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -4597,13 +4561,7 @@
     "label": "Hold the ladder.",
     "hint": "Steady it.",
     "outcome": "You held the ladder with both hands. She never looked down.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "bea",
@@ -4707,13 +4665,7 @@
     "label": "Egg's fine.",
     "hint": "Eat.",
     "outcome": "The egg was fine. She watched you take the first bite.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "bea",
@@ -4804,13 +4756,7 @@
     "label": "I wasn't looking.",
     "hint": "Look at the fern.",
     "outcome": "You studied the fern instead. It was a good fern.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "bea",
@@ -4907,13 +4853,7 @@
     "label": "I won't ask.",
     "hint": "Let it be.",
     "outcome": "You picked up a rag and wiped the lid. She let you.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "bea",
@@ -5017,11 +4957,6 @@
     "hint": "Join her.",
     "outcome": "The panel was warm through your jacket. She said nothing for a long time.",
     "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     },
      {
       "type": "flag",
       "id": "bea_roof_night"
@@ -5133,13 +5068,7 @@
     "label": "Touch it.",
     "hint": "Go closer.",
     "outcome": "It was cool and a bit damp. It moved, or you imagined it.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "bea",
@@ -5242,13 +5171,7 @@
     "label": "What's in it?",
     "hint": "Ask.",
     "outcome": "She turned the jar so the label faced you. The label was blank.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "mel",
@@ -5341,13 +5264,7 @@
     "label": "Can I have a pair?",
     "hint": "Ask.",
     "outcome": "She handed you a pair. They were too big. She didn't have a smaller size.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "mel",
@@ -5450,13 +5367,7 @@
     "label": "Read me a date.",
     "hint": "Listen.",
     "outcome": "She read the label on the third rack. A Tuesday in March.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "mel",
@@ -5563,13 +5474,7 @@
     "label": "I like it.",
     "hint": "Say so.",
     "outcome": "It was nobody's favourite song. You stayed for all of it.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "mel",
@@ -5672,13 +5577,7 @@
     "label": "I'll take a damp one.",
     "hint": "Go along.",
     "outcome": "You dried your hands on it, side by side. She laughed through her nose.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "mel",
@@ -5782,11 +5681,6 @@
     "hint": "Offer it.",
     "outcome": "She took it very carefully, as if it were a sample. Her glove was off.",
     "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 1
-     },
      {
       "type": "flag",
       "id": "mel_wrist"
@@ -5898,13 +5792,7 @@
     "label": "I'll sit.",
     "hint": "Stay a while.",
     "outcome": "She turned a page. She didn't send you away.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "luci",
@@ -6000,13 +5888,7 @@
     "label": "Hand me the tape.",
     "hint": "Help anyway.",
     "outcome": "You held a receipt flat while she taped. It was for the sad sandwich.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "luci",
@@ -6103,13 +5985,7 @@
     "label": "Can I look?",
     "hint": "Ask nicely.",
     "outcome": "She held it up to the lamp. The gold was worn through at the grip.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "luci",
@@ -6221,13 +6097,7 @@
     "label": "I'll stay.",
     "hint": "Keep her company.",
     "outcome": "You sat across from her. At midnight the cursor blinked and the numbers stopped.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "luci",
@@ -6339,13 +6209,7 @@
     "label": "I'm looking.",
     "hint": "Look.",
     "outcome": "You looked. It was gold, and it focused a fraction after the lamp moved.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "luci",
@@ -6458,11 +6322,6 @@
     "hint": "Take it.",
     "outcome": "Her hand was warm. It shook against yours, then didn't.",
     "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     },
      {
       "type": "flag",
       "id": "luci_hand"
@@ -6704,11 +6563,11 @@
   "title": "Eighty-One Paces",
   "body": "I come down here when I can't add up.",
   "weight": 1,
-  "minTier": 2,
+  "minTier": 3,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 8640
+   "atLeast": 11520
   },
   "location": "D-2 · SERVER FLOOR · NIGHT",
   "lines": [
@@ -6839,7 +6698,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 6,
+  "minDay": 8,
   "minBond": {
    "advisor": "luci",
    "atLeast": 60
@@ -6852,11 +6711,11 @@
   "title": "The Pen",
   "body": "I did the sums. All of them.",
   "weight": 1,
-  "minTier": 3,
+  "minTier": 4,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 14400
+   "atLeast": 20160
   },
   "location": "F2 · LEDGER ROOM · DAWN",
   "lines": [
@@ -6994,7 +6853,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 10,
+  "minDay": 14,
   "minBond": {
    "advisor": "luci",
    "atLeast": 80
@@ -7158,11 +7017,11 @@
   "title": "First Memory",
   "body": "I wanted to ask you something. It's not a hypothetical this time.",
   "weight": 1,
-  "minTier": 2,
+  "minTier": 3,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 8640
+   "atLeast": 11520
   },
   "location": "B-3 · WET LAB · NIGHT",
   "lines": [
@@ -7297,7 +7156,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 6,
+  "minDay": 8,
   "minBond": {
    "advisor": "mel",
    "atLeast": 60
@@ -7310,11 +7169,11 @@
   "title": "The Second Stool",
   "body": "I know you're not someone who stays in labs.",
   "weight": 1,
-  "minTier": 3,
+  "minTier": 4,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 14400
+   "atLeast": 20160
   },
   "location": "B-3 · WET LAB · BEFORE DAWN",
   "lines": [
@@ -7444,7 +7303,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 10,
+  "minDay": 14,
   "minBond": {
    "advisor": "mel",
    "atLeast": 80
@@ -7604,11 +7463,11 @@
   "title": "The Good Wrench",
   "body": "It's the tap. It's been dripping a month.",
   "weight": 1,
-  "minTier": 2,
+  "minTier": 3,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 8640
+   "atLeast": 11520
   },
   "location": "C-4 · ROOF GARDEN",
   "lines": [
@@ -7751,7 +7610,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 6,
+  "minDay": 8,
   "minBond": {
    "advisor": "bea",
    "atLeast": 60
@@ -7764,11 +7623,11 @@
   "title": "First Light",
   "body": "Okay. Okay.",
   "weight": 1,
-  "minTier": 3,
+  "minTier": 4,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 14400
+   "atLeast": 20160
   },
   "location": "C-4 · ROOF · DAWN",
   "lines": [
@@ -7902,7 +7761,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 10,
+  "minDay": 14,
   "minBond": {
    "advisor": "bea",
    "atLeast": 80
@@ -8034,11 +7893,11 @@
   "title": "Sticky Note",
   "body": "You fell asleep at your desk.",
   "weight": 1,
-  "minTier": 2,
+  "minTier": 3,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 8640
+   "atLeast": 11520
   },
   "location": "B1 · PLANT ROOM · 06:00",
   "lines": [
@@ -8162,7 +8021,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 6,
+  "minDay": 8,
   "minBond": {
    "advisor": "cass",
    "atLeast": 60
@@ -8175,11 +8034,11 @@
   "title": "The Cold Room",
   "body": "I stood in here once. Years ago, another job.",
   "weight": 1,
-  "minTier": 3,
+  "minTier": 4,
   "cooldownDays": 0,
   "trigger": {
    "kind": "tick",
-   "atLeast": 14400
+   "atLeast": 20160
   },
   "location": "B1 · COLD ROOM",
   "lines": [
@@ -8313,7 +8172,7 @@
    }
   ],
   "quiet": true,
-  "minDay": 10,
+  "minDay": 14,
   "minBond": {
    "advisor": "cass",
    "atLeast": 80

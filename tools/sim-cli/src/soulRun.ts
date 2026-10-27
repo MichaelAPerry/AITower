@@ -56,8 +56,8 @@ export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, se
 	let lastTier = 1;
 	let pathSeen = false;
 	for (let day = 0; day < days; day++) {
-		player.dayStart(day);
 		for (let t = 0; t < TICKS_PER_DAY; t++) {
+			if (t === 720) player.dayStart(day); // After hours: the evening visit, once a day
 			const events = sim.step();
 			for (const e of events) {
 				if (e.type === "contractOffered") {

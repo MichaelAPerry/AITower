@@ -109,6 +109,19 @@ describe("scene conditions: minBond and bondGap", () => {
 	});
 });
 
+describe("quiet scenes and the daily decision slot", () => {
+	it("a quiet story scene announces itself but does not spend the day's slot for an operational decision; an ordinary one does", () => {
+		const q = sim(withScenes(scene("q")));
+		q.state.lastDecisionDay = -1;
+		expect(steps(q, 20).some((e) => e.type === "decisionIssued")).toBe(true);
+		expect(q.state.lastDecisionDay).toBe(-1);
+		const n = sim(withScenes(scene("n", { quiet: false })));
+		n.state.lastDecisionDay = -1;
+		steps(n, 20);
+		expect(n.state.lastDecisionDay).toBe(0);
+	});
+});
+
 describe("After hours", () => {
 	const visit = (s: SimImpl, advisor: AdvisorId): { ok: boolean; reason?: string } => {
 		const r = s.submit({ type: "visitAdvisor", advisor });
@@ -150,11 +163,9 @@ describe("After hours", () => {
 		expect(s.submit({ type: "visitAdvisor", advisor: "nobody" as AdvisorId })).toMatchObject({ ok: false });
 	});
 
-	it("the first answer of every visit scene is the warm one: +1 to the visited advisor and nothing on the others", () => {
+	it("the first answer of every visit scene is the plain one: it adds no bond to the +3 the visit earned, so the pace is exactly +3 a day", () => {
 		for (const e of base.events.filter((x) => x.trigger?.kind === "afterHours")) {
-			const first = e.choices[0];
-			const bonds = first.effects.filter((f) => f.type === "bond");
-			expect(bonds, e.id).toEqual([{ type: "bond", advisor: e.advisor, amount: 1 }]);
+			expect(e.choices[0].effects.filter((f) => f.type === "bond"), e.id).toEqual([]);
 		}
 	});
 

@@ -68,7 +68,8 @@ export function openDecision(state: SimState, e: EventDef, events: SimEvent[], s
 	state.decision = decision;
 	if (!paced) return;
 	state.lastIssuedDay[e.id] = dayOf(state.tick);
-	state.lastDecisionDay = dayOf(state.tick);
+	// A quiet scene (a milestone, a rival, the confession) is not advice: it never spends the day's slot for an operational decision.
+	if (!e.quiet) state.lastDecisionDay = dayOf(state.tick);
 	events.push({ type: "decisionIssued", decisionId: decision.id, eventId: e.id });
 }
 

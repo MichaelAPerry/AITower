@@ -284,6 +284,8 @@ export class Player {
 
 	/** The choice a trusting, careful player makes: advisors she trusts first, never a commit to the wrong tree, no new seal on her own tree. */
 	chooseDecision(def: EventDef): string {
+		// After-hours visits, route scenes and the confession are not advice: the script takes the first, ordinary answer.
+		if (def.quiet) return def.choices[0].id;
 		const champ: AdvisorId = CHAMPION[this.tree];
 		const score = (c: EventDef["choices"][number]): number => {
 			let s = 0;
