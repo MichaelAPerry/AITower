@@ -1,100 +1,159 @@
-/** Pure helpers for the Soul HUD (docs/SOUL.md): the three Singularity bars and what each advisor's trust reveals. */
-import { type AdvisorId, type AscensionPath, bondStage, type ContentDB, type SealedTree } from "@aitower/content";
-import type { SoulView } from "@aitower/sim";
+/**
+ * Pure helpers for the Soul HUD (docs/SOUL.md, docs/REFRAME.md): the three Singularity bars in the top strip and the Trees panel
+ * (one column per tree: points and days to win, the rung ladder, what the next rung needs, the speed factor and the seal).
+ */
+import { type AdvisorId, type AscensionPath, CHAMPION, type ContentDB, type FacilityDef, treeLadder, TREES } from "@aitower/content";
+import type { SimView, SoulView, TreeView } from "@aitower/sim";
 
 export const TREE_NAME: Record<AscensionPath, string> = { synthetic: "LATTICE", biotech: "FLESH", greentech: "GARDEN" };
-export const TREE_LONG: Record<AscensionPath, string> = { synthetic: "The Singularity", biotech: "The Flesh", greentech: "The Garden" };
+export const TREE_LONG: Record<AscensionPath, string> = { synthetic: "The Lattice", biotech: "The Flesh", greentech: "The Garden" };
+/** The branch word on the Retrofit buttons and in the panel. */
+export const TREE_BRANCH: Record<AscensionPath, string> = { synthetic: "Synthetic", biotech: "Bio", greentech: "Green" };
 export const TREE_COLOR: Record<AscensionPath, string> = { synthetic: "var(--tree-syn)", biotech: "var(--tree-bio)", greentech: "var(--tree-green)" };
+/** The placeholder tint of a tree's racks in the world (hex, for the renderer and the build cards). */
+export const TREE_TINT: Record<AscensionPath, string> = { synthetic: "#6fd3ff", biotech: "#ff4f6d", greentech: "#9be564" };
 
 export interface TreeBar {
 	tree: AscensionPath;
 	label: string;
 	/** 0..1 of the target. */
 	frac: number;
-	/** "active" accrues now; "dormant" needs the commitment; "sealed" is closed for good. */
-	state: "active" | "dormant" | "sealed";
+	/** "active" accrues; "closed" took its seal to the limit: no new retrofits, and its racks stopped scoring. */
+	state: "active" | "closed";
 	title: string;
 }
 
-/** The three bars, in display order: the Lattice first (it always fills). */
-export function treeBars(soul: SoulView, path: AscensionPath | null): TreeBar[] {
-	return (["synthetic", "biotech", "greentech"] as const).map((tree) => {
+/** The three bars, in display order. */
+export function treeBars(soul: SoulView): TreeBar[] {
+	return TREES.map((tree) => {
 		const frac = Math.min(1, soul.sp[tree] / soul.spTarget);
-		const sealed = tree !== "synthetic" && soul.sealedOut.includes(tree);
-		const state = sealed ? "sealed" : tree === "synthetic" || path === tree ? "active" : "dormant";
+		const closed = soul.trees[tree].closed;
 		const pts = `${Math.floor(soul.sp[tree])} / ${soul.spTarget} Singularity points`;
-		const title =
-			tree === "synthetic"
-				? `The Lattice: ${pts}. Every running rack that is not on the Bio or Green line feeds it. At ${soul.spTarget} the world ends this way.`
-				: sealed
-					? `${TREE_LONG[tree]} rejected this tower. It is closed for good.`
-					: state === "dormant"
-						? `${TREE_LONG[tree]}: ${pts}. It only grows after you commit to it on FORM A-5 (Level 3), with its champion's trust.`
-						: `${TREE_LONG[tree]}: ${pts}.`;
-		return { tree, label: TREE_NAME[tree], frac, state, title };
+		const title = closed
+			? `${TREE_LONG[tree]}: ${pts}. Its seal is full: no new retrofits, and its racks have stopped scoring. Click for the Trees panel.`
+			: `${TREE_LONG[tree]}: ${pts}. Only ${TREE_BRANCH[tree]} racks fill it. At ${soul.spTarget} the world ends this way. Click for the Trees panel.`;
+		return { tree, label: TREE_NAME[tree], frac, state: closed ? "closed" : "active", title };
 	});
 }
 
-/** What an advisor tells you about the hidden seal, given her bond (null = she says nothing). */
-export function revealedSeal(soul: SoulView, advisor: AdvisorId): { tree: SealedTree; value: number }[] | null {
-	if (soul.bonds[advisor] < soul.bondReveal) return null;
-	const trees: SealedTree[] = advisor === "bea" ? ["greentech"] : advisor === "mel" ? ["biotech"] : advisor === "cass" ? ["greentech", "biotech"] : [];
-	return trees.map((tree) => ({ tree, value: soul.seal[tree] }));
-}
+const num = (n: number): string => Math.round(n).toLocaleString("en-US");
 
-/** The words for a tree's seal on FORM A-5 and in the dossier: never the number unless trust allows it. */
-export function sealWords(soul: SoulView, tree: SealedTree): string {
-	if (soul.sealedOut.includes(tree) || soul.seal[tree] >= soul.sealMax) return "closed to you";
-	const f = soul.seal[tree] / soul.sealMax;
-	return f < 0.25 ? "open" : f < 0.5 ? "marked" : f < 0.75 ? "scarred" : "nearly closed";
-}
-
-/** A facility's secret numbers as shown on a build card, by the advisors who trust you enough to say (Luci only ever mentions money). */
-export function sealNotes(soul: SoulView, seal: Partial<Record<SealedTree, number>> | undefined): { advisor: AdvisorId; tree: SealedTree; value: number }[] {
-	const out: { advisor: AdvisorId; tree: SealedTree; value: number }[] = [];
-	for (const tree of ["greentech", "biotech"] as const) {
-		const v = seal?.[tree] ?? 0;
-		if (v === 0) continue;
-		const champ: AdvisorId = tree === "greentech" ? "bea" : "mel";
-		if (soul.bonds[champ] >= soul.bondReveal) out.push({ advisor: champ, tree, value: v });
-		else if (soul.bonds.cass >= soul.bondReveal) out.push({ advisor: "cass", tree, value: v });
-	}
+/** The unresearched nodes `techId` still needs, prerequisites first (including itself), as "Name (cost RP)". */
+export function researchSteps(content: Pick<ContentDB, "tech">, researched: ReadonlySet<string>, techId: string): { id: string; name: string; cost: number }[] {
+	const byId = new Map(content.tech.map((n) => [n.id, n]));
+	const out: { id: string; name: string; cost: number }[] = [];
+	const seen = new Set<string>();
+	const visit = (id: string): void => {
+		const n = byId.get(id);
+		if (!n || researched.has(id) || seen.has(id)) return;
+		seen.add(id);
+		for (const r of n.requires) visit(r);
+		out.push({ id: n.id, name: n.name, cost: n.cost });
+	};
+	visit(techId);
 	return out;
 }
 
-/** The champion's line on FORM A-5 for her tree, in her voice. */
-export function champLine(soul: SoulView, tree: AscensionPath): string {
-	if (tree === "synthetic") return "Luci: “Sign here. It's already filling, darling. It always was.”";
-	const who = tree === "biotech" ? "Mel" : "Bea";
-	const champ = tree === "biotech" ? "mel" : "bea";
-	const words = sealWords(soul, tree);
-	if (words === "closed to you") return tree === "biotech" ? "Mel: “It said no. I didn't know it could.”" : "Bea: “Nothing grows on the roof any more. You did that.”";
-	if (soul.bonds[champ] < soul.bondCommit) return tree === "biotech" ? `${who}: “I don't know you well enough to let you in. Not yet.”` : `${who}: “Prove you mean it. Then ask me again.”`;
-	return tree === "biotech" ? `${who}: “The tissue is ${words}. It will have you. So will I.”` : `${who}: “The ground is ${words}. We can still do this. Together.”`;
+/** One rung of a tree's ladder. */
+export interface RungRow {
+	rung: number;
+	defId: string;
+	name: string;
+	level: number;
+	pflops: number;
+	/** "held": a rack of this rung or higher stands; "next": the one to work toward; "later". */
+	status: "held" | "next" | "later";
 }
 
-// ─── The dating side ──────────────────────────────────────────────────────────
+export interface TreeCard {
+	tree: AscensionPath;
+	name: string;
+	branch: string;
+	color: string;
+	champion: AdvisorId;
+	sp: number;
+	target: number;
+	frac: number;
+	/** "+38 points a day · about 16 days to go", or why there is no rate. */
+	rate: string;
+	ladder: RungRow[];
+	/** "Next: research Event Array (8,000 RP), then retrofit racks to NM-2." */
+	next: string;
+	/** Factor lines, plainest first. */
+	factor: string[];
+	/** The seal meter, or null for the Lattice. */
+	seal: { value: number; max: number; closed: boolean; hurting: string[] } | null;
+	racks: number;
+}
 
-
-/** "Friend", "Close"... for a bond. */
-export const stageName = (bond: number): string => bondStage(bond).name;
-
-/** What `advisor` remembers about you, newest first, at most `max` lines (from the flags your choices set). */
-export function memoriesFor(flags: readonly string[], content: Pick<ContentDB, "memories">, advisor: AdvisorId, max = 3): string[] {
-	const out: string[] = [];
-	for (let i = flags.length - 1; i >= 0 && out.length < max; i--) {
-		const m = content.memories.find((x) => x.flag === flags[i] && x.advisor === advisor);
-		if (m) out.push(m.text);
+function nextStep(view: Pick<SimView, "tier" | "techResearched">, content: ContentDB, tv: TreeView): string {
+	if (tv.closed) return `The ${TREE_BRANCH[tv.tree]} branch is closed: its seal is full. No new retrofits.`;
+	const ladder = treeLadder(content, tv.tree);
+	const rack: FacilityDef | undefined = ladder.find((d) => (d.rung ?? 0) === tv.rung + 1);
+	if (!rack) return tv.racks > 0 ? "That is the top rung. Retrofit the rest of your racks." : "No racks on this branch.";
+	const done = new Set(view.techResearched);
+	const needs: string[] = [];
+	if (rack.tech) {
+		const steps = researchSteps(content, done, rack.tech);
+		if (steps.length) needs.push(`research ${steps.map((s) => `${s.name} (${num(s.cost)} RP)`).join(", then ")}`);
 	}
-	return out;
+	if (view.tier < rack.unlockTier) needs.push(`reach Level ${rack.unlockTier} (${num(content.balance.tiers.pflops[rack.unlockTier - 1])} petaflops installed)`);
+	return needs.length ? `Next: ${needs.join(" and ")}, then retrofit racks to ${rack.name}.` : `Next: retrofit racks to ${rack.name}.`;
 }
 
-/** Her taste in gifts, shown as she warms to you: liked at Friend (30), disliked at Close (50). Names only, never the numbers. */
-export function tasteFor(content: Pick<ContentDB, "gifts" | "facilities">, advisor: AdvisorId, bond: number): { likes: string | null; dislikes: string | null } {
-	const g = content.gifts.find((x) => x.advisor === advisor);
-	if (!g) return { likes: null, dislikes: null };
-	return { likes: bond >= 30 ? (content.facilities[g.liked]?.name ?? null) : null, dislikes: bond >= 50 ? (content.facilities[g.disliked]?.name ?? null) : null };
+function factorLines(soul: SoulView, tv: TreeView): string[] {
+	const pct = (n: number): string => `${Math.round(n * 100)}%`;
+	if (tv.tree === "synthetic") return ["Speed ×1.00. Nothing slows the Lattice."];
+	const sealMul = 1 - Math.min(1, (tv.seal ?? 0) / soul.sealMax);
+	if (tv.tree === "biotech") return [`Seal ${Math.round(tv.seal ?? 0)} → Flesh speed ×${sealMul.toFixed(2)}.`];
+	const g = soul.green;
+	const lines = [`Clean power ${pct(g.cleanPower)} → Garden speed ×${g.speed.toFixed(2)}${g.speed < 0.95 ? ": add PV or wind" : ""}`];
+	if (sealMul < 1) lines.push(`Seal ${Math.round(tv.seal ?? 0)} takes it down to ×${(g.speed * sealMul).toFixed(2)}.`);
+	return lines;
 }
 
-/** Texts not yet answered. */
-export const unreadCount = (soul: Pick<SoulView, "inbox">): number => soul.inbox.filter((m) => m.tapped === null).length;
+function rateText(tv: TreeView): string {
+	if (tv.closed) return "Closed. No points are coming in.";
+	if (tv.spPerDay <= 0) return tv.racks > 0 ? "No points yet: your racks on this branch are idle or down." : "No points yet. Retrofit a rack to this branch.";
+	const days = tv.daysToWin;
+	return `+${num(tv.spPerDay)} points a day${days !== null ? ` · about ${num(Math.max(1, days))} days to go` : ""}`;
+}
+
+/** Everything the Trees panel shows, from the view and the content. */
+export function treeCards(view: Pick<SimView, "soul" | "tier" | "techResearched">, content: ContentDB): TreeCard[] {
+	const soul = view.soul;
+	return TREES.map((tree) => {
+		const tv = soul.trees[tree];
+		const ladder: RungRow[] = treeLadder(content, tree).map((d) => ({
+			rung: d.rung ?? 0,
+			defId: d.id,
+			name: d.name,
+			level: d.unlockTier,
+			pflops: d.rack?.pflops ?? 0,
+			status: (d.rung ?? 0) <= tv.rung ? "held" : (d.rung ?? 0) === tv.rung + 1 ? "next" : "later",
+		}));
+		return {
+			tree,
+			name: TREE_LONG[tree],
+			branch: TREE_BRANCH[tree],
+			color: TREE_COLOR[tree],
+			champion: CHAMPION[tree],
+			sp: tv.sp,
+			target: soul.spTarget,
+			frac: Math.min(1, tv.sp / soul.spTarget),
+			rate: rateText(tv),
+			ladder,
+			next: nextStep(view, content, tv),
+			factor: factorLines(soul, tv),
+			seal: tv.seal === null ? null : { value: tv.seal, max: soul.sealMax, closed: tv.closed, hurting: tv.hurting.map((h) => `${h.name}${h.count > 1 ? ` ×${h.count}` : ""}`) },
+			racks: tv.racks,
+		};
+	});
+}
+
+/** The advisor with the highest bond, if it is at the epilogue level (the one who speaks at the end). */
+export function epilogueAdvisor(soul: Pick<SoulView, "bonds" | "bondEpilogue">): AdvisorId | null {
+	let best: AdvisorId | null = null;
+	for (const id of ["cass", "bea", "mel", "luci"] as const) if (best === null || soul.bonds[id] > soul.bonds[best]) best = id;
+	return best !== null && soul.bonds[best] >= soul.bondEpilogue ? best : null;
+}

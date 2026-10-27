@@ -13,15 +13,12 @@ import { BuildInspector } from "./build/BuildInspector";
 import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker, WIDE } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
 import { nextDrawer } from "./calm/calm";
-import { AscensionSheet } from "./ascension/AscensionSheet";
-import { ascensionDue } from "./ascension/ascension";
 import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { GameOverScreen } from "./gameover/GameOverScreen";
 import { gameOverToShow, keepDismissed, overKey } from "./gameover/gameOver";
 import { DecisionCard } from "./advisors/DecisionCard";
-import { DatingDock } from "./soul/DatingDock";
-import { Dossier } from "./soul/Dossier";
+import { TreesPanel } from "./soul/TreesPanel";
 import { reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { TitleScreen } from "./title/TitleScreen";
@@ -69,7 +66,7 @@ export function Hud({ store, content, title }: HudProps) {
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
 	// FORM A-5 (ascension) pauses the same way: the choice is irreversible, so nothing may happen while it is read.
-	const [ascensionOpen, setAscensionOpen] = useState(false);
+	const [_ascensionOpen, setAscensionOpen] = useState(false);
 	const ascension = useMemo(() => createMenuController(store, setAscensionOpen), [store]);
 	// The quarterly audit sheet does not pause. `auditRef` lets the Esc handler (a stable object) see the current report.
 	const [audit, setAudit] = useState<QuarterReport | null>(null);
@@ -80,6 +77,8 @@ export function Hud({ store, content, title }: HudProps) {
 	const uiRef = useRef(ui);
 	uiRef.current = ui;
 	const drawerCloser = useMemo(() => ({ isOpen: () => uiRef.current.drawer !== null || uiRef.current.paletteOpen || !!uiRef.current.help, close: () => setUiState((u) => ({ ...u, drawer: null, paletteOpen: false, buildHover: null, help: false })) }), []);
+	// The Trees panel does not pause the game; Esc closes it.
+	const treesCloser = useMemo(() => ({ isOpen: () => uiRef.current.trees === true, close: () => setUiState((u) => ({ ...u, trees: false })) }), []);
 	const [menuSection, setMenuSection] = useState<MenuSection>("save");
 	const [titleOpen, setTitleOpen] = useState(() => title ?? (typeof location !== "undefined" && showTitleAtBoot(location.search)));
 	const [dismissedOver, setDismissedOver] = useState<string | null>(null);
@@ -120,7 +119,6 @@ export function Hud({ store, content, title }: HudProps) {
 			/* storage blocked */
 		}
 	}, []);
-	useEffect(() => () => ascension.close(), [ascension]);
 	useHudKeyboard(
 		store,
 		{
@@ -135,7 +133,7 @@ export function Hud({ store, content, title }: HudProps) {
 		},
 		menu,
 		useCallback(() => titleOpenRef.current || overRef.current || crawlRef.current !== null, []),
-		{ ascension, audit: auditSheet, drawer: drawerCloser },
+		{ audit: auditSheet, trees: treesCloser, drawer: drawerCloser },
 	);
 
 	// Game over: shown once per game. Bankrupt and absorbed are final; victory can be dismissed (sandbox).
@@ -211,12 +209,6 @@ export function Hud({ store, content, title }: HudProps) {
 		if (alertsOpen) setUi({ alertsSeenTick: tick });
 	}, [alertsOpen, tick, setUi]);
 
-	// The sheet has nothing to offer once a path is chosen (or after a load of a game that has one): close it.
-	const ascensionStale = ascensionOpen && !ascensionDue(state.view, content);
-	useEffect(() => {
-		if (ascensionStale) ascension.close();
-	}, [ascensionStale, ascension]);
-
 	const openResearch = useCallback(
 		(techId?: string) => {
 			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
@@ -230,7 +222,7 @@ export function Hud({ store, content, title }: HudProps) {
 	useEffect(() => {
 		if (decisionId !== null) setUiState((u) => (u.drawer || u.paletteOpen ? { ...u, drawer: null, paletteOpen: false, buildHover: null } : u));
 	}, [decisionId]);
-	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch, openAscension: ascension.open, openAudit: setAudit };
+	const props: PanelProps = { store, content, state, ui, setUi, openMenu: () => openMenuAt("save"), openResearch, openAudit: setAudit };
 	return (
 		<TermProvider open={openHandbookAt}>
 		<div
@@ -253,25 +245,12 @@ export function Hud({ store, content, title }: HudProps) {
 				<div className="ui-right">
 					{ui.paletteOpen && (!inLesson || ui.buildHover) ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
-				{!titleOpen && !crawl && !over && !lesson.active && state.view.soul && <DatingDock store={store} content={content} state={state} />}
 				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} teacher={lesson.teacher} teacherAdvisor={lesson.advisor} />}
 				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />
 				<Drawer {...props} />
 			</div>
-			{ui.dossier && !titleOpen && !over && <Dossier view={state.view} content={content} onClose={() => setUi({ dossier: false })} />}
+			{ui.trees && !titleOpen && !over && state.view.soul && <TreesPanel view={state.view} content={content} onClose={() => setUi({ trees: false })} />}
 			{audit && !titleOpen && <AuditSheet report={audit} onClose={() => setAudit(null)} />}
-			{ascensionOpen && !titleOpen && !over && (
-				<AscensionSheet
-					store={store}
-					content={content}
-					view={state.view}
-					onClose={ascension.close}
-					onFiled={(f) => {
-						setUi({ pathFiled: f });
-						ascension.close();
-					}}
-				/>
-			)}
 			{showNotice && <DesktopNotice store={store} onDismiss={() => setNoticeDismissed(true)} />}
 			{titleOpen && (
 				<TitleScreen

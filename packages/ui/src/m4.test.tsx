@@ -184,16 +184,17 @@ describe("top strip", () => {
 		expect(droughtChip({ drought: false }, content)).toBeNull();
 		expect(droughtChip({ drought: true }, content)?.title).toMatch(/Dunkelflaute/);
 	});
-	it("shows the three Singularity bars, the committed tree active and a sealed one marked", () => {
+	it("shows the three Singularity bars, a closed tree marked", () => {
 		const { store, content } = setup();
 		const v = store.get().view;
 		const gauges = () => findAll(TopStrip(panelProps(store, content)), (el) => el.type === SoulGauge);
 		expect(gauges()).toHaveLength(1);
-		const bars = treeBars({ ...v.soul, sp: { synthetic: 500, biotech: 0, greentech: 100 }, sealedOut: ["biotech"] }, "greentech");
-		expect(bars.map((b) => [b.tree, b.state, b.frac])).toEqual([["synthetic", "active", 0.5], ["biotech", "sealed", 0], ["greentech", "active", 0.1]]);
+		const trees = { ...v.soul.trees, biotech: { ...v.soul.trees.biotech, closed: true } };
+		const soul = { ...v.soul, sp: { synthetic: 500, biotech: 0, greentech: 100 }, trees };
+		const bars = treeBars(soul);
+		expect(bars.map((b) => [b.tree, b.state, b.frac])).toEqual([["synthetic", "active", 0.5], ["biotech", "closed", 0], ["greentech", "active", 0.1]]);
 		expect(bars[0].title).toContain("1000 Singularity points");
-		expect(treeBars(v.soul, null)[2].state).toBe("dormant");
-		expect(textOf(SoulGauge({ view: { ...v, soul: { ...v.soul, sealedOut: ["biotech"] } }, onOpen: () => {} }))).toContain("SEALED");
+		expect(textOf(SoulGauge({ view: { ...v, soul }, onOpen: () => {} }))).toContain("CLOSED");
 	});
 	it("the green score gauge names the Garden's target from the content", () => {
 		const { content } = setup();

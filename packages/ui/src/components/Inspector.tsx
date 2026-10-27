@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { type Balance, type ContentDB, upgradeCost, upgradesTo } from "@aitower/content";
+import { type Balance, BRANCH_NAME, type ContentDB, isRetrofittable, retrofitCost, retrofitTarget, treeOf, TREES, upgradeCost, upgradesTo } from "@aitower/content";
 import type { GameStore } from "@aitower/shared";
 import type { BotState, FacilityView, SimView } from "@aitower/sim";
 import { fmtDuration, fmtEnergy, fmtMoney, fmtPct, fmtPflops, fmtPower, fmtTemp } from "../format";
@@ -9,6 +9,7 @@ import { rackProblem } from "../objective/diagnose";
 import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { Dial } from "./Dial";
+import { TREE_COLOR, TREE_LONG } from "../soul/soul";
 
 const botStateLabel: Record<BotState, string> = {
 	idle: "idle",
@@ -177,6 +178,68 @@ export function UpgradeActions({ store, content, f }: { store: GameStore; conten
 	);
 }
 
+/**
+ * Retrofit (docs/REFRAME.md): three branch buttons, one per tree. Each says what the rack becomes, the price (the new rack less half of
+ * this one) and, when the sim says no, why (Level, research, the pipe under it, a closed tree, cash). A base rack goes to rung 1 of the
+ * branch; a tree rack goes down its own tree; another branch starts again at rung 1.
+ */
+export function RetrofitSection({ store, content, f, onTrees }: { store: GameStore; content: ContentDB; f: FacilityView; onTrees?: () => void }) {
+	const from = content.facilities[f.defId];
+	if (!from || f.grown || !isRetrofittable(from)) return null;
+	const own = treeOf(from);
+	return (
+		<div className="ui-retrofit" data-tut="retrofit">
+			<div className="ui-retrofit-head">
+				<span className="ui-label">Retrofit</span>
+				{onTrees && (
+					<button type="button" className="ui-link" onClick={onTrees}>
+						The three trees
+					</button>
+				)}
+			</div>
+			<p className="ui-dim ui-retrofit-note">{own ? `This is a ${BRANCH_NAME[own]} rack, rung ${from.rung}. It scores only for ${TREE_LONG[own]}.` : "A base rack scores for no tree. Retrofit it in place to start scoring."}</p>
+			{TREES.map((tree) => {
+				const t = retrofitTarget(content, from, tree);
+				const name = BRANCH_NAME[tree];
+				if (!t) {
+					return (
+						<div key={tree} className="ui-retrofit-row is-done" data-tree={tree} style={{ ["--tree" as string]: TREE_COLOR[tree] }}>
+							<button type="button" className="ui-btn ui-retrofit-btn" disabled>
+								{name}
+							</button>
+							<p className="ui-upgrade-why">Already the last rung of {TREE_LONG[tree]}.</p>
+						</div>
+					);
+				}
+				const cmd = { type: "retrofit", facilityId: f.id, tree } as const;
+				const can = store.canBuild(cmd);
+				const cost = retrofitCost(content, from, t.to);
+				return (
+					<div key={tree} className={`ui-retrofit-row ${can.ok ? "" : "is-locked"}`} data-tree={tree} style={{ ["--tree" as string]: TREE_COLOR[tree] }}>
+						<button
+							type="button"
+							className="ui-btn ui-retrofit-btn"
+							disabled={!can.ok}
+							title={can.ok ? `Retrofit in place to ${t.to.name}` : can.reason}
+							onClick={() => {
+								const r = store.dispatch(cmd);
+								if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `retrofit:${r.reason}` });
+							}}
+						>
+							<b>{name}</b> → {t.to.name} · {fmtMoney(cost)}
+						</button>
+						<p className="ui-retrofit-what">
+							{t.to.rack ? `${fmtPflops(t.to.rack.pflops)} from ${fmtPower(t.to.rack.powerKw)}` : ""}
+							{t.switching ? ` · starts again at rung 1 (a ${BRANCH_NAME[own as NonNullable<typeof own>]} rack loses its rungs)` : ` · rung ${t.to.rung}`}
+						</p>
+						{!can.ok && <p className="ui-upgrade-why">{can.reason}</p>}
+					</div>
+				);
+			})}
+		</div>
+	);
+}
+
 function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f: FacilityView }) {
 	const { view } = state;
 	const def = content.facilities[f.defId];
@@ -257,6 +320,7 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 				</Row>
 			</div>
 			<NetSummaries view={view} f={f} />
+			<RetrofitSection store={store} content={content} f={f} onTrees={() => setUi({ trees: true })} />
 			<UpgradeActions store={store} content={content} f={f} />
 			<div className="ui-insp-actions">
 				<Toggle

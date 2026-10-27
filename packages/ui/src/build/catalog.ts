@@ -1,5 +1,5 @@
 /** Catalog lookup shared by the build bar, the catalog grid and the Inspector. */
-import { type BuildCategory, type CatalogueGroup, catalogueGroup, type ContentDB, type FacilityDef, GROUP_LABEL } from "@aitower/content";
+import { type BuildCategory, type ContentDB, type FacilityDef, isRetrofitOnly } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import type { Tool } from "@aitower/shared";
 import { conduitUnitCost, toolKey } from "../tools/controller";
@@ -10,15 +10,9 @@ export const structure = (content: ContentDB): CatalogItem[] => structureItems(c
 /** Buildable facilities of a category: those the player can build now first (by level, then cost), locked ones separately. */
 export function categoryDefs(content: ContentDB, view: SimView, cat: BuildCategory): { open: FacilityDef[]; locked: FacilityDef[] } {
 	const defs = Object.values(content.facilities)
-		.filter((d) => d.category === cat && !d.growth && !d.retired)
+		.filter((d) => d.category === cat && !d.growth && !d.retired && !isRetrofitOnly(d))
 		.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 	return { open: defs.filter((d) => !lockReason(d, view, content)), locked: defs.filter((d) => lockReason(d, view, content)) };
-}
-
-/** The tag a card wears besides its tier badge: Starter, Specialist, Signature or Synthetic (Shared items wear none). */
-export function groupTag(def: FacilityDef): { group: CatalogueGroup; label: string } | null {
-	const group = catalogueGroup(def);
-	return group === "shared" ? null : { group, label: GROUP_LABEL[group] };
 }
 
 /** Find a catalog item by key (a structure tool key or a facility id). */
@@ -42,4 +36,7 @@ export function tabForItem(item: CatalogItem): Tab {
 	return item.category;
 }
 
-export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !lockReason(d, view, content);
+export const isBuildable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !isRetrofitOnly(d) && !lockReason(d, view, content);
+
+/** Reachable now (Level and research), whether it is built from scratch or by retrofit: for comparing what a rack could become. */
+export const isReachable = (d: FacilityDef, view: SimView, content: ContentDB): boolean => !d.growth && !d.retired && !lockReason(d, view, content);

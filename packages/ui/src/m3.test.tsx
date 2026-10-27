@@ -2,8 +2,6 @@ import type { OrganoidSpec } from "@aitower/content";
 import { type CellPointerEvent, DEFAULT_SETTINGS } from "@aitower/shared";
 import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AscensionForm } from "./ascension/AscensionForm";
-import { ascensionDue, filePath, pathPending, pathRows, pathToConfirm } from "./ascension/ascension";
 import { bandText, bioWords, decisionStain, organoidBand, showGrowthGauge, tissueState, traitInfo } from "./bio/bio";
 import { NextChip, Ticker } from "./calm/Parts";
 import { BuildBar } from "./build/BuildBar";
@@ -159,82 +157,6 @@ describe("dossier", () => {
 	});
 });
 
-describe("ascension", () => {
-	it("is due at the minimum Clearance with no path chosen, and not before or after", () => {
-		const { content, store } = setup();
-		const v = store.get().view;
-		expect(ascensionDue({ ...v, tier: 4, path: null }, content)).toBe(false);
-		expect(ascensionDue({ ...v, tier: 5, path: null }, content)).toBe(true);
-		expect(ascensionDue({ ...v, tier: 5, path: "biotech" }, content)).toBe(false);
-	});
-	it("CURRENT ORDERS says so and offers the form; nothing once the choice is pending or made", () => {
-		const { content, store } = setup();
-		store.setTier(5);
-		const v = store.get().view;
-		const o = currentObjective(v, content, () => ({ ok: true }));
-		expect(o).toMatchObject({ action: "ascension", title: expect.stringContaining("Ascension") });
-		expect(currentObjective(v, content, () => ({ ok: true }), { path: "biotech", tick: v.tick }).action).toBeUndefined();
-		let opened = 0;
-		const tree = NextChip(panelProps(store, content, { openAscension: () => opened++ }));
-		click(findButton(tree, /ASCENSION/));
-		expect(opened).toBe(1);
-	});
-	it("lists the content's paths and stamps the unavailable ones COMING SOON", () => {
-		const { content, store } = setup();
-		const rows = pathRows(content, store.get().view);
-		expect(rows.map((r) => [r.id, r.available])).toEqual([["biotech", true], ["greentech", false], ["synthetic", false]]);
-		const html = renderToString(<AscensionForm rows={rows} tier={5} pending={null} onPick={() => {}} onConfirm={() => {}} onCancel={() => {}} onClose={() => {}} />);
-		expect(html).toContain("WHICH WAY THE WORLD ENDS");
-		expect(html.match(/ui-asc-soon/g)?.length).toBe(2);
-		expect(pathToConfirm(content, "greentech")).toBeNull();
-		expect(pathToConfirm(content, "biotech")).toBe("biotech");
-	});
-	it("choosing asks for confirmation, and only confirming dispatches choosePath", () => {
-		const { content, store } = setup();
-		store.setTier(5);
-		const sent: unknown[] = [];
-		const orig = store.dispatch;
-		store.dispatch = (c) => {
-			sent.push(c);
-			return orig(c);
-		};
-		const rows = pathRows(content, store.get().view);
-		let picked: string | null = null;
-		let confirmed = 0;
-		const form = (pending: typeof picked) => AscensionForm({ rows, tier: 5, pending: pending as never, onPick: (id) => (picked = id), onConfirm: () => confirmed++, onCancel: () => {}, onClose: () => {} });
-		click(findButton(form(null), /Choose/));
-		expect(picked).toBe("biotech");
-		expect(sent).toEqual([]); // nothing dispatched by picking
-				const bar0 = findAll(form("biotech" as never), (e) => typeof e.props.onYes === "function")[0];
-		expect(bar0.props.question).toBe("Commit to Biotech? This cannot be undone.");
-		expect(findAll(form(null), (e) => typeof e.props.onYes === "function")).toHaveLength(0);
-		const bar = findAll(form("biotech" as never), (e) => typeof e.props.onYes === "function")[0];
-		(bar.props.onYes as () => void)();
-		expect(confirmed).toBe(1);
-		const filed = filePath(store, content, "biotech");
-		expect(sent).toEqual([{ type: "choosePath", path: "biotech" }]);
-		expect(filed).toMatchObject({ path: "biotech" });
-		store.advance(1);
-		expect(store.get().view.path).toBe("biotech");
-		expect(store.get().log.some((e) => e.event.type === "pathChosen")).toBe(true);
-	});
-	it("refuses an unavailable path and a second choice without dispatching a wrong command", () => {
-		const { content, store } = setup();
-		store.setTier(5);
-		expect(filePath(store, content, "greentech")).toBeNull();
-		expect(filePath(store, content, "biotech")).not.toBeNull();
-		store.advance(1);
-		expect(filePath(store, content, "biotech")).toBeNull(); // the sim says it was already chosen
-	});
-	it("a filed choice is pending only until the next tick", () => {
-		const f = { path: "biotech" as const, tick: 100 };
-		expect(pathPending(f, { path: null, tick: 100 })).toBe(true);
-		expect(pathPending(f, { path: null, tick: 101 })).toBe(false); // the sim refused it
-		expect(pathPending(f, { path: "biotech", tick: 101 })).toBe(false);
-		expect(pathPending(null, { path: null, tick: 1 })).toBe(false);
-	});
-});
-
 describe("endings", () => {
 	const { content } = setup();
 	const over = (kind: "victory" | "absorbed" | "bankrupt", ending?: "flesh" | "garden" | "absorbed") => ({ kind, tick: 1, ...(ending ? { ending } : {}) });
@@ -279,7 +201,6 @@ describe("event wording", () => {
 		expect(describeEvent({ type: "botMutated", botId: 1, trait: "tendriled" }, v, content, "off").text).toMatch(/mutated \(tendriled\)/);
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content).text).toMatch(/recertified/);
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content, "off").text).toMatch(/no longer be reversed/);
-		expect(describeEvent({ type: "pathChosen", path: "biotech" }, v, content).text).toMatch(/path committed: Biotech/);
 		expect(describeEvent({ type: "gameOver", kind: "absorbed", ending: "absorbed" }, v, content).text).toMatch(/reclassified as a Compute Authority asset/);
 		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "flesh" }, v, content).text).toMatch(/The Flesh Remembers/);
 	});

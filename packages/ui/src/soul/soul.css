@@ -1,4 +1,4 @@
-/* The Soul HUD (docs/SOUL.md): three Singularity bars in the top strip and the advisors' dossier. */
+/* The Soul HUD (docs/SOUL.md, docs/REFRAME.md): three Singularity bars in the top strip and the Trees panel. */
 .aitower-hud .soul-gauge {
 	display: grid;
 	gap: 2px;
@@ -37,131 +37,11 @@
 	text-align: right;
 	color: var(--text-dim);
 }
-.aitower-hud .soul-bar.is-dormant {
-	opacity: 0.5;
-}
-.aitower-hud .soul-bar.is-sealed .soul-bar-track {
+.aitower-hud .soul-bar.is-closed .soul-bar-track {
 	background: repeating-linear-gradient(-45deg, #3a0d18 0 3px, #10104a 3px 6px);
 }
-.aitower-hud .soul-bar.is-sealed .soul-bar-pct {
+.aitower-hud .soul-bar.is-closed .soul-bar-pct {
 	color: var(--bad);
-}
-
-.aitower-hud .soul-dossier {
-	position: fixed;
-	inset: 0;
-	z-index: 110;
-	display: grid;
-	place-items: center;
-	overflow: auto;
-	padding: 24px;
-	background: color-mix(in srgb, var(--bg) 82%, transparent);
-	pointer-events: auto;
-	outline: none;
-}
-.aitower-hud .soul-dossier-grid {
-	display: grid;
-	grid-template-columns: repeat(2, minmax(0, 520px));
-	gap: 16px;
-	position: relative;
-}
-.aitower-hud .soul-card {
-	display: grid;
-	grid-template-columns: 170px 1fr;
-	gap: 0;
-	background: #eef0ff;
-	border: 3px solid var(--adv);
-	box-shadow: 0 0 0 2px #05051e, 4px 4px 0 rgba(0, 0, 0, 0.6);
-}
-.aitower-hud .soul-card-art {
-	overflow: hidden;
-	display: flex;
-	align-items: flex-end;
-	justify-content: center;
-}
-.aitower-hud .soul-card-art img {
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-	object-position: 50% 0%;
-	max-height: 290px;
-}
-.aitower-hud .soul-card-box {
-	margin: 8px;
-	padding: 10px 12px;
-	display: grid;
-	gap: 6px;
-	align-content: start;
-	font: 13px/1.35 var(--f-body);
-	color: var(--text);
-}
-.aitower-hud .soul-card-box h3 {
-	margin: 0;
-	padding-bottom: 4px;
-	border-bottom: 1px solid var(--pc-rule);
-	font: 16px/1.1 var(--f-display);
-	color: var(--text);
-}
-.aitower-hud .soul-card-name {
-	font: 15px/1 var(--f-display);
-	font-weight: 400;
-	color: var(--adv);
-}
-.aitower-hud .soul-card-box p {
-	margin: 0;
-}
-.aitower-hud .soul-card-box dl {
-	margin: 0;
-	display: grid;
-	gap: 4px;
-	padding: 6px;
-	border: 1px solid var(--pc-rule-in);
-}
-.aitower-hud .soul-card-box dl div {
-	display: grid;
-	grid-template-columns: 76px 1fr;
-	align-items: center;
-	gap: 8px;
-}
-.aitower-hud .soul-card-box dt {
-	font: 13px/1 var(--f-display);
-	color: var(--text-dim);
-}
-.aitower-hud .soul-card-box dd {
-	margin: 0;
-}
-.aitower-hud .soul-stat {
-	display: block;
-	height: 9px;
-	background: repeating-linear-gradient(90deg, #10104a 0 5px, #05051e 5px 7px);
-}
-.aitower-hud .soul-stat i {
-	display: block;
-	height: 100%;
-	background: repeating-linear-gradient(90deg, var(--adv) 0 5px, transparent 5px 7px);
-}
-.aitower-hud .soul-card-secret {
-	color: var(--warn);
-	font-size: 12px;
-}
-.aitower-hud .soul-dossier-close {
-	grid-column: 1 / -1;
-	justify-self: center;
-	padding: 6px 18px;
-	font: 15px/1 var(--f-display);
-}
-@media (max-width: 1000px) {
-	.aitower-hud .soul-dossier-grid {
-		grid-template-columns: minmax(0, 520px);
-	}
-}
-@media (max-width: 560px) {
-	.aitower-hud .soul-card {
-		grid-template-columns: 1fr;
-	}
-	.aitower-hud .soul-card-art img {
-		max-height: 200px;
-	}
 }
 
 /* Keep the strip on one line at 1280: the Level readout truncates rather than running under its neighbours. */
@@ -182,7 +62,7 @@
 	gap: 4px;
 }
 
-/* Build card: the tree line and the advisors' word on an item's secret numbers. */
+/* Build card and rack inspector: the tree line of a rack. */
 .aitower-hud .soul-notes {
 	display: grid;
 	gap: 4px;
@@ -192,135 +72,168 @@
 	font: 12px/1 var(--f-display);
 	letter-spacing: 0.1em;
 }
-.aitower-hud .soul-note {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-	margin: 0;
-	font: 12px/1.3 var(--f-body);
+
+/* The Trees panel: three columns, one per tree. */
+.aitower-hud .trees-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 110;
+	display: grid;
+	place-items: center;
+	overflow: auto;
+	padding: 24px;
+	background: color-mix(in srgb, var(--bg) 82%, transparent);
+	pointer-events: auto;
+	outline: none;
+}
+.aitower-hud .trees-panel {
+	position: relative;
+	display: grid;
+	gap: 12px;
+	width: min(1180px, 100%);
+	padding: 14px 18px 16px;
+	font: 14px/1.35 var(--f-body);
 	color: var(--text);
 }
-.aitower-hud .soul-note b {
-	font-weight: 400;
-	color: var(--adv);
+.aitower-hud .trees-title h2 {
+	margin: 0 0 2px;
+	font: 18px/1 var(--f-display);
+	letter-spacing: 0.1em;
 }
-
-/* The dating side: stage, memories, tastes. */
-.aitower-hud .soul-card-memory {
-	margin: 6px 0 2px;
-	font-size: 12px;
-}
-.aitower-hud .soul-card-memory ul {
-	margin: 2px 0 0;
-	padding-left: 16px;
-}
-.aitower-hud .soul-card-memory p {
-	margin: 2px 0 0;
+.aitower-hud .trees-title p {
+	margin: 0;
 	color: var(--text-dim);
 }
-.aitower-hud .soul-card-taste {
-	font-size: 12px;
-	color: var(--text-dim);
-	margin: 2px 0;
+.aitower-hud .trees-cols {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 12px;
 }
-
-/* After hours, texts and the gift prompt: a small dock above the advisor strip. */
-.aitower-hud .dating-dock {
-	position: absolute;
-	left: calc(76px + var(--gap) * 2);
-	bottom: calc(var(--gap) * 2 + 30px + 66px);
-	z-index: 6;
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
-	align-items: flex-start;
-	pointer-events: none;
-}
-.aitower-hud .dating-dock > * {
-	pointer-events: auto;
-}
-.aitower-hud .dating-bar {
-	display: flex;
-	gap: 6px;
-}
-.aitower-hud .dating-btn {
-	padding: 4px 10px;
-	font: 12px/1 var(--f-display);
-	letter-spacing: 0.06em;
-}
-.aitower-hud .dating-btn.is-ready {
-	animation: dating-pulse 2.4s ease-in-out infinite;
-}
-@keyframes dating-pulse {
-	50% {
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 55%, transparent);
+@media (max-width: 1000px) {
+	.aitower-hud .trees-cols {
+		grid-template-columns: minmax(0, 1fr);
 	}
 }
-.aitower-hud.is-reduced-motion .dating-btn.is-ready {
-	animation: none;
-}
-.aitower-hud .dating-card {
+.aitower-hud .trees-col {
 	display: grid;
-	gap: 8px;
-	padding: 8px 10px;
-	max-width: 420px;
-	border: 1px solid var(--adv, var(--pc-rule));
-	font-size: 13px;
+	align-content: start;
+	gap: 10px;
+	padding: 10px 12px;
+	background: color-mix(in srgb, var(--tree) 6%, #05051e);
+	border: 1px solid color-mix(in srgb, var(--tree) 55%, transparent);
 }
-.aitower-hud .dating-card header {
+.aitower-hud .trees-head {
 	display: flex;
-	justify-content: space-between;
 	align-items: center;
 	gap: 10px;
 }
-.aitower-hud .dating-card p {
+.aitower-hud .trees-head h3 {
 	margin: 0;
+	color: var(--tree);
+	font: 16px/1 var(--f-display);
+	letter-spacing: 0.08em;
 }
-.aitower-hud .dating-faces {
-	display: flex;
-	gap: 8px;
-}
-.aitower-hud .dating-face {
-	display: grid;
-	justify-items: center;
-	gap: 2px;
-	padding: 6px 8px;
-	background: none;
-	color: var(--text);
-	border: 2px solid transparent;
-	cursor: pointer;
-	font: inherit;
-}
-.aitower-hud .dating-face:hover,
-.aitower-hud .dating-face:focus-visible {
-	border-color: var(--adv);
-	outline: none;
-}
-.aitower-hud .dating-face small {
+.aitower-hud .trees-head small,
+.aitower-hud .trees-sp small {
 	color: var(--text-dim);
+	font-size: 12px;
 }
-.aitower-hud .dating-texts {
-	list-style: none;
+.aitower-hud .trees-sp {
+	display: grid;
+	gap: 4px;
+}
+.aitower-hud .trees-sp b {
+	font: 20px/1 var(--f-display);
+}
+.aitower-hud .trees-track {
+	display: block;
+	height: 8px;
+	background: #10104a;
+	box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tree) 40%, transparent);
+}
+.aitower-hud .trees-track i {
+	display: block;
+	height: 100%;
+	background: var(--tree);
+}
+.aitower-hud .trees-track.is-seal i {
+	background: var(--bad);
+}
+.aitower-hud .trees-rate {
+	color: var(--text);
+}
+.aitower-hud .trees-ladder {
+	display: grid;
+	gap: 3px;
 	margin: 0;
 	padding: 0;
+	list-style: none;
+}
+.aitower-hud .trees-ladder li {
 	display: grid;
-	gap: 8px;
-	max-height: 260px;
-	overflow: auto;
-}
-.aitower-hud .dating-texts li {
-	display: flex;
-	gap: 8px;
-	border-left: 2px solid var(--adv);
-	padding-left: 6px;
-}
-.aitower-hud .dating-taps {
-	display: inline-flex;
+	grid-template-columns: 28px 1fr auto;
+	align-items: baseline;
 	gap: 6px;
-	flex-wrap: wrap;
-	margin-top: 4px;
-}
-.aitower-hud .dating-back,
-.aitower-hud .dating-empty {
+	padding: 3px 6px;
+	border-left: 3px solid color-mix(in srgb, var(--tree) 25%, transparent);
 	color: var(--text-dim);
+}
+.aitower-hud .trees-ladder li.is-held {
+	border-left-color: var(--tree);
+	color: var(--text);
+}
+.aitower-hud .trees-ladder li.is-next {
+	border-left-color: var(--tree);
+	background: color-mix(in srgb, var(--tree) 14%, transparent);
+	color: var(--text);
+}
+.aitower-hud .trees-rung {
+	color: var(--tree);
+	font: 12px/1 var(--f-display);
+}
+.aitower-hud .trees-meta {
+	font-size: 12px;
+	white-space: nowrap;
+}
+.aitower-hud .trees-next {
+	margin: 0;
+	padding: 6px 8px;
+	background: color-mix(in srgb, var(--tree) 10%, transparent);
+	border: 1px dashed color-mix(in srgb, var(--tree) 50%, transparent);
+}
+.aitower-hud .trees-factor p,
+.aitower-hud .trees-hurt {
+	margin: 0 0 3px;
+}
+.aitower-hud .trees-hurt span {
+	color: var(--bad);
+}
+.aitower-hud .trees-seal {
+	display: grid;
+	gap: 4px;
+	padding-top: 8px;
+	border-top: 1px solid color-mix(in srgb, var(--tree) 30%, transparent);
+}
+.aitower-hud .trees-seal-row {
+	display: grid;
+	grid-template-columns: 40px 1fr auto;
+	align-items: center;
+	gap: 8px;
+	font: 12px/1 var(--f-display);
+}
+.aitower-hud .trees-seal.is-closed .trees-seal-row b {
+	color: var(--bad);
+}
+.aitower-hud .trees-bonds {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px 14px;
+	color: var(--text-dim);
+	font-size: 13px;
+}
+.aitower-hud .trees-bond {
+	color: var(--text);
+}
+.aitower-hud .trees-close {
+	justify-self: end;
 }

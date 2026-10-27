@@ -70,15 +70,15 @@ export function InsightsPanel(props: PanelProps) {
 					{view.soul && (
 						<section className="ins-card" aria-label="The Singularity">
 							<h3 className="ins-h">The Singularity</h3>
-							{treeBars(view.soul, view.path).map((t) => (
+							{treeBars(view.soul).map((t) => (
 								<div key={t.tree} className="ins-tree" title={t.title}>
 									<span className="ins-k" style={{ color: TREE_COLOR[t.tree] }}>
-										{TREE_LONG[t.tree]} {t.state === "sealed" ? "· closed" : t.state === "dormant" ? "· not committed" : ""}
+										{TREE_LONG[t.tree]} {t.state === "closed" ? "· closed" : ""}
 									</span>
 									<Meter value={t.frac} tone={t.tree === "synthetic" ? "warn" : "good"} height={6} />
 								</div>
 							))}
-							<p className="ins-p">The first tree to fill ends the game. The Lattice fills from every rack that is not on the Bio or Green line, whatever you intend. Click the bars at the top for your advisors' dossier.</p>
+							<p className="ins-p">The first tree to fill ends the game. Each fills only from racks you have retrofitted down it; base racks score for none. Click the bars at the top for the Trees panel.</p>
 						</section>
 					)}
 

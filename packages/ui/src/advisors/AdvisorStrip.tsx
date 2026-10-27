@@ -32,7 +32,7 @@ export function Say({ text }: { text: string }): ReactNode {
 }
 
 /** Carry out a line's action in the HUD. */
-export function runAction(a: AdvisorAction, p: Pick<PanelProps, "store" | "content" | "setUi" | "openResearch" | "openAscension">): void {
+export function runAction(a: AdvisorAction, p: Pick<PanelProps, "store" | "content" | "setUi" | "openResearch">): void {
 	const { store, content, setUi } = p;
 	if ("focus" in a && a.focus) store.focus(a.focus);
 	switch (a.kind) {
@@ -56,11 +56,8 @@ export function runAction(a: AdvisorAction, p: Pick<PanelProps, "store" | "conte
 		case "research":
 			p.openResearch(a.techId ?? cheapestAvailable(store.get().view, content)?.id);
 			return;
-		case "ascension":
-			p.openAscension();
-			return;
-		case "dossier":
-			setUi({ dossier: true, paletteOpen: false, drawer: null, buildHover: null });
+		case "trees":
+			setUi({ trees: true, paletteOpen: false, drawer: null, buildHover: null });
 			return;
 	}
 }

@@ -1,7 +1,7 @@
 import type { BuildCategory, ContentDB, FacilityDef } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { leadingPath, preselectedPath } from "./ascension/ascension";
+import { leadingPath } from "./ascension/ascension";
 import { chipParts, effectChip } from "./calm/calm";
 import { lockText, paletteDefs } from "./components/BuildPalette";
 
@@ -12,8 +12,8 @@ const content = {
 	),
 	tech: [{ id: "central_stores", name: "Central Stores" }],
 	paths: [
-		{ id: "biotech", name: "Biotech", available: true },
-		{ id: "greentech", name: "Greentech", available: false },
+		{ id: "biotech", name: "Biotech" },
+		{ id: "greentech", name: "Greentech" },
 	],
 } as unknown as ContentDB;
 const view = { tier: 2, researched: [] } as unknown as SimView;
@@ -41,10 +41,6 @@ describe("path affinity", () => {
 		expect(leadingPath({ biotech: 0.2, greentech: 0.5, synthetic: 0.3 })).toBe("greentech");
 		expect(leadingPath({ biotech: 0, greentech: 0, synthetic: 0 })).toBeNull();
 		expect(leadingPath({ biotech: 0.5, greentech: 0.5, synthetic: 0 })).toBeNull();
-	});
-	it("pre-selects the leader only when it can be chosen", () => {
-		expect(preselectedPath(content, { biotech: 0.6, greentech: 0.2, synthetic: 0.2 })).toBe("biotech");
-		expect(preselectedPath(content, { biotech: 0.1, greentech: 0.8, synthetic: 0.1 })).toBeNull();
 	});
 	it("renders affinity effects as path chips", () => {
 		expect(effectChip({ type: "affinity", path: "biotech", amount: 5 })).toBe("Flesh +5");

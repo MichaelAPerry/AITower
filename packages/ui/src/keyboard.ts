@@ -56,8 +56,8 @@ export interface KeyEnv {
 	openSearch?: () => void;
 	/** The research sheet: R toggles it (opening pauses the game, closing restores the speed). */
 	research?: MenuController;
-	/** FORM A-5, the ascension sheet: modal like research, but only Esc acts (its own handler closes it too). */
-	ascension?: MenuController;
+	/** The Trees panel: Esc closes it; the game keeps running under it. */
+	trees?: Closable;
 	/** The quarterly audit sheet: only Esc closes it; the game keeps running under it. */
 	audit?: Closable;
 	/** The open edge drawer or build palette: Esc closes it before cancelling the tool. */
@@ -73,7 +73,7 @@ export interface KeyEnv {
 export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 	const a = keyAction(key);
 	if (!a) return false;
-	const sheets = { research: env.research, ascension: env.ascension, audit: env.audit, drawer: env.drawer };
+	const sheets = { research: env.research, audit: env.audit, trees: env.trees, drawer: env.drawer };
 	if (env.menu.isOpen()) {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		return a.type === "escape";
@@ -83,11 +83,6 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 		if (a.type === "escape") applyEscape(store, env.menu, sheets);
 		else if (a.type === "drawer" && a.id === "research") env.research.close();
 		return a.type === "escape" || (a.type === "drawer" && a.id === "research");
-	}
-	// The ascension sheet is modal as well: only Esc acts, and it closes the sheet.
-	if (env.ascension?.isOpen()) {
-		if (a.type === "escape") applyEscape(store, env.menu, sheets);
-		return a.type === "escape";
 	}
 	const s = store.get();
 	if (s.speed !== 0) env.lastSpeed.current = s.speed;
@@ -128,15 +123,15 @@ export function runKey(store: GameStore, key: string, env: KeyEnv): boolean {
 }
 
 /** `blocked()` is true while a full-screen notice (title screen, game over) owns the keyboard: no game hotkeys then. */
-export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: DrawerId) => void; togglePalette: () => void; toggleHelp?: () => void; openSearch?: () => void }, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; ascension?: MenuController; audit?: Closable; drawer?: Closable } = {}): void {
+export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: DrawerId) => void; togglePalette: () => void; toggleHelp?: () => void; openSearch?: () => void }, menu: MenuController, blocked: () => boolean = () => false, sheets: { research?: MenuController; audit?: Closable; trees?: Closable; drawer?: Closable } = {}): void {
 	const lastSpeed = useRef<Speed>(1);
 	const toggleRef = useRef(toggles);
 	toggleRef.current = toggles;
 	const blockedRef = useRef(blocked);
 	blockedRef.current = blocked;
-	const { research, ascension, audit, drawer } = sheets;
+	const { research, audit, trees, drawer } = sheets;
 	useEffect(() => {
-		const env: KeyEnv = { menu, research, ascension, audit, drawer, lastSpeed, toggleDrawer: (id) => toggleRef.current.toggleDrawer(id), togglePalette: () => toggleRef.current.togglePalette(), toggleHelp: () => toggleRef.current.toggleHelp?.(), openSearch: () => toggleRef.current.openSearch?.() };
+		const env: KeyEnv = { menu, research, audit, trees, drawer, lastSpeed, toggleDrawer: (id) => toggleRef.current.toggleDrawer(id), togglePalette: () => toggleRef.current.togglePalette(), toggleHelp: () => toggleRef.current.toggleHelp?.(), openSearch: () => toggleRef.current.openSearch?.() };
 		const onKey = (e: KeyboardEvent): void => {
 			if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 			if (blockedRef.current() && !menu.isOpen()) return;
@@ -146,5 +141,5 @@ export function useHudKeyboard(store: GameStore, toggles: { toggleDrawer: (id: D
 		};
 		window.addEventListener("keydown", onKey);
 		return () => window.removeEventListener("keydown", onKey);
-	}, [store, menu, research, ascension, audit, drawer]);
+	}, [store, menu, research, audit, trees, drawer]);
 }

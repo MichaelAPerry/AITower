@@ -20,13 +20,6 @@ describe("treeState", () => {
 		expect(treeState(by("vendor_stamp"), view({ tier: 2, techResearched: ["contracts_clerk", "reading_room"], researchPoints: 9999 }), content)).toBe("avail");
 	});
 
-	it("a path node stays locked until its path is chosen", () => {
-		const g = by("canopy_array");
-		expect(g.path).toBe("greentech");
-		expect(treeState(g, view({ tier: 5, researchPoints: 99999, techResearched: g.requires }), content)).toBe("locked");
-		expect(treeState(g, view({ tier: 5, researchPoints: 99999, techResearched: g.requires, path: "greentech" }), content)).toBe("avail");
-	});
-
 	it("signature changes with a state change, not with points that change nothing", () => {
 		const a = stateSignature(content, view({ researchPoints: 1 }));
 		const b = stateSignature(content, view({ researchPoints: 2 }));

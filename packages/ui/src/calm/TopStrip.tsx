@@ -25,7 +25,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	const auto = anyAutomation(view);
 	// Before the first contract the red figure is only upkeep: say so, in words.
 	// ...and the hint yields the top centre to a NEXT alert.
-	const nextShown = isProblem(currentObjective(view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null));
+	const nextShown = isProblem(currentObjective(view, content, (cmd) => store.canBuild(cmd)));
 	const maint = maintenanceReadout(view);
 	const idleCost = rate !== null && rate < 0 && !view.jobs.some((j) => j.status === "running") && !nextShown;
 	return (
@@ -91,7 +91,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					<span className="ui-big">{drought.value}</span>
 				</div>
 			)}
-			<SoulGauge view={view} onOpen={() => setUi({ dossier: true })} />
+			<SoulGauge view={view} onOpen={() => setUi({ trees: true })} />
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<div className="ui-sysbox">
 				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>

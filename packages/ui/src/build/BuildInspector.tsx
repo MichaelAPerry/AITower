@@ -6,7 +6,7 @@ import { Jargon, TermScope } from "../glossary/Term";
 import { OutputBar, TierMark } from "./TierMark";
 import { findItem, itemForTool } from "./catalog";
 import { upgradeCost, upgradesTo } from "@aitower/content";
-import { accessLocked, CATEGORY_LABEL, lockReason, type Stat } from "./plain";
+import { CATEGORY_LABEL, lockReason, type Stat } from "./plain";
 import { SealNotes } from "../soul/SealNotes";
 
 function StatRow({ s }: { s: Stat }) {
@@ -42,9 +42,8 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 	if (!item) return null; // nothing hovered or picked: keep the screen clear
 	const isPicked = !!picked && picked.key === item.key;
 	const missing = item.def ? item.cost - view.cash : 0;
-	const why = item.def ? accessLocked(item.def, view, content) : null;
 	const reason = item.def ? lockReason(item.def, view, content) : null;
-	const lock = why ? `Locked: ${why.text}` : reason?.level !== undefined ? `Opens at Level ${reason.level}` : null;
+	const lock = reason?.level !== undefined ? `Opens at Level ${reason.level}` : null;
 	const from = item.def?.upgradesFrom ? content.facilities[item.def.upgradesFrom] : undefined;
 	const next = item.def ? upgradesTo(content, item.def.id) : [];
 	const openEntry = (): void => setUi({ drawer: "handbook", encyId: item.entry, paletteOpen: false, buildHover: null });
@@ -54,7 +53,7 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 			<div className="bld-kicker">
 				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
 			</div>
-			{item.tier && <TierMark t={item.tier} group={item.group} />}
+			{item.tier && <TierMark t={item.tier} />}
 			<h2 className="bld-h">{item.name}</h2>
 			{lock && <p className="bld-lock-why">{lock}</p>}
 			{item.tier?.note && <p className="bld-note">{item.tier.note}. The next rack down the line costs more per PFLOPS.</p>}
@@ -68,7 +67,7 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 				</p>
 			)}
 			{next.length > 0 && <p className="bld-upgrade">Next down this line: {next.map((d) => d.name).join(", ")}.</p>}
-			<SealNotes def={item.def} view={view} />
+			<SealNotes def={item.def} />
 			<div className="bld-stats">
 				{item.stats.map((s) => (
 					<StatRow key={`${s.label}${s.sub}`} s={s} />

@@ -12,7 +12,6 @@ import { clearanceProgress } from "../calm/calm";
 import { fmtMoney } from "../format";
 import { unreachedFloors } from "../objective/diagnose";
 import { rackIsHot } from "../objective/heat";
-import { ascensionDue } from "../ascension/ascension";
 import { cheapestAvailable } from "../research/tech";
 
 /** What the "Show me" button does. */
@@ -24,12 +23,11 @@ export type AdvisorAction =
 	/** Open the Supplies tab of the catalog (spare parts). */
 	| { kind: "supplies"; focus?: CellRef }
 	| { kind: "drawer"; drawer: DrawerId; focus?: CellRef }
-	/** The advisors' dossier (bonds and what they trust you with). */
-	| { kind: "dossier" }
+	/** The Trees panel (points, rungs, seal). */
+	| { kind: "trees" }
 	/** Open the Department of Research, on one node when `techId` is given. */
-	| { kind: "research"; techId?: string }
-	/** Open FORM A-5. */
-	| { kind: "ascension" };
+	| { kind: "research"; techId?: string };
+
 
 /** A Handbook link chip: opens the entry (an Encyclopedia or chapter id). */
 export interface HandbookLink {
@@ -74,13 +72,14 @@ export function hotRacks(view: SimView, content: ContentDB, confirmed?: Readonly
 	return view.facilities.filter((f) => rackIsHot(f, content) && (!confirmed || confirmed.has(f.id)));
 }
 
-/** Committed to Bio or Green while the Lattice (fed by every shared rack) is ahead: Cass says so. */
+/** The tower leans to Bio or Green while the Lattice is ahead of it: Cass says so, and where to look. */
 function latticePull(view: SimView): Omit<Suggestion, "advisor" | "links"> | null {
 	const p = view.path;
 	const s = view.soul;
 	if (!s || (p !== "biotech" && p !== "greentech") || !(s.sp.synthetic > s.sp[p])) return null;
 	const pct = (n: number): number => Math.floor((n / s.spTarget) * 100);
-	return { id: "lattice", urgent: false, recommend: [], cta: "Dossier", action: { kind: "dossier" }, text: `The Lattice is ahead of your tree: ${pct(s.sp.synthetic)}% against ${pct(s.sp[p])}%. Every shared rack feeds it. Build on your own line, or it ends the world first.` };
+	const name = p === "biotech" ? "the Flesh" : "the Garden";
+	return { id: "lattice", urgent: false, recommend: [], cta: "Trees", action: { kind: "trees" }, text: `The Lattice is ahead of ${name}: ${pct(s.sp.synthetic)}% against ${pct(s.sp[p])}%. Retrofit more racks down your tree, or the Lattice ends the world first.` };
 }
 
 const cap = (t: string): string => t.charAt(0).toUpperCase() + t.slice(1);
@@ -236,9 +235,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 	}
 
 	// Level-up due or near.
-	if (ascensionDue(view, content)) {
-		out.push({ id: "level", text: "The tower is cleared to choose an Ascension path. It is a one-way decision, so read it first.", cta: "Show me", action: { kind: "ascension" }, urgent: false, recommend: [] });
-	} else {
+	{
 		const c = clearanceProgress(view, content);
 		if (c.next !== null && c.frac >= 1 && !c.techsOk) {
 			out.push({ id: "level", text: `Compute is enough for Level ${c.next}, but research is short: ${c.techsDone} of ${c.techs} nodes done.`, cta: "Show me", action: { kind: "research" }, urgent: false, recommend: [] });

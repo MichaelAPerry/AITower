@@ -111,11 +111,11 @@ describe("tier on the cards", () => {
 		const t = (id: string) => findItem(id, content)?.tier;
 		expect(t("rack_air_gpu")?.className).toBe("t-std");
 		expect(t("rack_dlc_gpu2")?.className).toBe("t-adv");
-		expect(t("rack_imm_gpu2")?.className).toBe("t-fro");
+		expect(t("rack_dlc_gpu3")?.className).toBe("t-fro");
 		expect(t("organoid_incubator")).toMatchObject({ className: "t-bio", label: "Path: Wetware", isPath: true });
 		expect(t("rack_mind_lattice")?.className).toBe("t-syn");
 		expect(t("rack_mind_lattice")?.output?.share).toBe(1);
-		expect(t("rack_imm_gpu3")?.output?.share).toBeCloseTo(800 / 1400, 5);
+		expect(t("rack_dlc_gpu3")?.output?.share).toBeCloseTo(420 / 1400, 5);
 		expect(t("rack_infer")?.note).toBe("Air tops out here");
 	});
 	it("renders the Inspector with the badge, bar and note", () => {

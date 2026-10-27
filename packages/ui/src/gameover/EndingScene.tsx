@@ -8,28 +8,15 @@ import { lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
 
 /**
- * The advisor whose epilogue closes the ending. A locked route (the confession was accepted) is guaranteed; otherwise it is the
- * highest bond, if it reaches `bondEpilogue` (ties go to the earlier in this order).
+ * The advisor whose epilogue closes the ending: the one with the highest bond, if it reaches `bondEpilogue` (ties go to the
+ * earlier in this order).
  */
 export function epilogueAdvisor(view: Pick<SimView, "soul">, ending: EndingDef): AdvisorId | null {
 	const s = view.soul;
 	if (!s || !ending.epilogue) return null;
-	if (s.route && ending.epilogue[s.route]) return s.route;
 	let best: AdvisorId | null = null;
 	for (const id of ["cass", "mel", "bea", "luci"] as const) {
 		if (!ending.epilogue[id] || s.bonds[id] < s.bondEpilogue) continue;
-		if (best === null || s.bonds[id] > s.bonds[best]) best = id;
-	}
-	return best;
-}
-
-/** With a locked route, the closest of the other advisors says she noticed whom you chose (null without a route). */
-export function routeAcknowledger(view: Pick<SimView, "soul">, ending: EndingDef): AdvisorId | null {
-	const s = view.soul;
-	if (!s?.route || !ending.routeAck) return null;
-	let best: AdvisorId | null = null;
-	for (const id of ["cass", "mel", "bea", "luci"] as const) {
-		if (id === s.route || !ending.routeAck[id]) continue;
 		if (best === null || s.bonds[id] > s.bonds[best]) best = id;
 	}
 	return best;
@@ -41,11 +28,9 @@ export function routeAcknowledger(view: Pick<SimView, "soul">, ending: EndingDef
  */
 export function EndingScene({ ending, view, menuOpen, onContinue, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; onContinue: () => void; onNewGame: () => void }) {
 	const who = epilogueAdvisor(view, ending);
-	const ack = routeAcknowledger(view, ending);
 	const pages: { who: AdvisorId | null; text: string }[] = [
 		...paragraphs(ending.body).map((text) => ({ who: null, text })),
 		...(who && ending.epilogue?.[who] ? [{ who, text: ending.epilogue[who] as string }] : []),
-		...(ack && ending.routeAck?.[ack] ? [{ who: ack, text: ending.routeAck[ack] as string }] : []),
 	];
 	const [i, setI] = useState(0);
 	const root = useRef<HTMLDivElement>(null);

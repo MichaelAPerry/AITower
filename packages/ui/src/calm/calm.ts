@@ -164,9 +164,6 @@ export function effectChip(e: EventEffect): string {
 		case "seal":
 		case "bond":
 		case "sp":
-		case "commitPath":
-		case "flag":
-		case "route":
 			return "";
 	}
 }

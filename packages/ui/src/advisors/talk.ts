@@ -8,7 +8,7 @@
  */
 import type { AdvisorId, ContentDB, FacilityDef, TechNode } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
-import { isBuildable } from "../build/catalog";
+import { isReachable } from "../build/catalog";
 import { fmtMoney } from "../format";
 import { nodeState } from "../research/tech";
 import { advisorOfLane } from "./advisors";
@@ -48,10 +48,10 @@ function rackAdvisor(d: FacilityDef): AdvisorId {
 	return c === "air" || c === "dlc" || c === "immersion" ? "cass" : "mel";
 }
 
-/** The best compute rack the player can build right now in a slot of this width. */
+/** The best compute rack the player can have right now in a slot of this width (a base rack or a rung already open to retrofit). */
 function bestBuildable(view: SimView, content: ContentDB, width: number): FacilityDef | undefined {
 	return Object.values(content.facilities)
-		.filter((d) => isRackDef(d) && d.width === width && isBuildable(d, view, content))
+		.filter((d) => isRackDef(d) && d.width === width && isReachable(d, view, content))
 		.sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0))[0];
 }
 
@@ -64,7 +64,7 @@ const needsOf = (d: FacilityDef): string => {
 
 // ─── Pitches ──────────────────────────────────────────────────────────
 
-/** A research node that unlocks a clearly better rack than the best one the player can build in the same slot. */
+/** A research node that unlocks a clearly better rack than the best one the player can have in the same slot. */
 function rackPitch(node: TechNode, view: SimView, content: ContentDB): Line | null {
 	const unlocked = Object.values(content.facilities).filter((d) => d.tech === node.id && isRackDef(d));
 	let best: { rack: FacilityDef; old: FacilityDef } | null = null;
@@ -83,7 +83,7 @@ function rackPitch(node: TechNode, view: SimView, content: ContentDB): Line | nu
 		id: `pitch:${node.id}`,
 		// The lane's own advisor (data/lanes.json), so the pitch matches the one on the research tree.
 		advisor: advisorOfLane(content.lanes?.find((l) => l.id === node.lane)?.advisor ?? "") ?? (bio ? "mel" : rackAdvisor(rack)),
-		text: `On your floor ${modelCode(rack)} gives ${compare}.${watts} ${node.name} costs ${Math.round(node.cost).toLocaleString("en-US")} {{rp|RP}}; you hold ${Math.floor(view.researchPoints).toLocaleString("en-US")}.${needsOf(rack)}`,
+		text: `Retrofit a rack to ${modelCode(rack)} and it gives ${compare}.${watts} ${node.name} costs ${Math.round(node.cost).toLocaleString("en-US")} {{rp|RP}}; you hold ${Math.floor(view.researchPoints).toLocaleString("en-US")}.${needsOf(rack)}`,
 		links: [{ label: bio ? "Wetware and Biotech" : "Cooling and heat", entry: bio ? "ch:path-biotech" : "ch:heat" }],
 		cta: "Open research",
 		action: { kind: "research", techId: node.id } as AdvisorAction,
@@ -150,17 +150,15 @@ function statusLine(advisor: AdvisorId, view: SimView, content: ContentDB): Line
 function compareLine(advisor: AdvisorId, view: SimView, content: ContentDB): Line | null {
 	const racks = Object.values(content.facilities).filter((d) => isRackDef(d) && d.unlockTier <= Math.max(3, view.tier));
 	if (advisor === "cass") {
-		// Immersion starts at Level 4 (the Two-Phase Tank), so Cass compares what Level 4 holds.
-		const upTo4 = Object.values(content.facilities).filter((d) => isRackDef(d) && d.unlockTier <= Math.max(4, view.tier));
-		const topOf = (cool: string): FacilityDef | undefined => upTo4.filter((d) => d.rack?.cooling === cool).sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0))[0];
+		const upTo5 = Object.values(content.facilities).filter((d) => isRackDef(d) && d.unlockTier <= Math.max(4, view.tier));
+		const topOf = (cool: string): FacilityDef | undefined => upTo5.filter((d) => d.rack?.cooling === cool).sort((a, b) => (b.rack?.pflops ?? 0) - (a.rack?.pflops ?? 0))[0];
 		const air = topOf("air");
 		const dlc = topOf("dlc");
-		const imm = topOf("immersion");
-		if (!air || !dlc || !imm) return null;
+		if (!air || !dlc) return null;
 		return {
 			id: "compare:cooling",
 			advisor,
-			text: `Air tops out at ${modelCode(air)}, ${fmtNum(air.rack?.pflops ?? 0)} PF a cabinet, for ${fmtMoney(air.cost)}. {{dlc|Liquid}} reaches ${fmtNum(dlc.rack?.pflops ?? 0)} PF in ${modelCode(dlc)} but needs a loop, a {{cdu|CDU}} and a chiller. {{immersion|Immersion}} ${modelCode(imm)} reaches ${fmtNum(imm.rack?.pflops ?? 0)} PF and a plumbing problem.`,
+			text: `Air tops out at ${modelCode(air)}, ${fmtNum(air.rack?.pflops ?? 0)} PF a cabinet, for ${fmtMoney(air.cost)}. {{dlc|Liquid}} reaches ${fmtNum(dlc.rack?.pflops ?? 0)} PF in ${modelCode(dlc)} but needs a loop, a {{cdu|CDU}} and a chiller, and a pipe under the rack you retrofit.`,
 			links: [{ label: "Coolant loops", entry: "basics:loops" }],
 			urgent: false,
 		};

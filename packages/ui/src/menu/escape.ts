@@ -1,23 +1,23 @@
 import type { GameStore, Selection, Tool } from "@aitower/shared";
 import type { MenuController } from "./menuController";
 
-export type EscapeStep = "closeMenu" | "closeResearch" | "closeAscension" | "closeAudit" | "closeDrawer" | "cancelTool" | "clearSelection" | "openMenu";
+export type EscapeStep = "closeMenu" | "closeResearch" | "closeAudit" | "closeTrees" | "closeDrawer" | "cancelTool" | "clearSelection" | "openMenu";
 
-/** A sheet that Esc can close (the research, ascension and audit sheets). */
+/** A sheet that Esc can close (the research sheet, the audit sheet and the Trees panel). */
 export interface Closable {
 	isOpen(): boolean;
 	close(): void;
 }
 
 /**
- * Esc order: close the menu, else the research sheet, else the ascension sheet, else the audit sheet, else cancel the armed tool (before any panel closes), else the open
+ * Esc order: close the menu, else the research sheet, else the audit sheet, else the Trees panel, else cancel the armed tool (before any panel closes), else the open
  * drawer or build catalog, else clear the selection, else open the menu.
  */
-export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; ascensionOpen?: boolean; auditOpen?: boolean; drawerOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
+export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; auditOpen?: boolean; treesOpen?: boolean; drawerOpen?: boolean; tool: Tool; selection: Selection }): EscapeStep {
 	if (ctx.menuOpen) return "closeMenu";
 	if (ctx.researchOpen) return "closeResearch";
-	if (ctx.ascensionOpen) return "closeAscension";
 	if (ctx.auditOpen) return "closeAudit";
+	if (ctx.treesOpen) return "closeTrees";
 	if (ctx.tool.kind !== "select") return "cancelTool";
 	if (ctx.drawerOpen) return "closeDrawer";
 	if (ctx.selection) return "clearSelection";
@@ -25,9 +25,9 @@ export function escapeStep(ctx: { menuOpen: boolean; researchOpen?: boolean; asc
 }
 
 /** Run one Esc press against the store and the menu controller. Returns the step taken. */
-export function applyEscape(store: GameStore, menu: MenuController, sheets: { research?: Closable; ascension?: Closable; audit?: Closable; drawer?: Closable } = {}): EscapeStep {
+export function applyEscape(store: GameStore, menu: MenuController, sheets: { research?: Closable; audit?: Closable; trees?: Closable; drawer?: Closable } = {}): EscapeStep {
 	const s = store.get();
-	const step = escapeStep({ menuOpen: menu.isOpen(), researchOpen: sheets.research?.isOpen(), ascensionOpen: sheets.ascension?.isOpen(), auditOpen: sheets.audit?.isOpen(), drawerOpen: sheets.drawer?.isOpen(), tool: s.tool, selection: s.selection });
+	const step = escapeStep({ menuOpen: menu.isOpen(), researchOpen: sheets.research?.isOpen(), auditOpen: sheets.audit?.isOpen(), treesOpen: sheets.trees?.isOpen(), drawerOpen: sheets.drawer?.isOpen(), tool: s.tool, selection: s.selection });
 	switch (step) {
 		case "closeMenu":
 			menu.close();
@@ -35,8 +35,8 @@ export function applyEscape(store: GameStore, menu: MenuController, sheets: { re
 		case "closeResearch":
 			sheets.research?.close();
 			break;
-		case "closeAscension":
-			sheets.ascension?.close();
+		case "closeTrees":
+			sheets.trees?.close();
 			break;
 		case "closeDrawer":
 			sheets.drawer?.close();

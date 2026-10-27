@@ -1,19 +1,13 @@
-import { type CatalogueGroup, GROUP_LABEL } from "@aitower/content";
 import type { TierView } from "./tier";
 
-/** Tier badge, with the filled diamond for Path items, and the catalogue tag (Starter, Specialist, Signature, Synthetic; Shared wears none). */
-export function TierMark({ t, group }: { t: TierView; group?: CatalogueGroup }) {
+/** Tier badge, with the filled diamond for Path items. */
+export function TierMark({ t }: { t: TierView }) {
 	return (
 		<span className="tier-mark">
 			<span className="tier-badge" data-tier={t.info.tier}>
 				{t.label}
 			</span>
 			{t.isPath && <span className="tier-diamond" aria-hidden="true" />}
-			{group && group !== "shared" && (
-				<span className="group-tag" data-group={group}>
-					{GROUP_LABEL[group]}
-				</span>
-			)}
 		</span>
 	);
 }

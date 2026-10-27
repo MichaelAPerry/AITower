@@ -44,7 +44,7 @@ export function findButton(node: ReactNode, re: RegExp): ReactElement<Props> {
 
 export const click = (el: ReactElement<Props>): void => (el.props.onClick as () => void)();
 
-export function panelProps(store: GameStore, content: ContentDB, over: { ui?: Partial<UiState>; openResearch?: () => void; openAscension?: () => void; openAudit?: PanelProps["openAudit"]; setUi?: PanelProps["setUi"] } = {}): PanelProps {
+export function panelProps(store: GameStore, content: ContentDB, over: { ui?: Partial<UiState>; openResearch?: () => void; openAudit?: PanelProps["openAudit"]; setUi?: PanelProps["setUi"] } = {}): PanelProps {
 	const ui: UiState = { drawer: null, paletteOpen: false, focusJobId: null, alertsSeenTick: -1, paletteTab: "structure", financeTab: "ledger", ...over.ui };
-	return { store, content, state: store.get(), ui, setUi: over.setUi ?? (() => {}), openMenu: () => {}, openResearch: over.openResearch ?? (() => {}), openAscension: over.openAscension ?? (() => {}), openAudit: over.openAudit ?? (() => {}) };
+	return { store, content, state: store.get(), ui, setUi: over.setUi ?? (() => {}), openMenu: () => {}, openResearch: over.openResearch ?? (() => {}), openAudit: over.openAudit ?? (() => {}) };
 }

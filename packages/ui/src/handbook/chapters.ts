@@ -121,8 +121,8 @@ function levelAdvice(n: number, c: ContentDB): { next: string; mistakes: string 
 			};
 		default:
 			return {
-				next: "Open FORM A-5 and choose a tree when you are ready. Read its chapter first, and check your advisors' dossier: the Flesh and the Garden need their champion's trust.",
-				mistakes: "Signing the form unread. The choice is permanent. Letting the Lattice fill while you decide.",
+				next: "Select a rack and press a Retrofit button to start a tree. Click the gauges in the top strip to see all three trees and what each needs next.",
+				mistakes: "Spreading racks over all three trees: each tree scores only its own racks. Ignoring a tree's seal until it closes.",
 			};
 	}
 }
@@ -158,12 +158,12 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	const unlocks = `Machines: ${list(gear, 5)}. Research: ${list(researchNodes, 3)}.`;
 	const text: Record<AscensionPath, { earn: string; win: string; risk: string }> = {
 		biotech: {
-			earn: "Commit to The Flesh at Level 3, once Dr. Mel Kiorre trusts you. From then on, running organoid racks earn Bio Singularity points.",
-			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. The Flesh Remembers at ${target} Bio points. Every rack not on the Bio line feeds the Lattice instead, so build on your own line.`,
+			earn: "Retrofit racks to the Bio line (Level 2 and up, after the Wetware Annex research). Running Bio racks earn Bio Singularity points.",
+			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. The Flesh Remembers at ${target} Bio points. Only Bio racks score for the Flesh, so retrofit your racks up the Bio line.`,
 			risk: "Growth spreads if you do not contain it, and at 99% corruption the tower absorbs you. Some machines hurt the tissue. Mel will tell you which ones, once she trusts you.",
 		},
 		greentech: {
-			earn: "Commit to The Garden at Level 3, once Bea Altasar trusts you. From then on, compute earns Green Singularity points, scaled by your Green Score.",
+			earn: "Retrofit racks to the Green line (Level 2 and up, after the Neuromorphic Bench research). Running Green racks earn Green Singularity points, scaled by your Green Score.",
 			win: `Your Green Score rises with the share of power from the weather and the heat you sell. Green-line racks earn the most. The Garden opens at ${target} Green points. Sell waste heat (heat reuse) and grow algae for carbon credits.`,
 			risk: `Some days are dark and still. Weather-dependent supply drops to ${pct(c.balance.green.droughtFactor)} for ${c.balance.green.droughtHours} hours. Keep a genset ready and a UPS charged.`,
 		},

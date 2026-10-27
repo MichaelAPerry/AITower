@@ -3,7 +3,7 @@
  * Every number comes from content or the view; only the wording is written here.
  */
 import { type TierView, tierView } from "../build/tier";
-import { type AscensionPath, type ContentDB, type TechBranch, type TechNode, TREE_NAME } from "@aitower/content";
+import type { AscensionPath, ContentDB, TechBranch, TechNode, } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { plainBlurb, plainStats } from "../build/plain";
 import { fmtDuration } from "../format";
@@ -27,7 +27,6 @@ export function groupOf(node: TechNode, view: SimView, content: ContentDB): Node
 	if (s.kind !== "locked") return "ready";
 	const done = researchedSet(view);
 	const missing = node.requires.filter((r) => !done.has(r));
-	if (node.requiresCommit !== undefined && view.path !== node.requiresCommit) return "later";
 	// Only the clearance is missing: it is coming soon.
 	if (missing.length === 0) return node.minTier <= view.tier + 1 ? "next" : "later";
 	const byId = new Map(techList(content).map((t) => [t.id, t]));
@@ -184,12 +183,11 @@ export interface Step {
 	done: boolean;
 }
 
-/** The chain of things needed first, with a tick for each one finished. Clearance and path come last. */
+/** The chain of things needed first, with a tick for each one finished. Clearance comes last. */
 export function chain(node: TechNode, view: SimView, content: ContentDB): Step[] {
 	const done = researchedSet(view);
 	const steps: Step[] = node.requires.map((id) => ({ id, name: techName(content, id), done: done.has(id) }));
 	if (node.minTier > 1) steps.push({ id: "_tier", name: `Level ${node.minTier}`, done: view.tier >= node.minTier });
-	if (node.requiresCommit !== undefined) steps.push({ id: "_path", name: `Committed to ${TREE_NAME[node.requiresCommit]}`, done: view.path === node.requiresCommit });
 	return steps;
 }
 

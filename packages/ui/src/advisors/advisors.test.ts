@@ -101,7 +101,7 @@ describe("advisors argue with live numbers", () => {
 		const v = ready("cold_plate_gen3");
 		const p = pitches(v, content).find((x) => x.id === "pitch:cold_plate_gen3");
 		expect(p?.advisor).toBe("mel"); // the Compute lane's advisor, as the research tree says: "Same floor, more output."
-		expect(p?.text).toContain("LC-3 gives 230 PF in the slot LC-2 gives 130"); // the best rack this floor can build in that slot
+		expect(p?.text).toContain("Retrofit a rack to LC-3 and it gives 230 PF in the slot LC-2 gives 130"); // the best rack this floor can have in that slot
 		expect(plainText(p?.text ?? "")).toMatch(/RP; you hold/);
 		expect(p?.action).toMatchObject({ kind: "research", techId: "cold_plate_gen3" });
 	});
@@ -118,8 +118,8 @@ describe("advisors argue with live numbers", () => {
 		expect(pitches(poor, content).find((x) => x.id === "pitch:cold_plate_gen3")).toBeUndefined();
 	});
 	it("wetware racks are pitched by Mel with power per kW", () => {
-		const v = ready("culture_bench"); // the Starter node: it opens the OC-0 Culture Rack (the Specialist nodes wait for the commit)
-		const p = pitches(v, content).find((x) => x.id === "pitch:culture_bench");
+		const v = ready("wetware_annex"); // Rung 1 of the Flesh: the OC-1 Organoid Cabinet
+		const p = pitches(v, content).find((x) => x.id === "pitch:wetware_annex");
 		expect(p?.advisor).toBe("mel");
 		expect(p?.text).toMatch(/PF per/);
 	});
@@ -137,7 +137,7 @@ describe("Ask: a ranked answer from one advisor", () => {
 	});
 	it("Mel answers why wetware over racks with PF per kW from the content, and every advisor always has something to say", () => {
 		const a = answerFor("mel", view({ tier: 3 }), content);
-		expect(a.lines.find((l) => l.id === "compare:wetware")?.text).toMatch(/OC-1 tissue gives .* PF per/);
+		expect(a.lines.find((l) => l.id === "compare:wetware")?.text).toMatch(/OC-\d tissue gives .* PF per/);
 		for (const id of ADVISOR_ORDER) expect(answerFor(id, view(), content).lines.length).toBeGreaterThan(0);
 	});
 });

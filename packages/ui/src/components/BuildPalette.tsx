@@ -1,4 +1,4 @@
-import { type BuildCategory, commitFor, type ContentDB, type FacilityDef, TREE_NAME } from "@aitower/content";
+import { type BuildCategory, type ContentDB, type FacilityDef, isRetrofitOnly } from "@aitower/content";
 import type { SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney, fmtPflops, fmtPower } from "../format";
 import { pushNotice } from "../notices";
@@ -6,7 +6,7 @@ import { techGate, techName } from "../research/tech";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
 import { findItem, structure } from "../build/catalog";
-import { accessLocked, CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate, viewAccess } from "../build/plain";
+import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { OutputBar, TierMark } from "../build/TierMark";
 import { allowedIds } from "../lessons/lessons";
 import { toolKey } from "../tools/controller";
@@ -67,7 +67,7 @@ export function lockText(def: FacilityDef, view: SimView, content: ContentDB): s
 	const r = lockReason(def, view, content);
 	if (!r) return null;
 	const gate = r.tech ? techGate(def.tech, view, content) : null;
-	const parts = [gate ? gate.replace("Requires research: ", "") : null, r.level !== undefined ? `Level ${r.level}` : null, r.access?.short ?? null].filter(Boolean);
+	const parts = [gate ? gate.replace("Requires research: ", "") : null, r.level !== undefined ? `Level ${r.level}` : null].filter(Boolean);
 	return parts.length ? `Locked: ${parts.join(" · ")}` : null;
 }
 
@@ -81,21 +81,12 @@ export function storageNote(def: FacilityDef | undefined, view: SimView): string
 /** A tab's rows: unlocked first, each group by unlock tier, then cost. */
 export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategory): FacilityDef[] {
 	return Object.values(content.facilities)
-		.filter((d) => d.category === cat && !d.growth && !d.retired)
+		.filter((d) => d.category === cat && !d.growth && !d.retired && !isRetrofitOnly(d))
 		.map((d) => ({ d, locked: lockText(d, view, content) !== null }))
 		.sort((a, b) => Number(a.locked) - Number(b.locked) || a.d.unlockTier - b.d.unlockTier || a.d.cost - b.d.cost || a.d.id.localeCompare(b.d.id))
 		.map((x) => x.d);
 }
 
-
-/**
- * A specialist item of a tree the player has not committed to (docs/TREES.md). Such items are hidden from the catalogue, not just
- * greyed: a preview unit the bond allows stays on the shelf.
- */
-export function treeHidden(def: FacilityDef, view: SimView): boolean {
-	const need = commitFor(def);
-	return !!need && view.path !== need && !viewAccess(def, view).preview;
-}
 
 /** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
 function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; lock?: string; note?: string | null; onPick: () => void; onHover: (key: string | null) => void }) {
@@ -115,7 +106,7 @@ function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plai
 			onBlur={() => onHover(null)}
 		>
 			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
-			{item.tier && <TierMark t={item.tier} group={item.group} />}
+			{item.tier && <TierMark t={item.tier} />}
 			<span className="bld-name">{item.name}</span>
 			{item.tier?.output && <OutputBar t={item.tier} />}
 			{item.tier?.note && <span className="bld-note">{item.tier.note}</span>}
@@ -139,18 +130,12 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		if ((ui.buildHover ?? null) !== key) setUi({ buildHover: key });
 	};
 	const pick = (item: CatalogItem): void => {
-		const why = item.def ? accessLocked(item.def, view, content) : null;
-		if (why) {
-			// Reached the Level but not the commit or the bond: say what it takes, do not arm the tool.
-			pushNotice({ text: `${item.name}: ${why.text}`, severity: "info", key: `lock:${item.key}` });
-			return;
-		}
 		store.setGhost(null);
 		store.setTool(active === toolKey(item.tool) ? { kind: "select" } : item.tool);
 	};
 	// Called as a plain function (no hooks), so tests can walk the returned element tree.
 	const card = (item: CatalogItem, plain = false) =>
-		Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, lock: item.def ? accessLocked(item.def, view, content)?.short : undefined, note: storageNote(item.def, view), onPick: () => pick(item), onHover: hover });
+		Card({ plain, item, picked: active === toolKey(item.tool), poor: !!item.def && view.cash < item.cost, note: storageNote(item.def, view), onPick: () => pick(item), onHover: hover });
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
@@ -164,26 +149,14 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 	}
 	else if (tab !== "supplies") {
 		const defs = Object.values(content.facilities)
-			.filter((d) => d.category === tab && !d.growth && !d.retired)
+			.filter((d) => d.category === tab && !d.growth && !d.retired && !isRetrofitOnly(d))
 			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
 		// A lesson shows only what it teaches: the rest is not even listed.
 		const lesson = allowedIds(view);
-		// Open items first; then the ones whose Level is reached but need a commit or a bond (shown with the reason).
 		const shelf = (d: FacilityDef): boolean => !lesson || lesson.has(d.id);
-		const visible = defs.filter((d) => !treeHidden(d, view));
-		const open = visible.filter((d) => !lockReason(d, view, content) && shelf(d));
-		const gated = lesson ? [] : visible.filter((d) => accessLocked(d, view, content));
-		cards = [...open, ...gated].map((d) => findItem(d.id, content) as CatalogItem);
-		lockedLines = lesson ? [] : lockedSummary(visible.filter((d) => lockReason(d, view, content) && !accessLocked(d, view, content)), view, content);
-		// One greyed row per tree the player has not committed to yet (none once the tree has closed its door, which says so).
-		if (!lesson && view.path === null) {
-			const trees = new Set(defs.filter((d) => treeHidden(d, view)).map((d) => commitFor(d)));
-			for (const t of trees) {
-				if (t !== "biotech" && t !== "greentech") continue;
-				const closed = view.soul?.sealedOut?.includes(t) ?? false;
-				lockedLines.push(closed ? `${TREE_NAME[t]} has closed its door on this tower` : `Commit to ${TREE_NAME[t]} to unlock`);
-			}
-		}
+		const open = defs.filter((d) => !lockReason(d, view, content) && shelf(d));
+		cards = open.map((d) => findItem(d.id, content) as CatalogItem);
+		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
 	}
 	const rec = (recommended ?? []).map((id) => findItem(id, content)).filter((i): i is CatalogItem => !!i?.def && !lockReason(i.def, view, content));
 

@@ -12,14 +12,13 @@ import { DRAWER_TABS, type DrawerId, feedLines, isRoutine, nextDrawer } from "./
 import { Icon } from "../components/common";
 
 /** NEXT: one line from the current objective, with the key to press. The detail is its tooltip. */
-export function NextChip({ store, content, state, ui, setUi, openAscension }: PanelProps) {
-	const obj = currentObjective(state.view, content, (cmd) => store.canBuild(cmd), ui.pathFiled ?? null);
+export function NextChip({ store, content, state, setUi }: PanelProps) {
+	const obj = currentObjective(state.view, content, (cmd) => store.canBuild(cmd));
 	const ending = endingLine(state.view, content);
 	// NEXT is for problems; the Goals card is the everyday guide.
 	if (!isProblem(obj) && !ending) return null;
 	const go = (): void => {
-		if (obj.action === "ascension") openAscension();
-		else if (obj.key === "C") setUi({ drawer: "contracts" });
+		if (obj.key === "C") setUi({ drawer: "contracts" });
 		else if (obj.key === "R") setUi({ drawer: "research" });
 	};
 	return (
@@ -29,7 +28,6 @@ export function NextChip({ store, content, state, ui, setUi, openAscension }: Pa
 					<span className="ui-tag">NEXT</span>
 					<span className="ui-next-title">{obj.title}</span>
 					{obj.key && <span className="ui-tag is-key">{obj.key}</span>}
-					{obj.action === "ascension" && <span className="ui-tag is-key">ASCENSION</span>}
 				</button>
 			)}
 			{ending && (

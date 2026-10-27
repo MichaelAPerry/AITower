@@ -41,12 +41,9 @@ const commandName: Record<SimCommand["type"], string> = {
 	setClerk: "Contract Automation orders",
 	takeLoan: "Take loan",
 	repayLoan: "Repay loan",
-	choosePath: "Choose path",
+	retrofit: "Retrofit",
 	setAutomation: "Automation orders",
 	upgradeFacility: "Upgrade",
-	visitAdvisor: "Stay late",
-	giveGift: "Give a gift",
-	replyMessage: "Reply",
 };
 
 const gradeSeverity = (g: AuditGrade): Severity => {
@@ -173,9 +170,10 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 		}
 		case "loanRepaid":
 			return { text: `Credit Facility: ${fmtMoney(ev.amount)} repaid. Repayment recorded`, severity: "good", toast: false };
-		case "pathChosen": {
-			const name = content.paths?.find((p) => p.id === ev.path)?.name ?? ev.path;
-			return { text: plain ? `Ascension path chosen: ${name}` : `Ascension path committed: ${name}`, severity: "good", toast: true };
+		case "retrofitted": {
+			const f = fac(ev.facilityId);
+			const tree = ev.tree === "synthetic" ? "Synthetic" : ev.tree === "biotech" ? "Bio" : "Green";
+			return { text: `Retrofitted ${f.name} (${tree}, rung ${ev.rung})`, severity: "good", toast: false, cell: f.cell };
 		}
 		case "growthSprouted": {
 			const f = fac(ev.facilityId);
@@ -195,21 +193,8 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			return { text: ev.what === "parts" ? `Stores bought ${ev.count} spare part${ev.count === 1 ? "" : "s"}` : `Stores bought ${ev.count} bot${ev.count === 1 ? "" : "s"}`, severity: "info", toast: false };
 		case "droughtStarted":
 			return { text: "Dunkelflaute: calm and dark. Solar and wind output has collapsed until it passes", severity: "warn", toast: true };
-		case "sealedOut":
-			return { text: `${ev.path === "biotech" ? "The Flesh" : "The Garden"} has rejected the tower. You are on the Singularity now`, severity: "warn", toast: true };
 		case "droughtEnded":
 			return { text: "The Dunkelflaute has passed. Solar and wind are back", severity: "good", toast: false };
-		case "visited":
-			return { text: "", severity: "info", toast: false };
-		case "gifted": {
-			const g = content.gifts?.find((x) => x.advisor === ev.advisor);
-			const line = g ? (ev.liked ? g.likedLine : g.dislikedLine) : "";
-			return { text: line, severity: ev.liked ? "good" : "warn", toast: line !== "" };
-		}
-		case "messageReceived":
-			return { text: `${ev.from === "cass" ? "Cass" : ev.from === "bea" ? "Bea" : ev.from === "mel" ? "Mel" : "Luci"} sent you a text`, severity: "info", toast: true };
-		case "messageAnswered":
-			return { text: "", severity: "info", toast: false };
 		case "contaminationIrreversible": {
 			const k = content.balance?.bio?.irreversibleCleanFactor;
 			const strength = k === undefined ? "" : ` Sterile bays now work at ${Math.round(k * 100)} % of rated effect.`;

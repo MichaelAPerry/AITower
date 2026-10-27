@@ -6,7 +6,6 @@ import type { ContentDB } from "@aitower/content";
 import type { CommandResult, SimCommand, SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 import { cheapestAvailable, effectText, fmtRp } from "../research/tech";
-import { ascensionDue, type PathFiled, pathPending } from "../ascension/ascension";
 import { rackProblem, unreachedFloors } from "./diagnose";
 
 export type ObjectiveTone = "alert" | "action" | "progress";
@@ -17,8 +16,6 @@ export interface Objective {
 	title: string;
 	/** One sentence saying exactly where and why. */
 	detail: string;
-	/** A button the orders offer: open FORM A-5 (the Ascension sheet). */
-	action?: "ascension";
 	/** Hotkey that opens where to act (shown on the NEXT chip): "C" contracts, "R" research. */
 	key?: string;
 }
@@ -42,7 +39,7 @@ export function installedPflops(view: SimView, content: ContentDB): number {
 	return p;
 }
 
-export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult, filed: PathFiled | null = null): Objective {
+export function currentObjective(view: SimView, content: ContentDB, canBuild: (cmd: SimCommand) => CommandResult): Objective {
 	const active = view.jobs.filter((j) => ACTIVE.has(j.status));
 
 	// A sandbox lot has no bankruptcy, so a negative balance is no warning there.
@@ -86,16 +83,6 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 			tone: "alert",
 			title: `${cold.length} organoid rack${cold.length === 1 ? " is" : "s are"} too cold`,
 			detail: `${name} on F${f.floor} (x${f.x}): ${rackProblem(view, content, f) ?? "it is below its band."}`,
-		};
-	}
-
-	// Clearance reached for the Ascension: the one irreversible decision of the game.
-	if (ascensionDue(view, content) && !pathPending(filed, view)) {
-		return {
-			tone: "action",
-			title: "Choose your Ascension path",
-			detail: `Level ${view.tier} entitles the tower to commit to one path. The election is final: it cannot be amended or withdrawn. Open the review below to read the options.`,
-			action: "ascension",
 		};
 	}
 
@@ -187,7 +174,7 @@ export function currentObjective(view: SimView, content: ContentDB, canBuild: (c
 }
 
 /** True for problems (broken, too hot, no power, the red, a decision due); the Goals card carries plain progress. */
-export const isProblem = (o: Objective): boolean => o.tone === "alert" || o.action === "ascension" || o.title.includes("lift access") || o.title.startsWith("No offer fits");
+export const isProblem = (o: Objective): boolean => o.tone === "alert" || o.title.includes("lift access") || o.title.startsWith("No offer fits");
 
 /** "The Lattice: 34%" for the tree closest to its Singularity; null before any SP. */
 export function endingLine(view: SimView, content: ContentDB): string | null {

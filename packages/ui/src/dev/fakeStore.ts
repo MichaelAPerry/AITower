@@ -2,8 +2,8 @@
  * Dev-only fake GameStore backed by a hand-built SimView fixture. Uses content *types* only and a small
  * local facility list (real content data is written in parallel). Not exported from the package index.
  */
-import type { ContentDB, EventDef, FacilityDef, Scenario, TechNode } from "@aitower/content";
-import type { AscensionPath, AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, DecisionView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
+import { type ContentDB, type EventDef, type FacilityDef, retrofitCost, retrofitTarget, type Scenario, type TechNode } from "@aitower/content";
+import type { AuditGrade, CommandResult, EndingId, FacilityView, GameOverKind, JobView, LedgerDay, DecisionView, MetricSample, ModifierView, QuarterReport, SimCommand, SimEvent, SimView } from "@aitower/sim";
 import { createFakeSaves } from "./fakeSaves";
 import { type GameState, type GameStore, type Ghost, DEFAULT_SETTINGS, cellIndex, inBounds, normalizeSettings } from "@aitower/shared";
 
@@ -94,9 +94,9 @@ export function createFakeContent(): ContentDB {
 			drone: { id: "drone", name: "Rotor Drone", cost: 30_000, speed: 0.8, batteryTicks: 400, repairTicks: 30, color: "#ffd34d", tech: "log_drone", flying: true, carry: 2 },
 		},
 		paths: [
-			{ id: "biotech", name: "Biotech", description: "Cultured tissue computes cheaply. Feed the Annex, hold the jars at 37 °C. The Ministry assures you it is under control.", available: true },
-			{ id: "greentech", name: "Greentech", description: "Coming soon.", available: false },
-			{ id: "synthetic", name: "Synthetic Mind", description: "Coming soon.", available: false },
+			{ id: "biotech", name: "Biotech", description: "Cultured tissue computes cheaply. Feed the Annex, hold the jars at 37 °C. The Ministry assures you it is under control." },
+			{ id: "greentech", name: "Greentech", description: "Coming soon." },
+			{ id: "synthetic", name: "Synthetic Mind", description: "Coming soon." },
 		],
 		endings: [
 			{ id: "singularity", title: "The Lattice", body: "The tower stopped asking for permission.\n\nNobody noticed.", backdrop: "synthetic" },
@@ -104,9 +104,6 @@ export function createFakeContent(): ContentDB {
 			{ id: "garden", title: "The Garden", body: "The tower stopped burning anything at all.\n\nThen it started to grow.", backdrop: "greentech" },
 			{ id: "absorbed", title: "Absorbed", body: "The facility and its superintendent have been reclassified as Ministry assets.\n\nNo further correspondence is required." },
 		],
-		gifts: [],
-		messages: [],
-		memories: [],
 		clients: [],
 		structure: { slabPerTile: 1_200, basementSlabPerTile: 3_000, powerConduitPerTile: 150, coolantConduitPerTile: 400, liftPerFloor: 6_000, liftBase: 20_000, sparePart: 800 },
 		lift: { speed: 0.1, capacity: 2, dwellTicks: 2, facilityKw: 3 },
@@ -129,7 +126,7 @@ export function createFakeContent(): ContentDB {
 			automation: { partsBatch: 5, foremanPerHour: 1 },
 			ascension: { minTier: 5 },
 			endings: { absorbed: { corruption: 1 } },
-			soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: { shared: 1, synthetic: 2, greentech: 0.25, biotech: 0 }, biotech: { biotech: 1.5 }, greentech: { shared: 0.5, greentech: 2.5 } }, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, starterWeight: 0.5, bondStart: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1, afterHoursBond: 3, giftLiked: 4, giftDisliked: -3, messageBond: 1, confessionBond: 60, confessionTier: 4 },
+			soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: 2, biotech: 1.5, greentech: 2.5 }, greenFloor: 0.5, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, bondStart: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondEpilogue: 60, bondFollow: 3, bondOverrule: -1 },
 			audit: { periodDays: 7, cashShareByGrade: [0.05, 0.02, 0, -0.02, -0.05] },
 		},
 		scenarios: FAKE_SCENARIOS,
@@ -223,7 +220,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		irreversible: false,
 		path: null,
 		organoidPflops: 0,
-		soul: { sp: { synthetic: 0, biotech: 0, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, sealedOut: [], commitBlock: { synthetic: null, biotech: null, greentech: null }, route: null, flags: [], afterHours: { available: true, reason: null }, inbox: [], giftable: [], gifted: [] },
+		soul: { sp: { synthetic: 0, biotech: 0, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondEpilogue: 60, trees: { synthetic: { tree: "synthetic", sp: 0, spPerDay: 0, daysToWin: null, rung: 0, racks: 0, pflops: 0, installedPflops: 0, factor: 1, seal: null, closed: false, hurting: [] }, biotech: { tree: "biotech", sp: 0, spPerDay: 0, daysToWin: null, rung: 0, racks: 0, pflops: 0, installedPflops: 0, factor: 1, seal: 0, closed: false, hurting: [] }, greentech: { tree: "greentech", sp: 0, spPerDay: 0, daysToWin: null, rung: 0, racks: 0, pflops: 0, installedPflops: 0, factor: 0.5, seal: 0, closed: false, hurting: [] } }, green: { score: 0, cleanPower: 0, heatShare: 0, speed: 0.5 } },
 		affinity: { biotech: 0, greentech: 0, synthetic: 0 },
 		pathScore: 0,
 		greenScore: 0,
@@ -424,7 +421,6 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 	// Decisions, mimicking the sim: resolveDecision is queued and applied on the next advance().
 	let nextDecision = 1;
 	const queued: { decisionId: number; choiceId: string }[] = [];
-	let queuedPath: AscensionPath | null = null;
 	const eventById = (eventId: string): EventDef => content.events.find((e) => e.id === eventId) ?? content.events[0];
 	const fileDecision = (decisionId: number, choiceId: string): void => {
 		const m = view.decision;
@@ -611,11 +607,17 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 					pushEvents([{ type: "researched", techId: n.id }]);
 					return ok;
 				}
-				case "choosePath": {
-					if (view.path) return no("A path has already been chosen");
-					if (view.tier < content.balance.ascension.minTier) return no(`Requires Level ${content.balance.ascension.minTier}`);
-					if (!content.paths.find((p) => p.id === cmd.path)?.available) return no("That path is not available yet");
-					queuedPath = cmd.path;
+				case "retrofit": {
+					const f = view.facilities.find((x) => x.id === cmd.facilityId);
+					if (!f) return no("No such facility");
+					const from = content.facilities[f.defId];
+					const t = from ? retrofitTarget(content, from, cmd.tree) : null;
+					if (!from || !t) return no("Nothing to retrofit it to");
+					if (view.tier < t.to.unlockTier) return no(`Requires tier ${t.to.unlockTier}`);
+					const price = retrofitCost(content, from, t.to);
+					if (view.cash < price) return no(`Insufficient funds: need ${price}`);
+					newView({ cash: view.cash - price, facilities: view.facilities.map((x) => (x.id === f.id ? { ...x, defId: t.to.id } : x)) });
+					pushEvents([{ type: "retrofitted", facilityId: f.id, tree: cmd.tree, rung: t.to.rung ?? 1 }]);
 					return ok;
 				}
 				case "setAutomation": {
@@ -681,12 +683,6 @@ export function createFakeStore(content: ContentDB = createFakeContent(), opts: 
 			// Like the sim, queued commands apply only when the clock actually advances.
 			if (minutes > 0) {
 				for (const q of queued.splice(0)) fileDecision(q.decisionId, q.choiceId);
-				if (queuedPath) {
-					const path = queuedPath;
-					queuedPath = null;
-					newView({ path });
-					pushEvents([{ type: "pathChosen", path }]);
-				}
 			}
 			const ph = tick / 97;
 			const facilities = view.facilities.map((f) => {

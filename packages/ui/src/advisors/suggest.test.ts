@@ -58,11 +58,11 @@ describe("suggestions", () => {
 		expect(suggestions(view({ spareParts: 0, facilities: [rack(1, "failed")] }), content)[0]).toMatchObject({ id: "parts", action: { kind: "supplies" } });
 		expect(ids(view({ spareParts: 2, facilities: [rack(1, "failed")] }))).not.toContain("parts");
 	});
-	it("committed to a tree while the Lattice is ahead → Cass warns, with the dossier", () => {
-		const soul = { sp: { synthetic: 400, biotech: 100, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondReveal: 40, bondCommit: 50, bondEpilogue: 60, sealedOut: [], commitBlock: { synthetic: null, biotech: null, greentech: null } };
+	it("leaning to a tree while the Lattice is ahead → Cass warns, with the Trees panel", () => {
+		const soul = { sp: { synthetic: 400, biotech: 100, greentech: 0 }, spTarget: 1000, seal: { biotech: 0, greentech: 0 }, sealMax: 100, bonds: { cass: 20, bea: 20, mel: 20, luci: 30 }, bondEpilogue: 60 };
 		const s = suggestions(view({ soul, path: "biotech" }), content).find((x) => x.id === "lattice");
 		expect(s?.text).toMatch(/40% against 10%/);
-		expect(s?.action).toMatchObject({ kind: "dossier" });
+		expect(s?.action).toMatchObject({ kind: "trees" });
 		expect(ids(view({ soul, path: null }))).not.toContain("lattice");
 		expect(ids(view({ soul: { ...soul, sp: { ...soul.sp, biotech: 500 } }, path: "biotech" }))).not.toContain("lattice");
 	});
