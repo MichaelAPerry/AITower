@@ -21,19 +21,28 @@ export interface SpriteScene {
 }
 
 /** A one-floor scene: `ids` placed left to right from tile `SPRITE_PAD`, daylight, clock held at `minute`. */
-export function createSpriteScene(content: Pick<ContentDB, "facilities">, ids: readonly string[], minute = 780): SpriteScene {
+export interface SpriteSceneOpts {
+	/** A lift shaft at the left edge of the lot, then `gapBeforeFirst` free tiles, then the defs (the Consciousness Transfer Unit preview). */
+	lift?: boolean;
+	gapBeforeFirst?: number;
+	/** Facility ids start at `idBase + 1` (previews that hold several scenes at once give each its own range). */
+	idBase?: number;
+}
+
+export function createSpriteScene(content: Pick<ContentDB, "facilities">, ids: readonly string[], minute = 780, opts: SpriteSceneOpts = {}): SpriteScene {
 	const base = createFixture(minute, 0).view;
-	const width = rowTiles(content, ids) + SPRITE_PAD * 2;
+	const lead = opts.lift ? 1 + (opts.gapBeforeFirst ?? 1) : 0;
+	const width = rowTiles(content, ids) + SPRITE_PAD * 2 + lead;
 	const n = width;
 	const slab = new Uint8Array(n).fill(1);
 	const power = new Uint8Array(n).fill(1);
 	const facilities: FacilityView[] = [];
-	let x = SPRITE_PAD;
+	let x = SPRITE_PAD + lead;
 	ids.forEach((defId, i) => {
 		const d = content.facilities[defId];
 		const isRack = d.kind === "rack";
 		facilities.push({
-			id: i + 1,
+			id: (opts.idBase ?? 0) + i + 1,
 			defId,
 			floor: 0,
 			x,
@@ -72,7 +81,7 @@ export function createSpriteScene(content: Pick<ContentDB, "facilities">, ids: r
 		nutrientNetOf: new Int32Array(n).fill(-1),
 		contamination: new Float32Array(n),
 		facilities,
-		lifts: [],
+		lifts: opts.lift ? [{ id: 1, x: SPRITE_PAD, floorMin: 0, floorMax: 0, carFloor: 0, dir: 0, doorsOpen: true, riders: 0, powered: true }] : [],
 		bots: [],
 		powerNets: [{ id: 0, supplyKw: 9000, demandKw: 100, satisfaction: 1, storedKwh: 0, storageCapacityKwh: 0, gridImportKw: 100 }],
 		coolantNets: [],

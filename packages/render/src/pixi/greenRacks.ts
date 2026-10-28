@@ -61,9 +61,9 @@ export function greenDoorStatic(g: Graphics, s: GreenRack, cx: number, y: number
 		// Overgrown: moss over most of the glass, mycelium threads climbing from the foot, nodes at the junctions.
 		scatter(g, gx, gy + 1, GW, GH - 2, 21 + i * 31, 0.5, DEEP_SHADES);
 		scatter(g, gx, gy + 12, GW, 11, 7 + i * 9, 0.85, MOSS_SHADES, true);
-		hypha(g, gx + 1, gy + GH - 3, 18, 1, -1, 41 + i * 7);
-		hypha(g, gx + 6, gy + GH - 3, 16, -1, -1, 77 + i * 5);
-		hypha(g, gx + 3, gy + 12, 9, 1, -1, 13 + i);
+		hypha(g, gx + 1, gy + GH - 3, 18, 1, -1, 41 + i * 7, 0.9, [cx + 1, cx + 14]);
+		hypha(g, gx + 6, gy + GH - 3, 16, -1, -1, 77 + i * 5, 0.9, [cx + 1, cx + 14]);
+		hypha(g, gx + 3, gy + 12, 9, 1, -1, 13 + i, 0.9, [cx + 1, cx + 14]);
 		for (const n of NM2_NODES) px(g, gx + n[0], gy + n[1], 1, 1, SPORE, 0.55);
 		// Bracket fungus shelves growing off the door frame, a small toadstool at the foot.
 		bracket(g, gx + GW - 1, gy + 8 + (i ? 3 : 0), 2, -1, 5);
@@ -82,7 +82,7 @@ export function greenDoorStatic(g: Graphics, s: GreenRack, cx: number, y: number
 		// Light shafts coming down through the leaves (two diagonals).
 		for (let k = 0; k < GH - 2; k++) {
 			px(g, gx + 1 + Math.floor(k * 0.35), gy + 1 + k, 1, 1, SUN, 0.28);
-			px(g, gx + 5 + Math.floor(k * 0.3), gy + 1 + k, 1, 1, SUN, 0.2);
+			px(g, gx + Math.min(GW - 1, 5 + Math.floor(k * 0.3)), gy + 1 + k, 1, 1, SUN, 0.2);
 		}
 		if (i === 0) {
 			// The sapling: trunk up the middle of the door, three leaf pairs, a crown above the cabinet.
@@ -108,9 +108,9 @@ export function greenDoorStatic(g: Graphics, s: GreenRack, cx: number, y: number
 			px(g, gx + 5, gy - 2, 1, 2, BARK.mid);
 		} else {
 			// Second cabinet: the photonic door, overgrown from the first, vines hanging over the beams.
-			vine(g, gx + 1, gy + 1, 15, 31);
-			vine(g, gx + 6, gy + 1, 9, 77);
-			vine(g, gx + 8, gy + 1, 12, 19);
+			vine(g, gx + 1, gy + 1, 15, 31, [cx + 1, cx + 14]);
+			vine(g, gx + 6, gy + 1, 9, 77, [cx + 1, cx + 14]);
+			vine(g, gx + 8, gy + 1, 12, 19, [cx + 1, cx + 14]);
 			scatter(g, gx, gy + GH - 6, GW, 6, 17, 0.9, MOSS_SHADES, true);
 			px(g, gx + 4, gy + GH - 6, 1, 1, LEAF.hi);
 		}
@@ -219,7 +219,7 @@ function ph2Tree(g: Graphics, x: number, y: number, n: number): void {
 		[W - 14, 4, 12],
 		[16, -4, 13],
 		[W - 29, -5, 13],
-		[mid - x - 6, -7, 12],
+		[mid - x - 6, -6, 12],
 	];
 	for (const [cx, cy, d] of clumps) {
 		const px0 = Math.max(0, Math.min(W - d, cx));
@@ -305,14 +305,14 @@ export function greenSpansLive(g: Graphics, s: GreenRack, x: number, y: number, 
 		px(g, x + 3 + Math.floor(hash(seed, 3) * 8), y + 22 - Math.round(m * 8), 1, 1, SPORE, 0.9 * (1 - m));
 	} else if (s === "ph2") {
 		const W = n * 16;
-		// Leaves flicker as the light moves; spore motes rise from under the canopy; one photonic glint remains at the foot.
+		// A stopped tree is still: leaves flicker as the light moves, spore motes rise from under the canopy and one photonic glint runs at the foot only while it works.
+		if (!on) return;
 		const slot = calm ? 0 : Math.floor(t * 2.2);
 		for (let k = 0; k < 8; k++) {
 			const dx = 3 + Math.floor(hash(seed + 9, k * 5 + (slot % 3)) * (W - 6));
 			const dy = -2 + Math.floor(hash(seed + 11, k + slot) * 10);
 			px(g, x + dx, y + dy, 1, 1, SUN, calm ? 0.8 : 0.5 + 0.5 * hash(seed, k + slot));
 		}
-		if (!on) return;
 		for (let k = 0; k < 3; k++) {
 			const u = calm ? 0.2 + 0.3 * k : (t * 0.22 + k / 3) % 1;
 			px(g, x + 6 + k * 15 + Math.floor(Math.sin(u * 6 + k) * 2), y + 24 - Math.round(u * 20), 1, 1, SPORE, 0.9 * (1 - u));

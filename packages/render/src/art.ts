@@ -142,7 +142,6 @@ export const annexTiles = (def: Pick<FacilityDef, "kind" | "width">): number => 
 /** Height in px of a rack's vertical status light strip: a taller light means a higher unlock tier. */
 export const stripHeight = (tier: ArtTier): number => [10, 14, 18, 22][tier - 1];
 
-
 /**
  * Own sprites of the three trees (docs/ART_DIRECTION.md, docs/TREES.md section 7): the tree racks and the support items that used
  * to borrow a base body. Green is alive and natural (moss, mycelium, a tree), Bio is flesh, Synthetic is chrome. Keyed by def id.
@@ -162,7 +161,6 @@ export type GreenSprite =
 	| "iron_air"
 	| "geothermal"
 	| "microgrid"
-	| "pv_wall"
 	// Bio
 	| "oc1"
 	| "oc2"
@@ -170,10 +168,6 @@ export type GreenSprite =
 	| "oc4"
 	| "bath"
 	| "vascular"
-	| "nutrient"
-	| "bioreactor"
-	| "digester"
-	| "sterile"
 	// Synthetic
 	| "lc2"
 	| "lc3"
@@ -181,8 +175,7 @@ export type GreenSprite =
 	| "ml1"
 	| "cdu"
 	| "syn_chiller"
-	| "turbine"
-	| "smr"
+	| "cryo"
 	| "transfer";
 
 export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
@@ -197,7 +190,6 @@ export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
 	ups_iron_air: "iron_air",
 	geothermal: "geothermal",
 	microgrid_bea: "microgrid",
-	solar_skin: "pv_wall",
 	organoid_incubator: "oc1",
 	rack_organoid_2: "oc2",
 	rack_organoid_3: "oc3",
@@ -205,11 +197,6 @@ export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
 	perfusion_bath: "bath",
 	perfusion_manifold: "bath",
 	vascular_plant: "vascular",
-	nutrient_plant: "nutrient",
-	nutrient_works: "nutrient",
-	bioreactor: "bioreactor",
-	biogas_digester: "digester",
-	sterile_bay: "sterile",
 	rack_dlc_gpu: "lc2",
 	rack_dlc_gpu2: "lc3",
 	rack_dlc_gpu3: "lc4",
@@ -219,11 +206,8 @@ export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
 	cdu_hall: "cdu",
 	chiller: "syn_chiller",
 	chiller_tower: "syn_chiller",
-	cryo_core: "syn_chiller",
-	cryo_plant: "syn_chiller",
-	genset_gas: "turbine",
-	genset_cc: "turbine",
-	reactor_smr: "smr",
+	cryo_core: "cryo",
+	cryo_plant: "cryo",
 	consciousness_transfer: "transfer",
 };
 
@@ -240,25 +224,19 @@ export const GREEN_SPRITE_WIDTH: Readonly<Record<GreenSprite, readonly number[]>
 	iron_air: [6],
 	geothermal: [4],
 	microgrid: [4],
-	pv_wall: [4],
 	oc1: [2],
 	oc2: [3],
 	oc3: [3],
 	oc4: [4],
 	bath: [2, 3],
 	vascular: [5],
-	nutrient: [3, 4],
-	bioreactor: [4],
-	digester: [6],
-	sterile: [2],
 	lc2: [2],
 	lc3: [2],
 	lc4: [2],
 	ml1: [3],
 	cdu: [2, 3, 5],
 	syn_chiller: [4, 6, 8],
-	turbine: [6, 8],
-	smr: [8],
+	cryo: [6, 8],
 	transfer: [3],
 };
 
@@ -271,9 +249,9 @@ export const greenSprite = (def: Pick<FacilityDef, "width"> & Partial<Pick<Facil
 /** Which tree a sprite belongs to. */
 export type SpriteTree = "greentech" | "biotech" | "synthetic";
 export const spriteTree = (s: GreenSprite): SpriteTree =>
-	s === "oc1" || s === "oc2" || s === "oc3" || s === "oc4" || s === "bath" || s === "vascular" || s === "nutrient" || s === "bioreactor" || s === "digester" || s === "sterile"
+	s === "oc1" || s === "oc2" || s === "oc3" || s === "oc4" || s === "bath" || s === "vascular"
 		? "biotech"
-		: s === "lc2" || s === "lc3" || s === "lc4" || s === "ml1" || s === "cdu" || s === "syn_chiller" || s === "turbine" || s === "smr" || s === "transfer"
+		: s === "lc2" || s === "lc3" || s === "lc4" || s === "ml1" || s === "cdu" || s === "syn_chiller" || s === "cryo" || s === "transfer"
 			? "synthetic"
 			: "greentech";
 

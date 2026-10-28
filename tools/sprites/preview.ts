@@ -1,9 +1,10 @@
 #!/usr/bin/env -S npx tsx
 /**
- * Sprite preview for the Green tree (docs/TREES.md section 7). Usage (from the repo root):
+ * Sprite previews for the three trees and the Consciousness Transfer Unit (docs/TREES.md section 7). Usage (from the repo root):
  *
- *   npx tsx tools/sprites/preview.ts            # both PNGs
- *   npx tsx tools/sprites/preview.ts sheet      # docs/preview/green-sprites.png only
+ *   npx tsx tools/sprites/preview.ts            # every PNG
+ *   npx tsx tools/sprites/preview.ts sheet      # the four sheets: green-sprites, bio-sprites, synthetic-sprites, transfer-unit (docs/preview/)
+ *   npx tsx tools/sprites/preview.ts bio        # one sheet: green | bio | synthetic | transfer
  *   npx tsx tools/sprites/preview.ts ingame     # docs/preview/green-ingame.png only
  *
  * `sheet` serves packages/render/dev (sprites.html) with vite and screenshots it in headless Chromium: every new sprite drawn by the
@@ -79,20 +80,31 @@ const stopServers = (): void => {
 
 const launchArgs = { args: ["--use-gl=swiftshader", "--enable-unsafe-swiftshader"] };
 
-async function sheet(browser: Browser): Promise<void> {
+/** The four sheets: one per tree, plus the Consciousness Transfer Unit's walk-in and upload. */
+const SHEETS: readonly { tree: string; file: string }[] = [
+	{ tree: "green", file: "green-sprites.png" },
+	{ tree: "bio", file: "bio-sprites.png" },
+	{ tree: "synthetic", file: "synthetic-sprites.png" },
+	{ tree: "transfer", file: "transfer-unit.png" },
+];
+
+async function sheet(browser: Browser, only?: string): Promise<void> {
 	const url = await serve("packages/render/dev", 5184, "sprites.html");
-	const page = await browser.newPage({ viewport: { width: 1700, height: 900 } });
-	const errors: string[] = [];
-	page.on("pageerror", (e) => errors.push(String(e)));
-	await page.goto(url, { waitUntil: "load" });
-	await page.waitForFunction(() => document.title === "sprites-ready", null, { timeout: 60_000 });
-	await page.waitForTimeout(1500);
-	// Hold the animation on one frame so the PNG is the same every run on the same machine.
-	await page.evaluate("window.__freeze(true)");
-	await page.waitForTimeout(300);
-	await page.screenshot({ path: join(OUT, "green-sprites.png"), fullPage: true });
-	if (errors.length) throw new Error(`page errors:\n${errors.join("\n")}`);
-	console.log("saved docs/preview/green-sprites.png");
+	for (const sh of SHEETS) {
+		if (only && sh.tree !== only) continue;
+		const page = await browser.newPage({ viewport: { width: 1520, height: 900 } });
+		const errors: string[] = [];
+		page.on("pageerror", (e) => errors.push(String(e)));
+		await page.goto(`${url}?tree=${sh.tree}`, { waitUntil: "load" });
+		await page.waitForFunction(() => document.title === "sprites-ready", null, { timeout: 90_000 });
+		await page.waitForTimeout(1500);
+		// Hold the animation on one frame so the PNG is the same every run on the same machine.
+		await page.evaluate("window.__freeze(true)");
+		await page.waitForTimeout(300);
+		await page.screenshot({ path: join(OUT, sh.file), fullPage: true });
+		if (errors.length) throw new Error(`page errors (${sh.tree}):\n${errors.join("\n")}`);
+		console.log(`saved docs/preview/${sh.file}`);
+	}
 }
 
 /** Story scenes (the first Green retrofit opens one) are played through with Enter until none shows for a second. */
@@ -175,6 +187,7 @@ mkdirSync(OUT, { recursive: true });
 const browser = await loadPlaywright().chromium.launch(launchArgs);
 try {
 	if (which === "all" || which === "sheet") await sheet(browser);
+	if (SHEETS.some((x) => x.tree === which)) await sheet(browser, which);
 	if (which === "all" || which === "ingame") await ingame(browser);
 } finally {
 	await browser.close();

@@ -14,6 +14,7 @@ import { HorrorLayer } from "./horror";
 import { Arrows } from "./arrows";
 import { Background } from "./background";
 import { Bots } from "./bots";
+import { Transfers } from "./transfers";
 import { drawCoolant, drawNutrient, drawPower, dripCells } from "./conduits";
 import { Effects, dripFloorY } from "./effects";
 import { Feedback } from "./feedback";
@@ -121,6 +122,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const pillLabels = new TextPool(10);
 	const pneumatics = new Pneumatics(content);
 	const bots = new Bots(content);
+	const transfers = new Transfers();
 	const effects = new Effects(content);
 	const feedback = new Feedback(content);
 	const horror = new HorrorLayer();
@@ -149,6 +151,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		feedback.dark,
 		pneumatics.g,
 		bots.g,
+		transfers.g,
 		effects.g,
 		juice.root,
 		feedback.g,
@@ -341,6 +344,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const renderer: Renderer = {
 		pushEvents(events: SimEvent[]) {
 			juice.push(events, lastView);
+				transfers.push(events, lastView, (performance.now() - t0) / 1000);
 		},
 		setOptions(o: RenderOptions) {
 			// Cheap when nothing changed: only changed keys invalidate anything.
@@ -454,6 +458,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			lifts.drawCars(view, (l) => liftPos(l.id) ?? l.carFloor, t, opt);
 			const botPos = (b: { id: number; x: number; floor: number }) => botInterp.get(b.id, a) ?? { x: b.x, y: b.floor };
 			bots.draw(view, botPos, (b) => botInterp.velocity(b.id), t, opt, stages);
+			transfers.update(view, t);
 			horror.updateBreath(view, stages, t, opt);
 			horror.update({ x0: vx0, x1: vx1, y0: vy0, y1: vy1 }, stages, t, opt);
 			effects.update(view, bots.torches, dt, t, opt);

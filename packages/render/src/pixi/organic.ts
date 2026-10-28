@@ -53,15 +53,16 @@ export function mossCap(g: Graphics, x: number, y: number, w: number, seed: numb
 }
 
 /** A hanging vine: `len` px, wobbling one pixel, with a leaf every few rows. */
-export function vine(g: Graphics, x: number, y: number, len: number, seed: number): void {
+export function vine(g: Graphics, x: number, y: number, len: number, seed: number, bounds?: readonly [number, number]): void {
 	let vx = x;
+	const inside = (v: number): boolean => bounds === undefined || (v >= bounds[0] && v < bounds[1]);
 	for (let r = 0; r < len; r++) {
 		if (hash(seed, r) < 0.3) vx += hash(seed + 3, r) < 0.5 ? -1 : 1;
-		px(g, vx, y + r, 1, 1, r & 1 ? FERN.lo : FERN.mid);
+		if (inside(vx)) px(g, vx, y + r, 1, 1, r & 1 ? FERN.lo : FERN.mid);
 		if (r % 4 === 2) {
 			const s = hash(seed + 9, r) < 0.5 ? -1 : 1;
-			px(g, vx + s, y + r, 1, 1, LEAF.mid);
-			px(g, vx + s * 2, y + r - 1 + (r % 8 === 2 ? 0 : 1), 1, 1, LEAF.hi);
+			if (inside(vx + s)) px(g, vx + s, y + r, 1, 1, LEAF.mid);
+			if (inside(vx + s * 2)) px(g, vx + s * 2, y + r - 1 + (r % 8 === 2 ? 0 : 1), 1, 1, LEAF.hi);
 		}
 	}
 }
@@ -123,11 +124,11 @@ export function toadstool(g: Graphics, x: number, y: number, big = true): void {
 }
 
 /** Mycelium: a thread random-walking from (x, y) for `len` px in direction (dx, dy) with side branches. */
-export function hypha(g: Graphics, x: number, y: number, len: number, dx: number, dy: number, seed: number, alpha = 0.9): void {
+export function hypha(g: Graphics, x: number, y: number, len: number, dx: number, dy: number, seed: number, alpha = 0.9, bounds?: readonly [number, number]): void {
 	let hx = x;
 	let hy = y;
 	for (let k = 0; k < len; k++) {
-		px(g, hx, hy, 1, 1, HYPHA, alpha * (1 - (k / len) * 0.5));
+		if (bounds === undefined || (hx >= bounds[0] && hx < bounds[1])) px(g, hx, hy, 1, 1, HYPHA, alpha * (1 - (k / len) * 0.5));
 		const r = hash(seed, k);
 		if (r < 0.45) hx += dx;
 		else if (r < 0.9) hy += dy;
@@ -135,7 +136,7 @@ export function hypha(g: Graphics, x: number, y: number, len: number, dx: number
 			hx += dx;
 			hy += dy;
 		}
-		if (k % 6 === 4 && len - k > 4) hypha(g, hx, hy, Math.floor((len - k) / 2), dy === 0 ? 0 : dx, dx === 0 ? 0 : dy, seed + k * 3 + 1, alpha * 0.7);
+		if (k % 6 === 4 && len - k > 4) hypha(g, hx, hy, Math.floor((len - k) / 2), dy === 0 ? 0 : dx, dx === 0 ? 0 : dy, seed + k * 3 + 1, alpha * 0.7, bounds);
 	}
 }
 

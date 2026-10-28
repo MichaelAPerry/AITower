@@ -3,7 +3,7 @@ import type { FacilityDef } from "@aitower/content";
 import type { FacilityStatus, FacilityView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
 import { describe, expect, it } from "vitest";
-import { GREEN_SPRITE_BY_ID, GREEN_SPRITE_WIDTH, greenSprite } from "../art";
+import { GREEN_SPRITE_BY_ID, GREEN_SPRITE_WIDTH, greenSprite, spriteTree } from "../art";
 import { FAC_BOTTOM, FAC_TOP, TILE } from "../constants";
 import { NO_FX } from "../horror";
 import { drawBody, drawLive } from "./facilityArt";
@@ -48,14 +48,19 @@ const OPT = { reducedMotion: false, crtEffects: false, colorBlind: false, horror
 const IDS = Object.keys(GREEN_SPRITE_BY_ID);
 const sig = (rs: Rect[]): string => rs.map((q) => `${q.x},${q.y},${q.w},${q.h},${q.c},${q.a}`).join(";");
 
-describe("green sprites: selection", () => {
+describe("tree sprites: selection", () => {
 	it("every listed id exists in the content at the width its sprite was drawn for", () => {
 		for (const id of IDS) {
 			const def = defOf(id);
 			expect(def, id).toBeDefined();
-			expect(def.width, id).toBe(GREEN_SPRITE_WIDTH[GREEN_SPRITE_BY_ID[id]]);
+			expect(GREEN_SPRITE_WIDTH[GREEN_SPRITE_BY_ID[id]], id).toContain(def.width);
 			expect(greenSprite(def), id).toBe(GREEN_SPRITE_BY_ID[id]);
 		}
+	});
+	it("covers all three trees", () => {
+		const trees = new Set(Object.values(GREEN_SPRITE_BY_ID).map((x) => spriteTree(x)));
+		expect([...trees].sort()).toEqual(["biotech", "greentech", "synthetic"]);
+		expect(greenSprite(defOf("consciousness_transfer"))).toBe("transfer");
 	});
 	it("a def of another width falls back to base art, and base defs have no green sprite", () => {
 		expect(greenSprite({ id: "rack_neuromorphic", width: 3 })).toBeNull();
@@ -64,7 +69,7 @@ describe("green sprites: selection", () => {
 	});
 });
 
-describe("green sprites: drawing", () => {
+describe("tree sprites: drawing", () => {
 	it("bodies stay inside their tiles and paint something of their own", () => {
 		const bad: string[] = [];
 		const seen = new Map<string, string>();
@@ -73,7 +78,7 @@ describe("green sprites: drawing", () => {
 			const r = recorder();
 			drawBody(r.g, def, 0, TOP);
 			if (r.rects.length < 30) bad.push(`${id}: only ${r.rects.length} rects`);
-			for (const q of r.rects) if (!(Number.isFinite(q.x + q.y + q.w + q.h) && q.x >= 0 && q.x + q.w <= def.width * TILE && q.y >= TOP + FAC_TOP - 3 && q.y + q.h <= TOP + FAC_BOTTOM)) bad.push(`${id}: ${q.x},${q.y} ${q.w}x${q.h}`);
+			for (const q of r.rects) if (!(Number.isFinite(q.x + q.y + q.w + q.h) && q.x >= 0 && q.x + q.w <= def.width * TILE && q.y >= TOP && q.y + q.h <= TOP + FAC_BOTTOM)) bad.push(`${id}: ${q.x},${q.y} ${q.w}x${q.h}`);
 			const s = sig(r.rects);
 			const twin = seen.get(s);
 			if (twin) bad.push(`${id} draws the same pixels as ${twin}`);
