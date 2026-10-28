@@ -40,6 +40,9 @@ export const T = {
 	blood: 0x6a2c22,
 } as const;
 
+/** `--tree-green` (docs/STYLE_PC98.md): the Green tree's colour. Trim and light of the Green racks and support items. */
+export const TREE_GREEN = 0x9be564;
+
 /** `--money` (docs/STYLE_SYNTHETIC.md): cash and per-hour figures, the "+$" floaters. */
 export const MONEY = 0xffd75e;
 

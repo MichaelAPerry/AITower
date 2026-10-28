@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { heatColor } from "./color";
-import { CB, HEAT_RAMP, HEAT_RAMP_CB, T, dk, lt, mat, mix } from "./palette";
+import { CB, HEAT_RAMP, HEAT_RAMP_CB, T, TREE_GREEN, dk, lt, mat, mix } from "./palette";
 
 describe("palette", () => {
 	it("tokens match docs/STYLE_PC98.md (bg, text, accent, accent-2, good, warn, bad)", () => {
@@ -18,6 +18,13 @@ describe("palette", () => {
 		expect(T.green).toBe(val("good"));
 		expect(T.red).toBe(val("bad"));
 		expect(T.amber).toBe(val("warn"));
+	});
+
+	it("tree green matches docs/STYLE_PC98.md --tree-green", () => {
+		const doc = readFileSync(new URL("../../../docs/STYLE_PC98.md", import.meta.url), "utf8");
+		const m = /--tree-green[`]\s*#([0-9a-f]{6})/i.exec(doc);
+		expect(m).not.toBeNull();
+		expect(TREE_GREEN).toBe(Number.parseInt(m?.[1] ?? "", 16));
 	});
 
 	it("keeps exactly three horror tokens: flesh, bile, blood", () => {

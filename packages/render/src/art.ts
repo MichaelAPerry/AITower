@@ -141,3 +141,45 @@ export const annexTiles = (def: Pick<FacilityDef, "kind" | "width">): number => 
 
 /** Height in px of a rack's vertical status light strip: a taller light means a higher unlock tier. */
 export const stripHeight = (tier: ArtTier): number => [10, 14, 18, 22][tier - 1];
+
+/**
+ * Own sprites of the Green tree (docs/TREES.md section 7): the four tree racks and the support items that used to borrow a
+ * base body. Keyed by def id. A sprite is used only at the width it was drawn for (`GREEN_SPRITE_WIDTH`); any other width
+ * falls back to the kind's body, so a re-balanced def never overflows its art.
+ */
+export type GreenSprite = "nm1" | "nm2" | "ph1" | "ph2" | "econ" | "adiabatic" | "adiabatic_chiller" | "fuel_cell" | "iron_air" | "geothermal" | "microgrid";
+
+export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
+	rack_neuromorphic: "nm1",
+	rack_neuromorphic2: "nm2",
+	rack_photonic: "ph1",
+	rack_photonic2: "ph2",
+	crah_econ: "econ",
+	crah_adiabatic: "adiabatic",
+	chiller_free: "adiabatic_chiller",
+	fuel_cell: "fuel_cell",
+	ups_iron_air: "iron_air",
+	geothermal: "geothermal",
+	microgrid_bea: "microgrid",
+};
+
+/** Tiles each Green sprite spans (racks: one cabinet per tile). */
+export const GREEN_SPRITE_WIDTH: Readonly<Record<GreenSprite, number>> = {
+	nm1: 2,
+	nm2: 2,
+	ph1: 2,
+	ph2: 3,
+	econ: 3,
+	adiabatic: 4,
+	adiabatic_chiller: 8,
+	fuel_cell: 4,
+	iron_air: 6,
+	geothermal: 4,
+	microgrid: 4,
+};
+
+/** The Green sprite a def draws, or null (base art). */
+export const greenSprite = (def: Pick<FacilityDef, "width"> & Partial<Pick<FacilityDef, "id">>): GreenSprite | null => {
+	const s = def.id === undefined ? undefined : GREEN_SPRITE_BY_ID[def.id];
+	return s !== undefined && GREEN_SPRITE_WIDTH[s] === def.width ? s : null;
+};

@@ -163,3 +163,8 @@ overlay → ghost → selection. Screen space on top: CRT scanlines (6 %) + vign
   floaters within 28 px and 0.9 s fold together; pool of 10, puffs 8. `autoBuilt` = a puff. Reduced motion: no rise / spread, fade only. Pools are fixed (no per-frame allocation).
 - **Dev:** `?scene=variety&path=greentech|synthetic&stage=0..4&drought=1&minute=&mpt=`; key `J` fires sample juice events. The variety scene has solar, wind, heat export and carbon rows.
 - **Needs from the sim (not blocking):** per-facility renewable output (so rotors / panels could follow the real value instead of the stand-in).
+
+## Green sprites (docs/TREES.md section 7)
+- `art.ts` `greenSprite(def)` maps def ids (NM-1, NM-2, PH-1, PH-2, OA-400, AD-1500, CH-5000, FC-1000, IA-20, GW-2000, Leaf-Bolt Microgrid) to own art, only at the width drawn (`GREEN_SPRITE_WIDTH`).
+  `pixi/greenSprites.ts` draws it: rack door interiors inside the shared 15-px cabinet (chip mesh / glass beams / woven fabric) and whole support bodies, plus per-frame live passes (no allocation). Leaf trim = `TREE_GREEN` (`--tree-green`).
+- Preview: `npm run sprites` (`tools/sprites/preview.ts`, Playwright) writes `docs/preview/green-sprites.png` (harness `packages/render/dev/sprites.html`) and `green-ingame.png`.

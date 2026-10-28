@@ -9,7 +9,7 @@ import type { FacilityDef } from "@aitower/content";
 import type { RenderOptions } from "@aitower/shared";
 import type { FacilityView } from "@aitower/sim";
 import type { Graphics } from "pixi.js";
-import { type ArtTier, type RackVariant, annexTiles, artSpec, artTier, bodyArt, bodyWidth, cabinetDetail, rackVariant, stripHeight, trimDetail } from "../art";
+import { type ArtTier, type GreenSprite, type RackVariant, annexTiles, artSpec, greenSprite, artTier, bodyArt, bodyWidth, cabinetDetail, rackVariant, stripHeight, trimDetail } from "../art";
 import { alertColor, hex, skinAccent, skinColor } from "../color";
 import { type LiveFx, NO_FX, breathFrame, crtMotif, isPlain, lampFactor } from "../horror";
 import { RotorPhases } from "../green";
@@ -37,6 +37,7 @@ import {
 	valveWheel,
 } from "./draw";
 import { greenKindBody, greenKindLive, greenSkin, pathLive, synthSkin, windOmega } from "./greenArt";
+import { TREE, greenShell, isGreenRack, rackDoorLive, rackDoorStatic, rackSpansLive, rackSpansStatic, supportBody, supportLive } from "./greenSprites";
 import type { TextPool } from "./labels";
 
 const H = FAC_BOTTOM - FAC_TOP;
@@ -135,7 +136,7 @@ export function drawBody(g: Graphics, def: FacilityDef, x: number, top: number, 
 		return;
 	}
 	baseBody(g, def, art, x, top);
-	if (def.kind !== "rack") {
+	if (def.kind !== "rack" && greenSprite(def) === null) {
 		const extra = annexTiles(def);
 		if (extra > 0) annexBay(g, x + bodyWidth(def) * TILE, y, extra * TILE, skinColor(hex(def.color)), skinAccent(hex(def.accent)));
 		tierTrim(g, x, y, def.width * TILE, artSpec(def).tier);
@@ -190,6 +191,11 @@ function baseBody(g: Graphics, def: FacilityDef, art: ReturnType<typeof bodyArt>
 	const a = skinAccent(hex(def.accent));
 	const W = bodyWidth(def) * TILE;
 	const y = top + FAC_TOP;
+	const gs = greenSprite(def);
+	if (gs !== null && art !== "rack") {
+		supportBody(g, gs, x, y, def.width * TILE);
+		return;
+	}
 	switch (art) {
 		case "nutrient":
 			nutrientBody(g, x, y, W, c);
@@ -256,9 +262,12 @@ const EYE_Y = 8; // eyes / face when the status light is "watching" (stage 3, fu
 /** Set per `drawBody` call: draw the plain synthetic look (horror intensity off). */
 let PLAIN = false;
 
-function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: number, c: number, a: number): void {
+function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: number, c0: number, a: number): void {
 	const spec = artSpec(def);
 	const v = spec.variant ?? "air";
+	const gs = greenSprite(def);
+	const green = isGreenRack(gs) ? gs : null;
+	const c = green ? greenShell(green) : c0;
 	const m = mat(c);
 	const sh = stripHeight(spec.tier);
 	const liquid = v === "dlc" || v === "immersion";
@@ -285,6 +294,8 @@ function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: numb
 			for (let r = 0; r < 3; r++) for (let q = 0; q < 3; q++) px(g, cx + 5 + q * 3, y + 14 + r * 4, 2, 3, dk(T.steel, 0.4));
 		} else if (v === "dna") {
 			dnaTubes(g, cx + 4, y + 11, 9, 15, i, PLAIN);
+		} else if (green) {
+			rackDoorStatic(g, green, cx, y, i);
 		} else {
 			// Fine vent slits.
 			for (let ly = y + 13; ly < y + 25; ly += 2) px(g, cx + 6, ly, 4, 1, HOUSING.line);
@@ -299,8 +310,9 @@ function rackBody(g: Graphics, def: FacilityDef, x: number, y: number, top: numb
 			}
 		}
 		kick(g, cx + 1, y + H - 4, CAB_W - 2);
-		cabinetTrim(g, v, det, cx, y);
+		cabinetTrim(g, v, det, cx, y, green !== null);
 	}
+	if (green) rackSpansStatic(g, green, x, y, def.width);
 	if (v === "neural") neuralPit(g, x + 3, y + 11, def.width * TILE - 6, 15, PLAIN);
 	void bio;
 	// Pneumatic receiver where the job tube meets the cabinet top.
@@ -348,14 +360,16 @@ function tankBubbles(g: Graphics, cx: number, y: number, accent: number, id: num
 }
 
 /** Light detail a rack cabinet earns from its `unlockTier`: edge lights, gauge, sensor bar, beacon. */
-function cabinetTrim(g: Graphics, v: RackVariant, d: ReturnType<typeof cabinetDetail>, cx: number, y: number): void {
+function cabinetTrim(g: Graphics, v: RackVariant, d: ReturnType<typeof cabinetDetail>, cx: number, y: number, green: boolean = false): void {
 	const liquid = v === "dlc" || v === "immersion" || v === "organoid";
-	if (d.cornice) px(g, cx + 2, y + 1, CAB_W - 4, 1, BRASS.mid, 0.8);
+	// Green racks: leaf-green trim instead of cyan, and no side gauge over the door (the chip mesh / beams own it).
+	const tm = green ? TREE : BRASS;
+	if (d.cornice) px(g, cx + 2, y + 1, CAB_W - 4, 1, tm.mid, 0.8);
 	if (d.pilasters) {
-		px(g, cx + 1, y + 6, 1, 20, BRASS.mid, 0.5);
-		if (!liquid) px(g, cx + CAB_W - 2, y + 6, 1, 20, BRASS.mid, 0.5);
+		px(g, cx + 1, y + 6, 1, 20, tm.mid, 0.5);
+		if (!liquid) px(g, cx + CAB_W - 2, y + 6, 1, 20, tm.mid, 0.5);
 	}
-	if (d.gauge) {
+	if (d.gauge && !green) {
 		if (liquid) {
 			// Thin light collars on the manifold.
 			for (const cy of [y + 5, y + 21]) {
@@ -372,15 +386,15 @@ function cabinetTrim(g: Graphics, v: RackVariant, d: ReturnType<typeof cabinetDe
 	}
 	if (d.hopper) {
 		// Sensor bar on the cabinet top.
-		px(g, cx + 9, y - 1, 5, 1, BRASS.lo);
-		px(g, cx + 10, y - 2, 3, 1, BRASS.mid);
-		px(g, cx + 11, y - 2, 1, 1, BRASS.hi);
+		px(g, cx + 9, y - 1, 5, 1, tm.lo);
+		px(g, cx + 10, y - 2, 3, 1, tm.mid);
+		px(g, cx + 11, y - 2, 1, 1, tm.hi);
 	}
 	if (d.crest) {
 		// Beacon lens above the cabinet.
-		px(g, cx + 6, y - 3, 3, 2, BRASS.mid);
-		px(g, cx + 7, y - 3, 1, 1, BRASS.hi);
-		px(g, cx + 7, y - 1, 1, 1, BRASS.lo);
+		px(g, cx + 6, y - 3, 3, 2, tm.mid);
+		px(g, cx + 7, y - 3, 1, 1, tm.hi);
+		px(g, cx + 7, y - 1, 1, 1, tm.lo);
 	}
 }
 
@@ -658,7 +672,8 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 	const calm = opt.reducedMotion;
 	const art = bodyArt(def, f.grown);
 	const eff = skinEffects({ path: lf.stage > 0 ? "biotech" : null, stage: lf.stage }, art === "growth" ? "growth" : def.kind);
-	const sel: string = art === "growth" ? "growth" : def.kind;
+	const gs = def.kind === "rack" ? null : greenSprite(def);
+	const sel: string = art === "growth" ? "growth" : gs !== null ? "green_sprite" : def.kind;
 	switch (sel) {
 		case "solar":
 		case "wind":
@@ -678,6 +693,22 @@ export function drawLive(g: Graphics, def: FacilityDef, f: FacilityView, x: numb
 				calm,
 				t,
 				phase: sel === "wind" ? ROTORS.at(f.id, t, omega) : 0,
+			});
+			break;
+		}
+		case "green_sprite": {
+			const cap = Math.max(1, def.cooling?.capacityKw ?? def.power?.capacityKw ?? 1);
+			const usable = active && f.status !== "tripped";
+			supportLive(g, gs as GreenSprite, x, y, W, {
+				id: f.id,
+				usable,
+				load: usable ? Math.min(1, Math.max(f.heatKw, f.powerKw > 0 ? f.powerKw : 0) / cap) : 0,
+				charge: f.charge ?? 0,
+				charging: usable && (f.charge ?? 0) < 0.98,
+				minute: lf.minute ?? 720,
+				drought: lf.drought === true,
+				calm,
+				t,
 			});
 			break;
 		}
@@ -883,9 +914,14 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 	const sh = stripHeight(artTier(def.unlockTier));
 	const level = f.status === "idle" ? 0.2 : cue.tone === "fault" ? 1 : 0.3 + 0.7 * Math.max(0.2, f.clock);
 	const fault = cue.tone === "fault";
+	const gs = greenSprite(def);
+	const green = isGreenRack(gs) ? gs : null;
+	const gOn = cue.mode !== "off" && cue.tone !== "fault";
+	const gP = f.status === "idle" ? 0.1 : Math.max(0.15, f.clock);
 	for (let i = 0; i < def.width; i++) {
 		const cx = x + i * TILE + 1;
 		const seed = f.id * 8 + i;
+		if (green) rackDoorLive(g, green, cx, y, seed, t, calm, gOn, gP);
 		// Status light strip: lit from the bottom by clock, faint pulse at stage 1+ (out of step per cabinet).
 		if (cue.mode !== "off") {
 			const pulse = eff.has("pulse") ? lampFactor(fx.stages, f.id, i, t, calm) : 1;
@@ -920,6 +956,7 @@ function rackLive(g: Graphics, def: FacilityDef, f: FacilityView, x: number, y: 
 			organoidPulse(g, cx + TANK_X, y + TANK_Y, seed, t, !calm && !isPlain(fx), active);
 		}
 	}
+	if (green) rackSpansLive(g, green, x, y, def.width, f.id, t, calm, gOn, gP);
 	if (v === "neural") neuralPulse(g, x + 3, y + 11, def.width * TILE - 6, 15, f.id, t, !calm && !isPlain(fx) && active);
 }
 
