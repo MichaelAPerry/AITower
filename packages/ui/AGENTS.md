@@ -151,7 +151,7 @@ input, download) was verified in Chromium through the dev harness.
 ## Calm HUD and synthetic look (M3-T4b; supersedes the layout notes above where they differ)
 Layout: a thin **top strip** (`calm/TopStrip.tsx`: day/clock, speed, TREASURY, PER HOUR, Level bar, the Singularity bars, growth index, MENU), the world, a **NEXT chip**
 (top centre, from `currentObjective`; tooltip = detail; click opens the drawer or FORM A-5), a **ticker** (bottom, click = alert log), a **build dock** (bottom left, 3 picks +
-More = the full `BuildPalette` as a popover, Wetware tab included) and **drawers on the right edge** (`calm/Parts.tsx`; one at a time; classes `ui-edge`, `data-drawer`):
+More = the full `BuildPalette` as a popover) and **drawers on the right edge** (`calm/Parts.tsx`; one at a time; classes `ui-edge`, `data-drawer`):
 C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). The bottom panel, TopBar and CURRENT ORDERS are gone.
 - Keys: C/R/F/I drawers, B palette, N/H/P overlays, **O** coolant, **U** nutrient, **G** contamination ("growth"), M mute, X demolish. R no longer opens the research
   sheet (that is a button in the Research drawer; the sheet still pauses). Esc order: menu, research sheet, ascension sheet, audit sheet, open drawer/palette, tool, selection, menu.

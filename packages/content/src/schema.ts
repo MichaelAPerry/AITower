@@ -7,8 +7,8 @@
  * Units: kW, kWh, °C, $, ticks (1 tick = 1 game-minute).
  */
 
-/** `bio`: the Wetware tab (nutrient plant, sterile bay, quarantine, bioreactor, organoid racks may also live here). */
-export type BuildCategory = "rack" | "power" | "cooling" | "logistics" | "bio";
+/** The build-menu categories. Wetware items are filed under these too: organoid racks under rack, bioreactors under power, the rest under cooling. */
+export type BuildCategory = "rack" | "power" | "cooling" | "logistics";
 
 export type FacilityKind =
 	| "rack" // IT load: produces FLOPS and heat

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isWetware } from "./catalogue";
 import { generateContract } from "./contracts";
 import { loadContent, validateContent } from "./load";
 import type { ContentDB } from "./schema";
@@ -12,7 +13,7 @@ const broken = (mutate: (db: ContentDB) => void): string => {
 describe("biotech content (bundled)", () => {
 	const db = loadContent();
 	const f = db.facilities;
-	const bio = Object.values(f).filter((d) => d.category === "bio");
+	const bio = Object.values(f).filter((d) => isWetware(d));
 	const player = bio.filter((d) => !d.growth);
 	const growths = bio.filter((d) => d.growth);
 
@@ -211,8 +212,9 @@ describe("validateContent: M3 rules", () => {
 		expect(broken((db) => delete db.facilities.bioreactor.power)).toMatch(/requires a "power" spec/);
 		expect(broken((db) => delete db.facilities.nutrient_plant.bio)).toMatch(/requires a "bio" spec/);
 		expect(broken((db) => (db.facilities.quarantine_lock.bio = { contamination: 1 }))).toMatch(/unexpected "bio" spec/);
-		expect(broken((db) => (db.facilities.sterile_bay.category = "cooling"))).toMatch(/category/);
-		expect(broken((db) => (db.facilities.organoid_incubator.category = "rack"))).toMatch(/should be "bio"/);
+		expect(broken((db) => (db.facilities.sterile_bay.category = "rack"))).toMatch(/should be "cooling"/);
+		expect(broken((db) => (db.facilities.organoid_incubator.category = "cooling"))).toMatch(/should be "rack"/);
+		expect(broken((db) => (db.facilities.nutrient_plant.category = "power"))).toMatch(/should be "cooling"/);
 		expect(broken((db) => (db.facilities.nutrient_plant.width = 1))).toMatch(/nutrient must be at least 2/);
 		expect(broken((db) => (db.facilities.bioreactor.width = 3))).toMatch(/bioreactor must be at least 4/);
 	});

@@ -18,7 +18,6 @@ export const CATEGORY_LABEL: Record<Tab, string> = {
 	power: "Power",
 	cooling: "Cooling",
 	logistics: "Logistics",
-	bio: "Wetware",
 	supplies: "Supplies",
 };
 

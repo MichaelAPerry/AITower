@@ -25,6 +25,10 @@ export const RETROFIT_REFUND = 0.5;
 /** A tree rack is reached only by retrofitting; it is not in the build menu and cannot be placed. */
 export const isRetrofitOnly = (d: FacilityDef): boolean => d.rung !== undefined;
 
+/** Wetware facilities: organoid racks, growths, nutrient plants, sterile bays, quarantine locks and bioreactors. They sit in Racks, Power and Cooling, with no tab of their own. */
+export const isWetware = (d: Pick<FacilityDef, "growth" | "rack" | "kind">): boolean =>
+	!!d.growth || d.rack?.cooling === "bio" || d.kind === "nutrient" || d.kind === "sterilizer" || d.kind === "quarantine" || d.kind === "bioreactor";
+
 /** A base rack: a compute rack that belongs to no tree (AC-1, AC-3, IA-1). */
 export const isBaseRack = (d: FacilityDef): boolean => d.kind === "rack" && !!d.rack && d.rack.pflops > 0 && !d.growth && !d.retired && d.rung === undefined && (d.line === undefined || d.line === "shared");
 

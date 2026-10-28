@@ -48,7 +48,7 @@ const text = (el: unknown): string =>
 
 describe("tree racks are not in the build menu", () => {
 	it("no rung rack, and none of the cut items, is on any palette shelf", () => {
-		const shelves = (["rack", "bio", "power", "cooling", "logistics"] as const).flatMap((tab) => paletteDefs(content, bareView(), tab));
+		const shelves = (["rack", "power", "cooling", "logistics"] as const).flatMap((tab) => paletteDefs(content, bareView(), tab));
 		expect(shelves.length).toBeGreaterThan(10);
 		for (const d of shelves) expect(isRetrofitOnly(d), d.id).toBe(false);
 		const ids = shelves.map((d) => d.id);
@@ -61,8 +61,8 @@ describe("tree racks are not in the build menu", () => {
 		const html = renderToString(<BuildPalette {...panelProps(createFakeStore(fc), content, { ui: { paletteTab: "rack", paletteOpen: true } })} />);
 		expect(html).toContain(content.facilities.rack_air_gpu.name);
 		for (const id of ["rack_dlc_gpu", "organoid_incubator", "rack_neuromorphic", "rack_mind_lattice"]) expect(html).not.toContain(content.facilities[id].name);
-		// The wetware tab has no specialist cards and no commit row any more.
-		const wet = renderToString(<BuildPalette {...panelProps(createFakeStore(fc), content, { ui: { paletteTab: "bio", paletteOpen: true } })} />);
+		// Wetware items sit in Cooling and have no specialist cards or commit row any more.
+		const wet = renderToString(<BuildPalette {...panelProps(createFakeStore(fc), content, { ui: { paletteTab: "cooling", paletteOpen: true } })} />);
 		expect(wet).not.toContain("Commit to");
 	});
 

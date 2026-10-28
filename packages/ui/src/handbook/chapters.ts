@@ -2,7 +2,7 @@
  * The Handbook chapters as data. Pure: chapters come from content, and unlocking is a function of the view.
  * Six core chapters (compact, under 170 words each, each ending in a "Speak the language" block), one "Making the most of Level N" per Level, one per path.
  */
-import type { AscensionPath, ContentDB, FacilityDef, Flavor } from "@aitower/content";
+import { type AscensionPath, type ContentDB, type FacilityDef, type Flavor, isWetware } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { fmtMoney } from "../format";
 import { termById } from "../glossary/terms";
@@ -146,7 +146,7 @@ function levelChapter(n: number, c: ContentDB): Chapter {
 
 const BIO = new Set(["nutrient", "sterilizer", "quarantine", "bioreactor"]);
 const GREEN = new Set(["solar", "wind", "heat_export", "carbon"]);
-const onPath = (p: AscensionPath, d: FacilityDef): boolean => !d.growth && (p === "biotech" ? d.category === "bio" || BIO.has(d.kind) || !!d.rack?.bio : p === "greentech" ? GREEN.has(d.kind) : d.kind === "rack" && d.unlockTier >= 4 && !d.rack?.bio);
+const onPath = (p: AscensionPath, d: FacilityDef): boolean => !d.growth && (p === "biotech" ? isWetware(d) || BIO.has(d.kind) || !!d.rack?.bio : p === "greentech" ? GREEN.has(d.kind) : d.kind === "rack" && d.unlockTier >= 4 && !d.rack?.bio);
 
 function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	const target = c.balance.soul?.spTarget ?? 1000;

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { isWetware } from "./catalogue";
 import { loadContent, validateContent } from "./load";
 import { M4_FACILITIES, M4_TECH, V2_FACILITIES, V2_TECH, V3_FACILITIES, V3_TECH } from "./m4ids";
 import type { ContentDB, PerkKind, TechNode } from "./schema";
@@ -173,7 +174,7 @@ describe("tier research gate (balance.tiers.techs)", () => {
 describe("new trunk content", () => {
 	const db = loadContent();
 	// The trunk (pre-M3) content; the biotech additions have their own tests in biotech.test.ts.
-	const trunk = Object.values(db.facilities).filter((d) => d.category !== "bio" && !M4_FACILITIES.includes(d.id) && !V2_FACILITIES.includes(d.id) && !V3_FACILITIES.includes(d.id));
+	const trunk = Object.values(db.facilities).filter((d) => !isWetware(d) && !M4_FACILITIES.includes(d.id) && !V2_FACILITIES.includes(d.id) && !V3_FACILITIES.includes(d.id));
 	const racks = trunk.filter((d) => d.rack);
 	const f = db.facilities;
 	// Same value measure as events.test.ts: PFLOPS per $ with a share of the baseline cooling plant included.

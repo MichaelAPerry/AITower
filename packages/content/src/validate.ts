@@ -3,6 +3,7 @@
  * problems; an empty array means the DB is valid.
  */
 import type { AdvisorId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
+import { isWetware } from "./catalogue";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	rack: "rack",
@@ -14,10 +15,10 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	cdu: "cooling",
 	depot: "logistics",
 	charger: "logistics",
-	nutrient: "bio",
-	sterilizer: "bio",
-	quarantine: "bio",
-	bioreactor: "bio",
+	nutrient: "cooling",
+	sterilizer: "cooling",
+	quarantine: "cooling",
+	bioreactor: "power",
 	// Greentech (M4): panels and masts are power sources; the exporters and carbon plants sit in the cooling tab.
 	solar: "power",
 	wind: "power",
@@ -224,8 +225,7 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		p.push(`${w}.kind: unknown kind "${d.kind}"`);
 		return;
 	}
-	// Organoid (bio-cooled) racks live in the Wetware tab.
-	const wantCategory = d.kind === "rack" && d.rack?.cooling === "bio" ? "bio" : KIND_CATEGORY[d.kind];
+	const wantCategory = KIND_CATEGORY[d.kind];
 	if (d.category !== wantCategory) p.push(`${w}.category: "${d.category}" should be "${wantCategory}" for kind ${d.kind}`);
 	num(p, `${w}.width`, d.width, { min: 1, int: true });
 	// The renderer draws these bodies at a fixed native width; narrower defs would overflow their tiles.
@@ -253,8 +253,8 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 	if (d.bio) validateBio(p, `${w}.bio`, d);
 	if (d.green) validateGreen(p, `${w}.green`, d);
 	if ((d.kind === "solar" || d.kind === "wind") && d.placement?.needsPower === false) p.push(`${w}.placement.needsPower: a ${d.kind} source must sit on a power conduit`);
-	if (d.placement?.needsNutrient && d.category !== "bio") p.push(`${w}.placement.needsNutrient: only wetware facilities use nutrient`);
-	if (d.category === "bio" && !d.growth && ["nutrient", "bioreactor", "rack"].includes(d.kind) && !d.placement?.needsNutrient) {
+	if (d.placement?.needsNutrient && !isWetware(d)) p.push(`${w}.placement.needsNutrient: only wetware facilities use nutrient`);
+	if (isWetware(d) && !d.growth && ["nutrient", "bioreactor", "rack"].includes(d.kind) && !d.placement?.needsNutrient) {
 		p.push(`${w}.placement.needsNutrient: a ${d.kind} must sit on a nutrient pipe`);
 	}
 	if (d.rack) {
@@ -970,10 +970,10 @@ function validateTech(p: Problems, db: ContentDB): void {
 
 	for (const [key, d] of Object.entries(db.facilities ?? {})) {
 		if (d.tech !== undefined && !byId.has(d.tech)) p.push(`facilities.${key}.tech: unknown tech "${d.tech}"`);
-		if (d.category === "bio" && !d.growth && d.tech !== undefined && byId.has(d.tech) && byId.get(d.tech)?.branch !== "wetware") {
+		if (isWetware(d) && !d.growth && d.tech !== undefined && byId.has(d.tech) && byId.get(d.tech)?.branch !== "wetware") {
 			p.push(`facilities.${key}.tech: wetware facilities must be gated by a "wetware" tech node`);
 		}
-		if (d.category === "bio" && !d.growth && d.tech === undefined) p.push(`facilities.${key}.tech: wetware facilities must be gated behind wetware tech`);
+		if (isWetware(d) && !d.growth && d.tech === undefined) p.push(`facilities.${key}.tech: wetware facilities must be gated behind wetware tech`);
 	}
 	for (const [key, b] of Object.entries(db.bots ?? {})) {
 		if (b.tech !== undefined && !byId.has(b.tech)) p.push(`bots.${key}.tech: unknown tech "${b.tech}"`);
