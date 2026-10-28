@@ -17,6 +17,7 @@
     "check": "npm run typecheck && npm run check:boundaries && npm run lint && npm test",
     "sim": "tsx tools/sim-cli/src/main.ts",
     "lint": "biome lint .",
+    "sprites": "tsx tools/sprites/preview.ts",
     "budget": "node scripts/bundle-budget.mjs",
     "e2e": "node e2e/smoke.mjs",
     "build:single": "node scripts/build-single.mjs"
