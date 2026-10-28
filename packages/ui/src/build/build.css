@@ -76,16 +76,6 @@
 	grid-template-columns: 1fr 1fr;
 	gap: 8px;
 }
-.aitower-hud .bld-sub {
-	margin: 0 0 6px;
-	font: 600 12px/1 var(--f-display);
-	letter-spacing: var(--tracking);
-	color: var(--warn);
-	text-transform: uppercase;
-}
-.aitower-hud .bld-rec {
-	margin-bottom: 12px;
-}
 .aitower-hud .bld-card {
 	display: flex;
 	flex-direction: column;

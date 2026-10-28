@@ -106,7 +106,7 @@ function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plai
 			onBlur={() => onHover(null)}
 		>
 			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
-			{item.tier && <TierMark t={item.tier} />}
+			{item.tier && !item.tier.isPath && <TierMark t={item.tier} />}
 			<span className="bld-name">{item.name}</span>
 			{item.tier?.output && <OutputBar t={item.tier} />}
 			{item.tier?.note && <span className="bld-note">{item.tier.note}</span>}
@@ -118,10 +118,9 @@ function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plai
 
 /**
  * The build catalog: a grid of item cards for the category chosen on the build bar. Hovering a card fills the Inspector
- * (BuildInspector); clicking it arms the tool and the card stays selected. `recommended` is a hook for a "Recommended" row
- * at the top (def ids from a suggestion helper); it renders nothing when empty.
+ * (BuildInspector); clicking it arms the tool and the card stays selected.
  */
-export function BuildPalette({ store, content, state, ui, setUi, recommended }: PanelProps & { recommended?: readonly string[] }) {
+export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 	const tab = ui.paletteTab as Tab;
 	const { view, tool } = state;
 	const active = toolKey(tool);
@@ -158,7 +157,6 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 		cards = open.map((d) => findItem(d.id, content) as CatalogItem);
 		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
 	}
-	const rec = (recommended ?? []).map((id) => findItem(id, content)).filter((i): i is CatalogItem => !!i?.def && !lockReason(i.def, view, content));
 
 	const buy = (cmd: SimCommand): void => {
 		const r = store.dispatch(cmd);
@@ -176,12 +174,6 @@ export function BuildPalette({ store, content, state, ui, setUi, recommended }: 
 				</button>
 			</div>
 			<div className="bld-scroll">
-				{rec.length > 0 && (
-					<section className="bld-rec" aria-label="Recommended">
-						<h4 className="bld-sub">Recommended</h4>
-						<div className="bld-grid">{rec.map((i) => card(i, true))}</div>
-					</section>
-				)}
 				{tab !== "supplies" && <div className="bld-grid">{cards.map((i) => card(i))}</div>}
 				{tab !== "supplies" && cards.length === 0 && lockedLines.length === 0 && <div className="ui-empty">Nothing in this category yet.</div>}
 				{lockedLines.length > 0 && (

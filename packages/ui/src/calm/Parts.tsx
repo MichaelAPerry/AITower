@@ -98,6 +98,6 @@ export function Drawer(props: PanelProps) {
 }
 
 /** The build catalog beside the category bar, and the Inspector that goes with it. */
-export function PalettePopover(props: PanelProps & { recommended?: readonly string[] }) {
+export function PalettePopover(props: PanelProps) {
 	return props.ui.paletteOpen ? <BuildPalette {...props} /> : null;
 }

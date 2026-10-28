@@ -70,17 +70,6 @@ describe("structure tools behind research", () => {
 	});
 });
 
-describe("Recommended row hook", () => {
-	const fc = createFakeContent();
-	const store = createFakeStore(fc);
-	const props = panelProps(store, fc, { ui: { paletteTab: "rack", paletteOpen: true } });
-	it("renders nothing when empty and a row when given buildable def ids", () => {
-		expect(renderToString(createElement(BuildPalette, props))).not.toContain("Recommended");
-		const id = Object.values(fc.facilities).find((d) => d.category === "cooling" && d.unlockTier <= store.get().view.tier && !d.tech)?.id;
-		if (id) expect(renderToString(createElement(BuildPalette, { ...props, recommended: [id, "nope"] }))).toContain("Recommended");
-	});
-});
-
 describe("the right column while the build menu is open", () => {
 	const base = { paletteOpen: true, inLesson: false, hovering: false, selected: false };
 	it("a selected building keeps its Inspector (with its Retrofit buttons) while the catalog is open", () => {
@@ -147,5 +136,15 @@ describe("tier on the cards", () => {
 		expect(html).toContain("t-std");
 		expect(html).toContain("Standard");
 		expect(html).toContain("tier-bar");
+	});
+	it("path items (the old specialist lines) get no badge or diamond in the Inspector; the Level badge stays", () => {
+		const fc = createFakeContent();
+		const at = (hover: string) => renderToString(createElement(BuildInspector, panelProps(createFakeStore(fc), content, { ui: { paletteTab: "bio", paletteOpen: true, buildHover: hover } })));
+		const wet = at("nutrient_plant");
+		expect(wet).toContain("Nutrient Medium Plant");
+		expect(wet).not.toContain("tier-diamond");
+		expect(wet).not.toContain("tier-badge");
+		expect(wet).not.toContain("Path: Wetware");
+		expect(at("rack_air_gpu")).toContain("tier-badge");
 	});
 });

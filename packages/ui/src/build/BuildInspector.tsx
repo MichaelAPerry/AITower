@@ -53,7 +53,7 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 			<div className="bld-kicker">
 				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
 			</div>
-			{item.tier && <TierMark t={item.tier} />}
+			{item.tier && !item.tier.isPath && <TierMark t={item.tier} />}
 			<h2 className="bld-h">{item.name}</h2>
 			{lock && <p className="bld-lock-why">{lock}</p>}
 			{item.tier?.note && <p className="bld-note">{item.tier.note}. The next rack down the line costs more per PFLOPS.</p>}
