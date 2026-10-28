@@ -137,7 +137,7 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 	const tipId = curStep ? `les:${curStep.id}` : null;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: when the panel opens during its step
 	useEffect(() => {
-		if (wantsTrees && ui.trees && tipId && enabled) store.submit({ type: "markTip", tipId });
+		if (wantsTrees && ui.trees && tipId && enabled) store.dispatch({ type: "markTip", tipId });
 	}, [wantsTrees, ui.trees, tipId, enabled]);
 	const slot = curStep?.slot ?? curStep?.focus;
 	const slotX = slot?.x;

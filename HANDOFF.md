@@ -43,7 +43,7 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 1. Owner playtest; fix bugs first.
 2. **Art from the owner** (requested only after scenes exist): rack sprites (`docs/TREES.md` section 7), mid-game scene backgrounds and "tender" expressions (`docs/VN_WRITING.md`, "Dating systems as built"). Placeholders are tinted existing sprites and the plain indigo stage.
 3. Simplified items to finish: Bea's microgrid has no storage; Cass's ice store doesn't time-shift.
-4. Lessons 2+ for the new loop.
+4. ~~Lessons 2+ for the new loop~~ done on `wip/lessons`: Build, Earn, Grow, The trees (scripted in `sim/src/lessons.test.ts`).
 
 **How to work:** Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
 

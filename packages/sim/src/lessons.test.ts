@@ -58,7 +58,7 @@ describe("Lesson 1: your first rack", () => {
 		// A rack with no power is dark: the checklist does not move.
 		run(sim, 30);
 		expect(lessonOf(sim).stepsDone).toEqual(["rack"]);
-		expect(sim.view().facilities.find((f) => f.defId === "rack_air_gpu")?.powered).toBeFalsy();
+		expect(sim.view().facilities.find((f) => f.defId === "rack_air_gpu")?.jobId).toBeNull();
 		doStep(sim, "power", () => ok(sim, { type: "place", defId: "grid_tie", floor: -1, x: 6 }));
 		doStep(sim, "cool", () => ok(sim, { type: "place", defId: "crah_unit", floor: 1, x: 8 }));
 		// The scripted job arrives once the rack is cooled, and the rack picks it up.
