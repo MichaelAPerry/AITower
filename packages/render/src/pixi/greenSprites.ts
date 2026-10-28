@@ -1,20 +1,16 @@
 /**
- * Own sprites of the Green tree (docs/TREES.md section 7, docs/STYLE_PC98.md): the four tree racks (NM-1 and NM-2
- * neuromorphic, PH-1 and PH-2 photonic) and the support items that used to borrow a base body (economizer, adiabatic unit and
- * chiller, hydrogen fuel cell, iron-air store, geothermal well, Bea's microgrid).
+ * Support items of the Green tree (docs/ART_DIRECTION.md): the economizer, adiabatic unit and chiller, hydrogen fuel cell, iron-air
+ * store, geothermal well, Bea's microgrid and the PV wall, each still recognisable as the machine it is but now overgrown:
+ * vines on the economizer, moss on the fuel cell, ferns around the wellhead, a living wall on the PV. The racks live in `greenRacks.ts`.
  *
  * Same rules as the rest of the world art: only axis-aligned rects, a 1 px dark outline (`bevel`), a light rim top-left, a shadow
- * bottom-right, every colour a token or a shade of one. Green is the `--tree-green` leaf trim (`TREE`); the photonic racks add
- * white / cyan glass and light. Rack sprites draw only the door interior of a 15 px cabinet (the shell, status strip and kick
- * plate stay the shared ones in `facilityArt.ts`), so tiers, proportions and status read exactly like AC-1 / LC-2.
- *
- * Static parts go into the cached body; the `*Live` functions run every frame and only blink, spin or slide a few rects
- * (module constants and arithmetic only: no allocation per frame).
- * Coordinates: support sprites take `x` = left edge, `y` = top of the body (`top + FAC_TOP`), `W` = width in px, and stay inside
- * x..x+W, y..y+H (31 rows). Racks take `cx` = cabinet left edge (tile x + 1), `y` = body top.
+ * bottom-right, every colour a token or a shade of one. Static parts go into the cached body; the `*Live` functions run every frame
+ * and only blink, spin or slide a few rects (module constants and arithmetic only: no allocation per frame).
+ * Coordinates: `x` = left edge, `y` = top of the body (`top + FAC_TOP`), `W` = width in px, inside x..x+W, y..y+H (31 rows).
  */
 import type { Graphics } from "pixi.js";
 import type { GreenSprite } from "../art";
+import { BARK, FERN, LEAF, MOSS, SHROOM, SOIL, SPORE, SUN, bracket, frond, mossCap, scatter, sprout, toadstool, vine } from "./organic";
 import { BRASS, PAPER, STEEL, T, TREE_GREEN, dk, lt, mat, mix } from "../palette";
 import { bevel, dialFace, dither, fanBlades, hash, lamp, needle, px, ring, valveWheel } from "./draw";
 import { solarGlow } from "../green";
@@ -24,9 +20,8 @@ const HOUSING = mat(T.housing);
 export const TREE = mat(TREE_GREEN);
 
 /** Cabinet shell (the rack enamel colour) of each Green rack: graphite with a leaf cast, the photonic ones paler and bluer. */
-export const greenShell = (s: GreenSprite): number => (s === "ph1" || s === "ph2" ? mix(T.putty, T.brass, 0.18) : mix(T.putty, T.greenDim, 0.42));
-
-export const isGreenRack = (s: GreenSprite | null): s is "nm1" | "nm2" | "ph1" | "ph2" => s === "nm1" || s === "nm2" || s === "ph1" || s === "ph2";
+/** Trim material of the Green racks. */
+export const greenTrim = (): ReturnType<typeof mat> => TREE;
 
 // ─── Palette of the sprites (all derived from tokens) ──────────────────
 const CHIP = mix(T.steel, T.ink, 0.45);
@@ -50,161 +45,6 @@ function leaf(g: Graphics, x: number, y: number, a = 1): void {
 	px(g, x + 1, y + 1, 3, 1, TREE.mid, a);
 	px(g, x, y + 2, 2, 1, TREE.lo, a);
 	px(g, x + 2, y + 2, 1, 1, TREE.mid, a);
-}
-
-// ═══ Racks ═════════════════════════════════════════════════════════════
-// Door interior of a 15 px cabinet: 8 × 22 px at (cx + 5, y + 4); the shared door frame, status strip and kick plate are drawn by the caller.
-const DX = 5;
-const DY = 4;
-const DW = 8;
-
-/** NM-1 chip mesh: 3 columns × 6 rows of 2×2 chips, 1 px apart. NM-2: 4 columns × 7 rows, edge to edge in a checker, traces between rows. */
-const NM1_COLS = 3;
-const NM1_ROWS = 6;
-const NM2_COLS = 4;
-const NM2_ROWS = 7;
-
-/** Static door interior of a Green rack cabinet. `i` = cabinet index. */
-export function rackDoorStatic(g: Graphics, s: "nm1" | "nm2" | "ph1" | "ph2", cx: number, y: number, i: number): void {
-	const x0 = cx + DX;
-	const y0 = y + DY;
-	px(g, cx + 5, y + 2, 7, 1, TREE.mid); // leaf-green accent line at the head of the door
-	if (s === "nm1") {
-		for (let r = 0; r < NM1_ROWS; r++) {
-			px(g, x0, y0 + 1 + r * 3 + 2, DW, 1, TRACE, 0.5);
-			for (let q = 0; q < NM1_COLS; q++) {
-				const cxp = x0 + q * 3;
-				const cyp = y0 + 1 + r * 3;
-				px(g, cxp, cyp, 2, 2, CHIP);
-				px(g, cxp, cyp, 1, 1, CHIP_HI);
-				if (q < NM1_COLS - 1) px(g, cxp + 2, cyp + 1, 1, 1, TRACE);
-			}
-		}
-		leaf(g, x0 + 2, y0 + 19);
-	} else if (s === "nm2") {
-		for (let r = 0; r < NM2_ROWS; r++) {
-			px(g, x0, y0 + r * 3 + 2, DW, 1, TRACE, 0.7);
-			for (let q = 0; q < NM2_COLS; q++) {
-				const cxp = x0 + q * 2;
-				const cyp = y0 + r * 3;
-				px(g, cxp, cyp, 2, 2, (q + r) & 1 ? CHIP_ALT : CHIP);
-				px(g, cxp, cyp, 1, 1, CHIP_HI);
-			}
-		}
-		// Leaf-green frame down the right edge of the array and a leaf pip.
-		px(g, x0 + DW - 1, y0 + 21, 1, 1, TREE.mid);
-		px(g, x0, y0 + 21, 2, 1, TREE.lo);
-	} else if (s === "ph1") {
-		px(g, x0, y0, DW, 22, GLASS_P);
-		px(g, x0, y0, DW, 1, lt(GLASS_P, 0.3));
-		px(g, x0, y0, 1, 22, lt(GLASS_P, 0.18));
-		for (let k = 0; k < 5; k++) px(g, x0 + 6 - k, y0 + 1 + k, 1, 1, PAPER.hi, 0.35); // glass glint
-		for (const by of PH_BEAMS) {
-			px(g, x0 + 1, y0 + by - 1, DW - 2, 3, T.brass, 0.12);
-			px(g, x0 + 1, y0 + by, DW - 2, 1, BEAM);
-			px(g, x0, y0 + by - 1, 1, 3, T.brass, 0.55); // emitter
-			px(g, x0, y0 + by, 1, 1, PAPER.hi);
-			px(g, x0 + DW - 1, y0 + by - 1, 1, 3, T.brass, 0.55); // detector
-			px(g, x0 + DW - 1, y0 + by, 1, 1, BRASS.hi);
-		}
-		leaf(g, x0 + 2, y0 + 19);
-	} else {
-		px(g, x0, y0, DW, 22, GLASS_P);
-		px(g, x0, y0, DW, 1, lt(GLASS_P, 0.3));
-		px(g, x0, y0, 1, 22, lt(GLASS_P, 0.18));
-		// Woven fabric: two families of diagonal threads crossing every 8 rows, a bright node at each crossing, a weft beam through each node.
-		for (let r = 0; r < 20; r++) {
-			const k = r & 7;
-			px(g, x0 + k, y0 + 1 + r, 1, 1, T.brass, 0.6);
-			px(g, x0 + 7 - k, y0 + 1 + r, 1, 1, PAPER.mid, 0.5);
-		}
-		for (const ny of PH2_NODES) {
-			px(g, x0 + 1, y0 + ny + 1, DW - 2, 1, BEAM);
-			px(g, x0 + 3, y0 + ny, 2, 2, PAPER.hi);
-		}
-		if (i === 0) px(g, x0, y0 + 21, 3, 1, TREE.mid);
-	}
-}
-
-const PH_BEAMS = [5, 11, 17] as const;
-const PH2_NODES = [3, 11, 19] as const;
-
-/** Beams of a photonic fabric threading through the 1 px gaps between cabinets (PH-2): static dim weft. */
-export function rackSpansStatic(g: Graphics, s: "nm1" | "nm2" | "ph1" | "ph2", x: number, y: number, n: number): void {
-	if (s !== "ph2") return;
-	for (let i = 0; i < n - 1; i++) {
-		const cx = x + i * 16 + 1;
-		for (const ny of PH2_NODES) px(g, cx + DX + DW, y + DY + ny + 1, 16 - DW + 0, 1, BEAM);
-	}
-}
-
-/**
- * Live blink of one cabinet's door. `p` = share of lit chips / strength 0..1 (from the rack's clock; 0 when idle), `on` = powered.
- * `calm` (reduced motion) freezes the pattern; lamps stay lit.
- */
-export function rackDoorLive(g: Graphics, s: "nm1" | "nm2" | "ph1" | "ph2", cx: number, y: number, seed: number, t: number, calm: boolean, on: boolean, p: number): void {
-	if (!on) return;
-	const x0 = cx + DX;
-	const y0 = y + DY;
-	if (s === "nm1") {
-		// Small chips blink steadily and out of step: about a third lit while busy.
-		const lit = 0.1 + 0.4 * p;
-		for (let r = 0; r < NM1_ROWS; r++)
-			for (let q = 0; q < NM1_COLS; q++) {
-				const k = r * 3 + q;
-				const slot = calm ? 0 : Math.floor(t * 2.6 + hash(seed, k) * 5);
-				if (hash(seed * 31 + k, slot) < lit) {
-					px(g, x0 + q * 3, y0 + 1 + r * 3, 2, 2, TREE.mid);
-					px(g, x0 + q * 3, y0 + 1 + r * 3, 1, 1, TREE.hi);
-				}
-			}
-	} else if (s === "nm2") {
-		// Sparse event lights: most of the mesh stays dark, a few chips fire a bright spike that lights the trace under it.
-		const lit = 0.03 + 0.07 * p;
-		for (let r = 0; r < NM2_ROWS; r++)
-			for (let q = 0; q < NM2_COLS; q++) {
-				const k = r * 4 + q;
-				const slot = calm ? 0 : Math.floor(t * 7 + hash(seed, k) * 3);
-				if (hash(seed * 37 + k, slot) < lit) {
-					px(g, x0 + q * 2, y0 + r * 3, 2, 2, PAPER.hi);
-					px(g, x0 + q * 2, y0 + r * 3, 1, 1, TREE.hi);
-					px(g, x0 + q * 2, y0 + r * 3 + 2, 2, 1, TREE.hi);
-				} else if (calm && hash(seed * 41 + k, 1) < 0.12) {
-					px(g, x0 + q * 2, y0 + r * 3, 1, 1, TREE.mid);
-				}
-			}
-	} else if (s === "ph1") {
-		// A photon (bright dash with a glow) runs along each beam; the beams breathe.
-		for (let b = 0; b < 3; b++) {
-			const by = y0 + PH_BEAMS[b];
-			const u = calm ? 0.5 : (t * (0.55 + 0.4 * p) + b * 0.33 + hash(seed, b) * 0.2) % 1;
-			const bx = x0 + 1 + Math.floor(u * (DW - 4));
-			px(g, bx, by - 1, 3, 3, T.brass, 0.2);
-			px(g, bx, by, 3, 1, PAPER.hi);
-			px(g, x0 + 1, by, DW - 2, 1, T.brass, calm ? 0.35 : 0.18 + 0.22 * (0.5 + 0.5 * Math.sin(t * 2.2 + b * 2)));
-		}
-	} else {
-		// Nodes of the fabric shimmer in a wave that travels along the cabinet (the rack-wide wave is in `rackSpansLive`).
-		for (let k = 0; k < 3; k++) {
-			const w = calm ? 0.6 : 0.5 + 0.5 * Math.sin(t * 2.6 - (seed * 3 + k) * 0.9);
-			const ny = y0 + PH2_NODES[k];
-			px(g, x0 + 2, ny - 1, 4, 4, T.brass, 0.12 + 0.18 * w);
-			px(g, x0 + 3, ny, 2, 2, PAPER.hi, 0.5 + 0.5 * w);
-		}
-	}
-}
-
-/** PH-2: bright dashes run along the weft beams across the whole rack, over the gaps between cabinets. */
-export function rackSpansLive(g: Graphics, s: "nm1" | "nm2" | "ph1" | "ph2", x: number, y: number, n: number, seed: number, t: number, calm: boolean, on: boolean, p: number): void {
-	if (s !== "ph2" || !on) return;
-	const span = n * 16 - 6;
-	for (let b = 0; b < 3; b++) {
-		const u = calm ? (b + 0.5) / 3 : (t * (0.18 + 0.2 * p) + b * 0.31 + hash(seed, b + 9) * 0.1) % 1;
-		const bx = x + 3 + Math.floor(u * span);
-		const by = y + DY + PH2_NODES[b] + 1;
-		px(g, bx, by - 1, 4, 3, T.brass, 0.22);
-		px(g, bx, by, 4, 1, PAPER.hi);
-	}
 }
 
 // ═══ Support items ═════════════════════════════════════════════════════
@@ -620,7 +460,7 @@ export interface SupportLive {
 }
 
 /** Static body of a support sprite (not a rack). */
-export function supportBody(g: Graphics, s: GreenSprite, x: number, y: number, W: number): void {
+export function greenSupportBody(g: Graphics, s: GreenSprite, x: number, y: number, W: number): void {
 	switch (s) {
 		case "econ":
 			econBody(g, x, y, W);
@@ -649,7 +489,7 @@ export function supportBody(g: Graphics, s: GreenSprite, x: number, y: number, W
 }
 
 /** Live pass of a support sprite (not a rack). */
-export function supportLive(g: Graphics, s: GreenSprite, x: number, y: number, W: number, l: SupportLive): void {
+export function greenSupportLive(g: Graphics, s: GreenSprite, x: number, y: number, W: number, l: SupportLive): void {
 	switch (s) {
 		case "econ":
 			econLive(g, x, y, l);

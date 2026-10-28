@@ -41,6 +41,7 @@ export function TreeColumn({ card }: { card: TreeCard }) {
 				))}
 			</ol>
 			<p className="trees-next">{card.next}</p>
+			{card.special ? <p className="trees-special">{card.special}</p> : null}
 			<div className="trees-factor">
 				{card.factor.map((t) => (
 					<p key={t}>{t}</p>

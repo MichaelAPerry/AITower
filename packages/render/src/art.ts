@@ -142,12 +142,48 @@ export const annexTiles = (def: Pick<FacilityDef, "kind" | "width">): number => 
 /** Height in px of a rack's vertical status light strip: a taller light means a higher unlock tier. */
 export const stripHeight = (tier: ArtTier): number => [10, 14, 18, 22][tier - 1];
 
+
 /**
- * Own sprites of the Green tree (docs/TREES.md section 7): the four tree racks and the support items that used to borrow a
- * base body. Keyed by def id. A sprite is used only at the width it was drawn for (`GREEN_SPRITE_WIDTH`); any other width
- * falls back to the kind's body, so a re-balanced def never overflows its art.
+ * Own sprites of the three trees (docs/ART_DIRECTION.md, docs/TREES.md section 7): the tree racks and the support items that used
+ * to borrow a base body. Green is alive and natural (moss, mycelium, a tree), Bio is flesh, Synthetic is chrome. Keyed by def id.
+ * A sprite is used only at a width it was drawn for (`GREEN_SPRITE_WIDTH`); any other width falls back to the kind's body,
+ * so a re-balanced def never overflows its art. (The type keeps its old name; it now covers every tree.)
  */
-export type GreenSprite = "nm1" | "nm2" | "ph1" | "ph2" | "econ" | "adiabatic" | "adiabatic_chiller" | "fuel_cell" | "iron_air" | "geothermal" | "microgrid";
+export type GreenSprite =
+	// Green
+	| "nm1"
+	| "nm2"
+	| "ph1"
+	| "ph2"
+	| "econ"
+	| "adiabatic"
+	| "adiabatic_chiller"
+	| "fuel_cell"
+	| "iron_air"
+	| "geothermal"
+	| "microgrid"
+	| "pv_wall"
+	// Bio
+	| "oc1"
+	| "oc2"
+	| "oc3"
+	| "oc4"
+	| "bath"
+	| "vascular"
+	| "nutrient"
+	| "bioreactor"
+	| "digester"
+	| "sterile"
+	// Synthetic
+	| "lc2"
+	| "lc3"
+	| "lc4"
+	| "ml1"
+	| "cdu"
+	| "syn_chiller"
+	| "turbine"
+	| "smr"
+	| "transfer";
 
 export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
 	rack_neuromorphic: "nm1",
@@ -161,25 +197,87 @@ export const GREEN_SPRITE_BY_ID: Readonly<Record<string, GreenSprite>> = {
 	ups_iron_air: "iron_air",
 	geothermal: "geothermal",
 	microgrid_bea: "microgrid",
+	solar_skin: "pv_wall",
+	organoid_incubator: "oc1",
+	rack_organoid_2: "oc2",
+	rack_organoid_3: "oc3",
+	neural_pit: "oc4",
+	perfusion_bath: "bath",
+	perfusion_manifold: "bath",
+	vascular_plant: "vascular",
+	nutrient_plant: "nutrient",
+	nutrient_works: "nutrient",
+	bioreactor: "bioreactor",
+	biogas_digester: "digester",
+	sterile_bay: "sterile",
+	rack_dlc_gpu: "lc2",
+	rack_dlc_gpu2: "lc3",
+	rack_dlc_gpu3: "lc4",
+	rack_mind_lattice: "ml1",
+	cdu: "cdu",
+	cdu_big: "cdu",
+	cdu_hall: "cdu",
+	chiller: "syn_chiller",
+	chiller_tower: "syn_chiller",
+	cryo_core: "syn_chiller",
+	cryo_plant: "syn_chiller",
+	genset_gas: "turbine",
+	genset_cc: "turbine",
+	reactor_smr: "smr",
+	consciousness_transfer: "transfer",
 };
 
-/** Tiles each Green sprite spans (racks: one cabinet per tile). */
-export const GREEN_SPRITE_WIDTH: Readonly<Record<GreenSprite, number>> = {
-	nm1: 2,
-	nm2: 2,
-	ph1: 2,
-	ph2: 3,
-	econ: 3,
-	adiabatic: 4,
-	adiabatic_chiller: 8,
-	fuel_cell: 4,
-	iron_air: 6,
-	geothermal: 4,
-	microgrid: 4,
+/** Tiles each sprite spans (racks: one cabinet per tile); the flexible ones list every width they are drawn for. */
+export const GREEN_SPRITE_WIDTH: Readonly<Record<GreenSprite, readonly number[]>> = {
+	nm1: [2],
+	nm2: [2],
+	ph1: [2],
+	ph2: [3],
+	econ: [3],
+	adiabatic: [4],
+	adiabatic_chiller: [8],
+	fuel_cell: [4],
+	iron_air: [6],
+	geothermal: [4],
+	microgrid: [4],
+	pv_wall: [4],
+	oc1: [2],
+	oc2: [3],
+	oc3: [3],
+	oc4: [4],
+	bath: [2, 3],
+	vascular: [5],
+	nutrient: [3, 4],
+	bioreactor: [4],
+	digester: [6],
+	sterile: [2],
+	lc2: [2],
+	lc3: [2],
+	lc4: [2],
+	ml1: [3],
+	cdu: [2, 3, 5],
+	syn_chiller: [4, 6, 8],
+	turbine: [6, 8],
+	smr: [8],
+	transfer: [3],
 };
 
-/** The Green sprite a def draws, or null (base art). */
+/** The tree sprite a def draws, or null (base art). */
 export const greenSprite = (def: Pick<FacilityDef, "width"> & Partial<Pick<FacilityDef, "id">>): GreenSprite | null => {
 	const s = def.id === undefined ? undefined : GREEN_SPRITE_BY_ID[def.id];
-	return s !== undefined && GREEN_SPRITE_WIDTH[s] === def.width ? s : null;
+	return s !== undefined && GREEN_SPRITE_WIDTH[s].includes(def.width) ? s : null;
 };
+
+/** Which tree a sprite belongs to. */
+export type SpriteTree = "greentech" | "biotech" | "synthetic";
+export const spriteTree = (s: GreenSprite): SpriteTree =>
+	s === "oc1" || s === "oc2" || s === "oc3" || s === "oc4" || s === "bath" || s === "vascular" || s === "nutrient" || s === "bioreactor" || s === "digester" || s === "sterile"
+		? "biotech"
+		: s === "lc2" || s === "lc3" || s === "lc4" || s === "ml1" || s === "cdu" || s === "syn_chiller" || s === "turbine" || s === "smr" || s === "transfer"
+			? "synthetic"
+			: "greentech";
+
+/** A tree rack sprite (drawn into rack cabinets rather than as a stand-alone support body). */
+export type RackSprite = "nm1" | "nm2" | "ph1" | "ph2" | "oc1" | "oc2" | "oc3" | "oc4" | "lc2" | "lc3" | "lc4" | "ml1";
+const RACK_SPRITES: ReadonlySet<GreenSprite> = new Set<GreenSprite>(["nm1", "nm2", "ph1", "ph2", "oc1", "oc2", "oc3", "oc4", "lc2", "lc3", "lc4", "ml1"]);
+export const isRackSprite = (s: GreenSprite | null): s is RackSprite => s !== null && RACK_SPRITES.has(s);

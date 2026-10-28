@@ -175,6 +175,10 @@ export function describeEvent(ev: SimEvent, view: SimView, content: ContentDB, h
 			const tree = ev.tree === "synthetic" ? "Synthetic" : ev.tree === "biotech" ? "Bio" : "Green";
 			return { text: `Retrofitted ${f.name} (${tree}, rung ${ev.rung})`, severity: "good", toast: false, cell: f.cell };
 		}
+		case "consciousnessTransferred": {
+			const f = fac(ev.facilityId);
+			return { text: `${f.name}: one person transferred (+${Math.round(ev.sp * 10) / 10} Synthetic SP)`, severity: "info", toast: false, cell: f.cell };
+		}
 		case "growthSprouted": {
 			const f = fac(ev.facilityId);
 			return { text: plain ? `A growth has appeared at ${f.cell ? `F${f.cell.floor} x${f.cell.x}` : f.name}` : `Inventory notice: an unregistered asset has been found at ${f.cell ? `F${f.cell.floor} x${f.cell.x}` : f.name}. It has been entered in the register`, severity: plain ? "warn" : "info", toast: false, cell: f.cell };

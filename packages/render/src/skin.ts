@@ -94,6 +94,7 @@ const RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	wind: ["damp", "tissue"],
 	heat_export: ["damp", "veins", "tissue"],
 	carbon: ["damp", "flesh", "tissue"],
+	transfer: ["damp", "pulse"],
 	// Growths are already tissue.
 	growth: ["pulse", "veins", "breathe", "eyes"],
 };
@@ -127,6 +128,7 @@ const GREEN_RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	wind: ["moss", "vines"],
 	heat_export: ["moss", "vines", "plants", "garden"],
 	carbon: ["fungus", "tank", "garden"],
+	transfer: ["moss"],
 	growth: [],
 };
 
@@ -149,6 +151,7 @@ const SYNTH_RESPONDS: Record<DeviceClass, readonly SkinEffect[]> = {
 	wind: ["lines", "light"],
 	heat_export: ["lines", "glass", "light"],
 	carbon: ["lines", "glass", "light"],
+	transfer: ["lines", "light"],
 	growth: [],
 };
 

@@ -74,6 +74,7 @@ const CATEGORY: Record<Kind, FacilityDef["category"]> = {
 	wind: "power",
 	heat_export: "cooling",
 	carbon: "cooling",
+	transfer: "rack",
 };
 
 export const varietyId = (row: VarietyRow, tier: number, width: number): string => `var_${row.kind}${row.flavour ? `_${row.flavour}` : ""}_t${tier}_w${width}`;

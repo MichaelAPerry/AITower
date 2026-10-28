@@ -68,6 +68,7 @@ const KIND_BLURB: Partial<Record<FacilityDef["kind"], string>> = {
 	nutrient: "Makes the nutrient liquid that wetware racks feed on. It travels down nutrient pipes.",
 	sterilizer: "Cleans contamination off the tiles near it.",
 	quarantine: "A sealed door that stops contamination from spreading through.",
+	transfer: "A chrome pod beside the lift. Every few hours a person steps in and joins the Lattice, and you get Singularity points. It needs power, not coolant.",
 };
 
 /** One or two friendly sentences for a facility. */
@@ -117,6 +118,7 @@ export function plainStats(def: FacilityDef): Stat[] {
 		if (def.green?.creditsPerDay) s.push({ icon: "$", label: "Earns", sub: "Carbon credits each day", value: String(def.green.creditsPerDay), tone: "money" });
 		if (def.bio?.nutrientCapacity) s.push({ icon: "leaf", label: "Makes", sub: "Nutrient liquid per minute", value: String(def.bio.nutrientCapacity) });
 		if (def.bio?.cleanRate) s.push({ icon: "leaf", label: "Cleans", sub: "Contamination within reach", value: `${def.bio.radius ?? 0} tiles` });
+		if (def.transfer) s.push({ icon: "star", label: "Transfers", sub: `One person every ${def.transfer.everyHours} hours while powered: about one ML-1 of Lattice points`, value: `+${def.transfer.sp} SP each`, tone: "money" });
 		if (def.facilityKw > 0) s.push({ icon: "bolt", label: "Power", sub: "Electricity it uses itself", value: fmtPower(def.facilityKw) });
 	}
 	const p = def.placement;
