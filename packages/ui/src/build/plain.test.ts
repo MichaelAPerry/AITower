@@ -1,10 +1,11 @@
-import { loadContent } from "@aitower/content";
+import { isRetrofitOnly, isWetware, loadContent } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { renderToString } from "react-dom/server";
 import { createElement } from "react";
 import { describe, expect, it } from "vitest";
 import { BuildInspector } from "./BuildInspector";
-import { BuildPalette } from "../components/BuildPalette";
+import { BuildPalette, paletteDefs } from "../components/BuildPalette";
+import { BAR_TABS } from "./BuildBar";
 import { CURSOR_HINT_PLACEMENTS, cursorHintVisible } from "../components/CursorHint";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
 import { panelProps } from "../dev/walk";
@@ -67,6 +68,26 @@ describe("structure tools behind research", () => {
 		expect(html).toContain("Power pipe");
 		expect(html.split("Coolant pipe").length - 1).toBe(1); // only in the Research row, no card
 		expect(html).toMatch(/Research &quot;[^&]+&quot; to unlock Coolant pipe/);
+	});
+});
+
+describe("build categories after the Wetware merge", () => {
+	it("the rail has no Wetware tab, and every facility sits in exactly one tab that the rail shows", () => {
+		expect(BAR_TABS).not.toContain("bio");
+		for (const d of Object.values(content.facilities)) {
+			expect(BAR_TABS, d.id).toContain(d.category);
+			if (d.growth || d.retired || isRetrofitOnly(d)) continue;
+			expect(paletteDefs(content, view, d.category).filter((x) => x.id === d.id), d.id).toHaveLength(1);
+		}
+	});
+	it("wetware items moved to their normal tabs: bioreactors to Power, nutrient and sterile kit to Cooling, organoid racks to Racks", () => {
+		const cat = (id: string) => content.facilities[id].category;
+		expect(cat("bioreactor")).toBe("power");
+		expect(cat("nutrient_plant")).toBe("cooling");
+		expect(cat("sterile_bay")).toBe("cooling");
+		expect(cat("dna_vault")).toBe("rack");
+		expect(cat("organoid_incubator")).toBe("rack");
+		expect(Object.values(content.facilities).filter((d) => isWetware(d) && !d.growth).length).toBeGreaterThan(5);
 	});
 });
 
@@ -139,7 +160,7 @@ describe("tier on the cards", () => {
 	});
 	it("path items (the old specialist lines) get no badge or diamond in the Inspector; the Level badge stays", () => {
 		const fc = createFakeContent();
-		const at = (hover: string) => renderToString(createElement(BuildInspector, panelProps(createFakeStore(fc), content, { ui: { paletteTab: "bio", paletteOpen: true, buildHover: hover } })));
+		const at = (hover: string) => renderToString(createElement(BuildInspector, panelProps(createFakeStore(fc), content, { ui: { paletteTab: "cooling", paletteOpen: true, buildHover: hover } })));
 		const wet = at("nutrient_plant");
 		expect(wet).toContain("Nutrient Medium Plant");
 		expect(wet).not.toContain("tier-diamond");

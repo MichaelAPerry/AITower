@@ -2,7 +2,7 @@
  * The Encyclopedia as data: pure generation from content (and the view, for lock state) plus search.
  * Basics and glossary are hand-written; facilities, bots and research are generated, so they never drift from the numbers.
  */
-import type { ContentDB, FacilityDef, Flavor, TechNode } from "@aitower/content";
+import { type ContentDB, type FacilityDef, type Flavor, isWetware, type TechNode } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { type TierView, tierView } from "../build/tier";
 import { defSpecs, lockText } from "../components/BuildPalette";
@@ -42,7 +42,7 @@ export interface Entry {
 }
 
 const BIO_KINDS = new Set(["nutrient", "sterilizer", "quarantine", "bioreactor"]);
-const isBioFacility = (d: FacilityDef): boolean => d.category === "bio" || BIO_KINDS.has(d.kind) || !!d.bio || !!d.rack?.bio;
+const isBioFacility = (d: FacilityDef): boolean => isWetware(d) || BIO_KINDS.has(d.kind) || !!d.bio || !!d.rack?.bio;
 const isSpoilerTech = (t: TechNode): boolean => t.branch === "wetware" || t.path === "biotech";
 
 /** Facility "Needs": what it has to be connected to before it works. */

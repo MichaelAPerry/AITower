@@ -24,11 +24,10 @@ const ICONS: Record<Tab, ReactNode> = {
 			<path d="M16 12V6M12 18h2M18 18h2" />
 		</>,
 	),
-	bio: svg(<path d="M16 28V14M16 14c-6 0-8-5-8-9 6 0 8 4 8 9zM16 18c5 0 8-4 8-8-5 0-8 3-8 8z" />),
 	supplies: svg(<path d="M6 11h20l-2 15H8zM11 11V8a5 5 0 0 1 10 0v3" />),
 };
 
-export const BAR_TABS: Tab[] = ["structure", "rack", "power", "cooling", "logistics", "bio", "supplies"];
+export const BAR_TABS: Tab[] = ["structure", "rack", "power", "cooling", "logistics", "supplies"];
 
 /** The always-visible category bar. One click on a category opens its catalog; clicking it again closes it. */
 export function BuildBar({ ui, setUi, tabs }: Pick<PanelProps, "ui" | "setUi"> & { /** A lesson shows only these categories. */ tabs?: readonly Tab[] | null }) {

@@ -213,14 +213,13 @@ describe("event wording", () => {
 	});
 });
 
-describe("Wetware tab, nutrient tool and overlays", () => {
-	it("has a Wetware tab listing the bio category, with the headline band", () => {
+describe("Wetware items, nutrient tool and overlays", () => {
+	it("has no Wetware tab: nutrient plants sit in Cooling, bioreactors in Power, organoid racks in Racks", () => {
 		const { content, store } = setup();
 		store.setTier(5);
-		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "bio", paletteOpen: true } })} />);
-		expect(html).toContain("Wetware");
+		const html = renderToString(<BuildPalette {...panelProps(store, content, { ui: { paletteTab: "cooling", paletteOpen: true } })} />);
 		expect(html).toContain("Nutrient Plant");
-		const insp = renderToString(<BuildInspector {...panelProps(store, content, { ui: { paletteTab: "bio", paletteOpen: true, buildHover: "organoid_incubator" } })} />);
+		const insp = renderToString(<BuildInspector {...panelProps(store, content, { ui: { paletteTab: "rack", paletteOpen: true, buildHover: "organoid_incubator" } })} />);
 		expect(insp).toContain("37 °C ±1");
 		expect(html).not.toContain("Growth Mass"); // growths are never buildable
 	});

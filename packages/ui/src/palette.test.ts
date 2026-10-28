@@ -8,7 +8,7 @@ import { lockText, paletteDefs } from "./components/BuildPalette";
 const def = (id: string, category: BuildCategory, unlockTier: number, cost: number, tech?: string): FacilityDef => ({ id, name: id, category, unlockTier, cost, tech }) as unknown as FacilityDef;
 const content = {
 	facilities: Object.fromEntries(
-		[def("depot_big", "logistics", 2, 190_000, "central_stores"), def("depot", "logistics", 1, 60_000), def("charger", "logistics", 1, 40_000), def("fast", "logistics", 3, 160_000), def("chiller", "cooling", 1, 1), def("plant", "bio", 3, 9)].map((d) => [d.id, d]),
+		[def("depot_big", "logistics", 2, 190_000, "central_stores"), def("depot", "logistics", 1, 60_000), def("charger", "logistics", 1, 40_000), def("fast", "logistics", 3, 160_000), def("chiller", "cooling", 1, 1), def("plant", "cooling", 3, 9)].map((d) => [d.id, d]),
 	),
 	tech: [{ id: "central_stores", name: "Central Stores" }],
 	paths: [
@@ -21,8 +21,7 @@ const view = { tier: 2, researched: [] } as unknown as SimView;
 describe("palette lists", () => {
 	it("each tab holds only its own category (logistics lists its facilities)", () => {
 		expect(paletteDefs(content, view, "logistics").map((d) => d.id)).toContain("charger");
-		expect(paletteDefs(content, view, "bio").map((d) => d.id)).toEqual(["plant"]);
-		expect(paletteDefs(content, view, "cooling").map((d) => d.id)).toEqual(["chiller"]);
+		expect(paletteDefs(content, view, "cooling").map((d) => d.id)).toEqual(["chiller", "plant"]);
 	});
 	it("sorts by tier then cost, with locked rows after unlocked ones", () => {
 		const ids = paletteDefs(content, view, "logistics").map((d) => d.id);

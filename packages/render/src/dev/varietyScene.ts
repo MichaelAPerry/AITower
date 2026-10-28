@@ -65,10 +65,10 @@ const CATEGORY: Record<Kind, FacilityDef["category"]> = {
 	depot: "logistics",
 	charger: "logistics",
 	// M3 placeholders (M3-T3 adds biotech kinds to the scene).
-	nutrient: "bio",
-	sterilizer: "bio",
-	quarantine: "bio",
-	bioreactor: "bio",
+	nutrient: "cooling",
+	sterilizer: "cooling",
+	quarantine: "cooling",
+	bioreactor: "power",
 	// Greentech (M4).
 	solar: "power",
 	wind: "power",
@@ -118,7 +118,7 @@ function makeGrowth(w: number): FacilityDef {
 		name: `growth w${w}`,
 		description: "",
 		kind: "rack",
-		category: "bio",
+		category: "rack",
 		width: w,
 		cost: 0,
 		upkeepPerDay: 0,
