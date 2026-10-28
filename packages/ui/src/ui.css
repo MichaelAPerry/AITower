@@ -885,11 +885,6 @@
 	gap: 12px;
 	flex: none;
 }
-.aitower-hud .ui-gauge {
-	display: flex;
-	align-items: center;
-	gap: 6px;
-}
 .aitower-hud .ui-dial {
 	display: block;
 	flex: none;
@@ -905,27 +900,6 @@
 }
 .aitower-hud .ui-dial-needle {
 	transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.aitower-hud .ui-gauge-read {
-	display: flex;
-	flex-direction: column;
-	gap: 4px;
-	align-items: flex-start;
-}
-.aitower-hud .ui-gauge-crt {
-	display: flex;
-	flex-direction: column;
-	gap: 1px;
-	padding: 4px 8px 3px;
-	min-width: 62px;
-}
-.aitower-hud .ui-gauge-crt .ui-big {
-	font-size: 23px;
-}
-.aitower-hud .ui-gauge-sub {
-	font: 15px/1 var(--f-crt);
-	color: var(--ph-lo);
-	white-space: nowrap;
 }
 
 /* Clearance lamps */
@@ -2171,9 +2145,6 @@
 	width: 46px;
 	height: 46px;
 }
-.aitower-hud.is-density-tight .ui-gauge-crt {
-	min-width: 56px;
-}
 .aitower-hud.is-density-tight .ui-cash {
 	min-width: 96px;
 }
@@ -2191,13 +2162,8 @@
 	grid-template-columns: 196px minmax(0, 1fr) 232px;
 }
 .aitower-hud.is-density-cramped .ui-dial,
-.aitower-hud.is-density-cramped .ui-gauge-sub,
 .aitower-hud.is-density-cramped .ui-env {
 	display: none;
-}
-.aitower-hud.is-density-cramped .ui-gauge-crt {
-	min-width: 0;
-	padding: 3px 6px 2px;
 }
 .aitower-hud.is-density-cramped .ui-gauges {
 	gap: 4px;

@@ -66,9 +66,6 @@ export function Hud({ store, content, title }: HudProps) {
 	const setUi = useCallback((patch: Partial<UiState>) => setUiState((u) => ({ ...u, ...patch })), []);
 	const [menuOpen, setMenuOpen] = useState(false);
 	const menu = useMemo(() => createMenuController(store, setMenuOpen), [store]);
-	// FORM A-5 (ascension) pauses the same way: the choice is irreversible, so nothing may happen while it is read.
-	const [_ascensionOpen, setAscensionOpen] = useState(false);
-	const ascension = useMemo(() => createMenuController(store, setAscensionOpen), [store]);
 	// The quarterly audit sheet does not pause. `auditRef` lets the Esc handler (a stable object) see the current report.
 	const [audit, setAudit] = useState<QuarterReport | null>(null);
 	const auditRef = useRef<QuarterReport | null>(null);
@@ -170,7 +167,6 @@ export function Hud({ store, content, title }: HudProps) {
 	// biome-ignore lint/correctness/useExhaustiveDependencies: pause once when a game-over appears
 	useEffect(() => {
 		if (overId) {
-			ascension.close();
 			store.setSpeed(0);
 		}
 	}, [overId]);

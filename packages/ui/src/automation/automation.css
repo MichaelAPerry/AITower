@@ -103,11 +103,6 @@
 .aitower-hud .ui-strip .ui-drought .ui-big {
 	font-size: 16px;
 }
-.aitower-hud .ui-strip .ui-pathgauge {
-	height: auto;
-	align-self: center;
-	min-height: 0;
-}
 
 .aitower-hud .ui-auto-spec {
 	display: flex;

@@ -70,8 +70,7 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
   BuildPalette (index cards), OverlaySwitcher (compact, foldable strip at the top of the world + CRT legends),
   DesktopNotice ("best on desktop" memo), Inspector (TempBar = temperature dial,
   net summaries, MAINS toggle), BottomPanel (Contracts form / Jobs CRT / Telemetry scopes / Finance
-  printout / Alerts teletype), Sparkline (oscilloscope trace), Toasts (memo slips), PueGauge (also the
-  generic `Gauge` = Dial + Dymo label + CRT readout), Dial (SVG needle gauge, `niceMax`), common
+  printout / Alerts teletype), Sparkline (oscilloscope trace), Toasts (memo slips), Dial (SVG needle gauge, `niceMax`), common
   (Pill/Meter/Swatch/Icon/Row/Kbd plus the hardware primitives Crt/Lamp/Toggle/Stamp/Counter/FormLabel).
 - `dev/walk.ts`: test helpers (no DOM here): call hook-free function components directly, walk the returned element tree, find a control by text/title/`rest`
   and call its handler; `panelProps()` builds `PanelProps`. `m2b.test.tsx` uses them for the research, clerk, finance, audit and key tests.
@@ -170,7 +169,7 @@ C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). 
   the command on the policy read from the store at that moment and show a refusal as a notice), `AutomationDrawer.tsx` (rows `data-order="research|parts|bots|foreman|clerk"`, each with a Toggle; settings are branch chips,
   number boxes (the Clerk's `AmountField`) and the Foreman's racks/cooling/power ticks; the Foreman shows "Research: Works Foreman" until `view.automation.foremanUnlocked`; the Clerk is a one-line toggle or its hire-me line).
   **The key is T, not A**: the renderer pans the camera with WASD (`keyAction("a")` stays null, see `format.test.ts`). The top strip shows an AUTO lamp (a button that opens the drawer) while any order or the hired Clerk is on.
-- **Paths** (`paths/`): `pathGauge` (green score on Greentech, refinement on Synthetic; tooltip names the ending target from `balance.endings`), `PathGauge` (styled like the growth index), `droughtChip` ("WEATHER / DARK CALM"),
+- **Paths** (`paths/`): `droughtChip` ("WEATHER / DARK CALM"),
   the SANDBOX badge. On those two paths the growth index hides unless corruption is above zero (`showGrowthGauge(view with path)`). The ascension sheet is content-driven: both paths are selectable when `available`.
 - **Sandbox**: `view.sandbox` shows the badge and `currentObjective` skips the "Treasury is in the red / bankruptcy" order.
 - **Ticker and alert log** share `calm.feedLines`, which folds `earned`, `autoBuilt` and `autoBought` per game-hour (no toasts for them; the drought start still toasts).

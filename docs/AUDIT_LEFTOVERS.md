@@ -1,6 +1,26 @@
 # Audit: leftovers after the redesign
 
-Scope: reputation removed; commit and bond gates, after-hours, texts, gifts, confession and FORM A-5 removed; retrofit added. This is a read-only audit. No game code or data was changed. Each finding has a recommendation: **remove**, **fix** or **keep**.
+Scope: reputation removed; commit and bond gates, after-hours, texts, gifts, confession and FORM A-5 removed; retrofit added. The audit was read-only; the cleanup pass below changed code (see Status). Each finding has a recommendation: **remove**, **fix** or **keep**.
+
+## Status (cleanup pass)
+
+Done:
+- **1** Singularity help text rewritten to the current rules (`packages/ui/src/help/helpText.ts`). Click now names the Trees panel.
+- **4** `PathGauge.tsx`, `PueGauge.tsx` and `pathGauge()` removed, with their test case in `m4.test.tsx` and their CSS (`.ui-pathgauge`, `.ui-gauge*`). `paths/paths.ts` stays: `droughtChip` and `SANDBOX_TITLE` are still used by `TopStrip.tsx`. `Dial.tsx` stays (Inspector uses it).
+- **5** `tools/sim-cli/src/run.test.ts` real-content test has an explicit 120 s timeout (it runs about 50 s alone).
+- **6** FORM A-5 state and menu controller removed from `Hud.tsx`; the `ascension.ts` header no longer describes the commit sheet.
+- **14** Mel's line in `events.json` (and `docs/DIALOGUE.md`) now reads "The contract limits…".
+- Stale mentions of PueGauge and PathGauge removed from `packages/ui/AGENTS.md`.
+
+Not done (out of this pass):
+- **2** Lesson 2 / outro pointer: owner decision.
+- **3** Absorbed ending: owner decision (not touched).
+- **7** `balance.ascension.minTier` rename: needs the owner of `balance.json`.
+- **8** Stale comments (`Inspector.tsx`, `advisors/suggest.ts`, `packages/sim/src/api.ts`).
+- **9** `packages/content/AGENTS.md` and `packages/sim/AGENTS.md` still mention reputation.
+- **11, 12** Scenario description and `m4ids.ts`: low priority.
+- Commit wording in `docs/SOUL.md`, `docs/VN_WRITING.md` and `docs/TREES.md` was left as design history.
+- `events.json` "gift basket" (Form 9B outcome) is a flavour line, not the removed gift mechanic; left as is.
 
 ## Baseline
 

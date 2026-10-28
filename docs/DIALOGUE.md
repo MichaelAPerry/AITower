@@ -910,7 +910,7 @@ Choice `gensets`:
 > MAGI votes on the recommended choice: Cass for, Bea for, Mel against. Each vote line is spoken by that advisor.
 - [heat_tariff_revision.vote.cass] cass: Heat we export is heat I do not cool.
 - [heat_tariff_revision.vote.bea] bea: Longer terms mean a steadier feeder. Sign.
-- [heat_tariff_revision.vote.mel] mel: The commitment limits how hard I can push the racks.
+- [heat_tariff_revision.vote.mel] mel: The contract limits how hard I can push the racks.
 
 Choice `sign` (recommended):
 

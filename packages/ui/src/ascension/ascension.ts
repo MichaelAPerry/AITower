@@ -1,7 +1,4 @@
-/**
- * Tree colours and the affinity helpers. (The commit sheet FORM A-5 is gone: docs/REFRAME.md has no commit; a rack is retrofitted
- * toward a tree from the rack inspector, and the Trees panel shows how each tree is doing.)
- */
+/** Path colours and the affinity helpers. */
 import type { AscensionPath } from "@aitower/content";
 
 /** Path order and colours (one hue per path; used by the bars, the decision chips and the panels). */

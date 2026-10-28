@@ -28,7 +28,7 @@ describe("sim-cli runHeadless", () => {
 			expect(r.uptime).toBeGreaterThan(0.5);
 		}
 		expect(rows[14].cash).toBeGreaterThan(rows[0].cash);
-	});
+	}, 120_000); // real content, 15 game days: about 50 s alone, far over the 5 s default in the full suite
 
 	it("real content: every day's save validates, reloads to the same hash and keeps running identically", () => {
 		const content = loadContent();

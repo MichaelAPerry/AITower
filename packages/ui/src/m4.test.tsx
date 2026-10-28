@@ -15,7 +15,7 @@ import { onNotice } from "./notices";
 import { currentObjective } from "./objective/objective";
 import { SoulGauge } from "./soul/SoulGauge";
 import { treeBars } from "./soul/soul";
-import { droughtChip, pathGauge } from "./paths/paths";
+import { droughtChip } from "./paths/paths";
 import { CRAWL_LINES, crawlSeconds, isSkipKey, lineDelay, reducedMotion } from "./title/crawl";
 import { OpeningCrawl } from "./title/OpeningCrawl";
 import { scenarioCards, showPicker, validScenario } from "./title/scenarios";
@@ -195,11 +195,6 @@ describe("top strip", () => {
 		expect(bars.map((b) => [b.tree, b.state, b.frac])).toEqual([["synthetic", "active", 0.5], ["biotech", "closed", 0], ["greentech", "active", 0.1]]);
 		expect(bars[0].title).toContain("1000 Singularity points");
 		expect(textOf(SoulGauge({ view: { ...v, soul }, onOpen: () => {} }))).toContain("CLOSED");
-	});
-	it("the green score gauge names the Garden's target from the content", () => {
-		const { content } = setup();
-		const g = pathGauge({ path: "greentech", greenScore: 0.5, refinement: 0 }, content);
-		expect(g?.title).toContain("1000 Singularity points");
 	});
 	it("growth index gives way to the path gauge on Greentech and Synthetic unless corruption exists", () => {
 		expect(showGrowthGauge({ corruption: 0, tier: 4 })).toBe(true);

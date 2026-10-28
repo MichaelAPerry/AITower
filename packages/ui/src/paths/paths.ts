@@ -1,35 +1,6 @@
-/** Pure helpers for the path gauges in the top strip: green score, refinement, the drought chip and the sandbox badge. */
+/** Pure helpers for the top strip: the weather (drought) chip and the sandbox badge. */
 import type { ContentDB } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
-import type { Tone } from "../components/common";
-import { fmtPct } from "../format";
-
-export interface PathGaugeInfo {
-	id: "greentech" | "synthetic";
-	label: string;
-	/** 0..1 */
-	value: number;
-	tone: Tone;
-	title: string;
-}
-
-const endingTarget = (content: ContentDB, id: "garden" | "singularity"): string => {
-	const title = content.endings?.find((x) => x.id === id)?.title ?? id;
-	return ` ${title} comes at ${content.balance?.soul?.spTarget ?? 1000} Singularity points.`;
-};
-
-/** The gauge of the chosen path: green score for Greentech, refinement for Synthetic; null on any other path. */
-export function pathGauge(view: Pick<SimView, "path" | "greenScore" | "refinement">, content: ContentDB): PathGaugeInfo | null {
-	if (view.path === "greentech") {
-		const g = view.greenScore ?? 0;
-		return { id: "greentech", label: "GREEN SCORE", value: g, tone: "good", title: `Green score ${fmtPct(g, 0)}: solar, wind and exported heat raise it; a Dunkelflaute lowers it.${endingTarget(content, "garden")}` };
-	}
-	if (view.path === "synthetic") {
-		const r = view.refinement ?? 0;
-		return { id: "synthetic", label: "REFINEMENT", value: r, tone: "cyan", title: `Refinement ${fmtPct(r, 0)}: uptime times the share of compute on top-tier racks.${endingTarget(content, "singularity")}` };
-	}
-	return null;
-}
 
 /** The weather chip while a Dunkelflaute is in force. */
 export function droughtChip(view: Pick<SimView, "drought">, content: ContentDB): { label: string; value: string; title: string } | null {

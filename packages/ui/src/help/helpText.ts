@@ -15,7 +15,7 @@ export const HELP = {
 	perhour: { title: "Per hour", text: "How much money you are making or losing each game hour, averaged over the last six. Red means upkeep and power cost more than you earn.", entry: "basics:money" },
 	"res-level": { title: "Level research requirement", text: "To reach the next Level you must also finish this many research items, on top of output and uptime. Any branch counts.", entry: "basics:level" },
 	level: { title: "Level", text: "Your standing with the Compute Authority. Install more compute, keep uptime high and finish enough research to reach the next level, which unlocks bigger builds.", entry: "basics:level" },
-	singularity: { title: "Singularity", text: "One bar per tree. The Lattice fills from almost any rack; the Flesh and the Garden grow only once you commit at Level 3. The first full bar ends the world. Click: dossier.", entry: "basics:singularity" },
+	singularity: { title: "Singularity", text: "One bar per tree: Lattice, Flesh, Garden. Each fills only from its own racks, retrofitted to it. Green is faster on clean power. The first full bar ends the world. Click: Trees panel, next step.", entry: "basics:singularity" },
 	advisors: { title: "Advisors", text: "Four advisors. Click a portrait to ask what to worry about. Tips show once and fade to a chip; the dot means a tip is waiting.", entry: "basics:advisors" },
 	decision: { title: "Decision", text: "An advisor needs a call. The game is paused and waiting costs nothing. Her recommended choice is marked, and she has an agenda. Defer pushes it one day, once.", entry: "basics:advisors" },
 	help: { title: "Help", text: "Turn help mode on or off. While it is on, hover any outlined part of the screen to see what it does. Press ? or F1.", entry: "basics:money" },
