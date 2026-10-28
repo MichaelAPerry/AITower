@@ -39,13 +39,21 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 - **Dating systems** (all nine): after-hours visits, bond stages, milestone scenes, gifts, rivalry, confession and route lock, texts, memories. Snapshot v14.
 - Ending paintings appear only on ending screens. Quotes checked in `docs/QUOTES_CHECK.md`.
 
-### Next, in order
-1. Owner playtest; fix bugs first.
-2. **Art from the owner** (requested only after scenes exist): rack sprites (`docs/TREES.md` section 7), mid-game scene backgrounds and "tender" expressions (`docs/VN_WRITING.md`, "Dating systems as built"). Placeholders are tinted existing sprites and the plain indigo stage.
-3. Simplified items to finish: Bea's microgrid has no storage; Cass's ice store doesn't time-shift.
-4. Lessons 2+ for the new loop.
+### State on Oct 28 (read this first)
+- **Live:** retrofit reframe (`docs/REFRAME.md`), bug fixes. **On branch, not live yet:** build-menu fixes (retrofit with menu open, Wetware tab folded into Power/Cooling/Racks), audit cleanups, the rejected Green sprite pass, `docs/DIALOGUE.md` (owner is rewriting it), `docs/ART_NEEDED.md`, `docs/AUDIT_LEFTOVERS.md`.
+- **Stopped mid-task, pushed as WIP branches** (check each runs; finish or redo):
+  - `wip/tree-sprites`: redraw all three trees per owner direction (`docs/ART_DIRECTION.md`). Green = alive/natural, plant and fungus, solarpunk; last rung looks like a tree. Bio = fleshy, MTG "Living Wall" feel. Synthetic = chrome. Plus the **Consciousness Transfer Unit** (Synthetic special: little humans walk out of the lift into a chrome pod and are uploaded; each adds Synthetic SP, about one ML-1 per unit). Preview PNGs in `docs/preview/` for owner approval BEFORE merging. The current Green sprites on the branch were rejected.
+  - `wip/lessons`: four short lessons for this version (Build, Earn, Grow, The trees), each scripted to completion in tests; remove "Coming soon" rows.
+  - `wip/endings`: five endings (Lattice, Flesh, Garden, Absorbed, Bankrupt as a real ending screen), an epilogue per advisor, and `docs/ENDING_PROMPTS.md` (image prompts for the owner).
 
-**How to work:** Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
+### Next, in order
+1. Finish the three WIP branches (one agent each), owner approves sprite previews, merge, deploy.
+2. **Off-duty portraits** (owner approved, instead of lingerie): an unlockable casual portrait per advisor, each with its own requirement (e.g. Bea in her garden on a Garden win; Cass asleep on the B2 cot after 30 days at 99% uptime). Write the four requirements and image prompts for the owner, then build the unlock and a gallery.
+3. Import the owner's rewritten `docs/DIALOGUE.md` (build `tools/dialogue/import.ts` against the export's grammar).
+4. Owner art arrives (scene backgrounds, ending screens, portraits): wire it in.
+5. Green clean power reaches only ~0.35 score: batteries don't shift solar to evening; heat export is weak beside liquid racks.
+
+**How to work:** Opus coordinates only (no hands-on coding). Small, verified steps; the owner plays each build before the next big change; sprites and writing get a sample approved before the bulk. Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
 
 The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, at the root and in `docs/`.
 
