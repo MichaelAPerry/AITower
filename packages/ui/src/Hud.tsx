@@ -10,6 +10,7 @@ import { LevelUpCard } from "./levelup/LevelUpCard";
 import { Toasts } from "./components/Toasts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
+import { rightPanelFor } from "./build/plain";
 import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker, WIDE } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
 import { nextDrawer } from "./calm/calm";
@@ -243,7 +244,7 @@ export function Hud({ store, content, title }: HudProps) {
 				<BuildBar ui={ui} setUi={setUi} tabs={lessonTabs(content, state.view)} />
 				<Ticker {...props} />
 				<div className="ui-right">
-					{ui.paletteOpen && (!inLesson || ui.buildHover) ? <BuildInspector {...props} /> : <Inspector {...props} />}
+					{rightPanelFor({ paletteOpen: ui.paletteOpen, inLesson, hovering: !!ui.buildHover, selected: !!state.selection }) === "build" ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
 				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} teacher={lesson.teacher} teacherAdvisor={lesson.advisor} />}
 				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />

@@ -9,7 +9,7 @@ import { CURSOR_HINT_PLACEMENTS, cursorHintVisible } from "../components/CursorH
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
 import { panelProps } from "../dev/walk";
 import { findItem, itemForTool } from "./catalog";
-import { lockedSummary, plainBlurb, plainStats, structureGate } from "./plain";
+import { lockedSummary, plainBlurb, plainStats, rightPanelFor, structureGate } from "./plain";
 
 const content = loadContent();
 const view = { tier: 1, techResearched: [] } as unknown as SimView;
@@ -78,6 +78,28 @@ describe("Recommended row hook", () => {
 		expect(renderToString(createElement(BuildPalette, props))).not.toContain("Recommended");
 		const id = Object.values(fc.facilities).find((d) => d.category === "cooling" && d.unlockTier <= store.get().view.tier && !d.tech)?.id;
 		if (id) expect(renderToString(createElement(BuildPalette, { ...props, recommended: [id, "nope"] }))).toContain("Recommended");
+	});
+});
+
+describe("the right column while the build menu is open", () => {
+	const base = { paletteOpen: true, inLesson: false, hovering: false, selected: false };
+	it("a selected building keeps its Inspector (with its Retrofit buttons) while the catalog is open", () => {
+		expect(rightPanelFor({ ...base, selected: true })).toBe("inspector");
+	});
+	it("hovering a card previews it, even over a selection", () => {
+		expect(rightPanelFor({ ...base, hovering: true, selected: true })).toBe("build");
+		expect(rightPanelFor({ ...base, hovering: true })).toBe("build");
+	});
+	it("with nothing selected or hovered the build preview (picked item, or empty) shows as before", () => {
+		expect(rightPanelFor(base)).toBe("build");
+	});
+	it("the catalog closed means the Inspector, whatever the hover", () => {
+		expect(rightPanelFor({ ...base, paletteOpen: false, hovering: true })).toBe("inspector");
+		expect(rightPanelFor({ ...base, paletteOpen: false })).toBe("inspector");
+	});
+	it("in a lesson the catalog preview shows only for a hovered card", () => {
+		expect(rightPanelFor({ ...base, inLesson: true })).toBe("inspector");
+		expect(rightPanelFor({ ...base, inLesson: true, hovering: true })).toBe("build");
 	});
 });
 
