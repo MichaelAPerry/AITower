@@ -36,9 +36,9 @@ export function GameOverScreen({ over, view, content, horror = "full", onLoad, o
 		if (!menuOpen && root.current) focusables(root.current)[0]?.focus();
 	}, [menuOpen, over.kind]);
 
-	// The three Singularity wins play as a visual-novel scene over their tree's painting.
-	const tree = over.kind === "victory" && ending ? content.endings?.find((e) => e.id === ending && e.backdrop) : undefined;
-	if (tree) return <EndingScene ending={tree} view={view} content={content} menuOpen={menuOpen} onContinue={onContinue} onNewGame={onNewGame} />;
+	// Every ending plays as a visual-novel scene: the three wins over their painting, Absorbed and Bankrupt over the plain stage.
+	const scene = ending ? content.endings?.find((e) => e.id === ending && (over.kind === "victory" ? e.art || e.backdrop : e.epilogue)) : undefined;
+	if (scene) return <EndingScene ending={scene} view={view} content={content} menuOpen={menuOpen} final={final} onContinue={onContinue} onLoad={onLoad} onNewGame={onNewGame} />;
 
 	const onKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
 		e.stopPropagation();

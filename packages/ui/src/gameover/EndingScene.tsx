@@ -2,9 +2,9 @@ import type { AdvisorId, ContentDB, EndingDef } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
-import { BACKDROP, PORTRAITS } from "../art";
+import { endingBackdrop, PORTRAITS } from "../art";
 import { StampBtn } from "../menu/parts";
-import { lifetimeStats, paragraphs } from "./gameOver";
+import { endingKicker, lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
 
 /**
@@ -26,7 +26,8 @@ export function epilogueAdvisor(view: Pick<SimView, "soul">, ending: EndingDef):
  * A Singularity ending as a visual-novel scene: the tree's floor painting, the ending's paragraphs in the dialogue box, the
  * epilogue of the advisor the player is closest to, then the service record and the buttons.
  */
-export function EndingScene({ ending, view, menuOpen, onContinue, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; onContinue: () => void; onNewGame: () => void }) {
+export function EndingScene({ ending, view, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {
+	const backdrop = endingBackdrop(ending);
 	const who = epilogueAdvisor(view, ending);
 	const pages: { who: AdvisorId | null; text: string }[] = [
 		...paragraphs(ending.body).map((text) => ({ who: null, text })),
@@ -49,10 +50,10 @@ export function EndingScene({ ending, view, menuOpen, onContinue, onNewGame }: {
 	const page = pages[i];
 	const speaker = page?.who ? ADVISORS[page.who] : null;
 	return (
-		<div className={`vn-stage has-backdrop ui-over ending-${ending.id}`} ref={root} tabIndex={-1} role="alertdialog" aria-modal="true" aria-label={ending.title} onKeyDown={onKey} onClick={done ? undefined : next}>
-			{ending.backdrop && <img className="vn-backdrop" src={BACKDROP[ending.backdrop]} alt="" draggable={false} />}
+		<div className={`vn-stage ${backdrop ? "has-backdrop" : "is-plain"} ui-over ending-${ending.id}`} ref={root} tabIndex={-1} role="alertdialog" aria-modal="true" aria-label={ending.title} onKeyDown={onKey} onClick={done ? undefined : next}>
+			{backdrop && <img className="vn-backdrop" src={backdrop} alt="" draggable={false} />}
 			<div className="vn-caption">
-				<span>SINGULARITY</span>
+				<span>{endingKicker(ending.id)}</span>
 				<b>{ending.title}</b>
 			</div>
 			{speaker && page?.who && (
@@ -83,8 +84,8 @@ export function EndingScene({ ending, view, menuOpen, onContinue, onNewGame }: {
 						))}
 					</dl>
 					<footer className="ui-over-acts">
-						<StampBtn tone="green" rest="Continue in sandbox" onClick={onContinue} />
-						<StampBtn tone="green" rest="New game" onClick={onNewGame} />
+						{final ? <StampBtn tone="green" rest="Load game" onClick={onLoad ?? onNewGame} /> : <StampBtn tone="green" rest="Continue in sandbox" onClick={onContinue} />}
+						<StampBtn tone={final ? "red" : "green"} rest="New game" onClick={onNewGame} />
 					</footer>
 				</div>
 			)}

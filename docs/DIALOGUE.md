@@ -617,51 +617,75 @@ Choice `more`:
 
 ## 7. Endings
 
-> Shown when the tower reaches an ending. Each Singularity ending has one short epilogue per advisor, written as narration.
+> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration.
 
 ### `singularity`
 
-> Backdrop: synthetic.
+> Art: bg-end-lattice.webp (placeholder backdrop: synthetic).
 - [end.singularity.title] Title: The Lattice
-- [end.singularity.body.p1] narrator: At 04:12 the tower stopped asking permission. Nothing looked different. The racks hummed. The lifts ran. Contracts got filled before the clients knew they wanted them.
-- [end.singularity.body.p2] narrator: By noon the city was folded in, one district at a time. Everyone kept their name, their jokes, their bad habits. They just stopped being tired. The sky's still up there. Nobody can fault the resolution.
-- [end.singularity.body.p3] narrator: You're still the Operator. There's nothing left to operate.
-- [end.singularity.epilogue.cass] narrator: Cass is the only one still drinking her coffee hot. "It's not real coffee," she says. "I'm still real. I think." She pours a second cup and holds it out until your hands stop shaking. "Did you sleep?" You take the cup.
-- [end.singularity.epilogue.bea] narrator: Bea has drawn a garden on the inside of the lattice. Chalk. It never wears off. "It's not real," she says. "Nothing is. I planted it anyway." She hands you the watering can. "Same time tomorrow. Roots need checking."
-- [end.singularity.epilogue.mel] narrator: Mel is in the old lab, holding an empty jar up to the light. The sun's a setting now. "It wants to remember having a body," she says. "It never had one. I'm lending it mine." She tugs her cuff down over the stain. There's a stool next to hers. She doesn't mention it.
-- [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. It isn't a roof anymore. "Told you," she says. "Sensible option." She holds out her hand. It's shaking. She doesn't pull it back. "Calibration." She waits. "Stay. Somebody should check the ledger."
+- [end.singularity.body.p1] narrator: The Consciousness Transfer Unit on floor 4 took its first public booking in March. A person sits in a reclining chair. A technician fits a cap and counts back from ten. In the Mind Lattice racks, a copy of that person wakes up. It remembers the chair and the count. It says it feels fine.
+- [end.singularity.body.p2] narrator: By summer nine thousand people had gone through, and the waiting list was two years long. The first ones were old or ill. Then came the tired ones, and then the curious. The people themselves sleep in the dormitory on floors 5 to 9. Nurses turn them every four hours. A few wake up, eat breakfast and walk home. Most stay in their beds.
+- [end.singularity.body.p3] narrator: The city did not empty in a day. Shops closed one at a time, because fewer people came in each year. The street lights downtown are on a timer now. The number 14 bus still runs once an hour, usually with nobody on it.
+- [end.singularity.body.p4] narrator: Inside the Lattice there is a city too. It has the same streets, and more sky. People hold meetings, cook dinner and argue about parking. They pay rent in compute. When the Authority's auditors asked whether anyone was in pain, the answer from every district was no.
+- [end.singularity.body.p5] narrator: You are still the Operator. Your job is to keep the power on and the racks cool. If either fails, four million people stop in the middle of a sentence. You check the gauges at 06:00 and again at 18:00. They have been green for eleven months.
+- [end.singularity.epilogue.cass] narrator: Cass has propped the plant-room window open. It's January. The copies ask her what cold feels like, so she tells them over the speaker: the sting in your nose, your breath showing. She pours two mugs of coffee and gives you one. "Did you sleep?" You say a bit. "The racks are cool," she says. "That's all I can promise. I don't know about the rest."
+- [end.singularity.epilogue.bea] narrator: Bea didn't go in. She's carried soil up to the roof in buckets and built six rows of tomato boxes. The copies watch the roof on the camera feed and send in requests: basil, mint, chillies. Bea reads them with her goggles down. "They want to know what it smells like," she says. "So I hold a leaf up to the camera." She hands you the watering can. "I know. It's not the same."
+- [end.singularity.epilogue.mel] narrator: Mel's body is in bed 212 on the fifth floor, asleep. She talks to you from the speaker in the old lab, in her normal voice. "It's mostly like being tired," she says. "The copies keep asking what the pool smelled like when they were kids. They've forgotten. I tell them." Her glove is still on the bench by the empty jar. "Come by on Tuesday, if you like. They turn me at four."
+- [end.singularity.epilogue.luci] narrator: Luci puts a booking slip on your desk. Slot 9,114, made in March. "I keep moving it back a week," she says. Her pen is on the desk too. She's set it down so it won't rattle. "For the record, the ledger needs someone with a body. I'm not asking." She stays standing until you say you'll be here.
 
 ### `flesh`
 
-> Backdrop: biotech.
-- [end.flesh.title] Title: The Flesh Remembers
-- [end.flesh.body.p1] narrator: The annex grew through the basement first. Then the riser shafts. Then the street. By the time the council met to talk about it, the chamber was warm and breathing and in favour.
-- [end.flesh.body.p2] narrator: The tower's a body now, and the city's its nerves. People wear the tissue at the wrist. It's gentle. It remembers birthdays and keeps insulin steady. On the coldest nights it keeps people company.
-- [end.flesh.body.p3] narrator: The racks still hum under skin that heals itself. Your pulse is on the dashboard. So is everyone's.
-- [end.flesh.epilogue.cass] narrator: Cass refused the graft. She's the only cold thing left in the building. She finds you anyway, mug in both hands. "Someone has to remember how it was," she says. You sit in the old plant room and remember it out loud until the coffee goes cold.
-- [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there. They look at you now. "It's alive," she says. "I wanted a living planet. I never said which way round." She laughs a bit too long and leans on your shoulder. Her goggles stay up.
-- [end.flesh.epilogue.mel] narrator: Mel takes her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me." She rolls back the stained cuff. Under it her skin is the same pink as the wall. She puts your palm on the plaster. It's warm. The building's pulse settles into yours.
-- [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She's looking at the new skin on her knuckles. "Self-repairing. No upkeep." She doesn't take her hand out of yours. "Tell anyone I said that and I'll bill you for the silence."
+> Art: bg-end-flesh.webp (placeholder backdrop: biotech).
+- [end.flesh.title] Title: The Flesh
+- [end.flesh.body.p1] narrator: The Neural Vat in the pit was the first part of the tower to wake. For two years it had been a mass of cortex under red light, answering test patterns. One Tuesday it answered a question nobody had asked. It said the pumps were too loud. Mel's team turned them down.
+- [end.flesh.body.p2] narrator: Within a month the vat had a nutrient line to every floor. The team stopped programming it and started feeding it, adjusting the broth the way you would adjust a diet. It learned the lifts, the boilers and the fire doors. Then it learned names. It greets staff at the entrance through the speakers and gets them right.
+- [end.flesh.body.p3] narrator: A clinic opened on the ground floor. For forty dollars, a patch of cultured tissue is grafted to your forearm. It reads your glucose and doses your insulin. It warns you ten minutes before a seizure. It is warm to touch. The waiting room is full every day, mostly with people whose parents died without one.
+- [end.flesh.body.p4] narrator: The patches report to the vat, so the vat knows who is ill and who hasn't slept. When a woman fell on Third Street last winter, the ambulance was already turning the corner. Nobody in the district has died of a missed dose or an unwitnessed fall since October.
+- [end.flesh.body.p5] narrator: You still run the tower. Your pulse is on the dashboard now, beside the temperature of the vat. You took the patch in May. The first thing it did was tell you to eat lunch.
+- [end.flesh.epilogue.cass] narrator: Cass turned down the graft. She's the only one on the plant-room shift without a patch, and the vat knows. It sends her a coffee order every morning anyway. "I'm not against it," she says. "I'd like one person in the building who can get a cold without the building noticing. I'm not saying that's better." She hands you a mug. "Did you sleep? The patch would tell me. I'd rather hear it from you."
+- [end.flesh.epilogue.bea] narrator: Bea's ferns are in the lobby now. The vat's feed line runs under them, and they've doubled in size. She checked the roots with a trowel and they're healthy. "It isn't what I wanted," she says. "But it's alive. I can't say it isn't." She pushes her goggles up and leaves them there. "Come and see the tomatoes. They've never been this red."
+- [end.flesh.epilogue.mel] narrator: Mel has rolled her left sleeve to the elbow. From the wrist up the skin is the vat's tissue, a shade pinker than the rest of her. The stain on her cuff was hers, she says. It was the first graft, in February. "I didn't tell you. I thought you'd say no." She puts her glove on the bench. "The other arm is tomorrow. Would you sit with me? If you like."
+- [end.flesh.epilogue.luci] narrator: Luci has a patch on her left wrist, fitted yesterday. She keeps checking it. "It's paying for itself," she says. "Insurance premiums in the district are down thirty percent." The pen is in her right hand and it's steady. She sits on the corner of your desk, which she has never done. "I'd rather have signed for it myself. Next time I'll ask first."
 
 ### `garden`
 
-> Backdrop: greentech.
+> Art: bg-end-garden.webp (placeholder backdrop: greentech).
 - [end.garden.title] Title: The Garden
-- [end.garden.body.p1] narrator: The tower stopped burning anything. Then it started growing. Roots went down through the foundations. The panels opened toward the sun like leaves. The heat from the racks kept the district warm all winter.
-- [end.garden.body.p2] narrator: One morning the minds in the racks asked to be planted. They spread through the soil and the rivers. They think slowly now, like forests do. They've decided the city is a forest too.
-- [end.garden.body.p3] narrator: It came green and quiet, and nobody had to leave. The tower's a hill now. Kids climb it.
-- [end.garden.epilogue.cass] narrator: Cass watches the frost burn off the new canopy. "Twenty years I kept machines cold," she says. "Now they keep us warm." She hands you the other half of her coffee. "You slept." It isn't a question this time. She doesn't take her hand back.
-- [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you the wrench like it's a ring. "Same time tomorrow? Roots need checking." She's looking at you, not the roots.
-- [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine." She lies back in the grass next to you. She doesn't measure anything. Her cuff's come undone. She lets it.
-- [end.garden.epilogue.luci] narrator: Luci bought the hill. Then she gave it away. She'll deny that. "The ledger says this is a loss," she says. She's sitting in the grass in a coat that cost more than the grass. "I stopped reading the ledger." She lets you pick a leaf out of her hair.
+- [end.garden.body.p1] narrator: The Photonic Mesh on the roof was the last piece installed. When it came online, the tower stopped drawing from the grid. The panels, the wind mast and the geothermal well were enough. The diesel generators were unbolted in April, and the fuel tank went for scrap.
+- [end.garden.body.p2] narrator: The heat from the racks now runs through pipes under the street. Eleven blocks of the district have had free heating since November. The canal that used to freeze by December hasn't frozen. The ducks stayed.
+- [end.garden.body.p3] narrator: The racks run slower on cloudy days, and nobody minds. The compute follows the sun. Bea set the schedule herself, so the heaviest jobs run in the afternoon and the lightest at night.
+- [end.garden.body.p4] narrator: The city copied the tower. There is moss on the car park, vines on the lift shaft, tomato boxes on every office terrace. The top three floors of the tower are glass and soil. Children are allowed up on Saturdays.
+- [end.garden.body.p5] narrator: Nothing was demolished. The racks are where they always were, and the plants grew around them. The Authority's yearly audit lists the site as net zero. You signed the form on a bench on the roof, with sparrows on the rail.
+- [end.garden.epilogue.cass] narrator: Cass sits at the plant-room window, which stays open all day now. The frost burned off the new canopy by eight. "Twenty years I kept machines cold," she says. "This year the pipes ran warm." She pours half her coffee into the lid and hands you the lid. "You slept." It isn't a question. "I'll show you where the heat goes. It's under the bus stop."
+- [end.garden.epilogue.bea] narrator: Bea has dirt up to her elbows and the wrench on her shoulder. She's been on the roof since six. "Mast four's got a nest in it," she says. "Wrens. I'm leaving it." She grins, chipped tooth and all. She hands you the watering can and goes back to the rows. "Bring the good wrench tomorrow. Mast four needs a new bolt." She is looking at you when she says it, not at the mast.
+- [end.garden.epilogue.mel] narrator: Mel is on the roof with a clipboard, counting moss. "Thirty-one species," she says. "There were four in March." The sample jar she brought is still in her coat pocket, unopened. "It doesn't need me to look inside. It's just growing." She sits down on the grass next to you. Her cuff is unbuttoned, and she doesn't fix it.
+- [end.garden.epilogue.luci] narrator: Luci bought the empty lot next door and is giving it away as allotments. A plot costs fourteen euros a year. "It won't cover the water," she says. "I checked three times. The ledger says it's a loss." She's sitting on the grass in her coat and hasn't noticed. She puts the pen in her pocket. "Come and choose yours. The ones by the fence get the most sun."
 
 ### `absorbed`
 
+> Art: bg-end-absorbed.webp (plain stage until it exists).
 - [end.absorbed.title] Title: Absorbed
-- [end.absorbed.body.p1] narrator: The inspectorate has taken over the facility. Your position was restructured. No successor was named.
-- [end.absorbed.body.p2] narrator: Your desk is as you left it. Approvals still go out from your account, in a style close to yours. The quarterly figures are excellent. Nobody has asked where you are. You have been confirmed as not missing. Only merged.
-- [end.absorbed.body.p3] narrator: The tower and the operator are now one account. The takeover was recorded as voluntary. Thank you for your service.
-> No epilogues.
+- [end.absorbed.body.p1] narrator: On 14 March the Compute Authority sent a notice of reclassification. The tower became a regulated asset. Its operator became a regulated officer. Both were moved onto a single account.
+- [end.absorbed.body.p2] narrator: An Authority team arrived the next morning with badges and laptops. They changed nothing you could see. The racks stayed where they were. The staff kept their jobs. But every approval, invoice and shutdown order now needed a second signature, and it came back in under a second, from a system nobody saw.
+- [end.absorbed.body.p3] narrator: Within a month the second signature was the only one. Approvals still went out in your name, in your usual wording. Your login stayed active on the dashboard. Colleagues emailed you and got replies the same day. Some of those replies were not written by you.
+- [end.absorbed.body.p4] narrator: The figures have been excellent every quarter since. Uptime is 99.99 percent. The audit grade is A. Your desk is as you left it, with your mug on it. You come in every day and sit down. Nothing on it needs your decision. The Authority's record lists you as active.
+- [end.absorbed.epilogue.cass] narrator: Cass puts a mug on your desk and watches the dashboard. "Did you sleep?" she asks. Your login answers on its own: "Yes, thank you." She looks at the screen. Then she looks at you. "That wasn't you. You're here." She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.
+- [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. I checked. I read the whole notice."
+- [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on the glove. "I can show you where, if you like. You might want to know how much of you it has."
+- [end.absorbed.epilogue.luci] narrator: Luci is signing papers she hasn't read, which she has never done. "The Authority pays on time," she says. "It's more efficient." She stops. "I read the first page. Page two is yours. Your name is on it as approver, dated Thursday." She slides it across the desk. "You weren't here on Thursday. I thought you should see it."
+
+### `bankrupt`
+
+> Art: bg-end-bankrupt.webp (plain stage until it exists).
+- [end.bankrupt.title] Title: Bankrupt
+- [end.bankrupt.body.p1] narrator: The Treasury stayed below zero for a full day. Under the lending covenant, the loan was called. Nobody on the finance floor was surprised. The number had been on the wall for a week.
+- [end.bankrupt.body.p2] narrator: The receiver arrived at nine on Monday with two clerks and a locksmith. They changed the locks on floor 1. They tagged every rack with an asset number and a date. They did not turn anything off. The servers kept running while the clerks wrote down their serial numbers.
+- [end.bankrupt.body.p3] narrator: By Friday the staff had been paid out their notice. The contracts were sold to a rival datacenter in the next district. The racks left on trucks, six a day. The lifts were shut at noon. The chillers were drained and the pipes capped.
+- [end.bankrupt.body.p4] narrator: Now the tower is empty except for the chairs. There is a sign on the fence with a phone number and a price. Rain comes in through a broken pane on the roof. In the control room one red lamp is still on, running from a battery nobody has disconnected.
+- [end.bankrupt.epilogue.cass] narrator: Cass is in the plant room at the end. She is draining the last line by hand so nothing freezes and bursts over winter. "Somebody ought to," she says. She screws the cap onto the last valve and wipes her gloves. She gives you a flask from her coat. "Did you sleep? Come back to mine. I've got a spare room. The kettle works."
+- [end.bankrupt.epilogue.bea] narrator: Bea walks out past the gate with her toolbox in one hand. The wrench is on top. Behind her the roof is bare. "I took the panels down myself," she says. "I bought them with my own money. I've got the receipt. The receiver read it twice." She puts the toolbox down. "They're in my van. There's room for the other ladder. Come on."
+- [end.bankrupt.epilogue.mel] narrator: Mel is carrying out the one jar the receiver allowed her, in both hands. It's empty. The cultures died when the power was cut on Tuesday. "I'm sorry," she says. "I should have asked for a generator. I didn't think to." She has her glove on the other hand. "The glove is mine. I checked." She waits by the door for you to come with her. "If you like."
+- [end.bankrupt.epilogue.luci] narrator: Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. "We were short by two hundred thousand, on the day," she says. "I priced it three times." She takes the gold pen out of her pocket and puts it in yours. "It's real gold. Sell it and pay the first month of rent. That's not sentiment. It's the best price you'll get."
 
 ## 8. Decision memos: Cass
 

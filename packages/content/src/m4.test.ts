@@ -205,15 +205,38 @@ describe("M4 content (bundled)", () => {
 			}
 		});
 
-		it("has real two- or three-paragraph endings for the two new paths, with no gore", () => {
-			for (const id of ["garden", "singularity"]) {
+		it("has real three- to five-paragraph endings, with no gore", () => {
+			for (const id of ["garden", "singularity", "absorbed", "bankrupt"]) {
 				const e = db.endings.find((x) => x.id === id)!;
 				expect(e.body, id).not.toMatch(/placeholder/i);
 				const n = e.body.split("\n\n").length;
-				expect(n, id).toBeGreaterThanOrEqual(2);
-				expect(n, id).toBeLessThanOrEqual(3);
+				expect(n, id).toBeGreaterThanOrEqual(3);
+				expect(n, id).toBeLessThanOrEqual(5);
 				expect(e.body, id).not.toMatch(GORE);
 			}
+		});
+
+		it("gives every ending a title, an art file name and an epilogue for each of the four advisors", () => {
+			expect(db.endings.map((e) => e.id).sort()).toEqual(["absorbed", "bankrupt", "flesh", "garden", "singularity"]);
+			for (const e of db.endings) {
+				expect(e.title, e.id).toBeTruthy();
+				expect(e.art, e.id).toMatch(/^bg-end-[a-z]+$/);
+				expect(Object.keys(e.epilogue ?? {}).sort(), e.id).toEqual(["bea", "cass", "luci", "mel"]);
+				for (const t of Object.values(e.epilogue ?? {})) expect(t.length, e.id).toBeGreaterThan(80);
+			}
+		});
+
+		it("points the three tree endings at a placeholder tree floor, and Absorbed and Bankrupt at the plain stage", () => {
+			const by = (id: string) => db.endings.find((x) => x.id === id)!;
+			expect(by("singularity").backdrop).toBe("synthetic");
+			expect(by("flesh").backdrop).toBe("biotech");
+			expect(by("garden").backdrop).toBe("greentech");
+			expect(by("absorbed").backdrop).toBeUndefined();
+			expect(by("bankrupt").backdrop).toBeUndefined();
+		});
+
+		it("the Lattice uses the Consciousness Transfer Unit", () => {
+			expect(db.endings.find((x) => x.id === "singularity")!.body).toMatch(/Consciousness Transfer Unit/);
 		});
 	});
 
@@ -378,5 +401,6 @@ describe("validateContent: M4 rules", () => {
 	it("requires every Singularity ending to have text", () => {
 		expect(broken((db) => (db.endings = db.endings.filter((e) => e.id !== "singularity")))).toMatch(/missing "singularity"/);
 		expect(broken((db) => (db.endings.find((e) => e.id === "garden")!.body = ""))).toMatch(/garden/);
+		expect(broken((db) => (db.endings = db.endings.filter((e) => e.id !== "bankrupt")))).toMatch(/missing "bankrupt"/);
 	});
 });

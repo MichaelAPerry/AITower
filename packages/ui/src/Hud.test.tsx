@@ -147,10 +147,7 @@ describe("SystemMenu (server render)", () => {
 
 	it("renders each game-over notice once the sim reports it", () => {
 		const content = createFakeContent();
-		for (const [kind, heading, buttons] of [
-			["bankrupt", "NOTICE OF TERMINATION", ["Load game", "New game"]],
-			["victory", "Victory", ["Continue in sandbox", "New game"]],
-		] as const) {
+		for (const [kind, heading, buttons] of [["victory", "Victory", ["Continue in sandbox", "New game"]]] as const) {
 			const store = createFakeStore(content);
 			store.triggerGameOver(kind);
 			const html = renderToString(<Hud store={store} content={content} />);
@@ -161,6 +158,19 @@ describe("SystemMenu (server render)", () => {
 		}
 		const clean = renderToString(<Hud store={createFakeStore(content)} content={content} />);
 		expect(clean).not.toContain("ui-over-memo");
+	});
+
+	it("bankrupt plays the Bankrupt ending scene on the plain stage, not the memo", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		store.triggerGameOver("bankrupt");
+		const html = renderToString(<Hud store={store} content={content} />);
+		expect(html).toContain("ending-bankrupt");
+		expect(html).toContain("is-plain");
+		expect(html).not.toContain("vn-backdrop");
+		expect(html).toContain("INSOLVENCY");
+		expect(html).toContain("The Treasury stayed below zero for a full day.");
+		expect(html).not.toContain("ui-over-memo");
 	});
 
 	it("uses Compute Authority wording for decision and game-over events", () => {
