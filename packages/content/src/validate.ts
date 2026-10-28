@@ -412,7 +412,8 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 
-const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day"];
+const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day", "coolers", "storageRacks", "jobsLive", "jobsStalled", "jobsDone", "offers", "parts", "bots", "techs", "rp", "tier", "foreman", "treeRacks", "pue", "cleanPower", "greenSp", "tips"];
+const LESSON_DRAWERS = ["contracts", "research", "automation", "insights"];
 const LESSON_OPS = [">=", ">", "<=", "<"];
 
 function validateLessons(p: Problems, db: ContentDB): void {
@@ -440,6 +441,15 @@ function validateLessons(p: Problems, db: ContentDB): void {
 				num(p, `${w}[${i}].factor`, (e as { factor?: unknown }).factor, { min: 0 });
 				num(p, `${w}[${i}].durationTicks`, (e as { durationTicks?: unknown }).durationTicks, { min: 1, int: true });
 				str(p, `${w}[${i}].label`, (e as { label?: unknown }).label);
+			} else if (t === "offer") {
+				const o = e as { kind?: unknown; pflops?: unknown; durationTicks?: unknown; payout?: unknown; storageTB?: unknown };
+				if (o.kind !== "inference" && o.kind !== "training") p.push(`${w}[${i}].kind: expected inference or training`);
+				num(p, `${w}[${i}].pflops`, o.pflops, { gt: 0 });
+				num(p, `${w}[${i}].durationTicks`, o.durationTicks, { min: 1, int: true });
+				num(p, `${w}[${i}].payout`, o.payout, { min: 0 });
+				if (o.storageTB !== undefined) num(p, `${w}[${i}].storageTB`, o.storageTB, { min: 0 });
+			} else if (t === "rp") {
+				num(p, `${w}[${i}].amount`, (e as { amount?: unknown }).amount, { gt: 0 });
 			} else p.push(`${w}[${i}].type: unknown effect '${String(t)}'`);
 		});
 	};
@@ -462,8 +472,11 @@ function validateLessons(p: Problems, db: ContentDB): void {
 			for (const a of s.allow ?? []) if (!db.facilities[a.defId]) p.push(`${w}.steps.${s.id}.allow: unknown facility '${a.defId}'`);
 			if (s.slot && !db.facilities[s.slot.defId]) p.push(`${w}.steps.${s.id}.slot: unknown facility '${s.slot.defId}'`);
 			if (!Array.isArray(s.say) || s.say.length === 0) p.push(`${w}.steps.${s.id}.say: the teacher needs a line`);
+			if (s.advisor !== undefined && !["cass", "bea", "mel", "luci"].includes(s.advisor)) p.push(`${w}.steps.${s.id}.advisor: unknown advisor`);
+			for (const d of s.drawers ?? []) if (!LESSON_DRAWERS.includes(d)) p.push(`${w}.steps.${s.id}.drawers: unknown drawer '${d}'`);
 			if (s.afterBeat && !beatIds.has(s.afterBeat)) p.push(`${w}.steps.${s.id}.afterBeat: unknown beat '${s.afterBeat}'`);
 		}
+		for (const t of l.research ?? []) if (!db.tech.some((n) => n.id === t)) p.push(`${w}.research: unknown tech '${t}'`);
 		for (const b of l.beats ?? []) {
 			conds(`${w}.beats.${b.id}.when`, b.when);
 			effects(`${w}.beats.${b.id}.effects`, b.effects);
@@ -490,6 +503,7 @@ function validateScenario(p: Problems, key: string, s: Scenario, db: ContentDB):
 	if (s.startTier !== undefined) num(p, `${w}.startTier`, s.startTier, { min: 1, max: Math.max(1, db.balance?.tiers?.pflops?.length ?? 1), int: true });
 	if (s.sandbox !== undefined && typeof s.sandbox !== "boolean") p.push(`${w}.sandbox: expected a boolean`);
 	if (s.lesson !== undefined) str(p, `${w}.lesson`, s.lesson);
+	for (const t of s.researched ?? []) if (!db.tech?.some((n) => n.id === t)) p.push(`${w}.researched: unknown tech '${t}'`);
 	if (!isNum(s.width) || !isNum(s.floorMin) || !isNum(s.floorMax) || s.floorMin > s.floorMax) return;
 
 	const W = s.width;

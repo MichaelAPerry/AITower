@@ -121,7 +121,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 										<span className="ui-title-label">{item === "lesson" && lessonDone ? "LESSONS" : LABEL[item]}</span>
 										{item === "continue" && auto && <span className="ui-title-detail">{continueSummary(auto, now)}</span>}
 										{item === "load" && <span className="ui-title-detail">{saves.length} saved</span>}
-										{item === "lesson" && <span className="ui-title-detail">{lessonDone ? "replay or pick one" : "Bea · power · 5 min · recommended"}</span>}
+										{item === "lesson" && <span className="ui-title-detail">{lessonDone ? "replay or pick one" : "build a rack · 4 min · recommended"}</span>}
 										{item === "new" && <span className="ui-title-detail">{bonus > 0 ? `sandbox sites · +${fmtMoney(bonus)} head start` : "sandbox sites, no teacher"}</span>}
 									</button>
 								</li>

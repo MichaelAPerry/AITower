@@ -13,7 +13,7 @@ import { BuildInspector } from "./build/BuildInspector";
 import { rightPanelFor } from "./build/plain";
 import { Drawer, DrawerTabs, NextChip, PalettePopover, Ticker, WIDE } from "./calm/Parts";
 import { TopStrip } from "./calm/TopStrip";
-import { nextDrawer } from "./calm/calm";
+import { type DrawerId, nextDrawer } from "./calm/calm";
 import { AuditSheet } from "./finance/AuditSheet";
 import { auditToShow, createLogCursor } from "./finance/auditTrigger";
 import { GameOverScreen } from "./gameover/GameOverScreen";
@@ -95,6 +95,7 @@ export function Hud({ store, content, title }: HudProps) {
 		if (c.run) store.setSpeed(1);
 	}, [store]);
 	const lessonRef = useRef(false);
+	const lessonDrawersRef = useRef<string[]>([]);
 	const titleOpenRef = useRef(titleOpen);
 	titleOpenRef.current = titleOpen;
 	const overRef = useRef(false);
@@ -124,8 +125,8 @@ export function Hud({ store, content, title }: HudProps) {
 		store,
 		{
 			toggleDrawer: useCallback((id) => {
-				// A lesson keeps the screen quiet: only the Handbook opens.
-				if (lessonRef.current && id !== "handbook") return;
+				// A lesson keeps the screen quiet: only the Handbook and the drawers the current step has opened.
+				if (lessonRef.current && id !== "handbook" && !lessonDrawersRef.current.includes(id)) return;
 				setUiState((u) => ({ ...u, drawer: nextDrawer(u.drawer, id), paletteOpen: false }));
 			}, []),
 			openSearch: useCallback(() => setUiState((u) => ({ ...u, drawer: "handbook", paletteOpen: false, buildHover: null, searchFocus: (u.searchFocus ?? 0) + 1 })), []),
@@ -163,6 +164,7 @@ export function Hud({ store, content, title }: HudProps) {
 	});
 	const inLesson = lesson.active && lessonActive(state.view);
 	lessonRef.current = inLesson;
+	lessonDrawersRef.current = lesson.drawers;
 	useEffect(() => {
 		setDismissedOver((k) => keepDismissed(gameOver, k));
 	}, [gameOver]);
@@ -247,7 +249,7 @@ export function Hud({ store, content, title }: HudProps) {
 					{rightPanelFor({ paletteOpen: ui.paletteOpen, inLesson, hovering: !!ui.buildHover, selected: !!state.selection }) === "build" ? <BuildInspector {...props} /> : <Inspector {...props} />}
 				</div>
 				{!titleOpen && !crawl && !over && <AdvisorStrip {...props} teacher={lesson.teacher} teacherAdvisor={lesson.advisor} />}
-				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? ["handbook"] : undefined} />
+				<DrawerTabs ui={ui} setUi={setUi} content={content} state={state} only={inLesson ? (["handbook", ...lesson.drawers] as DrawerId[]) : undefined} />
 				<Drawer {...props} />
 			</div>
 			{ui.trees && !titleOpen && !over && state.view.soul && <TreesPanel view={state.view} content={content} onClose={() => setUi({ trees: false })} />}

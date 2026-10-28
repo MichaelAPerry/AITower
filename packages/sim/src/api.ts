@@ -522,6 +522,12 @@ export interface LessonView {
 	stars: number;
 	/** Facilities that may be placed right now (all others are refused), with how many may exist. */
 	allowed: { defId: string; max?: number }[];
+	/** Live: power usage effectiveness (total power over rack power), 0 when nothing runs. */
+	pue: number;
+	/** Drawers the lesson has opened so far ("contracts", "research", ...). */
+	drawers: string[];
+	/** The Supplies tab (spare parts, bots) is open. */
+	supplies: boolean;
 	/** Live: all power nets summed, kW. */
 	loadKw: number;
 	capacityKw: number;

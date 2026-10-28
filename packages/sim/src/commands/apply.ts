@@ -43,7 +43,7 @@ export function planNormalized(ctx: PlanCtx, cmd: SimCommand): Plan {
 }
 
 function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
-	const refused = lessonBlocksCommand(ctx.state, ctx.content, cmd.type);
+	const refused = lessonBlocksCommand(ctx.state, ctx.content, cmd.type, cmd.type === "research" ? cmd.techId : undefined);
 	if (refused) return reject(refused);
 	let plan: Plan;
 	switch (cmd.type) {

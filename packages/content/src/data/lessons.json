@@ -1,259 +1,948 @@
 {
- "lessons": [
-  {
-   "id": "first_watt",
-   "number": 1,
-   "title": "First Watt",
-   "advisor": "bea",
-   "concept": "Power: kW is a rate, capacity is a ceiling, and load above capacity means a blackout.",
-   "goal": "Two racks, one day, no blackouts.",
-   "scenario": "lesson_first_watt",
-   "speed": 3,
-   "setup": [
-    {
-     "type": "failureRate",
-     "factor": 0,
-     "durationTicks": 100000000,
-     "label": "Lesson hall: nothing breaks today"
-    },
-    {
-     "type": "gridCap",
-     "factor": 0.08,
-     "durationTicks": 100000000,
-     "label": "Utility feeder limit 120 kW"
-    }
-   ],
-   "commands": [
-    "place",
-    "setEnabled",
-    "markTip",
-    "decisionGate",
-    "resolveDecision",
-    "deferDecision"
-   ],
-   "steps": [
-    {
-     "id": "rack1",
-     "text": "Build your first rack on the glowing slot",
-     "when": [
-      {
-       "metric": "racks",
-       "op": ">=",
-       "value": 1
-      }
-     ],
-     "allow": [
-      {
-       "defId": "rack_air_gpu",
-       "max": 2
-      }
-     ],
-     "slot": {
-      "floor": 1,
-      "x": 11,
-      "defId": "rack_air_gpu"
-     },
-     "handbook": "ch:power",
-     "say": [
-      "Bea. Power. Welcome to the hall. Two racks, one full day, nothing goes dark. That's the job.",
-      "Racks tab in the build bar. Grab the AC-1, drop it on the glowing slot. Rest is locked till it's in."
-     ],
-     "after": [
-      "Hear that? That's 40 kW, flat out. A {{kw|kW}} is a rate. How hard something's pulling right now.",
-      "Top bar's the whole hall. 93 kW, on a feeder that gives 120. Remember the 120."
-     ],
-     "pause": true
-    },
-    {
-     "id": "rack2",
-     "text": "Build a second rack on the next slot",
-     "when": [
-      {
-       "metric": "racks",
-       "op": ">=",
-       "value": 2
-      }
-     ],
-     "allow": [
-      {
-       "defId": "rack_air_gpu",
-       "max": 2
-      }
-     ],
-     "slot": {
-      "floor": 1,
-      "x": 15,
-      "defId": "rack_air_gpu"
-     },
-     "handbook": "ch:power",
-     "say": [
-      "{{capacity|Capacity}} is the most a supply can give. This feeder tops out at 120 kW.",
-      "The hall burns 53 before any rack works. Air handler, lift, the intake. One rack takes it to 93.",
-      "Put the second one in. Watch the bar."
-     ],
-     "afterBeat": "trip",
-     "after": [
-      "And there it goes. Two racks want 133 kW. The feeder gives 120. Breaker trips.",
-      "Load over capacity is a blackout. Every time. Keep capacity above load, with {{headroom|headroom}} to spare.",
-      "Power overlay's on so you can see the net. Next bit I hate. A generator."
-     ],
-     "pause": true
-    },
-    {
-     "id": "genset",
-     "text": "Add the diesel generator in Power",
-     "when": [
-      {
-       "metric": "gensets",
-       "op": ">=",
-       "value": 1
-      }
-     ],
-     "allow": [
-      {
-       "defId": "genset",
-       "max": 1
-      }
-     ],
-     "slot": {
-      "floor": -1,
-      "x": 12,
-      "defId": "genset"
-     },
-     "overlay": "power",
-     "handbook": "ch:power",
-     "say": [
-      "Power tab. Diesel Genset. Glowing slot. It starts itself when the grid can't keep up.",
-      "A {{genset|generator}} adds capacity. 120 from the feeder, plus 800 from the diesel. And smoke. Smoke doesn't wash out.",
-      "Today it's the right tool. Later I'll show you better ones."
-     ],
-     "after": [
-      "See the gap between what you can supply and what you're using? That's {{headroom|headroom}}. Loads of it now.",
-      "Hold both racks flat out for one game day and you pass."
-     ],
-     "pause": false
-    },
-    {
-     "id": "day",
-     "text": "Hold both racks at full load for one day",
-     "when": [],
-     "allow": [
-      {
-       "defId": "rack_air_gpu",
-       "max": 2
-      },
-      {
-       "defId": "genset",
-       "max": 1
-      }
-     ],
-     "handbook": "ch:power",
-     "say": [
-      "Let the clock run. Keep headroom above 10% all day. Nothing goes dark.",
-      "I'll watch the meter. And the exhaust."
-     ]
-    }
-   ],
-   "beats": [
-    {
-     "id": "job1",
-     "when": [
-      {
-       "metric": "racks",
-       "op": ">=",
-       "value": 1
-      }
-     ],
-     "effects": [
-      {
-       "type": "job",
-       "pflops": 20,
-       "durationTicks": 9000,
-       "payout": 300000
-      }
-     ]
-    },
-    {
-     "id": "job2",
-     "when": [
-      {
-       "metric": "racks",
-       "op": ">=",
-       "value": 2
-      }
-     ],
-     "effects": [
-      {
-       "type": "job",
-       "pflops": 20,
-       "durationTicks": 9000,
-       "payout": 300000
-      }
-     ]
-    },
-    {
-     "id": "trip",
-     "when": [
-      {
-       "metric": "racks",
-       "op": ">=",
-       "value": 2
-      },
-      {
-       "metric": "shortKw",
-       "op": ">",
-       "value": 0
-      }
-     ],
-     "effects": [
-      {
-       "type": "gridCap",
-       "factor": 0,
-       "durationTicks": 25,
-       "label": "Feeder tripped"
-      }
-     ]
-    }
-   ],
-   "win": {
-    "when": [
-     {
-      "metric": "racksBusy",
-      "op": ">=",
-      "value": 2
-     },
-     {
-      "metric": "headroomPct",
-      "op": ">",
-      "value": 10
-     },
-     {
-      "metric": "racksDark",
-      "op": "<=",
-      "value": 0
-     }
-    ],
-    "holdTicks": 1440
-   },
-   "lose": [
-    {
-     "metric": "cash",
-     "op": "<",
-     "value": 0
-    }
-   ],
-   "stars": {
-    "headroomPct": 50,
-    "maxDarkTicks": 600
-   },
-   "learned": "{{kw|kW}} is how hard equipment pulls right now. {{capacity|Capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.",
-   "handbook": [
-    "ch:power",
-    "ch:power#kw"
-   ],
-   "next": "Where the Heat Goes",
-   "bonus": 50000,
-   "outro": "Two racks, a whole day, lights on. Okay. Good. Next time I'll show you power that doesn't come out of a tank. When you want to know where all the heat goes, find Cass. She'll ask if you slept."
-  }
- ]
+	"lessons": [
+		{
+			"id": "first_watt",
+			"number": 1,
+			"title": "Your First Rack",
+			"advisor": "bea",
+			"concept": "Build: a rack needs power and cooling to run. Power is counted in kW, and PUE shows how much extra the hall burns.",
+			"goal": "Power a rack, cool it, and run it for three hours.",
+			"scenario": "lesson_first_watt",
+			"speed": 3,
+			"meter": true,
+			"holdLabel": "hours running",
+			"starred": false,
+			"passed": "A powered, cooled rack ran a job",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision"
+			],
+			"steps": [
+				{
+					"id": "rack",
+					"text": "Place a rack on the glowing spot",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 1
+						}
+					],
+					"say": [
+						"Hi. I'm Bea. I do power. Welcome to the hall.",
+						"It's empty. Let's build a working computer room, one piece at a time.",
+						"First piece: a {{rack|rack}}. It's a tall cabinet full of GPU chips. The chips do the computing that clients pay for.",
+						"Open Racks in the build bar. Pick the AC-1. Click the glowing spot."
+					],
+					"after": [
+						"There. Look at it. Dark. It has a cable under it, but nothing feeding the cable."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 11,
+						"defId": "rack_air_gpu"
+					},
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "power",
+					"text": "Place the Grid Intake in the basement",
+					"when": [
+						{
+							"metric": "supplyKw",
+							"op": ">",
+							"value": 0
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 1
+						},
+						{
+							"defId": "grid_tie",
+							"max": 1
+						}
+					],
+					"say": [
+						"A rack needs power. Power comes in through a Grid Intake. It's the plug into the city.",
+						"Open Power in the build bar. Pick Grid Intake. Click the glowing spot in the basement."
+					],
+					"after": [
+						"Lights on. The intake can give 1,500 kW.",
+						"A {{kw|kW}} is how hard something pulls right now. Your rack pulls up to 40 kW when it works.",
+						"The goal bar at the top shows it. LOAD is what the hall pulls. CAPACITY is what the intake can give."
+					],
+					"slot": {
+						"floor": -1,
+						"x": 6,
+						"defId": "grid_tie"
+					},
+					"overlay": "power",
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "cool",
+					"text": "Place an air handler next to the rack",
+					"when": [
+						{
+							"metric": "coolers",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 1
+						},
+						{
+							"defId": "grid_tie",
+							"max": 1
+						},
+						{
+							"defId": "crah_unit",
+							"max": 1
+						}
+					],
+					"say": [
+						"Cass. Cooling. Did you sleep? Never mind.",
+						"Every kW a rack uses turns into heat. A 40 kW rack is a 40 kW heater.",
+						"Too hot, and it slows down. Hotter still, and it shuts itself off.",
+						"An {{crah|air handler}} pulls the hot air away. Open Cooling. Pick the Air Handler. Click the glowing spot."
+					],
+					"after": [
+						"Good. The heat view is on. Red is hot, blue is cool.",
+						"Heat counts in kW too. Whatever the rack pulls, the air handler has to carry away."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 8,
+						"defId": "crah_unit"
+					},
+					"overlay": "heat",
+					"advisor": "cass",
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "run",
+					"text": "Watch the rack pick up its first job",
+					"when": [
+						{
+							"metric": "racksBusy",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 1
+						},
+						{
+							"defId": "grid_tie",
+							"max": 1
+						},
+						{
+							"defId": "crah_unit",
+							"max": 1
+						}
+					],
+					"say": [
+						"A client just sent a job. A job is work for your racks to do.",
+						"Watch the rack pick it up."
+					],
+					"after": [
+						"Running. That's the whole loop. Power in, work done, heat out.",
+						"See PUE in the goal bar? {{pue|PUE}} is the hall's total power divided by what the racks use. 1.0 would be no waste.",
+						"Yours is higher. The air handler and the lift burn power too. Good halls keep PUE low."
+					],
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "hold",
+					"text": "Keep it running cool for three hours",
+					"when": [],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 1
+						},
+						{
+							"defId": "grid_tie",
+							"max": 1
+						},
+						{
+							"defId": "crah_unit",
+							"max": 1
+						}
+					],
+					"say": [
+						"Let the clock run for three hours. Keep the rack busy and the temperature down.",
+						"I'll watch the meter. Cass will watch the heat."
+					],
+					"handbook": "ch:power"
+				}
+			],
+			"beats": [
+				{
+					"id": "job",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 1
+						},
+						{
+							"metric": "coolers",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 20,
+							"durationTicks": 9000,
+							"payout": 300000
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "racksBusy",
+						"op": ">=",
+						"value": 1
+					},
+					{
+						"metric": "maxRackC",
+						"op": "<",
+						"value": 80
+					},
+					{
+						"metric": "racksDark",
+						"op": "<=",
+						"value": 0
+					}
+				],
+				"holdTicks": 180
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				}
+			],
+			"stars": {
+				"headroomPct": 0,
+				"maxDarkTicks": 100000
+			},
+			"learned": "A {{rack|rack}} does the work. It needs power from the grid and cooling for its heat. Power is counted in {{kw|kW}}. {{pue|PUE}} shows how much extra the hall burns on top of the racks.",
+			"handbook": [
+				"ch:power",
+				"ch:heat"
+			],
+			"bonus": 50000,
+			"outro": "That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays."
+		},
+		{
+			"id": "earn_your_keep",
+			"number": 2,
+			"title": "Earn Your Keep",
+			"advisor": "luci",
+			"concept": "Earn: contracts pay for work. Jobs need running racks, storage for their data, and spare parts and bots to stay up.",
+			"goal": "Finish two contracts.",
+			"scenario": "lesson_earn",
+			"speed": 3,
+			"starred": false,
+			"passed": "Two contracts finished and paid",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision",
+				"acceptContract",
+				"buyParts",
+				"buyBot"
+			],
+			"steps": [
+				{
+					"id": "accept",
+					"text": "Accept the contract on the board",
+					"when": [
+						{
+							"metric": "jobsLive",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Luci Ferro. CFO. Call me Luci, Operator.",
+						"A rack that sits idle costs you. A rack that works pays you. That's the whole business.",
+						"Clients post contracts on the board. Open Contracts. Press C, or use the tab on the right.",
+						"This one is {{inference|inference}}. A client keeps asking a model questions, and pays every minute you keep up. Press Accept."
+					],
+					"after": [
+						"Signed. Your racks pick it up on their own. Money starts when they run."
+					],
+					"drawers": [
+						"contracts"
+					],
+					"pulse": [
+						"[data-tut=\"dtab-contracts\"]"
+					],
+					"handbook": "ch:money",
+					"pause": true
+				},
+				{
+					"id": "paid",
+					"text": "Keep the racks running until the job pays",
+					"when": [
+						{
+							"metric": "jobsDone",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Now the only job is not breaking anything.",
+						"Power on, cooling on, racks working. Watch TREASURY at the top. Wait for the contract to end."
+					],
+					"after": [
+						"There. Paid. For the record, that's revenue. Power and upkeep come out of it.",
+						"The PER HOUR figure at the top shows what's left."
+					],
+					"handbook": "ch:money",
+					"pause": true
+				},
+				{
+					"id": "storage",
+					"text": "Place a Storage Array on the glowing spot",
+					"when": [
+						{
+							"metric": "storageRacks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_storage",
+							"max": 1
+						}
+					],
+					"say": [
+						"Cass. Did you see the new contract on the board? {{training|Training}}. One big job, paid when it's done.",
+						"It's worth more, and it brings a dataset: 1,000 TB. Try to accept it. Go on.",
+						"Refused? That's why: there's no room for the data. A job's data lives on a Storage Array.",
+						"Open Racks. Pick the Storage Array. It does no computing. It only holds data. Click the glowing spot."
+					],
+					"after": [
+						"Now there's room. Storage doesn't earn by itself. It lets the racks earn."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 14,
+						"defId": "rack_storage"
+					},
+					"advisor": "cass",
+					"drawers": [
+						"contracts"
+					],
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "train",
+					"text": "Accept the training contract",
+					"when": [
+						{
+							"metric": "jobsLive",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_storage",
+							"max": 1
+						}
+					],
+					"say": [
+						"Luci. Good. Now open Contracts and accept it.",
+						"A training job pays when it's finished, so be patient. If the storage ever goes dark, the job stalls. No data, no work."
+					],
+					"after": [
+						"Signed. The racks are on it."
+					],
+					"drawers": [
+						"contracts"
+					],
+					"pulse": [
+						"[data-tut=\"dtab-contracts\"]"
+					],
+					"handbook": "ch:money",
+					"pause": true
+				},
+				{
+					"id": "parts",
+					"text": "Buy spare parts in Supplies",
+					"when": [
+						{
+							"metric": "parts",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Racks break. Nothing breaks today. Something will tomorrow.",
+						"A broken rack earns nothing until it's fixed. A fix uses one spare part.",
+						"Open Supplies in the build bar. Buy 5 spare parts."
+					],
+					"after": [
+						"Good. They wait in the depot until they're needed."
+					],
+					"supplies": true,
+					"pulse": [
+						"[data-tut=\"cat-supplies\"]"
+					],
+					"advisor": "cass",
+					"handbook": "ch:break",
+					"pause": true
+				},
+				{
+					"id": "bot",
+					"text": "Buy a maintenance bot in Supplies",
+					"when": [
+						{
+							"metric": "bots",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Parts sit in a depot. A bot carries one to the broken rack and fixes it.",
+						"Same tab. Buy a Rover."
+					],
+					"after": [
+						"That's your repair crew. Parts in the depot. A bot to carry them."
+					],
+					"supplies": true,
+					"pulse": [
+						"[data-tut=\"cat-supplies\"]"
+					],
+					"advisor": "cass",
+					"handbook": "ch:break",
+					"pause": true
+				},
+				{
+					"id": "finish",
+					"text": "Let the training job finish",
+					"when": [],
+					"allow": [],
+					"say": [
+						"Last thing. Let the big job finish and take the money."
+					],
+					"handbook": "ch:money"
+				}
+			],
+			"beats": [
+				{
+					"id": "offer1",
+					"when": [],
+					"effects": [
+						{
+							"type": "offer",
+							"kind": "inference",
+							"pflops": 40,
+							"durationTicks": 480,
+							"payout": 90000
+						}
+					]
+				},
+				{
+					"id": "offer2",
+					"when": [
+						{
+							"metric": "jobsDone",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"effects": [
+						{
+							"type": "offer",
+							"kind": "training",
+							"pflops": 60,
+							"workPfh": 240,
+							"durationTicks": 3000,
+							"payout": 300000,
+							"storageTB": 1000,
+							"client": "helios_labs"
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "jobsDone",
+						"op": ">=",
+						"value": 2
+					}
+				],
+				"holdTicks": 1
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				}
+			],
+			"stars": {
+				"headroomPct": 0,
+				"maxDarkTicks": 100000
+			},
+			"learned": "{{inference|Inference}} pays while it runs. {{training|Training}} pays when it ends. Both need powered, cooled racks, and training also needs storage for its data. Spare parts and bots keep racks earning when something breaks.",
+			"handbook": [
+				"ch:money",
+				"ch:break"
+			],
+			"bonus": 25000,
+			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. For the record, that's a business. Next, Mel will show you how it grows."
+		},
+		{
+			"id": "grow_the_tower",
+			"number": 3,
+			"title": "Grow the Tower",
+			"advisor": "mel",
+			"concept": "Grow: research unlocks new ideas, Levels unlock bigger machines, and the Foreman builds for you.",
+			"goal": "Research two ideas, reach Level 2, and switch on the Foreman.",
+			"scenario": "lesson_grow",
+			"speed": 10,
+			"starred": false,
+			"passed": "Level 2 reached and the Foreman at work",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision",
+				"research",
+				"setAutomation"
+			],
+			"research": [
+				"contracts_clerk",
+				"works_foreman"
+			],
+			"steps": [
+				{
+					"id": "research1",
+					"text": "Research Contract Automation",
+					"when": [
+						{
+							"metric": "techs",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Hello. I'm Mel. Research. Sorry, I get nervous around new people.",
+						"Your racks earn research points, {{rp|RP}}. You spend them on new ideas. I've put 1,500 in the account to start.",
+						"Open Research. Press R, or use the tab on the right. Pick Contract Automation, then press Research."
+					],
+					"after": [
+						"Mm. Noted. That one is done. Ideas are permanent."
+					],
+					"drawers": [
+						"research"
+					],
+					"pulse": [
+						"[data-tut=\"dtab-research\"]"
+					],
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "research2",
+					"text": "Research Works Foreman",
+					"when": [
+						{
+							"metric": "techs",
+							"op": ">=",
+							"value": 2
+						}
+					],
+					"allow": [],
+					"say": [
+						"Ideas open other ideas. The next one is the Works Foreman. A builder who works for you.",
+						"It needs the first idea done, and it costs more. You have enough."
+					],
+					"after": [
+						"Two ideas done. Keep that in mind. You'll need exactly two for something else."
+					],
+					"drawers": [
+						"research"
+					],
+					"pulse": [
+						"[data-tut=\"dtab-research\"]"
+					],
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "racks",
+					"text": "Build two more racks",
+					"when": [
+						{
+							"metric": "racks",
+							"op": ">=",
+							"value": 6
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 6
+						}
+					],
+					"say": [
+						"Luci. Levels. They're your company's rank. A higher Level opens bigger machines and pays a bonus.",
+						"Find the LEVEL bar at the top. Level 2 asks for two things. 120 PF of racks, and two ideas researched.",
+						"{{pflops|PF}} is how much computing a rack does. You have 80 PF. Two more racks make 120. Place two racks."
+					],
+					"after": [
+						"That's 120 PF. Both asks are met."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 18,
+						"defId": "rack_air_gpu"
+					},
+					"advisor": "luci",
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "level",
+					"text": "Wait for Level 2",
+					"when": [
+						{
+							"metric": "tier",
+							"op": ">=",
+							"value": 2
+						}
+					],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 6
+						}
+					],
+					"say": [
+						"Levels are awarded at midnight. Let the clock run."
+					],
+					"after": [
+						"Level 2. For the record, that's a $3.75 million bonus. Spend it well."
+					],
+					"advisor": "luci",
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "foreman",
+					"text": "Switch on the Foreman in Automation",
+					"when": [],
+					"allow": [
+						{
+							"defId": "rack_air_gpu",
+							"max": 6
+						}
+					],
+					"say": [
+						"Now the Foreman. Open Automation. Press T, or use the tab on the right.",
+						"He builds for you. Racks when contracts need them. An air handler when racks run hot. Power when it runs short.",
+						"He spends your money, so he keeps a reserve you set. Switch him on."
+					],
+					"drawers": [
+						"automation"
+					],
+					"pulse": [
+						"[data-tut=\"dtab-automation\"]"
+					],
+					"advisor": "luci",
+					"handbook": "ch:what"
+				}
+			],
+			"beats": [
+				{
+					"id": "rp",
+					"when": [],
+					"effects": [
+						{
+							"type": "rp",
+							"amount": 1500
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "foreman",
+						"op": ">=",
+						"value": 1
+					}
+				],
+				"holdTicks": 1
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				}
+			],
+			"stars": {
+				"headroomPct": 0,
+				"maxDarkTicks": 100000
+			},
+			"learned": "Research points buy new ideas. A Level needs enough PF of racks and enough ideas researched. The Foreman builds racks, cooling and power for you while you do something else.",
+			"handbook": [
+				"ch:what"
+			],
+			"bonus": 25000,
+			"outro": "Hm. It's growing. That's what it wants. Next is the part I find hard to say out loud: how this ends. Bea has the slides."
+		},
+		{
+			"id": "the_three_trees",
+			"number": 4,
+			"title": "The Three Trees",
+			"advisor": "bea",
+			"concept": "The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step, and the seal can close a tree.",
+			"goal": "Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.",
+			"scenario": "lesson_trees",
+			"speed": 3,
+			"starred": false,
+			"passed": "A Garden rack earned its first points",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision",
+				"retrofit"
+			],
+			"steps": [
+				{
+					"id": "retrofit",
+					"text": "Click a rack and retrofit it to Green",
+					"when": [
+						{
+							"metric": "treeRacks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Bea again. Last lesson. This one's about how the game ends.",
+						"There are three ways, called trees. The Lattice is Luci's: pure machines. The Flesh is Mel's: living tissue. The Garden is mine: clean power.",
+						"Each tree is a line of better racks. You join one by retrofitting. Click the rack that's glowing in the world. Its panel opens on the right.",
+						"Find Retrofit. Pick Green. The rack changes right where it stands."
+					],
+					"after": [
+						"There. An NM-1. It does 50 PF on 12 kW. The old one did 20 PF on 40 kW.",
+						"And now it counts. A plain rack scores for no tree. Only a retrofitted rack earns points."
+					],
+					"focus": {
+						"floor": 1,
+						"x": 6
+					},
+					"pulse": [
+						"[data-tut=\"retrofit\"]"
+					],
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "trees",
+					"text": "Open the Trees panel from the three bars at the top",
+					"when": [
+						{
+							"metric": "tips",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [],
+					"say": [
+						"Now the scoreboard. Click the three coloured bars at the top of the screen."
+					],
+					"after": [
+						"Three columns, one per tree. Each has its points, a ladder of racks, and a line that starts with Next.",
+						"That Next line is your to-do list. It names the research and the retrofit that come next.",
+						"The first tree to 1,000 points ends the game its way. Close the panel when you're done reading."
+					],
+					"panel": "trees",
+					"pulse": [
+						".soul-gauge"
+					],
+					"handbook": "ch:what",
+					"pause": true
+				},
+				{
+					"id": "clean",
+					"text": "Place PV Wall Panels in Power",
+					"when": [
+						{
+							"metric": "cleanPower",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "solar_skin",
+							"max": 1
+						}
+					],
+					"say": [
+						"Look at the Garden column again. It has a line about clean power.",
+						"Garden racks run at half speed on any power. Full speed only on clean power: sun and wind.",
+						"So give it some. Open Power. Pick PV Wall Panels. Click the glowing spot."
+					],
+					"after": [
+						"Panels in. The clean share climbs slowly. Check the Garden column later and watch the speed rise."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 40,
+						"defId": "solar_skin"
+					},
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "points",
+					"text": "Wait for the Garden's first points",
+					"when": [],
+					"allow": [],
+					"say": [
+						"Points come in once an hour, from racks that are busy.",
+						"One more thing: the seal. Each of Flesh and Garden has a SEAL bar. It's a damage meter.",
+						"Harmful builds fill it, like a diesel generator. Clean ones wear it down. Fill it to 100 and the tree closes for good.",
+						"Let the clock run until the Garden scores."
+					],
+					"handbook": "ch:what"
+				}
+			],
+			"beats": [
+				{
+					"id": "job",
+					"when": [
+						{
+							"metric": "treeRacks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 70,
+							"durationTicks": 20000,
+							"payout": 300000
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "greenSp",
+						"op": ">",
+						"value": 0.01
+					}
+				],
+				"holdTicks": 1
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				}
+			],
+			"stars": {
+				"headroomPct": 0,
+				"maxDarkTicks": 100000
+			},
+			"learned": "A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power. Harmful builds fill a tree's seal, and a full seal closes the tree.",
+			"handbook": [
+				"ch:what"
+			],
+			"bonus": 25000,
+			"outro": "That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower. Free Build is waiting."
+		}
+	]
 }

@@ -368,14 +368,72 @@
 	},
 	"lesson_first_watt": {
 		"id": "lesson_first_watt",
-		"name": "Lesson 1: First Watt",
-		"description": "A bare hall, a lift, a floor, an air handler and one grid feeder. Bea teaches you what kW and capacity mean.",
+		"name": "Lesson 1: Your First Rack",
+		"description": "A bare hall with a lift and nothing else. Bea and Cass help you place a rack, power it, cool it and run it.",
 		"width": 48,
 		"floorMin": -5,
 		"floorMax": 40,
 		"startingCash": 1500000,
 		"sandbox": true,
 		"lesson": "first_watt",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0
+	},
+	"lesson_earn": {
+		"id": "lesson_earn",
+		"name": "Lesson 2: Earn Your Keep",
+		"description": "A small working hall: three racks, an air handler, a parts depot and a bot dock. Luci and Cass show you how contracts, storage, parts and bots fit together.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 2000000,
+		"sandbox": true,
+		"lesson": "earn_your_keep",
 		"slabs": [
 			[
 				-1,
@@ -400,9 +458,34 @@
 				"x": 6
 			},
 			{
-				"defId": "crah_unit",
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
 				"floor": 1,
 				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 29
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 26
 			}
 		],
 		"conduits": [
@@ -434,5 +517,208 @@
 		],
 		"bots": [],
 		"spareParts": 0
+	},
+	"lesson_grow": {
+		"id": "lesson_grow",
+		"name": "Lesson 3: Grow the Tower",
+		"description": "Four racks and two air handlers. Mel and Luci show you research, Levels and the Foreman.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 3000000,
+		"sandbox": true,
+		"lesson": "grow_the_tower",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 14
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 16
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 29
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 26
+			}
+		],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0
+	},
+	"lesson_trees": {
+		"id": "lesson_trees",
+		"name": "Lesson 4: The Three Trees",
+		"description": "Three plain racks, Level 2 and the Garden research done. Bea shows you how to retrofit a rack and read the Trees panel.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 4000000,
+		"sandbox": true,
+		"lesson": "the_three_trees",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 12
+			},
+			{
+				"defId": "parts_depot",
+				"floor": 0,
+				"x": 29
+			},
+			{
+				"defId": "bot_charger",
+				"floor": 0,
+				"x": 26
+			}
+		],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0,
+		"startTier": 2,
+		"researched": [
+			"batch_cards",
+			"neuromorphic_bench"
+		]
 	}
 }

@@ -5,7 +5,7 @@ import { ADVISORS } from "../advisors/advisors";
 import { Say } from "../advisors/AdvisorStrip";
 import { Portrait } from "../advisors/Portrait";
 import type { PanelProps, UiState } from "../components/context";
-import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, pendingMessage, pulseTargets, ROADMAP, resultModel, slotGhost, stepOf } from "./lessons";
+import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse } from "./lessons";
 import "./lessons.css";
 
 const HL = "data-lesson-pulse";
@@ -41,6 +41,8 @@ export interface LessonUi {
 	advisor: AdvisorId | undefined;
 	/** The teacher's line for the advisor strip, or null outside a lesson. */
 	teacher: ReactNode | null;
+	/** Drawers the lesson has opened so far (the Handbook is always open). */
+	drawers: string[];
 	/** Goal bar, checklist and result screen. */
 	layer: ReactNode | null;
 }
@@ -129,13 +131,21 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 			store.setGhost(null);
 		};
 	}, [ghostKey, tool.kind === "place" ? tool.defId : tool.kind]);
-	const slot = def && lv ? def.steps[lv.current]?.slot : undefined;
+	const curStep = def && lv && active ? def.steps[lv.current] : undefined;
+	// A step that asks for a panel counts the act of opening it (the sim cannot see the UI): mark a tip the step waits for.
+	const wantsTrees = curStep?.panel === "trees";
+	const tipId = curStep ? `les:${curStep.id}` : null;
+	// biome-ignore lint/correctness/useExhaustiveDependencies: when the panel opens during its step
+	useEffect(() => {
+		if (wantsTrees && ui.trees && tipId && enabled) store.submit({ type: "markTip", tipId });
+	}, [wantsTrees, ui.trees, tipId, enabled]);
+	const slot = curStep?.slot ?? curStep?.focus;
 	const slotX = slot?.x;
 	const slotFloor = slot?.floor;
 	useEffect(() => {
 		if (slotX !== undefined && slotFloor !== undefined && enabled) store.focus({ x: slotX, floor: slotFloor });
 	}, [slotX, slotFloor, enabled, store]);
-	const pulse = def && lv && enabled && !msg ? pulseTargets(def, lv, content, ui).join("|") : "";
+	const pulse = def && lv && enabled && !msg ? stepPulse(def, lv, content, ui).join("|") : "";
 	useEffect(() => {
 		syncPulse(pulse ? pulse.split("|") : []);
 		return () => syncPulse([]);
@@ -155,9 +165,10 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		}
 	}, [done, enabled]);
 
-	if (!lv || !def) return { active: false, advisor: undefined, teacher: null, layer: null };
-	const adv = ADVISORS[def.advisor];
+	if (!lv || !def) return { active: false, advisor: undefined, teacher: null, drawers: [], layer: null };
 	const step = stepOf(def, lv);
+	const speaker = msg?.advisor ?? step?.advisor ?? def.advisor;
+	const adv = ADVISORS[speaker];
 	const handbookTarget = step?.handbook ?? def.handbook[0];
 	const openHandbook = (id: string): void => setUi({ drawer: "handbook", encyId: id, paletteOpen: false, buildHover: null });
 	const last = msg ? msg.n === msg.of : false;
@@ -188,24 +199,25 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 
 	const layer = enabled ? (
 		<>
-			{active && <GoalBar def={def} lv={lv} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
+			{active && <GoalBar def={def} lv={lv} total={content.lessons.length} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
 			{active && <Steps content={content} def={def} lv={lv} onHandbook={openHandbook} />}
-			{!active && <LessonResult content={content} def={def} lv={lv} firstTime={firstTime} openHandbook={openHandbook} onReplay={() => onReplay(def.scenario)} onFreeBuild={onFreeBuild} />}
+			{!active && <LessonResult content={content} def={def} lv={lv} firstTime={firstTime} openHandbook={openHandbook} onReplay={() => onReplay(def.scenario)} onNext={onReplay} onFreeBuild={onFreeBuild} />}
 		</>
 	) : null;
-	return { active: true, advisor: def.advisor, teacher, layer };
+	return { active: true, advisor: speaker, teacher, drawers: active ? lv.drawers : [], layer };
 }
 
-function GoalBar({ def, lv, onSkip, onHandbook }: { def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; onSkip: () => void; onHandbook: () => void }) {
+function GoalBar({ def, lv, total, onSkip, onHandbook }: { def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; total: number; onSkip: () => void; onHandbook: () => void }) {
 	const g = goalModel(lv);
 	return (
 		<section className="les-goal ui-glass" aria-label="Lesson goal" data-lesson-goal>
 			<div className="les-goal-head">
 				<span className="ui-label">
-					LESSON {def.number} OF {ROADMAP.length} · {def.title.toUpperCase()}
+					LESSON {def.number} OF {total} · {def.title.toUpperCase()}
 				</span>
 				<span className="les-goal-text">{def.goal}</span>
 			</div>
+			{def.meter && (
 			<div className={`les-meter tone-${g.tone}`} role="img" aria-label={`Load ${Math.round(g.loadKw)} kilowatts of ${Math.round(g.capacityKw)} kilowatts capacity`}>
 				<div className="les-meter-line">
 					<span>
@@ -217,18 +229,24 @@ function GoalBar({ def, lv, onSkip, onHandbook }: { def: LessonDef; lv: NonNulla
 					<span>
 						<span className="ui-label">HEADROOM</span> <b>{g.capacityKw > 0 ? `${Math.round(g.headroomPct)}%` : "none"}</b>
 					</span>
+					<span>
+						<span className="ui-label">PUE</span> <b>{g.pue > 0 ? g.pue.toFixed(2) : "none"}</b>
+					</span>
 				</div>
 				<div className="les-bar">
 					<i style={{ width: `${Math.round(g.frac * 100)}%` }} />
 				</div>
 			</div>
-			<div className="les-hold" title="Hold both racks at full load, with headroom, for a whole day">
-				<span className="ui-label">THE DAY</span>
-				<div className="les-bar is-hold">
-					<i style={{ width: `${Math.round(g.hold * 100)}%` }} />
+			)}
+			{def.holdLabel && (
+				<div className="les-hold" title={def.goal}>
+					<span className="ui-label">{def.holdLabel.toUpperCase()}</span>
+					<div className="les-bar is-hold">
+						<i style={{ width: `${Math.round(g.hold * 100)}%` }} />
+					</div>
+					<small>{g.holdText}</small>
 				</div>
-				<small>{g.holdText}</small>
-			</div>
+			)}
 			<div className="les-goal-acts">
 				<button type="button" className="ui-btn" onClick={onHandbook}>
 					Handbook
@@ -279,8 +297,9 @@ function Stars({ n }: { n: number }) {
 	);
 }
 
-function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onFreeBuild }: { content: ContentDB; def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; firstTime: boolean; openHandbook: (id: string) => void; onReplay: () => void; onFreeBuild: () => void }) {
+function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onNext, onFreeBuild }: { content: ContentDB; def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; firstTime: boolean; openHandbook: (id: string) => void; onReplay: () => void; onNext: (scenario: string) => void; onFreeBuild: () => void }) {
 	const r = resultModel(def, lv, firstTime, (id) => articleTitle(content, id));
+	const nextLesson = r.won ? nextLessonOf(content, def) : undefined;
 	const adv = ADVISORS[def.advisor];
 	return (
 		<div className="les-result-back">
@@ -289,7 +308,7 @@ function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onF
 					LESSON {def.number} · {def.title.toUpperCase()}
 				</span>
 				<h2>{r.won ? "Lesson complete" : "Not this time"}</h2>
-				{r.won && <Stars n={r.stars} />}
+				{r.won && r.starred && <Stars n={r.stars} />}
 				{r.won && (
 					<ul className="les-rows">
 						{r.rows.map((x) => (
@@ -319,15 +338,15 @@ function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onF
 				</div>
 				{r.bonus > 0 && <p className="les-bonus">+${r.bonus.toLocaleString("en-US")} starting cash in every Free Build game from now on.</p>}
 				<div className="les-result-acts">
-					{r.next && (
-						<span className="les-next" title="Lessons 2 to 6 arrive in the next update">
-							Next: {r.next} (coming soon)
-						</span>
-					)}
 					<button type="button" className="ui-btn" onClick={onReplay}>
 						{r.won ? "Replay lesson" : "Try again"}
 					</button>
-					<button type="button" className="ui-btn is-on" onClick={onFreeBuild} data-lesson-freebuild>
+					{nextLesson && (
+						<button type="button" className="ui-btn is-on" onClick={() => onNext(nextLesson.scenario)} data-lesson-next>
+							Next lesson: {nextLesson.title}
+						</button>
+					)}
+					<button type="button" className={`ui-btn ${nextLesson ? "" : "is-on"}`} onClick={onFreeBuild} data-lesson-freebuild>
 						Free Build
 					</button>
 				</div>

@@ -24,6 +24,7 @@ export function offersStep(ctx: TickCtx): void {
 			return false;
 		});
 	}
+	if (state.lesson) return; // a lesson's board holds only what the script puts there
 	if (state.offers.length === 0 && state.nextOfferTick > state.tick + GUARANTEED_OFFER_TICKS) state.nextOfferTick = state.tick + GUARANTEED_OFFER_TICKS;
 	if (state.tick < state.nextOfferTick) return;
 	state.nextOfferTick = state.tick + nextOfferDelay(state, content);

@@ -3,11 +3,14 @@
  * tracks, scripted beats (a client job, a tripped feeder), a catalog restricted to what the lesson teaches, and stars.
  * Everything here is deterministic and lives in the snapshot (`state.lesson`); the app only presents it.
  */
-import type { ContentDB, LessonCond, LessonDef, LessonEffect, LessonMetric } from "@aitower/content";
+import { type ContentDB, type LessonCond, type LessonDef, type LessonEffect, type LessonMetric, treeOf } from "@aitower/content";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import type { Job, LessonState, SimState } from "../core/state";
 import { getDef, isComputeRack } from "../world/defs";
 import type { TickCtx } from "../core/context";
+
+/** Tip ids the UI marks (with `markTip`) when the player opens a panel a lesson asked about. */
+export const LESSON_TIP = "les:";
 
 /** A tick far beyond any lesson: offers and decisions are parked there. */
 export const LESSON_NEVER = 1_000_000_000;
@@ -37,9 +40,19 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 	let dark = 0;
 	let gensets = 0;
 	let maxRackC = state.ambientC;
+	let coolers = 0;
+	let storageRacks = 0;
+	let parts = 0;
+	let treeRacks = 0;
+	let cleanPower = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind === "genset") gensets++;
+		if (d.kind === "crah" || d.kind === "chiller" || d.kind === "cdu") coolers++;
+		if (d.kind === "depot") parts += f.stored;
+		if (d.rack && d.rack.storageTB > 0) storageRacks++;
+		if (treeOf(d)) treeRacks++;
+		if (d.kind === "solar" || d.kind === "wind") cleanPower++;
 		if (!isComputeRack(d)) continue;
 		racks++;
 		if (f.busy && f.jobId >= 0 && !f.failed && f.sat >= MIN_POWERED_SATISFACTION) busy++;
@@ -66,6 +79,23 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		cash: state.cash,
 		pflops: state.metrics.pflops,
 		day: Math.floor(state.tick / 1440),
+		coolers,
+		storageRacks,
+		jobsLive: state.jobs.filter((j) => j.status === "queued" || j.status === "running" || j.status === "stalled").length,
+		jobsStalled: state.jobs.filter((j) => j.status === "stalled").length,
+		jobsDone: state.stats.jobsCompleted,
+		offers: state.offers.length,
+		parts,
+		bots: state.bots.length,
+		techs: state.techResearched.length,
+		rp: state.researchPoints,
+		tier: state.tier,
+		foreman: state.automation.foreman.enabled ? 1 : 0,
+		treeRacks,
+		pue: state.metrics.pue,
+		cleanPower,
+		greenSp: state.sp.greentech,
+		tips: state.advisorTips.filter((t) => t.startsWith(LESSON_TIP)).length,
 	};
 }
 
@@ -98,6 +128,20 @@ export function lessonAllowed(def: LessonDef, ls: LessonState): { defId: string;
 	return [...out].map(([defId, max]) => ({ defId, max }));
 }
 
+/** Drawers the lesson has opened up to and including the current step. */
+export function lessonDrawers(def: LessonDef, ls: LessonState): string[] {
+	const upTo = Math.min(def.steps.length - 1, currentStepIndex(def, ls));
+	const out = new Set<string>();
+	for (let i = 0; i <= upTo; i++) for (const d of def.steps[i].drawers ?? []) out.add(d);
+	return [...out];
+}
+
+/** True once the lesson has opened the Supplies tab (spare parts, bots). */
+export function lessonSupplies(def: LessonDef, ls: LessonState): boolean {
+	const upTo = Math.min(def.steps.length - 1, currentStepIndex(def, ls));
+	return def.steps.slice(0, upTo + 1).some((s) => s.supplies);
+}
+
 /** Refusal text when the active lesson does not allow placing `defId` (or `type` of command), else null. */
 export function lessonBlocksPlace(state: SimState, content: ContentDB, defId: string): string | null {
 	const def = state.lesson?.status === "active" ? lessonDef(state, content) : undefined;
@@ -107,16 +151,46 @@ export function lessonBlocksPlace(state: SimState, content: ContentDB, defId: st
 	if (a.max !== undefined && state.facilities.filter((f) => f.defId === defId).length >= a.max) return `This lesson needs only ${a.max}`;
 	return null;
 }
-export function lessonBlocksCommand(state: SimState, content: ContentDB, type: string): string | null {
+export function lessonBlocksCommand(state: SimState, content: ContentDB, type: string, techId?: string): string | null {
 	const def = state.lesson?.status === "active" ? lessonDef(state, content) : undefined;
 	if (!def) return null;
-	return def.commands.includes(type) ? null : "Not part of this lesson";
+	if (!def.commands.includes(type)) return "Not part of this lesson";
+	if (type === "research" && techId !== undefined && !(def.research ?? []).includes(techId)) return "Not part of this lesson";
+	return null;
 }
 
 function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	const { state } = ctx;
 	if (e.type === "gridCap" || e.type === "failureRate") {
 		state.modifiers.push({ kind: e.type, value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
+		return;
+	}
+	if (e.type === "rp") {
+		state.researchPoints += e.amount;
+		return;
+	}
+	if (e.type === "offer") {
+		const id = state.nextId.contract++;
+		const training = e.kind === "training";
+		const h = e.durationTicks / 60;
+		state.offers.push({
+			id,
+			spec: {
+				clientId: e.client ?? "kestrel_quant",
+				clientName: e.client === "helios_labs" ? "Helios Frontier Labs" : "Kestrel Quantitative",
+				kind: e.kind,
+				work: training ? (e.workPfh ?? Math.round(e.pflops * h * 0.6)) : e.pflops,
+				...(training ? {} : { sustainedPflops: e.pflops }),
+				durationTicks: e.durationTicks,
+				payout: e.payout,
+				penalty: 0,
+				needsLiquid: false,
+				storageTB: e.storageTB ?? 0,
+				checkpointTicks: training ? 60 : 0,
+			},
+			expiresAt: state.tick + 100_000,
+		});
+		ctx.events.push({ type: "contractOffered", contractId: id });
 		return;
 	}
 	const job: Job = {
@@ -192,7 +266,7 @@ export function lessonStep(ctx: TickCtx): void {
 		if (!ls.stepsDone.includes(last.id)) ls.stepsDone.push(last.id);
 		ls.status = "won";
 		ls.endTick = state.tick;
-		ls.stars = lessonStars(def, ls);
+		ls.stars = def.starred === false ? 1 : lessonStars(def, ls);
 	} else if (def.lose.length > 0 && allHold(def.lose, m)) {
 		ls.status = "lost";
 		ls.endTick = state.tick;

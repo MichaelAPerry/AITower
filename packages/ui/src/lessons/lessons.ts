@@ -10,15 +10,11 @@ import type { Tab } from "../build/plain";
 import { termById } from "../glossary/terms";
 import { buildChapters } from "../handbook/chapters";
 
-/** The six-lesson campaign from the design doc. Only lessons with a `LessonDef` in the content can be played yet. */
-export const ROADMAP: { n: number; id: string; title: string; concept: string; advisor: AdvisorId }[] = [
-	{ n: 1, id: "first_watt", title: "First Watt", concept: "Power: kW is a rate, capacity is a ceiling.", advisor: "bea" },
-	{ n: 2, id: "where_the_heat_goes", title: "Where the Heat Goes", concept: "Heat: all power becomes heat; air handlers have a limit.", advisor: "cass" },
-	{ n: 3, id: "things_break", title: "Things Break", concept: "Reliability: failure rate, spares, repair time, N+1.", advisor: "cass" },
-	{ n: 4, id: "follow_the_money", title: "Follow the Money", concept: "CAPEX vs OPEX, upkeep, energy price, contract margins.", advisor: "luci" },
-	{ n: 5, id: "grow_without_melting", title: "Grow Without Melting", concept: "Density: floor space, power per rack, AC-1 to LC-2.", advisor: "cass" },
-	{ n: 6, id: "pick_a_path", title: "Pick a Path", concept: "Trade-offs: efficiency vs risk. Wetware, Green, Synthetic.", advisor: "mel" },
-];
+/** The lessons that exist, in order. The menu lists exactly these: no placeholders. */
+export const lessonsInOrder = (content: Pick<ContentDB, "lessons">): LessonDef[] => [...content.lessons].sort((a, b) => a.number - b.number);
+
+/** The lesson after `def`, or undefined when it is the last one. */
+export const nextLessonOf = (content: Pick<ContentDB, "lessons">, def: LessonDef): LessonDef | undefined => lessonsInOrder(content).find((l) => l.number === def.number + 1);
 
 export const lessonDefOf = (content: ContentDB, view: Pick<SimView, "lesson">): LessonDef | undefined => (view.lesson ? content.lessons.find((l) => l.id === view.lesson?.id) : undefined);
 export const playable = (content: ContentDB, id: string): LessonDef | undefined => content.lessons.find((l) => l.id === id);
@@ -41,6 +37,8 @@ export interface Message {
 	of: number;
 	/** The clock stops while this line is up. */
 	pause: boolean;
+	/** Who says it: the step's own speaker, or the lesson's. */
+	advisor: AdvisorId;
 }
 
 /** The next line the teacher owes the player, or null. After-lines of a finished step come before the next step's own lines. */
@@ -51,7 +49,7 @@ export function pendingMessage(def: LessonDef, lv: Pick<LessonView, "stepsDone" 
 		if (done && s.after?.length && (!s.afterBeat || lv.beatsFired.includes(s.afterBeat))) {
 			const k = `${s.id}:after`;
 			const a = ack[k] ?? 0;
-			if (a < s.after.length) return { key: k, stepId: s.id, kind: "after", line: s.after[a], n: a + 1, of: s.after.length, pause: s.pause !== false };
+			if (a < s.after.length) return { key: k, stepId: s.id, kind: "after", line: s.after[a], n: a + 1, of: s.after.length, pause: s.pause !== false, advisor: s.advisor ?? def.advisor };
 		}
 		if (i === lv.current && !done) {
 			// The previous step's scripted moment has not landed yet: hold the next step's lines back.
@@ -59,7 +57,7 @@ export function pendingMessage(def: LessonDef, lv: Pick<LessonView, "stepsDone" 
 			if (prev?.after?.length && prev.afterBeat && !lv.beatsFired.includes(prev.afterBeat)) return null;
 			const k = `${s.id}:say`;
 			const a = ack[k] ?? 0;
-			if (a < s.say.length) return { key: k, stepId: s.id, kind: "say", line: s.say[a], n: a + 1, of: s.say.length, pause: true };
+			if (a < s.say.length) return { key: k, stepId: s.id, kind: "say", line: s.say[a], n: a + 1, of: s.say.length, pause: true, advisor: s.advisor ?? def.advisor };
 		}
 	}
 	return null;
@@ -91,6 +89,7 @@ export interface GoalModel {
 	/** 0..1 progress through the success hold. */
 	hold: number;
 	holdText: string;
+	pue: number;
 }
 
 export function goalModel(lv: LessonView): GoalModel {
@@ -98,7 +97,7 @@ export function goalModel(lv: LessonView): GoalModel {
 	const tone = lv.capacityKw <= 0 || lv.loadKw > lv.capacityKw ? "bad" : lv.headroomPct < 10 ? "warn" : "ok";
 	const hours = Math.floor(lv.holdTicks / 60);
 	const goalHours = Math.round(lv.holdGoal / 60);
-	return { loadKw: lv.loadKw, capacityKw: lv.capacityKw, frac, headroomPct: lv.headroomPct, tone, hold: lv.holdGoal > 0 ? Math.min(1, lv.holdTicks / lv.holdGoal) : 0, holdText: `${hours} of ${goalHours} h at full load` };
+	return { loadKw: lv.loadKw, capacityKw: lv.capacityKw, frac, headroomPct: lv.headroomPct, tone, hold: lv.holdGoal > 0 ? Math.min(1, lv.holdTicks / lv.holdGoal) : 0, holdText: `${hours} of ${goalHours} h`, pue: lv.pue };
 }
 
 // ─── The restricted catalog ───────────────────────────────────────────
@@ -111,6 +110,7 @@ export function lessonTabs(content: ContentDB, view: Pick<SimView, "lesson">): T
 	const ids = allowedIds(view);
 	if (!ids) return null;
 	const tabs = new Set<Tab>();
+	if (view.lesson?.supplies) tabs.add("supplies");
 	for (const id of ids) {
 		const d = content.facilities[id];
 		if (d) tabs.add(d.category as Tab);
@@ -140,15 +140,22 @@ export function pulseTargets(def: LessonDef, lv: LessonView, content: ContentDB,
 	return [`[data-tut="card-${d.id}"]`];
 }
 
+/** Everything the current step wants pulsed: the slot's category or card, and the step's own selectors. */
+export function stepPulse(def: LessonDef, lv: LessonView, content: ContentDB, ui: { paletteOpen: boolean; paletteTab: string }): string[] {
+	if (lv.status !== "active") return [];
+	return [...pulseTargets(def, lv, content, ui), ...(def.steps[lv.current]?.pulse ?? [])];
+}
+
 // ─── Result ───────────────────────────────────────────────────────────
 
 export interface ResultModel {
 	won: boolean;
+	/** False for the lessons that give no stars: finishing is the reward. */
+	starred: boolean;
 	stars: number;
 	rows: { label: string; value: string; earned: boolean }[];
 	learned: string;
 	handbook: { id: string; label: string }[];
-	next: string | null;
 	bonus: number;
 	/** Game-days the lesson took. */
 	days: string;
@@ -164,17 +171,20 @@ export function articleTitle(content: ContentDB, id: string): string {
 
 export function resultModel(def: LessonDef, lv: LessonView, firstTime: boolean, titleOf: (id: string) => string = (id) => id): ResultModel {
 	const won = lv.status === "won";
+	const starred = def.starred !== false;
 	return {
 		won,
+		starred,
 		stars: lv.stars,
-		rows: [
-			{ label: "Passed", value: won ? "Two racks, one day, no blackouts" : "Not this time", earned: won },
-			{ label: "Headroom", value: `lowest ${Math.round(lv.minHeadroom)}% (want ${def.stars.headroomPct}%+)`, earned: won && lv.minHeadroom >= def.stars.headroomPct },
-			{ label: "Uptime", value: `${lv.downTicks} min short of power (want ${def.stars.maxDarkTicks} or fewer)`, earned: won && lv.downTicks <= def.stars.maxDarkTicks },
-		],
+		rows: starred
+			? [
+					{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won },
+					{ label: "Headroom", value: `lowest ${Math.round(lv.minHeadroom)}% (want ${def.stars.headroomPct}%+)`, earned: won && lv.minHeadroom >= def.stars.headroomPct },
+					{ label: "Uptime", value: `${lv.downTicks} min short of power (want ${def.stars.maxDarkTicks} or fewer)`, earned: won && lv.downTicks <= def.stars.maxDarkTicks },
+				]
+			: [{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won }],
 		learned: def.learned,
 		handbook: def.handbook.map((id) => ({ id, label: titleOf(id) })),
-		next: def.next ?? null,
 		bonus: won && firstTime ? def.bonus : 0,
 		days: ((lv.endTick - lv.startTick) / 1440).toFixed(1),
 	};
