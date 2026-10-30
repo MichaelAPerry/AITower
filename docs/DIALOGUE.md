@@ -21,14 +21,15 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 5. [Story: Biotech tree, Mel's Flesh](#5-story-biotech-tree-mels-flesh)
 6. [Story: Greentech tree, Bea's Garden](#6-story-greentech-tree-beas-garden)
 7. [Story: a tree closes (seal scenes)](#7-story-a-tree-closes-seal-scenes)
-8. [Story: bond 50 beats](#8-story-bond-50-beats)
-9. [Story: Cass, in her own scene](#9-story-cass-in-her-own-scene)
-10. [Endings](#10-endings)
-11. [Decision memos: Cass](#11-decision-memos-cass)
-12. [Decision memos: Bea](#12-decision-memos-bea)
-13. [Decision memos: Mel](#13-decision-memos-mel)
-14. [Decision memos: Luci](#14-decision-memos-luci)
-15. [Lessons](#15-lessons)
+8. [Story: the bond tip](#8-story-the-bond-tip)
+9. [Story: bond 50 beats](#9-story-bond-50-beats)
+10. [Story: Cass, in her own scene](#10-story-cass-in-her-own-scene)
+11. [Endings](#11-endings)
+12. [Decision memos: Cass](#12-decision-memos-cass)
+13. [Decision memos: Bea](#13-decision-memos-bea)
+14. [Decision memos: Mel](#14-decision-memos-mel)
+15. [Decision memos: Luci](#15-decision-memos-luci)
+16. [Lessons](#16-lessons)
 
 ## 1. Title crawl
 
@@ -706,17 +707,40 @@ Choice `other`:
 
 Dialogue before the choice:
 
-- [tip_seal.l1] bea: Hey, the SEAL bar just moved. Look at it.
-- [tip_seal.l2] bea: It's a damage meter. Harmful builds fill it, clean ones wear it down.
-- [tip_seal.l3] bea: At 100, that tree closes for good.
+- [tip_seal.l1] bea: Hey, the something just moved. Did you feel it?
+- [tip_seal.l2] bea: Some things you build damage some futures more than others.
+- [tip_seal.l3] bea: Choices matter you dufus.
 
 Choice `ok` (recommended):
 
 - [tip_seal.ok.label] Label: Got it.
 - [tip_seal.ok.hint] Hint: Just a tip.
-- [tip_seal.ok.outcome] Outcome: Bea tapped the bar on her clipboard twice and went back up the ladder.
+- [tip_seal.ok.outcome] Outcome: Bea tapped her clipboard twice and went back up the ladder.
 
-## 8. Story: bond 50 beats
+## 8. Story: the bond tip
+
+
+### `tip_bond`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: Story scenes are issued in file order, one at a time.
+> Backdrop: synthetic floor.
+- [tip_bond.title] Title: A Word at the Desk
+- [tip_bond.location] Location: F1 · FINANCE OFFICE
+- [tip_bond.caption] Caption: Luci pauses over the ledger and finally looks up.
+
+Dialogue before the choice:
+
+- [tip_bond.l1] luci: Heads up. We are people too, make sure you pay attention.
+- [tip_bond.l2] luci: Take my advice or don't listen, we'll remember.
+
+Choice `ok` (recommended):
+
+- [tip_bond.ok.label] Label: Got it.
+- [tip_bond.ok.hint] Hint: Just a tip.
+- [tip_bond.ok.outcome] Outcome: She went back to work.
+
+## 9. Story: bond 50 beats
 
 
 ### `bond50_luci`
@@ -806,7 +830,7 @@ Choice `ok` (recommended):
 - [bond50_cass.ok.hint] Hint: She'll remember.
 - [bond50_cass.ok.outcome] Outcome: The coffee was instant. It was hot, which was the point.
 
-## 9. Story: Cass, in her own scene
+## 10. Story: Cass, in her own scene
 
 
 ### `cass_night_shift`
@@ -851,7 +875,7 @@ Choice `order`:
 - [cass_night_shift.order.r2] cass: But I won't say no. Thanks.
 - [cass_night_shift.order.r3 mood=displeased] luci: I'll find the funds.  I guess.
 
-## 10. Endings
+## 11. Endings
 
 > Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when no advisor's bond is high enough.
 
@@ -926,7 +950,7 @@ Choice `order`:
 > Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
 - [end.bankrupt.epilogue.fallback] narrator: Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care.
 
-## 11. Decision memos: Cass
+## 12. Decision memos: Cass
 
 > Decision memos Cass speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1085,7 +1109,7 @@ Choice `leave`:
 - [g_mycelium_ducts.leave.outcome] Outcome: Airflow remained improved. Nobody has asked what it is eating.
 > Effects: affinity path=greentech amount=5.
 
-## 12. Decision memos: Bea
+## 13. Decision memos: Bea
 
 > Decision memos Bea speaks, from packages/content/src/data/events.json. 4 memos.
 
@@ -1189,7 +1213,7 @@ Choice `keep`:
 - [heat_tariff_revision.keep.outcome] Outcome: Nothing changed.
 > Effects: bond advisor=cass amount=1.
 
-## 13. Decision memos: Mel
+## 14. Decision memos: Mel
 
 > Decision memos Mel speaks, from packages/content/src/data/events.json. 6 memos.
 
@@ -1331,7 +1355,7 @@ Choice `refuse`:
 - [s_backup_restore.refuse.outcome] Outcome: The request was declined and logged.
 > Effects: cash amount=-30000; bond advisor=cass amount=3.
 
-## 14. Decision memos: Luci
+## 15. Decision memos: Luci
 
 > Decision memos Luci speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1486,7 +1510,7 @@ Choice `add`:
 - [h_headcount.add.outcome] Outcome: Two new employee records were created. Neither has requested a desk.
 > Effects: cash amount=-20000; affinity path=biotech amount=4.
 
-## 15. Lessons
+## 16. Lessons
 
 > Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
 

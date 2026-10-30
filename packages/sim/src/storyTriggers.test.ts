@@ -163,3 +163,20 @@ describe("tip_seal", () => {
 		expect(s.view().decision).toBeNull();
 	});
 });
+
+describe("tip_bond", () => {
+	it("plays once, Luci speaking, the first time any bond leaves its starting value and never at the start", () => {
+		const s = sim("tip_bond");
+		steps(s, SETTLE);
+		expect(s.view().decision).toBeNull();
+		s.state.bonds.bea += 3;
+		steps(s, SETTLE);
+		const d = s.view().decision;
+		expect(d?.eventId).toBe("tip_bond");
+		expect(d?.advisor).toBe("luci");
+		answer(s, d?.choices[0].id ?? "");
+		s.state.bonds.mel += 3;
+		steps(s, SETTLE * 2);
+		expect(s.view().decision).toBeNull();
+	});
+});

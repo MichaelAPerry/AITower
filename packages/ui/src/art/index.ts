@@ -112,6 +112,7 @@ export const LOCATION_ART: Record<string, string> = {
 	seal_biotech: "bg-loc-wetware-annex",
 	seal_greentech: "bg-loc-panel-deck",
 	tip_seal: "bg-loc-panel-deck",
+	tip_bond: "bg-loc-finance-office",
 	bond50_luci: "bg-loc-finance-office",
 	bond50_mel: "bg-loc-wetware-annex",
 	bond50_bea: "bg-loc-panel-deck",

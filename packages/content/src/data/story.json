@@ -1751,15 +1751,15 @@
   "lines": [
    {
     "who": "bea",
-    "text": "Hey, the SEAL bar just moved. Look at it."
+    "text": "Hey, the something just moved. Did you feel it?"
    },
    {
     "who": "bea",
-    "text": "It's a damage meter. Harmful builds fill it, clean ones wear it down."
+    "text": "Some things you build damage some futures more than others."
    },
    {
     "who": "bea",
-    "text": "At 100, that tree closes for good."
+    "text": "Choices matter you dufus."
    }
   ],
   "recommended": "ok",
@@ -1768,7 +1768,42 @@
     "id": "ok",
     "label": "Got it.",
     "hint": "Just a tip.",
-    "outcome": "Bea tapped the bar on her clipboard twice and went back up the ladder.",
+    "outcome": "Bea tapped her clipboard twice and went back up the ladder.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "tip_bond",
+  "category": "story",
+  "advisor": "luci",
+  "title": "A Word at the Desk",
+  "body": "Luci pauses over the ledger and finally looks up.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "bondMoved"
+  },
+  "backdrop": "synthetic",
+  "location": "F1 · FINANCE OFFICE",
+  "lines": [
+   {
+    "who": "luci",
+    "text": "Heads up. We are people too, make sure you pay attention."
+   },
+   {
+    "who": "luci",
+    "text": "Take my advice or don't listen, we'll remember."
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Just a tip.",
+    "outcome": "She went back to work.",
     "effects": []
    }
   ]

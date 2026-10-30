@@ -24,9 +24,9 @@ describe("rung-up scenes", () => {
 			});
 		}
 	}
-	it("the story file holds the intro, both objections, the twelve rung scenes, Cass's night shift, two seal scenes, the seal tip and four bond beats", () => {
+	it("the story file holds the intro, both objections, the twelve rung scenes, Cass's night shift, two seal scenes, the seal tip, the bond tip and four bond beats", () => {
 		const ids = content.events.filter((x) => x.category === "story").map((x) => x.id);
-		expect(ids).toHaveLength(23);
+		expect(ids).toHaveLength(24);
 		expect(ids).toContain("st_intro");
 	});
 

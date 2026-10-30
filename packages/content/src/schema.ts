@@ -719,6 +719,8 @@ export type StoryTrigger =
 	| { kind: "seal"; tree: SealedTree }
 	/** The first time any tree's seal is above `above` (the seal tip). The starter tower begins at 10 and the bar shows whole numbers, so 10.5 is the first visible rise. */
 	| { kind: "sealRise"; above: number }
+	/** The first time any advisor's bond differs from its `soul.bondStart` (the bond tip: after the first taken or overruled advice). */
+	| { kind: "bondMoved" }
 	/** The first time that advisor's bond reaches `atLeast`. */
 	| { kind: "bond"; advisor: AdvisorId; atLeast: number };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];

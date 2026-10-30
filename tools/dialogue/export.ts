@@ -319,6 +319,7 @@ const storyGroups: { title: string; ids: string[] }[] = [
 	{ title: "Story: Biotech tree, Mel's Flesh", ids: ["obj_biotech", "rung_bio_1", "rung_bio_2", "rung_bio_3", "rung_bio_4"] },
 	{ title: "Story: Greentech tree, Bea's Garden", ids: ["obj_greentech", "rung_green_1", "rung_green_2", "rung_green_3", "rung_green_4"] },
 	{ title: "Story: a tree closes (seal scenes)", ids: ["seal_biotech", "seal_greentech", "tip_seal"] },
+	{ title: "Story: the bond tip", ids: ["tip_bond"] },
 	{ title: "Story: bond 50 beats", ids: ["bond50_luci", "bond50_mel", "bond50_bea", "bond50_cass"] },
 	{ title: "Story: Cass, in her own scene", ids: ["cass_night_shift"] },
 ];

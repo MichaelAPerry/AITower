@@ -121,6 +121,8 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
 			return isSealed(state, content, t.tree);
 		case "sealRise":
 			return SEALED_TREES.some((tree) => sealOf(state, tree) > t.above);
+		case "bondMoved":
+			return ADVISOR_IDS.some((id) => state.bonds[id] !== content.balance.soul.bondStart[id]);
 		case "bond":
 			return state.bonds[t.advisor] >= t.atLeast;
 	}
