@@ -5,7 +5,7 @@ import { parseMarkup } from "../advisors/advisors";
 import { buildChapters } from "../handbook/chapters";
 import { buildEntries } from "../encyclopedia/entries";
 import { termById } from "../glossary/terms";
-import { allowedIds, articleTitle, baselineAck, goalModel, lessonTabs, lessonsInOrder, nextLessonOf, pendingMessage, resultModel, slotGhost } from "./lessons";
+import { allowedIds, articleTitle, baselineAck, goalModel, lessonTabs, lessonTotal, lessonsInOrder, nextLessonOf, pendingMessage, resultModel, slotGhost } from "./lessons";
 
 const content = loadContent();
 const def = content.lessons[0];
@@ -76,6 +76,12 @@ describe("the lesson list", () => {
 		// Lesson 5 is not built yet: the next one after 4 is 6.
 		expect(nextLessonOf(content, list[3])?.number).toBe(6);
 		expect(nextLessonOf(content, list[4])).toBeUndefined();
+	});
+});
+
+describe("lesson count", () => {
+	it("totals by the highest lesson number, so a gap does not read LESSON 6 OF 5", () => {
+		expect(lessonTotal(content)).toBe(6);
 	});
 });
 

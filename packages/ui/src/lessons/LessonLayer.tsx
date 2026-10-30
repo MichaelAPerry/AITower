@@ -8,7 +8,7 @@ import { publishAwards } from "../achievements/awardBus";
 import { Say } from "../advisors/AdvisorStrip";
 import { Portrait } from "../advisors/Portrait";
 import type { PanelProps, UiState } from "../components/context";
-import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse } from "./lessons";
+import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, lessonTotal, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse } from "./lessons";
 import "./lessons.css";
 
 const HL = "data-lesson-pulse";
@@ -204,7 +204,7 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 
 	const layer = enabled ? (
 		<>
-			{active && <GoalBar def={def} lv={lv} total={content.lessons.length} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
+			{active && <GoalBar def={def} lv={lv} total={lessonTotal(content)} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
 			{active && <Steps content={content} def={def} lv={lv} onHandbook={openHandbook} />}
 			{!active && <LessonResult content={content} def={def} lv={lv} firstTime={firstTime} openHandbook={openHandbook} onReplay={() => onReplay(def.scenario)} onNext={onReplay} onFreeBuild={onFreeBuild} />}
 		</>

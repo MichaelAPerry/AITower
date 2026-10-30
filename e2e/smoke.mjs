@@ -164,7 +164,7 @@ async function run(url) {
 		await page.locator("[data-lesson-result]").waitFor({ timeout: 90_000 });
 		const won = await lessonState();
 		assert(won.status === "won", `the lesson is won: ${JSON.stringify(won)}`);
-		assert((await page.locator(".les-stars").count()) === 0, "Lesson 1 gives no stars");
+		assert((await page.locator(".les-stars b.is-on").count()) === 3, "Lesson 1 gives 3 stars to the scripted player");
 		assert(/learned/i.test(await page.locator("[data-lesson-result]").innerText()), "the result has a one-line 'what you learned'");
 		const progress = await game(() => JSON.parse(localStorage.getItem("aitower.lessons.v1") ?? "{}"));
 		assert(progress.done?.first_watt >= 1, `completion is persisted: ${JSON.stringify(progress)}`);

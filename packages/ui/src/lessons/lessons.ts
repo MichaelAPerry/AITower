@@ -14,6 +14,9 @@ import { buildChapters } from "../handbook/chapters";
 export const lessonsInOrder = (content: Pick<ContentDB, "lessons">): LessonDef[] => [...content.lessons].sort((a, b) => a.number - b.number);
 
 /** The lesson after `def`, or undefined when it is the last one. */
+/** The highest lesson number: the "N" in "LESSON 6 OF N". Stays right while a number is still missing. */
+export const lessonTotal = (content: Pick<ContentDB, "lessons">): number => Math.max(0, ...content.lessons.map((l) => l.number));
+
 export const nextLessonOf = (content: Pick<ContentDB, "lessons">, def: LessonDef): LessonDef | undefined => lessonsInOrder(content).find((l) => l.number > def.number);
 
 export const lessonDefOf = (content: ContentDB, view: Pick<SimView, "lesson">): LessonDef | undefined => (view.lesson ? content.lessons.find((l) => l.id === view.lesson?.id) : undefined);
