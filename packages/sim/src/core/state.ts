@@ -300,6 +300,16 @@ export interface LessonState {
 	startTick: number;
 	endTick: number;
 	stars: number;
+	/** Which bonus stars were earned when it was won: bit 1 = star 2, bit 2 = star 3. */
+	starBits: number;
+	/** Lowest cash seen during the lesson. */
+	minCash: number;
+	/** Game-minutes every battery bank stood empty. */
+	drainTicks: number;
+	/** Game-minutes a job stood stalled for want of storage. */
+	stallTicks: number;
+	/** Game-minutes the Foreman was on. */
+	foremanTicks: number;
 	/** The lesson's setup effects have been applied. */
 	setupDone: boolean;
 }

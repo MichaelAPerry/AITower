@@ -301,7 +301,11 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 	validateMinistry(content, s, nextId.decision);
 	if (s.lesson === undefined) s.lesson = null;
 	if (s.lesson !== null) {
-		const l = fields(s.lesson, { id: "str", status: "str", holdTicks: "int", minHeadroom: "num", downTicks: "int", startTick: "int", endTick: "int", stars: "int", setupDone: "bool" }, "lesson");
+		// Tallies added after the first lesson saves: older saves start them at zero.
+		const raw = s.lesson as Obj;
+		for (const k of ["starBits", "drainTicks", "stallTicks", "foremanTicks"]) if (raw[k] === undefined) raw[k] = 0;
+		if (raw.minCash === undefined) raw.minCash = typeof s.cash === "number" ? s.cash : 0;
+		const l = fields(s.lesson, { id: "str", status: "str", holdTicks: "int", minHeadroom: "num", downTicks: "int", startTick: "int", endTick: "int", stars: "int", starBits: "int", minCash: "num", drainTicks: "int", stallTicks: "int", foremanTicks: "int", setupDone: "bool" }, "lesson");
 		if (!content.lessons.some((x) => x.id === l.id)) fail(`lesson '${String(l.id)}' is unknown`);
 		if (!["active", "won", "lost"].includes(l.status as string)) fail("lesson.status is invalid");
 		for (const k of ["stepsDone", "beatsFired"]) {

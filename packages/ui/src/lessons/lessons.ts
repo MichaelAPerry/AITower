@@ -14,7 +14,7 @@ import { buildChapters } from "../handbook/chapters";
 export const lessonsInOrder = (content: Pick<ContentDB, "lessons">): LessonDef[] => [...content.lessons].sort((a, b) => a.number - b.number);
 
 /** The lesson after `def`, or undefined when it is the last one. */
-export const nextLessonOf = (content: Pick<ContentDB, "lessons">, def: LessonDef): LessonDef | undefined => lessonsInOrder(content).find((l) => l.number === def.number + 1);
+export const nextLessonOf = (content: Pick<ContentDB, "lessons">, def: LessonDef): LessonDef | undefined => lessonsInOrder(content).find((l) => l.number > def.number);
 
 export const lessonDefOf = (content: ContentDB, view: Pick<SimView, "lesson">): LessonDef | undefined => (view.lesson ? content.lessons.find((l) => l.id === view.lesson?.id) : undefined);
 export const playable = (content: ContentDB, id: string): LessonDef | undefined => content.lessons.find((l) => l.id === id);
@@ -179,8 +179,8 @@ export function resultModel(def: LessonDef, lv: LessonView, firstTime: boolean, 
 		rows: starred
 			? [
 					{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won },
-					{ label: "Headroom", value: `lowest ${Math.round(lv.minHeadroom)}% (want ${def.stars.headroomPct}%+)`, earned: won && lv.minHeadroom >= def.stars.headroomPct },
-					{ label: "Uptime", value: `${lv.downTicks} min short of power (want ${def.stars.maxDarkTicks} or fewer)`, earned: won && lv.downTicks <= def.stars.maxDarkTicks },
+					{ label: "Star 2", value: def.star2Text, earned: won && lv.star2 },
+					{ label: "Star 3", value: def.star3Text, earned: won && lv.star3 },
 				]
 			: [{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won }],
 		learned: def.learned,

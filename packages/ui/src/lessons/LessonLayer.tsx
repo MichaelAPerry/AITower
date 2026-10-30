@@ -339,7 +339,7 @@ function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onN
 				</div>
 				<div className="les-outro">
 					<Portrait id={def.advisor} size={40} talking />
-					<p>{r.won ? def.outro : "The lesson ran out of money before it ran out of day. Have another go; the numbers are the same."}</p>
+					<p>{r.won ? def.outro : (def.failed ?? "The lesson ran out of money before it ran out of day. Have another go; the numbers are the same.")}</p>
 				</div>
 				{r.bonus > 0 && <p className="les-bonus">+${r.bonus.toLocaleString("en-US")} starting cash in every Free Build game from now on.</p>}
 				<div className="les-result-acts">

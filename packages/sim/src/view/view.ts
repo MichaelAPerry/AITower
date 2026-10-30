@@ -41,6 +41,8 @@ function lessonView(state: SimState, content: ContentDB): LessonView | null {
 		minHeadroom: ls.minHeadroom,
 		downTicks: ls.downTicks,
 		stars: ls.stars,
+		star2: (ls.starBits & 1) !== 0,
+		star3: (ls.starBits & 2) !== 0,
 		allowed: ls.status === "active" ? lessonAllowed(def, ls) : [],
 		pue: m.pue,
 		drawers: ls.status === "active" ? lessonDrawers(def, ls) : [],

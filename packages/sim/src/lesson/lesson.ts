@@ -6,7 +6,9 @@
 import { type ContentDB, type LessonCond, type LessonDef, type LessonEffect, type LessonMetric, treeOf } from "@aitower/content";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import type { Job, LessonState, SimState } from "../core/state";
+import { isActive, storageCapacityTB } from "../compute/allocation";
 import { getDef, isComputeRack } from "../world/defs";
+import { modFactor } from "../ministry/modifiers";
 import type { TickCtx } from "../core/context";
 
 /** Tip ids the UI marks (with `markTip`) when the player opens a panel a lesson asked about. */
@@ -23,18 +25,19 @@ export function lessonDef(state: SimState, content: ContentDB): LessonDef | unde
 
 /** Start a lesson on a fresh site: its setup effects (a feeder limit, say) apply from tick 0, before anything is drawn. */
 export function startLesson(state: SimState, def: LessonDef): void {
-	state.lesson = newLessonState(def, state.tick);
+	state.lesson = newLessonState(def, state.tick, state.cash);
 	for (const e of def.setup ?? []) if (e.type === "gridCap" || e.type === "failureRate") state.modifiers.push({ kind: e.type, value: e.factor, endsAt: state.tick + e.durationTicks, label: e.label });
 }
 
-export function newLessonState(def: LessonDef, tick: number): LessonState {
-	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, setupDone: true };
+export function newLessonState(def: LessonDef, tick: number, cash = 0): LessonState {
+	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, starBits: 0, minCash: cash, drainTicks: 0, stallTicks: 0, foremanTicks: 0, setupDone: true };
 }
 
 export type LessonMetrics = Record<LessonMetric, number>;
 
 /** Read the lesson metrics from the tick that was just solved. */
 export function lessonMetrics(state: SimState, content: ContentDB): LessonMetrics {
+	const ls = state.lesson;
 	let racks = 0;
 	let busy = 0;
 	let dark = 0;
@@ -45,6 +48,9 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 	let parts = 0;
 	let treeRacks = 0;
 	let cleanPower = 0;
+	let batteries = 0;
+	let storedKwh = 0;
+	let storageKwh = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind === "genset") gensets++;
@@ -53,6 +59,11 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		if (d.rack && d.rack.storageTB > 0) storageRacks++;
 		if (treeOf(d)) treeRacks++;
 		if (d.kind === "solar" || d.kind === "wind") cleanPower++;
+		if (d.kind === "ups") {
+			batteries++;
+			storedKwh += f.storedKwh;
+			storageKwh += d.power?.storageKwh ?? 0;
+		}
 		if (!isComputeRack(d)) continue;
 		racks++;
 		if (f.busy && f.jobId >= 0 && !f.failed && f.sat >= MIN_POWERED_SATISFACTION) busy++;
@@ -96,6 +107,16 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		cleanPower,
 		greenSp: state.sp.greentech,
 		tips: state.advisorTips.filter((t) => t.startsWith(LESSON_TIP)).length,
+		batteries,
+		upsPct: storageKwh > 0 ? (storedKwh / storageKwh) * 100 : 100,
+		downTicks: ls?.downTicks ?? 0,
+		minHeadroom: ls?.minHeadroom ?? 100,
+		minCash: ls ? Math.min(ls.minCash, state.cash) : state.cash,
+		drainTicks: ls?.drainTicks ?? 0,
+		stallTicks: ls?.stallTicks ?? 0,
+		foremanTicks: ls?.foremanTicks ?? 0,
+		beats: ls?.beatsFired.length ?? 0,
+		gridPct: modFactor(state, "gridCap") * 100,
 	};
 }
 
@@ -228,9 +249,15 @@ function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	void def;
 }
 
-/** Star count for a finished lesson: passed, headroom held, little downtime. */
-export function lessonStars(def: LessonDef, ls: Pick<LessonState, "minHeadroom" | "downTicks">): number {
-	return 1 + (ls.minHeadroom >= def.stars.headroomPct ? 1 : 0) + (ls.downTicks <= def.stars.maxDarkTicks ? 1 : 0);
+/** Bonus stars for a finished lesson, tested on its metrics at the win: bit 1 = star 2 held, bit 2 = star 3 held. */
+export function lessonStarBits(def: LessonDef, m: LessonMetrics): number {
+	return (allHold(def.stars2, m) ? 1 : 0) | (allHold(def.stars3, m) ? 2 : 0);
+}
+
+/** Star count for a finished lesson: 1 for passing, plus one for each bonus star. */
+export function lessonStars(def: LessonDef, m: LessonMetrics): number {
+	const bits = lessonStarBits(def, m);
+	return 1 + (bits & 1) + (bits >> 1);
 }
 
 /** Tick stage 10b: run the lesson's beats, steps, success and failure. A won or lost lesson stays on the state (for the result screen) but stops restricting. */
@@ -254,6 +281,12 @@ export function lessonStep(ctx: TickCtx): void {
 	}
 	// Downtime after the second rack: any tick the racks are dark or the load exceeds capacity.
 	if (ls.beatsFired.length > 0 && m.racks > 0 && (m.racksDark > 0 || m.shortKw > 0)) ls.downTicks++;
+	// Running tallies the star rules may read.
+	if (state.cash < ls.minCash) ls.minCash = state.cash;
+	if (m.batteries > 0 && m.upsPct <= 0) ls.drainTicks++;
+	// A storage stall: the datasets of the live jobs do not fit in the powered storage.
+	if (state.jobs.some((j) => isActive(j) && j.spec.storageTB > 0) && state.jobs.reduce((tb, j) => (isActive(j) ? tb + j.spec.storageTB : tb), 0) > storageCapacityTB(state, content)) ls.stallTicks++;
+	if (m.foreman > 0) ls.foremanTicks++;
 	if (allHold(def.win.when, m)) {
 		ls.holdTicks++;
 		if (m.headroomPct < ls.minHeadroom) ls.minHeadroom = m.headroomPct;
@@ -266,8 +299,11 @@ export function lessonStep(ctx: TickCtx): void {
 		if (!ls.stepsDone.includes(last.id)) ls.stepsDone.push(last.id);
 		ls.status = "won";
 		ls.endTick = state.tick;
-		ls.stars = def.starred === false ? 1 : lessonStars(def, ls);
-	} else if (def.lose.length > 0 && allHold(def.lose, m)) {
+		// Tallies include this tick; the win-hold counters above are already settled.
+		const end = lessonMetrics(state, content);
+		ls.starBits = def.starred === false ? 0 : lessonStarBits(def, end);
+		ls.stars = def.starred === false ? 1 : 1 + (ls.starBits & 1) + (ls.starBits >> 1);
+	} else if (def.lose.some((c) => condHolds(c, m))) {
 		ls.status = "lost";
 		ls.endTick = state.tick;
 	}

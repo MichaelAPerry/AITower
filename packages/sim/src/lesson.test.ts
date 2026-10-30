@@ -2,6 +2,7 @@ import { loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { Sim } from "./api";
 import { condHolds, lessonMetrics, lessonStars } from "./lesson/lesson";
+import type { LessonMetrics } from "./lesson/lesson";
 import { type SimImpl, createSim, simFromSnapshot } from "./sim";
 
 const content = loadContent();
@@ -68,14 +69,15 @@ describe("lesson engine", () => {
 		expect(condHolds({ metric: "racksDark", op: "<=", value: 0 }, m)).toBe(true);
 	});
 
-	it("is completable by a scripted player: win after three hours running, no stars", () => {
+	it("is completable by a scripted player: win after three hours running", () => {
 		const sim = fresh();
 		play(sim);
 		const l = lesson(sim);
 		expect(l.status).toBe("won");
 		expect(l.stepsDone).toEqual(["rack", "power", "cool", "run", "hold"]);
 		expect(l.holdTicks).toBeGreaterThanOrEqual(l.holdGoal);
-		expect(l.stars).toBe(1);
+		expect(l.stars).toBe(3);
+		expect(l.star2 && l.star3).toBe(true);
 		expect(sim.view().facilities.filter((f) => f.defId === "rack_air_gpu").every((f) => f.tempC < 80)).toBe(true);
 		// A finished lesson stops restricting the site.
 		expect(sim.view().lesson?.allowed).toEqual([]);
@@ -100,11 +102,13 @@ describe("lesson engine", () => {
 		expect(lesson(sim).stepsDone).not.toContain("cool");
 	});
 
-	it("awards stars for headroom and uptime", () => {
-		const d = { ...def, stars: { headroomPct: 50, maxDarkTicks: 100 } };
-		expect(lessonStars(d, { minHeadroom: 89, downTicks: 40 })).toBe(3);
-		expect(lessonStars(d, { minHeadroom: 20, downTicks: 40 })).toBe(2);
-		expect(lessonStars(d, { minHeadroom: 20, downTicks: 900 })).toBe(1);
+	it("awards one star for passing and one for each star rule that holds", () => {
+		const d = { ...def, stars2: [{ metric: "minHeadroom" as const, op: ">=" as const, value: 50 }], stars3: [{ metric: "downTicks" as const, op: "<=" as const, value: 100 }] };
+		const m = (minHeadroom: number, downTicks: number) => ({ minHeadroom, downTicks }) as LessonMetrics;
+		expect(lessonStars(d, m(89, 40))).toBe(3);
+		expect(lessonStars(d, m(20, 40))).toBe(2);
+		expect(lessonStars(d, m(89, 900))).toBe(2);
+		expect(lessonStars(d, m(20, 900))).toBe(1);
 	});
 
 	it("round-trips through a snapshot mid-lesson and stays deterministic", () => {

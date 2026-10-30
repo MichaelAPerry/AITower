@@ -11,7 +11,7 @@
 			"speed": 3,
 			"meter": true,
 			"holdLabel": "hours running",
-			"starred": false,
+			"starred": true,
 			"passed": "A powered, cooled rack ran a job",
 			"setup": [
 				{
@@ -258,17 +258,29 @@
 					"value": 0
 				}
 			],
-			"stars": {
-				"headroomPct": 0,
-				"maxDarkTicks": 100000
-			},
 			"learned": "A {{rack|rack}} does the work. It needs power from the grid and cooling for its heat. Power is counted in {{kw|kW}}. {{pue|PUE}} shows how much extra the hall burns on top of the racks.",
 			"handbook": [
 				"ch:power",
 				"ch:heat"
 			],
 			"bonus": 50000,
-			"outro": "That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays."
+			"outro": "That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays.",
+			"stars2": [
+				{
+					"metric": "minHeadroom",
+					"op": ">=",
+					"value": 10
+				}
+			],
+			"star2Text": "At least 10% of the power was always spare while the rack ran.",
+			"stars3": [
+				{
+					"metric": "downTicks",
+					"op": "<=",
+					"value": 0
+				}
+			],
+			"star3Text": "Not one minute without power once the first job started."
 		},
 		{
 			"id": "earn_your_keep",
@@ -279,7 +291,7 @@
 			"goal": "Finish two contracts.",
 			"scenario": "lesson_earn",
 			"speed": 3,
-			"starred": false,
+			"starred": true,
 			"passed": "Two contracts finished and paid",
 			"setup": [
 				{
@@ -539,17 +551,34 @@
 					"value": 0
 				}
 			],
-			"stars": {
-				"headroomPct": 0,
-				"maxDarkTicks": 100000
-			},
 			"learned": "{{inference|Inference}} pays while it runs. {{training|Training}} pays when it ends. Both need powered, cooled racks, and training also needs storage for its data. Spare parts and bots keep racks earning when something breaks.",
 			"handbook": [
 				"ch:money",
 				"ch:break"
 			],
 			"bonus": 25000,
-			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. Next, Mel will show you how it grows."
+			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. Next, Mel will show you how it grows.",
+			"stars2": [
+				{
+					"metric": "jobsDone",
+					"op": ">=",
+					"value": 2
+				},
+				{
+					"metric": "cash",
+					"op": ">=",
+					"value": 2000000
+				}
+			],
+			"star2Text": "Both contracts were paid, and you finished with more cash than you started with.",
+			"stars3": [
+				{
+					"metric": "stallTicks",
+					"op": "<=",
+					"value": 0
+				}
+			],
+			"star3Text": "No job ever sat stalled for want of storage."
 		},
 		{
 			"id": "grow_the_tower",
@@ -560,7 +589,7 @@
 			"goal": "Research two ideas, reach Level 2, and switch on the Foreman.",
 			"scenario": "lesson_grow",
 			"speed": 10,
-			"starred": false,
+			"starred": true,
 			"passed": "Level 2 reached and the Foreman at work",
 			"setup": [
 				{
@@ -753,16 +782,33 @@
 					"value": 0
 				}
 			],
-			"stars": {
-				"headroomPct": 0,
-				"maxDarkTicks": 100000
-			},
 			"learned": "Research points buy new ideas. A Level needs enough PF of racks and enough ideas researched. The Foreman builds racks, cooling and power for you while you do something else.",
 			"handbook": [
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "Hm. It's growing. That's what it wants. Where it goes is up to you."
+			"outro": "Hm. It's growing. That's what it wants. Where it goes is up to you.",
+			"stars2": [
+				{
+					"metric": "day",
+					"op": "<=",
+					"value": 1
+				}
+			],
+			"star2Text": "Done within 2 game days.",
+			"stars3": [
+				{
+					"metric": "foreman",
+					"op": ">=",
+					"value": 1
+				},
+				{
+					"metric": "minCash",
+					"op": ">=",
+					"value": 1000000
+				}
+			],
+			"star3Text": "The Foreman is on, and cash never fell below his $1 million reserve."
 		},
 		{
 			"id": "the_three_trees",
@@ -773,7 +819,7 @@
 			"goal": "Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.",
 			"scenario": "lesson_trees",
 			"speed": 3,
-			"starred": false,
+			"starred": true,
 			"passed": "A Garden rack earned its first points",
 			"setup": [
 				{
@@ -931,16 +977,323 @@
 					"value": 0
 				}
 			],
-			"stars": {
-				"headroomPct": 0,
-				"maxDarkTicks": 100000
-			},
 			"learned": "A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power.",
 			"handbook": [
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower."
+			"outro": "That's everything I got. Where you go is up to you. Nobody's stopping you. Go build your tower.",
+			"stars2": [
+				{
+					"metric": "treeRacks",
+					"op": ">=",
+					"value": 1
+				},
+				{
+					"metric": "cleanPower",
+					"op": ">=",
+					"value": 1
+				}
+			],
+			"star2Text": "A Green rack and clean power both standing when the first Garden points arrived.",
+			"stars3": [
+				{
+					"metric": "downTicks",
+					"op": "<=",
+					"value": 0
+				},
+				{
+					"metric": "maxRackC",
+					"op": "<",
+					"value": 80
+				}
+			],
+			"star3Text": "No minute without power, and no rack ran hotter than 80 degrees C."
+		},
+		{
+			"id": "lights_out",
+			"number": 6,
+			"title": "Lights Out",
+			"advisor": "bea",
+			"concept": "Backup: a battery bank bridges the minutes after the grid drops, and a genset carries the racks for hours.",
+			"goal": "Ride out a grid failure with no dark racks.",
+			"scenario": "lesson_lights_out",
+			"speed": 3,
+			"meter": true,
+			"starred": true,
+			"passed": "The racks stayed lit through the outage",
+			"failed": "The racks stayed dark too long. The battery and the genset have to be up and running before the grid drops. Have another go.",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision"
+			],
+			"steps": [
+				{
+					"id": "battery",
+					"text": "Place a Battery Bank on the glowing spot",
+					"when": [
+						{
+							"metric": "batteries",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "ups_battery",
+							"max": 1
+						}
+					],
+					"say": [
+						"Bea. Power again. Today the grid goes out.",
+						"Not maybe. Today. So we get ready.",
+						"A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot."
+					],
+					"after": [
+						"Okay. Empty for now. It charges off the grid."
+					],
+					"slot": {
+						"floor": -1,
+						"x": 12,
+						"defId": "ups_battery"
+					},
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "genset",
+					"text": "Place a Diesel Genset on the glowing spot",
+					"when": [
+						{
+							"metric": "gensets",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "ups_battery",
+							"max": 1
+						},
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"say": [
+						"Batteries don't last. Maybe an hour and a half at this load.",
+						"For longer you want an engine. A {{genset|genset}}. Diesel. Loud, and it burns money.",
+						"Open Power. Pick the Diesel Genset. Click the glowing spot."
+					],
+					"after": [
+						"Right. It starts itself when the grid runs short. It needs a few minutes to get up to speed."
+					],
+					"slot": {
+						"floor": -1,
+						"x": 16,
+						"defId": "genset"
+					},
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "watch",
+					"text": "Check the Power view while the battery fills",
+					"when": [
+						{
+							"metric": "upsPct",
+							"op": ">=",
+							"value": 99
+						}
+					],
+					"allow": [
+						{
+							"defId": "ups_battery",
+							"max": 1
+						},
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"say": [
+						"I've put the power view on. That's where the load and the supply show.",
+						"Let the battery fill. Don't touch anything."
+					],
+					"after": [
+						"Full. Okay. Okay.",
+						"Hands off. Here it comes."
+					],
+					"overlay": "power",
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "outage",
+					"text": "Ride out the outage",
+					"when": [
+						{
+							"metric": "beats",
+							"op": ">=",
+							"value": 2
+						},
+						{
+							"metric": "gridPct",
+							"op": ">=",
+							"value": 100
+						}
+					],
+					"allow": [
+						{
+							"defId": "ups_battery",
+							"max": 1
+						},
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"say": [
+						"There. Grid's gone.",
+						"The battery has the racks. The genset's waking up. Watch the load."
+					],
+					"after": [
+						"Genset's carrying them. The battery's topping up. Nobody went dark.",
+						"Grid's back. The genset stands down on its own."
+					],
+					"afterBeat": "trip",
+					"overlay": "power",
+					"handbook": "ch:power",
+					"pause": true
+				},
+				{
+					"id": "steady",
+					"text": "Keep the racks lit for half an hour",
+					"when": [],
+					"allow": [
+						{
+							"defId": "ups_battery",
+							"max": 1
+						},
+						{
+							"defId": "genset",
+							"max": 1
+						}
+					],
+					"say": [
+						"Give it half an hour. Make sure it holds."
+					],
+					"handbook": "ch:power"
+				}
+			],
+			"beats": [
+				{
+					"id": "job",
+					"when": [],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 60,
+							"durationTicks": 20000,
+							"payout": 300000
+						}
+					]
+				},
+				{
+					"id": "trip",
+					"when": [
+						{
+							"metric": "batteries",
+							"op": ">=",
+							"value": 1
+						},
+						{
+							"metric": "gensets",
+							"op": ">=",
+							"value": 1
+						},
+						{
+							"metric": "upsPct",
+							"op": ">=",
+							"value": 99
+						}
+					],
+					"effects": [
+						{
+							"type": "gridCap",
+							"factor": 0,
+							"durationTicks": 180,
+							"label": "Grid failure"
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "racksDark",
+						"op": "<=",
+						"value": 0
+					},
+					{
+						"metric": "beats",
+						"op": ">=",
+						"value": 2
+					},
+					{
+						"metric": "gridPct",
+						"op": ">=",
+						"value": 100
+					}
+				],
+				"holdTicks": 30
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				},
+				{
+					"metric": "downTicks",
+					"op": ">=",
+					"value": 60
+				}
+			],
+			"stars2": [
+				{
+					"metric": "downTicks",
+					"op": "<=",
+					"value": 0
+				}
+			],
+			"star2Text": "Not one minute without power during the outage.",
+			"stars3": [
+				{
+					"metric": "drainTicks",
+					"op": "<=",
+					"value": 0
+				}
+			],
+			"star3Text": "The battery never ran empty.",
+			"learned": "A {{ups|battery bank}} carries the racks for the minutes a {{genset|genset}} needs to start. The genset carries them for hours. Build both before the grid drops.",
+			"handbook": [
+				"ch:power"
+			],
+			"bonus": 25000,
+			"outro": "That's how you keep the lights on. Build the backup before you need it."
 		}
 	]
 }

@@ -522,6 +522,9 @@ export interface LessonView {
 	minHeadroom: number;
 	downTicks: number;
 	stars: number;
+	/** Bonus stars earned (set when the lesson is won): star 2, star 3. */
+	star2: boolean;
+	star3: boolean;
 	/** Facilities that may be placed right now (all others are refused), with how many may exist. */
 	allowed: { defId: string; max?: number }[];
 	/** Live: power usage effectiveness (total power over rack power), 0 when nothing runs. */

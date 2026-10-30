@@ -421,7 +421,7 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 
-const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day", "coolers", "storageRacks", "jobsLive", "jobsStalled", "jobsDone", "offers", "parts", "bots", "techs", "rp", "tier", "foreman", "treeRacks", "pue", "cleanPower", "greenSp", "tips"];
+const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day", "coolers", "storageRacks", "jobsLive", "jobsStalled", "jobsDone", "offers", "parts", "bots", "techs", "rp", "tier", "foreman", "treeRacks", "pue", "cleanPower", "greenSp", "tips", "batteries", "upsPct", "downTicks", "minHeadroom", "minCash", "drainTicks", "stallTicks", "foremanTicks", "beats", "gridPct"];
 const LESSON_DRAWERS = ["contracts", "research", "automation", "insights"];
 const LESSON_OPS = [">=", ">", "<=", "<"];
 
@@ -494,6 +494,12 @@ function validateLessons(p: Problems, db: ContentDB): void {
 		conds(`${w}.win.when`, l.win?.when);
 		num(p, `${w}.win.holdTicks`, l.win?.holdTicks, { min: 1, int: true });
 		conds(`${w}.lose`, l.lose);
+		if (l.starred !== false) {
+			conds(`${w}.stars2`, l.stars2);
+			conds(`${w}.stars3`, l.stars3);
+			str(p, `${w}.star2Text`, l.star2Text);
+			str(p, `${w}.star3Text`, l.star3Text);
+		}
 		num(p, `${w}.bonus`, l.bonus, { min: 0 });
 		if (!Array.isArray(l.commands) || l.commands.length === 0) p.push(`${w}.commands: expected a list of command types`);
 	}

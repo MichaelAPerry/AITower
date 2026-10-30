@@ -1698,7 +1698,7 @@ Choice `add`:
 - [the_three_trees.concept] Concept: The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step.
 - [the_three_trees.goal] Goal: Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.
 - [the_three_trees.learned] Learned: A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power.
-- [the_three_trees.outro] bea: That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower.
+- [the_three_trees.outro] bea: That's everything I got. Where you go is up to you. Nobody's stopping you. Go build your tower.
 
 #### Step `retrofit`
 
@@ -1735,6 +1735,58 @@ Choice `add`:
 - [the_three_trees.points.objective] Objective: Wait for the Garden's first points
 - [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
 - [the_three_trees.points.say2] bea: Now let the clock run until the Garden scores.
+
+### Lesson 6: Lights Out (`lights_out`)
+
+> Speaker: Bea. Scenario `lesson_lights_out`. Every line in the steps is spoken by the lesson's advisor.
+- [lights_out.title] Title: Lights Out
+- [lights_out.concept] Concept: Backup: a battery bank bridges the minutes after the grid drops, and a genset carries the racks for hours.
+- [lights_out.goal] Goal: Ride out a grid failure with no dark racks.
+- [lights_out.learned] Learned: A {{ups|battery bank}} carries the racks for the minutes a {{genset|genset}} needs to start. The genset carries them for hours. Build both before the grid drops.
+- [lights_out.outro] bea: That's how you keep the lights on. Build the backup before you need it.
+
+#### Step `battery`
+
+> Done when: [{"metric":"batteries","op":">=","value":1}].
+- [lights_out.battery.objective] Objective: Place a Battery Bank on the glowing spot
+- [lights_out.battery.say1] bea: Bea. Power again. Today the grid goes out.
+- [lights_out.battery.say2] bea: Not maybe. Today. So we get ready.
+- [lights_out.battery.say3] bea: A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot.
+- [lights_out.battery.after1] bea: Okay. Empty for now. It charges off the grid.
+
+#### Step `genset`
+
+> Done when: [{"metric":"gensets","op":">=","value":1}].
+- [lights_out.genset.objective] Objective: Place a Diesel Genset on the glowing spot
+- [lights_out.genset.say1] bea: Batteries don't last. Maybe an hour and a half at this load.
+- [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Loud, and it burns money.
+- [lights_out.genset.say3] bea: Open Power. Pick the Diesel Genset. Click the glowing spot.
+- [lights_out.genset.after1] bea: Right. It starts itself when the grid runs short. It needs a few minutes to get up to speed.
+
+#### Step `watch`
+
+> Done when: [{"metric":"upsPct","op":">=","value":99}].
+- [lights_out.watch.objective] Objective: Check the Power view while the battery fills
+- [lights_out.watch.say1] bea: I've put the power view on. That's where the load and the supply show.
+- [lights_out.watch.say2] bea: Let the battery fill. Don't touch anything.
+- [lights_out.watch.after1] bea: Full. Okay. Okay.
+- [lights_out.watch.after2] bea: Hands off. Here it comes.
+
+#### Step `outage`
+
+> Done when: [{"metric":"beats","op":">=","value":2},{"metric":"gridPct","op":">=","value":100}].
+> Runs scripted beat `trip` after the lines.
+- [lights_out.outage.objective] Objective: Ride out the outage
+- [lights_out.outage.say1] bea: There. Grid's gone.
+- [lights_out.outage.say2] bea: The battery has the racks. The genset's waking up. Watch the load.
+- [lights_out.outage.after1] bea: Genset's carrying them. The battery's topping up. Nobody went dark.
+- [lights_out.outage.after2] bea: Grid's back. The genset stands down on its own.
+
+#### Step `steady`
+
+> Done when: immediately.
+- [lights_out.steady.objective] Objective: Keep the racks lit for half an hour
+- [lights_out.steady.say1] bea: Give it half an hour. Make sure it holds.
 
 ## 17. Achievements and the off-duty gallery
 

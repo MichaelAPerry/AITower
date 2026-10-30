@@ -39,9 +39,10 @@ function doStep(sim: Sim, id: string, act: () => void): void {
 
 describe("every lesson in the content is scripted below", () => {
 	it("lists exactly these lessons, numbered 1 to n, each with its own scenario", () => {
-		expect(content.lessons.map((l) => l.id)).toEqual(["first_watt", "earn_your_keep", "grow_the_tower", "the_three_trees"]);
+		expect(content.lessons.map((l) => l.id)).toEqual(["first_watt", "earn_your_keep", "grow_the_tower", "the_three_trees", "lights_out"]);
+		// Lesson 5 (Going Liquid) is not built yet, so the numbers skip it.
 		content.lessons.forEach((l, i) => {
-			expect(l.number).toBe(i + 1);
+			expect(l.number).toBe(i < 4 ? i + 1 : 6);
 			expect(content.scenarios[l.scenario]?.lesson).toBe(l.id);
 		});
 	});
@@ -65,7 +66,7 @@ describe("Lesson 1: your first rack", () => {
 		doStep(sim, "run", () => undefined);
 		expect(lessonOf(sim).beatsFired).toContain("job");
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 600);
-		expect(lessonOf(sim).stars).toBe(1);
+		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -89,6 +90,9 @@ describe("Lesson 2: earn your keep", () => {
 		doStep(sim, "bot", () => ok(sim, { type: "buyBot", defId: "rover" }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 6000);
 		expect(sim.view().stats.jobsCompleted).toBeGreaterThanOrEqual(2);
+		// Both contracts paid, cash above the 2 million start, and the data always had room: three stars.
+		expect(sim.view().cash).toBeGreaterThan(2_000_000);
+		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -112,6 +116,8 @@ describe("Lesson 3: grow the tower", () => {
 		const policy = sim.view().automation.policy;
 		ok(sim, { type: "setAutomation", policy: { ...policy, foreman: { ...policy.foreman, enabled: true } } });
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 50);
+		// Done inside two game days, with the Foreman on and cash above his $1M reserve all along: three stars.
+		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -129,5 +135,49 @@ describe("Lesson 4: the three trees", () => {
 		doStep(sim, "clean", () => ok(sim, { type: "place", defId: "solar_skin", floor: 1, x: 40 }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 6000);
 		expect(sim.view().soul?.trees.greentech.sp).toBeGreaterThan(0);
+		expect(lessonOf(sim).stars).toBe(3);
+	});
+});
+
+describe("Lesson 6: lights out", () => {
+	const play = (opts: { genset: boolean }) => {
+		const sim = createSim(content, "lesson_lights_out", 7);
+		run(sim, 3);
+		doStep(sim, "battery", () => ok(sim, { type: "place", defId: "ups_battery", floor: -1, x: 12 }));
+		if (opts.genset) doStep(sim, "genset", () => ok(sim, { type: "place", defId: "genset", floor: -1, x: 16 }));
+		return sim;
+	};
+	it("is won by a battery bank and a genset: the grid trips, the racks stay lit, the grid returns", () => {
+		const sim = play({ genset: true });
+		doStep(sim, "watch", () => undefined);
+		expect(lessonOf(sim).beatsFired).toContain("trip");
+		until(sim, "the grid is down", () => sim.view().modifiers.some((m) => m.label === "Grid failure"), 50);
+		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
+		const l = lessonOf(sim);
+		expect(l.downTicks).toBe(0);
+		expect(l.star2).toBe(true);
+		expect(l.star3).toBe(true);
+		expect(l.stars).toBe(3);
+	});
+	it("is lost when the genset is switched off: the battery runs dry and the racks go dark", () => {
+		const sim = play({ genset: true });
+		const gen = sim.view().facilities.find((f) => f.defId === "genset");
+		if (!gen) throw new Error("no genset");
+		ok(sim, { type: "setEnabled", facilityId: gen.id, enabled: false });
+		until(sim, "the grid trips", () => sim.view().modifiers.some((m) => m.label === "Grid failure"), 400);
+		until(sim, "the lesson is lost", () => lessonOf(sim).status === "lost", 1200);
+		expect(lessonOf(sim).stars).toBe(0);
+	});
+});
+
+describe("Per-lesson stars", () => {
+	it("lessons 1 to 4 and 6 are starred and say in words what each bonus star needs", () => {
+		for (const l of content.lessons) {
+			expect(l.starred, l.id).toBe(true);
+			expect(l.stars2.length, l.id).toBeGreaterThan(0);
+			expect(l.stars3.length, l.id).toBeGreaterThan(0);
+			expect(l.star2Text.length, l.id).toBeGreaterThan(10);
+			expect(l.star3Text.length, l.id).toBeGreaterThan(10);
+		}
 	});
 });

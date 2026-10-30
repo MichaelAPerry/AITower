@@ -720,5 +720,89 @@
 			"batch_cards",
 			"neuromorphic_bench"
 		]
+	},
+	"lesson_lights_out": {
+		"id": "lesson_lights_out",
+		"name": "Lesson 6: Lights Out",
+		"description": "A small working hall: three racks, an air handler and a grid intake. Bea shows you what happens when the grid drops, and what keeps the racks lit.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 2000000,
+		"sandbox": true,
+		"lesson": "lights_out",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 10
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 12
+			}
+		],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0
 	}
 }

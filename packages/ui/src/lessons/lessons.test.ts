@@ -9,7 +9,7 @@ import { allowedIds, articleTitle, baselineAck, goalModel, lessonTabs, lessonsIn
 
 const content = loadContent();
 const def = content.lessons[0];
-const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, stars: 0, allowed: [{ defId: "rack_air_gpu", max: 2 }], pue: 1.2, drawers: [], supplies: false, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
+const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, stars: 0, star2: false, star3: false, allowed: [{ defId: "rack_air_gpu", max: 2 }], pue: 1.2, drawers: [], supplies: false, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
 
 describe("teacher lines", () => {
 	it("walks the intro, then waits for the player", () => {
@@ -71,18 +71,25 @@ describe("goal bar and catalog", () => {
 describe("the lesson list", () => {
 	it("lists exactly the lessons that exist, in order, with a next lesson for all but the last", () => {
 		const list = lessonsInOrder(content);
-		expect(list.map((l) => l.number)).toEqual([1, 2, 3, 4]);
+		expect(list.map((l) => l.number)).toEqual([1, 2, 3, 4, 6]);
 		expect(nextLessonOf(content, list[0])?.id).toBe(list[1].id);
-		expect(nextLessonOf(content, list[3])).toBeUndefined();
+		// Lesson 5 is not built yet: the next one after 4 is 6.
+		expect(nextLessonOf(content, list[3])?.number).toBe(6);
+		expect(nextLessonOf(content, list[4])).toBeUndefined();
 	});
 });
 
 describe("result", () => {
-	it("passes the lesson with the Handbook links and no stars", () => {
-		const r = resultModel(def, lv({ status: "won", stars: 1, startTick: 0, endTick: 2000 }), true);
+	it("passes the lesson with the Handbook links and says in words what earned each star", () => {
+		const r = resultModel(def, lv({ status: "won", stars: 2, star2: true, startTick: 0, endTick: 2000 }), true);
 		expect(r.won).toBe(true);
-		expect(r.starred).toBe(false);
-		expect(r.rows).toEqual([{ label: "Passed", value: def.passed ?? def.goal, earned: true }]);
+		expect(r.starred).toBe(true);
+		expect(r.rows).toEqual([
+			{ label: "Passed", value: def.passed ?? def.goal, earned: true },
+			{ label: "Star 2", value: def.star2Text, earned: true },
+			{ label: "Star 3", value: def.star3Text, earned: false },
+		]);
+		expect(def.star2Text.length).toBeGreaterThan(10);
 		expect(r.bonus).toBe(def.bonus);
 		expect(resultModel(def, lv({ status: "won", stars: 1 }), false).bonus).toBe(0);
 		expect(r.handbook.map((h) => h.id)).toContain("ch:power");

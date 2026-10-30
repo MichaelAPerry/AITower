@@ -555,7 +555,27 @@ export type LessonMetric =
 	/** Green Singularity points banked. */
 	| "greenSp"
 	/** Lesson prompts the player has acknowledged in the UI (a panel opened). Counts the "les:" tips. */
-	| "tips";
+	| "tips"
+	/** Battery banks standing. */
+	| "batteries"
+	/** Battery charge, % of the storage on hand (100 when there is no battery). */
+	| "upsPct"
+	/** Game-minutes the racks were dark or over capacity during this lesson (after its first scripted beat). */
+	| "downTicks"
+	/** Lowest headroom % seen while the success conditions held (100 until they do). */
+	| "minHeadroom"
+	/** Lowest cash seen during this lesson, $. */
+	| "minCash"
+	/** Game-minutes during this lesson in which every battery bank stood empty. */
+	| "drainTicks"
+	/** Game-minutes during this lesson in which a job's data did not fit in the powered storage. */
+	| "stallTicks"
+	/** Game-minutes during this lesson in which the Foreman was on. */
+	| "foremanTicks"
+	/** Scripted beats fired so far. */
+	| "beats"
+	/** Grid import now, as % of what the intakes can give (0 while a feeder trip is on). */
+	| "gridPct";
 export type LessonOp = ">=" | ">" | "<=" | "<";
 export interface LessonCond {
 	metric: LessonMetric;
@@ -615,12 +635,6 @@ export interface LessonStep {
 	/** Handbook article for the "?" chip on the checklist. */
 	handbook?: string;
 }
-export interface LessonStars {
-	/** Star 2: the lowest headroom % seen during the success day is at least this. */
-	headroomPct: number;
-	/** Star 3: no more than this many game-minutes without power over the whole lesson. */
-	maxDarkTicks: number;
-}
 export interface LessonDef {
 	id: string;
 	number: number;
@@ -646,6 +660,8 @@ export interface LessonDef {
 	holdLabel?: string;
 	/** False: no stars; finishing is the reward. Default true. */
 	starred?: boolean;
+	/** The result screen's line when the lesson is lost (default: ran out of money). */
+	failed?: string;
 	/** The result screen's "Passed" line. */
 	passed?: string;
 	steps: LessonStep[];
@@ -654,7 +670,13 @@ export interface LessonDef {
 	win: { when: LessonCond[]; holdTicks: number };
 	/** Failure: any holds. */
 	lose: LessonCond[];
-	stars: LessonStars;
+	/** Star 2: all hold when the lesson is won (the metrics include the lesson's running tallies, e.g. `downTicks`). Used when `starred` is not false. */
+	stars2: LessonCond[];
+	/** Star 3: all hold when the lesson is won. */
+	stars3: LessonCond[];
+	/** The result screen says in plain words what earns star 2 / star 3. */
+	star2Text: string;
+	star3Text: string;
 	/** One line on the result screen. */
 	learned: string;
 	/** Handbook article ids linked from the result screen. */
