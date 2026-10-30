@@ -3,7 +3,7 @@ import type { DecisionView } from "@aitower/sim";
 import type { GameStore } from "@aitower/shared";
 import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
-import { BACKDROP, PORTRAITS } from "../art";
+import { PORTRAITS, sceneBackdrop } from "../art";
 import { pushNotice } from "../notices";
 import "./vn.css";
 
@@ -96,7 +96,7 @@ export function StoryScene({ store, decision: d, reduced }: { store: GameStore; 
 	const who = line?.who ?? d.advisor;
 	const mood = line?.mood ?? "neutral";
 	const speaker = who === "narrator" ? null : ADVISORS[who];
-	const backdrop = d.backdrop ? BACKDROP[d.backdrop] : null;
+	const backdrop = sceneBackdrop(d.eventId, d.backdrop) ?? null;
 	const text = full.slice(0, shown);
 
 	return (

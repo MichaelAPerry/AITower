@@ -99,12 +99,12 @@ The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening mes
 | Advisor full figures | `{advisor}-full.webp` | `FULL` | done |
 | Title | `bg-title.webp` | `BACKDROP.title` | done |
 | Tree floors | `bg-synth`, `bg-bio`, `bg-green` | `BACKDROP` | done; also the Lattice/Flesh/Garden ending placeholders |
-| Ending: Lattice | `bg-end-lattice.webp` | `ENDING_ART` | empty (shows `bg-synth`) |
+| Ending: Lattice | `bg-end-lattice.webp` | `ENDING_ART` | done |
 | Ending: Flesh | `bg-end-flesh.webp` | `ENDING_ART` | empty (shows `bg-bio`) |
 | Ending: Garden | `bg-end-garden.webp` | `ENDING_ART` | empty (shows `bg-green`) |
 | Ending: Absorbed | `bg-end-absorbed.webp` | `ENDING_ART` | empty (plain stage) |
 | Ending: Bankrupt | `bg-end-bankrupt.webp` | `ENDING_ART` | empty (plain stage) |
-| Location: lot (`st_intro`) | `bg-loc-f1-lot.webp` | to build | empty |
+| Location: lot (`st_intro`) | `bg-loc-f1-lot.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
 | Location: site install (`obj_greentech`, `obj_biotech`) | `bg-loc-site-install.webp` | to build | empty |
 | Location: control room (`rung_syn_1`) | `bg-loc-control-room.webp` | to build | empty |
 | Location: finance office (`rung_syn_2`) | `bg-loc-finance-office.webp` | to build | empty |

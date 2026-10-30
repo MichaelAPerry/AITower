@@ -26,6 +26,8 @@ import bg_title from "./bg-title.webp";
 import bg_bio from "./bg-bio.webp";
 import bg_green from "./bg-green.webp";
 import bg_synth from "./bg-synth.webp";
+import bg_end_lattice from "./bg-end-lattice.webp";
+import bg_loc_f1_lot from "./bg-loc-f1-lot.webp";
 
 export type ArtAdvisor = "luci" | "mel" | "bea" | "cass";
 export type Expression = "neutral" | "pleased" | "displeased" | "unsettling";
@@ -49,9 +51,42 @@ export type BackdropId = keyof typeof BACKDROP;
  * so they show the plain stage.
  */
 export const ENDING_ART: Record<string, string | undefined> = {
-	"bg-end-lattice": bg_synth,
+	"bg-end-lattice": bg_end_lattice,
 	"bg-end-flesh": bg_bio,
 	"bg-end-garden": bg_green,
+};
+
+/**
+ * Story-location paintings (docs/ART_NEEDED.md), keyed by file name without extension. Add an entry (static import) when a
+ * painting is dropped in; scenes whose file is absent fall back to the tree backdrop (or the plain stage).
+ */
+export const LOCATION_FILES: Record<string, string | undefined> = {
+	"bg-loc-f1-lot": bg_loc_f1_lot,
+};
+
+/** Scene id -> location painting name (HANDOFF "Art slots"). Only names present in LOCATION_FILES resolve to an image. */
+export const LOCATION_ART: Record<string, string> = {
+	st_intro: "bg-loc-f1-lot",
+	obj_greentech: "bg-loc-site-install",
+	obj_biotech: "bg-loc-site-install",
+	rung_syn_1: "bg-loc-control-room",
+	rung_syn_2: "bg-loc-finance-office",
+	rung_syn_3: "bg-loc-plant-room",
+	rung_green_2: "bg-loc-plant-room",
+	rung_syn_4: "bg-loc-floor-f2",
+	rung_bio_1: "bg-loc-wetware-annex",
+	rung_bio_2: "bg-loc-wetware-annex",
+	rung_bio_3: "bg-loc-nutrient-line",
+	rung_bio_4: "bg-loc-neural-pit",
+	rung_green_1: "bg-loc-panel-deck",
+	rung_green_3: "bg-loc-stairwell",
+	rung_green_4: "bg-loc-sunrise",
+};
+
+/** The painting for a scene: its location file if one exists, else the tree backdrop, else undefined (plain stage). */
+export const sceneBackdrop = (sceneId: string, tree?: BackdropId, files: Record<string, string | undefined> = LOCATION_FILES): string | undefined => {
+	const name = LOCATION_ART[sceneId];
+	return (name && files[name]) || (tree ? BACKDROP[tree] : undefined);
 };
 
 /** The backdrop image of an ending, or undefined for the plain stage. */
