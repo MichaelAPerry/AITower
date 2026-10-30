@@ -2378,3 +2378,47 @@
 	border: 1px solid currentColor;
 	font-weight: 600;
 }
+
+/* Achievement strip: PC-98 frame, top centre, never over the advisor strip. Shown 4 seconds. */
+.aitower-hud .ui-ach-toast {
+	position: absolute;
+	top: calc(var(--gap, 8px) + 34px);
+	left: 50%;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: baseline;
+	gap: 12px;
+	max-width: min(640px, 92%);
+	padding: 6px 14px;
+	color: var(--text);
+	background: var(--bg, #07072a);
+	border: 2px solid var(--money, #ffd75e);
+	outline: 1px solid var(--bg, #07072a);
+	box-shadow: 0 0 0 1px var(--text), 4px 4px 0 rgba(0, 0, 0, 0.55);
+	font: 15px/1.3 var(--f-crt);
+	pointer-events: none;
+	z-index: 11;
+	animation: ui-toast-in 180ms ease-out both;
+}
+.aitower-hud .ui-ach-tag {
+	flex: none;
+	padding: 1px 6px;
+	color: var(--bg, #07072a);
+	background: var(--money, #ffd75e);
+	font: 10px/1.4 var(--f-stamp);
+	letter-spacing: 0.08em;
+}
+.aitower-hud .ui-ach-name {
+	flex: none;
+	color: var(--money, #ffd75e);
+	font-size: 18px;
+}
+.aitower-hud .ui-ach-text {
+	color: var(--text-dim, var(--text));
+}
+@media (max-width: 720px) {
+	.aitower-hud .ui-ach-toast {
+		flex-wrap: wrap;
+		gap: 4px 10px;
+	}
+}

@@ -281,3 +281,55 @@ export function recordLesson(id: string, stars: number, storage: LessonStorage |
 /** The Free Build starting-cash bonus: each lesson's `bonus`, once, for every lesson completed. */
 export const freeBuildBonus = (lessons: readonly { id: string; bonus: number }[], progress: LessonProgress): number =>
 	lessons.reduce((sum, l) => sum + (progress.done[l.id] !== undefined ? l.bonus : 0), 0);
+
+// ─── Player profile (achievements; lifetime, not per run) ─────────────
+// Same pattern as the lesson progress above: best effort, the game works without storage. See docs/ACHIEVEMENTS.md.
+
+/** Where the profile lives. */
+export const PROFILE_KEY = "aitower.profile";
+
+export type AdvisorKey = "luci" | "mel" | "bea" | "cass";
+
+export interface Profile {
+	v: 1;
+	/** Achievement id to the game day it was earned and the ending of that run (null when earned mid-run). Latched for life. */
+	earned: Record<string, { day: number; ending: string | null }>;
+	/** Which advisors' ending epilogues have been seen (for `heard_out`). */
+	epilogues: Record<AdvisorKey, boolean>;
+}
+
+const emptyProfile = (): Profile => ({ v: 1, earned: {}, epilogues: { luci: false, mel: false, bea: false, cass: false } });
+
+export function loadProfile(storage: LessonStorage | null = defaultLessonStorage()): Profile {
+	const profile = emptyProfile();
+	try {
+		const raw = storage?.getItem(PROFILE_KEY);
+		if (!raw) return profile;
+		const p = JSON.parse(raw) as Partial<Profile> | null;
+		if (!p || typeof p !== "object" || p.v !== 1) return profile;
+		if (p.earned && typeof p.earned === "object")
+			for (const [id, e] of Object.entries(p.earned)) {
+				if (e && typeof e === "object" && Number.isFinite((e as { day: unknown }).day)) {
+					const ending = (e as { ending: unknown }).ending;
+					profile.earned[id] = { day: Math.floor((e as { day: number }).day), ending: typeof ending === "string" ? ending : null };
+				}
+			}
+		if (p.epilogues && typeof p.epilogues === "object") for (const a of Object.keys(profile.epilogues) as AdvisorKey[]) profile.epilogues[a] = (p.epilogues as Record<string, unknown>)[a] === true;
+	} catch {
+		/* unreadable: an empty profile */
+	}
+	return profile;
+}
+
+/** Latch an achievement. An id already earned is never overwritten or removed. Returns the profile and whether this call earned it. */
+export function recordAchievement(id: string, day: number, ending: string | null, storage: LessonStorage | null = defaultLessonStorage()): { profile: Profile; first: boolean } {
+	const profile = loadProfile(storage);
+	if (profile.earned[id]) return { profile, first: false };
+	profile.earned[id] = { day: Math.max(0, Math.floor(day)), ending };
+	try {
+		storage?.setItem(PROFILE_KEY, JSON.stringify(profile));
+	} catch {
+		/* best effort */
+	}
+	return { profile, first: true };
+}

@@ -7,6 +7,7 @@ import { CursorHint } from "./components/CursorHint";
 import { DesktopNotice } from "./components/DesktopNotice";
 import { Inspector } from "./components/Inspector";
 import { LevelUpCard } from "./levelup/LevelUpCard";
+import { AchievementToast } from "./achievements/AchievementToast";
 import { Toasts } from "./components/Toasts";
 import { BuildBar } from "./build/BuildBar";
 import { BuildInspector } from "./build/BuildInspector";
@@ -235,6 +236,7 @@ export function Hud({ store, content, title }: HudProps) {
 				{!lesson.active && <NextChip {...props} />}
 				{lesson.layer}
 				<Toasts content={content} state={state} />
+				<AchievementToast state={state} />
 				<LevelUpCard content={content} state={state} />
 				{!titleOpen && !over && <DecisionCard store={store} content={content} state={state} onHandbook={(id) => setUi({ drawer: "handbook", encyId: id, paletteOpen: false, buildHover: null })} />}
 				<CursorHint state={state} />
