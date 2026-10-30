@@ -6,4 +6,4 @@ I will attach new art (images) and my rewritten docs/DIALOGUE.md in this chat. C
 
 Start by telling me two things: (1) what is awaiting my approval (sprite previews, ending prompts, off-duty doc, lesson text), and (2) which art slots are still empty. Then wait for my verdicts before merging anything.
 
-Push to main only when check, build, e2e and budget all pass, and I have played the build.
+Push to main (the live site) only when check, build, e2e and budget all pass. I play each build before the next big change.
