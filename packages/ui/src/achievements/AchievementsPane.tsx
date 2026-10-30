@@ -66,7 +66,7 @@ function List() {
 		<ul className="ach-list" aria-label={U.ariaList}>
 			{rows.map((r) => (
 				<li key={r.id} className={`ach-row ${r.earned ? "is-earned" : "is-locked"} ${r.hidden ? "is-hidden" : ""}`} data-ach={r.id} data-earned={r.earned || undefined}>
-					<AchIcon icon={r.def.icon} scale={1} locked={!r.earned} hidden={r.hidden} />
+					<AchIcon icon={r.def.icon} scale={2} locked={!r.earned} hidden={r.hidden} />
 					<span className="ach-body">
 						<b className="ach-name">{r.name}</b>
 						<span className="ach-text">{r.text}</span>

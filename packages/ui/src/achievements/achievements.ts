@@ -40,14 +40,15 @@ const bondValues = (v: SimView): number[] => (v.soul ? Object.values(v.soul.bond
 type Check = Pick<AchievementDef, "when" | "check" | "icon">;
 
 const CHECKS: Readonly<Record<string, Check>> = {
-	end_lattice: { when: "gameOver", check: (v) => winEnding(v) === "singularity" },
-	end_flesh: { when: "gameOver", check: (v) => winEnding(v) === "flesh" },
-	end_garden: { when: "gameOver", check: (v) => winEnding(v) === "garden" },
-	end_absorbed: { when: "gameOver", check: (v) => v.gameOver?.kind === "absorbed" },
-	end_bankrupt: { when: "gameOver", check: (v) => v.gameOver?.kind === "bankrupt" },
-	lvl_five: { when: "dayClose", check: (v) => v.tier >= 5 },
-	rung_top: { when: "dayClose", check: (v) => !!v.soul && Object.values(v.soul.trees).some((t) => t.rung === 4) },
+	end_lattice: { icon: { sheet: "achievements", col: 0, row: 0 }, when: "gameOver", check: (v) => winEnding(v) === "singularity" },
+	end_flesh: { icon: { sheet: "achievements", col: 1, row: 0 }, when: "gameOver", check: (v) => winEnding(v) === "flesh" },
+	end_garden: { icon: { sheet: "achievements", col: 2, row: 0 }, when: "gameOver", check: (v) => winEnding(v) === "garden" },
+	end_absorbed: { icon: { sheet: "achievements", col: 3, row: 0 }, when: "gameOver", check: (v) => v.gameOver?.kind === "absorbed" },
+	end_bankrupt: { icon: { sheet: "achievements", col: 4, row: 0 }, when: "gameOver", check: (v) => v.gameOver?.kind === "bankrupt" },
+	lvl_five: { icon: { sheet: "achievements", col: 5, row: 0 }, when: "dayClose", check: (v) => v.tier >= 5 },
+	rung_top: { icon: { sheet: "achievements", col: 0, row: 1 }, when: "dayClose", check: (v) => !!v.soul && Object.values(v.soul.trees).some((t) => t.rung === 4) },
 	fast_win: {
+		icon: { sheet: "achievements", col: 1, row: 1 },
 		when: "gameOver",
 		check: (v) => {
 			const end = winEnding(v);
@@ -56,6 +57,7 @@ const CHECKS: Readonly<Record<string, Check>> = {
 		},
 	},
 	clean_hands: {
+		icon: { sheet: "achievements", col: 2, row: 1 },
 		when: "gameOver",
 		check: (v) => {
 			const end = winEnding(v);
@@ -63,21 +65,22 @@ const CHECKS: Readonly<Record<string, Check>> = {
 			return (end === "flesh" && v.soul.seal.biotech < 30) || (end === "garden" && v.soul.seal.greentech < 30);
 		},
 	},
-	open_hands: { when: "gameOver", check: (v) => winEnding(v) === "singularity" && !!v.soul && v.soul.seal.biotech < v.soul.sealMax && v.soul.seal.greentech < v.soul.sealMax },
-	cash_deep: { when: "dayClose", icon: "vault_bars", check: (v) => v.cash >= 10_000_000 },
-	books_clean: { when: "gameOver", check: (v, e) => v.gameOver?.kind === "victory" && v.loan.principal === 0 && v.cash >= e.startingCash },
+	open_hands: { icon: { sheet: "achievements", col: 3, row: 1 }, when: "gameOver", check: (v) => winEnding(v) === "singularity" && !!v.soul && v.soul.seal.biotech < v.soul.sealMax && v.soul.seal.greentech < v.soul.sealMax },
+	cash_deep: { when: "dayClose", icon: { sheet: "achievements", col: 4, row: 1 }, check: (v) => v.cash >= 10_000_000 },
+	books_clean: { icon: { sheet: "achievements", col: 5, row: 1 }, when: "gameOver", check: (v, e) => v.gameOver?.kind === "victory" && v.loan.principal === 0 && v.cash >= e.startingCash },
 	perfect_qtr: {
+		icon: { sheet: "achievements", col: 0, row: 2 },
 		when: "quarterReport",
 		check: (v) => {
 			const r = v.reports[v.reports.length - 1];
 			return !!r && r.grade === "A" && r.uptime >= 0.99;
 		},
 	},
-	calm_month: { when: "dayClose", check: (v) => v.uptimeStreak >= CALM_DAYS },
-	bond_close: { when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.max(...bondValues(v)) >= 50 },
-	bond_crew: { when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.min(...bondValues(v)) >= 40 },
-	les_done: { when: "lessonEnd", check: (_v, e) => e.lessonIds.length > 0 && e.lessonIds.every((id) => e.lessonsDone[id] !== undefined) },
-	heard_out: { when: "gameOver", check: (_v, e) => ADVISOR_KEYS.every((a) => e.profile.epilogues[a]) },
+	calm_month: { icon: { sheet: "achievements", col: 1, row: 2 }, when: "dayClose", check: (v) => v.uptimeStreak >= CALM_DAYS },
+	bond_close: { icon: { sheet: "achievements", col: 2, row: 2 }, when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.max(...bondValues(v)) >= 50 },
+	bond_crew: { icon: { sheet: "achievements", col: 3, row: 2 }, when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.min(...bondValues(v)) >= 40 },
+	les_done: { icon: { sheet: "achievements", col: 4, row: 2 }, when: "lessonEnd", check: (_v, e) => e.lessonIds.length > 0 && e.lessonIds.every((id) => e.lessonsDone[id] !== undefined) },
+	heard_out: { icon: { sheet: "achievements", col: 5, row: 2 }, when: "gameOver", check: (_v, e) => ADVISOR_KEYS.every((a) => e.profile.epilogues[a]) },
 };
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = achievementContent.achievements.map((t) => {

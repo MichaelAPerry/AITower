@@ -9,10 +9,24 @@
 .aitower-hud .ui-ach-sheet.is-locked {
 	filter: grayscale(1) brightness(0.55) contrast(0.8);
 }
-/* Hidden and still locked: a black silhouette with a "?" over it. */
+/* Hidden and still locked: a black plate (no hint of the picture) with a dim rim and a "?". The ::before covers the cell. */
 .aitower-hud .ui-ach-sheet.is-hidden {
 	position: relative;
-	filter: brightness(0) opacity(0.55);
+}
+.aitower-hud .ui-ach-sheet.is-hidden::before {
+	content: "?";
+	position: absolute;
+	inset: 0;
+	display: grid;
+	place-items: center;
+	box-sizing: border-box;
+	background: #05051e;
+	border: 2px solid #3a3a80;
+	color: #5a5aa8;
+	font-family: var(--f-display, monospace);
+	font-weight: 700;
+	line-height: 1;
+	font-size: calc(var(--ach-px, 48px) * 0.5);
 }
 
 .aitower-hud .ach-pane {
@@ -51,7 +65,7 @@
 }
 .aitower-hud .ach-row {
 	display: grid;
-	grid-template-columns: 24px 1fr auto;
+	grid-template-columns: 48px 1fr auto;
 	align-items: center;
 	gap: 10px;
 	padding: 4px 8px;
@@ -124,8 +138,9 @@
 .aitower-hud .ach-frame img {
 	display: block;
 	width: 100%;
-	aspect-ratio: 2 / 3;
+	aspect-ratio: 4 / 5;
 	object-fit: cover;
+	object-position: top;
 	image-rendering: pixelated;
 	background: #eef0ff;
 }
@@ -192,7 +207,7 @@
 		grid-template-columns: repeat(2, minmax(0, 1fr));
 	}
 	.aitower-hud .ach-row {
-		grid-template-columns: 24px 1fr;
+		grid-template-columns: 48px 1fr;
 	}
 	.aitower-hud .ach-when {
 		grid-column: 2;
@@ -212,4 +227,9 @@
 }
 .aitower-hud .ui-over-new {
 	margin: 10px 0;
+}
+
+/* The gallery is taller than the menu pane: keep the pane's scrollbar showing so the AFTER HOURS row is clearly one scroll away. */
+.aitower-hud .ui-menu-scroll:has(.ach-gallery) {
+	overflow-y: scroll;
 }

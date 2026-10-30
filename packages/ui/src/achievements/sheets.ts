@@ -1,9 +1,13 @@
+import achievementsSheet from "../art/achievement-icons.webp";
+
 /**
  * Image sprite sheets for achievement icons. An achievement row's `icon` may be `{ sheet, col, row }`: one cell of a grid image.
  * Register the sheet here when the owner supplies it (import the file and add an entry); nothing else changes.
  *
  *   import achievementsSheet from "../art/achievement-icons.webp";
  *   ICON_SHEETS.achievements = { url: achievementsSheet, cols: 6, rows: 3 };
+ *
+ * Make a sheet with `node tools/sprites/slice-sheet.mjs` (detects the plates, crops, downscales, packs a uniform atlas).
  *
  * Cells are equal; the cell is drawn at ICON_SIZE x scale pixels, crisp (pixelated). Locked and hidden looks are made from the
  * cell with CSS (ui.css `.ui-ach-sheet`): locked = dim grey, hidden = black silhouette with a "?".
@@ -15,8 +19,10 @@ export interface IconSheet {
 	rows: number;
 }
 
-/** No sheet is registered yet: every row without a code sprite shows the "?" plate. */
-export const ICON_SHEETS: Record<string, IconSheet | undefined> = {};
+/** The registered sheets. A row without an icon shows the "?" plate. */
+export const ICON_SHEETS: Record<string, IconSheet | undefined> = {
+	achievements: { url: achievementsSheet, cols: 6, rows: 3 },
+};
 
 export interface SheetCell {
 	sheet: string;

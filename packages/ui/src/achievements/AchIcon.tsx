@@ -21,7 +21,7 @@ export function AchIcon({ icon, scale = 2, locked = false, hidden = false, class
 		const style = sheetCellStyle(icon, px, sheets);
 		if (style) {
 			const state = locked ? (hidden ? "is-hidden" : "is-locked") : "";
-			return <span className={`${className ?? "ui-ach-icon"} ui-ach-sheet ${state}`.trim()} style={style} aria-hidden="true" data-icon={`${icon.sheet}:${icon.col},${icon.row}`} data-locked={locked || undefined} />;
+			return <span className={`${className ?? "ui-ach-icon"} ui-ach-sheet ${state}`.trim()} style={{ ...style, ["--ach-px" as string]: `${px}px` }} aria-hidden="true" data-icon={`${icon.sheet}:${icon.col},${icon.row}`} data-locked={locked || undefined} />;
 		}
 	}
 	const id = typeof icon === "string" ? icon : "";

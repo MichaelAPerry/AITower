@@ -75,8 +75,12 @@ describe("the table", () => {
 		for (const a of ACHIEVEMENTS) expect(a.name && a.text, a.id).toBeTruthy();
 	});
 
-	it("only Deep Pockets has a code sprite; the rest wait for the image sheet (placeholder plate)", () => {
-		expect(ACHIEVEMENTS.filter((a) => a.icon).map((a) => a.id)).toEqual(["cash_deep"]);
+	it("every row has a cell of the achievements sheet, each cell used once, all inside the grid", () => {
+		const sheet = ICON_SHEETS.achievements;
+		expect(sheet).toMatchObject({ cols: 6, rows: 3 });
+		const cells = ACHIEVEMENTS.map((a) => a.icon);
+		for (const c of cells) expect(c && typeof c === "object" && sheetCellStyle(c, 48), String(c)).not.toBeNull();
+		expect(new Set(cells.map((c) => JSON.stringify(c))).size).toBe(ACHIEVEMENTS.length);
 	});
 });
 
@@ -389,7 +393,6 @@ describe("achievement icons", () => {
 			expect(sheetCellStyle({ sheet: "achievements", col: 6, row: 0 }, 48, sheets)).toBeNull();
 			expect(sheetCellStyle({ sheet: "achievements", col: 0, row: -1 }, 48, sheets)).toBeNull();
 			expect(sheetCellStyle({ sheet: "achievements", col: 0.5, row: 0 }, 48, sheets)).toBeNull();
-			expect(ICON_SHEETS.achievements).toBeUndefined(); // no sheet shipped yet
 		});
 
 		it("renders the cell, with locked and hidden variants as CSS classes", () => {
