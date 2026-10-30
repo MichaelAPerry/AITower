@@ -11,6 +11,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ErrorBoundary } from "./ErrorBoundary";
 import { configureCrashOverlay, installGlobalErrorLogging } from "./crash";
+import { createInsetTracker } from "./insets";
 import { startLoop } from "./loop";
 import { createGameStore } from "./store";
 
@@ -70,6 +71,11 @@ async function boot() {
 	// Open on the starter rack row, nudged right so the build palette doesn't cover it.
 	renderer.focus({ x: 19, floor: 0 });
 	window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
+
+	// Let the camera pan the tower ends clear of whatever overlay covers that side.
+	const trackInsets = createInsetTracker((l, r) => renderer.setInsets?.(l, r));
+	window.setInterval(trackInsets, 200);
+	window.addEventListener("resize", trackInsets);
 
 	// Browsers only allow audio after a user gesture.
 	const unlockAudio = () => {

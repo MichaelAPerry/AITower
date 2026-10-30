@@ -7,6 +7,7 @@ import {
 	offset,
 	screenToCell,
 	screenToWorld,
+	sideMargin,
 	stepZoom,
 	worldToCell,
 	worldToScreen,
@@ -84,5 +85,35 @@ describe("camera", () => {
 		expect(far.cy).toBeGreaterThan(-400);
 		const ok = clampCamera(cam(384, 400, 2), grid);
 		expect(ok.cx).toBe(384);
+	});
+});
+
+describe("camera insets", () => {
+	const g = { width: 48, floorMin: -2, floorMax: 10 };
+	const w = 48 * TILE;
+	const leftEdgeX = (c: Camera) => worldToScreen(c, 0, 0).x;
+	const rightEdgeX = (c: Camera) => worldToScreen(c, w, 0).x;
+	for (const zoom of [1, 2, 3, 4]) {
+		it(`brings both tower ends clear of overlays at zoom ${zoom}`, () => {
+			const base = { zoom, vw: 1280, vh: 800, padL: 400, padR: 380 };
+			const l = clampCamera({ ...base, cx: -99999, cy: 300 }, g);
+			expect(leftEdgeX(l)).toBeGreaterThanOrEqual(400 + 24 - 1);
+			const r = clampCamera({ ...base, cx: 99999, cy: 300 }, g);
+			expect(rightEdgeX(r)).toBeLessThanOrEqual(1280 - 380 - 24 + 1);
+		});
+		it(`never loses the tower off screen at zoom ${zoom}`, () => {
+			const base = { zoom, vw: 800, vh: 600, padL: 5000, padR: 5000 };
+			expect(leftEdgeX(clampCamera({ ...base, cx: -99999, cy: 300 }, g))).toBeLessThan(800);
+			expect(rightEdgeX(clampCamera({ ...base, cx: 99999, cy: 300 }, g))).toBeGreaterThan(0);
+		});
+	}
+	it("without insets keeps the old world margin", () => {
+		const c = clampCamera(cam(-99999, 300, 2), g);
+		expect(leftEdgeX(c)).toBeCloseTo(12 * TILE * 2, 0);
+	});
+	it("sideMargin takes the larger of world margin and overlay, capped", () => {
+		expect(sideMargin(1, 1000, 300)).toBe(324);
+		expect(sideMargin(4, 1000, 0)).toBe(768);
+		expect(sideMargin(1, 1000, 9999)).toBe(800);
 	});
 });

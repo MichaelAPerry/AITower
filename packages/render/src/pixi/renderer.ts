@@ -571,6 +571,12 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 				if (grid) cam = clampCamera(cam, grid);
 			}
 		},
+		setInsets(left, right) {
+			const l = Math.max(0, Math.round(left));
+			const r = Math.max(0, Math.round(right));
+			if (l === (cam.padL ?? 0) && r === (cam.padR ?? 0)) return;
+			cam = { ...cam, padL: l, padR: r };
+		},
 		focus(cell) {
 			centreOn(cell);
 			if (titleScene) titleCx = cam.cx;

@@ -15,6 +15,9 @@ export interface Camera {
 	/** Viewport size in CSS pixels. */
 	vw: number;
 	vh: number;
+	/** Screen px at the left/right edge covered by UI overlays (palette, inspector, tabs). The tower may be panned clear of them. */
+	padL?: number;
+	padR?: number;
 }
 
 export interface GridDims {
@@ -74,6 +77,18 @@ export const cellCenter = (grid: GridDims, cell: CellRef): Vec => ({
 	y: floorTop(grid, cell.floor) + FLOOR_H / 2,
 });
 
+/** Breathing room (screen px) between the tower end and an overlay edge. */
+export const PAN_CLEAR = 24;
+
+/**
+ * Screen-pixel slack past a tower end: the fixed world margin, or enough to bring the end clear of the overlay on
+ * that side, whichever is larger. Capped so the tower can never leave the screen entirely.
+ */
+export const sideMargin = (zoom: number, vw: number, pad = 0): number => {
+	const want = Math.max(MARGIN_X * zoom, pad > 0 ? pad + PAN_CLEAR : 0);
+	return Math.min(want, vw * 0.8);
+};
+
 /** Keep the camera centre within the world bounds plus margin. */
 export const clampCamera = (cam: Camera, grid: GridDims): Camera => {
 	const { w, h } = worldSize(grid);
@@ -84,9 +99,11 @@ export const clampCamera = (cam: Camera, grid: GridDims): Camera => {
 		if (hi - lo <= half * 2) return (lo + hi) / 2;
 		return Math.min(Math.max(c, lo + half), hi - half);
 	};
+	const mL = sideMargin(cam.zoom, cam.vw, cam.padL) / cam.zoom;
+	const mR = sideMargin(cam.zoom, cam.vw, cam.padR) / cam.zoom;
 	return {
 		...cam,
-		cx: clampAxis(cam.cx, -MARGIN_X, w + MARGIN_X, halfW),
+		cx: clampAxis(cam.cx, -mL, w + mR, halfW),
 		cy: clampAxis(cam.cy, -MARGIN_TOP, h + MARGIN_BOTTOM, halfH),
 	};
 };

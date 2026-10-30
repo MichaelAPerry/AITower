@@ -136,6 +136,8 @@ export interface Renderer {
 	setSelection(sel: Selection): void;
 	/** Centre the camera on a cell. */
 	focus(cell: CellRef): void;
+	/** Screen px at the left and right edges covered by UI overlays; the camera may pan the tower ends clear of them. */
+	setInsets?(left: number, right: number): void;
 	/** Title screen backdrop: pan slowly and cycle day and night over the loaded game (a still frame under reduced motion). Never touches the sim. */
 	setTitleScene?(on: boolean): void;
 	onPointer(cb: (e: CellPointerEvent) => void): () => void;
