@@ -493,6 +493,8 @@ export interface Scenario {
 	sandbox?: boolean;
 	/** A lesson scenario: the id of the `LessonDef` this site runs (it never appears in the Free Build picker). */
 	lesson?: string;
+	/** Tech already researched when the site opens (lessons that start mid-game). */
+	researched?: string[];
 }
 
 // ─── Lessons (M6.4) ───────────────────────────────────────────────────
@@ -519,7 +521,41 @@ export type LessonMetric =
 	| "uptime"
 	| "cash"
 	| "pflops"
-	| "day";
+	| "day"
+	/** Air handlers, chillers and coolant units standing. */
+	| "coolers"
+	/** Storage arrays and tape libraries standing. */
+	| "storageRacks"
+	/** Jobs queued, running or stalled (accepted and not finished). */
+	| "jobsLive"
+	/** Jobs stalled for want of storage. */
+	| "jobsStalled"
+	/** Jobs finished and paid since the lesson began. */
+	| "jobsDone"
+	/** Contract offers waiting on the board. */
+	| "offers"
+	/** Spare parts in the depots. */
+	| "parts"
+	/** Maintenance bots. */
+	| "bots"
+	/** Tech nodes researched. */
+	| "techs"
+	/** Research points on hand. */
+	| "rp"
+	/** The Level (tier). */
+	| "tier"
+	/** 1 when the Foreman is switched on. */
+	| "foreman"
+	/** Racks retrofitted down a tree. */
+	| "treeRacks"
+	/** Power Usage Effectiveness, as the sim computes it (0 until something runs). */
+	| "pue"
+	/** Solar panels and wind masts standing. */
+	| "cleanPower"
+	/** Green Singularity points banked. */
+	| "greenSp"
+	/** Lesson prompts the player has acknowledged in the UI (a panel opened). Counts the "les:" tips. */
+	| "tips";
 export type LessonOp = ">=" | ">" | "<=" | "<";
 export interface LessonCond {
 	metric: LessonMetric;
@@ -533,7 +569,11 @@ export type LessonEffect =
 	/** The grid import is scaled by `factor` for `durationTicks` (0 = a tripped feeder). */
 	| { type: "gridCap"; factor: number; durationTicks: number; label: string }
 	/** Component failures are scaled by `factor` for `durationTicks` (0 = nothing breaks). */
-	| { type: "failureRate"; factor: number; durationTicks: number; label: string };
+	| { type: "failureRate"; factor: number; durationTicks: number; label: string }
+	/** A contract offer appears on the board (a client the lesson picks; the player still accepts it). `storageTB` > 0 makes it a training job that needs storage. */
+	| { type: "offer"; kind: "inference" | "training"; pflops: number; durationTicks: number; payout: number; storageTB?: number; workPfh?: number; client?: string }
+	/** Research points are handed over. */
+	| { type: "rp"; amount: number };
 /** A scripted moment: fires once, the first tick every `when` holds. */
 export interface LessonBeat {
 	id: string;
@@ -558,6 +598,18 @@ export interface LessonStep {
 	afterBeat?: string;
 	/** The overlay to switch on when this step begins. */
 	overlay?: "normal" | "heat" | "power" | "coolant";
+	/** Who speaks this step's lines, when it is not the lesson's own advisor. */
+	advisor?: AdvisorId;
+	/** Drawers (tabs on the screen edge) the player may open from this step on: "contracts", "research", "automation", "insights". The Handbook is always open. */
+	drawers?: string[];
+	/** The Supplies tab (spare parts, bots) is open from this step on. */
+	supplies?: boolean;
+	/** While this step is current, opening this panel counts as the step's action: the UI marks the tip `les:<step id>` (metric `tips`). */
+	panel?: "trees";
+	/** Pan the camera here while this step is current (a rack to click, say). */
+	focus?: { floor: number; x: number };
+	/** Extra things to pulse while this step is current: CSS selectors inside the HUD (e.g. `[data-tut="dtab-contracts"]`). */
+	pulse?: string[];
 	/** Pause the clock while the teacher talks (the player presses Continue). */
 	pause?: boolean;
 	/** Handbook article for the "?" chip on the checklist. */
@@ -586,6 +638,16 @@ export interface LessonDef {
 	setup?: LessonEffect[];
 	/** Command types the player may issue; any other is refused ("Not part of this lesson"). */
 	commands: string[];
+	/** Tech ids the player may research (any other is refused). Absent = research is not part of the lesson. */
+	research?: string[];
+	/** The goal bar shows the power meter (load, capacity, headroom). */
+	meter?: boolean;
+	/** Label for the success-hold bar in the goal bar (e.g. "hours running"); absent = no bar. */
+	holdLabel?: string;
+	/** False: no stars; finishing is the reward. Default true. */
+	starred?: boolean;
+	/** The result screen's "Passed" line. */
+	passed?: string;
 	steps: LessonStep[];
 	beats: LessonBeat[];
 	/** Success: all hold, continuously, for `holdTicks`. */
@@ -597,8 +659,6 @@ export interface LessonDef {
 	learned: string;
 	/** Handbook article ids linked from the result screen. */
 	handbook: string[];
-	/** Title of the next lesson, or absent for the last available. */
-	next?: string;
 	/** Free Build starting-cash bonus the first time it is completed, $. */
 	bonus: number;
 	/** Teacher's closing line on the result screen. */

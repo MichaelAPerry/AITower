@@ -98,7 +98,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		lastIssuedDay: {},
 		gameOver: null,
 		researchPoints: 0,
-		techResearched: [],
+		techResearched: [...(sc.researched ?? [])],
 		clerkPolicy: defaultClerkPolicy(),
 		clerkAccepted: 0,
 		loanPrincipal: 0,

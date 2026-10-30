@@ -109,50 +109,48 @@ async function run(url) {
 		assert((await page.getByText("Restart tutorial").count()) === 0 && (await page.locator(".ui-coach").count()) === 0, "the old tutorial is gone");
 		await page.getByRole("button", { name: /START LESSON 1/ }).click();
 		await page.locator("[data-lesson-goal]").waitFor();
-		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });
+		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { id: l.id, status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });
 		const ls = await lessonState();
-		assert(ls && ls.status === "active" && ls.speed === 0, `the lesson starts paused: ${JSON.stringify(ls)}`);
-		assert(ls.cap === 120 && ls.load === 53, `the goal bar reads load 53 of capacity 120 kW: ${JSON.stringify(ls)}`);
-		assert((await page.locator("[data-lesson-steps] li").count()) === 4, "four checklist steps");
+		assert(ls && ls.id === "first_watt" && ls.status === "active" && ls.speed === 0, `the lesson starts paused: ${JSON.stringify(ls)}`);
+		assert(ls.cap === 0 && ls.done.length === 0 && ls.allowed.length === 1 && ls.allowed[0] === "rack_air_gpu", `an empty hall with only the rack allowed: ${JSON.stringify(ls)}`);
+		assert((await page.locator("[data-lesson-steps] li").count()) === 5, "five checklist steps");
 		assert((await page.locator(".ui-goals, .ui-next-btn").count()) === 0, "no Goals card or NEXT chip during a lesson (calm)");
 		assert((await page.locator(".ui-dtab").count()) === 1, "only the Handbook tab is shown during the lesson");
-		const talk = async () => { // Bea's lines: press Next / Got it until she has nothing left to say
-			for (let i = 0; i < 6 && (await page.locator("[data-lesson-continue]").count()) > 0; i++) {
+		const talk = async () => { // the teacher's lines: press Next / Got it until nothing is left to say
+			for (let i = 0; i < 8 && (await page.locator("[data-lesson-continue]").count()) > 0; i++) {
 				await page.locator("[data-lesson-continue]").click();
 				await page.waitForTimeout(150);
 			}
 		};
 		await talk();
 		assert((await lessonState()).speed === 3, "the clock starts when Bea has finished her first lines");
-		// Nothing else is selectable: one category, one card, and the sim refuses the rest.
 		assert((await page.locator(".bld-bar .bld-cat").count()) === 1, "only the Racks category is shown at first");
 		await page.locator('[data-tut="cat-rack"]').click();
 		assert((await page.locator(".bld-catalog .bld-card, .bld-catalog [data-tut^=card-]").count()) === 1, "one rack card in the catalog");
-		const refused = await game(() => window.aitower.store.dispatch({ type: "place", defId: "genset", floor: -1, x: 12 }));
-		assert(!refused.ok, "the generator is refused before its step");
+		const refused = await game(() => window.aitower.store.dispatch({ type: "place", defId: "grid_tie", floor: -1, x: 6 }));
+		assert(!refused.ok, "the grid intake is refused before its step");
 		await page.keyboard.press("Escape");
 		const place = (defId, floor, x) => game((c) => window.aitower.store.dispatch(c), { type: "place", defId, floor, x });
 		const waitStep = (id) => page.waitForFunction((i) => window.aitower.store.get().view.lesson.stepsDone.includes(i), id, { timeout: 30_000 });
 		assert((await place("rack_air_gpu", 1, 11)).ok, "first rack on the glowing slot");
-		await waitStep("rack1");
-		await page.locator("[data-lesson-continue]").waitFor();
-		assert((await lessonState()).speed === 0, "the clock stops while Bea explains kW");
-		await talk();
-		assert((await place("rack_air_gpu", 1, 15)).ok, "second rack");
-		await waitStep("rack2");
-		await page.waitForFunction(() => window.aitower.store.get().view.lesson.beatsFired.includes("trip"), null, { timeout: 30_000 });
+		await waitStep("rack");
 		await page.locator("[data-lesson-continue]").waitFor();
 		await talk();
-		await page.waitForFunction(() => window.aitower.store.get().overlay === "power"); // the power overlay lights up for the generator step
-		assert((await place("genset", -1, 12)).ok, "the generator, now allowed");
-		await waitStep("genset");
+		assert((await place("grid_tie", -1, 6)).ok, "the grid intake, now allowed");
+		await waitStep("power");
+		await page.locator("[data-lesson-continue]").waitFor();
+		await talk();
+		assert((await lessonState()).cap === 1500, "the goal bar reads 1,500 kW of capacity");
+		assert((await place("crah_unit", 1, 8)).ok, "the air handler, now allowed");
+		await waitStep("cool");
+		await talk();
+		await page.waitForFunction(() => window.aitower.store.get().view.lesson.beatsFired.includes("job"), null, { timeout: 30_000 });
 		await talk();
 		await game(() => window.aitower.store.setSpeed(30));
 		await page.locator("[data-lesson-result]").waitFor({ timeout: 90_000 });
 		const won = await lessonState();
 		assert(won.status === "won", `the lesson is won: ${JSON.stringify(won)}`);
-		const stars = await game(() => window.aitower.store.get().view.lesson.stars);
-		assert(stars >= 1 && (await page.locator(".les-stars b.is-on").count()) === stars, "the result screen shows the stars the sim awarded");
+		assert((await page.locator(".les-stars").count()) === 0, "Lesson 1 gives no stars");
 		assert(/learned/i.test(await page.locator("[data-lesson-result]").innerText()), "the result has a one-line 'what you learned'");
 		const progress = await game(() => JSON.parse(localStorage.getItem("aitower.lessons.v1") ?? "{}"));
 		assert(progress.done?.first_watt >= 1, `completion is persisted: ${JSON.stringify(progress)}`);
@@ -161,9 +159,28 @@ async function run(url) {
 		await page.locator('[data-chapter-view="ch:power"]').waitFor();
 		await page.keyboard.press("Escape");
 		await page.locator("[data-drawer]").waitFor({ state: "detached" });
-		log(`lesson 1 won with ${stars} stars; Handbook opened on the Power chapter from the result; progress saved`);
-		await page.locator("[data-lesson-freebuild]").click();
-		await page.waitForFunction(() => window.aitower.store.get().view.lesson === null);
+		log("lesson 1 won; Handbook opened on the Power chapter from the result; progress saved");
+		await page.locator("[data-lesson-next]").click();
+		await page.waitForFunction(() => window.aitower.store.get().view.lesson?.id === "earn_your_keep");
+		assert((await lessonState()).status === "active", "Next lesson starts Lesson 2");
+		log("Next lesson started Lesson 2");
+		// Lesson 4 from the lesson list: the Trees-panel step completes when the panel is opened.
+		await page.goto(url, { waitUntil: "load" });
+		await ready();
+		await page.getByRole("button", { name: /LESSONS/ }).click();
+		await page.locator('[data-start-lesson="the_three_trees"]').click();
+		await page.locator("[data-lesson-goal]").waitFor();
+		await talk();
+		const base = await game(() => window.aitower.store.get().view.facilities.find((f) => f.defId === "rack_air_gpu").id);
+		assert((await game((id) => window.aitower.store.dispatch({ type: "retrofit", facilityId: id, tree: "greentech" }), base)).ok, "retrofit a rack to Green");
+		await waitStep("retrofit");
+		await talk();
+		await page.locator(".soul-gauge").first().click();
+		await waitStep("trees");
+		log("opening the Trees panel completed its lesson step");
+		// Free Build after the lessons carries the bonus.
+		await page.goto(`${url}?new&seed=${SEED}`, { waitUntil: "load" });
+		await ready();
 		const bonus = await game(() => window.aitower.store.get().view.cash);
 		assert(bonus > 3_040_000 && bonus <= 3_050_000, `Free Build starts with the lesson bonus (+$50k): $${bonus}`);
 		log("Free Build after the lesson starts with $3.05M");

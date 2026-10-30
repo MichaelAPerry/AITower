@@ -49,6 +49,12 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 - A pairwise merge-tree of the three code branches shows no conflicts, but they were never tested combined.
 - **Pending owner approvals:** sprite previews, `ENDING_PROMPTS.md`, `OFF_DUTY.md`, and optionally a lesson text sample.
 
+### Next, in order
+1. Owner playtest; fix bugs first.
+2. **Art from the owner** (requested only after scenes exist): rack sprites (`docs/TREES.md` section 7), mid-game scene backgrounds and "tender" expressions (`docs/VN_WRITING.md`, "Dating systems as built"). Placeholders are tinted existing sprites and the plain indigo stage.
+3. Simplified items to finish: Bea's microgrid has no storage; Cass's ice store doesn't time-shift.
+4. ~~Lessons 2+ for the new loop~~ done on `wip/lessons`: Build, Earn, Grow, The trees (scripted in `sim/src/lessons.test.ts`).
+
 ## Next session: owner art and dialogue
 The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening message: `docs/NEXT_PROMPT.md`.
 

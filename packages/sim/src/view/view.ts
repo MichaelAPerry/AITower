@@ -3,7 +3,7 @@
  * entity arrays are rebuilt small each call.
  */
 import { type AscensionPath, type BotDef, type ContentDB, type SceneLine, SEALED_TREES, treeOf, TREES } from "@aitower/content";
-import { currentStepIndex, lessonAllowed, lessonMetrics } from "../lesson/lesson";
+import { currentStepIndex, lessonAllowed, lessonDrawers, lessonMetrics, lessonSupplies } from "../lesson/lesson";
 import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, TreeView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
@@ -42,6 +42,9 @@ function lessonView(state: SimState, content: ContentDB): LessonView | null {
 		downTicks: ls.downTicks,
 		stars: ls.stars,
 		allowed: ls.status === "active" ? lessonAllowed(def, ls) : [],
+		pue: m.pue,
+		drawers: ls.status === "active" ? lessonDrawers(def, ls) : [],
+		supplies: ls.status === "active" && lessonSupplies(def, ls),
 		loadKw: m.demandKw,
 		capacityKw: m.supplyKw,
 		headroomPct: m.headroomPct,
