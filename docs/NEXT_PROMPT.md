@@ -1,9 +1,11 @@
-Work on branch `claude/youthful-ramanujan-msqcy9` of AITower. Read HANDOFF.md first: section 0, "State on Oct 30" and "Next session: owner art and dialogue".
+Work on branch `claude/youthful-ramanujan-msqcy9` of AITower. Read HANDOFF.md sections 1 to 4 only (the rest is in docs/HANDOFF_ARCHIVE.md if you need it).
 
-Rules: you (Opus) coordinate only. Sonnet builds and writes, Haiku verifies. One worktree agent per task. Never run `tsc -b`. Show me one sample (one image, one dialogue scene) before doing the rest. Keep your messages to me short and plain.
+Rules: you (Opus) coordinate only. Sonnet builds and writes, Haiku verifies. One worktree agent per task. Never run `tsc -b`. Show me one sample before doing the rest. Keep your messages to me short and plain.
 
-I will attach new art (images) and my rewritten docs/DIALOGUE.md in this chat. Copy them into the right place, convert images to .webp, and ask before committing any original over 1 MB.
+First, ask me for my play-test findings on the build I was given. Wait for my answer.
 
-Start by telling me two things: (1) what is awaiting my approval (sprite previews, ending prompts, off-duty doc, lesson text), and (2) which art slots are still empty. Then wait for my verdicts before merging anything.
-
-Push to main (the live site) only when check, build, e2e and budget all pass. I play each build before the next big change.
+Then the order of work:
+1. Fix the bugs I report. Push to main only when check, build, e2e and budget pass and I say so.
+2. Import my edited docs/DIALOGUE_NEW.md (dry-run first).
+3. Build achievements and the gallery from docs/ACHIEVEMENTS.md. Show me one unlock in the game first.
+4. Plan the missing lessons and propose a lesson list to me before writing any.
