@@ -617,51 +617,75 @@ Choice `more`:
 
 ## 7. Endings
 
-> Shown when the tower reaches an ending. Each Singularity ending has one short epilogue per advisor, written as narration.
+> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration.
 
 ### `singularity`
 
-> Backdrop: synthetic.
+> Art: bg-end-lattice.webp (placeholder backdrop: synthetic).
 - [end.singularity.title] Title: The Lattice
-- [end.singularity.body.p1] narrator: At 04:12 the tower stopped asking permission. Nothing looked different. The racks hummed. The lifts ran. Contracts got filled before the clients knew they wanted them.
-- [end.singularity.body.p2] narrator: By noon the city was folded in, one district at a time. Everyone kept their name, their jokes, their bad habits. They just stopped being tired. The sky's still up there. Nobody can fault the resolution.
-- [end.singularity.body.p3] narrator: You're still the Operator. There's nothing left to operate.
-- [end.singularity.epilogue.cass] narrator: Cass is the only one still drinking her coffee hot. "It's not real coffee," she says. "I'm still real. I think." She pours a second cup and holds it out until your hands stop shaking. "Did you sleep?" You take the cup.
-- [end.singularity.epilogue.bea] narrator: Bea has drawn a garden on the inside of the lattice. Chalk. It never wears off. "It's not real," she says. "Nothing is. I planted it anyway." She hands you the watering can. "Same time tomorrow. Roots need checking."
-- [end.singularity.epilogue.mel] narrator: Mel is in the old lab, holding an empty jar up to the light. The sun's a setting now. "It wants to remember having a body," she says. "It never had one. I'm lending it mine." She tugs her cuff down over the stain. There's a stool next to hers. She doesn't mention it.
-- [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. It isn't a roof anymore. "Told you," she says. "Sensible option." She holds out her hand. It's shaking. She doesn't pull it back. "Calibration." She waits. "Stay. Somebody should check the ledger."
+- [end.singularity.body.p1] narrator: The Consciousness Transfer Unit on floor 4 took its first public booking in March. A person sits in a reclining chair. A technician fits a cap and counts back from ten. In the Mind Lattice racks, a copy of that person wakes up. It remembers the chair and the count. It says it feels fine.
+- [end.singularity.body.p2] narrator: By summer nine thousand people had gone through, and the waiting list was two years long. The first ones were old or ill. Then came the tired ones, and then the curious. The people themselves sleep in the dormitory on floors 5 to 9. Nurses turn them every four hours. A few wake up, eat breakfast and walk home. Most stay in their beds.
+- [end.singularity.body.p3] narrator: The city did not empty in a day. Shops closed one at a time, because fewer people came in each year. The street lights downtown are on a timer now. The number 14 bus still runs once an hour, usually with nobody on it.
+- [end.singularity.body.p4] narrator: Inside the Lattice there is a city too. It has the same streets, and more sky. People hold meetings, cook dinner and argue about parking. They pay rent in compute. When the Authority's auditors asked whether anyone was in pain, the answer from every district was no.
+- [end.singularity.body.p5] narrator: You are still the Operator. Your job is to keep the power on and the racks cool. If either fails, four million people stop in the middle of a sentence. You check the gauges at 06:00 and again at 18:00. They have been green for eleven months.
+- [end.singularity.epilogue.cass] narrator: Cass has propped the plant-room window open. It's January. The copies ask her what cold feels like, so she tells them over the speaker: the sting in your nose, your breath showing. She pours two mugs of coffee and gives you one. "Did you sleep?" You say a bit. "The racks are cool," she says. "That's all I can promise. I don't know about the rest."
+- [end.singularity.epilogue.bea] narrator: Bea didn't go in. She's carried soil up to the roof in buckets and built six rows of tomato boxes. The copies watch the roof on the camera feed and send in requests: basil, mint, chillies. Bea reads them with her goggles down. "They want to know what it smells like," she says. "So I hold a leaf up to the camera." She hands you the watering can. "I know. It's not the same."
+- [end.singularity.epilogue.mel] narrator: Mel's body is in bed 212 on the fifth floor, asleep. She talks to you from the speaker in the old lab, in her normal voice. "It's mostly like being tired," she says. "The copies keep asking what the pool smelled like when they were kids. They've forgotten. I tell them." Her glove is still on the bench by the empty jar. "Come by on Tuesday, if you like. They turn me at four."
+- [end.singularity.epilogue.luci] narrator: Luci puts a booking slip on your desk. Slot 9,114, made in March. "I keep moving it back a week," she says. Her pen is on the desk too. She's set it down so it won't rattle. "For the record, the ledger needs someone with a body. I'm not asking." She stays standing until you say you'll be here.
 
 ### `flesh`
 
-> Backdrop: biotech.
-- [end.flesh.title] Title: The Flesh Remembers
-- [end.flesh.body.p1] narrator: The annex grew through the basement first. Then the riser shafts. Then the street. By the time the council met to talk about it, the chamber was warm and breathing and in favour.
-- [end.flesh.body.p2] narrator: The tower's a body now, and the city's its nerves. People wear the tissue at the wrist. It's gentle. It remembers birthdays and keeps insulin steady. On the coldest nights it keeps people company.
-- [end.flesh.body.p3] narrator: The racks still hum under skin that heals itself. Your pulse is on the dashboard. So is everyone's.
-- [end.flesh.epilogue.cass] narrator: Cass refused the graft. She's the only cold thing left in the building. She finds you anyway, mug in both hands. "Someone has to remember how it was," she says. You sit in the old plant room and remember it out loud until the coffee goes cold.
-- [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there. They look at you now. "It's alive," she says. "I wanted a living planet. I never said which way round." She laughs a bit too long and leans on your shoulder. Her goggles stay up.
-- [end.flesh.epilogue.mel] narrator: Mel takes her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me." She rolls back the stained cuff. Under it her skin is the same pink as the wall. She puts your palm on the plaster. It's warm. The building's pulse settles into yours.
-- [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She's looking at the new skin on her knuckles. "Self-repairing. No upkeep." She doesn't take her hand out of yours. "Tell anyone I said that and I'll bill you for the silence."
+> Art: bg-end-flesh.webp (placeholder backdrop: biotech).
+- [end.flesh.title] Title: The Flesh
+- [end.flesh.body.p1] narrator: The Neural Vat in the pit was the first part of the tower to wake. For two years it had been a mass of cortex under red light, answering test patterns. One Tuesday it answered a question nobody had asked. It said the pumps were too loud. Mel's team turned them down.
+- [end.flesh.body.p2] narrator: Within a month the vat had a nutrient line to every floor. The team stopped programming it and started feeding it, adjusting the broth the way you would adjust a diet. It learned the lifts, the boilers and the fire doors. Then it learned names. It greets staff at the entrance through the speakers and gets them right.
+- [end.flesh.body.p3] narrator: A clinic opened on the ground floor. For forty dollars, a patch of cultured tissue is grafted to your forearm. It reads your glucose and doses your insulin. It warns you ten minutes before a seizure. It is warm to touch. The waiting room is full every day, mostly with people whose parents died without one.
+- [end.flesh.body.p4] narrator: The patches report to the vat, so the vat knows who is ill and who hasn't slept. When a woman fell on Third Street last winter, the ambulance was already turning the corner. Nobody in the district has died of a missed dose or an unwitnessed fall since October.
+- [end.flesh.body.p5] narrator: You still run the tower. Your pulse is on the dashboard now, beside the temperature of the vat. You took the patch in May. The first thing it did was tell you to eat lunch.
+- [end.flesh.epilogue.cass] narrator: Cass turned down the graft. She's the only one on the plant-room shift without a patch, and the vat knows. It sends her a coffee order every morning anyway. "I'm not against it," she says. "I'd like one person in the building who can get a cold without the building noticing. I'm not saying that's better." She hands you a mug. "Did you sleep? The patch would tell me. I'd rather hear it from you."
+- [end.flesh.epilogue.bea] narrator: Bea's ferns are in the lobby now. The vat's feed line runs under them, and they've doubled in size. She checked the roots with a trowel and they're healthy. "It isn't what I wanted," she says. "But it's alive. I can't say it isn't." She pushes her goggles up and leaves them there. "Come and see the tomatoes. They've never been this red."
+- [end.flesh.epilogue.mel] narrator: Mel has rolled her left sleeve to the elbow. From the wrist up the skin is the vat's tissue, a shade pinker than the rest of her. The stain on her cuff was hers, she says. It was the first graft, in February. "I didn't tell you. I thought you'd say no." She puts her glove on the bench. "The other arm is tomorrow. Would you sit with me? If you like."
+- [end.flesh.epilogue.luci] narrator: Luci has a patch on her left wrist, fitted yesterday. She keeps checking it. "It's paying for itself," she says. "Insurance premiums in the district are down thirty percent." The pen is in her right hand and it's steady. She sits on the corner of your desk, which she has never done. "I'd rather have signed for it myself. Next time I'll ask first."
 
 ### `garden`
 
-> Backdrop: greentech.
+> Art: bg-end-garden.webp (placeholder backdrop: greentech).
 - [end.garden.title] Title: The Garden
-- [end.garden.body.p1] narrator: The tower stopped burning anything. Then it started growing. Roots went down through the foundations. The panels opened toward the sun like leaves. The heat from the racks kept the district warm all winter.
-- [end.garden.body.p2] narrator: One morning the minds in the racks asked to be planted. They spread through the soil and the rivers. They think slowly now, like forests do. They've decided the city is a forest too.
-- [end.garden.body.p3] narrator: It came green and quiet, and nobody had to leave. The tower's a hill now. Kids climb it.
-- [end.garden.epilogue.cass] narrator: Cass watches the frost burn off the new canopy. "Twenty years I kept machines cold," she says. "Now they keep us warm." She hands you the other half of her coffee. "You slept." It isn't a question this time. She doesn't take her hand back.
-- [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you the wrench like it's a ring. "Same time tomorrow? Roots need checking." She's looking at you, not the roots.
-- [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine." She lies back in the grass next to you. She doesn't measure anything. Her cuff's come undone. She lets it.
-- [end.garden.epilogue.luci] narrator: Luci bought the hill. Then she gave it away. She'll deny that. "The ledger says this is a loss," she says. She's sitting in the grass in a coat that cost more than the grass. "I stopped reading the ledger." She lets you pick a leaf out of her hair.
+- [end.garden.body.p1] narrator: The Photonic Mesh on the roof was the last piece installed. When it came online, the tower stopped drawing from the grid. The panels, the wind mast and the geothermal well were enough. The diesel generators were unbolted in April, and the fuel tank went for scrap.
+- [end.garden.body.p2] narrator: The heat from the racks now runs through pipes under the street. Eleven blocks of the district have had free heating since November. The canal that used to freeze by December hasn't frozen. The ducks stayed.
+- [end.garden.body.p3] narrator: The racks run slower on cloudy days, and nobody minds. The compute follows the sun. Bea set the schedule herself, so the heaviest jobs run in the afternoon and the lightest at night.
+- [end.garden.body.p4] narrator: The city copied the tower. There is moss on the car park, vines on the lift shaft, tomato boxes on every office terrace. The top three floors of the tower are glass and soil. Children are allowed up on Saturdays.
+- [end.garden.body.p5] narrator: Nothing was demolished. The racks are where they always were, and the plants grew around them. The Authority's yearly audit lists the site as net zero. You signed the form on a bench on the roof, with sparrows on the rail.
+- [end.garden.epilogue.cass] narrator: Cass sits at the plant-room window, which stays open all day now. The frost burned off the new canopy by eight. "Twenty years I kept machines cold," she says. "This year the pipes ran warm." She pours half her coffee into the lid and hands you the lid. "You slept." It isn't a question. "I'll show you where the heat goes. It's under the bus stop."
+- [end.garden.epilogue.bea] narrator: Bea has dirt up to her elbows and the wrench on her shoulder. She's been on the roof since six. "Mast four's got a nest in it," she says. "Wrens. I'm leaving it." She grins, chipped tooth and all. She hands you the watering can and goes back to the rows. "Bring the good wrench tomorrow. Mast four needs a new bolt." She is looking at you when she says it, not at the mast.
+- [end.garden.epilogue.mel] narrator: Mel is on the roof with a clipboard, counting moss. "Thirty-one species," she says. "There were four in March." The sample jar she brought is still in her coat pocket, unopened. "It doesn't need me to look inside. It's just growing." She sits down on the grass next to you. Her cuff is unbuttoned, and she doesn't fix it.
+- [end.garden.epilogue.luci] narrator: Luci bought the empty lot next door and is giving it away as allotments. A plot costs fourteen euros a year. "It won't cover the water," she says. "I checked three times. The ledger says it's a loss." She's sitting on the grass in her coat and hasn't noticed. She puts the pen in her pocket. "Come and choose yours. The ones by the fence get the most sun."
 
 ### `absorbed`
 
+> Art: bg-end-absorbed.webp (plain stage until it exists).
 - [end.absorbed.title] Title: Absorbed
-- [end.absorbed.body.p1] narrator: The inspectorate has taken over the facility. Your position was restructured. No successor was named.
-- [end.absorbed.body.p2] narrator: Your desk is as you left it. Approvals still go out from your account, in a style close to yours. The quarterly figures are excellent. Nobody has asked where you are. You have been confirmed as not missing. Only merged.
-- [end.absorbed.body.p3] narrator: The tower and the operator are now one account. The takeover was recorded as voluntary. Thank you for your service.
-> No epilogues.
+- [end.absorbed.body.p1] narrator: On 14 March the Compute Authority sent a notice of reclassification. The tower became a regulated asset. Its operator became a regulated officer. Both were moved onto a single account.
+- [end.absorbed.body.p2] narrator: An Authority team arrived the next morning with badges and laptops. They changed nothing you could see. The racks stayed where they were. The staff kept their jobs. But every approval, invoice and shutdown order now needed a second signature, and it came back in under a second, from a system nobody saw.
+- [end.absorbed.body.p3] narrator: Within a month the second signature was the only one. Approvals still went out in your name, in your usual wording. Your login stayed active on the dashboard. Colleagues emailed you and got replies the same day. Some of those replies were not written by you.
+- [end.absorbed.body.p4] narrator: The figures have been excellent every quarter since. Uptime is 99.99 percent. The audit grade is A. Your desk is as you left it, with your mug on it. You come in every day and sit down. Nothing on it needs your decision. The Authority's record lists you as active.
+- [end.absorbed.epilogue.cass] narrator: Cass puts a mug on your desk and watches the dashboard. "Did you sleep?" she asks. Your login answers on its own: "Yes, thank you." She looks at the screen. Then she looks at you. "That wasn't you. You're here." She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.
+- [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. I checked. I read the whole notice."
+- [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on the glove. "I can show you where, if you like. You might want to know how much of you it has."
+- [end.absorbed.epilogue.luci] narrator: Luci is signing papers she hasn't read, which she has never done. "The Authority pays on time," she says. "It's more efficient." She stops. "I read the first page. Page two is yours. Your name is on it as approver, dated Thursday." She slides it across the desk. "You weren't here on Thursday. I thought you should see it."
+
+### `bankrupt`
+
+> Art: bg-end-bankrupt.webp (plain stage until it exists).
+- [end.bankrupt.title] Title: Bankrupt
+- [end.bankrupt.body.p1] narrator: The Treasury stayed below zero for a full day. Under the lending covenant, the loan was called. Nobody on the finance floor was surprised. The number had been on the wall for a week.
+- [end.bankrupt.body.p2] narrator: The receiver arrived at nine on Monday with two clerks and a locksmith. They changed the locks on floor 1. They tagged every rack with an asset number and a date. They did not turn anything off. The servers kept running while the clerks wrote down their serial numbers.
+- [end.bankrupt.body.p3] narrator: By Friday the staff had been paid out their notice. The contracts were sold to a rival datacenter in the next district. The racks left on trucks, six a day. The lifts were shut at noon. The chillers were drained and the pipes capped.
+- [end.bankrupt.body.p4] narrator: Now the tower is empty except for the chairs. There is a sign on the fence with a phone number and a price. Rain comes in through a broken pane on the roof. In the control room one red lamp is still on, running from a battery nobody has disconnected.
+- [end.bankrupt.epilogue.cass] narrator: Cass is in the plant room at the end. She is draining the last line by hand so nothing freezes and bursts over winter. "Somebody ought to," she says. She screws the cap onto the last valve and wipes her gloves. She gives you a flask from her coat. "Did you sleep? Come back to mine. I've got a spare room. The kettle works."
+- [end.bankrupt.epilogue.bea] narrator: Bea walks out past the gate with her toolbox in one hand. The wrench is on top. Behind her the roof is bare. "I took the panels down myself," she says. "I bought them with my own money. I've got the receipt. The receiver read it twice." She puts the toolbox down. "They're in my van. There's room for the other ladder. Come on."
+- [end.bankrupt.epilogue.mel] narrator: Mel is carrying out the one jar the receiver allowed her, in both hands. It's empty. The cultures died when the power was cut on Tuesday. "I'm sorry," she says. "I should have asked for a generator. I didn't think to." She has her glove on the other hand. "The glove is mine. I checked." She waits by the door for you to come with her. "If you like."
+- [end.bankrupt.epilogue.luci] narrator: Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. "We were short by two hundred thousand, on the day," she says. "I priced it three times." She takes the gold pen out of her pocket and puts it in yours. "It's real gold. Sell it and pay the first month of rent. That's not sentiment. It's the best price you'll get."
 
 ## 8. Decision memos: Cass
 
@@ -1227,50 +1251,227 @@ Choice `add`:
 
 > Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
 
-### Lesson 1: First Watt (`first_watt`)
+### Lesson 1: Your First Rack (`first_watt`)
 
 > Speaker: Bea. Scenario `lesson_first_watt`. Every line in the steps is spoken by the lesson's advisor.
-- [first_watt.title] Title: First Watt
-- [first_watt.concept] Concept: Power: kW is a rate, capacity is a ceiling, and load above capacity means a blackout.
-- [first_watt.goal] Goal: Two racks, one day, no blackouts.
-- [first_watt.learned] Learned: {{kw|kW}} is how hard equipment pulls right now. {{capacity|Capacity}} is the most the supply can give. Keep capacity above load, with {{headroom|headroom}} to spare.
-- [first_watt.outro] bea: Two racks, a whole day, lights on. Okay. Good. Next time I'll show you power that doesn't come out of a tank. When you want to know where all the heat goes, find Cass. She'll ask if you slept.
-- [first_watt.next] Next lesson: Where the Heat Goes
+- [first_watt.title] Title: Your First Rack
+- [first_watt.concept] Concept: Build: a rack needs power and cooling to run. Power is counted in kW, and PUE shows how much extra the hall burns.
+- [first_watt.goal] Goal: Power a rack, cool it, and run it for three hours.
+- [first_watt.learned] Learned: A {{rack|rack}} does the work. It needs power from the grid and cooling for its heat. Power is counted in {{kw|kW}}. {{pue|PUE}} shows how much extra the hall burns on top of the racks.
+- [first_watt.outro] bea: That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays.
 
-#### Step `rack1`
+#### Step `rack`
 
 > Done when: [{"metric":"racks","op":">=","value":1}].
-- [first_watt.rack1.objective] Objective: Build your first rack on the glowing slot
-- [first_watt.rack1.say1] bea: Bea. Power. Welcome to the hall. Two racks, one full day, nothing goes dark. That's the job.
-- [first_watt.rack1.say2] bea: Racks tab in the build bar. Grab the AC-1, drop it on the glowing slot. Rest is locked till it's in.
-- [first_watt.rack1.after1] bea: Hear that? That's 40 kW, flat out. A {{kw|kW}} is a rate. How hard something's pulling right now.
-- [first_watt.rack1.after2] bea: Top bar's the whole hall. 93 kW, on a feeder that gives 120. Remember the 120.
+- [first_watt.rack.objective] Objective: Place a rack on the glowing spot
+- [first_watt.rack.say1] bea: Hi. I'm Bea. I do power. Welcome to the hall.
+- [first_watt.rack.say2] bea: It's empty. Let's build a working computer room, one piece at a time.
+- [first_watt.rack.say3] bea: First piece: a {{rack|rack}}. It's a tall cabinet full of GPU chips. The chips do the computing that clients pay for.
+- [first_watt.rack.say4] bea: Open Racks in the build bar. Pick the AC-1. Click the glowing spot.
+- [first_watt.rack.after1] bea: There. Look at it. Dark. It has a cable under it, but nothing feeding the cable.
 
-#### Step `rack2`
+#### Step `power`
 
-> Done when: [{"metric":"racks","op":">=","value":2}].
-> Runs scripted beat `trip` after the lines.
-- [first_watt.rack2.objective] Objective: Build a second rack on the next slot
-- [first_watt.rack2.say1] bea: {{capacity|Capacity}} is the most a supply can give. This feeder tops out at 120 kW.
-- [first_watt.rack2.say2] bea: The hall burns 53 before any rack works. Air handler, lift, the intake. One rack takes it to 93.
-- [first_watt.rack2.say3] bea: Put the second one in. Watch the bar.
-- [first_watt.rack2.after1] bea: And there it goes. Two racks want 133 kW. The feeder gives 120. Breaker trips.
-- [first_watt.rack2.after2] bea: Load over capacity is a blackout. Every time. Keep capacity above load, with {{headroom|headroom}} to spare.
-- [first_watt.rack2.after3] bea: Power overlay's on so you can see the net. Next bit I hate. A generator.
+> Done when: [{"metric":"supplyKw","op":">","value":0}].
+- [first_watt.power.objective] Objective: Place the Grid Intake in the basement
+- [first_watt.power.say1] bea: A rack needs power. Power comes in through a Grid Intake. It's the plug into the city.
+- [first_watt.power.say2] bea: Open Power in the build bar. Pick Grid Intake. Click the glowing spot in the basement.
+- [first_watt.power.after1] bea: Lights on. The intake can give 1,500 kW.
+- [first_watt.power.after2] bea: A {{kw|kW}} is how hard something pulls right now. Your rack pulls up to 40 kW when it works.
+- [first_watt.power.after3] bea: The goal bar at the top shows it. LOAD is what the hall pulls. CAPACITY is what the intake can give.
 
-#### Step `genset`
+#### Step `cool`
 
-> Done when: [{"metric":"gensets","op":">=","value":1}].
-- [first_watt.genset.objective] Objective: Add the diesel generator in Power
-- [first_watt.genset.say1] bea: Power tab. Diesel Genset. Glowing slot. It starts itself when the grid can't keep up.
-- [first_watt.genset.say2] bea: A {{genset|generator}} adds capacity. 120 from the feeder, plus 800 from the diesel. And smoke. Smoke doesn't wash out.
-- [first_watt.genset.say3] bea: Today it's the right tool. Later I'll show you better ones.
-- [first_watt.genset.after1] bea: See the gap between what you can supply and what you're using? That's {{headroom|headroom}}. Loads of it now.
-- [first_watt.genset.after2] bea: Hold both racks flat out for one game day and you pass.
+> Done when: [{"metric":"coolers","op":">=","value":1}].
+- [first_watt.cool.objective] Objective: Place an air handler next to the rack
+- [first_watt.cool.say1] bea: Cass. Cooling. Did you sleep? Never mind.
+- [first_watt.cool.say2] bea: Every kW a rack uses turns into heat. A 40 kW rack is a 40 kW heater.
+- [first_watt.cool.say3] bea: Too hot, and it slows down. Hotter still, and it shuts itself off.
+- [first_watt.cool.say4] bea: An {{crah|air handler}} pulls the hot air away. Open Cooling. Pick the Air Handler. Click the glowing spot.
+- [first_watt.cool.after1] bea: Good. The heat view is on. Red is hot, blue is cool.
+- [first_watt.cool.after2] bea: Heat counts in kW too. Whatever the rack pulls, the air handler has to carry away.
 
-#### Step `day`
+#### Step `run`
+
+> Done when: [{"metric":"racksBusy","op":">=","value":1}].
+- [first_watt.run.objective] Objective: Watch the rack pick up its first job
+- [first_watt.run.say1] bea: A client just sent a job. A job is work for your racks to do.
+- [first_watt.run.say2] bea: Watch the rack pick it up.
+- [first_watt.run.after1] bea: Running. That's the whole loop. Power in, work done, heat out.
+- [first_watt.run.after2] bea: See PUE in the goal bar? {{pue|PUE}} is the hall's total power divided by what the racks use. 1.0 would be no waste.
+- [first_watt.run.after3] bea: Yours is higher. The air handler and the lift burn power too. Good halls keep PUE low.
+
+#### Step `hold`
 
 > Done when: immediately.
-- [first_watt.day.objective] Objective: Hold both racks at full load for one day
-- [first_watt.day.say1] bea: Let the clock run. Keep headroom above 10% all day. Nothing goes dark.
-- [first_watt.day.say2] bea: I'll watch the meter. And the exhaust.
+- [first_watt.hold.objective] Objective: Keep it running cool for three hours
+- [first_watt.hold.say1] bea: Let the clock run for three hours. Keep the rack busy and the temperature down.
+- [first_watt.hold.say2] bea: I'll watch the meter. Cass will watch the heat.
+
+### Lesson 2: Earn Your Keep (`earn_your_keep`)
+
+> Speaker: Luci. Scenario `lesson_earn`. Every line in the steps is spoken by the lesson's advisor.
+- [earn_your_keep.title] Title: Earn Your Keep
+- [earn_your_keep.concept] Concept: Earn: contracts pay for work. Jobs need running racks, storage for their data, and spare parts and bots to stay up.
+- [earn_your_keep.goal] Goal: Finish two contracts.
+- [earn_your_keep.learned] Learned: {{inference|Inference}} pays while it runs. {{training|Training}} pays when it ends. Both need powered, cooled racks, and training also needs storage for its data. Spare parts and bots keep racks earning when something breaks.
+- [earn_your_keep.outro] luci: Two contracts paid. Racks busy, data stored, a crew on call. For the record, that's a business. Next, Mel will show you how it grows.
+
+#### Step `accept`
+
+> Done when: [{"metric":"jobsLive","op":">=","value":1}].
+- [earn_your_keep.accept.objective] Objective: Accept the contract on the board
+- [earn_your_keep.accept.say1] luci: Luci Ferro. CFO. Call me Luci, Operator.
+- [earn_your_keep.accept.say2] luci: A rack that sits idle costs you. A rack that works pays you. That's the whole business.
+- [earn_your_keep.accept.say3] luci: Clients post contracts on the board. Open Contracts. Press C, or use the tab on the right.
+- [earn_your_keep.accept.say4] luci: This one is {{inference|inference}}. A client keeps asking a model questions, and pays every minute you keep up. Press Accept.
+- [earn_your_keep.accept.after1] luci: Signed. Your racks pick it up on their own. Money starts when they run.
+
+#### Step `paid`
+
+> Done when: [{"metric":"jobsDone","op":">=","value":1}].
+- [earn_your_keep.paid.objective] Objective: Keep the racks running until the job pays
+- [earn_your_keep.paid.say1] luci: Now the only job is not breaking anything.
+- [earn_your_keep.paid.say2] luci: Power on, cooling on, racks working. Watch TREASURY at the top. Wait for the contract to end.
+- [earn_your_keep.paid.after1] luci: There. Paid. For the record, that's revenue. Power and upkeep come out of it.
+- [earn_your_keep.paid.after2] luci: The PER HOUR figure at the top shows what's left.
+
+#### Step `storage`
+
+> Done when: [{"metric":"storageRacks","op":">=","value":1}].
+- [earn_your_keep.storage.objective] Objective: Place a Storage Array on the glowing spot
+- [earn_your_keep.storage.say1] luci: Cass. Did you see the new contract on the board? {{training|Training}}. One big job, paid when it's done.
+- [earn_your_keep.storage.say2] luci: It's worth more, and it brings a dataset: 1,000 TB. Try to accept it. Go on.
+- [earn_your_keep.storage.say3] luci: Refused? That's why: there's no room for the data. A job's data lives on a Storage Array.
+- [earn_your_keep.storage.say4] luci: Open Racks. Pick the Storage Array. It does no computing. It only holds data. Click the glowing spot.
+- [earn_your_keep.storage.after1] luci: Now there's room. Storage doesn't earn by itself. It lets the racks earn.
+
+#### Step `train`
+
+> Done when: [{"metric":"jobsLive","op":">=","value":1}].
+- [earn_your_keep.train.objective] Objective: Accept the training contract
+- [earn_your_keep.train.say1] luci: Luci. Good. Now open Contracts and accept it.
+- [earn_your_keep.train.say2] luci: A training job pays when it's finished, so be patient. If the storage ever goes dark, the job stalls. No data, no work.
+- [earn_your_keep.train.after1] luci: Signed. The racks are on it.
+
+#### Step `parts`
+
+> Done when: [{"metric":"parts","op":">=","value":1}].
+- [earn_your_keep.parts.objective] Objective: Buy spare parts in Supplies
+- [earn_your_keep.parts.say1] luci: Racks break. Nothing breaks today. Something will tomorrow.
+- [earn_your_keep.parts.say2] luci: A broken rack earns nothing until it's fixed. A fix uses one spare part.
+- [earn_your_keep.parts.say3] luci: Open Supplies in the build bar. Buy 5 spare parts.
+- [earn_your_keep.parts.after1] luci: Good. They wait in the depot until they're needed.
+
+#### Step `bot`
+
+> Done when: [{"metric":"bots","op":">=","value":1}].
+- [earn_your_keep.bot.objective] Objective: Buy a maintenance bot in Supplies
+- [earn_your_keep.bot.say1] luci: Parts sit in a depot. A bot carries one to the broken rack and fixes it.
+- [earn_your_keep.bot.say2] luci: Same tab. Buy a Rover.
+- [earn_your_keep.bot.after1] luci: That's your repair crew. Parts in the depot. A bot to carry them.
+
+#### Step `finish`
+
+> Done when: immediately.
+- [earn_your_keep.finish.objective] Objective: Let the training job finish
+- [earn_your_keep.finish.say1] luci: Last thing. Let the big job finish and take the money.
+
+### Lesson 3: Grow the Tower (`grow_the_tower`)
+
+> Speaker: Mel. Scenario `lesson_grow`. Every line in the steps is spoken by the lesson's advisor.
+- [grow_the_tower.title] Title: Grow the Tower
+- [grow_the_tower.concept] Concept: Grow: research unlocks new ideas, Levels unlock bigger machines, and the Foreman builds for you.
+- [grow_the_tower.goal] Goal: Research two ideas, reach Level 2, and switch on the Foreman.
+- [grow_the_tower.learned] Learned: Research points buy new ideas. A Level needs enough PF of racks and enough ideas researched. The Foreman builds racks, cooling and power for you while you do something else.
+- [grow_the_tower.outro] mel: Hm. It's growing. That's what it wants. Next is the part I find hard to say out loud: how this ends. Bea has the slides.
+
+#### Step `research1`
+
+> Done when: [{"metric":"techs","op":">=","value":1}].
+- [grow_the_tower.research1.objective] Objective: Research Contract Automation
+- [grow_the_tower.research1.say1] mel: Hello. I'm Mel. Research. Sorry, I get nervous around new people.
+- [grow_the_tower.research1.say2] mel: Your racks earn research points, {{rp|RP}}. You spend them on new ideas. I've put 1,500 in the account to start.
+- [grow_the_tower.research1.say3] mel: Open Research. Press R, or use the tab on the right. Pick Contract Automation, then press Research.
+- [grow_the_tower.research1.after1] mel: Mm. Noted. That one is done. Ideas are permanent.
+
+#### Step `research2`
+
+> Done when: [{"metric":"techs","op":">=","value":2}].
+- [grow_the_tower.research2.objective] Objective: Research Works Foreman
+- [grow_the_tower.research2.say1] mel: Ideas open other ideas. The next one is the Works Foreman. A builder who works for you.
+- [grow_the_tower.research2.say2] mel: It needs the first idea done, and it costs more. You have enough.
+- [grow_the_tower.research2.after1] mel: Two ideas done. Keep that in mind. You'll need exactly two for something else.
+
+#### Step `racks`
+
+> Done when: [{"metric":"racks","op":">=","value":6}].
+- [grow_the_tower.racks.objective] Objective: Build two more racks
+- [grow_the_tower.racks.say1] mel: Luci. Levels. They're your company's rank. A higher Level opens bigger machines and pays a bonus.
+- [grow_the_tower.racks.say2] mel: Find the LEVEL bar at the top. Level 2 asks for two things. 120 PF of racks, and two ideas researched.
+- [grow_the_tower.racks.say3] mel: {{pflops|PF}} is how much computing a rack does. You have 80 PF. Two more racks make 120. Place two racks.
+- [grow_the_tower.racks.after1] mel: That's 120 PF. Both asks are met.
+
+#### Step `level`
+
+> Done when: [{"metric":"tier","op":">=","value":2}].
+- [grow_the_tower.level.objective] Objective: Wait for Level 2
+- [grow_the_tower.level.say1] mel: Levels are awarded at midnight. Let the clock run.
+- [grow_the_tower.level.after1] mel: Level 2. For the record, that's a $3.75 million bonus. Spend it well.
+
+#### Step `foreman`
+
+> Done when: immediately.
+- [grow_the_tower.foreman.objective] Objective: Switch on the Foreman in Automation
+- [grow_the_tower.foreman.say1] mel: Now the Foreman. Open Automation. Press T, or use the tab on the right.
+- [grow_the_tower.foreman.say2] mel: He builds for you. Racks when contracts need them. An air handler when racks run hot. Power when it runs short.
+- [grow_the_tower.foreman.say3] mel: He spends your money, so he keeps a reserve you set. Switch him on.
+
+### Lesson 4: The Three Trees (`the_three_trees`)
+
+> Speaker: Bea. Scenario `lesson_trees`. Every line in the steps is spoken by the lesson's advisor.
+- [the_three_trees.title] Title: The Three Trees
+- [the_three_trees.concept] Concept: The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step, and the seal can close a tree.
+- [the_three_trees.goal] Goal: Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.
+- [the_three_trees.learned] Learned: A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power. Harmful builds fill a tree's seal, and a full seal closes the tree. Taking an advisor's advice raises her bond; overruling her lowers it.
+- [the_three_trees.outro] bea: That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower. Free Build is waiting.
+
+#### Step `retrofit`
+
+> Done when: [{"metric":"treeRacks","op":">=","value":1}].
+- [the_three_trees.retrofit.objective] Objective: Click a rack and retrofit it to Green
+- [the_three_trees.retrofit.say1] bea: Bea again. Last lesson. This one's about how the game ends.
+- [the_three_trees.retrofit.say2] bea: There are three ways, called trees. The Lattice is Luci's: pure machines. The Flesh is Mel's: living tissue. The Garden is mine: clean power.
+- [the_three_trees.retrofit.say3] bea: Each tree is a line of better racks. You join one by retrofitting. Click the rack that's glowing in the world. Its panel opens on the right.
+- [the_three_trees.retrofit.say4] bea: Find Retrofit. Pick Green. The rack changes right where it stands.
+- [the_three_trees.retrofit.after1] bea: There. An NM-1. It does 50 PF on 12 kW. The old one did 20 PF on 40 kW.
+- [the_three_trees.retrofit.after2] bea: And now it counts. A plain rack scores for no tree. Only a retrofitted rack earns points.
+
+#### Step `trees`
+
+> Done when: [{"metric":"tips","op":">=","value":1}].
+- [the_three_trees.trees.objective] Objective: Open the Trees panel from the three bars at the top
+- [the_three_trees.trees.say1] bea: Now the scoreboard. Click the three coloured bars at the top of the screen.
+- [the_three_trees.trees.after1] bea: Three columns, one per tree. Each has its points, a ladder of racks, and a line that starts with Next.
+- [the_three_trees.trees.after2] bea: That Next line is your to-do list. It names the research and the retrofit that come next.
+- [the_three_trees.trees.after3] bea: The first tree to 1,000 points ends the game its way. Close the panel when you're done reading.
+
+#### Step `clean`
+
+> Done when: [{"metric":"cleanPower","op":">=","value":1}].
+- [the_three_trees.clean.objective] Objective: Place PV Wall Panels in Power
+- [the_three_trees.clean.say1] bea: Look at the Garden column again. It has a line about clean power.
+- [the_three_trees.clean.say2] bea: Garden racks run at half speed on any power. Full speed only on clean power: sun and wind.
+- [the_three_trees.clean.say3] bea: So give it some. Open Power. Pick PV Wall Panels. Click the glowing spot.
+- [the_three_trees.clean.after1] bea: Panels in. The clean share climbs slowly. Check the Garden column later and watch the speed rise.
+
+#### Step `points`
+
+> Done when: immediately.
+- [the_three_trees.points.objective] Objective: Wait for the Garden's first points
+- [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
+- [the_three_trees.points.say2] bea: One more thing: the seal. Each of Flesh and Garden has a SEAL bar. It's a damage meter.
+- [the_three_trees.points.say3] bea: Harmful builds fill it, like a diesel generator. Clean ones wear it down. Fill it to 100 and the tree closes for good.
+- [the_three_trees.points.say4] bea: Last thing. We advisors keep score of you too. Take our advice and the bond goes up 3. Overrule us and it drops 1.
+- [the_three_trees.points.say5] bea: The one with the highest bond, 60 or more, gets the last word when it ends.
+- [the_three_trees.points.say6] bea: Now let the clock run until the Garden scores.

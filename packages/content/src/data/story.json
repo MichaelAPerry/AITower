@@ -4,7 +4,7 @@
   "category": "story",
   "advisor": "luci",
   "title": "The Operator Arrives",
-  "body": "Rain on a gravel lot. One rack in a crate. Four people around it.",
+  "body": "The first unofficial team meeting occurs in a loading bay when you and a bot just unpacked a new rack.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -16,36 +16,36 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Rain on a gravel lot. One rack in a crate. Four people around it."
+    "text": "The rain pours down through the open door of the loading bay as you scan the four faces of your new coworkers."
    },
    {
     "who": "narrator",
-    "text": "Your first day as Operator. The company has bought this lot to build an AI datacenter tower, and these four are your advisors."
+    "text": "This is the first day of your new job, and since you are a newbie to datacenters these four women will be your teachers, coworkers and maybe friends."
    },
    {
     "who": "luci",
-    "text": "Luci. Finance. I sign the cheques, so you'll like me by Friday.",
+    "text": "You can call me Ms. Ferro. Remember who you're doing this for.",
     "mood": "pleased"
    },
    {
     "who": "mel",
-    "text": "Mel. Compute. And some other things. Those can wait."
+    "text": "Dr. Kiorre, a pleasure."
    },
    {
     "who": "bea",
-    "text": "Bea. Power. If something here burns diesel, I lost the argument."
+    "text": "Bea, nice to meet ya!"
    },
    {
     "who": "cass",
-    "text": "Cass. Cooling. Did you sleep?"
+    "text": "Hello, the name is Cass. I keep things cool."
    },
    {
     "who": "narrator",
-    "text": "Whichever tower reaches the Singularity first decides how the world ends. Luci is asking which way you lean."
+    "text": "There are decisions in this building that change the fate of the world.  You know it, your advisors know it, the stockholders know it. Ms. Ferro is concerned about the latter."
    },
    {
     "who": "luci",
-    "text": "Okay. Before anyone pours concrete. Operator, what's it for? The tower."
+    "text": "Well operator, it's your decision: what are we building this for?"
    }
   ],
   "recommended": "money",
@@ -100,16 +100,16 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Outlives. Yeah.",
+      "text": "Life must continue, how astute.",
       "mood": "pleased"
      },
      {
       "who": "mel",
-      "text": "Not 'serves'. Good word."
+      "text": "But what is life?"
      },
      {
       "who": "bea",
-      "text": "Then it needs a world to outlive us in."
+      "text": "Life is all around us!"
      }
     ]
    },
@@ -133,12 +133,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Okay. Good.",
+      "text": "Sometimes not having an answer is the best.",
       "mood": "pleased"
      },
      {
       "who": "luci",
-      "text": "By Thursday, ideally. I have a Thursday."
+      "text": "Not good enough. Make sure you send me an email about our direction by Thursday."
      }
     ]
    },
@@ -162,12 +162,12 @@
     "reply": [
      {
       "who": "cass",
-      "text": "It's terrible. And it's free.",
+      "text": "What a throwback.",
       "mood": "pleased"
      },
      {
       "who": "cass",
-      "text": "Don't get used to either."
+      "text": "But honestly, we need a better coffee machine."
      },
      {
       "who": "luci",
