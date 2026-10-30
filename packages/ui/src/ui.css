@@ -2386,10 +2386,10 @@
 	left: 50%;
 	transform: translateX(-50%);
 	display: flex;
-	align-items: baseline;
-	gap: 12px;
+	align-items: center;
+	gap: 8px;
 	max-width: min(640px, 92%);
-	padding: 6px 14px;
+	padding: 6px 10px;
 	color: var(--text);
 	background: var(--bg, #07072a);
 	border: 2px solid var(--money, #ffd75e);
@@ -2399,6 +2399,12 @@
 	pointer-events: none;
 	z-index: 11;
 	animation: ui-toast-in 180ms ease-out both;
+}
+.aitower-hud .ui-ach-icon {
+	flex: none;
+	align-self: center;
+	shape-rendering: crispEdges;
+	image-rendering: pixelated;
 }
 .aitower-hud .ui-ach-tag {
 	flex: none;

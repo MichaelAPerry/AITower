@@ -1,5 +1,6 @@
 import type { GameState } from "@aitower/shared";
 import { useEffect, useRef, useState } from "react";
+import { AchIcon } from "./AchIcon";
 import { ACHIEVEMENTS, type AchievementDef, awardFor } from "./achievements";
 
 /** How long the strip stays (spec: 4 seconds; the game keeps running). */
@@ -38,6 +39,7 @@ export function AchievementToast({ state, defs = ACHIEVEMENTS, enabled = !devBui
 	if (!now) return null;
 	return (
 		<div className="ui-ach-toast" role="status" aria-live="polite" data-achievement={now.id}>
+			<AchIcon id={now.icon} scale={2} />
 			<span className="ui-ach-tag">ACHIEVEMENT</span>
 			<span className="ui-ach-name">{now.name}</span>
 			<span className="ui-ach-text">{now.text}</span>

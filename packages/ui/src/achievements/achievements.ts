@@ -13,6 +13,8 @@ export interface AchievementDef {
 	name: string;
 	/** Player-facing text. */
 	text: string;
+	/** Sprite id in `ICONS` (icons.ts). */
+	icon: string;
 	when: AchievementMoment;
 	/** Hidden until earned (the failure endings). */
 	hidden?: boolean;
@@ -20,7 +22,7 @@ export interface AchievementDef {
 }
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = [
-	{ id: "cash_deep", name: "Deep Pockets", text: "Have $10M in the bank at day end.", when: "dayClose", check: (v) => v.cash >= 10_000_000 },
+	{ id: "cash_deep", icon: "vault_bars", name: "Deep Pockets", text: "Have $10M in the bank at day end.", when: "dayClose", check: (v) => v.cash >= 10_000_000 },
 ];
 
 /** Only normal runs count: not lessons, not sandbox sites. */
