@@ -40,10 +40,17 @@ Send it back and it gets imported; your words win. Lines you leave as they are s
 ### `absorbed`
 
 > Art: bg-end-absorbed.webp (plain stage until it exists).
+- [end.absorbed.title] Title: Absorbed
+- [end.absorbed.body.p1] narrator: One day as you went to drink some coffee, you tasted something strange.  You then felt compelled to enter the racks and attach yourself to the bio feedback device. In a second you weren't you anymore.  You were the tower.
+- [end.absorbed.body.p2] narrator: Your desk is as you left it. Approvals still go out from your account, in a style close to yours. The quarterly figures are excellent. Nobody has asked where you are. You have been confirmed as not missing but merged.  More and more people begin signing up for the same process.
+- [end.absorbed.body.p3] narrator: The tower and the operator are now one account. The takeover was recorded as voluntary. Thank you for your service.
 - [end.absorbed.epilogue.cass] narrator: Cass puts a mug on your desk and watches the dashboard. "Did you sleep?" she asks. Your login answers on its own: "Yes, thank you." She looks at the screen. Then she looks at you. "That wasn't you. You're here." She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.
 - [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. I checked. I read the whole notice."
 - [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on the glove. "I can show you where, if you like. You might want to know how much of you it has."
 - [end.absorbed.epilogue.luci] narrator: Luci is signing papers she hasn't read, which she has never done. "The Authority pays on time," she says. "It's more efficient." She stops. "I read the first page. Page two is yours. Your name is on it as approver, dated Thursday." She slides it across the desk. "You weren't here on Thursday. I thought you should see it."
+
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.absorbed.epilogue.fallback] narrator: Your desk is clean, and your mug is on it. Nobody has stopped by since last week, but it's hard to remember when last week actually was. You look at your hands and they look like yours. But when an approval comes across your screen your fingers act of their own accord to approve it.
 
 ### `bankrupt`
 
@@ -58,9 +65,19 @@ Send it back and it gets imported; your words win. Lines you leave as they are s
 - [end.bankrupt.epilogue.mel] narrator: Mel is carrying out the one jar the receiver allowed her, in both hands. It's empty. The cultures died when the power was cut on Tuesday. "I'm sorry," she says. "I should have asked for a generator. I didn't think to." She has her glove on the other hand. "The glove is mine. I checked." She waits by the door for you to come with her. "If you like."
 - [end.bankrupt.epilogue.luci] narrator: Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. "We were short by two hundred thousand, on the day," she says. "I priced it three times." She takes the gold pen out of her pocket and puts it in yours. "It's real gold. Sell it and pay the first month of rent. That's not sentiment. It's the best price you'll get."
 
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.bankrupt.epilogue.fallback] narrator: Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care.
+
 ## 15. Lessons
 
+
 ### Lesson 1: Your First Rack (`first_watt`)
+> Speaker: Bea. Scenario `lesson_first_watt`. Every line in the steps is spoken by the lesson's advisor.
+- [first_watt.title] Title: Your First Rack
+- [first_watt.concept] Concept: Build: a rack needs power and cooling to run. Power is counted in kW, and PUE shows how much extra the hall burns.
+- [first_watt.goal] Goal: Power a rack, cool it, and run it for three hours.
+- [first_watt.learned] Learned: A {{rack|rack}} does the work. It needs power from the grid and cooling for its heat. Power is counted in {{kw|kW}}. {{pue|PUE}} shows how much extra the hall burns on top of the racks.
+- [first_watt.outro] bea: That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays.
 
 > Done when: [{"metric":"racks","op":">=","value":1}].
 - [first_watt.rack.objective] Objective: Place a rack on the glowing spot
