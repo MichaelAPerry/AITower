@@ -2500,5 +2500,37 @@
    "source": "Poem 341, c. 1862"
   },
   "tech": "cold_room_spec"
+ },
+ "consciousness_transfer": {
+  "id": "consciousness_transfer",
+  "name": "CT-1 Consciousness Transfer Unit",
+  "description": "A chrome pod beside the lift. Every six hours, if it has power, one person walks in and the Lattice gains a resident: about 36 Singularity points a time, 143 a day, the same as one ML-1 running flat out. It needs no coolant and no jobs. Bio and Green both object, loudly.",
+  "kind": "transfer",
+  "category": "rack",
+  "width": 3,
+  "cost": 12000000,
+  "upkeepPerDay": 22000,
+  "unlockTier": 5,
+  "facilityKw": 90,
+  "color": "#8fa6bd",
+  "accent": "#cfeeff",
+  "transfer": {
+   "everyHours": 6,
+   "sp": 35.7
+  },
+  "placement": {
+   "needsPower": true
+  },
+  "tech": "transfer_protocol",
+  "line": "synthetic",
+  "seal": {
+   "biotech": 20,
+   "greentech": 20
+  },
+  "flavor": {
+   "quote": "The question of whether a computer can think is no more interesting than the question of whether a submarine can swim.",
+   "author": "Edsger W. Dijkstra",
+   "source": "The threats to computing science, EWD898, 1984"
+  }
  }
 }

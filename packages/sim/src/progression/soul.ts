@@ -13,6 +13,7 @@
 import { type AdvisorId, type AscensionPath, type ContentDB, type FacilityDef, SEALED_TREES, type SealedTree, treeOf, TREES } from "@aitower/content";
 import type { TickCtx } from "../core/context";
 import { TICKS_PER_HOUR } from "../core/constants";
+import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { GensetMode, type SimState } from "../core/state";
 import { minuteOfDay } from "../core/time";
 import { setGameOver } from "./gameOver";
@@ -133,7 +134,29 @@ export function soulStep(ctx: TickCtx): void {
 	// Points first, at the seal the hour started with; then what the running buildings do to the seal.
 	for (const t of TREES) addSp(state, t, pf[t] * s.spPerPflopHour * s.spWeights[t] * treeFactor(state, content, t));
 	for (const t of SEALED_TREES) addResidue(state, t, (resid[t] * s.residuePerDay) / 24);
+	transferStep(ctx);
 	soulWins(ctx);
+}
+
+/** The game hour (0..23) of a tick. */
+const hourOfDay = (tick: number): number => Math.floor(minuteOfDay(tick) / TICKS_PER_HOUR);
+
+/**
+ * Consciousness Transfer Units (docs/ART_DIRECTION.md, kind "transfer"): on the hours that are multiples of `transfer.everyHours`, each
+ * enabled, working, powered unit transfers one person: `transfer.sp` Synthetic SP and a `consciousnessTransferred` event for the renderer.
+ * Plain arithmetic on the clock, no randomness, so a replay gives the same events. Runs after the hour's tree-rack SP.
+ */
+export function transferStep(ctx: TickCtx): void {
+	const { state, content, events } = ctx;
+	const hour = hourOfDay(state.tick);
+	for (const f of state.facilities) {
+		const d = getDef(content, f.defId);
+		if (d.kind !== "transfer" || !d.transfer) continue;
+		if (hour % d.transfer.everyHours !== 0) continue;
+		if (!running(d, f) || f.powerNet < 0 || f.sat < MIN_POWERED_SATISFACTION) continue;
+		addSp(state, "synthetic", d.transfer.sp);
+		events.push({ type: "consciousnessTransferred", facilityId: f.id, sp: d.transfer.sp });
+	}
 }
 
 const ENDING_OF: Record<AscensionPath, "singularity" | "flesh" | "garden"> = { synthetic: "singularity", biotech: "flesh", greentech: "garden" };

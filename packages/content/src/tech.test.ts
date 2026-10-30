@@ -411,7 +411,7 @@ describe("research lanes (bundled)", () => {
 			expect(l.pitch, l.id).not.toContain("\n");
 			expect(l.color).toMatch(/^#[0-9a-f]{6}$/i);
 		}
-		expect(db.tech.length).toBe(76);
+		expect(db.tech.length).toBe(77);
 	});
 
 	it("validation rejects an unknown lane, a missing lane entry and a line outside cooling and compute", () => {

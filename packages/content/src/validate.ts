@@ -24,6 +24,7 @@ const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
 	wind: "power",
 	heat_export: "cooling",
 	carbon: "cooling",
+	transfer: "rack",
 };
 type SpecName = "rack" | "power" | "cooling" | "logistics" | "bio" | "green";
 /** Specs a kind requires. `bio` is also allowed (optional) on growth racks; bioreactors need both `power` and `bio`. */
@@ -45,6 +46,7 @@ const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
 	wind: ["power"],
 	heat_export: ["green"],
 	carbon: ["green"],
+	transfer: [],
 };
 const PATHS: AscensionPath[] = ["biotech", "greentech", "synthetic"];
 const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
@@ -250,6 +252,13 @@ function validateFacility(p: Problems, key: string, d: FacilityDef, tierCount: n
 		if (d.upkeepPerDay !== 0) p.push(`${w}.upkeepPerDay: growths have no upkeep`);
 		if (d.kind !== "rack") p.push(`${w}.kind: a growth must be a rack`);
 	}
+	if (d.kind === "transfer") {
+		if (!d.transfer) p.push(`${w}: kind transfer requires a "transfer" spec`);
+		else {
+			num(p, `${w}.transfer.everyHours`, d.transfer.everyHours, { min: 1, max: 24, int: true });
+			num(p, `${w}.transfer.sp`, d.transfer.sp, { gt: 0 });
+		}
+	} else if (d.transfer) p.push(`${w}: unexpected "transfer" spec for kind ${d.kind}`);
 	if (d.bio) validateBio(p, `${w}.bio`, d);
 	if (d.green) validateGreen(p, `${w}.green`, d);
 	if ((d.kind === "solar" || d.kind === "wind") && d.placement?.needsPower === false) p.push(`${w}.placement.needsPower: a ${d.kind} source must sit on a power conduit`);
@@ -981,7 +990,7 @@ function validateTech(p: Problems, db: ContentDB): void {
 }
 
 /** Native art widths (packages/render/src/pixi/facilityArt.ts); wider defs get filler bays. */
-const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 2, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2 };
+const MIN_WIDTH_BY_KIND: Partial<Record<string, number>> = { nutrient: 2, sterilizer: 2, bioreactor: 4, chiller: 4, genset: 4, grid_tie: 4, ups: 3, crah: 2, cdu: 2, solar: 2, wind: 1, heat_export: 2, carbon: 2, transfer: 3 };
 
 
 export function validateContent(db: ContentDB): string[] {

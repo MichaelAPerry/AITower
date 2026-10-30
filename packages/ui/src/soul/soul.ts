@@ -84,6 +84,15 @@ export interface TreeCard {
 	/** The seal meter, or null for the Lattice. */
 	seal: { value: number; max: number; closed: boolean; hurting: string[] } | null;
 	racks: number;
+	/** A one-line special item of the branch (the Lattice's Consciousness Transfer Unit), or null. */
+	special: string | null;
+}
+
+/** "CT-1 Consciousness Transfer Unit: one person every 6 hours, +36 points each, worth about one ML-1 (Level 5)." for the tree that owns a transfer unit. */
+function specialLine(content: ContentDB, tree: AscensionPath): string | null {
+	const d = Object.values(content.facilities).find((q) => q.kind === "transfer" && q.line === tree && !q.retired && q.transfer);
+	if (!d?.transfer) return null;
+	return `${d.name}: one person every ${d.transfer.everyHours} hours, +${num(d.transfer.sp)} points each, worth about one ML-1 (Level ${d.unlockTier}). Bio and Green seal +${d.seal?.biotech ?? 0}.`;
 }
 
 function nextStep(view: Pick<SimView, "tier" | "techResearched">, content: ContentDB, tv: TreeView): string {
@@ -150,6 +159,7 @@ export function treeCards(view: Pick<SimView, "soul" | "tier" | "techResearched"
 			factor: factorLines(soul, tv),
 			seal: tv.seal === null ? null : { value: tv.seal, max: soul.sealMax, closed: tv.closed, hurting: tv.hurting.map((h) => `${h.name}${h.count > 1 ? ` ×${h.count}` : ""}`) },
 			racks: tv.racks,
+			special: specialLine(content, tree),
 		};
 	});
 }

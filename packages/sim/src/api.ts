@@ -199,7 +199,9 @@ export type SimEvent =
 	| { type: "droughtStarted" }
 	| { type: "droughtEnded" }
 	/** A rack was retrofitted in place toward a tree. */
-	| { type: "retrofitted"; facilityId: number; tree: AscensionPath; rung: number };
+	| { type: "retrofitted"; facilityId: number; tree: AscensionPath; rung: number }
+	/** A Consciousness Transfer Unit moved one person into the Lattice (+`sp` Synthetic SP). The renderer walks someone in from the lift. */
+	| { type: "consciousnessTransferred"; facilityId: number; sp: number };
 
 // ─── View (read-only snapshot for render/ui/audio) ──────────────────────
 

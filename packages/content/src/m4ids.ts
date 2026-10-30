@@ -62,6 +62,8 @@ export const V3_FACILITIES = [
 	"cold_room",
 	// reworked into the Green line (Level 5, adiabatic plant)
 	"chiller_free",
+	// the Synthetic special
+	"consciousness_transfer",
 ];
 export const V3_TECH = [
 	"biogas_digester",
@@ -77,4 +79,5 @@ export const V3_TECH = [
 	"leaf_bolt",
 	"ice_battery",
 	"cold_room_spec",
+	"transfer_protocol",
 ];

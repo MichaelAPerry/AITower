@@ -29,7 +29,9 @@ export type FacilityKind =
 	| "solar" // power source: `power.capacityKw` × daylight (0 at night, peak at 13:00) × weather
 	| "wind" // power source: `power.capacityKw` × seeded wind (changes hourly; Dunkelflaute pulls it down)
 	| "heat_export" // district-heat exchanger: removes up to `green.exportKw` of heat from air cells within `green.radius` and sells it
-	| "carbon"; // carbon capture / algae façade: earns `green.creditsPerDay` carbon credits (paid at midnight)
+	| "carbon" // carbon capture / algae façade: earns `green.creditsPerDay` carbon credits (paid at midnight)
+	// ── Synthetic special ──
+	| "transfer"; // consciousness transfer unit: while powered, moves one person into the Lattice every `transfer.everyHours` hours (SP)
 
 /** `bio`: organoid tissue. Needs a nutrient net and a temperature band (`rack.bio`); too cold is also a fault. */
 export type CoolingMode = "air" | "dlc" | "immersion" | "bio";
@@ -150,6 +152,12 @@ export interface Flavor {
 	source?: string;
 }
 
+/** One person is transferred every `everyHours` game hours (at hour 0, `everyHours`, ...) while the unit is enabled, working and powered; each adds `sp` Synthetic SP. */
+export interface TransferSpec {
+	everyHours: number;
+	sp: number;
+}
+
 export interface FacilityDef {
 	id: string;
 	name: string;
@@ -183,6 +191,8 @@ export interface FacilityDef {
 	 * conduits (free, unreliable), can be demolished, and counts as a `grown` facility in the view.
 	 */
 	growth?: boolean;
+	/** Consciousness Transfer Unit (kind "transfer"): the schedule and the SP of one transfer. */
+	transfer?: TransferSpec;
 	flavor?: Flavor;
 	/**
 	 * The reframe (docs/REFRAME.md): the rung of a tree rack, 1..4. A rung rack is never placed from the menu: it is reached by

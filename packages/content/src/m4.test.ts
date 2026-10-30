@@ -145,8 +145,8 @@ describe("M4 content (bundled)", () => {
 				expect(byTech.get(id)!.path, id).toBe("synthetic");
 				expect(byTech.get(id)!.minTier, id).toBeGreaterThanOrEqual(4);
 			}
-			// + Combined-Cycle, Cryo Plant and Reactor Licence (docs/TREES.md).
-			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(8);
+			// + Combined-Cycle, Cryo Plant, Reactor Licence (docs/TREES.md) and Transfer Protocol.
+			expect(db.tech.filter((n) => n.path === "synthetic")).toHaveLength(9); // + Transfer Protocol (CT-1)
 		});
 
 		it("Level-3 nodes take 1-3 days of typical output and the rest 2.5-8 days", () => {
