@@ -28,6 +28,21 @@ import bg_green from "./bg-green.webp";
 import bg_synth from "./bg-synth.webp";
 import bg_end_lattice from "./bg-end-lattice.webp";
 import bg_loc_f1_lot from "./bg-loc-f1-lot.webp";
+import bg_end_flesh from "./bg-end-flesh.webp";
+import bg_end_garden from "./bg-end-garden.webp";
+import bg_end_absorbed from "./bg-end-absorbed.webp";
+import bg_end_bankrupt from "./bg-end-bankrupt.webp";
+import bg_loc_site_install from "./bg-loc-site-install.webp";
+import bg_loc_control_room from "./bg-loc-control-room.webp";
+import bg_loc_finance_office from "./bg-loc-finance-office.webp";
+import bg_loc_plant_room from "./bg-loc-plant-room.webp";
+import bg_loc_floor_f2 from "./bg-loc-floor-f2.webp";
+import bg_loc_wetware_annex from "./bg-loc-wetware-annex.webp";
+import bg_loc_nutrient_line from "./bg-loc-nutrient-line.webp";
+import bg_loc_neural_pit from "./bg-loc-neural-pit.webp";
+import bg_loc_panel_deck from "./bg-loc-panel-deck.webp";
+import bg_loc_stairwell from "./bg-loc-stairwell.webp";
+import bg_loc_sunrise from "./bg-loc-sunrise.webp";
 
 export type ArtAdvisor = "luci" | "mel" | "bea" | "cass";
 export type Expression = "neutral" | "pleased" | "displeased" | "unsettling";
@@ -46,14 +61,15 @@ export const BACKDROP = { title: bg_title, biotech: bg_bio, greentech: bg_green,
 export type BackdropId = keyof typeof BACKDROP;
 
 /**
- * Ending paintings by the `art` name in endings.json (docs/ENDING_PROMPTS.md). Until a new painting is dropped in and imported
- * here, the three tree endings borrow their tree floor (`bg-synth`, `bg-bio`, `bg-green`); Absorbed and Bankrupt have no entry,
- * so they show the plain stage.
+ * Ending paintings by the `art` name in endings.json (docs/ENDING_PROMPTS.md). An ending whose name has no entry here falls back
+ * to its tree floor (`backdrop`), else the plain stage.
  */
 export const ENDING_ART: Record<string, string | undefined> = {
 	"bg-end-lattice": bg_end_lattice,
-	"bg-end-flesh": bg_bio,
-	"bg-end-garden": bg_green,
+	"bg-end-flesh": bg_end_flesh,
+	"bg-end-garden": bg_end_garden,
+	"bg-end-absorbed": bg_end_absorbed,
+	"bg-end-bankrupt": bg_end_bankrupt,
 };
 
 /**
@@ -62,6 +78,17 @@ export const ENDING_ART: Record<string, string | undefined> = {
  */
 export const LOCATION_FILES: Record<string, string | undefined> = {
 	"bg-loc-f1-lot": bg_loc_f1_lot,
+	"bg-loc-site-install": bg_loc_site_install,
+	"bg-loc-control-room": bg_loc_control_room,
+	"bg-loc-finance-office": bg_loc_finance_office,
+	"bg-loc-plant-room": bg_loc_plant_room,
+	"bg-loc-floor-f2": bg_loc_floor_f2,
+	"bg-loc-wetware-annex": bg_loc_wetware_annex,
+	"bg-loc-nutrient-line": bg_loc_nutrient_line,
+	"bg-loc-neural-pit": bg_loc_neural_pit,
+	"bg-loc-panel-deck": bg_loc_panel_deck,
+	"bg-loc-stairwell": bg_loc_stairwell,
+	"bg-loc-sunrise": bg_loc_sunrise,
 };
 
 /** Scene id -> location painting name (HANDOFF "Art slots"). Only names present in LOCATION_FILES resolve to an image. */

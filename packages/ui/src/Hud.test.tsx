@@ -161,14 +161,14 @@ describe("SystemMenu (server render)", () => {
 		expect(clean).not.toContain("ui-over-memo");
 	});
 
-	it("bankrupt plays the Bankrupt ending scene on the plain stage, not the memo", () => {
+	it("bankrupt (a game over with a kind and no ending id) plays the Bankrupt ending scene on its own painting, not the memo", () => {
 		const content = createFakeContent();
 		const store = createFakeStore(content);
 		store.triggerGameOver("bankrupt");
 		const html = renderToString(<Hud store={store} content={content} />);
 		expect(html).toContain("ending-bankrupt");
-		expect(html).toContain("is-plain");
-		expect(html).not.toContain("vn-backdrop");
+		expect(html).toContain("has-backdrop");
+		expect(html).toContain("bg-end-bankrupt");
 		expect(html).toContain("INSOLVENCY");
 		expect(html).toContain("The Treasury stayed below zero for a full day.");
 		expect(html).not.toContain("ui-over-memo");
@@ -180,8 +180,8 @@ describe("SystemMenu (server render)", () => {
 			["victory", "singularity", "THE LATTICE", "has-backdrop", "At 04:12 the tower stopped allowing any control."],
 			["victory", "flesh", "THE FLESH", "has-backdrop", "The organoids grew a psuedopod weeks ago."],
 			["victory", "garden", "THE GARDEN", "has-backdrop", "The tower stopped burning fuel."],
-			["absorbed", "absorbed", "ABSORBED", "is-plain", "One day as you went to drink some coffee, you tasted something strange."],
-			["bankrupt", "bankrupt", "BANKRUPT", "is-plain", "The Treasury stayed below zero for a full day."],
+			["absorbed", "absorbed", "ABSORBED", "has-backdrop", "One day as you went to drink some coffee, you tasted something strange."],
+			["bankrupt", "bankrupt", "BANKRUPT", "has-backdrop", "The Treasury stayed below zero for a full day."],
 		] as const;
 		for (const [kind, ending, title, stage, text] of cases) {
 			const store = createFakeStore(real);

@@ -98,24 +98,24 @@ The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening mes
 | Advisor busts, 4 x 4 expressions | `{luci,mel,bea,cass}-{neutral,pleased,displeased,unsettling}.webp` | `PORTRAITS` | done; owner may replace |
 | Advisor full figures | `{advisor}-full.webp` | `FULL` | done |
 | Title | `bg-title.webp` | `BACKDROP.title` | done |
-| Tree floors | `bg-synth`, `bg-bio`, `bg-green` | `BACKDROP` | done; also the Lattice/Flesh/Garden ending placeholders |
+| Tree floors | `bg-synth`, `bg-bio`, `bg-green` | `BACKDROP` | done; fallback if an ending or scene has no painting |
 | Ending: Lattice | `bg-end-lattice.webp` | `ENDING_ART` | done |
-| Ending: Flesh | `bg-end-flesh.webp` | `ENDING_ART` | empty (shows `bg-bio`) |
-| Ending: Garden | `bg-end-garden.webp` | `ENDING_ART` | empty (shows `bg-green`) |
-| Ending: Absorbed | `bg-end-absorbed.webp` | `ENDING_ART` | empty (plain stage) |
-| Ending: Bankrupt | `bg-end-bankrupt.webp` | `ENDING_ART` | empty (plain stage) |
+| Ending: Flesh | `bg-end-flesh.webp` | `ENDING_ART` | done |
+| Ending: Garden | `bg-end-garden.webp` | `ENDING_ART` | done |
+| Ending: Absorbed | `bg-end-absorbed.webp` | `ENDING_ART` | done |
+| Ending: Bankrupt | `bg-end-bankrupt.webp` | `ENDING_ART` | done |
 | Location: lot (`st_intro`) | `bg-loc-f1-lot.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
-| Location: site install (`obj_greentech`, `obj_biotech`) | `bg-loc-site-install.webp` | to build | empty |
-| Location: control room (`rung_syn_1`) | `bg-loc-control-room.webp` | to build | empty |
-| Location: finance office (`rung_syn_2`) | `bg-loc-finance-office.webp` | to build | empty |
-| Location: plant room (`rung_syn_3`, `rung_green_2`) | `bg-loc-plant-room.webp` | to build | empty |
-| Location: floor F2 (`rung_syn_4`) | `bg-loc-floor-f2.webp` | to build | empty |
-| Location: wetware annex (`rung_bio_1`, `rung_bio_2`) | `bg-loc-wetware-annex.webp` | to build | empty |
-| Location: nutrient line (`rung_bio_3`) | `bg-loc-nutrient-line.webp` | to build | empty |
-| Location: neural pit (`rung_bio_4`) | `bg-loc-neural-pit.webp` | to build | empty |
-| Location: panel deck (`rung_green_1`) | `bg-loc-panel-deck.webp` | to build | empty |
-| Location: stairwell (`rung_green_3`) | `bg-loc-stairwell.webp` | to build | empty |
-| Location: sunrise (`rung_green_4`) | `bg-loc-sunrise.webp` | to build | empty |
+| Location: site install (`obj_greentech`, `obj_biotech`) | `bg-loc-site-install.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: control room (`rung_syn_1`) | `bg-loc-control-room.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: finance office (`rung_syn_2`) | `bg-loc-finance-office.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: plant room (`rung_syn_3`, `rung_green_2`) | `bg-loc-plant-room.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: floor F2 (`rung_syn_4`) | `bg-loc-floor-f2.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: wetware annex (`rung_bio_1`, `rung_bio_2`) | `bg-loc-wetware-annex.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: nutrient line (`rung_bio_3`) | `bg-loc-nutrient-line.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: neural pit (`rung_bio_4`) | `bg-loc-neural-pit.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: panel deck (`rung_green_1`) | `bg-loc-panel-deck.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: stairwell (`rung_green_3`) | `bg-loc-stairwell.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
+| Location: sunrise (`rung_green_4`) | `bg-loc-sunrise.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
 | Off duty: Luci, Mel, Bea, Cass | `{advisor}-offduty.webp` (match the base set's size) | gallery (d) | empty |
 
 Prompts: `docs/ART_NEEDED.md` (locations), `docs/ENDING_PROMPTS.md` (endings, on `wip/endings`), `docs/OFF_DUTY.md` (on `wip/off-duty`), `docs/ART_BRIEFS.md` (portraits). Layout rule for every backdrop: keep the upper-left third quiet (caption box) and the subject in the upper two thirds (the dialogue box covers the bottom third). Rack and support sprites are Part A of `docs/ART_NEEDED.md` and `wip/tree-sprites`; they are code, not owner art.
