@@ -96,28 +96,57 @@
  "offDuty": {
   "luci": {
    "name": "Luci",
-   "caption": "Off the clock. Don't enter the whisky, Operator.",
    "hint": "Close the books. All of them. Then we'll see.",
    "rule": "Close the books on the Lattice, with her on your side."
   },
   "mel": {
    "name": "Mel",
-   "caption": "Hm. Feet up. I read that helps. It does, a little, if you like.",
    "hint": "Come all the way. Keep something of yourself. Then I'll show you.",
    "rule": "Finish the Flesh and stay mostly yourself, with her trusting you."
   },
   "bea": {
    "name": "Bea",
-   "caption": "Okay. Okay. Nothing's biting. Best day I've had.",
    "hint": "Show me the Garden. Not a certificate.",
    "rule": "Win the Garden honestly, with her trusting you."
   },
   "cass": {
    "name": "Cass",
-   "caption": "It's holding. Don't say anything. Just sit.",
    "hint": "Hold it up for a month. I'll tell you when I'm asleep.",
    "rule": "Keep the tower steady for a long stretch."
   }
+ },
+ "ui": {
+  "menuLabel": "Achievements",
+  "menuTitle": "Achievements · and the off-duty gallery",
+  "titleItem": "ACHIEVEMENTS",
+  "titleDetail": "earned · off-duty gallery",
+  "tabList": "LIST",
+  "tabOffDuty": "OFF DUTY",
+  "ariaPages": "Achievements pages",
+  "ariaList": "Achievements",
+  "earnedMark": "Earned",
+  "day": "Day",
+  "endingSingularity": "The Lattice",
+  "endingFlesh": "The Flesh",
+  "endingGarden": "The Garden",
+  "endingAbsorbed": "Absorbed",
+  "endingBankrupt": "Bankrupt",
+  "hiddenName": "???",
+  "hiddenText": "There is another way this ends.",
+  "subOffDuty": "OFF DUTY",
+  "subAfterHours": "AFTER HOURS",
+  "altOffDuty": "off duty",
+  "altLocked": "locked",
+  "note": "Saved in this browser. Export to file keeps it.",
+  "stripAchievement": "ACHIEVEMENT",
+  "stripOffDuty": "OFF DUTY",
+  "stripPortrait": "has a new portrait",
+  "stripBed": "The after-hours set is open",
+  "stripBedText": "Four new portraits.",
+  "endNew": "New:",
+  "endOffDuty": "Off duty:",
+  "endPortrait": "'s portrait",
+  "endBed": "the after-hours set"
  },
  "scenes": [
   {

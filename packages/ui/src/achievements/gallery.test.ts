@@ -95,9 +95,10 @@ describe("scenes", () => {
 	});
 
 	it("an unlock scene ends on her caption", () => {
-		const pages = pagesOf(sceneById("ach_unlock_mel"), { advisor: "mel", text: achievementContent.offDuty.mel.caption });
-		expect(pages).toHaveLength(4);
-		expect(pages.at(-1)).toEqual({ who: "mel", text: "Hm. Feet up. I read that helps. It does, a little, if you like." });
+		const pages = pagesOf(sceneById("ach_unlock_mel"));
+		expect(pages).toHaveLength(3);
+		expect(pages.at(-1)).toEqual({ who: "mel", text: achievementContent.offDuty.mel.caption });
+		expect(achievementContent.offDuty.mel.caption).toBe("Come join me for a conversation, I can make more tea.");
 		expect(pagesOf(sceneById("ach_bed_luci"))).toHaveLength(1);
 	});
 

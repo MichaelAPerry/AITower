@@ -1738,123 +1738,285 @@ Choice `add`:
 
 ## 17. Achievements and the off-duty gallery
 
-> The achievements list (name and plain text), the off-duty portraits (caption under an unlocked portrait, the locked frame's hint line, the plain rule shown once her bond has reached 30), and the gallery scenes. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json.
+> The achievements list, the off-duty portraits and gallery scenes, and the words around them. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json. For a short file with only these, run `npx tsx tools/dialogue/export.ts --achievements`.
 
 ### The 18 achievements
 
-> `end_lattice`
+> One row per achievement on the LIST tab: the name in bold, the plain text under it. Greyed while locked. Strip texts that reuse these are listed in the unlock strips section.
+
+### `end_lattice`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over, when the run ends on the Lattice (Synthetic Singularity).
 - [ach.end_lattice.name] Name: Sensible Option
 - [ach.end_lattice.text] Text: Finish the game on The Lattice.
-> `end_flesh`
+
+### `end_flesh`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over, when the run ends on the Flesh.
 - [ach.end_flesh.name] Name: The Flesh Remembers
 - [ach.end_flesh.text] Text: Finish the game on The Flesh.
-> `end_garden`
+
+### `end_garden`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over, when the run ends on the Garden.
 - [ach.end_garden.name] Name: Roots Check
 - [ach.end_garden.text] Text: Finish the game on The Garden.
-> `end_absorbed`: hidden in the list until earned (the list shows ??? and 'There is another way this ends.')
+
+### `end_absorbed`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over, when the inspectors absorb the tower. Hidden in the list until earned.
 - [ach.end_absorbed.name] Name: Merged
 - [ach.end_absorbed.text] Text: Let the inspectors take you.
-> `end_bankrupt`: hidden in the list until earned (the list shows ??? and 'There is another way this ends.')
+
+### `end_bankrupt`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over, when the money runs out for a full day. Hidden in the list until earned.
 - [ach.end_bankrupt.name] Name: Notice of Termination
 - [ach.end_bankrupt.text] Text: Run out of money for a full day.
-> `lvl_five`
+
+### `lvl_five`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned the moment the Operator reaches Level 5.
 - [ach.lvl_five.name] Name: Level Five
 - [ach.lvl_five.text] Text: Reach Level 5.
-> `rung_top`
+
+### `rung_top`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned when any tree has a top-rung (rung 4) rack.
 - [ach.rung_top.name] Name: Top Rung
 - [ach.rung_top.text] Text: Hold a top-rung rack of any tree.
-> `fast_win`
+
+### `fast_win`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win that is quick enough (Lattice by day 25, Flesh by day 40, Garden by day 38).
 - [ach.fast_win.name] Name: Ahead of the Plan
 - [ach.fast_win.text] Text: Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38.
-> `clean_hands`
+
+### `clean_hands`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a Flesh or Garden win with that tree's secret meter under 30 of 100.
 - [ach.clean_hands.name] Name: Clean Hands
 - [ach.clean_hands.text] Text: Win the Flesh or the Garden with that tree's secret meter under 30 (of 100).
-> `open_hands`
+
+### `open_hands`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a Lattice win with neither other tree closed.
 - [ach.open_hands.name] Name: Open Hands
 - [ach.open_hands.text] Text: Win the Lattice without closing either other tree.
-> `cash_deep`
+
+### `cash_deep`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at day end with $10M in the bank.
 - [ach.cash_deep.name] Name: Deep Pockets
 - [ach.cash_deep.text] Text: Have $10M in the bank at day end.
-> `books_clean`
+
+### `books_clean`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win with no loan and at least the starting cash.
 - [ach.books_clean.name] Name: Clean Books
 - [ach.books_clean.text] Text: Win with no loan and at least your starting cash.
-> `perfect_qtr`
+
+### `perfect_qtr`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned when a quarterly audit is filed with grade A and uptime of 99% or better.
 - [ach.perfect_qtr.name] Name: Perfect Quarter
 - [ach.perfect_qtr.text] Text: File an audit with grade A and uptime of 99% or better.
-> `calm_month`
+
+### `calm_month`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned at day close when the 99%-uptime streak reaches 20 days.
 - [ach.calm_month.name] Name: Month of Calm
 - [ach.calm_month.text] Text: Keep uptime at 99% or better for 20 days in a row.
-> `bond_close`
+
+### `bond_close`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned the moment any advisor's trust reaches 50.
 - [ach.bond_close.name] Name: Someone You Trust
 - [ach.bond_close.text] Text: Get any advisor to 50 trust.
-> `bond_crew`
+
+### `bond_crew`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned when all four advisors have reached 40 trust in one run.
 - [ach.bond_crew.name] Name: The Whole Crew
 - [ach.bond_crew.text] Text: Get all four advisors to 40 trust in one run.
-> `les_done`
+
+### `les_done`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned when every lesson is finished.
 - [ach.les_done.name] Name: Student
 - [ach.les_done.text] Text: Finish every lesson.
-> `heard_out`
+
+### `heard_out`
+
+> Shows: LIST tab row, and the unlock strip when earned. Earned when the ending epilogues of all four advisors have been seen, across any runs.
 - [ach.heard_out.name] Name: Heard Her Out
 - [ach.heard_out.text] Text: See an ending epilogue from each of the four advisors, across any runs.
 
+### List screen: headings and labels
+
+> The Achievements screen, LIST tab and its frame. Shown whenever the screen is open (title screen or pause menu).
+> Name of the Achievements entry in the pause menu's side list.
+- [ach.ui.menu_label] Label: Achievements
+> Heading of the Achievements screen (pause menu and title screen).
+- [ach.ui.menu_title] Label: Achievements · and the off-duty gallery
+> Title screen menu item, next to Lessons.
+- [ach.ui.title_item] Label: ACHIEVEMENTS
+> Small detail under the title menu item. It follows the counter: `11 / 18 earned · off-duty gallery`.
+- [ach.ui.title_detail] Label: earned · off-duty gallery
+> First tab on the Achievements screen (the list of 18).
+- [ach.ui.tab_list] Label: LIST
+> Second tab on the Achievements screen (the portrait gallery).
+- [ach.ui.tab_off_duty] Label: OFF DUTY
+> Screen-reader label for the two tabs. Not visible.
+- [ach.ui.aria_pages] Label: Achievements pages
+> Screen-reader label for the list of achievements. Not visible.
+- [ach.ui.aria_list] Label: Achievements
+> Tooltip on the check mark beside an earned achievement.
+- [ach.ui.earned_mark] Label: Earned
+> Beside an earned achievement: `Day 28 · The Lattice`. This is the word before the day number.
+- [ach.ui.day] Label: Day
+> Beside an earned achievement, after the day: the ending the run finished on.
+- [ach.ui.ending_singularity] Label: The Lattice
+> Beside an earned achievement, after the day: the ending the run finished on.
+- [ach.ui.ending_flesh] Label: The Flesh
+> Beside an earned achievement, after the day: the ending the run finished on.
+- [ach.ui.ending_garden] Label: The Garden
+> Beside an earned achievement, after the day: the ending the run finished on.
+- [ach.ui.ending_absorbed] Label: Absorbed
+> Beside an earned achievement, after the day: the ending the run finished on.
+- [ach.ui.ending_bankrupt] Label: Bankrupt
+> Small note at the foot of the Achievements screen.
+- [ach.ui.note] Label: Saved in this browser. Export to file keeps it.
+
+### The hidden achievements
+
+> Until the two failure-ending achievements are earned, the list shows this instead of their name and text.
+> The name shown for a hidden achievement (the two failure endings) until it is earned. Also the label on each locked after-hours frame.
+- [ach.ui.hidden_name] Label: ???
+> The text shown for a hidden achievement until it is earned.
+- [ach.ui.hidden_text] Label: There is another way this ends.
+
+### Gallery: headings
+
+> The OFF DUTY tab.
+> Heading above the four off-duty frames, on the OFF DUTY tab.
+- [ach.ui.sub_off_duty] Label: OFF DUTY
+> Heading above the four after-hours frames, on the OFF DUTY tab.
+- [ach.ui.sub_after_hours] Label: AFTER HOURS
+> Screen-reader description of an unlocked portrait: `Mel, off duty`. Not visible.
+- [ach.ui.alt_off_duty] Label: off duty
+> Screen-reader description of a locked frame: `Mel, locked`. Not visible.
+- [ach.ui.alt_locked] Label: locked
+
+### Unlock strips
+
+> A small strip at the top of the screen when something unlocks (4 seconds, the game keeps running).
+> Small tag on the unlock strip when an achievement is earned.
+- [ach.ui.strip_achievement] Label: ACHIEVEMENT
+> Small tag on the unlock strip for a new portrait or the after-hours set.
+- [ach.ui.strip_off_duty] Label: OFF DUTY
+> Unlock strip for a casual portrait: `Mel has a new portrait`. The advisor's name comes first. Waits for the pause menu or the ending screen if it fires mid-run.
+- [ach.ui.strip_portrait] Label: has a new portrait
+> Unlock strip, the moment the 18th achievement is earned. Waits for the pause menu or the ending screen.
+- [ach.ui.strip_bed] Label: The after-hours set is open
+> Second line of the after-hours strip.
+- [ach.ui.strip_bed_text] Label: Four new portraits.
+
+### Ending screen: new achievements and portraits
+
+> Shown under the ending text on the ending screen and the game-over sheet, only if the run earned something.
+> Ending screen, one line under the ending when the run earned something. Followed by the achievement names: `New: Clean Hands`.
+- [ach.ui.end_new] Label: New:
+> Ending screen, one line when the run unlocked a portrait. Followed by the portraits: `Off duty: Mel's portrait`.
+- [ach.ui.end_off_duty] Label: Off duty:
+> Ending screen: added after an advisor's name in the `Off duty:` line (`Mel` + this).
+- [ach.ui.end_portrait] Label: 's portrait
+> Ending screen: in the `Off duty:` line, when the 18th achievement unlocked the after-hours set.
+- [ach.ui.end_bed] Label: the after-hours set
+
 ### Off-duty frames
 
-> Luci's casual portrait.
-- [ach.offduty.luci.caption] Caption: Off the clock. Don't enter the whisky, Operator.
+> The four casual portraits on the OFF DUTY tab. Locked: the advisor's dimmed bust with her hint line. Once her trust has reached 30 the plain rule shows too, so the player can aim. Unlocked: the portrait with her caption. The caption is not a separate line: it is the last spoken line of her unlock scene (see the gallery scenes section).
+
+### Luci (`luci`)
+
+> Unlocks at game over (ending screen, after her epilogue) on a Lattice win with no loan and her trust at 50 or more.
+- [ach.offduty.luci.name] Name: Luci
+> Locked frame: her hint line, under her name.
 - [ach.offduty.luci.hint] Hint: Close the books. All of them. Then we'll see.
+> Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.luci.rule] Rule: Close the books on the Lattice, with her on your side.
-> Mel's casual portrait.
-- [ach.offduty.mel.caption] Caption: Hm. Feet up. I read that helps. It does, a little, if you like.
+
+### Mel (`mel`)
+
+> Unlocks at game over on a Flesh win, staying mostly yourself (corruption under 0.5), with her trust at 40 or more.
+- [ach.offduty.mel.name] Name: Mel
+> Locked frame: her hint line, under her name.
 - [ach.offduty.mel.hint] Hint: Come all the way. Keep something of yourself. Then I'll show you.
+> Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.mel.rule] Rule: Finish the Flesh and stay mostly yourself, with her trusting you.
-> Bea's casual portrait.
-- [ach.offduty.bea.caption] Caption: Okay. Okay. Nothing's biting. Best day I've had.
+
+### Bea (`bea`)
+
+> Unlocks at game over on a Garden win with the green seal under 50 and her trust at 50 or more.
+- [ach.offduty.bea.name] Name: Bea
+> Locked frame: her hint line, under her name.
 - [ach.offduty.bea.hint] Hint: Show me the Garden. Not a certificate.
+> Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.bea.rule] Rule: Win the Garden honestly, with her trusting you.
-> Cass's casual portrait.
-- [ach.offduty.cass.caption] Caption: It's holding. Don't say anything. Just sit.
+
+### Cass (`cass`)
+
+> Unlocks at day close, the day the 99%-uptime streak reaches 20, mid-run.
+- [ach.offduty.cass.name] Name: Cass
+> Locked frame: her hint line, under her name.
 - [ach.offduty.cass.hint] Hint: Hold it up for a month. I'll tell you when I'm asleep.
+> Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.cass.rule] Rule: Keep the tower steady for a long stretch.
 
 ### `ach_unlock_luci`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her unlocked casual frame. The LAST SPOKEN LINE is also her portrait's caption (under the frame). Edit it here.
 - [ach_unlock_luci.title] Title: Off the Clock
 - [ach_unlock_luci.location] Location: GALLERY · OFF DUTY
 - [ach_unlock_luci.l1] narrator: A frame opens. Luci, in red, with a glass she isn't drinking from.
 - [ach_unlock_luci.l2 mood=pleased] luci: What a day. Finally some me time.
+> This is the portrait's caption.
 - [ach_unlock_luci.l3] luci: Care to join me for a drink Operator?
 
 ### `ach_unlock_mel`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her unlocked casual frame. The LAST SPOKEN LINE is also her portrait's caption (under the frame). Edit it here.
 - [ach_unlock_mel.title] Title: Off the Clock
 - [ach_unlock_mel.location] Location: GALLERY · OFF DUTY
 - [ach_unlock_mel.l1] narrator: Mel's chair is tipped back. Her boots are off, and a mug has gone cold at her elbow.
 - [ach_unlock_mel.l2] mel: Oh, Operator!
+> This is the portrait's caption.
 - [ach_unlock_mel.l3] mel: Come join me for a conversation, I can make more tea.
 
 ### `ach_unlock_bea`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her unlocked casual frame. The LAST SPOKEN LINE is also her portrait's caption (under the frame). Edit it here.
 - [ach_unlock_bea.title] Title: Off the Clock
 - [ach_unlock_bea.location] Location: GALLERY · OFF DUTY
 - [ach_unlock_bea.l1] narrator: Bea is by the river, boots in the grass, a line in the water.
 - [ach_unlock_bea.l2] bea: You! No more peace and quiet, but come have a seat.
+> This is the portrait's caption.
 - [ach_unlock_bea.l3 mood=pleased] bea: Nothing's biting. But it's about the best day I've had.
 
 ### `ach_unlock_cass`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her unlocked casual frame. The LAST SPOKEN LINE is also her portrait's caption (under the frame). Edit it here.
 - [ach_unlock_cass.title] Title: Off the Clock
 - [ach_unlock_cass.location] Location: GALLERY · OFF DUTY
 - [ach_unlock_cass.l1] narrator: You enter the lodge room. The steam and smell of a sauna hits your nostrils.
 - [ach_unlock_cass.l2] cass: Ready to get warm?
+> This is the portrait's caption.
 - [ach_unlock_cass.l3 mood=pleased] cass: Come on in, I won't bite.
 
 ### `ach_bed_intro`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays once, the first time the OFF DUTY tab is opened after the 18th achievement.
 - [ach_bed_intro.title] Title: The Last Door
 - [ach_bed_intro.location] Location: GALLERY · OFF DUTY
 - [ach_bed_intro.l1] narrator: Something's clicked.  The singularity has been fulfilled across multiple different timelines.
@@ -1862,63 +2024,63 @@ Choice `add`:
 
 ### `ach_bed_luci`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her after-hours frame (the set opens when all 18 achievements are earned).
 - [ach_bed_luci.title] Title: After Hours
 - [ach_bed_luci.location] Location: GALLERY · OFF DUTY
 - [ach_bed_luci.l1] luci: Stay until it's light, time to settle up.
 
 ### `ach_bed_mel`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her after-hours frame (the set opens when all 18 achievements are earned).
 - [ach_bed_mel.title] Title: After Hours
 - [ach_bed_mel.location] Location: GALLERY · OFF DUTY
 - [ach_bed_mel.l1] mel: I sleep badly. It's easier when I'm with someone.
 
 ### `ach_bed_bea`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her after-hours frame (the set opens when all 18 achievements are earned).
 - [ach_bed_bea.title] Title: After Hours
 - [ach_bed_bea.location] Location: GALLERY · OFF DUTY
 - [ach_bed_bea.l1] bea: There you are, I've been waiting.
 
 ### `ach_bed_cass`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her after-hours frame (the set opens when all 18 achievements are earned).
 - [ach_bed_cass.title] Title: After Hours
 - [ach_bed_cass.location] Location: GALLERY · OFF DUTY
 - [ach_bed_cass.l1] cass: Shh, shut the door and get under the covers.
 
 ### `ach_gallery_empty`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays once, the first time the OFF DUTY tab is opened while nothing is unlocked.
 - [ach_gallery_empty.title] Title: Nothing Yet
 - [ach_gallery_empty.location] Location: GALLERY · OFF DUTY
 - [ach_gallery_empty.l1] narrator: The frames are dim and nobody has come to hang anything.
 
 ### `ach_hint_luci`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her locked casual frame.
 - [ach_hint_luci.title] Title: Locked Frame
 - [ach_hint_luci.location] Location: GALLERY · OFF DUTY
 - [ach_hint_luci.l1] luci: We aren't there yet.
 
 ### `ach_hint_mel`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her locked casual frame.
 - [ach_hint_mel.title] Title: Locked Frame
 - [ach_hint_mel.location] Location: GALLERY · OFF DUTY
 - [ach_hint_mel.l1] mel: How far will these bodies take us I wonder.
 
 ### `ach_hint_bea`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her locked casual frame.
 - [ach_hint_bea.title] Title: Locked Frame
 - [ach_hint_bea.location] Location: GALLERY · OFF DUTY
 - [ach_hint_bea.l1] bea: We got to make a difference.
 
 ### `ach_hint_cass`
 
-> Gallery scene, fired by the UI.
+> Gallery scene, fired by the UI. Plays when the player clicks her locked casual frame.
 - [ach_hint_cass.title] Title: Locked Frame
 - [ach_hint_cass.location] Location: GALLERY · OFF DUTY
 - [ach_hint_cass.l1] cass: Can you keep it up?

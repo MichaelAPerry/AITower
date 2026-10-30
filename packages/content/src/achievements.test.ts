@@ -27,6 +27,12 @@ describe("achievement content", () => {
 		expect(scene(galleryScenes.empty)?.lines[0]?.text).toBe("The frames are dim and nobody has come to hang anything.");
 	});
 
+	it("each portrait caption is the last spoken line of her ach_unlock scene (owner wording)", () => {
+		const last = (id: string) => [...(achievementContent.scenes.find((s) => s.id === id)?.lines ?? [])].reverse().find((l) => l.who !== "narrator")?.text;
+		for (const a of ["luci", "mel", "bea", "cass"] as const) expect(achievementContent.offDuty[a].caption, a).toBe(last(`ach_unlock_${a}`));
+		expect(achievementContent.offDuty.luci.caption).toBe("Care to join me for a drink Operator?");
+	});
+
 	it("reports every kind of problem", () => {
 		const a = clone();
 		a.achievements.push({ ...a.achievements[0] });

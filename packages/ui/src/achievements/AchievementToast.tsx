@@ -28,9 +28,10 @@ export interface StripItem {
 
 const advisorName = (a: AdvisorKey): string => achievementContent.offDuty[a].name;
 
-export const achievementItem = (d: AchievementDef): StripItem => ({ key: `a:${d.id}`, tag: "ACHIEVEMENT", name: d.name, text: d.text, icon: d.icon });
-export const portraitItem = (a: AdvisorKey): StripItem => ({ key: `p:${a}`, tag: "OFF DUTY", name: `${advisorName(a)} has a new portrait`, deferred: true });
-export const bedItem = (): StripItem => ({ key: "p:bed", tag: "OFF DUTY", name: "The after-hours set is open", text: "Four new portraits.", deferred: true });
+const U = achievementContent.ui;
+export const achievementItem = (d: AchievementDef): StripItem => ({ key: `a:${d.id}`, tag: U.stripAchievement, name: d.name, text: d.text, icon: d.icon });
+export const portraitItem = (a: AdvisorKey): StripItem => ({ key: `p:${a}`, tag: U.stripOffDuty, name: `${advisorName(a)} ${U.stripPortrait}`, deferred: true });
+export const bedItem = (): StripItem => ({ key: "p:bed", tag: U.stripOffDuty, name: U.stripBed, text: U.stripBedText, deferred: true });
 
 /** The strips for what a check just earned. */
 export const itemsFor = (r: AwardResult): StripItem[] => [...r.won.map(achievementItem), ...r.portraits.map(portraitItem), ...(r.bed ? [bedItem()] : [])];

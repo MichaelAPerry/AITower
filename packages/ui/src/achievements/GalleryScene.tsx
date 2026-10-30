@@ -25,8 +25,8 @@ export interface GalleryFigure {
  * A short gallery moment: the portrait standing in front of the plain stage, the scene's lines in the dialogue box (click, Enter
  * or Space to go on), and `onClose` after the last. Esc closes it without closing the menu behind.
  */
-export function GalleryScene({ scene, figure, caption, onClose }: { scene: Scene; figure?: GalleryFigure; caption?: { advisor: "luci" | "mel" | "bea" | "cass"; text: string }; onClose: () => void }) {
-	const pages = pagesOf(scene, caption);
+export function GalleryScene({ scene, figure, onClose }: { scene: Scene; figure?: GalleryFigure; onClose: () => void }) {
+	const pages = pagesOf(scene);
 	const [i, setI] = useState(0);
 	const [shown, setShown] = useState(0);
 	const root = useRef<HTMLDivElement>(null);

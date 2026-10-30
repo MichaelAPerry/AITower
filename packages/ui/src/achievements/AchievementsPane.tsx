@@ -8,6 +8,8 @@ import { GalleryScene } from "./GalleryScene";
 import { autoScene, counter, type Frame, frames, listRows, sceneById, sceneIdFor } from "./gallery";
 import "./achievements.css";
 
+const U = achievementContent.ui;
+
 type Page = "list" | "offduty";
 
 interface Playing {
@@ -39,12 +41,12 @@ export function AchievementsPane() {
 	return (
 		<div className="ach-pane" data-pane="achievements">
 			<div className="ach-head">
-				<div className="ach-tabs" role="tablist" aria-label="Achievements pages">
+				<div className="ach-tabs" role="tablist" aria-label={U.ariaPages}>
 					<button type="button" role="tab" aria-selected={page === "list"} className={`ui-btn ${page === "list" ? "is-go" : ""}`} onClick={() => setPage("list")}>
-						LIST
+						{U.tabList}
 					</button>
 					<button type="button" role="tab" aria-selected={page === "offduty"} className={`ui-btn ${page === "offduty" ? "is-go" : ""}`} onClick={() => setPage("offduty")}>
-						OFF DUTY
+						{U.tabOffDuty}
 					</button>
 				</div>
 				<span className="ach-count" data-ach-count>
@@ -52,7 +54,7 @@ export function AchievementsPane() {
 				</span>
 			</div>
 			{page === "list" ? <List /> : <Gallery onPlay={(sceneId, frame) => setPlaying({ sceneId, frame })} />}
-			<p className="ach-note">Saved in this browser. Export to file keeps it.</p>
+			<p className="ach-note">{U.note}</p>
 			{playing && <Playback playing={playing} onClose={done} />}
 		</div>
 	);
@@ -61,7 +63,7 @@ export function AchievementsPane() {
 function List() {
 	const rows = listRows(loadProfile());
 	return (
-		<ul className="ach-list" aria-label="Achievements">
+		<ul className="ach-list" aria-label={U.ariaList}>
 			{rows.map((r) => (
 				<li key={r.id} className={`ach-row ${r.earned ? "is-earned" : "is-locked"} ${r.hidden ? "is-hidden" : ""}`} data-ach={r.id} data-earned={r.earned || undefined}>
 					<AchIcon icon={r.def.icon} scale={1} locked={!r.earned} hidden={r.hidden} />
@@ -69,7 +71,7 @@ function List() {
 						<b className="ach-name">{r.name}</b>
 						<span className="ach-text">{r.text}</span>
 					</span>
-					<span className="ach-when">{r.earned ? <><span className="ach-check" title="Earned">{"✓"}</span> {r.when}</> : ""}</span>
+					<span className="ach-when">{r.earned ? <><span className="ach-check" title={U.earnedMark}>{"✓"}</span> {r.when}</> : ""}</span>
 				</li>
 			))}
 		</ul>
@@ -80,13 +82,13 @@ function Gallery({ onPlay }: { onPlay: (sceneId: string, frame: Frame) => void }
 	const { casual, bed, bedOpen } = frames(loadProfile());
 	return (
 		<div className="ach-gallery">
-			<h3 className="ach-sub">OFF DUTY</h3>
+			<h3 className="ach-sub">{U.subOffDuty}</h3>
 			<div className="ach-frames" data-set="casual">
 				{casual.map((f) => (
 					<FrameCard key={f.advisor} frame={f} onPlay={onPlay} />
 				))}
 			</div>
-			<h3 className="ach-sub">AFTER HOURS</h3>
+			<h3 className="ach-sub">{U.subAfterHours}</h3>
 			<div className="ach-frames" data-set="bed" data-open={bedOpen || undefined}>
 				{bed.map((f) => (
 					<FrameCard key={f.advisor} frame={f} onPlay={onPlay} />
@@ -104,13 +106,13 @@ function FrameCard({ frame: f, onPlay }: { frame: Frame; onPlay: (sceneId: strin
 	if (f.set === "bed" && !f.unlocked)
 		return (
 			<div className="ach-frame is-blank" style={style} data-frame={`${f.set}:${f.advisor}`}>
-				<span className="ach-blank">???</span>
+				<span className="ach-blank">{U.hiddenName}</span>
 			</div>
 		);
 	const src = f.unlocked ? OFF_DUTY[f.advisor][f.set] : PORTRAITS[f.advisor].neutral;
 	return (
 		<button type="button" className={`ach-frame ${f.unlocked ? "is-open" : "is-locked"}`} style={style} data-frame={`${f.set}:${f.advisor}`} data-unlocked={f.unlocked || undefined} onClick={() => onPlay(sceneIdFor(f), f)}>
-			<img src={src} alt={f.unlocked ? `${adv.first}, off duty` : `${adv.first}, locked`} draggable={false} />
+			<img src={src} alt={`${adv.first}, ${f.unlocked ? U.altOffDuty : U.altLocked}`} draggable={false} />
 			<span className="ach-frame-name">{adv.first}</span>
 			{f.set === "casual" && (f.unlocked ? <span className="ach-frame-line">{text.caption}</span> : <span className="ach-frame-line">{text.hint}</span>)}
 			{f.showRule && <span className="ach-frame-rule">{text.rule}</span>}
@@ -123,7 +125,6 @@ function Playback({ playing, onClose }: { playing: Playing; onClose: () => void 
 	const f = playing.frame;
 	const advisor: GalleryAdvisor | undefined = f?.advisor;
 	const figure = f && advisor ? { src: f.unlocked ? OFF_DUTY[advisor][f.set] : PORTRAITS[advisor].neutral, dim: !f.unlocked, alt: ADVISORS[advisor].first } : undefined;
-	// A casual unlock ends on her caption, in her voice.
-	const caption = f && advisor && f.unlocked && f.set === "casual" ? { advisor, text: achievementContent.offDuty[advisor].caption } : undefined;
-	return <GalleryScene scene={scene} figure={figure} caption={caption} onClose={onClose} />;
+	// A casual unlock scene ends on her caption (its last line), in her voice.
+	return <GalleryScene scene={scene} figure={figure} onClose={onClose} />;
 }

@@ -1,4 +1,4 @@
-import type { ContentDB } from "@aitower/content";
+import { type ContentDB, achievementContent } from "@aitower/content";
 import type { GameState, GameStore } from "@aitower/shared";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Icon } from "../components/common";
@@ -17,7 +17,7 @@ const DRAWERS: { id: MenuSection; label: string; form: string; title: string }[]
 	{ id: "settings", label: "Settings", form: "SETTINGS", title: "Settings" },
 	{ id: "controls", label: "Controls", form: "CONTROLS", title: "Controls · keys and mouse" },
 	{ id: "lessons", label: "Lessons", form: "LESSONS", title: "Lessons · learn by doing" },
-	{ id: "achievements", label: "Achievements", form: "RECORD", title: "Achievements \u00b7 and the off-duty gallery" },
+	{ id: "achievements", label: achievementContent.ui.menuLabel, form: "RECORD", title: achievementContent.ui.menuTitle },
 	{ id: "new", label: "New game", form: "NEW GAME", title: "New game" },
 ];
 

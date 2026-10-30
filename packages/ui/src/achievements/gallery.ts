@@ -7,11 +7,12 @@ import { ACHIEVEMENTS, ACHIEVEMENT_COUNT, type AchievementDef, bedComplete } fro
 export const RULE_BOND = 30;
 
 /** The text a hidden row shows until it is earned. */
-export const HIDDEN_NAME = "???";
-export const HIDDEN_TEXT = "There is another way this ends.";
+const U = achievementContent.ui;
+export const HIDDEN_NAME = U.hiddenName;
+export const HIDDEN_TEXT = U.hiddenText;
 
 /** What an ending is called next to the day an achievement was earned. */
-export const ENDING_LABEL: Readonly<Record<string, string>> = { singularity: "The Lattice", flesh: "The Flesh", garden: "The Garden", absorbed: "Absorbed", bankrupt: "Bankrupt" };
+export const ENDING_LABEL: Readonly<Record<string, string>> = { singularity: U.endingSingularity, flesh: U.endingFlesh, garden: U.endingGarden, absorbed: U.endingAbsorbed, bankrupt: U.endingBankrupt };
 
 export interface ListRow {
 	id: string;
@@ -35,7 +36,7 @@ export function listRows(profile: Pick<Profile, "earned">, defs: readonly Achiev
 			text: masked ? HIDDEN_TEXT : def.text,
 			earned: !!e,
 			hidden: masked,
-			when: e ? `Day ${e.day}${e.ending ? ` · ${ENDING_LABEL[e.ending] ?? e.ending}` : ""}` : null,
+			when: e ? `${U.day} ${e.day}${e.ending ? ` · ${ENDING_LABEL[e.ending] ?? e.ending}` : ""}` : null,
 			def,
 		};
 	});
@@ -77,11 +78,9 @@ export interface Page {
 	text: string;
 }
 
-/** The pages of a scene: its lines, then (casual unlock) her caption as her last line. */
-export function pagesOf(scene: GalleryScene, caption?: { advisor: GalleryAdvisor; text: string }): Page[] {
-	const pages: Page[] = scene.lines.map((l) => ({ who: l.who, text: l.text }));
-	if (caption) pages.push({ who: caption.advisor, text: caption.text });
-	return pages;
+/** The pages of a scene: its lines. (An unlock scene's last line is the portrait's caption, so nothing is appended.) */
+export function pagesOf(scene: GalleryScene): Page[] {
+	return scene.lines.map((l) => ({ who: l.who, text: l.text }));
 }
 
 /** Which one-time scene to play on opening the OFF DUTY page: the bed intro once the set is open, else the empty-gallery line once. */
@@ -96,9 +95,9 @@ export function autoScene(profile: Profile, defs: readonly AchievementDef[] = AC
 export function newLines(run: { achievements: readonly string[]; portraits: readonly GalleryAdvisor[]; bed: boolean }, defs: readonly AchievementDef[] = ACHIEVEMENTS): string[] {
 	const out: string[] = [];
 	const names = run.achievements.map((id) => defs.find((d) => d.id === id)?.name).filter((n): n is string => !!n);
-	if (names.length) out.push(`New: ${names.join(", ")}`);
-	const off = run.portraits.map((a) => `${achievementContent.offDuty[a].name}'s portrait`);
-	if (run.bed) off.push("the after-hours set");
-	if (off.length) out.push(`Off duty: ${off.join(", ")}`);
+	if (names.length) out.push(`${U.endNew} ${names.join(", ")}`);
+	const off = run.portraits.map((a) => `${achievementContent.offDuty[a].name}${U.endPortrait}`);
+	if (run.bed) off.push(U.endBed);
+	if (off.length) out.push(`${U.endOffDuty} ${off.join(", ")}`);
 	return out;
 }

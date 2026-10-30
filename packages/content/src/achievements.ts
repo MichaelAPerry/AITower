@@ -17,7 +17,7 @@ export interface AchievementText {
 
 export interface OffDutyText {
 	name: string;
-	/** Under the portrait once it is unlocked. */
+	/** Under the portrait once it is unlocked. Not stored: it is the last spoken line of her `ach_unlock_*` scene (docs/NEW_SCENES.md). */
 	caption: string;
 	/** The locked frame's old-style line. */
 	hint: string;
@@ -38,10 +38,53 @@ export interface GalleryScene {
 	lines: GalleryLine[];
 }
 
+/** The fixed UI words of the achievements list, the gallery, the unlock strips and the ending-screen lines. */
+export const UI_KEYS = [
+	"menuLabel",
+	"menuTitle",
+	"titleItem",
+	"titleDetail",
+	"tabList",
+	"tabOffDuty",
+	"ariaPages",
+	"ariaList",
+	"earnedMark",
+	"day",
+	"endingSingularity",
+	"endingFlesh",
+	"endingGarden",
+	"endingAbsorbed",
+	"endingBankrupt",
+	"hiddenName",
+	"hiddenText",
+	"subOffDuty",
+	"subAfterHours",
+	"altOffDuty",
+	"altLocked",
+	"note",
+	"stripAchievement",
+	"stripOffDuty",
+	"stripPortrait",
+	"stripBed",
+	"stripBedText",
+	"endNew",
+	"endOffDuty",
+	"endPortrait",
+	"endBed",
+] as const;
+export type UiKey = (typeof UI_KEYS)[number];
+
 export interface AchievementContent {
 	achievements: AchievementText[];
 	offDuty: Record<GalleryAdvisor, OffDutyText>;
+	ui: Record<UiKey, string>;
 	scenes: GalleryScene[];
+}
+
+/** The last spoken (non-narrator) line of an advisor's unlock scene: her portrait caption. */
+export function captionOf(scenes: readonly GalleryScene[], a: GalleryAdvisor): string {
+	const lines = scenes.find((s) => s.id === `ach_unlock_${a}`)?.lines ?? [];
+	return [...lines].reverse().find((l) => l.who !== "narrator")?.text.trim() ?? "";
 }
 
 export const GALLERY_ADVISORS: readonly GalleryAdvisor[] = ["luci", "mel", "bea", "cass"];
@@ -73,7 +116,9 @@ export function validateAchievementContent(c: AchievementContent): string[] {
 			continue;
 		}
 		for (const k of ["name", "caption", "hint", "rule"] as const) if (!o[k]?.trim()) p.push(`offDuty.${adv}.${k}: empty`);
+		if (o.caption !== captionOf(c.scenes, adv)) p.push(`offDuty.${adv}.caption: must equal the last spoken line of ${galleryScenes.unlock(adv)}`);
 	}
+	for (const k of UI_KEYS) if (!c.ui?.[k]?.trim()) p.push(`ui.${k}: empty`);
 	const sceneIds = new Set<string>();
 	for (const s of c.scenes) {
 		if (sceneIds.has(s.id)) p.push(`scenes: duplicate id ${s.id}`);
@@ -94,6 +139,7 @@ export function validateAchievementContent(c: AchievementContent): string[] {
 /** The bundled achievement words, validated once at load. */
 export function loadAchievementContent(): AchievementContent {
 	const c = structuredClone(data) as unknown as AchievementContent;
+	for (const a of GALLERY_ADVISORS) if (c.offDuty?.[a]) c.offDuty[a].caption = captionOf(c.scenes ?? [], a);
 	const problems = validateAchievementContent(c);
 	if (problems.length) throw new Error(`Invalid achievements.json:\n- ${problems.join("\n- ")}`);
 	return c;

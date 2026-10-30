@@ -349,7 +349,8 @@ export function loadProject(root: string = DEFAULT_ROOT): Project {
 
 	const ach = JSON.parse(files[FILES.achievements] as string) as {
 		achievements: { id: string; name: string; text: string }[];
-		offDuty: Record<string, { name: string; caption: string; hint: string; rule: string }>;
+		offDuty: Record<string, { name: string; hint: string; rule: string }>;
+		ui?: Record<string, string>;
 		scenes: { id: string; title: string; location: string; lines: Reply[] }[];
 	};
 	{
@@ -360,10 +361,11 @@ export function loadProject(root: string = DEFAULT_ROOT): Project {
 		});
 		for (const [adv, o] of Object.entries(ach.offDuty)) {
 			const c = `ach.offduty.${adv}`;
-			put(c, `${c}.caption`, "Caption", ["offDuty", adv, "caption"], o.caption);
+			put(c, `${c}.name`, "Name", ["offDuty", adv, "name"], o.name);
 			put(c, `${c}.hint`, "Hint", ["offDuty", adv, "hint"], o.hint);
 			put(c, `${c}.rule`, "Rule", ["offDuty", adv, "rule"], o.rule);
 		}
+		for (const [k, v] of Object.entries(ach.ui ?? {})) put("ach.ui", `ach.ui.${k.replace(/[A-Z]/g, (c) => `_${c.toLowerCase()}`)}`, "Label", ["ui", k], v);
 		ach.scenes.forEach((s, si) => {
 			put(s.id, `${s.id}.title`, "Title", ["scenes", si, "title"], s.title);
 			put(s.id, `${s.id}.location`, "Location", ["scenes", si, "location"], s.location);
