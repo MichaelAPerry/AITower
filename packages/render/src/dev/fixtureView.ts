@@ -240,6 +240,7 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		contamination: new Float32Array(n),
 		nutrientNets: [],
 		corruption: 0,
+		uptimeStreak: 0,
 		contaminatedShare: 0,
 		irreversible: false,
 		path: null,

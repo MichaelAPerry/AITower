@@ -236,7 +236,6 @@ export function Hud({ store, content, title }: HudProps) {
 				{!lesson.active && <NextChip {...props} />}
 				{lesson.layer}
 				<Toasts content={content} state={state} />
-				<AchievementToast state={state} />
 				<LevelUpCard content={content} state={state} />
 				{!titleOpen && !over && <DecisionCard store={store} content={content} state={state} onHandbook={(id) => setUi({ drawer: "handbook", encyId: id, paletteOpen: false, buildHover: null })} />}
 				<CursorHint state={state} />
@@ -286,6 +285,7 @@ export function Hud({ store, content, title }: HudProps) {
 					}}
 				/>
 			)}
+			<AchievementToast state={state} content={content} deferOk={menuOpen || !!over} />
 			{menuOpen && <SystemMenu key={menuSection} store={store} state={state} content={content} menu={menu} onEncyclopedia={() => setUi({ drawer: "handbook", paletteOpen: false })} initial={menuSection} fromTitle={titleOpen} onReplaced={onReplaced} />}
 		</div>
 		</TermProvider>

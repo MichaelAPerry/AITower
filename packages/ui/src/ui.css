@@ -2382,6 +2382,7 @@
 /* Achievement strip: PC-98 frame, top centre, never over the advisor strip. Shown 4 seconds. */
 .aitower-hud .ui-ach-toast {
 	position: absolute;
+	z-index: 200; /* above the menu (60), the ending and gallery stages (120) */
 	top: calc(var(--gap, 8px) + 34px);
 	left: 50%;
 	transform: translateX(-50%);

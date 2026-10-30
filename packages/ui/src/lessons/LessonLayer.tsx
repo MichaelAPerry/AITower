@@ -2,6 +2,9 @@ import type { AdvisorId, ContentDB, LessonDef } from "@aitower/content";
 import { type GameState, type GameStore, recordLesson } from "@aitower/shared";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
+import { awardsAllowed } from "../achievements/AchievementToast";
+import { awardFor } from "../achievements/achievements";
+import { publishAwards } from "../achievements/awardBus";
 import { Say } from "../advisors/AdvisorStrip";
 import { Portrait } from "../advisors/Portrait";
 import type { PanelProps, UiState } from "../components/context";
@@ -162,6 +165,8 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		if (lv.status === "won" && recorded.current !== done) {
 			recorded.current = done;
 			setFirstTime(recordLesson(lv.id, lv.stars).first);
+			// Student: every lesson finished (the one achievement a lesson can earn).
+			if (awardsAllowed()) publishAwards(awardFor("lessonEnd", state.view, { content }));
 		}
 	}, [done, enabled]);
 
