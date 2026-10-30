@@ -1,5 +1,6 @@
 import type { ContentDB } from "@aitower/content";
-import { type GameState, type GameStore, freeBuildBonus, loadLessonProgress } from "@aitower/shared";
+import { type GameState, type GameStore, freeBuildBonus, loadLessonProgress, loadProfile } from "@aitower/shared";
+import { counter } from "../achievements/gallery";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { fmtMoney } from "../format";
 import { focusables, nextFocusIndex } from "../menu/focus";
@@ -23,7 +24,7 @@ export interface TitleScreenProps {
 	content?: ContentDB;
 }
 
-const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", lesson: "START LESSON 1", new: "FREE BUILD", load: "LOAD GAME", settings: "SETTINGS", controls: "CONTROLS" };
+const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", lesson: "START LESSON 1", new: "FREE BUILD", load: "LOAD GAME", achievements: "ACHIEVEMENTS", settings: "SETTINGS", controls: "CONTROLS" };
 
 /**
  * The title screen: the AITOWER nameplate and the menu. The game stays paused
@@ -121,6 +122,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 										<span className="ui-title-label">{item === "lesson" && lessonDone ? "LESSONS" : LABEL[item]}</span>
 										{item === "continue" && auto && <span className="ui-title-detail">{continueSummary(auto, now)}</span>}
 										{item === "load" && <span className="ui-title-detail">{saves.length} saved</span>}
+										{item === "achievements" && <span className="ui-title-detail">{counter(loadProfile())} earned \u00b7 off-duty gallery</span>}
 										{item === "lesson" && <span className="ui-title-detail">{lessonDone ? "replay or pick one" : "build a rack · 4 min · recommended"}</span>}
 										{item === "new" && <span className="ui-title-detail">{bonus > 0 ? `sandbox sites · +${fmtMoney(bonus)} head start` : "sandbox sites, no teacher"}</span>}
 									</button>

@@ -107,6 +107,20 @@ async function run(url) {
 		await page.getByRole("button", { name: /START LESSON 1/ }).waitFor();
 		assert((await page.getByRole("button", { name: /FREE BUILD/ }).count()) === 1, "the title offers Free Build next to the lesson");
 		assert((await page.getByText("Restart tutorial").count()) === 0 && (await page.locator(".ui-coach").count()) === 0, "the old tutorial is gone");
+		await page.getByRole("button", { name: /ACHIEVEMENTS/ }).click();
+		await page.locator(".ach-list").waitFor();
+		assert((await page.locator("[data-ach-count]").innerText()).trim() === "0 / 18", "a new profile shows 0 / 18");
+		assert((await page.locator(".ach-row").count()) === 18, "eighteen achievement rows");
+		assert((await page.locator(".ach-row.is-hidden").count()) === 2, "two hidden rows (There is another way this ends.)");
+		await page.getByRole("tab", { name: "OFF DUTY" }).click();
+		await page.locator(".ach-frames").first().waitFor();
+		await page.locator(".gal-scene").waitFor(); // the first visit plays the one-line "nothing yet" moment
+		await page.keyboard.press("Escape"); // closes that scene only, not the menu behind it
+		await page.locator(".gal-scene").waitFor({ state: "detached" });
+		assert((await page.locator('[data-set="casual"] .ach-frame.is-locked').count()) === 4, "four locked off-duty frames");
+		assert((await page.locator('[data-set="bed"] .ach-frame.is-blank').count()) === 4, "four blank bed frames");
+		await page.keyboard.press("Escape");
+		await page.locator(".ui-menu").waitFor({ state: "detached" });
 		await page.getByRole("button", { name: /START LESSON 1/ }).click();
 		await page.locator("[data-lesson-goal]").waitFor();
 		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { id: l.id, status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });

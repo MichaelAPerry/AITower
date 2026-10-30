@@ -2,6 +2,9 @@ import type { ContentDB } from "@aitower/content";
 import type { HorrorIntensity } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
+import "../achievements/achievements.css";
+import { useRunAwards } from "../achievements/awardBus";
+import { newLines } from "../achievements/gallery";
 import { Stamp } from "../components/common";
 import { focusables, nextFocusIndex } from "../menu/focus";
 import { StampBtn } from "../menu/parts";
@@ -30,6 +33,7 @@ export function GameOverScreen({ over, view, content, horror = "full", onLoad, o
 	const copy = overCopyFor(over, content, horror);
 	const ending = endingOf(over);
 	const final = isFinal(over.kind);
+	const fresh = newLines(useRunAwards());
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: refocus the first button when the notice appears and when the menu hands control back
 	useEffect(() => {
@@ -78,6 +82,13 @@ export function GameOverScreen({ over, view, content, horror = "full", onLoad, o
 						))}
 					</dl>
 				</section>
+				{fresh.length > 0 && (
+					<p className="ui-over-new" data-ach-new>
+						{fresh.map((l) => (
+							<span key={l}>{l}</span>
+						))}
+					</p>
+				)}
 				<Stamp tone={copy.tone === "red" ? "red" : "green"} className="ui-over-stamp">
 					{copy.stamp}
 				</Stamp>

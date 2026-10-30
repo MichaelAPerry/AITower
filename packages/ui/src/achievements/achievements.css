@@ -1,0 +1,215 @@
+/* Achievements list, off-duty gallery and image-sheet icons (docs/ACHIEVEMENTS.md). Tokens only, scoped under .aitower-hud. */
+
+/* An icon cut from an image sheet: crisp, with the locked and hidden looks made by filter. */
+.aitower-hud .ui-ach-sheet {
+	display: inline-block;
+	flex: none;
+	image-rendering: pixelated;
+}
+.aitower-hud .ui-ach-sheet.is-locked {
+	filter: grayscale(1) brightness(0.55) contrast(0.8);
+}
+/* Hidden and still locked: a black silhouette with a "?" over it. */
+.aitower-hud .ui-ach-sheet.is-hidden {
+	position: relative;
+	filter: brightness(0) opacity(0.55);
+}
+
+.aitower-hud .ach-pane {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	min-height: 0;
+}
+.aitower-hud .ach-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 10px;
+}
+.aitower-hud .ach-tabs {
+	display: flex;
+	gap: 6px;
+}
+.aitower-hud .ach-count {
+	color: #1a1a6e;
+	font: 22px/1 var(--f-display);
+	letter-spacing: 0.06em;
+}
+.aitower-hud .ach-note {
+	margin: 0;
+	color: #3a3a80;
+	font-size: 13px;
+}
+
+.aitower-hud .ach-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 4px;
+}
+.aitower-hud .ach-row {
+	display: grid;
+	grid-template-columns: 24px 1fr auto;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 8px;
+	border: 1px solid var(--pc-rule-in, currentColor);
+	background: color-mix(in srgb, var(--bg, #07072a) 70%, transparent);
+	color: var(--text);
+}
+.aitower-hud .ach-row.is-earned {
+	border-color: var(--money, #ffd75e);
+}
+.aitower-hud .ach-row.is-locked {
+	color: var(--text-dim, var(--text));
+	opacity: 0.72;
+}
+.aitower-hud .ach-body {
+	display: grid;
+	gap: 1px;
+	min-width: 0;
+}
+.aitower-hud .ach-name {
+	font: 16px/1.2 var(--f-display);
+	letter-spacing: 0.04em;
+}
+.aitower-hud .ach-row.is-earned .ach-name {
+	color: var(--money, #ffd75e);
+}
+.aitower-hud .ach-text {
+	font-size: 13px;
+	line-height: 1.3;
+}
+.aitower-hud .ach-when {
+	font-size: 12px;
+	text-align: right;
+	white-space: nowrap;
+	color: var(--text-dim, var(--text));
+}
+.aitower-hud .ach-check {
+	color: var(--money, #ffd75e);
+	font-weight: bold;
+}
+
+.aitower-hud .ach-sub {
+	margin: 4px 0 6px;
+	font: 14px/1 var(--f-display);
+	letter-spacing: 0.1em;
+	color: #3a3a80;
+}
+.aitower-hud .ach-frames {
+	display: grid;
+	grid-template-columns: repeat(4, minmax(0, 1fr));
+	gap: 10px;
+}
+.aitower-hud .ach-frame {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	padding: 6px;
+	text-align: left;
+	color: var(--text);
+	font: inherit;
+	background: #05051e;
+	border: 2px solid var(--adv, var(--pc-rule));
+	box-shadow: 0 0 0 1px #05051e, 3px 3px 0 rgba(0, 0, 0, 0.55);
+	cursor: pointer;
+}
+.aitower-hud .ach-frame:focus-visible {
+	outline: 2px solid var(--money, #ffd75e);
+	outline-offset: 2px;
+}
+.aitower-hud .ach-frame img {
+	display: block;
+	width: 100%;
+	aspect-ratio: 2 / 3;
+	object-fit: cover;
+	image-rendering: pixelated;
+	background: #eef0ff;
+}
+.aitower-hud .ach-frame.is-locked img {
+	object-position: top;
+	filter: brightness(0.35) grayscale(0.7);
+}
+.aitower-hud .ach-frame-name {
+	color: var(--adv, var(--text));
+	font: 15px/1 var(--f-display);
+	letter-spacing: 0.06em;
+}
+.aitower-hud .ach-frame-line {
+	font-size: 12px;
+	line-height: 1.3;
+	font-style: italic;
+	color: var(--text-dim, var(--text));
+}
+.aitower-hud .ach-frame-rule {
+	font-size: 12px;
+	line-height: 1.3;
+	color: var(--money, #ffd75e);
+}
+.aitower-hud .ach-frame.is-blank {
+	display: grid;
+	place-items: center;
+	min-height: 84px;
+	cursor: default;
+	border-style: dashed;
+	opacity: 0.7;
+}
+.aitower-hud .ach-blank {
+	color: var(--text-dim, var(--text));
+	font: 28px/1 var(--f-display);
+	letter-spacing: 0.1em;
+}
+
+/* The gallery scene: the vn stage with a tall portrait. */
+.aitower-hud .gal-scene .gal-figure {
+	position: absolute;
+	left: max(16px, calc(50% - 480px));
+	bottom: 196px;
+	height: min(420px, calc(100vh - 260px));
+	aspect-ratio: 2 / 3;
+	background: #eef0ff;
+	border: 3px solid var(--adv, var(--pc-rule));
+	box-shadow: 0 0 0 2px #05051e, 4px 4px 0 rgba(0, 0, 0, 0.6);
+	animation: vn-figure-in 0.3s steps(5) both;
+}
+.aitower-hud .gal-scene .gal-figure img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	image-rendering: pixelated;
+}
+.aitower-hud .gal-scene .gal-figure.is-dim img {
+	object-position: top;
+	filter: brightness(0.4) grayscale(0.6);
+}
+
+@media (max-width: 720px) {
+	.aitower-hud .ach-frames {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+	.aitower-hud .ach-row {
+		grid-template-columns: 24px 1fr;
+	}
+	.aitower-hud .ach-when {
+		grid-column: 2;
+		text-align: left;
+	}
+}
+
+/* "New: ..." on the ending screens: what this run earned. */
+.aitower-hud .vn-new,
+.aitower-hud .ui-over-new {
+	display: grid;
+	gap: 2px;
+	margin: 0;
+	color: var(--money, #ffd75e);
+	font: 17px/1.3 var(--f-display);
+	letter-spacing: 0.04em;
+}
+.aitower-hud .ui-over-new {
+	margin: 10px 0;
+}

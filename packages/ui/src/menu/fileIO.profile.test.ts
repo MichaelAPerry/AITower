@@ -45,7 +45,10 @@ describe("the profile in the save file", () => {
 		let blob: Blob | null = null;
 		const a = { click: () => {}, remove: () => {}, style: {} } as unknown as HTMLAnchorElement;
 		vi.stubGlobal("localStorage", mem);
-		vi.stubGlobal("URL", { createObjectURL: (b: Blob) => ((blob = b), "blob:x"), revokeObjectURL: () => {} });
+		vi.stubGlobal("URL", { createObjectURL: (b: Blob) => {
+				blob = b;
+				return "blob:x";
+			}, revokeObjectURL: () => {} });
 		vi.stubGlobal("document", { createElement: () => a, body: { appendChild: () => {} } });
 		try {
 			expect(exportSave(createFakeStore(), 3).ok).toBe(true);

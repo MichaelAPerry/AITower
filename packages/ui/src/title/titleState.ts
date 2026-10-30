@@ -5,7 +5,7 @@ import { fmtMoney } from "../format";
 /** Shown at boot unless the URL has ?new (the e2e smoke test relies on that). */
 export const showTitleAtBoot = (search: string): boolean => !new URLSearchParams(search).has("new");
 
-export type TitleItem = "continue" | "lesson" | "new" | "load" | "settings" | "controls";
+export type TitleItem = "continue" | "lesson" | "new" | "load" | "achievements" | "settings" | "controls";
 
 /**
  * The entries to offer for the saves found. Continue needs the autosave; Load needs any save. The lesson comes right after
@@ -16,7 +16,7 @@ export function titleItems(saves: readonly SaveSlotInfo[]): TitleItem[] {
 	if (saves.some((s) => s.id === "auto")) items.push("continue");
 	items.push("lesson", "new");
 	if (saves.length > 0) items.push("load");
-	items.push("settings", "controls");
+	items.push("achievements", "settings", "controls");
 	return items;
 }
 

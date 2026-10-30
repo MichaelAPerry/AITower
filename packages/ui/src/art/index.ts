@@ -22,6 +22,14 @@ import cass_pleased from "./cass-pleased.webp";
 import cass_displeased from "./cass-displeased.webp";
 import cass_unsettling from "./cass-unsettling.webp";
 import cass_full from "./cass-full.webp";
+import luci_offduty from "./luci-offduty.webp";
+import luci_offduty_night from "./luci-offduty-night.webp";
+import mel_offduty from "./mel-offduty.webp";
+import mel_offduty_night from "./mel-offduty-night.webp";
+import bea_offduty from "./bea-offduty.webp";
+import bea_offduty_night from "./bea-offduty-night.webp";
+import cass_offduty from "./cass-offduty.webp";
+import cass_offduty_night from "./cass-offduty-night.webp";
 import bg_title from "./bg-title.webp";
 import bg_bio from "./bg-bio.webp";
 import bg_green from "./bg-green.webp";
@@ -127,3 +135,11 @@ export const sceneBackdrop = (sceneId: string, tree?: BackdropId, files: Record<
 
 /** The backdrop image of an ending, or undefined for the plain stage. */
 export const endingBackdrop = (e: { art?: string; backdrop?: BackdropId }): string | undefined => (e.art && e.art in ENDING_ART ? ENDING_ART[e.art] : e.backdrop ? BACKDROP[e.backdrop] : undefined);
+
+/** Off-duty gallery portraits (docs/ACHIEVEMENTS.md section 4): the casual set, and the bed set that unlocks at 18 of 18. 280x420. */
+export const OFF_DUTY: Record<ArtAdvisor, { casual: string; bed: string }> = {
+	luci: { casual: luci_offduty, bed: luci_offduty_night },
+	mel: { casual: mel_offduty, bed: mel_offduty_night },
+	bea: { casual: bea_offduty, bed: bea_offduty_night },
+	cass: { casual: cass_offduty, bed: cass_offduty_night },
+};

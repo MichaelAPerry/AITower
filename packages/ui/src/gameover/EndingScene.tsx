@@ -3,6 +3,9 @@ import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
 import { endingBackdrop, PORTRAITS } from "../art";
+import { newLines } from "../achievements/gallery";
+import "../achievements/achievements.css";
+import { useRunAwards } from "../achievements/awardBus";
 import { StampBtn } from "../menu/parts";
 import { endingKicker, lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
@@ -46,6 +49,7 @@ export function EndingScene({ ending, view, menuOpen, final = false, onContinue,
 	const [i, setI] = useState(0);
 	const root = useRef<HTMLDivElement>(null);
 	const done = i >= pages.length;
+	const fresh = newLines(useRunAwards());
 	useEffect(() => {
 		if (!menuOpen) root.current?.focus();
 	}, [menuOpen]);
@@ -85,6 +89,13 @@ export function EndingScene({ ending, view, menuOpen, final = false, onContinue,
 				// biome-ignore lint/a11y/noStaticElementInteractions: stops the stage's click-to-advance; the buttons inside take the input
 				<div className="vn-box vn-record" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
 					<div className="vn-name">SERVICE RECORD</div>
+					{fresh.length > 0 && (
+						<p className="vn-new" data-ach-new>
+							{fresh.map((l) => (
+								<span key={l}>{l}</span>
+							))}
+						</p>
+					)}
 					<dl className="vn-stats">
 						{lifetimeStats(view).map((r) => (
 							<div key={r.label}>
