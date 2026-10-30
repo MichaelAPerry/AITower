@@ -141,3 +141,25 @@ describe("cass_night_shift", () => {
 		expect(s.state.bonds.luci).toBe(luci - 1);
 	});
 });
+
+describe("tip_seal", () => {
+	it("plays once, Bea speaking, the first time any seal rises above the starting 10 and never before", () => {
+		const s = sim("tip_seal");
+		steps(s, SETTLE);
+		expect(s.view().decision).toBeNull();
+		// the starter tower already sits at 10 and the bar rounds: only 10.5 or more is a visible rise
+		steps(s, SETTLE);
+		expect(s.view().decision).toBeNull();
+		s.state.sealScar.greentech = 12;
+		steps(s, SETTLE);
+		const d = s.view().decision;
+		expect(d?.eventId).toBe("tip_seal");
+		expect(d?.advisor).toBe("bea");
+		answer(s, d?.choices[0].id ?? "");
+		s.state.sealScar.greentech = 0;
+		steps(s, SETTLE);
+		s.state.sealScar.biotech = 5;
+		steps(s, SETTLE * 2);
+		expect(s.view().decision).toBeNull();
+	});
+});

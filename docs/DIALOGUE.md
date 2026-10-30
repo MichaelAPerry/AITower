@@ -695,6 +695,27 @@ Choice `other`:
 - [seal_greentech.other.r1] bea: Sure. I'll be up here.
 - [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Operator.
 
+### `tip_seal`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: Story scenes are issued in file order, one at a time.
+> Backdrop: greentech floor.
+- [tip_seal.title] Title: The Seal Bar
+- [tip_seal.location] Location: ROOF · PANEL DECK
+- [tip_seal.caption] Caption: Bea has her clipboard out and a pen behind her ear.
+
+Dialogue before the choice:
+
+- [tip_seal.l1] bea: Hey, the SEAL bar just moved. Look at it.
+- [tip_seal.l2] bea: It's a damage meter. Harmful builds fill it, clean ones wear it down.
+- [tip_seal.l3] bea: At 100, that tree closes for good.
+
+Choice `ok` (recommended):
+
+- [tip_seal.ok.label] Label: Got it.
+- [tip_seal.ok.hint] Hint: Just a tip.
+- [tip_seal.ok.outcome] Outcome: Bea tapped the bar on her clipboard twice and went back up the ladder.
+
 ## 8. Story: bond 50 beats
 
 
@@ -1649,9 +1670,9 @@ Choice `add`:
 
 > Speaker: Bea. Scenario `lesson_trees`. Every line in the steps is spoken by the lesson's advisor.
 - [the_three_trees.title] Title: The Three Trees
-- [the_three_trees.concept] Concept: The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step, and the seal can close a tree.
+- [the_three_trees.concept] Concept: The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step.
 - [the_three_trees.goal] Goal: Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.
-- [the_three_trees.learned] Learned: A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power. Harmful builds fill a tree's seal, and a full seal closes the tree. Taking an advisor's advice raises her bond; overruling her lowers it.
+- [the_three_trees.learned] Learned: A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power.
 - [the_three_trees.outro] bea: That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower.
 
 #### Step `retrofit`
@@ -1688,8 +1709,4 @@ Choice `add`:
 > Done when: immediately.
 - [the_three_trees.points.objective] Objective: Wait for the Garden's first points
 - [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
-- [the_three_trees.points.say2] bea: One more thing: the seal. Each of Flesh and Garden has a SEAL bar. It's a damage meter.
-- [the_three_trees.points.say3] bea: Harmful builds fill it, like a diesel generator. Clean ones wear it down. Fill it to 100 and the tree closes for good.
-- [the_three_trees.points.say4] bea: Last thing. We advisors keep score of you too. Take our advice and the bond goes up 3. Overrule us and it drops 1.
-- [the_three_trees.points.say5] bea: The one with the highest bond, 60 or more, gets the last word when it ends.
-- [the_three_trees.points.say6] bea: Now let the clock run until the Garden scores.
+- [the_three_trees.points.say2] bea: Now let the clock run until the Garden scores.

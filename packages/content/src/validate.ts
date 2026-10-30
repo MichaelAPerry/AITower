@@ -636,6 +636,9 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 		case "seal":
 			if (!SEALED.includes(t.tree)) p.push(`${w}.tree: only biotech or greentech can be sealed`);
 			break;
+		case "sealRise":
+			num(p, `${w}.above`, t.above, { min: 0 });
+			break;
 		case "bond":
 			if (!ADVISORS.includes(t.advisor)) p.push(`${w}.advisor: unknown advisor "${String(t.advisor)}"`);
 			num(p, `${w}.atLeast`, t.atLeast, { min: 1, max: 100, int: true });

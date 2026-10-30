@@ -1734,6 +1734,46 @@
   ]
  },
  {
+  "id": "tip_seal",
+  "category": "story",
+  "advisor": "bea",
+  "title": "The Seal Bar",
+  "body": "Bea has her clipboard out and a pen behind her ear.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "sealRise",
+   "above": 10.5
+  },
+  "backdrop": "greentech",
+  "location": "ROOF · PANEL DECK",
+  "lines": [
+   {
+    "who": "bea",
+    "text": "Hey, the SEAL bar just moved. Look at it."
+   },
+   {
+    "who": "bea",
+    "text": "It's a damage meter. Harmful builds fill it, clean ones wear it down."
+   },
+   {
+    "who": "bea",
+    "text": "At 100, that tree closes for good."
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Just a tip.",
+    "outcome": "Bea tapped the bar on her clipboard twice and went back up the ladder.",
+    "effects": []
+   }
+  ]
+ },
+ {
   "id": "bond50_luci",
   "category": "story",
   "advisor": "luci",

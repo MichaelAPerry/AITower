@@ -769,7 +769,7 @@
 			"number": 4,
 			"title": "The Three Trees",
 			"advisor": "bea",
-			"concept": "The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step, and the seal can close a tree.",
+			"concept": "The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step.",
 			"goal": "Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.",
 			"scenario": "lesson_trees",
 			"speed": 3,
@@ -889,9 +889,7 @@
 					"allow": [],
 					"say": [
 						"Points come in once an hour, from racks that are busy.",
-						"One more thing: the seal. Each of Flesh and Garden has a SEAL bar. It's a damage meter.",
-						"Harmful builds fill it, like a diesel generator. Clean ones wear it down. Fill it to 100 and the tree closes for good.",
-						"Last thing. We advisors keep score of you too. Take our advice and the bond goes up 3. Overrule us and it drops 1.","The one with the highest bond, 60 or more, gets the last word when it ends.","Now let the clock run until the Garden scores."
+						"Now let the clock run until the Garden scores."
 					],
 					"handbook": "ch:what"
 				}
@@ -937,7 +935,7 @@
 				"headroomPct": 0,
 				"maxDarkTicks": 100000
 			},
-			"learned": "A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power. Harmful builds fill a tree's seal, and a full seal closes the tree. Taking an advisor's advice raises her bond; overruling her lowers it.",
+			"learned": "A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power.",
 			"handbook": [
 				"ch:what"
 			],

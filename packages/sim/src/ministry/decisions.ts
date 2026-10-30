@@ -24,7 +24,7 @@ import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
 import { addAffinity } from "../progression/affinity";
-import { addBond, addResidue, addSp, isSealed, leadingTree, rungsHeld } from "../progression/soul";
+import { addBond, addResidue, addSp, isSealed, leadingTree, rungsHeld, sealOf } from "../progression/soul";
 import { featureUnlocked } from "../research/research";
 import { expireModifiers, modifierLabel } from "./modifiers";
 
@@ -119,6 +119,8 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
 			return rungsHeld(state, content)[t.tree] >= t.rung;
 		case "seal":
 			return isSealed(state, content, t.tree);
+		case "sealRise":
+			return SEALED_TREES.some((tree) => sealOf(state, tree) > t.above);
 		case "bond":
 			return state.bonds[t.advisor] >= t.atLeast;
 	}
