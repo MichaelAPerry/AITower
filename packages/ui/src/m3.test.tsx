@@ -1,4 +1,4 @@
-import type { OrganoidSpec } from "@aitower/content";
+import { loadContent, type OrganoidSpec } from "@aitower/content";
 import { type CellPointerEvent, DEFAULT_SETTINGS } from "@aitower/shared";
 import { renderToString as render } from "react-dom/server";
 import { describe, expect, it } from "vitest";
@@ -11,6 +11,7 @@ import { MODES, overlayLabel } from "./components/OverlaySwitcher";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
 import { click, findAll, findButton, panelProps, textOf } from "./dev/walk";
 import { describeEvent } from "./events";
+import { epilogueAdvisor } from "./gameover/EndingScene";
 import { endingOf, overCopyFor } from "./gameover/gameOver";
 import { DecisionCard } from "./advisors/DecisionCard";
 import { currentObjective, endingLine } from "./objective/objective";
@@ -159,22 +160,35 @@ describe("dossier", () => {
 
 describe("endings", () => {
 	const { content } = setup();
-	const over = (kind: "victory" | "absorbed" | "bankrupt", ending?: "flesh" | "garden" | "absorbed") => ({ kind, tick: 1, ...(ending ? { ending } : {}) });
+	const over = (kind: "victory" | "absorbed" | "bankrupt", ending?: "flesh" | "garden" | "absorbed" | "bankrupt") => ({ kind, tick: 1, ...(ending ? { ending } : {}) });
 	it("prints the content's text for the ending reached", () => {
 		const flesh = overCopyFor(over("victory", "flesh"), content);
-		expect(flesh.heading).toBe("THE FLESH REMEMBERS");
+		expect(flesh.heading).toBe("THE FLESH");
 		expect(flesh.lines).toEqual(content.endings.find((e) => e.id === "flesh")?.body.split("\n\n"));
 		expect(overCopyFor(over("victory", "garden"), content).heading).toBe("THE GARDEN");
 		const abs = overCopyFor(over("absorbed", "absorbed"), content);
 		expect(abs).toMatchObject({ heading: "ABSORBED", tone: "red", stamp: "ABSORBED" });
 		expect(overCopyFor(over("absorbed"), content).heading).toBe("ABSORBED"); // kind alone is enough
 	});
-	it("keeps the old copy for bankrupt and a victory without an ending, and when content lacks the ending", () => {
-		expect(overCopyFor(over("bankrupt"), content).heading).toBe("NOTICE OF TERMINATION");
+	it("keeps the old copy for a victory without an ending, for bankrupt when content lacks it, and when content lacks the ending", () => {
+		expect(overCopyFor(over("bankrupt"), content).heading).toBe("BANKRUPT");
+		expect(overCopyFor(over("bankrupt"), { ...content, endings: [] }).heading).toBe("NOTICE OF TERMINATION");
 		expect(overCopyFor(over("victory"), content).heading).toBe("COMMENDATION");
 		expect(overCopyFor(over("victory", "flesh"), { ...content, endings: [] }).heading).toBe("COMMENDATION");
 		expect(endingOf(over("absorbed"))).toBe("absorbed");
-		expect(endingOf(over("bankrupt"))).toBeUndefined();
+		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
+	});
+	it("Bankrupt and Absorbed are final scenes: the epilogue of the closest advisor (bond 60+) closes each", () => {
+		const real = loadContent();
+		const v = setup().store.get().view;
+		for (const id of ["bankrupt", "absorbed", "singularity", "flesh", "garden"] as const) {
+			const end = real.endings.find((e) => e.id === id)!;
+			const bonds = { cass: 20, mel: 20, bea: 20, luci: 20 };
+			const soul = (b: typeof bonds) => ({ ...v, soul: { ...v.soul!, bonds: b, bondEpilogue: 60 } });
+			expect(epilogueAdvisor(soul(bonds), end), id).toBeNull();
+			for (const adv of ["cass", "mel", "bea", "luci"] as const) expect(epilogueAdvisor(soul({ ...bonds, [adv]: 70 }), end), `${id} ${adv}`).toBe(adv);
+		}
+		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
 	});
 	it("prints plain forms at horror off", () => {
 		expect(overCopyFor(over("absorbed"), content, "full").stamp).toBe("ABSORBED");
@@ -202,7 +216,7 @@ describe("event wording", () => {
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content).text).toMatch(/recertified/);
 		expect(describeEvent({ type: "contaminationIrreversible" }, v, content, "off").text).toMatch(/no longer be reversed/);
 		expect(describeEvent({ type: "gameOver", kind: "absorbed", ending: "absorbed" }, v, content).text).toMatch(/reclassified as a Compute Authority asset/);
-		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "flesh" }, v, content).text).toMatch(/The Flesh Remembers/);
+		expect(describeEvent({ type: "gameOver", kind: "victory", ending: "flesh" }, v, content).text).toMatch(/The Flesh/);
 	});
 	it("no horror words reach a toast in the Compute Authority voice", () => {
 		for (const e of [{ type: "growthSprouted", facilityId: grown }, { type: "botMutated", botId: 1, trait: "fleshed" }, { type: "contaminationIrreversible" }] as const) expect(describeEvent(e, v, content).text).not.toMatch(/mutat|infect|contamin|flesh|gore|blood/i);

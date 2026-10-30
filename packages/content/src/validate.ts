@@ -49,7 +49,7 @@ const SPECS_FOR_KIND: Record<FacilityKind, SpecName[]> = {
 	transfer: [],
 };
 const PATHS: AscensionPath[] = ["biotech", "greentech", "synthetic"];
-const ENDINGS = ["singularity", "flesh", "garden", "absorbed"];
+const ENDINGS = ["singularity", "flesh", "garden", "absorbed", "bankrupt"];
 const SECTORS = ["frontier", "biotech", "finance", "gov", "climate", "media"];
 const JOB_KINDS: JobKind[] = ["training", "finetune", "inference"];
 const COOLING_MODES = ["air", "dlc", "immersion", "bio"];
@@ -885,6 +885,7 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			str(p, `${w}.title`, d.title);
 			str(p, `${w}.body`, d.body);
 			if (d.backdrop !== undefined && !PATHS.includes(d.backdrop)) p.push(`${w}.backdrop: unknown path`);
+			if (d.art !== undefined) str(p, `${w}.art`, d.art);
 			for (const [a, t] of Object.entries(d.epilogue ?? {})) {
 				if (!ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
 				str(p, `${w}.epilogue.${a}`, t);

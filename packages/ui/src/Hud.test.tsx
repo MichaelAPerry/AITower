@@ -1,3 +1,4 @@
+import { loadContent } from "@aitower/content";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
@@ -147,10 +148,7 @@ describe("SystemMenu (server render)", () => {
 
 	it("renders each game-over notice once the sim reports it", () => {
 		const content = createFakeContent();
-		for (const [kind, heading, buttons] of [
-			["bankrupt", "NOTICE OF TERMINATION", ["Load game", "New game"]],
-			["victory", "Victory", ["Continue in sandbox", "New game"]],
-		] as const) {
+		for (const [kind, heading, buttons] of [["victory", "Victory", ["Continue in sandbox", "New game"]]] as const) {
 			const store = createFakeStore(content);
 			store.triggerGameOver(kind);
 			const html = renderToString(<Hud store={store} content={content} />);
@@ -161,6 +159,40 @@ describe("SystemMenu (server render)", () => {
 		}
 		const clean = renderToString(<Hud store={createFakeStore(content)} content={content} />);
 		expect(clean).not.toContain("ui-over-memo");
+	});
+
+	it("bankrupt plays the Bankrupt ending scene on the plain stage, not the memo", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		store.triggerGameOver("bankrupt");
+		const html = renderToString(<Hud store={store} content={content} />);
+		expect(html).toContain("ending-bankrupt");
+		expect(html).toContain("is-plain");
+		expect(html).not.toContain("vn-backdrop");
+		expect(html).toContain("INSOLVENCY");
+		expect(html).toContain("The Treasury stayed below zero for a full day.");
+		expect(html).not.toContain("ui-over-memo");
+	});
+
+	it("each of the five endings renders its own scene from the real content", () => {
+		const real = { ...createFakeContent(), endings: loadContent().endings };
+		const cases = [
+			["victory", "singularity", "THE LATTICE", "has-backdrop", "The Consciousness Transfer Unit on floor 4"],
+			["victory", "flesh", "THE FLESH", "has-backdrop", "The Neural Vat in the pit"],
+			["victory", "garden", "THE GARDEN", "has-backdrop", "The Photonic Mesh on the roof"],
+			["absorbed", "absorbed", "ABSORBED", "is-plain", "On 14 March the Compute Authority sent a notice"],
+			["bankrupt", "bankrupt", "BANKRUPT", "is-plain", "The Treasury stayed below zero for a full day."],
+		] as const;
+		for (const [kind, ending, title, stage, text] of cases) {
+			const store = createFakeStore(real);
+			store.triggerGameOver(kind, ending);
+			const html = renderToString(<Hud store={store} content={real} />);
+			expect(html, ending).toContain(`ending-${ending}`);
+			expect(html, ending).toContain(stage);
+			expect(html.toUpperCase(), ending).toContain(title);
+			expect(html, ending).toContain(text);
+			expect(html, ending).not.toContain("ui-over-memo");
+		}
 	});
 
 	it("uses Compute Authority wording for decision and game-over events", () => {

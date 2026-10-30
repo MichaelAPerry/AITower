@@ -92,6 +92,7 @@ interface Ending {
 	id: string;
 	title: string;
 	backdrop?: string;
+	art?: string;
 	body: string;
 	epilogue?: Record<string, string>;
 }
@@ -332,10 +333,10 @@ for (const g of storyGroups) {
 sections.push({
 	title: "Endings",
 	body: () => {
-		meta("Shown when the tower reaches an ending. Each Singularity ending has one short epilogue per advisor, written as narration.");
+		meta("Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration.");
 		for (const e of endings) {
 			h(3, `\`${e.id}\``);
-			if (e.backdrop) meta(`Backdrop: ${e.backdrop}.`);
+			if (e.art) meta(`Art: ${e.art}.webp${e.backdrop ? ` (placeholder backdrop: ${e.backdrop})` : " (plain stage until it exists)"}.`);
 			text(`end.${e.id}.title`, "Title", e.title);
 			text(`end.${e.id}.body`, "narrator", e.body);
 			if (!e.epilogue) {

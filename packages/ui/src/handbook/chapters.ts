@@ -159,7 +159,7 @@ function pathChapter(p: AscensionPath, c: ContentDB): Chapter {
 	const text: Record<AscensionPath, { earn: string; win: string; risk: string }> = {
 		biotech: {
 			earn: "Retrofit racks to the Bio line (Level 2 and up, after the Wetware Annex research). Running Bio racks earn Bio Singularity points.",
-			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. The Flesh Remembers at ${target} Bio points. Only Bio racks score for the Flesh, so retrofit your racks up the Bio line.`,
+			win: `Feed the annex and hold the tanks at 37 °C. Living cabinets give about three times the compute for each kW. The Flesh at ${target} Bio points. Only Bio racks score for the Flesh, so retrofit your racks up the Bio line.`,
 			risk: "Growth spreads if you do not contain it, and at 99% corruption the tower absorbs you. Some machines hurt the tissue. Mel will tell you which ones, once she trusts you.",
 		},
 		greentech: {

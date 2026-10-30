@@ -42,3 +42,17 @@ export const FULL: Record<ArtAdvisor, string> = { luci: luci_full, mel: mel_full
 /** Backdrops: the title skyline and the three tree floors (B-3 Bio, C-4 Green, D-2 Synthetic). */
 export const BACKDROP = { title: bg_title, biotech: bg_bio, greentech: bg_green, synthetic: bg_synth } as const;
 export type BackdropId = keyof typeof BACKDROP;
+
+/**
+ * Ending paintings by the `art` name in endings.json (docs/ENDING_PROMPTS.md). Until a new painting is dropped in and imported
+ * here, the three tree endings borrow their tree floor (`bg-synth`, `bg-bio`, `bg-green`); Absorbed and Bankrupt have no entry,
+ * so they show the plain stage.
+ */
+export const ENDING_ART: Record<string, string | undefined> = {
+	"bg-end-lattice": bg_synth,
+	"bg-end-flesh": bg_bio,
+	"bg-end-garden": bg_green,
+};
+
+/** The backdrop image of an ending, or undefined for the plain stage. */
+export const endingBackdrop = (e: { art?: string; backdrop?: BackdropId }): string | undefined => (e.art && e.art in ENDING_ART ? ENDING_ART[e.art] : e.backdrop ? BACKDROP[e.backdrop] : undefined);

@@ -778,7 +778,7 @@ export interface LaneDef {
 export type AscensionPath = "biotech" | "greentech" | "synthetic";
 
 /** Ending ids (see `Balance.endings`). */
-export type EndingId = "singularity" | "flesh" | "garden" | "absorbed";
+export type EndingId = "singularity" | "flesh" | "garden" | "absorbed" | "bankrupt";
 
 /** Text of an ending, shown on the game-over sheet. */
 export interface EndingDef {
@@ -786,8 +786,10 @@ export interface EndingDef {
 	title: string;
 	/** Prose, paragraphs separated by "\n\n". */
 	body: string;
-	/** The tree whose floor art is shown (absent = the dark failure screen). */
+	/** The tree whose floor art stands in until the ending's own painting (`art`) exists (absent = the plain stage). */
 	backdrop?: AscensionPath;
+	/** File name (no extension) of the ending's own 640x420 painting in packages/ui/src/art, e.g. "bg-end-lattice". */
+	art?: string;
 	/** Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). */
 	epilogue?: Partial<Record<AdvisorId, string>>;
 }

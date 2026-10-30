@@ -112,12 +112,12 @@ describe("biotech content (bundled)", () => {
 		}
 	});
 
-	it("has three Singularity endings and Absorbed, of two or three paragraphs, with no gore words", () => {
-		expect(db.endings.map((e) => e.id)).toEqual(["singularity", "flesh", "garden", "absorbed"]);
+	it("has three Singularity endings, Absorbed and Bankrupt, of three to five paragraphs, with no gore words", () => {
+		expect(db.endings.map((e) => e.id)).toEqual(["singularity", "flesh", "garden", "absorbed", "bankrupt"]);
 		for (const e of db.endings) {
 			const n = e.body.split("\n\n").length;
-			expect(n, e.id).toBeGreaterThanOrEqual(2);
-			expect(n, e.id).toBeLessThanOrEqual(3);
+			expect(n, e.id).toBeGreaterThanOrEqual(3);
+			expect(n, e.id).toBeLessThanOrEqual(5);
 			expect(e.body, e.id).not.toMatch(/\b(blood|gore|corpse|scream)\b/i);
 		}
 	});

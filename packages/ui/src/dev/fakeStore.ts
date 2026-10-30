@@ -99,10 +99,11 @@ export function createFakeContent(): ContentDB {
 			{ id: "synthetic", name: "Synthetic Mind", description: "Coming soon." },
 		],
 		endings: [
-			{ id: "singularity", title: "The Lattice", body: "The tower stopped asking for permission.\n\nNobody noticed.", backdrop: "synthetic" },
-			{ id: "flesh", title: "The Flesh Remembers", body: "The annex grew through the basement first.\n\nThen the city.", backdrop: "biotech" },
+			{ id: "singularity", title: "The Lattice", body: "The tower stopped asking for permission.\n\nNobody noticed.", backdrop: "synthetic", art: "bg-end-lattice" },
+			{ id: "flesh", title: "The Flesh", body: "The annex grew through the basement first.\n\nThen the city.", backdrop: "biotech", art: "bg-end-flesh" },
 			{ id: "garden", title: "The Garden", body: "The tower stopped burning anything at all.\n\nThen it started to grow.", backdrop: "greentech" },
 			{ id: "absorbed", title: "Absorbed", body: "The facility and its superintendent have been reclassified as Ministry assets.\n\nNo further correspondence is required." },
+			{ id: "bankrupt", title: "Bankrupt", art: "bg-end-bankrupt", body: "The Treasury stayed below zero for a full day.\n\nThe receiver changed the locks.", epilogue: { cass: "Cass drains the last line by hand.", mel: "Mel carries out one empty jar.", bea: "Bea takes her toolbox out the gate.", luci: "Luci keeps the ledger." } },
 		],
 		clients: [],
 		structure: { slabPerTile: 1_200, basementSlabPerTile: 3_000, powerConduitPerTile: 150, coolantConduitPerTile: 400, liftPerFloor: 6_000, liftBase: 20_000, sparePart: 800 },

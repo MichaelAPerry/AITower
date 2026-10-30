@@ -58,10 +58,14 @@ const ENDING_FRAME: Record<EndingId, { form: string; stamp: string; tone: "red" 
 	flesh: { form: "BIO SINGULARITY", stamp: "THE FLESH", tone: "green", plainForm: "BIO SINGULARITY", plainStamp: "THE FLESH" },
 	garden: { form: "GREEN SINGULARITY", stamp: "THE GARDEN", tone: "green", plainForm: "GREEN SINGULARITY", plainStamp: "THE GARDEN" },
 	absorbed: { form: "ASSET RECLASSIFICATION", stamp: "ABSORBED", tone: "red", plainForm: "TAKEOVER", plainStamp: "TAKEN OVER" },
+	bankrupt: { form: "INSOLVENCY", stamp: "BANKRUPT", tone: "red", plainForm: "INSOLVENCY", plainStamp: "BANKRUPT" },
 };
 
-/** The ending shown for a game-over: `ending` when set, else the secret one for kind "absorbed", else none. */
-export const endingOf = (over: GameOver): EndingId | undefined => over.ending ?? (over.kind === "absorbed" ? "absorbed" : undefined);
+/** The small label on the ending scene's caption box. */
+export const endingKicker = (id: EndingId, horror: HorrorIntensity = "full"): string => (horror === "off" ? ENDING_FRAME[id].plainForm : ENDING_FRAME[id].form);
+
+/** The ending shown for a game-over: `ending` when set, else the one named by its kind ("absorbed", "bankrupt"), else none. */
+export const endingOf = (over: GameOver): EndingId | undefined => over.ending ?? (over.kind === "absorbed" || over.kind === "bankrupt" ? over.kind : undefined);
 
 /** Ending text split into paragraphs ("\n\n"), blank ones dropped. */
 export const paragraphs = (body: string): string[] =>
