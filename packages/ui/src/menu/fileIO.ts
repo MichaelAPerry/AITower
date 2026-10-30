@@ -1,4 +1,4 @@
-import type { GameStore } from "@aitower/shared";
+import { attachProfile, extractProfile, type GameStore, mergeStoredProfile } from "@aitower/shared";
 import { exportFileName, importErrorMessage } from "./slots";
 
 /** Offer `text` as a file download. Browser only. */
@@ -29,7 +29,10 @@ export type ImportResult = { ok: true } | { ok: false; reason: string };
 /** Replace the running game from exported JSON. Never throws: failures come back as "Invalid save: …" and the running game is kept. */
 export function importSaveText(store: GameStore, text: string): ImportResult {
 	try {
-		store.load(text);
+		// The file may carry the player's profile (achievements, gallery). It is merged in only once the save itself has loaded.
+		const { text: saveText, profile } = extractProfile(text);
+		store.load(saveText);
+		if (profile) mergeStoredProfile(profile);
 		return { ok: true };
 	} catch (e) {
 		return { ok: false, reason: importErrorMessage(e) };
@@ -50,7 +53,7 @@ export async function importSaveFile(store: GameStore, file: Blob): Promise<Impo
 /** Export the running game as a downloaded file; returns the file name. */
 export function exportSave(store: GameStore, day: number): { ok: true; name: string } | { ok: false; reason: string } {
 	try {
-		const text = store.save();
+		const text = attachProfile(store.save());
 		const name = exportFileName(day, new Date());
 		downloadText(name, text);
 		return { ok: true, name };

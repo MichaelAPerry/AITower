@@ -290,22 +290,46 @@ export const PROFILE_KEY = "aitower.profile";
 
 export type AdvisorKey = "luci" | "mel" | "bea" | "cass";
 
+export const ADVISOR_KEYS: readonly AdvisorKey[] = ["luci", "mel", "bea", "cass"];
+
 export interface Profile {
 	v: 1;
 	/** Achievement id to the game day it was earned and the ending of that run (null when earned mid-run). Latched for life. */
 	earned: Record<string, { day: number; ending: string | null }>;
 	/** Which advisors' ending epilogues have been seen (for `heard_out`). */
 	epilogues: Record<AdvisorKey, boolean>;
+	/** Off-duty gallery: the casual portrait of each advisor is unlocked (`aitower.profile.offDuty.<advisor>.casual`). Latched. */
+	offDuty: Record<AdvisorKey, { casual: boolean }>;
+	/** Highest bond each advisor reached in any run (the gallery shows a locked frame's plain rule from 30). */
+	bondMax: Record<AdvisorKey, number>;
+	/** Unlock strips already shown, by key (an advisor id for a casual portrait, "bed" for the bed set). */
+	told: Record<string, boolean>;
+	/** One-time gallery scenes already played (`ach_bed_intro`, `ach_gallery_empty`). */
+	scenesSeen: Record<string, boolean>;
 }
 
-const emptyProfile = (): Profile => ({ v: 1, earned: {}, epilogues: { luci: false, mel: false, bea: false, cass: false } });
+const perAdvisor = <T,>(v: () => T): Record<AdvisorKey, T> => ({ luci: v(), mel: v(), bea: v(), cass: v() });
+const emptyProfile = (): Profile => ({
+	v: 1,
+	earned: {},
+	epilogues: perAdvisor(() => false),
+	offDuty: perAdvisor(() => ({ casual: false })),
+	bondMax: perAdvisor(() => 0),
+	told: {},
+	scenesSeen: {},
+});
 
-export function loadProfile(storage: LessonStorage | null = defaultLessonStorage()): Profile {
+const flags = (raw: unknown): Record<string, boolean> => {
+	const out: Record<string, boolean> = {};
+	if (raw && typeof raw === "object") for (const [k, v] of Object.entries(raw)) if (v === true) out[k] = true;
+	return out;
+};
+
+/** Read a profile from untrusted JSON (storage or an imported file). Anything malformed is dropped; never throws. */
+export function parseProfile(raw: unknown): Profile {
 	const profile = emptyProfile();
 	try {
-		const raw = storage?.getItem(PROFILE_KEY);
-		if (!raw) return profile;
-		const p = JSON.parse(raw) as Partial<Profile> | null;
+		const p = raw as Partial<Profile> | null;
 		if (!p || typeof p !== "object" || p.v !== 1) return profile;
 		if (p.earned && typeof p.earned === "object")
 			for (const [id, e] of Object.entries(p.earned)) {
@@ -314,11 +338,36 @@ export function loadProfile(storage: LessonStorage | null = defaultLessonStorage
 					profile.earned[id] = { day: Math.floor((e as { day: number }).day), ending: typeof ending === "string" ? ending : null };
 				}
 			}
-		if (p.epilogues && typeof p.epilogues === "object") for (const a of Object.keys(profile.epilogues) as AdvisorKey[]) profile.epilogues[a] = (p.epilogues as Record<string, unknown>)[a] === true;
+		for (const a of ADVISOR_KEYS) {
+			profile.epilogues[a] = (p.epilogues as Record<string, unknown> | undefined)?.[a] === true;
+			profile.offDuty[a].casual = (p.offDuty as Record<string, { casual?: unknown } | undefined> | undefined)?.[a]?.casual === true;
+			const b = (p.bondMax as Record<string, unknown> | undefined)?.[a];
+			profile.bondMax[a] = typeof b === "number" && Number.isFinite(b) ? Math.max(0, Math.min(100, b)) : 0;
+		}
+		profile.told = flags(p.told);
+		profile.scenesSeen = flags(p.scenesSeen);
 	} catch {
 		/* unreadable: an empty profile */
 	}
 	return profile;
+}
+
+export function loadProfile(storage: LessonStorage | null = defaultLessonStorage()): Profile {
+	try {
+		const raw = storage?.getItem(PROFILE_KEY);
+		if (raw) return parseProfile(JSON.parse(raw));
+	} catch {
+		/* unreadable: an empty profile */
+	}
+	return emptyProfile();
+}
+
+function saveProfile(profile: Profile, storage: LessonStorage | null): void {
+	try {
+		storage?.setItem(PROFILE_KEY, JSON.stringify(profile));
+	} catch {
+		/* best effort */
+	}
 }
 
 /** Latch an achievement. An id already earned is never overwritten or removed. Returns the profile and whether this call earned it. */
@@ -326,10 +375,104 @@ export function recordAchievement(id: string, day: number, ending: string | null
 	const profile = loadProfile(storage);
 	if (profile.earned[id]) return { profile, first: false };
 	profile.earned[id] = { day: Math.max(0, Math.floor(day)), ending };
-	try {
-		storage?.setItem(PROFILE_KEY, JSON.stringify(profile));
-	} catch {
-		/* best effort */
-	}
+	saveProfile(profile, storage);
 	return { profile, first: true };
+}
+
+/** Apply `change` to the stored profile and save it. Returns the new profile. */
+export function updateProfile(change: (p: Profile) => void, storage: LessonStorage | null = defaultLessonStorage()): Profile {
+	const profile = loadProfile(storage);
+	change(profile);
+	saveProfile(profile, storage);
+	return profile;
+}
+
+/** Latch that an advisor's epilogue was shown at an ending. Returns true the first time. */
+export function recordEpilogue(advisor: AdvisorKey, storage: LessonStorage | null = defaultLessonStorage()): boolean {
+	let first = false;
+	updateProfile((p) => {
+		first = !p.epilogues[advisor];
+		p.epilogues[advisor] = true;
+	}, storage);
+	return first;
+}
+
+/** Latch an advisor's casual off-duty portrait. Returns true the first time. */
+export function recordOffDuty(advisor: AdvisorKey, storage: LessonStorage | null = defaultLessonStorage()): boolean {
+	let first = false;
+	updateProfile((p) => {
+		first = !p.offDuty[advisor].casual;
+		p.offDuty[advisor].casual = true;
+	}, storage);
+	return first;
+}
+
+/** Remember the highest bond seen per advisor. */
+export function recordBonds(bonds: Partial<Record<AdvisorKey, number>>, storage: LessonStorage | null = defaultLessonStorage()): void {
+	const p0 = loadProfile(storage);
+	if (!ADVISOR_KEYS.some((a) => (bonds[a] ?? 0) > p0.bondMax[a])) return;
+	updateProfile((p) => {
+		for (const a of ADVISOR_KEYS) p.bondMax[a] = Math.max(p.bondMax[a], Math.min(100, bonds[a] ?? 0));
+	}, storage);
+}
+
+/** Mark an unlock strip as shown (`told`) or a one-time scene as played (`scenesSeen`). */
+export function markProfileFlag(kind: "told" | "scenesSeen", key: string, storage: LessonStorage | null = defaultLessonStorage()): void {
+	if (loadProfile(storage)[kind][key]) return;
+	updateProfile((p) => {
+		p[kind][key] = true;
+	}, storage);
+}
+
+/** Union of two profiles: nothing is ever removed. For an achievement in both, the earlier day wins. */
+export function mergeProfiles(a: Profile, b: Profile): Profile {
+	const out = emptyProfile();
+	for (const src of [a, b])
+		for (const [id, e] of Object.entries(src.earned)) {
+			const cur = out.earned[id];
+			if (!cur || e.day < cur.day) out.earned[id] = { ...e };
+		}
+	for (const k of ADVISOR_KEYS) {
+		out.epilogues[k] = a.epilogues[k] || b.epilogues[k];
+		out.offDuty[k].casual = a.offDuty[k].casual || b.offDuty[k].casual;
+		out.bondMax[k] = Math.max(a.bondMax[k], b.bondMax[k]);
+	}
+	// A strip counts as shown only if both sides showed it, so a merge never hides a portrait the player has not been told about.
+	for (const k of Object.keys({ ...a.told, ...b.told })) if (a.told[k] && b.told[k]) out.told[k] = true;
+	for (const k of Object.keys({ ...a.scenesSeen, ...b.scenesSeen })) if (a.scenesSeen[k] || b.scenesSeen[k]) out.scenesSeen[k] = true;
+	return out;
+}
+
+/** The key the profile travels under in an exported save file. */
+export const PROFILE_FILE_KEY = "profile";
+
+/** Add the stored profile to an exported save's JSON text (an object at the top level). Text that is not a JSON object is returned unchanged. */
+export function attachProfile(saveText: string, storage: LessonStorage | null = defaultLessonStorage()): string {
+	try {
+		const obj = JSON.parse(saveText) as unknown;
+		if (!obj || typeof obj !== "object" || Array.isArray(obj)) return saveText;
+		return JSON.stringify({ ...(obj as Record<string, unknown>), [PROFILE_FILE_KEY]: loadProfile(storage) });
+	} catch {
+		return saveText;
+	}
+}
+
+/** Take the profile out of an imported file's text. `text` is what to hand to the save loader (the original when there is no profile or it does not parse). */
+export function extractProfile(fileText: string): { text: string; profile: Profile | null } {
+	try {
+		const obj = JSON.parse(fileText) as unknown;
+		if (!obj || typeof obj !== "object" || Array.isArray(obj) || !(PROFILE_FILE_KEY in obj)) return { text: fileText, profile: null };
+		const { [PROFILE_FILE_KEY]: raw, ...rest } = obj as Record<string, unknown>;
+		const profile = raw && typeof raw === "object" && (raw as { v?: unknown }).v === 1 ? parseProfile(raw) : null;
+		return { text: JSON.stringify(rest), profile };
+	} catch {
+		return { text: fileText, profile: null };
+	}
+}
+
+/** Merge an imported profile into the stored one (union; nothing removed) and save it. */
+export function mergeStoredProfile(incoming: Profile, storage: LessonStorage | null = defaultLessonStorage()): Profile {
+	const merged = mergeProfiles(loadProfile(storage), incoming);
+	saveProfile(merged, storage);
+	return merged;
 }
