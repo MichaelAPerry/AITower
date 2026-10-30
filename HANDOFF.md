@@ -25,7 +25,7 @@ The full spec is in `docs/SOUL.md`, the look is in `docs/STYLE_PC98.md`, and the
 - **Lesson 1** rewritten in Bea's voice.
 - **Saves:** snapshot v12. Older saves gain scars and bonds rebuilt from their facilities; old path endings map onto the new trees.
 
-### Playtest focus (owner)
+### Playtest focus (owner; still open)
 1. Does the opening scene and Lesson 1 make the three trees clear?
 2. Is the Lattice too easy, and are the Flesh and the Garden reachable? Watch the seal notes and bonds.
 3. Do the advisors feel distinct? Do the objections and the wrong-advice scenes land?
@@ -39,21 +39,114 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 - **Dating systems** (all nine): after-hours visits, bond stages, milestone scenes, gifts, rivalry, confession and route lock, texts, memories. Snapshot v14.
 - Ending paintings appear only on ending screens. Quotes checked in `docs/QUOTES_CHECK.md`.
 
-### State on Oct 28 (read this first)
-- **Live:** retrofit reframe (`docs/REFRAME.md`), bug fixes. **On branch, not live yet:** build-menu fixes (retrofit with menu open, Wetware tab folded into Power/Cooling/Racks), audit cleanups, the rejected Green sprite pass, `docs/DIALOGUE.md` (owner is rewriting it), `docs/ART_NEEDED.md`, `docs/AUDIT_LEFTOVERS.md`.
-- **Stopped mid-task, pushed as WIP branches** (check each runs; finish or redo):
-  - `wip/tree-sprites`: redraw all three trees per owner direction (`docs/ART_DIRECTION.md`). Green = alive/natural, plant and fungus, solarpunk; last rung looks like a tree. Bio = fleshy, MTG "Living Wall" feel. Synthetic = chrome. Plus the **Consciousness Transfer Unit** (Synthetic special: little humans walk out of the lift into a chrome pod and are uploaded; each adds Synthetic SP, about one ML-1 per unit). Preview PNGs in `docs/preview/` for owner approval BEFORE merging. The current Green sprites on the branch were rejected.
-  - `wip/lessons`: four short lessons for this version (Build, Earn, Grow, The trees), each scripted to completion in tests; remove "Coming soon" rows.
-  - `wip/endings`: five endings (Lattice, Flesh, Garden, Absorbed, Bankrupt as a real ending screen), an epilogue per advisor, and `docs/ENDING_PROMPTS.md` (image prompts for the owner).
+### State on Oct 30 (read this first)
+- **Live main = `d8e2450`** (retrofit reframe). Branch `claude/youthful-ramanujan-msqcy9` (`9883f4b`) holds unreleased work: build-menu fixes, audit cleanups, docs. Not live.
+- **Four finished branches, all built on youthful, NOT merged, awaiting owner approval:**
+  - `wip/tree-sprites` (`6425adb`): Green, Bio and Synthetic sprites redrawn, plus the Consciousness Transfer Unit (CT-1) walk-in/upload animation. Previews in `docs/preview/` (`green-`, `bio-`, `synthetic-sprites.png`, `transfer-unit.png`, `green-ingame.png`). Check, build, e2e, budget pass. Owner will likely say: the pod looks like a vending machine; Bio is uniformly pink; 7 support items are still base art (nutrient plant/works, bioreactor, digester, sterile bay, gensets, SMR, PV wall). Direction: `docs/ART_DIRECTION.md` on that branch.
+  - `wip/lessons` (`3a8be69`): four lessons (Build, Earn, Grow, The trees), each scripted to completion in tests; e2e plays the new Lesson 1. All checks pass. Lessons 2-4 give no stars; lesson 4 does not wait for a seal. Owner has not read the lesson text yet.
+  - `wip/endings` (`005fd38`): five ending screens (Lattice, Flesh, Garden, Absorbed, Bankrupt), 20 epilogues (4 advisors x 5), `docs/ENDING_PROMPTS.md`. All checks pass (`perf.test.ts` is flaky under load; passes alone). It adds `art` to `endings.json`, `ENDING_ART` in `packages/ui/src/art/index.ts`, and edits `tools/dialogue/export.ts` (new `Art:` line; epilogues for all five endings). `docs/DIALOGUE.md` was NOT regenerated there.
+  - `wip/off-duty` (`f622354`): `docs/OFF_DUTY.md` only, no code. Unlocks: Luci = Lattice win, no debt, bond >= 70; Mel = Flesh win, corruption < 0.5 (a guess); Bea = Garden win; Cass = 30 days in a row at 99% uptime (needs new `uptimeStreak` field + snapshot v16; whether uptime is 0-1 or 0-100 is unconfirmed). Gallery in localStorage `aitower.gallery`.
+- A pairwise merge-tree of the three code branches shows no conflicts, but they were never tested combined.
+- **Pending owner approvals:** sprite previews, `ENDING_PROMPTS.md`, `OFF_DUTY.md`, and optionally a lesson text sample.
 
-### Next, in order
-1. Finish the three WIP branches (one agent each), owner approves sprite previews, merge, deploy.
-2. **Off-duty portraits** (owner approved, instead of lingerie): an unlockable casual portrait per advisor, each with its own requirement (e.g. Bea in her garden on a Garden win; Cass asleep on the B2 cot after 30 days at 99% uptime). Write the four requirements and image prompts for the owner, then build the unlock and a gallery.
-3. Import the owner's rewritten `docs/DIALOGUE.md` (build `tools/dialogue/import.ts` against the export's grammar).
-4. Owner art arrives (scene backgrounds, ending screens, portraits): wire it in.
-5. Green clean power reaches only ~0.35 score: batteries don't shift solar to evening; heat export is weak beside liquid racks.
+## Next session: owner art and dialogue
+The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening message: `docs/NEXT_PROMPT.md`.
 
-**How to work:** Opus coordinates only (no hands-on coding). Small, verified steps; the owner plays each build before the next big change; sprites and writing get a sample approved before the bulk. Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
+### Order of work
+**(a) Approvals and merges.**
+1. Ask the owner for a verdict on the pending approvals above.
+2. Merge each approved branch into `claude/youthful-ramanujan-msqcy9`, one at a time (sprites, lessons, endings). After each merge run `npm run check`, `npm run build`, `npm run e2e`, `npm run budget`. Fix before the next merge.
+3. Push to main only when all four pass on the combined branch. The owner plays the build first.
+4. A rejected branch is redone, not polished.
+
+**(b) Owner art.** Use the recipe and table below. Merge `wip/endings` first so `ENDING_ART` exists. Show the owner one screenshot per kind of slot before wiring the rest.
+
+**(c) Owner's DIALOGUE.md.** Build `tools/dialogue/import.ts` against the grammar below.
+1. Write the importer. Round-trip test first: `export` -> `import` -> `git diff packages/` must be empty.
+2. Import the owner's file. Report ids that are missing, extra or empty; do not guess.
+3. Show the owner ONE imported scene in the game (screenshot) before importing the rest.
+4. Then `npm run check`, build, e2e. Regenerate `docs/DIALOGUE.md` from the data and confirm it matches the owner's file.
+
+**(d) Then** the off-duty unlock and gallery code, from `docs/OFF_DUTY.md` (on `wip/off-duty`; bring the doc over first).
+
+### How uploaded files reach the repo
+- The owner attaches images/files in chat. The session copies each to the right path in the repo, converts to `.webp` if needed, and never commits an original over 1 MB without asking.
+- Keep the owner's originals outside the repo (scratchpad) unless asked.
+
+### How to drop in an image
+- Format: **lossless WebP**, quantised (48 colours for backdrops, 32 for portraits). Pillow: `Image.open(p).convert("RGB").quantize(48).convert("RGB").save(out, lossless=True)`. If the size is wrong, resize with `Image.NEAREST` first (art drawn at 2x halves cleanly).
+- Sizes in the repo today: backdrops 640x420 (`bg-title` 640x480), busts 256x256, full figures 280x420. `docs/ART_BRIEFS.md` says `art/portraits/*.png` at about 480x600; the repo actually keeps `.webp` directly in `packages/ui/src/art/`. The briefs are a source-art spec, not the repo layout.
+- Put the file in `packages/ui/src/art/<name>.webp`. `assets.d.ts` declares `*.webp`.
+- Register it in `packages/ui/src/art/index.ts` with a static import (`import x from "./x.webp"`):
+  - Portraits: `PORTRAITS[advisor][expression]` (`neutral|pleased|displeased|unsettling`) or `FULL[advisor]`. Names `<advisor>-<expression>.webp`, `<advisor>-full.webp`; advisors `luci mel bea cass`.
+  - Tree floors and title: `BACKDROP` (`title`, `biotech`, `greentech`, `synthetic`).
+  - Endings (after merging `wip/endings`): `ENDING_ART`, keyed by name without extension (`"bg-end-absorbed"`). `endings.json` already names each in its `art` field.
+  - Story locations: not wired. `packages/ui/src/vn/StoryScene.tsx` takes the backdrop from the scene's `backdrop` field (a tree id). Add a location-to-file map for the 12 `bg-loc-*` files (keys: scene `location` text or scene id).
+  - Off-duty: `<advisor>-offduty.webp`, registered with the gallery code (d).
+  - Rack and support sprites are drawn in code, not images: `packages/render/src/art.ts` (`bodyArt`, `rackVariant`) and `packages/render/src/pixi/facilityArt.ts` (on `wip/tree-sprites`, the `*Sprites.ts` files). There is no image loader for them; an owner image there is a new feature, so ask first.
+- After any art change: `npm run build` and `npm run budget` (3 MB tripwire; backdrops are 150-170 KB each). Screenshot the screen that shows it.
+
+### Art slots
+| Slot | File | Registry | Status |
+|--|--|--|--|
+| Advisor busts, 4 x 4 expressions | `{luci,mel,bea,cass}-{neutral,pleased,displeased,unsettling}.webp` | `PORTRAITS` | done; owner may replace |
+| Advisor full figures | `{advisor}-full.webp` | `FULL` | done |
+| Title | `bg-title.webp` | `BACKDROP.title` | done |
+| Tree floors | `bg-synth`, `bg-bio`, `bg-green` | `BACKDROP` | done; also the Lattice/Flesh/Garden ending placeholders |
+| Ending: Lattice | `bg-end-lattice.webp` | `ENDING_ART` | empty (shows `bg-synth`) |
+| Ending: Flesh | `bg-end-flesh.webp` | `ENDING_ART` | empty (shows `bg-bio`) |
+| Ending: Garden | `bg-end-garden.webp` | `ENDING_ART` | empty (shows `bg-green`) |
+| Ending: Absorbed | `bg-end-absorbed.webp` | `ENDING_ART` | empty (plain stage) |
+| Ending: Bankrupt | `bg-end-bankrupt.webp` | `ENDING_ART` | empty (plain stage) |
+| Location: lot (`st_intro`) | `bg-loc-f1-lot.webp` | to build | empty |
+| Location: site install (`obj_greentech`, `obj_biotech`) | `bg-loc-site-install.webp` | to build | empty |
+| Location: control room (`rung_syn_1`) | `bg-loc-control-room.webp` | to build | empty |
+| Location: finance office (`rung_syn_2`) | `bg-loc-finance-office.webp` | to build | empty |
+| Location: plant room (`rung_syn_3`, `rung_green_2`) | `bg-loc-plant-room.webp` | to build | empty |
+| Location: floor F2 (`rung_syn_4`) | `bg-loc-floor-f2.webp` | to build | empty |
+| Location: wetware annex (`rung_bio_1`, `rung_bio_2`) | `bg-loc-wetware-annex.webp` | to build | empty |
+| Location: nutrient line (`rung_bio_3`) | `bg-loc-nutrient-line.webp` | to build | empty |
+| Location: neural pit (`rung_bio_4`) | `bg-loc-neural-pit.webp` | to build | empty |
+| Location: panel deck (`rung_green_1`) | `bg-loc-panel-deck.webp` | to build | empty |
+| Location: stairwell (`rung_green_3`) | `bg-loc-stairwell.webp` | to build | empty |
+| Location: sunrise (`rung_green_4`) | `bg-loc-sunrise.webp` | to build | empty |
+| Off duty: Luci, Mel, Bea, Cass | `{advisor}-offduty.webp` (match the base set's size) | gallery (d) | empty |
+
+Prompts: `docs/ART_NEEDED.md` (locations), `docs/ENDING_PROMPTS.md` (endings, on `wip/endings`), `docs/OFF_DUTY.md` (on `wip/off-duty`), `docs/ART_BRIEFS.md` (portraits). Layout rule for every backdrop: keep the upper-left third quiet (caption box) and the subject in the upper two thirds (the dialogue box covers the bottom third). Rack and support sprites are Part A of `docs/ART_NEEDED.md` and `wip/tree-sprites`; they are code, not owner art.
+
+### DIALOGUE.md grammar (what the importer must read)
+Generated by `tools/dialogue/export.ts`; `npx tsx tools/dialogue/export.ts --check` validates it. Sections `## N. Title` in order: crawl, advisors, four story groups, endings, memos (Cass, Bea, Mel, Luci), lessons.
+- **Editable line:** `- [ID] TAG: TEXT`, regex `^- \[([a-z0-9_.]+)( mood=[a-z]+)?\] ([A-Za-z][A-Za-z ]*): (\S.*)$`. IDs are unique. TAG is a speaker id (`narrator luci mel bea cass`) or a capitalised field label (`Title Label Hint Outcome Caption Location Objective Concept Goal Learned Name ...`). Import only TEXT; warn if the owner changed a TAG or `mood=`.
+- `> ...` metadata, headings, "Choice ..." lines and blanks are ignored.
+- Multi-paragraph values were split on blank lines into `ID.p1`, `ID.p2`...; join in order with a blank line (`"\n\n"`). Export collapses inner newlines to spaces.
+- Keep `{item}`, `{{term}}`, `{{term|label}}` markers. Fail if the markers or a term id differ from the current text.
+- ID to data (files in `packages/content/src/data/` unless noted):
+
+| ID | Field |
+|--|--|
+| `crawl.N` | `CRAWL_LINES[N-1]` in `packages/ui/src/title/crawl.ts` (TS array: rewrite the string in place) |
+| `adv.<id>.{name,first,role,areas,motto}` | `ADVISORS[id]` in `packages/ui/src/advisors/advisors.ts` (TS object literals) |
+| `<scene>.title`, `.location`, `.caption` | `story.json` scene `title`, `location`, `body` |
+| `<scene>.lN` (`mood=`) | `story.json` scene `lines[N-1].text` (`who`, `mood` stay) |
+| `<scene>.<choice>.{label,hint,outcome}` | `story.json` choice fields |
+| `<scene>.<choice>.rN` | `story.json` choice `reply[N-1].text` |
+| `end.<id>.{title,body}`, `end.<id>.epilogue.<adv>` | `endings.json` `title`, `body`, `epilogue[adv]` |
+| `<event>.title`, `.body` | `events.json` `title`, `body` |
+| `<event>.vote.<adv>` | `events.json` `votes[advisor].line` |
+| `<event>.<choice>.{label,hint,outcome}` | `events.json` choice fields |
+| `<lesson>.{title,concept,goal,learned,outro,next}` | `lessons.json` lesson fields |
+| `<lesson>.<step>.objective`, `.sayN`, `.afterN` | `lessons.json` step `text`, `say[N-1]`, `after[N-1]` |
+
+- Scene, event and choice ids contain underscores and may contain dots only as separators, so resolve an ID by matching known scene/event/lesson ids from the data (longest prefix), not by splitting on `.`.
+- Write JSON back in the file's existing formatting so the round-trip diff is empty. Touch only the text fields above, never effects, triggers or `recommended`.
+- The export on `wip/endings` covers all five endings, and `wip/lessons` has four lessons. Merge both, regenerate `docs/DIALOGUE.md`, and compare: ids in the data but not in the owner's file keep their current text and are listed for the owner.
+
+### Rules for the next session
+- Opus coordinates only. Sonnet builds and writes, Haiku verifies. One worktree agent per task.
+- Never run `tsc -b` or plain `npx tsc`.
+- Sample approval before bulk for sprites and writing (one scene, one image, shown to the owner first).
+- Short, plain messages to the owner.
+- Push to main only when check, build, e2e and budget all pass and the owner has played the build.
 
 The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, at the root and in `docs/`.
 
@@ -96,7 +189,7 @@ The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, 
 ## 2. Architecture (TypeScript monorepo, npm workspaces)
 | Package | What it does |
 |--|--|
-| `packages/sim` | Deterministic fixed tick (1 tick = 1 game minute). Commands in, view out. Snapshot v12 with migrations. The Soul (SP, seals, bonds) lives in `progression/soul.ts`; decisions and story scenes in `ministry/decisions.ts`; the Foreman in `automation/foreman.ts`; Level gates in `progression/tier.ts`; affinity and green score in `progression/`. |
+| `packages/sim` | Deterministic fixed tick (1 tick = 1 game minute). Commands in, view out. Snapshot v14 with migrations. The Soul (SP, seals, bonds) lives in `progression/soul.ts`; decisions and story scenes in `ministry/decisions.ts`; the Foreman in `automation/foreman.ts`; Level gates in `progression/tier.ts`; affinity and green score in `progression/`. |
 | `packages/content` | Data in `src/data/*.json` (facilities, tech with lanes, lanes, bots, events/decisions, scenarios, balance), plus schema and validation. Tiers are derived in `tier.ts`. |
 | `packages/ui` | React HUD (PC-98 theme in `pc98/`, VN scenes in `vn/`, Soul gauge and dossier in `soul/`): build catalog and inspector, contracts, research tree, insights, automation, advisors, Handbook, lessons. |
 | `packages/render` | PixiJS world and skyline. |
@@ -135,14 +228,12 @@ The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, 
 
 ## 7. How to work (cost lessons)
 - Start a fresh session per work block. Long sessions re-read their whole history every turn, and that was most of the cost.
-- Run one agent at a time with `isolation: "worktree"`. Use Sonnet to build and Haiku to verify.
+- One worktree agent per task. Sonnet builds, Haiku verifies.
 - Ask the owner before any redesign, and show a small mockup first.
 - Fix reported bugs first.
 
 ## 8. Next session
-1. Read the owner's playtest notes; fix bugs first.
-2. Tune `balance.soul` and the seal numbers.
-3. Then the "Next" list in section 0.
+See "Next session: owner art and dialogue" in section 0. Fix reported bugs first; tune `balance.soul` and the seal numbers after the owner plays.
 
 ### Dating systems (snapshot v14)
 After hours, bond stages, route milestones, gifts, rivals, confession and route, earned options, texts and memory flags are in. Spec and art wishes: `docs/VN_WRITING.md` ("Dating systems as built"). Code: `ministry/dating.ts`, `ministry/decisions.ts` (`conditionsHold`, `quiet`), UI `soul/DatingDock.tsx`, `soul/Dossier.tsx`, `gameover/EndingScene.tsx`. Data: `story.json`, `gifts.json`, `messages.json`, `memories.json`.
