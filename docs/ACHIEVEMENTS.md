@@ -1,6 +1,6 @@
 # Achievements and off-duty gallery
 
-Status: **approved by the owner (Oct 30). Not built yet.** This is the build spec. Read against branch `claude/youthful-ramanujan-msqcy9`. It supersedes `docs/OFF_DUTY.md` (that file lived only on `wip/off-duty` and its art rule is dropped). The gallery scene lines are written: they are the `ach_*` scenes in `docs/NEW_SCENES.md` (typo fixes applied). Portrait art is saved, unregistered, on branch `wip/gallery-art`.
+Status: **approved by the owner (Oct 30). Built on `claude/youthful-ramanujan-msqcy9`** (see HANDOFF.md). This is the build spec. Read against branch `claude/youthful-ramanujan-msqcy9`. It supersedes `docs/OFF_DUTY.md` (that file lived only on `wip/off-duty` and its art rule is dropped). The gallery scene lines are written: they are the `ach_*` scenes in `docs/NEW_SCENES.md` (typo fixes applied). Portrait art is saved, unregistered, on branch `wip/gallery-art`.
 
 Decisions in force: 18 achievements; failure endings kept and hidden; bed set = all 18 earned; Month of Calm = 20 days; the profile travels in the save export/import file; the epilogue bar is 50 (already in code); `les_stars` is replaced by `heard_out`.
 

@@ -3,7 +3,7 @@ import { type ContentDB, loadContent, isRetrofitOnly } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimCommand } from "./api";
 import { TICKS_PER_DAY } from "./api";
-import { type SimImpl, createSim, simFromSnapshot } from "./sim";
+import { type SimImpl, createSim, SNAPSHOT_VERSION, simFromSnapshot } from "./sim";
 import { REMOVED_TECH_V15, SOLD_FACILITIES, SWAPPED_FACILITIES } from "./snapshot/migrate";
 import { addFacility } from "./world/entities";
 import { exec } from "./test/fixture";
@@ -265,7 +265,7 @@ describe("snapshot v15", () => {
 		s.state.sealResidue.biotech = 7;
 		s.state.bonds.mel = 66;
 		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
-		expect(loaded.snapshot().version).toBe(15);
+		expect(loaded.snapshot().version).toBe(SNAPSHOT_VERSION);
 		for (const k of ["path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in loaded.state, k).toBe(false);
 		expect(loaded.state.sp.greentech).toBe(321);
 		expect(loaded.state.sealResidue.biotech).toBe(7);

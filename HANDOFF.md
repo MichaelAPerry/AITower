@@ -8,7 +8,7 @@ AI Tower is a browser datacenter-management game in a PC-98 style. You are the O
 You grow racks and power, and retrofit them toward one of three trees: Lattice (synthetic), Flesh (biotech), Garden (greentech). There is no commit step: a tree is chosen by retrofitting.
 Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The sim is deterministic; the UI reads a view of it.
 
-Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (approved spec, not built), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/DIALOGUE_NEW.md` (lines the owner has not edited yet), `docs/ART_NEEDED.md` (art slots).
+Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (approved spec, now built), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/DIALOGUE_NEW.md` (lines the owner has not edited yet), `docs/ART_NEEDED.md` (art slots).
 
 ## 1. State on Oct 30 (end of session)
 
@@ -23,7 +23,9 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
   - epilogue bar 50 (`balance.json` `soul.bondEpilogue`).
 - All checks pass. A playable single-file build was given to the owner.
 - NOT pushed to main yet: waiting for the owner to play it.
-- Branch `wip/gallery-art`: 8 off-duty portraits, unregistered (not shipped). Not on youthful.
+- BUILT, UNRELEASED: achievements and the off-duty gallery (`docs/ACHIEVEMENTS.md`). Snapshot v16 (`uptimeStreak`); 18 rows in `packages/ui/src/achievements/achievements.ts` with words in `packages/content/src/data/achievements.json` (also in `docs/DIALOGUE.md`); list + gallery are the menu section "Achievements" (title and pause menu); profile travels in the save file, import merges; 8 portraits registered (`OFF_DUTY` in `art/index.ts`, 280x420 webp, 32-57 KB each).
+- Icons: only `cash_deep` has a code sprite; every other row shows the "?" plate. The owner's image sheet plugs in via `ICON_SHEETS` in `achievements/sheets.ts` plus `icon: {sheet, col, row}` on a row (locked/hidden looks are CSS). No sheet shipped yet.
+- Branch `wip/gallery-art` is merged in (art only) and can be dropped.
 
 ## 2. Owner decisions on record
 
@@ -40,7 +42,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 
 a. The owner plays the build. Fix the bugs they report. Push youthful to main only when check, build, e2e and budget all pass AND the owner says so.
 b. DONE: owner's edited `DIALOGUE_NEW.md` imported (`--truncate-paragraphs --write`).
-c. Build achievements and gallery per `docs/ACHIEVEMENTS.md`: snapshot v16 for `uptimeStreak`; art from `wip/gallery-art`; VN lines `ach_*` in `docs/NEW_SCENES.md`. Sample first: show one unlock in the game before doing the rest.
+c. DONE: achievements and gallery built per `docs/ACHIEVEMENTS.md`. Left: the owner's icon sheet (see section 1), a human check of the balance numbers (bond bars, `fast_win` days, `open_hands`, `calm_month`), and `end_bankrupt_note` (no owner wording exists, not built).
 d. Lessons: four exist (Build, Earn, Grow, The trees). Lessons 2-4 give no stars and none teaches the retrofit loop. The owner wants lessons made. Plan the missing teaching, propose a lesson list to the owner first, then sample one.
 
 ## 4. How to work

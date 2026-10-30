@@ -367,7 +367,9 @@ export function loadProject(root: string = DEFAULT_ROOT): Project {
 		ach.scenes.forEach((s, si) => {
 			put(s.id, `${s.id}.title`, "Title", ["scenes", si, "title"], s.title);
 			put(s.id, `${s.id}.location`, "Location", ["scenes", si, "location"], s.location);
-			s.lines.forEach((l, li) => put(s.id, `${s.id}.l${li + 1}`, l.who, ["scenes", si, "lines", li, "text"], l.text, l.mood));
+			s.lines.forEach((l, li) => {
+				put(s.id, `${s.id}.l${li + 1}`, l.who, ["scenes", si, "lines", li, "text"], l.text, l.mood);
+			});
 		});
 	}
 
