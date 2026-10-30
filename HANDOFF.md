@@ -17,6 +17,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
   - sprites, endings, and four lessons (Build, Earn, Grow, The trees);
   - owner art: 5 endings and 12 locations (`LOCATION_ART`, `sceneBackdrop`);
   - owner dialogue import: the owner's words win; endings cut to the owner's 3 paragraphs; 43 approved typo fixes;
+  - DONE: the owner's edited `DIALOGUE_NEW.md` is imported (21 changed, 13 typo-fix groups applied; DIALOGUE.md re-exported);
   - importer `tools/dialogue/import.ts` (+ `--truncate-paragraphs`), exporter `tools/dialogue/export.ts`;
   - new scenes: `cass_night_shift`, `seal_biotech` / `seal_greentech` (trigger `seal`), `bond50_*` (trigger `bond`), fallback epilogues;
   - epilogue bar 50 (`balance.json` `soul.bondEpilogue`).
@@ -38,7 +39,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 ## 3. Next, in order
 
 a. The owner plays the build. Fix the bugs they report. Push youthful to main only when check, build, e2e and budget all pass AND the owner says so.
-b. Import the owner's edited `DIALOGUE_NEW.md` (dry-run first, then `--write`; use `--truncate-paragraphs` for bodies that got shorter).
+b. DONE: owner's edited `DIALOGUE_NEW.md` imported (`--truncate-paragraphs --write`).
 c. Build achievements and gallery per `docs/ACHIEVEMENTS.md`: snapshot v16 for `uptimeStreak`; art from `wip/gallery-art`; VN lines `ach_*` in `docs/NEW_SCENES.md`. Sample first: show one unlock in the game before doing the rest.
 d. Lessons: four exist (Build, Earn, Grow, The trees). Lessons 2-4 give no stars and none teaches the retrofit loop. The owner wants lessons made. Plan the missing teaching, propose a lesson list to the owner first, then sample one.
 

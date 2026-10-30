@@ -319,7 +319,7 @@
 						"This one is {{inference|inference}}. A client keeps asking a model questions, and pays every minute you keep up. Press Accept."
 					],
 					"after": [
-						"Signed. Your racks pick it up on their own. Money starts when they run."
+						"Once signed, your racks pick it up on their own. Money flows as soon as they run."
 					],
 					"drawers": [
 						"contracts"
@@ -346,7 +346,7 @@
 						"Power on, cooling on, racks working. Watch TREASURY at the top. Wait for the contract to end."
 					],
 					"after": [
-						"There. Paid. For the record, that's revenue. Power and upkeep come out of it.",
+						"There. Paid. We need the revenue for our power and upkeep.",
 						"The PER HOUR figure at the top shows what's left."
 					],
 					"handbook": "ch:money",
@@ -433,7 +433,7 @@
 					],
 					"allow": [],
 					"say": [
-						"Racks break. Nothing breaks today. Something will tomorrow.",
+						"Racks break. Something will break today. Something will tomorrow.",
 						"A broken rack earns nothing until it's fixed. A fix uses one spare part.",
 						"Open Supplies in the build bar. Buy 5 spare parts."
 					],
@@ -461,7 +461,7 @@
 					"allow": [],
 					"say": [
 						"Parts sit in a depot. A bot carries one to the broken rack and fixes it.",
-						"Same tab. Buy a Rover."
+						"Same tab. Buy a bot."
 					],
 					"after": [
 						"That's your repair crew. Parts in the depot. A bot to carry them."
@@ -549,7 +549,7 @@
 				"ch:break"
 			],
 			"bonus": 25000,
-			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. For the record, that's a business. Next, Mel will show you how it grows."
+			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. Next, Mel will show you how it grows."
 		},
 		{
 			"id": "grow_the_tower",
@@ -712,7 +712,7 @@
 					"say": [
 						"Now the Foreman. Open Automation. Press T, or use the tab on the right.",
 						"He builds for you. Racks when contracts need them. An air handler when racks run hot. Power when it runs short.",
-						"He spends your money, so he keeps a reserve you set. Switch him on."
+						"He spends your money, so he keeps a reserve you set. Switch him on but watch him."
 					],
 					"drawers": [
 						"automation"
@@ -762,7 +762,7 @@
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "Hm. It's growing. That's what it wants. Next is the part I find hard to say out loud: how this ends. Bea has the slides."
+			"outro": "Hm. It's growing. That's what it wants. Where it goes is up to you."
 		},
 		{
 			"id": "the_three_trees",
@@ -805,10 +805,10 @@
 					],
 					"allow": [],
 					"say": [
-						"Bea again. Last lesson. This one's about how the game ends.",
-						"There are three ways, called trees. The Lattice is Luci's: pure machines. The Flesh is Mel's: living tissue. The Garden is mine: clean power.",
+						"Bea again. Last lesson. This one's about how the whole ball of wax goes. That's the world, you idiot.",
+						"There are three ways, called trees. The Lattice: pure machines. The Flesh: living tissue. The Garden: clean power.",
 						"Each tree is a line of better racks. You join one by retrofitting. Click the rack that's glowing in the world. Its panel opens on the right.",
-						"Find Retrofit. Pick Green. The rack changes right where it stands."
+						"Find Retrofit. Pick an upgrade path. The rack changes right where it stands."
 					],
 					"after": [
 						"There. An NM-1. It does 50 PF on 12 kW. The old one did 20 PF on 40 kW.",
@@ -942,7 +942,7 @@
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower. Free Build is waiting."
+			"outro": "That's everything I've got. Three trees, one race. Pick a road, or mix them. Nobody's stopping you. Go build your tower."
 		}
 	]
 }
