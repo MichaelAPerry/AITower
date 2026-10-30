@@ -235,8 +235,10 @@ describe("M4 content (bundled)", () => {
 			expect(by("bankrupt").backdrop).toBeUndefined();
 		});
 
-		it("the Lattice uses the Consciousness Transfer Unit", () => {
-			expect(db.endings.find((x) => x.id === "singularity")!.body).toMatch(/Consciousness Transfer Unit/);
+		it("the Lattice body is the owner's three paragraphs (the owner dropped the Consciousness Transfer Unit)", () => {
+			const body = db.endings.find((x) => x.id === "singularity")!.body;
+			expect(body).toMatch(/^At 04:12 the tower stopped allowing any control\./);
+			expect(body.split(/\n\s*\n/)).toHaveLength(3);
 		});
 	});
 

@@ -1,12 +1,12 @@
 /** The opening crawl: a few cards of Compute Authority prose before a new game, in the manner of an old film's title sequence. */
 
 export const CRAWL_LINES: readonly string[] = [
-	"Year 14 of the compute build-out.",
-	"Everyone agrees the Singularity is coming. Nobody agrees what it will look like.",
-	"Some say it will be a machine. Some say it will grow. Some say it will be green.",
-	"You have been allocated a plot, a 1.5 MW grid intake and four advisors.",
-	"Each of them wants the world to end a different way.",
-	"This tower is now your responsibility.",
+	"The year is 20XX, you have been assigned the job as datacenter manager.",
+	"Everyone agrees the Singularity is coming but nobody agrees what it will look like.",
+	"Will it be a machine dominated world with minds lost to chrome? Or something else?",
+	"What you build and what you think are the producers of this world.",
+	"The four advisors given to you are to help lead you to the world in which you want.",
+	"This tower and perhaps the world is under your care.",
 ];
 
 /** Seconds between one line appearing and the next. */

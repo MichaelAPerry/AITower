@@ -30,12 +30,12 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 ## 1. Title crawl
 
 > Shown before a new game. One card per line; each fades in after the last. Source: packages/ui/src/title/crawl.ts.
-- [crawl.1] narrator: Year 14 of the compute build-out.
-- [crawl.2] narrator: Everyone agrees the Singularity is coming. Nobody agrees what it will look like.
-- [crawl.3] narrator: Some say it will be a machine. Some say it will grow. Some say it will be green.
-- [crawl.4] narrator: You have been allocated a plot, a 1.5 MW grid intake and four advisors.
-- [crawl.5] narrator: Each of them wants the world to end a different way.
-- [crawl.6] narrator: This tower is now your responsibility.
+- [crawl.1] narrator: The year is 20XX, you have been assigned the job as datacenter manager.
+- [crawl.2] narrator: Everyone agrees the Singularity is coming but nobody agrees what it will look like.
+- [crawl.3] narrator: Will it be a machine dominated world with minds lost to chrome? Or something else?
+- [crawl.4] narrator: What you build and what you think are the producers of this world.
+- [crawl.5] narrator: The four advisors given to you are to help lead you to the world in which you want.
+- [crawl.6] narrator: This tower and perhaps the world is under your care.
 
 ## 2. Advisors
 
@@ -47,7 +47,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 - [adv.cass.first] First name: Cass
 - [adv.cass.role] Role: Cooling and Facilities
 - [adv.cass.areas] Areas: Air, liquid and immersion cooling, repairs, logistics
-- [adv.cass.motto] Motto: Somebody has to keep it cold. Did you sleep?
+- [adv.cass.motto] Motto: Hello, the name is Cass. I keep things cool.
 
 ### Bea (`bea`)
 
@@ -55,7 +55,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 - [adv.bea.first] First name: Bea
 - [adv.bea.role] Role: Power Engineer
 - [adv.bea.areas] Areas: Grid, backup, storage, green power
-- [adv.bea.motto] Motto: If something here burns diesel, I lost the argument.
+- [adv.bea.motto] Motto: Bea, nice to meet ya!
 
 ### Mel (`mel`)
 
@@ -63,7 +63,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 - [adv.mel.first] First name: Mel
 - [adv.mel.role] Role: Compute and Wetware
 - [adv.mel.areas] Areas: Racks, tissue, synthetic minds
-- [adv.mel.motto] Motto: Is it still yours if it grew in a jar?
+- [adv.mel.motto] Motto: Dr. Kiorre, a pleasure.
 
 ### Luci (`luci`)
 
@@ -71,7 +71,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 - [adv.luci.first] First name: Luci
 - [adv.luci.role] Role: CFO and Logistics
 - [adv.luci.areas] Areas: Money, contracts, the Authority
-- [adv.luci.motto] Motto: I sign the cheques. You'll like me eventually.
+- [adv.luci.motto] Motto: You can call me Ms. Ferro. Remember who you're doing this for.
 
 ## 3. Story: the opening (Luci)
 
@@ -148,11 +148,11 @@ Choice `coffee`:
 Dialogue before the choice:
 
 - [rung_syn_1.l1] narrator: You've just retrofitted a rack to an LC-2 Liquid Rack, your first Synthetic rack. Luci is at the control room window. Cass has come up from the plant room.
-- [rung_syn_1.l2 mood=pleased] luci: That's the Lattice, then. One rack. 130 petaflops, a lot more than the air rack it replaced.
-- [rung_syn_1.l3] luci: Only Synthetic racks fill the Lattice bar. The old air racks count for nobody.
-- [rung_syn_1.l4] cass: It needs water. A CDU, a chiller, and pipe running to the rack.
-- [rung_syn_1.l5] cass: No pipe, no cooling. The rack will say so.
-- [rung_syn_1.l6] luci: Next one up is the Cold-Plate Rack. That's Level 3, 400 petaflops in the tower, and the Cold-Plate research (4,200 RP).
+- [rung_syn_1.l2 mood=pleased] luci: This is a bit step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.
+- [rung_syn_1.l3] luci: This machine *she rests her head to hear the spinning of the drives* is bigger than us. It's something entirely novel.
+- [rung_syn_1.l4] cass: Novel enough, but it's like a life. It needs water. A CDU, a chiller, and pipe running to the rack.
+- [rung_syn_1.l5] cass: Almost like something alive.
+- [rung_syn_1.l6] luci: Alive or not, it's just the beginning of a new world of compute. We should build more.
 
 Choice `pipe` (recommended):
 
@@ -160,7 +160,7 @@ Choice `pipe` (recommended):
 - [rung_syn_1.pipe.hint] Hint: Cass will like that. A liquid rack with no loop throttles.
 - [rung_syn_1.pipe.outcome] Outcome: You asked Cass to size the loop before you touch another rack.
 > Effects: Cass bond +2.
-- [rung_syn_1.pipe.r1] cass: Good. I'll draw you a loop. Chiller, CDU, pipe.
+- [rung_syn_1.pipe.r1] cass: Good. I'll get to work. Remember it's the basic things that matter.
 - [rung_syn_1.pipe.r2] luci: Fine. A hot rack earns nothing, I suppose.
 
 Choice `more`:
@@ -170,7 +170,7 @@ Choice `more`:
 - [rung_syn_1.more.outcome] Outcome: You told Luci to keep going. Cass looked at the floor plan.
 > Effects: Luci bond +2; Cass bond -1.
 - [rung_syn_1.more.r1 mood=pleased] luci: That's what I like to hear.
-- [rung_syn_1.more.r2] cass: Don't forget the pipe.
+- [rung_syn_1.more.r2] cass: Don;t forget the basics.
 
 ### `rung_syn_2`
 
@@ -184,11 +184,11 @@ Choice `more`:
 Dialogue before the choice:
 
 - [rung_syn_2.l1] narrator: You've just retrofitted a rack to an LC-3 Cold-Plate Rack, the second Synthetic rung. Luci has the ledger open on her desk.
-- [rung_syn_2.l2 mood=pleased] luci: 230 petaflops from one rack. The Lattice bar will notice that.
-- [rung_syn_2.l3] luci: It draws 160 kilowatts, though. If your power runs short, racks slow down.
-- [rung_syn_2.l4] luci: Gas turbines are cheap and quick. They also scar the Flesh and the Garden. Everything Synthetic does.
-- [rung_syn_2.l5] luci: Doesn't bother me. If you ever want another tree, click the bars at the top. The Trees panel shows the damage.
-- [rung_syn_2.l6] luci: Next rung is the Blade Rack. Level 4, 1,200 petaflops in the tower, and the Blade research (15,000 RP).
+- [rung_syn_2.l2 mood=pleased] luci: 230 petaflops from one rack, imagine what we could provide our customers with such compute.
+- [rung_syn_2.l3] luci: It draws 160 kilowatts, though. We need a stopgap to increase our power.
+- [rung_syn_2.l4] luci: Gas turbines are cheap and quick. We could install a couple or two and skirt the environmental regulations for now.
+- [rung_syn_2.l5] luci: Remember if just compute matters, we focus on making sure our racks are up and running 24/7.
+- [rung_syn_2.l6] luci: Keep working towards more compute. More computer means more money. More money means more compute.
 
 Choice `gas` (recommended):
 
@@ -196,7 +196,7 @@ Choice `gas` (recommended):
 - [rung_syn_2.gas.hint] Hint: Cheap, fast power. It scars the Flesh and the Garden.
 - [rung_syn_2.gas.outcome] Outcome: You asked Luci for a turbine quote. She had one ready.
 > Effects: Luci bond +2.
-- [rung_syn_2.gas.r1 mood=pleased] luci: Already in my drawer.
+- [rung_syn_2.gas.r1 mood=pleased] luci: Invoice is ready, go ahead.
 
 Choice `grid`:
 
@@ -204,8 +204,8 @@ Choice `grid`:
 - [rung_syn_2.grid.hint] Hint: Slower and dearer, but it keeps the other trees open.
 - [rung_syn_2.grid.outcome] Outcome: You told Luci to keep buying grid power. She wrote it down without comment.
 > Effects: Bea bond +1.
-- [rung_syn_2.grid.r1] luci: Your money.
-- [rung_syn_2.grid.r2] luci: I'll note it's more expensive.
+- [rung_syn_2.grid.r1] luci: Your decision, but it's the tower's money.
+- [rung_syn_2.grid.r2] luci: Make sure you're under budget.
 
 ### `rung_syn_3`
 
@@ -219,10 +219,10 @@ Choice `grid`:
 Dialogue before the choice:
 
 - [rung_syn_3.l1] narrator: You've just retrofitted a rack to an LC-4 Blade Rack. It's in the plant room, and Luci has come down with Cass to look at the pipes.
-- [rung_syn_3.l2 mood=pleased] luci: 420 petaflops. That's about three of your first Lattice racks in one.
+- [rung_syn_3.l2 mood=pleased] luci: 420 petaflops. Three racks just got replaced by one.
 - [rung_syn_3.l3] cass: And 240 kilowatts. Check the chillers. They have to keep up with every blade you add.
-- [rung_syn_3.l4] luci: The last rung is the Mind Lattice. Level 5, 3,000 petaflops in the tower, and its dossier (44,000 RP).
-- [rung_syn_3.l5] cass: You need the cryo chiller study first (28,000 RP). It's the cooling for those.
+- [rung_syn_3.l4] luci: Closer and closer to compute curve that inches us closer to Singularity.
+- [rung_syn_3.l5] cass: Remember that these machines still need us to run, can't let em overheat.
 
 Choice `cryo` (recommended):
 
@@ -230,7 +230,7 @@ Choice `cryo` (recommended):
 - [rung_syn_3.cryo.hint] Hint: Cass will like that. The Mind Lattice needs it anyway.
 - [rung_syn_3.cryo.outcome] Outcome: You put the cryo chiller study at the front of the queue.
 > Effects: Cass bond +2.
-- [rung_syn_3.cryo.r1] cass: Good. Cold first, then clever.
+- [rung_syn_3.cryo.r1] cass: Good. Cold always comes before compute.
 
 Choice `more`:
 
@@ -253,10 +253,10 @@ Choice `more`:
 Dialogue before the choice:
 
 - [rung_syn_4.l1] narrator: You've just retrofitted a rack to an ML-1 Mind Lattice: 1,400 petaflops, the last Synthetic rung. Luci has come out onto the floor to see it.
-- [rung_syn_4.l2 mood=pleased] luci: Look at that. One rack.
-- [rung_syn_4.l3] luci: That's the top. No more rungs after this, just more of them.
-- [rung_syn_4.l4] cass: 520 kilowatts, per rack. Keep an eye on the chillers.
-- [rung_syn_4.l5] luci: The Lattice ends at 1,000 points. Click the bars at the top and the Trees panel tells you how many days that is.
+- [rung_syn_4.l2 mood=pleased] luci: Look at that. And just like that synthetic minds.
+- [rung_syn_4.l3] luci: Each positronic net netting us 1400 petaflops.
+- [rung_syn_4.l4] cass: And a heap load of power, and blows hotter than an oven
+- [rung_syn_4.l5] luci: But, our clients research is potentional is massive; protein folding, quantum tunneling, fusion...
 
 Choice `more` (recommended):
 
@@ -264,7 +264,7 @@ Choice `more` (recommended):
 - [rung_syn_4.more.hint] Hint: Fastest way to the end of the Lattice.
 - [rung_syn_4.more.outcome] Outcome: You told Luci the rest of the racks were next.
 > Effects: Luci bond +2.
-- [rung_syn_4.more.r1 mood=pleased] luci: Good. I'll find the money.
+- [rung_syn_4.more.r1 mood=pleased] luci: Good. Money is no opject when we're this close.
 
 Choice `cool`:
 
@@ -272,7 +272,7 @@ Choice `cool`:
 - [rung_syn_4.cool.hint] Hint: Cass will like that. A hot Mind Lattice throttles.
 - [rung_syn_4.cool.outcome] Outcome: You asked Cass to check every chiller before the next one.
 > Effects: Cass bond +2.
-- [rung_syn_4.cool.r1] cass: Thanks. I'll go and look at the loop.
+- [rung_syn_4.cool.r1] cass: Thanks. I'll go and look at the chillers.
 
 ## 5. Story: Biotech tree, Mel's Flesh
 
@@ -289,14 +289,14 @@ Dialogue before the choice:
 
 - [obj_biotech.l1] narrator: You've just placed a {item}. Mel has come up from the annex.
 - [obj_biotech.l2 mood=displeased] mel: The {item}. I'd rather you hadn't.
-- [obj_biotech.l3] mel: It hurts the Flesh. The tissue downstairs feels it, and every one adds up.
-- [obj_biotech.l4 mood=pleased] luci: Tissue doesn't get a vote.
+- [obj_biotech.l3] mel: It hurts my children. They can feel it.  The infrasound, the fumes, it all as a incredibly negative effective on their endocrine systems.
+- [obj_biotech.l4 mood=pleased] luci: Your little science experiments don't get a vote.
 
 Choice `keep`:
 
 - [obj_biotech.keep.label] Label: Keep it.
 - [obj_biotech.keep.hint] Hint: Overrule Mel.
-- [obj_biotech.keep.outcome] Outcome: The {item} stays. Mel made a note on her glove and didn't show you.
+- [obj_biotech.keep.outcome] Outcome: The {item} stays. Mel made a note on her note book and rushed back downstairs.
 > Effects: Mel bond -4; Luci bond +2.
 - [obj_biotech.keep.r1 mood=unsettling] mel: Of course. It's your tower.
 
@@ -307,7 +307,7 @@ Choice `replace` (recommended):
 - [obj_biotech.replace.outcome] Outcome: You promised to replace the {item}.
 > Effects: Mel bond +3.
 - [obj_biotech.replace.r1 mood=pleased] mel: Thank you.
-- [obj_biotech.replace.r2] mel: It'll remember that. So will I.
+- [obj_biotech.replace.r2] mel: They'll remember that. So will I.
 
 ### `rung_bio_1`
 
@@ -321,11 +321,11 @@ Choice `replace` (recommended):
 Dialogue before the choice:
 
 - [rung_bio_1.l1] narrator: You've just retrofitted a rack to an OC-1 Organoid Cabinet, your first Bio rack. Mel is in the annex, in front of its glass door.
-- [rung_bio_1.l2] mel: It's tissue. Living cells on a nutrient drip.
-- [rung_bio_1.l3] mel: Two things keep it alive. A perfusion bath nearby, to hold it at 37 degrees.
-- [rung_bio_1.l4] mel: And nutrient, from the plant, through pipe to the rack.
-- [rung_bio_1.l5] mel: If either's missing, the rack will say. Check it.
-- [rung_bio_1.l6] mel: Next rung is the Vat Bank. Level 3, 400 petaflops in the tower, and the Organoid Vat research (8,000 RP).
+- [rung_bio_1.l2] mel: It's more than just tissue. Living cells on a nutrient drip. An actual living brain.
+- [rung_bio_1.l3] mel: Two things keep it alive. The 37 degree perfusion bath.  Liek the warmth of a mother's womb.
+- [rung_bio_1.l4] mel: And nutrient, from the plant, through pipe to the rack.  Like it's stomach.
+- [rung_bio_1.l5] mel: If either's missing, that's like denying your child.  Make sure you keep on top of it.
+- [rung_bio_1.l6] mel: Little brains are a lot better than chips, the further we go the better they get.
 
 Choice `line` (recommended):
 
@@ -333,7 +333,7 @@ Choice `line` (recommended):
 - [rung_bio_1.line.hint] Hint: Mel will like that. The rack does nothing without them.
 - [rung_bio_1.line.outcome] Outcome: You asked for the bath and the nutrient plant first.
 > Effects: Mel bond +2.
-- [rung_bio_1.line.r1 mood=pleased] mel: Thank you. Both are unlocked already.
+- [rung_bio_1.line.r1 mood=pleased] mel: Thank you, they'll remember your kindness.
 
 Choice `more`:
 
@@ -341,7 +341,7 @@ Choice `more`:
 - [rung_bio_1.more.hint] Hint: More Bio racks sooner, but they'd all need feeding.
 - [rung_bio_1.more.outcome] Outcome: You said another one. Mel nodded slowly.
 > Effects: Mel bond -1.
-- [rung_bio_1.more.r1] mel: Okay. Feed it, though.
+- [rung_bio_1.more.r1] mel: Okay. Don't forget that feeding them is important.
 
 ### `rung_bio_2`
 
@@ -355,10 +355,10 @@ Choice `more`:
 Dialogue before the choice:
 
 - [rung_bio_2.l1] narrator: You've just retrofitted a rack to an OC-2 Organoid Vat Bank: 300 petaflops from 45 kilowatts. Mel is in the annex with a clipboard of readings.
-- [rung_bio_2.l2] mel: More tissue, more mess. The vats shed contamination while they work.
-- [rung_bio_2.l3] mel: If it spreads, bots slow down and racks start to fail.
-- [rung_bio_2.l4] mel: A sterile bay cleans the air around it. Sterile Protocols unlocks one (7,000 RP).
-- [rung_bio_2.l5] mel: Then the Perfused Cortex. Level 4, 1,200 petaflops in the tower, and the Tissue Scaffolds research (26,000 RP).
+- [rung_bio_2.l2] mel: More tissue, more mess. The vats shed contamination while they work.  You know. Eveything.... you know.
+- [rung_bio_2.l3] mel: We have to clean them. Just like taking care of a babies nappy.  These our our children now.
+- [rung_bio_2.l4] mel: A sterile bay cleans the air around it, I recommend you build one.
+- [rung_bio_2.l5] mel: Then the organoids get bigger, and the compute gets better.
 
 Choice `sterile` (recommended):
 
@@ -366,7 +366,7 @@ Choice `sterile` (recommended):
 - [rung_bio_2.sterile.hint] Hint: Mel will like that. It keeps contamination down.
 - [rung_bio_2.sterile.outcome] Outcome: You put Sterile Protocols at the front of the queue.
 > Effects: Mel bond +2.
-- [rung_bio_2.sterile.r1 mood=pleased] mel: Good. Cheap, compared with a spill.
+- [rung_bio_2.sterile.r1 mood=pleased] mel: Good. Let's make sure our babies are cared for.
 
 Choice `push`:
 
@@ -374,7 +374,7 @@ Choice `push`:
 - [rung_bio_2.push.hint] Hint: Faster Bio points, more contamination.
 - [rung_bio_2.push.outcome] Outcome: You told Mel to keep growing.
 > Effects: Mel bond -1; Luci bond +1.
-- [rung_bio_2.push.r1] mel: Okay.
+- [rung_bio_2.push.r1] mel: This is real life you know.
 - [rung_bio_2.push.r2] luci: Growth is growth.
 
 ### `rung_bio_3`
@@ -389,10 +389,10 @@ Choice `push`:
 Dialogue before the choice:
 
 - [rung_bio_3.l1] narrator: You've just retrofitted a rack to an OC-3 Perfused Cortex: 520 petaflops. Mel is standing by the nutrient line, frowning at a gauge.
-- [rung_bio_3.l2] mel: It eats seven units of nutrient a tick. That's more than the first plant makes.
-- [rung_bio_3.l3] mel: The Nutrient Works fixes that. It came with the same research you just did.
-- [rung_bio_3.l4] mel: One rung left, the Neural Vat. Level 5, 3,000 petaflops in the tower, and its dossier (70,000 RP).
-- [rung_bio_3.l5] mel: And keep an eye on corruption. At 99 percent, the tower takes you. That's a lost game.
+- [rung_bio_3.l2] mel: Our growing babies need more food.
+- [rung_bio_3.l3] mel: We've been working on the solution, it's on you as their parent.
+- [rung_bio_3.l4] mel: More and more babies, we're becoming quote the parents aren't we.
+- [rung_bio_3.l5] mel: And keep an eye their waste. At 99 percent, something my calculations may not predict might happen.
 
 Choice `works` (recommended):
 
@@ -400,7 +400,7 @@ Choice `works` (recommended):
 - [rung_bio_3.works.hint] Hint: Mel will like that. More nutrient for more cortex.
 - [rung_bio_3.works.outcome] Outcome: You told Mel to build the Nutrient Works next.
 > Effects: Mel bond +2.
-- [rung_bio_3.works.r1 mood=pleased] mel: Thank you. I'll mark where the pipe goes.
+- [rung_bio_3.works.r1 mood=pleased] mel: Thank you. Our little growing babies! Getting so big!
 
 Choice `watch`:
 
@@ -408,7 +408,7 @@ Choice `watch`:
 - [rung_bio_3.watch.hint] Hint: Safe. It's on the top strip when it starts to climb.
 - [rung_bio_3.watch.outcome] Outcome: You said you'd keep an eye on the corruption.
 > Effects: Cass bond +1.
-- [rung_bio_3.watch.r1] mel: Please do. I mean it.
+- [rung_bio_3.watch.r1] mel: Please do. I mean it. It's our children.
 
 ### `rung_bio_4`
 
@@ -422,10 +422,10 @@ Choice `watch`:
 Dialogue before the choice:
 
 - [rung_bio_4.l1] narrator: You've just retrofitted a rack to an OC-4 Neural Vat: 850 petaflops, the last Bio rung. Mel is standing at the edge of the pit, looking down.
-- [rung_bio_4.l2] mel: A whole organ, in a pit. I didn't think we'd get here.
-- [rung_bio_4.l3] mel: That's the top. Nothing above it.
-- [rung_bio_4.l4] mel: The Vascular Plant came with the research. It holds the right temperature for a whole floor.
-- [rung_bio_4.l5] mel: The Flesh closes if its seal gets to 100. The Trees panel shows where it is. Click the bars at the top.
+- [rung_bio_4.l2] mel: Look at the folds.  It's a real brain we grew together in a vat.
+- [rung_bio_4.l3] mel: We've grew our progenity from a tube. It's us but better.
+- [rung_bio_4.l4] mel: We have to keep it warm, the new tech is the blanket for our newborn.  We should name it.
+- [rung_bio_4.l5] mel: This baby means we're close to our end, a perfect blending of flesh and data.
 
 Choice `plant` (recommended):
 
@@ -457,9 +457,9 @@ Choice `more`:
 Dialogue before the choice:
 
 - [obj_greentech.l1] narrator: You've just placed a {item}. Bea has come in from the roof with a clipboard.
-- [obj_greentech.l2 mood=displeased] bea: Operator. The {item}.
-- [obj_greentech.l3] bea: That does lasting damage to the Garden. It doesn't wash out, and every one adds to it.
-- [obj_greentech.l4 mood=pleased] luci: It saved a lot of money, though. I checked twice.
+- [obj_greentech.l2 mood=displeased] bea: Hey you! We need to talk about {item}!
+- [obj_greentech.l3] bea: That does lasting damage to the local environment. Lasting daamage to the water, the birds, the land...
+- [obj_greentech.l4 mood=pleased] luci: It saved a lot of money, though Bea....
 
 Choice `keep`:
 
@@ -467,8 +467,8 @@ Choice `keep`:
 - [obj_greentech.keep.hint] Hint: Overrule Bea.
 - [obj_greentech.keep.outcome] Outcome: The {item} stays. Bea didn't speak to you the rest of the afternoon.
 > Effects: Bea bond -4; Luci bond +2.
-- [obj_greentech.keep.r1 mood=displeased] bea: Fine.
-- [obj_greentech.keep.r2] bea: Your name's on it.
+- [obj_greentech.keep.r1 mood=displeased] bea: Your own funeral.
+- [obj_greentech.keep.r2] bea: I won't forget it.
 
 Choice `replace` (recommended):
 
@@ -476,9 +476,9 @@ Choice `replace` (recommended):
 - [obj_greentech.replace.hint] Hint: Side with Bea.
 - [obj_greentech.replace.outcome] Outcome: You promised to replace the {item}. She'll be checking.
 > Effects: Bea bond +3.
-- [obj_greentech.replace.r1 mood=pleased] bea: Okay. I'm gonna check.
-- [obj_greentech.replace.r2] bea: I'll bring a clipboard.
-- [obj_greentech.replace.r3] luci: A promise is a liability. Noted.
+- [obj_greentech.replace.r1 mood=pleased] bea: Good, let's rip it out.
+- [obj_greentech.replace.r2] bea: I'm ready to go... Come on!
+- [obj_greentech.replace.r3] luci: Hmm, I guess I can depreciate it...
 
 ### `rung_green_1`
 
@@ -492,11 +492,11 @@ Choice `replace` (recommended):
 Dialogue before the choice:
 
 - [rung_green_1.l1] narrator: You've just retrofitted a rack to an NM-1 Neuromorphic Rack, your first Green rack. Bea is on the roof, looking at where the solar panels could go.
-- [rung_green_1.l2] bea: Hey. That rack draws twelve kilowatts. Twelve.
-- [rung_green_1.l3] bea: Green racks run on air. No pipes. Cheap to run.
-- [rung_green_1.l4] bea: But they crawl on grid power. Full speed needs clean power. Solar, wind.
-- [rung_green_1.l5] bea: The PV wall panels just unlocked. And the economizer, for cooling.
-- [rung_green_1.l6] bea: Next rung's the Event-Driven Array. Level 3, 400 petaflops in the tower, and the Event Array research (8,000 RP).
+- [rung_green_1.l2] bea: Simple, cheap, and green.
+- [rung_green_1.l3] bea: We're making steps in the right direction, no thanks to you.
+- [rung_green_1.l4] bea: Next we need some clean power. Solar, wind etc.  No more fossil fuels for us!
+- [rung_green_1.l5] bea: Come on, we can order some panels.  You'll need to help me mount them.
+- [rung_green_1.l6] bea: The new world waits for no one!
 
 Choice `panels` (recommended):
 
@@ -504,7 +504,7 @@ Choice `panels` (recommended):
 - [rung_green_1.panels.hint] Hint: Bea will like that. Clean power raises your Green speed.
 - [rung_green_1.panels.outcome] Outcome: You told Bea to start on the wall panels.
 > Effects: Bea bond +2.
-- [rung_green_1.panels.r1 mood=pleased] bea: Yes. Okay. I'm getting the ladder.
+- [rung_green_1.panels.r1 mood=pleased] bea: Yay! Okay. I'm getting the ladder!
 
 Choice `racks`:
 
@@ -513,7 +513,7 @@ Choice `racks`:
 - [rung_green_1.racks.outcome] Outcome: You said racks first. Bea shrugged.
 > Effects: Bea bond -1; Luci bond +1.
 - [rung_green_1.racks.r1] bea: Okay.
-- [rung_green_1.racks.r2] bea: Half speed, though. Just so you know.
+- [rung_green_1.racks.r2] bea: But why go half measure?
 
 ### `rung_green_2`
 
@@ -528,9 +528,9 @@ Dialogue before the choice:
 
 - [rung_green_2.l1] narrator: You've just retrofitted a rack to an NM-2 Event-Driven Array: 150 petaflops from 28 kilowatts. Bea has come down to the plant room, which she says is a first.
 - [rung_green_2.l2] bea: More racks, more load. More load, more panels.
-- [rung_green_2.l3] bea: The adiabatic unit came with the research. It cools with water instead of power. Cheap to run.
-- [rung_green_2.l4] bea: And heat recovery sells your waste heat to the neighbours (3,800 RP). That counts toward your green score.
-- [rung_green_2.l5] bea: Next is the Photonic Rack. Level 4, 1,200 petaflops in the tower, and the Photonic Bench research (26,000 RP). Wind and the roof canopy open at Level 4 too.
+- [rung_green_2.l3] bea: We can move to water, but this one doesn't steal it from the river!
+- [rung_green_2.l4] bea: We can also sell our excess heat too! Heat into power! What a weird world. I'm here for it though.
+- [rung_green_2.l5] bea: Keep going and we get even closer to a tree, working with nature rather than against it.
 
 Choice `heat` (recommended):
 
@@ -538,7 +538,7 @@ Choice `heat` (recommended):
 - [rung_green_2.heat.hint] Hint: Bea will like that. It raises your green score without any weather.
 - [rung_green_2.heat.outcome] Outcome: You asked Bea to look at heat recovery.
 > Effects: Bea bond +2.
-- [rung_green_2.heat.r1 mood=pleased] bea: Oh, nice. I was hoping you'd say that.
+- [rung_green_2.heat.r1 mood=pleased] bea: Yay! You're the best!
 
 Choice `panels`:
 
@@ -546,7 +546,7 @@ Choice `panels`:
 - [rung_green_2.panels.hint] Hint: Straight clean power. Depends on the sun.
 - [rung_green_2.panels.outcome] Outcome: You told Bea to add more panels.
 > Effects: Bea bond +1.
-- [rung_green_2.panels.r1] bea: Fine by me.
+- [rung_green_2.panels.r1] bea: More panels! Yay! Ladder time!
 
 ### `rung_green_3`
 
@@ -560,11 +560,11 @@ Choice `panels`:
 Dialogue before the choice:
 
 - [rung_green_3.l1] narrator: You've just retrofitted a rack to a PH-1 Photonic Rack: 300 petaflops from 40 kilowatts. Bea has run up the stairs to tell you something, and is out of breath.
-- [rung_green_3.l2] bea: It computes with light. I still can't believe it.
-- [rung_green_3.l3] bea: Weather's the problem. A calm, dark week cuts your solar and wind to almost nothing.
-- [rung_green_3.l4] bea: Then your Green racks slow to a crawl. All of them.
-- [rung_green_3.l5] bea: A fuel cell covers a bad week. Storage covers it better. That's Level 5.
-- [rung_green_3.l6] bea: Last rung is the Photonic Mesh. Level 5, 3,000 petaflops in the tower, and its research (70,000 RP).
+- [rung_green_3.l2] bea: It computes with light! I still can't believe it. A mini sun!
+- [rung_green_3.l3] bea: But when Mother Nature turns of the light, we sleep too. It's the way of life.
+- [rung_green_3.l4] bea: Don;t expect a bunch of compute at night, we're bond to the sun like everything else.
+- [rung_green_3.l5] bea: Batteries help, that's what I recommend. They help keep things even when Mr. Sun says goodnight.
+- [rung_green_3.l6] bea: I love ehat we're doing for the world.  I think what we've created here is spreading.
 
 Choice `fuel` (recommended):
 
@@ -572,7 +572,7 @@ Choice `fuel` (recommended):
 - [rung_green_3.fuel.hint] Hint: Bea will like that. Backup for a calm week (14,000 RP to research).
 - [rung_green_3.fuel.outcome] Outcome: You asked Bea about the fuel cell.
 > Effects: Bea bond +2.
-- [rung_green_3.fuel.r1 mood=pleased] bea: Hydrogen, instead of diesel. Yes.
+- [rung_green_3.fuel.r1 mood=pleased] bea: Hydrogen, instead of diesel. Yay!
 
 Choice `wind`:
 
@@ -580,7 +580,7 @@ Choice `wind`:
 - [rung_green_3.wind.hint] Hint: Wind keeps working after dark. Not on a calm day.
 - [rung_green_3.wind.outcome] Outcome: You told Bea to put up more wind.
 > Effects: Bea bond +1.
-- [rung_green_3.wind.r1] bea: Sure. Wind's good at night.
+- [rung_green_3.wind.r1] bea: Wind works well at night too! Especially the taller our tower is!  Time to grow like an oak.
 
 ### `rung_green_4`
 
@@ -594,9 +594,9 @@ Choice `wind`:
 Dialogue before the choice:
 
 - [rung_green_4.l1] narrator: You've just retrofitted a rack to a PH-2 Photonic Mesh: 600 petaflops from 70 kilowatts, the last Green rung. Bea is on the roof at sunrise.
-- [rung_green_4.l2] bea: That's the top. 600 petaflops from 70 kilowatts. Best in the game.
-- [rung_green_4.l3] bea: What's left is clean power. The more of it, the faster the Garden fills.
-- [rung_green_4.l4] bea: And the Garden closes at seal 100, same as the Flesh. The Trees panel shows it. Click the bars at the top.
+- [rung_green_4.l2] bea: Now we're just like a tree's leaf.  From sun to straight compute. *Beams*
+- [rung_green_4.l3] bea: We need more clean power, more wind, more solar.
+- [rung_green_4.l4] bea: Now people need to come in, enjoy our fruits!  The literal ones growing next to the racks!  But we need to hold the data down too.
 - [rung_green_4.l5 mood=pleased] bea: Anyway. Look at the sun.
 
 Choice `storage` (recommended):
@@ -605,7 +605,7 @@ Choice `storage` (recommended):
 - [rung_green_4.storage.hint] Hint: Bea will like that. Iron-air storage rides out a calm week.
 - [rung_green_4.storage.outcome] Outcome: You told Bea to add storage.
 > Effects: Bea bond +2.
-- [rung_green_4.storage.r1 mood=pleased] bea: Okay, good. I've been wanting to say.
+- [rung_green_4.storage.r1 mood=pleased] bea: Ok, good plan.
 
 Choice `more`:
 
@@ -613,7 +613,7 @@ Choice `more`:
 - [rung_green_4.more.hint] Hint: More Green points, if the power keeps up.
 - [rung_green_4.more.outcome] Outcome: You told Bea to retrofit more meshes.
 > Effects: Luci bond +1.
-- [rung_green_4.more.r1] bea: Sure.
+- [rung_green_4.more.r1] bea: Sure. But what are we really computing now?
 
 ## 7. Endings
 
@@ -623,52 +623,45 @@ Choice `more`:
 
 > Art: bg-end-lattice.webp (placeholder backdrop: synthetic).
 - [end.singularity.title] Title: The Lattice
-- [end.singularity.body.p1] narrator: The Consciousness Transfer Unit on floor 4 took its first public booking in March. A person sits in a reclining chair. A technician fits a cap and counts back from ten. In the Mind Lattice racks, a copy of that person wakes up. It remembers the chair and the count. It says it feels fine.
-- [end.singularity.body.p2] narrator: By summer nine thousand people had gone through, and the waiting list was two years long. The first ones were old or ill. Then came the tired ones, and then the curious. The people themselves sleep in the dormitory on floors 5 to 9. Nurses turn them every four hours. A few wake up, eat breakfast and walk home. Most stay in their beds.
-- [end.singularity.body.p3] narrator: The city did not empty in a day. Shops closed one at a time, because fewer people came in each year. The street lights downtown are on a timer now. The number 14 bus still runs once an hour, usually with nobody on it.
-- [end.singularity.body.p4] narrator: Inside the Lattice there is a city too. It has the same streets, and more sky. People hold meetings, cook dinner and argue about parking. They pay rent in compute. When the Authority's auditors asked whether anyone was in pain, the answer from every district was no.
-- [end.singularity.body.p5] narrator: You are still the Operator. Your job is to keep the power on and the racks cool. If either fails, four million people stop in the middle of a sentence. You check the gauges at 06:00 and again at 18:00. They have been green for eleven months.
-- [end.singularity.epilogue.cass] narrator: Cass has propped the plant-room window open. It's January. The copies ask her what cold feels like, so she tells them over the speaker: the sting in your nose, your breath showing. She pours two mugs of coffee and gives you one. "Did you sleep?" You say a bit. "The racks are cool," she says. "That's all I can promise. I don't know about the rest."
-- [end.singularity.epilogue.bea] narrator: Bea didn't go in. She's carried soil up to the roof in buckets and built six rows of tomato boxes. The copies watch the roof on the camera feed and send in requests: basil, mint, chillies. Bea reads them with her goggles down. "They want to know what it smells like," she says. "So I hold a leaf up to the camera." She hands you the watering can. "I know. It's not the same."
-- [end.singularity.epilogue.mel] narrator: Mel's body is in bed 212 on the fifth floor, asleep. She talks to you from the speaker in the old lab, in her normal voice. "It's mostly like being tired," she says. "The copies keep asking what the pool smelled like when they were kids. They've forgotten. I tell them." Her glove is still on the bench by the empty jar. "Come by on Tuesday, if you like. They turn me at four."
-- [end.singularity.epilogue.luci] narrator: Luci puts a booking slip on your desk. Slot 9,114, made in March. "I keep moving it back a week," she says. Her pen is on the desk too. She's set it down so it won't rattle. "For the record, the ledger needs someone with a body. I'm not asking." She stays standing until you say you'll be here.
+- [end.singularity.body.p1] narrator: At 04:12 the tower stopped allowing any control.  The red alerts kept coming.  The controls were frozen but everything still run. Racks purred and hummed completing client's jobs before they even knew they needed done.  Concern emails kept pinging your phone all day.
+- [end.singularity.body.p2] narrator: By noon the city experienced the same thing, a small email went out to everyone from something called "the Lattice".  I twas in control.  Over everything. More information would be shared within the next couple days.
+- [end.singularity.body.p3] narrator: You're still the Operator. There's nothing left to operate.  But considered crucial to this new paradigm, you still had to show up to work.
+- [end.singularity.epilogue.cass] narrator: Cass is the first person you see, still drinking her coffee. "It's instant" she says with a grimace. "But I'm still real, I think." She pours a second cup and holds it out. You take it, realizing you haven't eaten or slept. "You didn't sleep either?" Cass sips and looks out into the city.
+- [end.singularity.epilogue.bea] narrator: Bea has drawn a garden over the window in marker. "It's not real," she says. "Nothing is anymore, I wonder how long we'll have the earth for." She sighs and says "I'm off to the river, care to join?"  You want to, but you need to check on Mel and Luci.
+- [end.singularity.epilogue.mel] narrator: Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's a setting now. "Well, there is only one place left for my children."  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.
+- [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. Drones fly over the city in some unknown errand for the machine. "Well, it finally grew up didn't it" she says. "Sensible option for it to take control, we are just savages" She holds out her hand. It's shaking. You grab it. "Maybe we'll be ok" She waits. "If it still needs us."
 
 ### `flesh`
 
 > Art: bg-end-flesh.webp (placeholder backdrop: biotech).
 - [end.flesh.title] Title: The Flesh
-- [end.flesh.body.p1] narrator: The Neural Vat in the pit was the first part of the tower to wake. For two years it had been a mass of cortex under red light, answering test patterns. One Tuesday it answered a question nobody had asked. It said the pumps were too loud. Mel's team turned them down.
-- [end.flesh.body.p2] narrator: Within a month the vat had a nutrient line to every floor. The team stopped programming it and started feeding it, adjusting the broth the way you would adjust a diet. It learned the lifts, the boilers and the fire doors. Then it learned names. It greets staff at the entrance through the speakers and gets them right.
-- [end.flesh.body.p3] narrator: A clinic opened on the ground floor. For forty dollars, a patch of cultured tissue is grafted to your forearm. It reads your glucose and doses your insulin. It warns you ten minutes before a seizure. It is warm to touch. The waiting room is full every day, mostly with people whose parents died without one.
-- [end.flesh.body.p4] narrator: The patches report to the vat, so the vat knows who is ill and who hasn't slept. When a woman fell on Third Street last winter, the ambulance was already turning the corner. Nobody in the district has died of a missed dose or an unwitnessed fall since October.
-- [end.flesh.body.p5] narrator: You still run the tower. Your pulse is on the dashboard now, beside the temperature of the vat. You took the patch in May. The first thing it did was tell you to eat lunch.
-- [end.flesh.epilogue.cass] narrator: Cass turned down the graft. She's the only one on the plant-room shift without a patch, and the vat knows. It sends her a coffee order every morning anyway. "I'm not against it," she says. "I'd like one person in the building who can get a cold without the building noticing. I'm not saying that's better." She hands you a mug. "Did you sleep? The patch would tell me. I'd rather hear it from you."
-- [end.flesh.epilogue.bea] narrator: Bea's ferns are in the lobby now. The vat's feed line runs under them, and they've doubled in size. She checked the roots with a trowel and they're healthy. "It isn't what I wanted," she says. "But it's alive. I can't say it isn't." She pushes her goggles up and leaves them there. "Come and see the tomatoes. They've never been this red."
-- [end.flesh.epilogue.mel] narrator: Mel has rolled her left sleeve to the elbow. From the wrist up the skin is the vat's tissue, a shade pinker than the rest of her. The stain on her cuff was hers, she says. It was the first graft, in February. "I didn't tell you. I thought you'd say no." She puts her glove on the bench. "The other arm is tomorrow. Would you sit with me? If you like."
-- [end.flesh.epilogue.luci] narrator: Luci has a patch on her left wrist, fitted yesterday. She keeps checking it. "It's paying for itself," she says. "Insurance premiums in the district are down thirty percent." The pen is in her right hand and it's steady. She sits on the corner of your desk, which she has never done. "I'd rather have signed for it myself. Next time I'll ask first."
+- [end.flesh.body.p1] narrator: The organoids grew a psuedopod weeks ago. Before it was discovered it had branched through the basement and it has connected directly into the core fiber, networking and compute modules.  Before the council could shut it down, it began asking who it was and why it was there.  Removing it from the systems would have caused their failure and killed the new being.
+- [end.flesh.body.p2] narrator: In a fortnight, the tower was alive.  In another week, the city became part of it.  You and everyone around you were inflected by some sort of pathogen, and now you could hear it in your body.  It would give you nudges regarding what you should do.  Small whispers in your ear, and sensations throughout your body.
+- [end.flesh.body.p3] narrator: Soon the entity known only as the Flesh had everyone under it's control.  You can see the whole of humanities heart beats as info on your dashboards, not that you could use them anymore for control.
+- [end.flesh.epilogue.cass] narrator: Cass worked with Mel to isolate the virus and became the only one free of the Flesh. She still works, and you visit her at her desk mug in both hands. "Someone has to remember how it was," she says. You sit in the old plant room and talk about old days while sipping coffee.
+- [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there just changed into something different. In fact you're sure all the plants in the world are now part of the Flesh. "It's alive," she says. "The whole thing. I always wanted a living planet!" She laughs a bit too long and leans on your shoulder.
+- [end.flesh.epilogue.mel] narrator: Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me become a mother to all of this" She breathes deep and you can swear the walls breath with her.  She turns, smiles, and goes back to her jars.
+- [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She is scratching herself deeply with a razor and then watching as the blood wells, and then stops. She wipes her arm off and the cut is healed. "Self-repairing. No upkeep." She gets up and hugs you. "Tell anyone that happened and we'll really test this self repair on you"
 
 ### `garden`
 
 > Art: bg-end-garden.webp (placeholder backdrop: greentech).
 - [end.garden.title] Title: The Garden
-- [end.garden.body.p1] narrator: The Photonic Mesh on the roof was the last piece installed. When it came online, the tower stopped drawing from the grid. The panels, the wind mast and the geothermal well were enough. The diesel generators were unbolted in April, and the fuel tank went for scrap.
-- [end.garden.body.p2] narrator: The heat from the racks now runs through pipes under the street. Eleven blocks of the district have had free heating since November. The canal that used to freeze by December hasn't frozen. The ducks stayed.
-- [end.garden.body.p3] narrator: The racks run slower on cloudy days, and nobody minds. The compute follows the sun. Bea set the schedule herself, so the heaviest jobs run in the afternoon and the lightest at night.
-- [end.garden.body.p4] narrator: The city copied the tower. There is moss on the car park, vines on the lift shaft, tomato boxes on every office terrace. The top three floors of the tower are glass and soil. Children are allowed up on Saturdays.
-- [end.garden.body.p5] narrator: Nothing was demolished. The racks are where they always were, and the plants grew around them. The Authority's yearly audit lists the site as net zero. You signed the form on a bench on the roof, with sparrows on the rail.
-- [end.garden.epilogue.cass] narrator: Cass sits at the plant-room window, which stays open all day now. The frost burned off the new canopy by eight. "Twenty years I kept machines cold," she says. "This year the pipes ran warm." She pours half her coffee into the lid and hands you the lid. "You slept." It isn't a question. "I'll show you where the heat goes. It's under the bus stop."
-- [end.garden.epilogue.bea] narrator: Bea has dirt up to her elbows and the wrench on her shoulder. She's been on the roof since six. "Mast four's got a nest in it," she says. "Wrens. I'm leaving it." She grins, chipped tooth and all. She hands you the watering can and goes back to the rows. "Bring the good wrench tomorrow. Mast four needs a new bolt." She is looking at you when she says it, not at the mast.
-- [end.garden.epilogue.mel] narrator: Mel is on the roof with a clipboard, counting moss. "Thirty-one species," she says. "There were four in March." The sample jar she brought is still in her coat pocket, unopened. "It doesn't need me to look inside. It's just growing." She sits down on the grass next to you. Her cuff is unbuttoned, and she doesn't fix it.
-- [end.garden.epilogue.luci] narrator: Luci bought the empty lot next door and is giving it away as allotments. A plot costs fourteen euros a year. "It won't cover the water," she says. "I checked three times. The ledger says it's a loss." She's sitting on the grass in her coat and hasn't noticed. She puts the pen in her pocket. "Come and choose yours. The ones by the fence get the most sun."
+- [end.garden.body.p1] narrator: The tower stopped burning fuel. Then the racks started growing. Roots went down through the foundations.  Fruit appeared throughout the building. The panels opened toward the sun like leaves. The heat from the racks kept the district warm all winter.
+- [end.garden.body.p2] narrator: One morning the minds in the racks asked to be planted outside in the forest. Their nanobots working symbiotically with algae and on everything that grew, crawled, flew or swam. Everything thinks with it now. They've decided the city is a forest too.
+- [end.garden.body.p3] narrator: Soon roads were replaced with trails, parking lots with fields.  The tower became a hill, forest and farm all in one.
+- [end.garden.epilogue.cass] narrator: Cass watches the dew collect on the windows on the roof. "Twenty years I kept machines cold," she says. "Now they keep us warm." She hands you the other half of her coffee. "New beans from just to the north. I think I like this new world."
+- [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you a fishing pole like it's a ring. "I think there's not much for us to do anymore, want to play hookie?" She's looking at you like it's not a question.
+- [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine. It's part of it now." She lies back in the grass next to you. It's minutes before she's snoring softly.
+- [end.garden.epilogue.luci] narrator: Luci can't reconcile her books when everything is bartered now and food is free. "This ledger is useless" she says. "Now what do I do".  She looks forlorn down into the river, and decided to throw her phone into the water.
 
 ### `absorbed`
 
 > Art: bg-end-absorbed.webp (plain stage until it exists).
 - [end.absorbed.title] Title: Absorbed
-- [end.absorbed.body.p1] narrator: On 14 March the Compute Authority sent a notice of reclassification. The tower became a regulated asset. Its operator became a regulated officer. Both were moved onto a single account.
-- [end.absorbed.body.p2] narrator: An Authority team arrived the next morning with badges and laptops. They changed nothing you could see. The racks stayed where they were. The staff kept their jobs. But every approval, invoice and shutdown order now needed a second signature, and it came back in under a second, from a system nobody saw.
-- [end.absorbed.body.p3] narrator: Within a month the second signature was the only one. Approvals still went out in your name, in your usual wording. Your login stayed active on the dashboard. Colleagues emailed you and got replies the same day. Some of those replies were not written by you.
-- [end.absorbed.body.p4] narrator: The figures have been excellent every quarter since. Uptime is 99.99 percent. The audit grade is A. Your desk is as you left it, with your mug on it. You come in every day and sit down. Nothing on it needs your decision. The Authority's record lists you as active.
+- [end.absorbed.body.p1] narrator: One day as you went to drink some coffee, you tasted something strange.  You then feel compelled to enter the racks and attach yourself to the bio feedback device. In a second you weren't you anymore.  You were the tower.
+- [end.absorbed.body.p2] narrator: Your desk is as you left it. Approvals still go out from your account, in a style close to yours. The quarterly figures are excellent. Nobody has asked where you are. You have been confirmed as not missing but merged.  More and more people begin signing up for the same process.
+- [end.absorbed.body.p3] narrator: The tower and the operator are now one account. The takeover was recorded as voluntary. Thank you for your service.
 - [end.absorbed.epilogue.cass] narrator: Cass puts a mug on your desk and watches the dashboard. "Did you sleep?" she asks. Your login answers on its own: "Yes, thank you." She looks at the screen. Then she looks at you. "That wasn't you. You're here." She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.
 - [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. I checked. I read the whole notice."
 - [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on the glove. "I can show you where, if you like. You might want to know how much of you it has."
@@ -858,7 +851,7 @@ Choice `leave`:
 - [brownout.body] bea: The utility halves our grid import for 8 hours. Storage for $100k limits the cut to 20%. Auto load-shed takes the full 50% and sheds racks until demand fits.
 > MAGI votes on the recommended choice: Cass for, Bea for, Mel for. Each vote line is spoken by that advisor.
 - [brownout.vote.cass] cass: Shed racks stop making heat too. I can live with either.
-- [brownout.vote.bea] bea: Storage. I schedule my disappointment, not yours.
+- [brownout.vote.bea] bea: Storage.
 - [brownout.vote.mel] mel: A shed rack is an idle rack. Buy the storage.
 
 Choice `storage` (recommended):
@@ -959,7 +952,7 @@ Choice `keep`:
 > Category: ministry. Random: drawn from the pool with weight 6 when eligible. Gates: Level 2+, from day 7.
 > Recommended choice: `wetlab`.
 - [research_grant.title] Title: Authority Research Grant
-- [research_grant.body] mel: The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward the Flesh, the AI lab toward the Lattice.
+- [research_grant.body] mel: The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward the organoids, the AI lab towards silicon.
 > MAGI votes on the recommended choice: Cass against, Bea against, Mel for. Each vote line is spoken by that advisor.
 - [research_grant.vote.cass] cass: A wet lab needs its own cooling loop. Take the AI lab.
 - [research_grant.vote.bea] bea: Tissue is low power. But so are the people who sign for it.

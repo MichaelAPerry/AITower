@@ -21,10 +21,10 @@ export interface AdvisorInfo {
 }
 
 export const ADVISORS: Record<AdvisorId, AdvisorInfo> = {
-	cass: { id: "cass", name: "Cass Parr", first: "Cass", role: "Cooling and Facilities", areas: "Air, liquid and immersion cooling, repairs, logistics", color: "#7fdcff", motto: "Somebody has to keep it cold. Did you sleep?" },
-	bea: { id: "bea", name: "Bea Altasar", first: "Bea", role: "Power Engineer", areas: "Grid, backup, storage, green power", color: "#9be564", motto: "If something here burns diesel, I lost the argument." },
-	mel: { id: "mel", name: "Dr. Mel Kiorre", first: "Mel", role: "Compute and Wetware", areas: "Racks, tissue, synthetic minds", color: "#c58bff", motto: "Is it still yours if it grew in a jar?" },
-	luci: { id: "luci", name: "Luci Ferro", first: "Luci", role: "CFO and Logistics", areas: "Money, contracts, the Authority", color: "#ff5d6c", motto: "I sign the cheques. You'll like me eventually." },
+	cass: { id: "cass", name: "Cass Parr", first: "Cass", role: "Cooling and Facilities", areas: "Air, liquid and immersion cooling, repairs, logistics", color: "#7fdcff", motto: "Hello, the name is Cass. I keep things cool." },
+	bea: { id: "bea", name: "Bea Altasar", first: "Bea", role: "Power Engineer", areas: "Grid, backup, storage, green power", color: "#9be564", motto: "Bea, nice to meet ya!" },
+	mel: { id: "mel", name: "Dr. Mel Kiorre", first: "Mel", role: "Compute and Wetware", areas: "Racks, tissue, synthetic minds", color: "#c58bff", motto: "Dr. Kiorre, a pleasure." },
+	luci: { id: "luci", name: "Luci Ferro", first: "Luci", role: "CFO and Logistics", areas: "Money, contracts, the Authority", color: "#ff5d6c", motto: "You can call me Ms. Ferro. Remember who you're doing this for." },
 };
 
 /** Which tree each advisor argues for (Cass argues for nobody's Singularity). */

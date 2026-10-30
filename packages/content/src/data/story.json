@@ -198,16 +198,16 @@
    },
    {
     "who": "bea",
-    "text": "Operator. The {item}.",
+    "text": "Hey you! We need to talk about {item}!",
     "mood": "displeased"
    },
    {
     "who": "bea",
-    "text": "That does lasting damage to the Garden. It doesn't wash out, and every one adds to it."
+    "text": "That does lasting damage to the local environment. Lasting daamage to the water, the birds, the land..."
    },
    {
     "who": "luci",
-    "text": "It saved a lot of money, though. I checked twice.",
+    "text": "It saved a lot of money, though Bea....",
     "mood": "pleased"
    }
   ],
@@ -233,12 +233,12 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Fine.",
+      "text": "Your own funeral.",
       "mood": "displeased"
      },
      {
       "who": "bea",
-      "text": "Your name's on it."
+      "text": "I won't forget it."
      }
     ]
    },
@@ -257,16 +257,16 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Okay. I'm gonna check.",
+      "text": "Good, let's rip it out.",
       "mood": "pleased"
      },
      {
       "who": "bea",
-      "text": "I'll bring a clipboard."
+      "text": "I'm ready to go... Come on!"
      },
      {
       "who": "luci",
-      "text": "A promise is a liability. Noted."
+      "text": "Hmm, I guess I can depreciate it..."
      }
     ]
    }
@@ -298,11 +298,11 @@
    },
    {
     "who": "mel",
-    "text": "It hurts the Flesh. The tissue downstairs feels it, and every one adds up."
+    "text": "It hurts my children. They can feel it.  The infrasound, the fumes, it all as a incredibly negative effective on their endocrine systems."
    },
    {
     "who": "luci",
-    "text": "Tissue doesn't get a vote.",
+    "text": "Your little science experiments don't get a vote.",
     "mood": "pleased"
    }
   ],
@@ -312,7 +312,7 @@
     "id": "keep",
     "label": "Keep it.",
     "hint": "Overrule Mel.",
-    "outcome": "The {item} stays. Mel made a note on her glove and didn't show you.",
+    "outcome": "The {item} stays. Mel made a note on her note book and rushed back downstairs.",
     "effects": [
      {
       "type": "bond",
@@ -353,7 +353,7 @@
      },
      {
       "who": "mel",
-      "text": "It'll remember that. So will I."
+      "text": "They'll remember that. So will I."
      }
     ]
    }
@@ -382,24 +382,24 @@
    },
    {
     "who": "luci",
-    "text": "That's the Lattice, then. One rack. 130 petaflops, a lot more than the air rack it replaced.",
+    "text": "This is a bit step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.",
     "mood": "pleased"
    },
    {
     "who": "luci",
-    "text": "Only Synthetic racks fill the Lattice bar. The old air racks count for nobody."
+    "text": "This machine *she rests her head to hear the spinning of the drives* is bigger than us. It's something entirely novel."
    },
    {
     "who": "cass",
-    "text": "It needs water. A CDU, a chiller, and pipe running to the rack."
+    "text": "Novel enough, but it's like a life. It needs water. A CDU, a chiller, and pipe running to the rack."
    },
    {
     "who": "cass",
-    "text": "No pipe, no cooling. The rack will say so."
+    "text": "Almost like something alive."
    },
    {
     "who": "luci",
-    "text": "Next one up is the Cold-Plate Rack. That's Level 3, 400 petaflops in the tower, and the Cold-Plate research (4,200 RP)."
+    "text": "Alive or not, it's just the beginning of a new world of compute. We should build more."
    }
   ],
   "recommended": "pipe",
@@ -419,7 +419,7 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. I'll draw you a loop. Chiller, CDU, pipe."
+      "text": "Good. I'll get to work. Remember it's the basic things that matter."
      },
      {
       "who": "luci",
@@ -452,7 +452,7 @@
      },
      {
       "who": "cass",
-      "text": "Don't forget the pipe."
+      "text": "Don;t forget the basics."
      }
     ]
    }
@@ -481,24 +481,24 @@
    },
    {
     "who": "luci",
-    "text": "230 petaflops from one rack. The Lattice bar will notice that.",
+    "text": "230 petaflops from one rack, imagine what we could provide our customers with such compute.",
     "mood": "pleased"
    },
    {
     "who": "luci",
-    "text": "It draws 160 kilowatts, though. If your power runs short, racks slow down."
+    "text": "It draws 160 kilowatts, though. We need a stopgap to increase our power."
    },
    {
     "who": "luci",
-    "text": "Gas turbines are cheap and quick. They also scar the Flesh and the Garden. Everything Synthetic does."
+    "text": "Gas turbines are cheap and quick. We could install a couple or two and skirt the environmental regulations for now."
    },
    {
     "who": "luci",
-    "text": "Doesn't bother me. If you ever want another tree, click the bars at the top. The Trees panel shows the damage."
+    "text": "Remember if just compute matters, we focus on making sure our racks are up and running 24/7."
    },
    {
     "who": "luci",
-    "text": "Next rung is the Blade Rack. Level 4, 1,200 petaflops in the tower, and the Blade research (15,000 RP)."
+    "text": "Keep working towards more compute. More computer means more money. More money means more compute."
    }
   ],
   "recommended": "gas",
@@ -518,7 +518,7 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Already in my drawer.",
+      "text": "Invoice is ready, go ahead.",
       "mood": "pleased"
      }
     ]
@@ -538,11 +538,11 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Your money."
+      "text": "Your decision, but it's the tower's money."
      },
      {
       "who": "luci",
-      "text": "I'll note it's more expensive."
+      "text": "Make sure you're under budget."
      }
     ]
    }
@@ -571,7 +571,7 @@
    },
    {
     "who": "luci",
-    "text": "420 petaflops. That's about three of your first Lattice racks in one.",
+    "text": "420 petaflops. Three racks just got replaced by one.",
     "mood": "pleased"
    },
    {
@@ -580,11 +580,11 @@
    },
    {
     "who": "luci",
-    "text": "The last rung is the Mind Lattice. Level 5, 3,000 petaflops in the tower, and its dossier (44,000 RP)."
+    "text": "Closer and closer to compute curve that inches us closer to Singularity."
    },
    {
     "who": "cass",
-    "text": "You need the cryo chiller study first (28,000 RP). It's the cooling for those."
+    "text": "Remember that these machines still need us to run, can't let em overheat."
    }
   ],
   "recommended": "cryo",
@@ -604,7 +604,7 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Good. Cold first, then clever."
+      "text": "Good. Cold always comes before compute."
      }
     ]
    },
@@ -657,20 +657,20 @@
    },
    {
     "who": "luci",
-    "text": "Look at that. One rack.",
+    "text": "Look at that. And just like that synthetic minds.",
     "mood": "pleased"
    },
    {
     "who": "luci",
-    "text": "That's the top. No more rungs after this, just more of them."
+    "text": "Each positronic net netting us 1400 petaflops."
    },
    {
     "who": "cass",
-    "text": "520 kilowatts, per rack. Keep an eye on the chillers."
+    "text": "And a heap load of power, and blows hotter than an oven"
    },
    {
     "who": "luci",
-    "text": "The Lattice ends at 1,000 points. Click the bars at the top and the Trees panel tells you how many days that is."
+    "text": "But, our clients research is potentional is massive; protein folding, quantum tunneling, fusion..."
    }
   ],
   "recommended": "more",
@@ -690,7 +690,7 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Good. I'll find the money.",
+      "text": "Good. Money is no opject when we're this close.",
       "mood": "pleased"
      }
     ]
@@ -710,7 +710,7 @@
     "reply": [
      {
       "who": "cass",
-      "text": "Thanks. I'll go and look at the loop."
+      "text": "Thanks. I'll go and look at the chillers."
      }
     ]
    }
@@ -739,23 +739,23 @@
    },
    {
     "who": "mel",
-    "text": "It's tissue. Living cells on a nutrient drip."
+    "text": "It's more than just tissue. Living cells on a nutrient drip. An actual living brain."
    },
    {
     "who": "mel",
-    "text": "Two things keep it alive. A perfusion bath nearby, to hold it at 37 degrees."
+    "text": "Two things keep it alive. The 37 degree perfusion bath.  Liek the warmth of a mother's womb."
    },
    {
     "who": "mel",
-    "text": "And nutrient, from the plant, through pipe to the rack."
+    "text": "And nutrient, from the plant, through pipe to the rack.  Like it's stomach."
    },
    {
     "who": "mel",
-    "text": "If either's missing, the rack will say. Check it."
+    "text": "If either's missing, that's like denying your child.  Make sure you keep on top of it."
    },
    {
     "who": "mel",
-    "text": "Next rung is the Vat Bank. Level 3, 400 petaflops in the tower, and the Organoid Vat research (8,000 RP)."
+    "text": "Little brains are a lot better than chips, the further we go the better they get."
    }
   ],
   "recommended": "line",
@@ -775,7 +775,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Thank you. Both are unlocked already.",
+      "text": "Thank you, they'll remember your kindness.",
       "mood": "pleased"
      }
     ]
@@ -795,7 +795,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Okay. Feed it, though."
+      "text": "Okay. Don't forget that feeding them is important."
      }
     ]
    }
@@ -824,19 +824,19 @@
    },
    {
     "who": "mel",
-    "text": "More tissue, more mess. The vats shed contamination while they work."
+    "text": "More tissue, more mess. The vats shed contamination while they work.  You know. Eveything.... you know."
    },
    {
     "who": "mel",
-    "text": "If it spreads, bots slow down and racks start to fail."
+    "text": "We have to clean them. Just like taking care of a babies nappy.  These our our children now."
    },
    {
     "who": "mel",
-    "text": "A sterile bay cleans the air around it. Sterile Protocols unlocks one (7,000 RP)."
+    "text": "A sterile bay cleans the air around it, I recommend you build one."
    },
    {
     "who": "mel",
-    "text": "Then the Perfused Cortex. Level 4, 1,200 petaflops in the tower, and the Tissue Scaffolds research (26,000 RP)."
+    "text": "Then the organoids get bigger, and the compute gets better."
    }
   ],
   "recommended": "sterile",
@@ -856,7 +856,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Good. Cheap, compared with a spill.",
+      "text": "Good. Let's make sure our babies are cared for.",
       "mood": "pleased"
      }
     ]
@@ -881,7 +881,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Okay."
+      "text": "This is real life you know."
      },
      {
       "who": "luci",
@@ -914,19 +914,19 @@
    },
    {
     "who": "mel",
-    "text": "It eats seven units of nutrient a tick. That's more than the first plant makes."
+    "text": "Our growing babies need more food."
    },
    {
     "who": "mel",
-    "text": "The Nutrient Works fixes that. It came with the same research you just did."
+    "text": "We've been working on the solution, it's on you as their parent."
    },
    {
     "who": "mel",
-    "text": "One rung left, the Neural Vat. Level 5, 3,000 petaflops in the tower, and its dossier (70,000 RP)."
+    "text": "More and more babies, we're becoming quote the parents aren't we."
    },
    {
     "who": "mel",
-    "text": "And keep an eye on corruption. At 99 percent, the tower takes you. That's a lost game."
+    "text": "And keep an eye their waste. At 99 percent, something my calculations may not predict might happen."
    }
   ],
   "recommended": "works",
@@ -946,7 +946,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Thank you. I'll mark where the pipe goes.",
+      "text": "Thank you. Our little growing babies! Getting so big!",
       "mood": "pleased"
      }
     ]
@@ -966,7 +966,7 @@
     "reply": [
      {
       "who": "mel",
-      "text": "Please do. I mean it."
+      "text": "Please do. I mean it. It's our children."
      }
     ]
    }
@@ -995,19 +995,19 @@
    },
    {
     "who": "mel",
-    "text": "A whole organ, in a pit. I didn't think we'd get here."
+    "text": "Look at the folds.  It's a real brain we grew together in a vat."
    },
    {
     "who": "mel",
-    "text": "That's the top. Nothing above it."
+    "text": "We've grew our progenity from a tube. It's us but better."
    },
    {
     "who": "mel",
-    "text": "The Vascular Plant came with the research. It holds the right temperature for a whole floor."
+    "text": "We have to keep it warm, the new tech is the blanket for our newborn.  We should name it."
    },
    {
     "who": "mel",
-    "text": "The Flesh closes if its seal gets to 100. The Trees panel shows where it is. Click the bars at the top."
+    "text": "This baby means we're close to our end, a perfect blending of flesh and data."
    }
   ],
   "recommended": "plant",
@@ -1076,23 +1076,23 @@
    },
    {
     "who": "bea",
-    "text": "Hey. That rack draws twelve kilowatts. Twelve."
+    "text": "Simple, cheap, and green."
    },
    {
     "who": "bea",
-    "text": "Green racks run on air. No pipes. Cheap to run."
+    "text": "We're making steps in the right direction, no thanks to you."
    },
    {
     "who": "bea",
-    "text": "But they crawl on grid power. Full speed needs clean power. Solar, wind."
+    "text": "Next we need some clean power. Solar, wind etc.  No more fossil fuels for us!"
    },
    {
     "who": "bea",
-    "text": "The PV wall panels just unlocked. And the economizer, for cooling."
+    "text": "Come on, we can order some panels.  You'll need to help me mount them."
    },
    {
     "who": "bea",
-    "text": "Next rung's the Event-Driven Array. Level 3, 400 petaflops in the tower, and the Event Array research (8,000 RP)."
+    "text": "The new world waits for no one!"
    }
   ],
   "recommended": "panels",
@@ -1112,7 +1112,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Yes. Okay. I'm getting the ladder.",
+      "text": "Yay! Okay. I'm getting the ladder!",
       "mood": "pleased"
      }
     ]
@@ -1141,7 +1141,7 @@
      },
      {
       "who": "bea",
-      "text": "Half speed, though. Just so you know."
+      "text": "But why go half measure?"
      }
     ]
    }
@@ -1174,15 +1174,15 @@
    },
    {
     "who": "bea",
-    "text": "The adiabatic unit came with the research. It cools with water instead of power. Cheap to run."
+    "text": "We can move to water, but this one doesn't steal it from the river!"
    },
    {
     "who": "bea",
-    "text": "And heat recovery sells your waste heat to the neighbours (3,800 RP). That counts toward your green score."
+    "text": "We can also sell our excess heat too! Heat into power! What a weird world. I'm here for it though."
    },
    {
     "who": "bea",
-    "text": "Next is the Photonic Rack. Level 4, 1,200 petaflops in the tower, and the Photonic Bench research (26,000 RP). Wind and the roof canopy open at Level 4 too."
+    "text": "Keep going and we get even closer to a tree, working with nature rather than against it."
    }
   ],
   "recommended": "heat",
@@ -1202,7 +1202,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Oh, nice. I was hoping you'd say that.",
+      "text": "Yay! You're the best!",
       "mood": "pleased"
      }
     ]
@@ -1222,7 +1222,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Fine by me."
+      "text": "More panels! Yay! Ladder time!"
      }
     ]
    }
@@ -1251,23 +1251,23 @@
    },
    {
     "who": "bea",
-    "text": "It computes with light. I still can't believe it."
+    "text": "It computes with light! I still can't believe it. A mini sun!"
    },
    {
     "who": "bea",
-    "text": "Weather's the problem. A calm, dark week cuts your solar and wind to almost nothing."
+    "text": "But when Mother Nature turns of the light, we sleep too. It's the way of life."
    },
    {
     "who": "bea",
-    "text": "Then your Green racks slow to a crawl. All of them."
+    "text": "Don;t expect a bunch of compute at night, we're bond to the sun like everything else."
    },
    {
     "who": "bea",
-    "text": "A fuel cell covers a bad week. Storage covers it better. That's Level 5."
+    "text": "Batteries help, that's what I recommend. They help keep things even when Mr. Sun says goodnight."
    },
    {
     "who": "bea",
-    "text": "Last rung is the Photonic Mesh. Level 5, 3,000 petaflops in the tower, and its research (70,000 RP)."
+    "text": "I love ehat we're doing for the world.  I think what we've created here is spreading."
    }
   ],
   "recommended": "fuel",
@@ -1287,7 +1287,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Hydrogen, instead of diesel. Yes.",
+      "text": "Hydrogen, instead of diesel. Yay!",
       "mood": "pleased"
      }
     ]
@@ -1307,7 +1307,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Sure. Wind's good at night."
+      "text": "Wind works well at night too! Especially the taller our tower is!  Time to grow like an oak."
      }
     ]
    }
@@ -1336,15 +1336,15 @@
    },
    {
     "who": "bea",
-    "text": "That's the top. 600 petaflops from 70 kilowatts. Best in the game."
+    "text": "Now we're just like a tree's leaf.  From sun to straight compute. *Beams*"
    },
    {
     "who": "bea",
-    "text": "What's left is clean power. The more of it, the faster the Garden fills."
+    "text": "We need more clean power, more wind, more solar."
    },
    {
     "who": "bea",
-    "text": "And the Garden closes at seal 100, same as the Flesh. The Trees panel shows it. Click the bars at the top."
+    "text": "Now people need to come in, enjoy our fruits!  The literal ones growing next to the racks!  But we need to hold the data down too."
    },
    {
     "who": "bea",
@@ -1369,7 +1369,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Okay, good. I've been wanting to say.",
+      "text": "Ok, good plan.",
       "mood": "pleased"
      }
     ]
@@ -1389,7 +1389,7 @@
     "reply": [
      {
       "who": "bea",
-      "text": "Sure."
+      "text": "Sure. But what are we really computing now?"
      }
     ]
    }

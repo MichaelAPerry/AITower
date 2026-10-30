@@ -3,6 +3,7 @@
  *
  *   npx tsx tools/dialogue/import.ts docs/DIALOGUE.md             dry run (default): report only, nothing written
  *   npx tsx tools/dialogue/import.ts --write docs/DIALOGUE.md     write the changed text into the data
+ *   add --truncate-paragraphs: a body whose file has only p1..pk (k < n) is cut to those k paragraphs
  *   npx tsx tools/dialogue/import.ts --dry-run <file> --root <dir>  (--root: repo root, for tests)
  *
  * Only TEXT is imported. Ids, speaker/field TAGs and mood= are read for checking only (a change is a warning).
@@ -388,7 +389,16 @@ interface FileLine {
 	text: string;
 }
 
-export function importDialogue(project: Project, md: string): Report {
+export interface ImportOptions {
+	/**
+	 * When a multi-paragraph value has only its first k paragraph lines in the file (p1..pk, k < n), the file wins:
+	 * the value is cut to those k paragraphs instead of keeping the current text. Without it the slot is kept and
+	 * a warning is reported.
+	 */
+	truncateParagraphs?: boolean;
+}
+
+export function importDialogue(project: Project, md: string, opts: ImportOptions = {}): Report {
 	const r: Report = { changed: [], unchanged: 0, missing: [], extra: [], empty: [], warnings: [], errors: [], edits: [] };
 
 	// 1. Parse the file.
@@ -433,12 +443,16 @@ export function importDialogue(project: Project, md: string): Report {
 			for (const i of absent) if (!emptySet.has(i)) r.missing.push(i);
 			continue;
 		}
-		if (absent.length) {
+		const prefix = present.length < ids.length && present.every((i, k) => i === ids[k]);
+		if (absent.length && opts.truncateParagraphs && prefix) {
+			// the file wins: handled below with only the present lines
+		} else if (absent.length) {
 			for (const i of absent) if (!emptySet.has(i)) r.missing.push(i);
 			r.warnings.push(`${s.id}: only ${present.length} of ${ids.length} paragraph lines present; kept current text`);
 			continue;
 		}
-		const lines = ids.map((i) => byId.get(i) as FileLine);
+		const lines = present.map((i) => byId.get(i) as FileLine);
+		if (absent.length) r.warnings.push(`${s.id}: cut from ${ids.length} to ${present.length} paragraphs (--truncate-paragraphs)`);
 		for (const l of lines) {
 			if (l.tag !== s.tag) r.warnings.push(`line ${l.n} [${l.id}]: TAG changed from "${s.tag}" to "${l.tag}" (ignored)`);
 			if ((l.mood ?? "") !== (s.mood ?? "")) r.warnings.push(`line ${l.n} [${l.id}]: mood changed from "${s.mood ?? ""}" to "${l.mood ?? ""}" (ignored)`);
@@ -508,7 +522,7 @@ function main(argv: string[]): number {
 		return 2;
 	}
 	const project = loadProject(root);
-	const report = importDialogue(project, readFileSync(mdPath, "utf8"));
+	const report = importDialogue(project, readFileSync(mdPath, "utf8"), { truncateParagraphs: argv.includes("--truncate-paragraphs") });
 	console.log(formatReport(report, mdPath, write));
 	if (report.errors.length) {
 		if (write) console.error("errors found: nothing written");

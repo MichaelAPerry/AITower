@@ -177,6 +177,24 @@ describe("dialogue import", () => {
 		expect(report.errors.join("\n")).toContain("duplicate id crawl.2");
 	});
 
+	it("a body with fewer paragraph lines keeps its text by default and is cut with truncateParagraphs", () => {
+		const doc = DOC.replace("- [rung_a.go.outcome.p2] Outcome: Really done.\n", "");
+		const project = loadProject(fixture());
+		const kept = importDialogue(project, doc);
+		expect(kept.changed).toEqual([]);
+		expect(kept.missing).toEqual(["rung_a.go.outcome.p2"]);
+		const cut = importDialogue(project, doc, { truncateParagraphs: true });
+		expect(cut.errors).toEqual([]);
+		expect(cut.missing).toEqual([]);
+		expect(cut.changed).toEqual(["rung_a.go.outcome"]);
+		const out = JSON.parse(applyEdits(project.files, cut.edits)[FILES.story] as string);
+		expect(out[0].choices[0].outcome).toBe("Done.");
+		// a gap (p2 present, p1 missing) is never treated as a cut
+		const gap = importDialogue(project, DOC.replace("- [rung_a.go.outcome.p1] Outcome: Done.\n", ""), { truncateParagraphs: true });
+		expect(gap.changed).toEqual([]);
+		expect(gap.missing).toEqual(["rung_a.go.outcome.p1"]);
+	});
+
 	it("resolves ids by longest known prefix, not by splitting on dots", () => {
 		const known = ["rung_a", "rung_a.b", "end.e1"];
 		expect(resolveContainer("rung_a.b.x.label", known)).toEqual({ container: "rung_a.b", rest: "x.label" });

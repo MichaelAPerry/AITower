@@ -123,7 +123,7 @@
    {
     "advisor": "bea",
     "approve": true,
-    "line": "Storage. I schedule my disappointment, not yours."
+    "line": "Storage."
    },
    {
     "advisor": "mel",
@@ -501,7 +501,7 @@
   "category": "ministry",
   "advisor": "mel",
   "title": "Authority Research Grant",
-  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward the Flesh, the AI lab toward the Lattice.",
+  "body": "The Authority funds one partnership: a wet lab or an AI lab. Either pays $200k. The wet lab pushes you toward the organoids, the AI lab towards silicon.",
   "weight": 6,
   "minTier": 2,
   "minDay": 7,

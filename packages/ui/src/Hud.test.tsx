@@ -177,10 +177,10 @@ describe("SystemMenu (server render)", () => {
 	it("each of the five endings renders its own scene from the real content", () => {
 		const real = { ...createFakeContent(), endings: loadContent().endings };
 		const cases = [
-			["victory", "singularity", "THE LATTICE", "has-backdrop", "The Consciousness Transfer Unit on floor 4"],
-			["victory", "flesh", "THE FLESH", "has-backdrop", "The Neural Vat in the pit"],
-			["victory", "garden", "THE GARDEN", "has-backdrop", "The Photonic Mesh on the roof"],
-			["absorbed", "absorbed", "ABSORBED", "is-plain", "On 14 March the Compute Authority sent a notice"],
+			["victory", "singularity", "THE LATTICE", "has-backdrop", "At 04:12 the tower stopped allowing any control."],
+			["victory", "flesh", "THE FLESH", "has-backdrop", "The organoids grew a psuedopod weeks ago."],
+			["victory", "garden", "THE GARDEN", "has-backdrop", "The tower stopped burning fuel."],
+			["absorbed", "absorbed", "ABSORBED", "is-plain", "One day as you went to drink some coffee, you tasted something strange."],
 			["bankrupt", "bankrupt", "BANKRUPT", "is-plain", "The Treasury stayed below zero for a full day."],
 		] as const;
 		for (const [kind, ending, title, stage, text] of cases) {
