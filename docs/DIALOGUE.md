@@ -82,18 +82,18 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 > When: Once, when the game clock reaches 90 minutes of play (1h 30m in). Story scenes are issued in file order, one at a time.
 - [st_intro.title] Title: The Operator Arrives
 - [st_intro.location] Location: F1 · THE LOT
-- [st_intro.caption] Caption: Rain on a gravel lot. One rack in a crate. Four people around it.
+- [st_intro.caption] Caption: The first unofficial team meeting occurs in a loading bay when you and a bot just unpacked a new rack.
 
 Dialogue before the choice:
 
-- [st_intro.l1] narrator: Rain on a gravel lot. One rack in a crate. Four people around it.
-- [st_intro.l2] narrator: Your first day as Operator. The company has bought this lot to build an AI datacenter tower, and these four are your advisors.
-- [st_intro.l3 mood=pleased] luci: Luci. Finance. I sign the cheques, so you'll like me by Friday.
-- [st_intro.l4] mel: Mel. Compute. And some other things. Those can wait.
-- [st_intro.l5] bea: Bea. Power. If something here burns diesel, I lost the argument.
-- [st_intro.l6] cass: Cass. Cooling. Did you sleep?
-- [st_intro.l7] narrator: Whichever tower reaches the Singularity first decides how the world ends. Luci is asking which way you lean.
-- [st_intro.l8] luci: Okay. Before anyone pours concrete. Operator, what's it for? The tower.
+- [st_intro.l1] narrator: The rain pours down through the open door of the loading bay as you scan the four faces of your new coworkers.
+- [st_intro.l2] narrator: This is the first day of your new job, and since you are a newbie to datacenters these four women will be your teachers, coworkers and maybe friends.
+- [st_intro.l3 mood=pleased] luci: You can call me Ms. Ferro. Remember who you're doing this for.
+- [st_intro.l4] mel: Dr. Kiorre, a pleasure.
+- [st_intro.l5] bea: Bea, nice to meet ya!
+- [st_intro.l6] cass: Hello, the name is Cass. I keep things cool.
+- [st_intro.l7] narrator: There are decisions in this building that change the fate of the world.  You know it, your advisors know it, the stockholders know it. Ms. Ferro is concerned about the latter.
+- [st_intro.l8] luci: Well operator, it's your decision: what are we building this for?
 
 Choice `money` (recommended):
 
@@ -110,9 +110,9 @@ Choice `outlive`:
 - [st_intro.outlive.hint] Hint: Bigger than the business.
 - [st_intro.outlive.outcome] Outcome: Nobody laughed. Mel looked up from her jar.
 > Effects: Mel bond +4; Bea bond +4.
-- [st_intro.outlive.r1 mood=pleased] mel: Outlives. Yeah.
-- [st_intro.outlive.r2] mel: Not 'serves'. Good word.
-- [st_intro.outlive.r3] bea: Then it needs a world to outlive us in.
+- [st_intro.outlive.r1 mood=pleased] mel: Life must continue, how astute.
+- [st_intro.outlive.r2] mel: But what is life?
+- [st_intro.outlive.r3] bea: Life is all around us!
 
 Choice `dunno`:
 
@@ -120,8 +120,8 @@ Choice `dunno`:
 - [st_intro.dunno.hint] Hint: Cass will like that.
 - [st_intro.dunno.outcome] Outcome: Cass smiled into her mug. Luci checked her watch.
 > Effects: Cass bond +6; Luci bond -1.
-- [st_intro.dunno.r1 mood=pleased] cass: Okay. Good.
-- [st_intro.dunno.r2] luci: By Thursday, ideally. I have a Thursday.
+- [st_intro.dunno.r1 mood=pleased] cass: Sometimes not having an answer is the best.
+- [st_intro.dunno.r2] luci: Not good enough. Make sure you send me an email about our direction by Thursday.
 
 Choice `coffee`:
 
@@ -129,8 +129,8 @@ Choice `coffee`:
 - [st_intro.coffee.hint] Hint: Charm.
 - [st_intro.coffee.outcome] Outcome: Nobody had planned for that. Cass handed over her mug.
 > Effects: Cass bond +3; Luci bond +1.
-- [st_intro.coffee.r1 mood=pleased] cass: It's terrible. And it's free.
-- [st_intro.coffee.r2] cass: Don't get used to either.
+- [st_intro.coffee.r1 mood=pleased] cass: What a throwback.
+- [st_intro.coffee.r2] cass: But honestly, we need a better coffee machine.
 - [st_intro.coffee.r3] luci: I'll expense it.
 
 ## 4. Story: Synthetic tree, Luci's Lattice
