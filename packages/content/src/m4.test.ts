@@ -216,12 +216,12 @@ describe("M4 content (bundled)", () => {
 			}
 		});
 
-		it("gives every ending a title, an art file name and an epilogue for each of the four advisors", () => {
+		it("gives every ending a title, an art file name and an epilogue for each of the four advisors and a fallback", () => {
 			expect(db.endings.map((e) => e.id).sort()).toEqual(["absorbed", "bankrupt", "flesh", "garden", "singularity"]);
 			for (const e of db.endings) {
 				expect(e.title, e.id).toBeTruthy();
 				expect(e.art, e.id).toMatch(/^bg-end-[a-z]+$/);
-				expect(Object.keys(e.epilogue ?? {}).sort(), e.id).toEqual(["bea", "cass", "luci", "mel"]);
+				expect(Object.keys(e.epilogue ?? {}).sort(), e.id).toEqual(["bea", "cass", "fallback", "luci", "mel"]);
 				for (const t of Object.values(e.epilogue ?? {})) expect(t.length, e.id).toBeGreaterThan(80);
 			}
 		});
@@ -324,7 +324,7 @@ describe("M4 content (bundled)", () => {
 			expect(so.spWeights.greentech).toBeGreaterThan(so.spWeights.synthetic);
 			expect(so.spWeights.synthetic).toBeGreaterThan(so.spWeights.biotech);
 			expect(so.greenFloor).toBeLessThanOrEqual(0.2);
-			expect(so.bondEpilogue).toBe(60);
+			expect(so.bondEpilogue).toBe(50);
 			// A Level-5 tower of 3000 PF of Synthetic racks reaches the Lattice within about a week.
 			const days = so.spTarget / (3000 * so.spWeights.synthetic * so.spPerPflopHour * 24);
 			expect(days).toBeGreaterThan(3);

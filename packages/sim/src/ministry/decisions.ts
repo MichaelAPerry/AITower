@@ -117,6 +117,10 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
 			return state.tier >= t.atLeast;
 		case "rung":
 			return rungsHeld(state, content)[t.tree] >= t.rung;
+		case "seal":
+			return isSealed(state, content, t.tree);
+		case "bond":
+			return state.bonds[t.advisor] >= t.atLeast;
 	}
 }
 

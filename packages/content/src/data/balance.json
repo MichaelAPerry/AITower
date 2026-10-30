@@ -168,7 +168,7 @@
    "mel": 20,
    "luci": 30
   },
-  "bondEpilogue": 60,
+  "bondEpilogue": 50,
   "bondFollow": 3,
   "bondOverrule": -1
  }

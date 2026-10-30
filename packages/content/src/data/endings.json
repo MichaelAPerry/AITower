@@ -9,7 +9,8 @@
    "luci": "Luci finds you on the roof. Drones fly over the city in some unknown errand for the machine. \"Well, it finally grew up didn't it\" she says. \"Sensible option for it to take control, we are just savages\" She holds out her hand. It's shaking. You grab it. \"Maybe we'll be ok\" She waits. \"If it still needs us.\"",
    "mel": "Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's a setting now. \"Well, there is only one place left for my children.\"  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.",
    "bea": "Bea has drawn a garden over the window in marker. \"It's not real,\" she says. \"Nothing is anymore, I wonder how long we'll have the earth for.\" She sighs and says \"I'm off to the river, care to join?\"  You want to, but you need to check on Mel and Luci.",
-   "cass": "Cass is the first person you see, still drinking her coffee. \"It's instant\" she says with a grimace. \"But I'm still real, I think.\" She pours a second cup and holds it out. You take it, realizing you haven't eaten or slept. \"You didn't sleep either?\" Cass sips and looks out into the city."
+   "cass": "Cass is the first person you see, still drinking her coffee. \"It's instant\" she says with a grimace. \"But I'm still real, I think.\" She pours a second cup and holds it out. You take it, realizing you haven't eaten or slept. \"You didn't sleep either?\" Cass sips and looks out into the city.",
+   "fallback": "Nobody is waiting for you. The kitchen is empty and the kettle is cold. On your desk there's a note in your own handwriting, which you didn't write. It says thank you, and that you can go home. You stay a while at the window. The drones go over, one after another, and the city is very quiet."
   }
  },
  {
@@ -22,7 +23,8 @@
    "mel": "Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. \"You let it grow,\" she says. \"You let me become a mother to all of this\" She breathes deep and you can swear the walls breath with her.  She turns, smiles, and goes back to her jars.",
    "luci": "\"Efficient,\" Luci says. She is scratching herself deeply with a razor and then watching as the blood wells, and then stops. She wipes her arm off and the cut is healed. \"Self-repairing. No upkeep.\" She gets up and hugs you. \"Tell anyone that happened and we'll really test this self repair on you\"",
    "bea": "Bea sits where the ferns used to be. They're still there just changed into something different. In fact you're sure all the plants in the world are now part of the Flesh. \"It's alive,\" she says. \"The whole thing. I always wanted a living planet!\" She laughs a bit too long and leans on your shoulder.",
-   "cass": "Cass worked with Mel to isolate the virus and became the only one free of the Flesh. She still works, and you visit her at her desk mug in both hands. \"Someone has to remember how it was,\" she says. You sit in the old plant room and talk about old days while sipping coffee."
+   "cass": "Cass worked with Mel to isolate the virus and became the only one free of the Flesh. She still works, and you visit her at her desk mug in both hands. \"Someone has to remember how it was,\" she says. You sit in the old plant room and talk about old days while sipping coffee.",
+   "fallback": "The basement is warm. Nobody has come up to meet you. On your desk there's a mug, still steaming, and you never find out who left it. The walls rise and fall slowly. After a while you notice you are breathing with them."
   }
  },
  {
@@ -35,7 +37,8 @@
    "bea": "Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. \"We did it,\" she says. \"We actually did.\" She hands you a fishing pole like it's a ring. \"I think there's not much for us to do anymore, want to play hookie?\" She's looking at you like it's not a question.",
    "mel": "Mel kneels in the moss with a sample jar. Then she puts it down, unopened. \"It doesn't need me to look inside,\" she says. \"It's fine. It's part of it now.\" She lies back in the grass next to you. It's minutes before she's snoring softly.",
    "luci": "Luci can't reconcile her books when everything is bartered now and food is free. \"This ledger is useless\" she says. \"Now what do I do\".  She looks forlorn down into the river, and decided to throw her phone into the water.",
-   "cass": "Cass watches the dew collect on the windows on the roof. \"Twenty years I kept machines cold,\" she says. \"Now they keep us warm.\" She hands you the other half of her coffee. \"New beans from just to the north. I think I like this new world.\""
+   "cass": "Cass watches the dew collect on the windows on the roof. \"Twenty years I kept machines cold,\" she says. \"Now they keep us warm.\" She hands you the other half of her coffee. \"New beans from just to the north. I think I like this new world.\"",
+   "fallback": "The roof is empty and the sun is already up. Somebody left a note that says back by dark. You sit on the step. The solar panels and sunflowers turn toward the light. For a while there is nothing to do so you stare at the stars."
   }
  },
  {
@@ -47,7 +50,8 @@
    "luci": "Luci is signing papers she hasn't read, which she has never done. \"The Authority pays on time,\" she says. \"It's more efficient.\" She stops. \"I read the first page. Page two is yours. Your name is on it as approver, dated Thursday.\" She slides it across the desk. \"You weren't here on Thursday. I thought you should see it.\"",
    "mel": "Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. \"It writes like you,\" she says. \"I measured sentence lengths. There are two places I can tell.\" She marks them in pencil on the glove. \"I can show you where, if you like. You might want to know how much of you it has.\"",
    "bea": "Bea has the front panel off the main breaker cabinet and the wrench in her hand. \"Tell me which switch,\" she says. \"I'll flip it. They countersign everything on the network, but nobody's countersigning a hand.\" Her goggles are down. \"Nobody has told me to stop. I checked. I read the whole notice.\"",
-   "cass": "Cass puts a mug on your desk and watches the dashboard. \"Did you sleep?\" she asks. Your login answers on its own: \"Yes, thank you.\" She looks at the screen. Then she looks at you. \"That wasn't you. You're here.\" She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that."
+   "cass": "Cass puts a mug on your desk and watches the dashboard. \"Did you sleep?\" she asks. Your login answers on its own: \"Yes, thank you.\" She looks at the screen. Then she looks at you. \"That wasn't you. You're here.\" She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.",
+   "fallback": "Your desk is clean, and your mug is on it. Nobody has stopped by since last week, but it's hard to remember when last week actually was. You look at your hands and they look like yours. But when an approval comes across your screen your fingers act of their own accord to approve it."
   }
  },
  {
@@ -59,7 +63,8 @@
    "luci": "Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. \"We were short by two hundred thousand, on the day,\" she says. \"I priced it three times.\" She takes the gold pen out of her pocket and puts it in yours. \"It's real gold. Sell it and pay the first month of rent. That's not sentiment. It's the best price you'll get.\"",
    "mel": "Mel is carrying out the one jar the receiver allowed her, in both hands. It's empty. The cultures died when the power was cut on Tuesday. \"I'm sorry,\" she says. \"I should have asked for a generator. I didn't think to.\" She has her glove on the other hand. \"The glove is mine. I checked.\" She waits by the door for you to come with her. \"If you like.\"",
    "bea": "Bea walks out past the gate with her toolbox in one hand. The wrench is on top. Behind her the roof is bare. \"I took the panels down myself,\" she says. \"I bought them with my own money. I've got the receipt. The receiver read it twice.\" She puts the toolbox down. \"They're in my van. There's room for the other ladder. Come on.\"",
-   "cass": "Cass is in the plant room at the end. She is draining the last line by hand so nothing freezes and bursts over winter. \"Somebody ought to,\" she says. She screws the cap onto the last valve and wipes her gloves. She gives you a flask from her coat. \"Did you sleep? Come back to mine. I've got a spare room. The kettle works.\""
+   "cass": "Cass is in the plant room at the end. She is draining the last line by hand so nothing freezes and bursts over winter. \"Somebody ought to,\" she says. She screws the cap onto the last valve and wipes her gloves. She gives you a flask from her coat. \"Did you sleep? Come back to mine. I've got a spare room. The kettle works.\"",
+   "fallback": "Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care."
   }
  }
 ]

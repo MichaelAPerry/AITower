@@ -1394,5 +1394,526 @@
     ]
    }
   ]
+ },
+ {
+  "id": "cass_night_shift",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Night Shift",
+  "body": "It's past midnight. Cass has the panel off number two compressor and a flashlight in her teeth.",
+  "weight": 1,
+  "minTier": 1,
+  "minDay": 10,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "tick",
+   "atLeast": 14400
+  },
+  "location": "B1 · PLANT ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "It's past midnight. Cass has the panel off number two compressor and a flashlight in her teeth."
+   },
+   {
+    "who": "cass",
+    "text": "Oh. Hey, Hold onto this?"
+   },
+   {
+    "who": "narrator",
+    "text": "You hold the flashlight. The compressor shudders and catches."
+   },
+   {
+    "who": "cass",
+    "text": "Bearing's going. *she wipes the sweat from her brow*"
+   },
+   {
+    "who": "cass",
+    "text": "FUBAR'd for sure."
+   },
+   {
+    "who": "cass",
+    "text": "Parts are slow now, I'll just try some more grease."
+   },
+   {
+    "who": "cass",
+    "text": "Thanks for the help, Did you come down to say something?"
+   },
+   {
+    "who": "narrator",
+    "text": "You didn't. You couldn't sleep either."
+   },
+   {
+    "who": "cass",
+    "text": "Couldnt sleep? Me neither, most nights.",
+    "mood": "pleased"
+   },
+   {
+    "who": "cass",
+    "text": "But something needs fixing all the time."
+   },
+   {
+    "who": "cass",
+    "text": "Want the real version of this tower? Not the spreadsheet view?"
+   }
+  ],
+  "recommended": "ask",
+  "choices": [
+   {
+    "id": "ask",
+    "label": "Tell me the honest version.",
+    "hint": "Cass will like that.",
+    "outcome": "Cass told you. It took ten minutes and she didn't soften any of it.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 4
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "It's old. It's loud."
+     },
+     {
+      "who": "cass",
+      "text": "Without us and duct tape, it would be beyond FUBAR'd."
+     },
+     {
+      "who": "cass",
+      "text": "But it needs me, I like being needed.",
+      "mood": "pleased"
+     }
+    ]
+   },
+   {
+    "id": "order",
+    "label": "Order the bearing now. Rush it.",
+    "hint": "-$12k now. Cass will say what she thinks.",
+    "outcome": "You rang the supplier from the plant room. Cass wrote the part number on her glove.",
+    "effects": [
+     {
+      "type": "cash",
+      "amount": -12000
+     },
+     {
+      "type": "bond",
+      "advisor": "cass",
+      "amount": 2
+     },
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "You rushed it??"
+     },
+     {
+      "who": "cass",
+      "text": "But I won't say no. Thanks."
+     },
+     {
+      "who": "luci",
+      "text": "I'll find the funds.  I guess.",
+      "mood": "displeased"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "seal_biotech",
+  "category": "story",
+  "advisor": "mel",
+  "title": "The Flesh Closes",
+  "body": "The annex panel has changed. Mel is standing in front of it. Cass is in the doorway.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "seal",
+   "tree": "biotech"
+  },
+  "backdrop": "biotech",
+  "location": "B1 · WETWARE ANNEX",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Techinicans and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway."
+   },
+   {
+    "who": "mel",
+    "text": "Nothing more to do my babies."
+   },
+   {
+    "who": "mel",
+    "text": "I'm sorry I couldn't do more."
+   },
+   {
+    "who": "luci",
+    "text": "They still work Mel, just in check like they're suppose to be.",
+    "mood": "pleased"
+   },
+   {
+    "who": "cass",
+    "text": "Almost like any other rack."
+   },
+   {
+    "who": "mel",
+    "text": "Heh, I guess.. *she holds back a sob*",
+    "mood": "unsettling"
+   },
+   {
+    "who": "mel",
+    "text": "You guys can go, I have some work to finish here."
+   }
+  ],
+  "recommended": "stay",
+  "choices": [
+   {
+    "id": "stay",
+    "label": "Stay with her a minute.",
+    "hint": "Mel will like that.",
+    "outcome": "You stood next to Mel at the panel until she was done closing the input.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Thank you.",
+      "mood": "pleased"
+     },
+     {
+      "who": "mel",
+      "text": "They did well. For a while they did very well."
+     }
+    ]
+   },
+   {
+    "id": "other",
+    "label": "We're pivoting is all, nothing but numbers Mel.",
+    "hint": "Luci will like that.",
+    "outcome": "You said the word another. Mel took the jar downstairs.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     },
+     {
+      "type": "bond",
+      "advisor": "mel",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Yes. Of course."
+     },
+     {
+      "who": "luci",
+      "text": "Good. Remember we are the sails blown by our clients wind.",
+      "mood": "pleased"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "seal_greentech",
+  "category": "story",
+  "advisor": "bea",
+  "title": "The Garden Closes",
+  "body": "The leaf badge on the cabinet has gone grey. Bea is sitting on the parapet with her clipboard on her knees.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "seal",
+   "tree": "greentech"
+  },
+  "backdrop": "greentech",
+  "location": "ROOF · PANEL DECK",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The leaf badge on the cabinet has gone grey. Bea is sitting on the parapet with her clipboard on her knees."
+   },
+   {
+    "who": "bea",
+    "text": "Well I tried to make the world a better place."
+   },
+   {
+    "who": "bea",
+    "text": "Guess people want their information regardless of the planet."
+   },
+   {
+    "who": "bea",
+    "text": "And you just all go along with it, it just makes too much damn logical sense you yall doesn't it."
+   },
+   {
+    "who": "cass",
+    "text": "Bea.. The panels still work, we're still helping something."
+   },
+   {
+    "who": "luci",
+    "text": "A cost saving measure for sure...",
+    "mood": "pleased"
+   },
+   {
+    "who": "bea",
+    "text": "...Hmm"
+   }
+  ],
+  "recommended": "own",
+  "choices": [
+   {
+    "id": "own",
+    "label": "That one was on me.",
+    "hint": "Bea will like that.",
+    "outcome": "You told Bea the Garden closing was your call. She didn't argue.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": 3
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Okay."
+     },
+     {
+      "who": "bea",
+      "text": "Thanks for owning up to it at least. You're still a scoundrel.",
+      "mood": "pleased"
+     }
+    ]
+   },
+   {
+    "id": "other",
+    "label": "We'll go another direction.",
+    "hint": "Luci will like that.",
+    "outcome": "You turned to the stairwell. Bea stayed up on the roof a while.",
+    "effects": [
+     {
+      "type": "bond",
+      "advisor": "luci",
+      "amount": 1
+     },
+     {
+      "type": "bond",
+      "advisor": "bea",
+      "amount": -1
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Sure. I'll be up here."
+     },
+     {
+      "who": "luci",
+      "text": "I'm pleased with you Opertator.",
+      "mood": "pleased"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "bond50_luci",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Ms. Ferro Stays Late",
+  "body": "The finance office light is still on. Luci doesn't look up from the ledger.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "bond",
+   "advisor": "luci",
+   "atLeast": 50
+  },
+  "backdrop": "synthetic",
+  "location": "F1 · FINANCE OFFICE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "The finance office light is still on. Luci doesn't look up from the ledger."
+   },
+   {
+    "who": "luci",
+    "text": "You've been right about more things than I expected from you.",
+    "mood": "pleased"
+   },
+   {
+    "who": "luci",
+    "text": "I never said that to you, officially that is. Unofficially I think we have some unfinished business."
+   },
+   {
+    "who": "luci",
+    "text": "When this is over, come and see me. We'll settle up."
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "I'll bring the pen.",
+    "hint": "She'll remember.",
+    "outcome": "Luci smiles and writes something small in her calender.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "bond50_mel",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Mel Offers a Seat",
+  "body": "Mel pulls a stool out from under the bench. You've never seen in more since you've been here.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "bond",
+   "advisor": "mel",
+   "atLeast": 50
+  },
+  "backdrop": "biotech",
+  "location": "B1 · WETWARE ANNEX",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Mel pulls a stool out from under the bench. You've never seen in more since you've been here."
+   },
+   {
+    "who": "mel",
+    "text": "Sit. Please."
+   },
+   {
+    "who": "mel",
+    "text": "You listen when I talk about them. I like that, and they like that."
+   },
+   {
+    "who": "mel",
+    "text": "We'll be hear waiting for your ear.",
+    "mood": "pleased"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "I'd like that.",
+    "hint": "She'll remember.",
+    "outcome": "You sat on the stool. The vats hummed. Mel spoke about things you didn't understand for hours, but it felt like minutes.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "bond50_bea",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Bea Shares Her Lunch",
+  "body": "Bea is on the roof with two sandwiches. She holds one out without looking.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "bond",
+   "advisor": "bea",
+   "atLeast": 50
+  },
+  "backdrop": "greentech",
+  "location": "ROOF · PANEL DECK",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "Bea is on the roof with two sandwiches. She holds one out without looking."
+   },
+   {
+    "who": "bea",
+    "text": "Cheese. It's the only kind I make.",
+    "mood": "pleased"
+   },
+   {
+    "who": "bea",
+    "text": "Hey, if this all goes sideways, I'll be down at the river."
+   },
+   {
+    "who": "bea",
+    "text": "Just saying, in case you need someone."
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Take the sandwich.",
+    "hint": "She'll remember.",
+    "outcome": "You thank her for lunch and she punches you.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "bond50_cass",
+  "category": "story",
+  "advisor": "cass",
+  "title": "Cass Pours Two",
+  "body": "There are two mugs on the gauge board this time. Cass must have been expecting you.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "bond",
+   "advisor": "cass",
+   "atLeast": 50
+  },
+  "location": "B1 · PLANT ROOM",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "There are two mugs on the gauge board this time. Cass must have been expecting you."
+   },
+   {
+    "who": "cass",
+    "text": "There you are, grab a cup.",
+    "mood": "pleased"
+   },
+   {
+    "who": "cass",
+    "text": "You ask me what I think, I appreciate that you listen. That's rare."
+   },
+   {
+    "who": "cass",
+    "text": "When it's over, find me at the lodge."
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Thanks for the mug.",
+    "hint": "She'll remember.",
+    "outcome": "The coffee was instant. It was hot, which was the point.",
+    "effects": []
+   }
+  ]
  }
 ]

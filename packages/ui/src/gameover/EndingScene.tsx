@@ -22,17 +22,27 @@ export function epilogueAdvisor(view: Pick<SimView, "soul">, ending: EndingDef):
 	return best;
 }
 
+/** The pages of an ending: its paragraphs, then the closest advisor's epilogue, or the ending's narrated fallback if nobody qualifies. */
+export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { who: AdvisorId | null; text: string }[] {
+	const who = epilogueAdvisor(view, ending);
+	return [
+		...paragraphs(ending.body).map((text) => ({ who: null, text })),
+		...(who && ending.epilogue?.[who]
+			? [{ who, text: ending.epilogue[who] as string }]
+			: ending.epilogue?.fallback
+				? [{ who: null, text: ending.epilogue.fallback }]
+				: []),
+	];
+}
+
 /**
  * A Singularity ending as a visual-novel scene: the tree's floor painting, the ending's paragraphs in the dialogue box, the
- * epilogue of the advisor the player is closest to, then the service record and the buttons.
+ * epilogue of the advisor the player is closest to (or, when no bond reaches the bar, the ending's narrated fallback), then the
+ * service record and the buttons.
  */
 export function EndingScene({ ending, view, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {
 	const backdrop = endingBackdrop(ending);
-	const who = epilogueAdvisor(view, ending);
-	const pages: { who: AdvisorId | null; text: string }[] = [
-		...paragraphs(ending.body).map((text) => ({ who: null, text })),
-		...(who && ending.epilogue?.[who] ? [{ who, text: ending.epilogue[who] as string }] : []),
-	];
+	const pages = endingPages(ending, view);
 	const [i, setI] = useState(0);
 	const root = useRef<HTMLDivElement>(null);
 	const done = i >= pages.length;

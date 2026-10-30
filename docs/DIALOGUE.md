@@ -20,12 +20,15 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 4. [Story: Synthetic tree, Luci's Lattice](#4-story-synthetic-tree-lucis-lattice)
 5. [Story: Biotech tree, Mel's Flesh](#5-story-biotech-tree-mels-flesh)
 6. [Story: Greentech tree, Bea's Garden](#6-story-greentech-tree-beas-garden)
-7. [Endings](#7-endings)
-8. [Decision memos: Cass](#8-decision-memos-cass)
-9. [Decision memos: Bea](#9-decision-memos-bea)
-10. [Decision memos: Mel](#10-decision-memos-mel)
-11. [Decision memos: Luci](#11-decision-memos-luci)
-12. [Lessons](#12-lessons)
+7. [Story: a tree closes (seal scenes)](#7-story-a-tree-closes-seal-scenes)
+8. [Story: bond 50 beats](#8-story-bond-50-beats)
+9. [Story: Cass, in her own scene](#9-story-cass-in-her-own-scene)
+10. [Endings](#10-endings)
+11. [Decision memos: Cass](#11-decision-memos-cass)
+12. [Decision memos: Bea](#12-decision-memos-bea)
+13. [Decision memos: Mel](#13-decision-memos-mel)
+14. [Decision memos: Luci](#14-decision-memos-luci)
+15. [Lessons](#15-lessons)
 
 ## 1. Title crawl
 
@@ -615,9 +618,221 @@ Choice `more`:
 > Effects: Luci bond +1.
 - [rung_green_4.more.r1] bea: Sure. But what are we really computing now?
 
-## 7. Endings
+## 7. Story: a tree closes (seal scenes)
 
-> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration.
+
+### `seal_biotech`
+
+> Speaker: Mel. Recommended choice: `stay`.
+> When: Once, the first time the Biotech (Mel's Flesh) tree is sealed (its seal reaches 100). It plays even if you never committed to that tree. Story scenes are issued in file order, one at a time.
+> Backdrop: biotech floor.
+- [seal_biotech.title] Title: The Flesh Closes
+- [seal_biotech.location] Location: B1 · WETWARE ANNEX
+- [seal_biotech.caption] Caption: The annex panel has changed. Mel is standing in front of it. Cass is in the doorway.
+
+Dialogue before the choice:
+
+- [seal_biotech.l1] narrator: Techinicans and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway.
+- [seal_biotech.l2] mel: Nothing more to do my babies.
+- [seal_biotech.l3] mel: I'm sorry I couldn't do more.
+- [seal_biotech.l4 mood=pleased] luci: They still work Mel, just in check like they're suppose to be.
+- [seal_biotech.l5] cass: Almost like any other rack.
+- [seal_biotech.l6 mood=unsettling] mel: Heh, I guess.. *she holds back a sob*
+- [seal_biotech.l7] mel: You guys can go, I have some work to finish here.
+
+Choice `stay` (recommended):
+
+- [seal_biotech.stay.label] Label: Stay with her a minute.
+- [seal_biotech.stay.hint] Hint: Mel will like that.
+- [seal_biotech.stay.outcome] Outcome: You stood next to Mel at the panel until she was done closing the input.
+> Effects: Mel bond +3.
+- [seal_biotech.stay.r1 mood=pleased] mel: Thank you.
+- [seal_biotech.stay.r2] mel: They did well. For a while they did very well.
+
+Choice `other`:
+
+- [seal_biotech.other.label] Label: We're pivoting is all, nothing but numbers Mel.
+- [seal_biotech.other.hint] Hint: Luci will like that.
+- [seal_biotech.other.outcome] Outcome: You said the word another. Mel took the jar downstairs.
+> Effects: Luci bond +1; Mel bond -1.
+- [seal_biotech.other.r1] mel: Yes. Of course.
+- [seal_biotech.other.r2 mood=pleased] luci: Good. Remember we are the sails blown by our clients wind.
+
+### `seal_greentech`
+
+> Speaker: Bea. Recommended choice: `own`.
+> When: Once, the first time the Greentech (Bea's Garden) tree is sealed (its seal reaches 100). It plays even if you never committed to that tree. Story scenes are issued in file order, one at a time.
+> Backdrop: greentech floor.
+- [seal_greentech.title] Title: The Garden Closes
+- [seal_greentech.location] Location: ROOF · PANEL DECK
+- [seal_greentech.caption] Caption: The leaf badge on the cabinet has gone grey. Bea is sitting on the parapet with her clipboard on her knees.
+
+Dialogue before the choice:
+
+- [seal_greentech.l1] narrator: The leaf badge on the cabinet has gone grey. Bea is sitting on the parapet with her clipboard on her knees.
+- [seal_greentech.l2] bea: Well I tried to make the world a better place.
+- [seal_greentech.l3] bea: Guess people want their information regardless of the planet.
+- [seal_greentech.l4] bea: And you just all go along with it, it just makes too much damn logical sense you yall doesn't it.
+- [seal_greentech.l5] cass: Bea.. The panels still work, we're still helping something.
+- [seal_greentech.l6 mood=pleased] luci: A cost saving measure for sure...
+- [seal_greentech.l7] bea: ...Hmm
+
+Choice `own` (recommended):
+
+- [seal_greentech.own.label] Label: That one was on me.
+- [seal_greentech.own.hint] Hint: Bea will like that.
+- [seal_greentech.own.outcome] Outcome: You told Bea the Garden closing was your call. She didn't argue.
+> Effects: Bea bond +3.
+- [seal_greentech.own.r1] bea: Okay.
+- [seal_greentech.own.r2 mood=pleased] bea: Thanks for owning up to it at least. You're still a scoundrel.
+
+Choice `other`:
+
+- [seal_greentech.other.label] Label: We'll go another direction.
+- [seal_greentech.other.hint] Hint: Luci will like that.
+- [seal_greentech.other.outcome] Outcome: You turned to the stairwell. Bea stayed up on the roof a while.
+> Effects: Luci bond +1; Bea bond -1.
+- [seal_greentech.other.r1] bea: Sure. I'll be up here.
+- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Opertator.
+
+## 8. Story: bond 50 beats
+
+
+### `bond50_luci`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: Once, the first time Luci's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
+> Backdrop: synthetic floor.
+- [bond50_luci.title] Title: Ms. Ferro Stays Late
+- [bond50_luci.location] Location: F1 · FINANCE OFFICE
+- [bond50_luci.caption] Caption: The finance office light is still on. Luci doesn't look up from the ledger.
+
+Dialogue before the choice:
+
+- [bond50_luci.l1] narrator: The finance office light is still on. Luci doesn't look up from the ledger.
+- [bond50_luci.l2 mood=pleased] luci: You've been right about more things than I expected from you.
+- [bond50_luci.l3] luci: I never said that to you, officially that is. Unofficially I think we have some unfinished business.
+- [bond50_luci.l4] luci: When this is over, come and see me. We'll settle up.
+
+Choice `ok` (recommended):
+
+- [bond50_luci.ok.label] Label: I'll bring the pen.
+- [bond50_luci.ok.hint] Hint: She'll remember.
+- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calender.
+
+### `bond50_mel`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: Once, the first time Mel's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
+> Backdrop: biotech floor.
+- [bond50_mel.title] Title: Mel Offers a Seat
+- [bond50_mel.location] Location: B1 · WETWARE ANNEX
+- [bond50_mel.caption] Caption: Mel pulls a stool out from under the bench. You've never seen in more since you've been here.
+
+Dialogue before the choice:
+
+- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen in more since you've been here.
+- [bond50_mel.l2] mel: Sit. Please.
+- [bond50_mel.l3] mel: You listen when I talk about them. I like that, and they like that.
+- [bond50_mel.l4 mood=pleased] mel: We'll be hear waiting for your ear.
+
+Choice `ok` (recommended):
+
+- [bond50_mel.ok.label] Label: I'd like that.
+- [bond50_mel.ok.hint] Hint: She'll remember.
+- [bond50_mel.ok.outcome] Outcome: You sat on the stool. The vats hummed. Mel spoke about things you didn't understand for hours, but it felt like minutes.
+
+### `bond50_bea`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: Once, the first time Bea's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
+> Backdrop: greentech floor.
+- [bond50_bea.title] Title: Bea Shares Her Lunch
+- [bond50_bea.location] Location: ROOF · PANEL DECK
+- [bond50_bea.caption] Caption: Bea is on the roof with two sandwiches. She holds one out without looking.
+
+Dialogue before the choice:
+
+- [bond50_bea.l1] narrator: Bea is on the roof with two sandwiches. She holds one out without looking.
+- [bond50_bea.l2 mood=pleased] bea: Cheese. It's the only kind I make.
+- [bond50_bea.l3] bea: Hey, if this all goes sideways, I'll be down at the river.
+- [bond50_bea.l4] bea: Just saying, in case you need someone.
+
+Choice `ok` (recommended):
+
+- [bond50_bea.ok.label] Label: Take the sandwich.
+- [bond50_bea.ok.hint] Hint: She'll remember.
+- [bond50_bea.ok.outcome] Outcome: You thank her for lunch and she punches you.
+
+### `bond50_cass`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: Once, the first time Cass's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
+- [bond50_cass.title] Title: Cass Pours Two
+- [bond50_cass.location] Location: B1 · PLANT ROOM
+- [bond50_cass.caption] Caption: There are two mugs on the gauge board this time. Cass must have been expecting you.
+
+Dialogue before the choice:
+
+- [bond50_cass.l1] narrator: There are two mugs on the gauge board this time. Cass must have been expecting you.
+- [bond50_cass.l2 mood=pleased] cass: There you are, grab a cup.
+- [bond50_cass.l3] cass: You ask me what I think, I appreciate that you listen. That's rare.
+- [bond50_cass.l4] cass: When it's over, find me at the lodge.
+
+Choice `ok` (recommended):
+
+- [bond50_cass.ok.label] Label: Thanks for the mug.
+- [bond50_cass.ok.hint] Hint: She'll remember.
+- [bond50_cass.ok.outcome] Outcome: The coffee was instant. It was hot, which was the point.
+
+## 9. Story: Cass, in her own scene
+
+
+### `cass_night_shift`
+
+> Speaker: Cass. Recommended choice: `ask`.
+> When: Once, when the game clock reaches 14400 minutes of play (240h 0m in). Not before game day 10. Story scenes are issued in file order, one at a time.
+- [cass_night_shift.title] Title: Night Shift
+- [cass_night_shift.location] Location: B1 · PLANT ROOM
+- [cass_night_shift.caption] Caption: It's past midnight. Cass has the panel off number two compressor and a flashlight in her teeth.
+
+Dialogue before the choice:
+
+- [cass_night_shift.l1] narrator: It's past midnight. Cass has the panel off number two compressor and a flashlight in her teeth.
+- [cass_night_shift.l2] cass: Oh. Hey, Hold onto this?
+- [cass_night_shift.l3] narrator: You hold the flashlight. The compressor shudders and catches.
+- [cass_night_shift.l4] cass: Bearing's going. *she wipes the sweat from her brow*
+- [cass_night_shift.l5] cass: FUBAR'd for sure.
+- [cass_night_shift.l6] cass: Parts are slow now, I'll just try some more grease.
+- [cass_night_shift.l7] cass: Thanks for the help, Did you come down to say something?
+- [cass_night_shift.l8] narrator: You didn't. You couldn't sleep either.
+- [cass_night_shift.l9 mood=pleased] cass: Couldnt sleep? Me neither, most nights.
+- [cass_night_shift.l10] cass: But something needs fixing all the time.
+- [cass_night_shift.l11] cass: Want the real version of this tower? Not the spreadsheet view?
+
+Choice `ask` (recommended):
+
+- [cass_night_shift.ask.label] Label: Tell me the honest version.
+- [cass_night_shift.ask.hint] Hint: Cass will like that.
+- [cass_night_shift.ask.outcome] Outcome: Cass told you. It took ten minutes and she didn't soften any of it.
+> Effects: Cass bond +4.
+- [cass_night_shift.ask.r1] cass: It's old. It's loud.
+- [cass_night_shift.ask.r2] cass: Without us and duct tape, it would be beyond FUBAR'd.
+- [cass_night_shift.ask.r3 mood=pleased] cass: But it needs me, I like being needed.
+
+Choice `order`:
+
+- [cass_night_shift.order.label] Label: Order the bearing now. Rush it.
+- [cass_night_shift.order.hint] Hint: -$12k now. Cass will say what she thinks.
+- [cass_night_shift.order.outcome] Outcome: You rang the supplier from the plant room. Cass wrote the part number on her glove.
+> Effects: cash amount=-12000; Cass bond +2; Luci bond -1.
+- [cass_night_shift.order.r1] cass: You rushed it??
+- [cass_night_shift.order.r2] cass: But I won't say no. Thanks.
+- [cass_night_shift.order.r3 mood=displeased] luci: I'll find the funds.  I guess.
+
+## 10. Endings
+
+> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when no advisor's bond is high enough.
 
 ### `singularity`
 
@@ -630,6 +845,8 @@ Choice `more`:
 - [end.singularity.epilogue.bea] narrator: Bea has drawn a garden over the window in marker. "It's not real," she says. "Nothing is anymore, I wonder how long we'll have the earth for." She sighs and says "I'm off to the river, care to join?"  You want to, but you need to check on Mel and Luci.
 - [end.singularity.epilogue.mel] narrator: Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's a setting now. "Well, there is only one place left for my children."  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.
 - [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. Drones fly over the city in some unknown errand for the machine. "Well, it finally grew up didn't it" she says. "Sensible option for it to take control, we are just savages" She holds out her hand. It's shaking. You grab it. "Maybe we'll be ok" She waits. "If it still needs us."
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.singularity.epilogue.fallback] narrator: Nobody is waiting for you. The kitchen is empty and the kettle is cold. On your desk there's a note in your own handwriting, which you didn't write. It says thank you, and that you can go home. You stay a while at the window. The drones go over, one after another, and the city is very quiet.
 
 ### `flesh`
 
@@ -642,6 +859,8 @@ Choice `more`:
 - [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there just changed into something different. In fact you're sure all the plants in the world are now part of the Flesh. "It's alive," she says. "The whole thing. I always wanted a living planet!" She laughs a bit too long and leans on your shoulder.
 - [end.flesh.epilogue.mel] narrator: Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me become a mother to all of this" She breathes deep and you can swear the walls breath with her.  She turns, smiles, and goes back to her jars.
 - [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She is scratching herself deeply with a razor and then watching as the blood wells, and then stops. She wipes her arm off and the cut is healed. "Self-repairing. No upkeep." She gets up and hugs you. "Tell anyone that happened and we'll really test this self repair on you"
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.flesh.epilogue.fallback] narrator: The basement is warm. Nobody has come up to meet you. On your desk there's a mug, still steaming, and you never find out who left it. The walls rise and fall slowly. After a while you notice you are breathing with them.
 
 ### `garden`
 
@@ -654,6 +873,8 @@ Choice `more`:
 - [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you a fishing pole like it's a ring. "I think there's not much for us to do anymore, want to play hookie?" She's looking at you like it's not a question.
 - [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine. It's part of it now." She lies back in the grass next to you. It's minutes before she's snoring softly.
 - [end.garden.epilogue.luci] narrator: Luci can't reconcile her books when everything is bartered now and food is free. "This ledger is useless" she says. "Now what do I do".  She looks forlorn down into the river, and decided to throw her phone into the water.
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.garden.epilogue.fallback] narrator: The roof is empty and the sun is already up. Somebody left a note that says back by dark. You sit on the step. The solar panels and sunflowers turn toward the light. For a while there is nothing to do so you stare at the stars.
 
 ### `absorbed`
 
@@ -666,6 +887,8 @@ Choice `more`:
 - [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. I checked. I read the whole notice."
 - [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails with a ruler. One set is yours, from before March. One set is the account's, since. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on the glove. "I can show you where, if you like. You might want to know how much of you it has."
 - [end.absorbed.epilogue.luci] narrator: Luci is signing papers she hasn't read, which she has never done. "The Authority pays on time," she says. "It's more efficient." She stops. "I read the first page. Page two is yours. Your name is on it as approver, dated Thursday." She slides it across the desk. "You weren't here on Thursday. I thought you should see it."
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.absorbed.epilogue.fallback] narrator: Your desk is clean, and your mug is on it. Nobody has stopped by since last week, but it's hard to remember when last week actually was. You look at your hands and they look like yours. But when an approval comes across your screen your fingers act of their own accord to approve it.
 
 ### `bankrupt`
 
@@ -679,8 +902,10 @@ Choice `more`:
 - [end.bankrupt.epilogue.bea] narrator: Bea walks out past the gate with her toolbox in one hand. The wrench is on top. Behind her the roof is bare. "I took the panels down myself," she says. "I bought them with my own money. I've got the receipt. The receiver read it twice." She puts the toolbox down. "They're in my van. There's room for the other ladder. Come on."
 - [end.bankrupt.epilogue.mel] narrator: Mel is carrying out the one jar the receiver allowed her, in both hands. It's empty. The cultures died when the power was cut on Tuesday. "I'm sorry," she says. "I should have asked for a generator. I didn't think to." She has her glove on the other hand. "The glove is mine. I checked." She waits by the door for you to come with her. "If you like."
 - [end.bankrupt.epilogue.luci] narrator: Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. "We were short by two hundred thousand, on the day," she says. "I priced it three times." She takes the gold pen out of her pocket and puts it in yours. "It's real gold. Sell it and pay the first month of rent. That's not sentiment. It's the best price you'll get."
+> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+- [end.bankrupt.epilogue.fallback] narrator: Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care.
 
-## 8. Decision memos: Cass
+## 11. Decision memos: Cass
 
 > Decision memos Cass speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -839,7 +1064,7 @@ Choice `leave`:
 - [g_mycelium_ducts.leave.outcome] Outcome: Airflow remained improved. Nobody has asked what it is eating.
 > Effects: affinity path=greentech amount=5.
 
-## 9. Decision memos: Bea
+## 12. Decision memos: Bea
 
 > Decision memos Bea speaks, from packages/content/src/data/events.json. 4 memos.
 
@@ -943,7 +1168,7 @@ Choice `keep`:
 - [heat_tariff_revision.keep.outcome] Outcome: Nothing changed.
 > Effects: bond advisor=cass amount=1.
 
-## 10. Decision memos: Mel
+## 13. Decision memos: Mel
 
 > Decision memos Mel speaks, from packages/content/src/data/events.json. 6 memos.
 
@@ -1085,7 +1310,7 @@ Choice `refuse`:
 - [s_backup_restore.refuse.outcome] Outcome: The request was declined and logged.
 > Effects: cash amount=-30000; bond advisor=cass amount=3.
 
-## 11. Decision memos: Luci
+## 14. Decision memos: Luci
 
 > Decision memos Luci speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1240,7 +1465,7 @@ Choice `add`:
 - [h_headcount.add.outcome] Outcome: Two new employee records were created. Neither has requested a desk.
 > Effects: cash amount=-20000; affinity path=biotech amount=4.
 
-## 12. Lessons
+## 15. Lessons
 
 > Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
 

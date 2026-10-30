@@ -108,6 +108,13 @@ export const LOCATION_ART: Record<string, string> = {
 	rung_green_1: "bg-loc-panel-deck",
 	rung_green_3: "bg-loc-stairwell",
 	rung_green_4: "bg-loc-sunrise",
+	cass_night_shift: "bg-loc-plant-room",
+	seal_biotech: "bg-loc-wetware-annex",
+	seal_greentech: "bg-loc-panel-deck",
+	bond50_luci: "bg-loc-finance-office",
+	bond50_mel: "bg-loc-wetware-annex",
+	bond50_bea: "bg-loc-panel-deck",
+	bond50_cass: "bg-loc-plant-room",
 };
 
 /** The painting for a scene: its location file if one exists, else the tree backdrop, else undefined (plain stage). */

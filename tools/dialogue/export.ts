@@ -52,6 +52,7 @@ interface Trigger {
 	tree?: string;
 	rung?: number;
 	path?: string;
+	advisor?: string;
 }
 interface Scene {
 	id: string;
@@ -62,6 +63,7 @@ interface Scene {
 	backdrop?: string;
 	trigger?: Trigger;
 	minTier?: number;
+	minDay?: number;
 	lines?: Reply[];
 	recommended: string;
 	choices: Choice[];
@@ -177,13 +179,18 @@ function whenInWords(s: Scene): string {
 	else if (t.kind === "tick") {
 		const n = t.atLeast ?? 0;
 		parts.push(`Once, when the game clock reaches ${n} minute${n === 1 ? "" : "s"} of play (${Math.floor(n / 60)}h ${n % 60}m in).`);
-	} else if (t.kind === "tier") parts.push(`Once, when the Operator's Level reaches ${t.atLeast}.`);
+	} else if (t.kind === "seal")
+		parts.push(`Once, the first time the ${TREE_NAME[t.tree ?? ""] ?? t.tree} tree is sealed (its seal reaches 100). It plays even if you never committed to that tree.`);
+	else if (t.kind === "bond")
+		parts.push(`Once, the first time ${ADV_NAME[t.advisor ?? ""] ?? t.advisor}'s bond with the Operator reaches ${t.atLeast}.`);
+	else if (t.kind === "tier") parts.push(`Once, when the Operator's Level reaches ${t.atLeast}.`);
 	else if (t.kind === "rung") parts.push(`Once, when the ${TREE_NAME[t.tree ?? ""] ?? t.tree} tree reaches rung ${t.rung} of 4.`);
 	else if (t.kind === "objection")
 		parts.push(
 			`Once per facility: when you place a facility that scars the ${TREE_NAME[t.path ?? ""] ?? t.path} tree enough, provided that tree is not sealed yet. The {item} in the text is the name of the facility just placed.`,
 		);
 	if (s.minTier && s.minTier > 1) parts.push(`Needs Level ${s.minTier} or higher.`);
+	if (s.minDay) parts.push(`Not before game day ${s.minDay}.`);
 	parts.push("Story scenes are issued in file order, one at a time.");
 	return parts.join(" ");
 }
@@ -311,6 +318,9 @@ const storyGroups: { title: string; ids: string[] }[] = [
 	{ title: "Story: Synthetic tree, Luci's Lattice", ids: ["rung_syn_1", "rung_syn_2", "rung_syn_3", "rung_syn_4"] },
 	{ title: "Story: Biotech tree, Mel's Flesh", ids: ["obj_biotech", "rung_bio_1", "rung_bio_2", "rung_bio_3", "rung_bio_4"] },
 	{ title: "Story: Greentech tree, Bea's Garden", ids: ["obj_greentech", "rung_green_1", "rung_green_2", "rung_green_3", "rung_green_4"] },
+	{ title: "Story: a tree closes (seal scenes)", ids: ["seal_biotech", "seal_greentech"] },
+	{ title: "Story: bond 50 beats", ids: ["bond50_luci", "bond50_mel", "bond50_bea", "bond50_cass"] },
+	{ title: "Story: Cass, in her own scene", ids: ["cass_night_shift"] },
 ];
 const storyById = new Map(story.map((s) => [s.id, s]));
 const grouped = new Set(storyGroups.flatMap((g) => g.ids));
@@ -333,7 +343,7 @@ for (const g of storyGroups) {
 sections.push({
 	title: "Endings",
 	body: () => {
-		meta("Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration.");
+		meta("Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when no advisor's bond is high enough.");
 		for (const e of endings) {
 			h(3, `\`${e.id}\``);
 			if (e.art) meta(`Art: ${e.art}.webp${e.backdrop ? ` (placeholder backdrop: ${e.backdrop})` : " (plain stage until it exists)"}.`);
@@ -346,6 +356,10 @@ sections.push({
 			for (const adv of ADVISOR_ORDER) {
 				const t = e.epilogue[adv];
 				if (t) text(`end.${e.id}.epilogue.${adv}`, "narrator", t);
+			}
+			if (e.epilogue.fallback) {
+				meta("Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).");
+				text(`end.${e.id}.epilogue.fallback`, "narrator", e.epilogue.fallback);
 			}
 		}
 	},

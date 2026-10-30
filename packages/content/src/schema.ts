@@ -710,7 +710,15 @@ export interface SceneLine {
  * `rung` fires the first time the tower holds a rack of that tree at that rung or higher; `objection` scenes are issued by the sim
  * for a placed item (see `SoulBalance.objectionScar`).
  */
-export type StoryTrigger = { kind: "tick"; atLeast: number } | { kind: "tier"; atLeast: number } | { kind: "rung"; tree: AscensionPath; rung: number } | { kind: "objection"; path: SealedTree };
+export type StoryTrigger =
+	| { kind: "tick"; atLeast: number }
+	| { kind: "tier"; atLeast: number }
+	| { kind: "rung"; tree: AscensionPath; rung: number }
+	| { kind: "objection"; path: SealedTree }
+	/** The first time that tree's seal reaches `soul.sealMax`. */
+	| { kind: "seal"; tree: SealedTree }
+	/** The first time that advisor's bond reaches `atLeast`. */
+	| { kind: "bond"; advisor: AdvisorId; atLeast: number };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
@@ -850,8 +858,11 @@ export interface EndingDef {
 	backdrop?: AscensionPath;
 	/** File name (no extension) of the ending's own 640x420 painting in packages/ui/src/art, e.g. "bg-end-lattice". */
 	art?: string;
-	/** Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). */
-	epilogue?: Partial<Record<AdvisorId, string>>;
+	/**
+	 * Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). `fallback` is shown, as narration,
+	 * when no advisor qualifies.
+	 */
+	epilogue?: Partial<Record<AdvisorId, string>> & { fallback?: string };
 }
 
 /** A tree: its name and what it is about (the Trees panel and the Handbook). */

@@ -127,7 +127,7 @@ describe("biotech content (bundled)", () => {
 		for (const [id, tree] of Object.entries(art)) {
 			const e = db.endings.find((x) => x.id === id);
 			expect(e?.backdrop, id).toBe(tree);
-			expect(Object.keys(e?.epilogue ?? {}).sort(), id).toEqual(["bea", "cass", "luci", "mel"]);
+			expect(Object.keys(e?.epilogue ?? {}).sort(), id).toEqual(["bea", "cass", "fallback", "luci", "mel"]);
 		}
 	});
 

@@ -633,6 +633,13 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 		case "objection":
 			if (!SEALED.includes(t.path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
 			break;
+		case "seal":
+			if (!SEALED.includes(t.tree)) p.push(`${w}.tree: only biotech or greentech can be sealed`);
+			break;
+		case "bond":
+			if (!ADVISORS.includes(t.advisor)) p.push(`${w}.advisor: unknown advisor "${String(t.advisor)}"`);
+			num(p, `${w}.atLeast`, t.atLeast, { min: 1, max: 100, int: true });
+			break;
 		default:
 			p.push(`${w}.kind: unknown trigger "${String((t as { kind?: unknown })?.kind)}"`);
 	}
@@ -901,7 +908,7 @@ function validatePathsAndEndings(p: Problems, db: ContentDB): void {
 			if (d.backdrop !== undefined && !PATHS.includes(d.backdrop)) p.push(`${w}.backdrop: unknown path`);
 			if (d.art !== undefined) str(p, `${w}.art`, d.art);
 			for (const [a, t] of Object.entries(d.epilogue ?? {})) {
-				if (!ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
+				if (a !== "fallback" && !ADVISORS.includes(a)) p.push(`${w}.epilogue.${a}: unknown advisor`);
 				str(p, `${w}.epilogue.${a}`, t);
 			}
 		});
