@@ -3,6 +3,10 @@ import buildCooling from "../art/build-icons-cooling.webp";
 import buildPower from "../art/build-icons-power.webp";
 import buildRacks from "../art/build-icons-racks.webp";
 import buildSupport from "../art/build-icons-support.webp";
+import researchCompute from "../art/research-icons-compute_admin.webp";
+import researchCooling from "../art/research-icons-cooling_logistics.webp";
+import researchPower from "../art/research-icons-power.webp";
+import researchWetware from "../art/research-icons-wetware.webp";
 
 /**
  * Image sprite sheets for achievement icons. An achievement row's `icon` may be `{ sheet, col, row }`: one cell of a grid image.
@@ -35,6 +39,11 @@ export const ICON_SHEETS: Record<string, IconSheet | undefined> = {
 	build_power: { url: buildPower, cols: 6, rows: 4 },
 	build_cooling: { url: buildCooling, cols: 6, rows: 3 },
 	build_support: { url: buildSupport, cols: 5, rows: 3 },
+	// Research icons (see research/researchIcons.ts for which technology sits in which cell).
+	research_power: { url: researchPower, cols: 6, rows: 4 },
+	research_compute_admin: { url: researchCompute, cols: 6, rows: 4 },
+	research_cooling_logistics: { url: researchCooling, cols: 6, rows: 3 },
+	research_wetware: { url: researchWetware, cols: 5, rows: 3 },
 };
 
 export interface SheetCell {

@@ -7,6 +7,8 @@ import { pushNotice } from "../notices";
 import { ListHeading, PanelHead, PanelTabs, PrimaryAction, SplitPane } from "../panel/PanelShell";
 import { Jargon, TermScope } from "../glossary/Term";
 import { branchView, chain, defaultBranch, defaultPick, etaText, getLines, groupOf, isSpoilerTech, PATH_NOTE, plainName, rpPerHour, tabsFor, whyText } from "./researchText";
+import { SheetIcon } from "../components/SheetIcon";
+import { researchIcon } from "./researchIcons";
 import { ResearchTree } from "./ResearchTree";
 import { cheapestAvailable, fmtRp, nodeState, techList } from "./tech";
 import { laneOf, lanesOf } from "./treeLayout";
@@ -43,20 +45,27 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 		const g = groupOf(n, view, content);
 		const on = sel?.id === n.id;
 		const masked = isSpoilerTech(n) && s.kind !== "researched" && s.kind !== "available" && s.kind !== "poor";
+		const cell = researchIcon(n.id);
+		const locked = s.kind === "locked" || masked;
 		const sub = masked ? "Details sealed until you can start it" : plainName(n, content);
 		return (
 			<button key={n.id} type="button" role="option" aria-selected={on} data-tech={n.id} className={`pnl-card ${on ? "is-sel" : ""} ${g === "next" ? "is-blocked" : ""}`} onClick={() => setUi({ researchSel: n.id, researchTab: n.branch })}>
-				<span className="pnl-card-top">
-					<span className="pnl-card-name">
-						{g === "done" ? "✓ " : ""}
-						{n.name}
+				<span className="res-card-row">
+					{cell && <SheetIcon cell={cell} size={48} locked={locked} hidden={masked} className="res-icon" />}
+					<span className="res-card-body">
+					<span className="pnl-card-top">
+						<span className="pnl-card-name">
+							{g === "done" ? "✓ " : ""}
+							{n.name}
+						</span>
+						{g !== "done" && <span className="pnl-card-pay">{rpText(n.cost)}</span>}
 					</span>
-					{g !== "done" && <span className="pnl-card-pay">{rpText(n.cost)}</span>}
+					<span className="pnl-card-sub">{sub}</span>
+					{g === "ready" && s.kind === "available" && <span className="pnl-fit is-ok">Ready to start ✓</span>}
+					{g === "ready" && s.kind === "poor" && <span className="pnl-fit is-no">Need {s.short.toLocaleString("en-US")} more RP</span>}
+					{g === "next" && s.kind === "locked" && <span className="pnl-card-sub">{s.reason}</span>}
+					</span>
 				</span>
-				<span className="pnl-card-sub">{sub}</span>
-				{g === "ready" && s.kind === "available" && <span className="pnl-fit is-ok">Ready to start ✓</span>}
-				{g === "ready" && s.kind === "poor" && <span className="pnl-fit is-no">Need {s.short.toLocaleString("en-US")} more RP</span>}
-				{g === "next" && s.kind === "locked" && <span className="pnl-card-sub">{s.reason}</span>}
 			</button>
 		);
 	};
@@ -65,6 +74,7 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 	if (sel) {
 		const s = nodeState(sel, view, content);
 		const masked = isSpoilerTech(sel) && s.kind !== "researched" && s.kind !== "available" && s.kind !== "poor";
+		const selCell = researchIcon(sel.id);
 		const steps = chain(sel, view, content);
 		const lane = laneDefs.find((l) => l.id === laneOf(sel));
 		const kicker = `Research · ${lane?.name ?? tabs.find((t) => t.id === sel.branch)?.label ?? sel.branch}${sel.minTier > 1 ? ` · Level ${sel.minTier}` : ""}`;
@@ -72,8 +82,13 @@ export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) 
 		const leads = leadsTo(content, sel.id).filter((c) => !isSpoilerTech(c) || wetOpen);
 		inspector = (
 			<>
-				<div className="bld-kicker">{kicker}</div>
-				<h3 className="bld-h">{sel.name}</h3>
+				<div className="res-head">
+					{selCell && <SheetIcon cell={selCell} size={64} locked={s.kind === "locked" || masked} hidden={masked} className="res-icon" />}
+					<div className="res-head-text">
+						<div className="bld-kicker">{kicker}</div>
+						<h3 className="bld-h">{sel.name}</h3>
+					</div>
+				</div>
 				{masked ? (
 					<p className="bld-blurb">Details stay sealed until you can start this one.</p>
 				) : (

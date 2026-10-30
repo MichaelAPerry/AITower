@@ -9,6 +9,7 @@
  * --ids      comma list, row-major; used only for the preview labels and the printed `col,row` map.
  * --method   nearest (centre sample, default: crispest) or area (box average, softer).
  * --stretch true  map each plate's own box (not a square crop) to the cell: for sheets whose plates are not square.
+ * --colors N    reduce the whole atlas to N colours (median cut, no dithering) before the lossless encode: smaller files (128 is plenty).
  * --preview  PNG: the atlas at 3x with ids. --compare PNG: first cells, nearest over area, each at 4x, for choosing.
  * No dependencies of its own: decoding, resampling and the lossless webp encode run in the pre-installed Playwright's Chromium
  * (global, PLAYWRIGHT_DIR, or the repo root). Nothing is downloaded.
@@ -41,7 +42,7 @@ function loadPlaywright() {
 }
 
 /** Runs in the page. Returns the atlas (and optional preview/compare) as data URLs plus the detected boxes. */
-async function work({ src, cols, rows, cell, method, ids, wantCompare, stretch }) {
+async function work({ src, cols, rows, cell, method, ids, wantCompare, stretch, colors }) {
 	const img = new Image();
 	img.src = src;
 	await img.decode();
@@ -141,6 +142,46 @@ async function work({ src, cols, rows, cell, method, ids, wantCompare, stretch }
 	boxes.forEach((b, i) => {
 		ag.putImageData(new ImageData(area(b), cell, cell), (i % cols) * cell, Math.floor(i / cols) * cell);
 	});
+	if (colors > 1) {
+		// Median-cut palette over the atlas, then snap every pixel to its box's mean colour.
+		const im = ag.getImageData(0, 0, atlas.width, atlas.height);
+		const d = im.data;
+		const n = d.length / 4;
+		const boxesQ = [Array.from({ length: n }, (_, i) => i)];
+		while (boxesQ.length < colors) {
+			let bi = -1;
+			let bestRange = 0;
+			let bestCh = 0;
+			boxesQ.forEach((bx, k) => {
+				if (bx.length < 2) return;
+				for (let ch = 0; ch < 3; ch++) {
+					let lo = 255;
+					let hi = 0;
+					for (const i of bx) {
+						const v = d[i * 4 + ch];
+						if (v < lo) lo = v;
+						if (v > hi) hi = v;
+					}
+					if (hi - lo > bestRange) {
+						bestRange = hi - lo;
+						bi = k;
+						bestCh = ch;
+					}
+				}
+			});
+			if (bi < 0) break;
+			const bx = boxesQ[bi].sort((a, b) => d[a * 4 + bestCh] - d[b * 4 + bestCh]);
+			const mid = bx.length >> 1;
+			boxesQ.splice(bi, 1, bx.slice(0, mid), bx.slice(mid));
+		}
+		for (const bx of boxesQ) {
+			const m = [0, 0, 0];
+			for (const i of bx) for (let ch = 0; ch < 3; ch++) m[ch] += d[i * 4 + ch];
+			for (let ch = 0; ch < 3; ch++) m[ch] = Math.round(m[ch] / bx.length);
+			for (const i of bx) for (let ch = 0; ch < 3; ch++) d[i * 4 + ch] = m[ch];
+		}
+		ag.putImageData(im, 0, 0);
+	}
 	const res = { boxes, size: [W, H], webp: atlas.toDataURL("image/webp", 1) };
 	const scaled = (z, labels) => {
 		const p = document.createElement("canvas");
@@ -191,7 +232,7 @@ const browser = await chromium.launch();
 try {
 	const page = await browser.newPage();
 	const src = `data:image/png;base64,${readFileSync(args.in).toString("base64")}`;
-	const res = await page.evaluate(`(${work.toString()})(${JSON.stringify({ src, cols, rows, cell, method, ids, wantCompare: !!args.compare, stretch: args.stretch === "true" })})`);
+	const res = await page.evaluate(`(${work.toString()})(${JSON.stringify({ src, cols, rows, cell, method, ids, wantCompare: !!args.compare, stretch: args.stretch === "true", colors: Number(args.colors ?? 0) })})`);
 	const save = (path, url) => {
 		mkdirSync(dirname(resolve(path)), { recursive: true });
 		writeFileSync(path, Buffer.from(url.split(",")[1], "base64"));

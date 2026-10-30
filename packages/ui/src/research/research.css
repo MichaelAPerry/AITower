@@ -378,3 +378,28 @@
 	background: var(--housing-lo);
 	border-top: 1px solid var(--panel-edge);
 }
+
+/* The owner's icons: 48 px on list cards, 64 px beside the Inspector title (1:1 with the sheet cell, crisp). Locked and sealed looks come from SheetIcon. */
+.aitower-hud .res-card-row {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+.aitower-hud .res-card-body {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	flex: 1;
+	min-width: 0;
+}
+.aitower-hud .res-head {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.aitower-hud .res-head-text {
+	min-width: 0;
+}
+.aitower-hud .res-icon {
+	display: block;
+}
