@@ -203,7 +203,7 @@
    },
    {
     "who": "bea",
-    "text": "That does lasting damage to the local environment. Lasting daamage to the water, the birds, the land..."
+    "text": "That does lasting damage to the local environment. Lasting damage to the water, the birds, the land..."
    },
    {
     "who": "luci",
@@ -298,7 +298,7 @@
    },
    {
     "who": "mel",
-    "text": "It hurts my children. They can feel it.  The infrasound, the fumes, it all as a incredibly negative effective on their endocrine systems."
+    "text": "It hurts my children. They can feel it.  The infrasound, the fumes, it all as an incredibly negative effect on their endocrine systems."
    },
    {
     "who": "luci",
@@ -312,7 +312,7 @@
     "id": "keep",
     "label": "Keep it.",
     "hint": "Overrule Mel.",
-    "outcome": "The {item} stays. Mel made a note on her note book and rushed back downstairs.",
+    "outcome": "The {item} stays. Mel made a note on her notebook and rushed back downstairs.",
     "effects": [
      {
       "type": "bond",
@@ -382,7 +382,7 @@
    },
    {
     "who": "luci",
-    "text": "This is a bit step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.",
+    "text": "This is a big step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.",
     "mood": "pleased"
    },
    {
@@ -452,7 +452,7 @@
      },
      {
       "who": "cass",
-      "text": "Don;t forget the basics."
+      "text": "Don't forget the basics."
      }
     ]
    }
@@ -498,7 +498,7 @@
    },
    {
     "who": "luci",
-    "text": "Keep working towards more compute. More computer means more money. More money means more compute."
+    "text": "Keep working towards more compute. More compute means more money. More money means more compute."
    }
   ],
   "recommended": "gas",
@@ -670,7 +670,7 @@
    },
    {
     "who": "luci",
-    "text": "But, our clients research is potentional is massive; protein folding, quantum tunneling, fusion..."
+    "text": "But, our clients research potential is massive; protein folding, quantum tunneling, fusion..."
    }
   ],
   "recommended": "more",
@@ -690,7 +690,7 @@
     "reply": [
      {
       "who": "luci",
-      "text": "Good. Money is no opject when we're this close.",
+      "text": "Good. Money is no object when we're this close.",
       "mood": "pleased"
      }
     ]
@@ -743,11 +743,11 @@
    },
    {
     "who": "mel",
-    "text": "Two things keep it alive. The 37 degree perfusion bath.  Liek the warmth of a mother's womb."
+    "text": "Two things keep it alive. The 37 degree perfusion bath.  Like the warmth of a mother's womb."
    },
    {
     "who": "mel",
-    "text": "And nutrient, from the plant, through pipe to the rack.  Like it's stomach."
+    "text": "And nutrient, from the plant, through pipe to the rack.  Like its stomach."
    },
    {
     "who": "mel",
@@ -824,11 +824,11 @@
    },
    {
     "who": "mel",
-    "text": "More tissue, more mess. The vats shed contamination while they work.  You know. Eveything.... you know."
+    "text": "More tissue, more mess. The vats shed contamination while they work.  You know. Everything.... you know."
    },
    {
     "who": "mel",
-    "text": "We have to clean them. Just like taking care of a babies nappy.  These our our children now."
+    "text": "We have to clean them. Just like taking care of a baby's nappy.  These are our children now."
    },
    {
     "who": "mel",
@@ -922,11 +922,11 @@
    },
    {
     "who": "mel",
-    "text": "More and more babies, we're becoming quote the parents aren't we."
+    "text": "More and more babies, we're becoming quite the parents aren't we."
    },
    {
     "who": "mel",
-    "text": "And keep an eye their waste. At 99 percent, something my calculations may not predict might happen."
+    "text": "And keep an eye on their waste. At 99 percent, something my calculations may not predict might happen."
    }
   ],
   "recommended": "works",
@@ -999,7 +999,7 @@
    },
    {
     "who": "mel",
-    "text": "We've grew our progenity from a tube. It's us but better."
+    "text": "We've grown our progeny from a tube. It's us but better."
    },
    {
     "who": "mel",
@@ -1255,11 +1255,11 @@
    },
    {
     "who": "bea",
-    "text": "But when Mother Nature turns of the light, we sleep too. It's the way of life."
+    "text": "But when Mother Nature turns off the light, we sleep too. It's the way of life."
    },
    {
     "who": "bea",
-    "text": "Don;t expect a bunch of compute at night, we're bond to the sun like everything else."
+    "text": "Don't expect a bunch of compute at night, we're bound to the sun like everything else."
    },
    {
     "who": "bea",
@@ -1267,7 +1267,7 @@
    },
    {
     "who": "bea",
-    "text": "I love ehat we're doing for the world.  I think what we've created here is spreading."
+    "text": "I love what we're doing for the world.  I think what we've created here is spreading."
    }
   ],
   "recommended": "fuel",
@@ -1445,7 +1445,7 @@
    },
    {
     "who": "cass",
-    "text": "Couldnt sleep? Me neither, most nights.",
+    "text": "Couldn't sleep? Me neither, most nights.",
     "mood": "pleased"
    },
    {
@@ -1544,7 +1544,7 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Techinicans and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway."
+    "text": "Technicians and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway."
    },
    {
     "who": "mel",
@@ -1556,7 +1556,7 @@
    },
    {
     "who": "luci",
-    "text": "They still work Mel, just in check like they're suppose to be.",
+    "text": "They still work Mel, just in check like they're supposed to be.",
     "mood": "pleased"
    },
    {
@@ -1726,7 +1726,7 @@
      },
      {
       "who": "luci",
-      "text": "I'm pleased with you Opertator.",
+      "text": "I'm pleased with you Operator.",
       "mood": "pleased"
      }
     ]
@@ -1774,7 +1774,7 @@
     "id": "ok",
     "label": "I'll bring the pen.",
     "hint": "She'll remember.",
-    "outcome": "Luci smiles and writes something small in her calender.",
+    "outcome": "Luci smiles and writes something small in her calendar.",
     "effects": []
    }
   ]
@@ -1784,7 +1784,7 @@
   "category": "story",
   "advisor": "mel",
   "title": "Mel Offers a Seat",
-  "body": "Mel pulls a stool out from under the bench. You've never seen in more since you've been here.",
+  "body": "Mel pulls a stool out from under the bench. You've never seen her more since you've been here.",
   "weight": 1,
   "minTier": 1,
   "cooldownDays": 0,
@@ -1798,7 +1798,7 @@
   "lines": [
    {
     "who": "narrator",
-    "text": "Mel pulls a stool out from under the bench. You've never seen in more since you've been here."
+    "text": "Mel pulls a stool out from under the bench. You've never seen her more since you've been here."
    },
    {
     "who": "mel",
@@ -1810,7 +1810,7 @@
    },
    {
     "who": "mel",
-    "text": "We'll be hear waiting for your ear.",
+    "text": "We'll be here waiting for your ear.",
     "mood": "pleased"
    }
   ],

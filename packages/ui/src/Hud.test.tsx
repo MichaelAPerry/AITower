@@ -178,7 +178,7 @@ describe("SystemMenu (server render)", () => {
 		const real = { ...createFakeContent(), endings: loadContent().endings };
 		const cases = [
 			["victory", "singularity", "THE LATTICE", "has-backdrop", "At 04:12 the tower stopped allowing any control."],
-			["victory", "flesh", "THE FLESH", "has-backdrop", "The organoids grew a psuedopod weeks ago."],
+			["victory", "flesh", "THE FLESH", "has-backdrop", "The organoids grew a pseudopod weeks ago."],
 			["victory", "garden", "THE GARDEN", "has-backdrop", "The tower stopped burning fuel."],
 			["absorbed", "absorbed", "ABSORBED", "has-backdrop", "One day as you went to drink some coffee, you tasted something strange."],
 			["bankrupt", "bankrupt", "BANKRUPT", "has-backdrop", "The Treasury stayed below zero for a full day."],

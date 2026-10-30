@@ -5,7 +5,7 @@ export const CRAWL_LINES: readonly string[] = [
 	"Everyone agrees the Singularity is coming but nobody agrees what it will look like.",
 	"Will it be a machine dominated world with minds lost to chrome? Or something else?",
 	"What you build and what you think are the producers of this world.",
-	"The four advisors given to you are to help lead you to the world in which you want.",
+	"The four advisors given to you are to help lead you to the world you want.",
 	"This tower and perhaps the world is under your care.",
 ];
 

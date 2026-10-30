@@ -38,10 +38,10 @@ No new art is needed. Every location reuses an existing backdrop. The gallery sc
 - [seal_biotech.title] Title: The Flesh Closes
 - [seal_biotech.location] Location: B1 · WETWARE ANNEX
 - [seal_biotech.caption] Caption: The annex panel has changed. Mel is standing in front of it. Cass is in the doorway.
-- [seal_biotech.l1] narrator: Techinicans and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway.
+- [seal_biotech.l1] narrator: Technicians and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway.
 - [seal_biotech.l2] mel: Nothing more to do my babies.
 - [seal_biotech.l3] mel: I'm sorry I couldn't do more. 
-- [seal_biotech.l4 mood=pleased] luci: They still work Mel, just in check like they're suppose to be. 
+- [seal_biotech.l4 mood=pleased] luci: They still work Mel, just in check like they're supposed to be. 
 - [seal_biotech.l5] cass: Almost like any other rack. 
 - [seal_biotech.l6 mood=unsettling] mel: Heh, I guess.. *she holds back a sob*
 - [seal_biotech.l7] mel: You guys can go, I have some work to finish here. 
@@ -95,7 +95,7 @@ Choice `other`:
 - [seal_greentech.other.outcome] Outcome: You turned to the stairwell. Bea stayed up on the roof a while.
 > Effects: Luci bond +1; Bea bond -1.
 - [seal_greentech.other.r1] bea: Sure. I'll be up here.
-- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Opertator. 
+- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Operator. 
 
 ---
 
@@ -117,17 +117,17 @@ Choice `ok`:
 
 - [bond50_luci.ok.label] Label: I'll bring the pen.
 - [bond50_luci.ok.hint] Hint: She'll remember.
-- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calender. 
+- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calendar. 
 
 ### bond50_mel — Mel Offers a Seat
 > trigger: new `{kind:"bond", advisor:"mel", atLeast:50}`, once. Suggest 40 for Mel: headless runs only reach 38.
 > location: B1 · WETWARE ANNEX
 - [bond50_mel.title] Title: Mel Offers a Seat
 - [bond50_mel.location] Location: B1 · WETWARE ANNEX
-- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen in more since you've been here. 
+- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen her more since you've been here. 
 - [bond50_mel.l2] mel: Sit. Please. 
 - [bond50_mel.l3] mel: You listen when I talk about them. I like that, and they like that. 
-- [bond50_mel.l4 mood=pleased] mel: We'll be hear waiting for your ear. 
+- [bond50_mel.l4 mood=pleased] mel: We'll be here waiting for your ear. 
 
 Choice `ok`:
 
@@ -197,7 +197,7 @@ Choice `ok`:
 - [cass_night_shift.l6] cass: Parts are slow now, I'll just try some more grease. 
 - [cass_night_shift.l7] cass: Thanks for the help, Did you come down to say something?
 - [cass_night_shift.l8] narrator: You didn't. You couldn't sleep either.
-- [cass_night_shift.l9 mood=pleased] cass: Couldnt sleep? Me neither, most nights.
+- [cass_night_shift.l9 mood=pleased] cass: Couldn't sleep? Me neither, most nights.
 - [cass_night_shift.l10] cass: But something needs fixing all the time. 
 - [cass_night_shift.l11] cass: Want the real version of this tower? Not the spreadsheet view? 
 
@@ -268,8 +268,8 @@ Choice `order`:
 > location: GALLERY · OFF DUTY
 - [ach_bed_intro.title] Title: The Last Door
 - [ach_bed_intro.location] Location: GALLERY · OFF DUTY
-- [ach_bed_intro.l1] narrator: Something's clicked.  The singularity has been fufilled across multiple different timelines. 
-- [ach_bed_intro.l2] narrator: You walk down a white hallway for what seems like ages. There are 4 dours ready to open. 
+- [ach_bed_intro.l1] narrator: Something's clicked.  The singularity has been fulfilled across multiple different timelines. 
+- [ach_bed_intro.l2] narrator: You walk down a white hallway for what seems like ages. There are 4 doors ready to open. 
 
 ### ach_bed_luci — After Hours: Luci
 > trigger: opening Luci's bed portrait. Quiet, at rest, covered, no pose to the viewer.
@@ -311,7 +311,7 @@ Choice `order`:
 > location: GALLERY · OFF DUTY
 - [ach_hint_luci.title] Title: Locked Frame
 - [ach_hint_luci.location] Location: GALLERY · OFF DUTY
-- [ach_hint_luci.l1] luci: We aren;t there yet. 
+- [ach_hint_luci.l1] luci: We aren't there yet. 
 
 ### ach_hint_mel — Locked Frame: Mel
 > trigger: selecting Mel's locked frame

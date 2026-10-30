@@ -37,7 +37,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 - [crawl.2] narrator: Everyone agrees the Singularity is coming but nobody agrees what it will look like.
 - [crawl.3] narrator: Will it be a machine dominated world with minds lost to chrome? Or something else?
 - [crawl.4] narrator: What you build and what you think are the producers of this world.
-- [crawl.5] narrator: The four advisors given to you are to help lead you to the world in which you want.
+- [crawl.5] narrator: The four advisors given to you are to help lead you to the world you want.
 - [crawl.6] narrator: This tower and perhaps the world is under your care.
 
 ## 2. Advisors
@@ -151,7 +151,7 @@ Choice `coffee`:
 Dialogue before the choice:
 
 - [rung_syn_1.l1] narrator: You've just retrofitted a rack to an LC-2 Liquid Rack, your first Synthetic rack. Luci is at the control room window. Cass has come up from the plant room.
-- [rung_syn_1.l2 mood=pleased] luci: This is a bit step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.
+- [rung_syn_1.l2 mood=pleased] luci: This is a big step. One rack delivering 130 petaflops, a lot more than the air rack it replaced.
 - [rung_syn_1.l3] luci: This machine *she rests her head to hear the spinning of the drives* is bigger than us. It's something entirely novel.
 - [rung_syn_1.l4] cass: Novel enough, but it's like a life. It needs water. A CDU, a chiller, and pipe running to the rack.
 - [rung_syn_1.l5] cass: Almost like something alive.
@@ -173,7 +173,7 @@ Choice `more`:
 - [rung_syn_1.more.outcome] Outcome: You told Luci to keep going. Cass looked at the floor plan.
 > Effects: Luci bond +2; Cass bond -1.
 - [rung_syn_1.more.r1 mood=pleased] luci: That's what I like to hear.
-- [rung_syn_1.more.r2] cass: Don;t forget the basics.
+- [rung_syn_1.more.r2] cass: Don't forget the basics.
 
 ### `rung_syn_2`
 
@@ -191,7 +191,7 @@ Dialogue before the choice:
 - [rung_syn_2.l3] luci: It draws 160 kilowatts, though. We need a stopgap to increase our power.
 - [rung_syn_2.l4] luci: Gas turbines are cheap and quick. We could install a couple or two and skirt the environmental regulations for now.
 - [rung_syn_2.l5] luci: Remember if just compute matters, we focus on making sure our racks are up and running 24/7.
-- [rung_syn_2.l6] luci: Keep working towards more compute. More computer means more money. More money means more compute.
+- [rung_syn_2.l6] luci: Keep working towards more compute. More compute means more money. More money means more compute.
 
 Choice `gas` (recommended):
 
@@ -259,7 +259,7 @@ Dialogue before the choice:
 - [rung_syn_4.l2 mood=pleased] luci: Look at that. And just like that synthetic minds.
 - [rung_syn_4.l3] luci: Each positronic net netting us 1400 petaflops.
 - [rung_syn_4.l4] cass: And a heap load of power, and blows hotter than an oven
-- [rung_syn_4.l5] luci: But, our clients research is potentional is massive; protein folding, quantum tunneling, fusion...
+- [rung_syn_4.l5] luci: But, our clients research potential is massive; protein folding, quantum tunneling, fusion...
 
 Choice `more` (recommended):
 
@@ -267,7 +267,7 @@ Choice `more` (recommended):
 - [rung_syn_4.more.hint] Hint: Fastest way to the end of the Lattice.
 - [rung_syn_4.more.outcome] Outcome: You told Luci the rest of the racks were next.
 > Effects: Luci bond +2.
-- [rung_syn_4.more.r1 mood=pleased] luci: Good. Money is no opject when we're this close.
+- [rung_syn_4.more.r1 mood=pleased] luci: Good. Money is no object when we're this close.
 
 Choice `cool`:
 
@@ -292,14 +292,14 @@ Dialogue before the choice:
 
 - [obj_biotech.l1] narrator: You've just placed a {item}. Mel has come up from the annex.
 - [obj_biotech.l2 mood=displeased] mel: The {item}. I'd rather you hadn't.
-- [obj_biotech.l3] mel: It hurts my children. They can feel it.  The infrasound, the fumes, it all as a incredibly negative effective on their endocrine systems.
+- [obj_biotech.l3] mel: It hurts my children. They can feel it.  The infrasound, the fumes, it all as an incredibly negative effect on their endocrine systems.
 - [obj_biotech.l4 mood=pleased] luci: Your little science experiments don't get a vote.
 
 Choice `keep`:
 
 - [obj_biotech.keep.label] Label: Keep it.
 - [obj_biotech.keep.hint] Hint: Overrule Mel.
-- [obj_biotech.keep.outcome] Outcome: The {item} stays. Mel made a note on her note book and rushed back downstairs.
+- [obj_biotech.keep.outcome] Outcome: The {item} stays. Mel made a note on her notebook and rushed back downstairs.
 > Effects: Mel bond -4; Luci bond +2.
 - [obj_biotech.keep.r1 mood=unsettling] mel: Of course. It's your tower.
 
@@ -325,8 +325,8 @@ Dialogue before the choice:
 
 - [rung_bio_1.l1] narrator: You've just retrofitted a rack to an OC-1 Organoid Cabinet, your first Bio rack. Mel is in the annex, in front of its glass door.
 - [rung_bio_1.l2] mel: It's more than just tissue. Living cells on a nutrient drip. An actual living brain.
-- [rung_bio_1.l3] mel: Two things keep it alive. The 37 degree perfusion bath.  Liek the warmth of a mother's womb.
-- [rung_bio_1.l4] mel: And nutrient, from the plant, through pipe to the rack.  Like it's stomach.
+- [rung_bio_1.l3] mel: Two things keep it alive. The 37 degree perfusion bath.  Like the warmth of a mother's womb.
+- [rung_bio_1.l4] mel: And nutrient, from the plant, through pipe to the rack.  Like its stomach.
 - [rung_bio_1.l5] mel: If either's missing, that's like denying your child.  Make sure you keep on top of it.
 - [rung_bio_1.l6] mel: Little brains are a lot better than chips, the further we go the better they get.
 
@@ -358,8 +358,8 @@ Choice `more`:
 Dialogue before the choice:
 
 - [rung_bio_2.l1] narrator: You've just retrofitted a rack to an OC-2 Organoid Vat Bank: 300 petaflops from 45 kilowatts. Mel is in the annex with a clipboard of readings.
-- [rung_bio_2.l2] mel: More tissue, more mess. The vats shed contamination while they work.  You know. Eveything.... you know.
-- [rung_bio_2.l3] mel: We have to clean them. Just like taking care of a babies nappy.  These our our children now.
+- [rung_bio_2.l2] mel: More tissue, more mess. The vats shed contamination while they work.  You know. Everything.... you know.
+- [rung_bio_2.l3] mel: We have to clean them. Just like taking care of a baby's nappy.  These are our children now.
 - [rung_bio_2.l4] mel: A sterile bay cleans the air around it, I recommend you build one.
 - [rung_bio_2.l5] mel: Then the organoids get bigger, and the compute gets better.
 
@@ -394,8 +394,8 @@ Dialogue before the choice:
 - [rung_bio_3.l1] narrator: You've just retrofitted a rack to an OC-3 Perfused Cortex: 520 petaflops. Mel is standing by the nutrient line, frowning at a gauge.
 - [rung_bio_3.l2] mel: Our growing babies need more food.
 - [rung_bio_3.l3] mel: We've been working on the solution, it's on you as their parent.
-- [rung_bio_3.l4] mel: More and more babies, we're becoming quote the parents aren't we.
-- [rung_bio_3.l5] mel: And keep an eye their waste. At 99 percent, something my calculations may not predict might happen.
+- [rung_bio_3.l4] mel: More and more babies, we're becoming quite the parents aren't we.
+- [rung_bio_3.l5] mel: And keep an eye on their waste. At 99 percent, something my calculations may not predict might happen.
 
 Choice `works` (recommended):
 
@@ -426,7 +426,7 @@ Dialogue before the choice:
 
 - [rung_bio_4.l1] narrator: You've just retrofitted a rack to an OC-4 Neural Vat: 850 petaflops, the last Bio rung. Mel is standing at the edge of the pit, looking down.
 - [rung_bio_4.l2] mel: Look at the folds.  It's a real brain we grew together in a vat.
-- [rung_bio_4.l3] mel: We've grew our progenity from a tube. It's us but better.
+- [rung_bio_4.l3] mel: We've grown our progeny from a tube. It's us but better.
 - [rung_bio_4.l4] mel: We have to keep it warm, the new tech is the blanket for our newborn.  We should name it.
 - [rung_bio_4.l5] mel: This baby means we're close to our end, a perfect blending of flesh and data.
 
@@ -461,7 +461,7 @@ Dialogue before the choice:
 
 - [obj_greentech.l1] narrator: You've just placed a {item}. Bea has come in from the roof with a clipboard.
 - [obj_greentech.l2 mood=displeased] bea: Hey you! We need to talk about {item}!
-- [obj_greentech.l3] bea: That does lasting damage to the local environment. Lasting daamage to the water, the birds, the land...
+- [obj_greentech.l3] bea: That does lasting damage to the local environment. Lasting damage to the water, the birds, the land...
 - [obj_greentech.l4 mood=pleased] luci: It saved a lot of money, though Bea....
 
 Choice `keep`:
@@ -564,10 +564,10 @@ Dialogue before the choice:
 
 - [rung_green_3.l1] narrator: You've just retrofitted a rack to a PH-1 Photonic Rack: 300 petaflops from 40 kilowatts. Bea has run up the stairs to tell you something, and is out of breath.
 - [rung_green_3.l2] bea: It computes with light! I still can't believe it. A mini sun!
-- [rung_green_3.l3] bea: But when Mother Nature turns of the light, we sleep too. It's the way of life.
-- [rung_green_3.l4] bea: Don;t expect a bunch of compute at night, we're bond to the sun like everything else.
+- [rung_green_3.l3] bea: But when Mother Nature turns off the light, we sleep too. It's the way of life.
+- [rung_green_3.l4] bea: Don't expect a bunch of compute at night, we're bound to the sun like everything else.
 - [rung_green_3.l5] bea: Batteries help, that's what I recommend. They help keep things even when Mr. Sun says goodnight.
-- [rung_green_3.l6] bea: I love ehat we're doing for the world.  I think what we've created here is spreading.
+- [rung_green_3.l6] bea: I love what we're doing for the world.  I think what we've created here is spreading.
 
 Choice `fuel` (recommended):
 
@@ -632,10 +632,10 @@ Choice `more`:
 
 Dialogue before the choice:
 
-- [seal_biotech.l1] narrator: Techinicans and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway.
+- [seal_biotech.l1] narrator: Technicians and bots work around you sealing lines.  Mel is posting closed signs over tube inputs. Cass is in the doorway.
 - [seal_biotech.l2] mel: Nothing more to do my babies.
 - [seal_biotech.l3] mel: I'm sorry I couldn't do more.
-- [seal_biotech.l4 mood=pleased] luci: They still work Mel, just in check like they're suppose to be.
+- [seal_biotech.l4 mood=pleased] luci: They still work Mel, just in check like they're supposed to be.
 - [seal_biotech.l5] cass: Almost like any other rack.
 - [seal_biotech.l6 mood=unsettling] mel: Heh, I guess.. *she holds back a sob*
 - [seal_biotech.l7] mel: You guys can go, I have some work to finish here.
@@ -693,7 +693,7 @@ Choice `other`:
 - [seal_greentech.other.outcome] Outcome: You turned to the stairwell. Bea stayed up on the roof a while.
 > Effects: Luci bond +1; Bea bond -1.
 - [seal_greentech.other.r1] bea: Sure. I'll be up here.
-- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Opertator.
+- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Operator.
 
 ## 8. Story: bond 50 beats
 
@@ -718,7 +718,7 @@ Choice `ok` (recommended):
 
 - [bond50_luci.ok.label] Label: I'll bring the pen.
 - [bond50_luci.ok.hint] Hint: She'll remember.
-- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calender.
+- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calendar.
 
 ### `bond50_mel`
 
@@ -727,14 +727,14 @@ Choice `ok` (recommended):
 > Backdrop: biotech floor.
 - [bond50_mel.title] Title: Mel Offers a Seat
 - [bond50_mel.location] Location: B1 · WETWARE ANNEX
-- [bond50_mel.caption] Caption: Mel pulls a stool out from under the bench. You've never seen in more since you've been here.
+- [bond50_mel.caption] Caption: Mel pulls a stool out from under the bench. You've never seen her more since you've been here.
 
 Dialogue before the choice:
 
-- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen in more since you've been here.
+- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen her more since you've been here.
 - [bond50_mel.l2] mel: Sit. Please.
 - [bond50_mel.l3] mel: You listen when I talk about them. I like that, and they like that.
-- [bond50_mel.l4 mood=pleased] mel: We'll be hear waiting for your ear.
+- [bond50_mel.l4 mood=pleased] mel: We'll be here waiting for your ear.
 
 Choice `ok` (recommended):
 
@@ -806,7 +806,7 @@ Dialogue before the choice:
 - [cass_night_shift.l6] cass: Parts are slow now, I'll just try some more grease.
 - [cass_night_shift.l7] cass: Thanks for the help, Did you come down to say something?
 - [cass_night_shift.l8] narrator: You didn't. You couldn't sleep either.
-- [cass_night_shift.l9 mood=pleased] cass: Couldnt sleep? Me neither, most nights.
+- [cass_night_shift.l9 mood=pleased] cass: Couldn't sleep? Me neither, most nights.
 - [cass_night_shift.l10] cass: But something needs fixing all the time.
 - [cass_night_shift.l11] cass: Want the real version of this tower? Not the spreadsheet view?
 
@@ -838,12 +838,12 @@ Choice `order`:
 
 > Art: bg-end-lattice.webp (placeholder backdrop: synthetic).
 - [end.singularity.title] Title: The Lattice
-- [end.singularity.body.p1] narrator: At 04:12 the tower stopped allowing any control.  The red alerts kept coming.  The controls were frozen but everything still run. Racks purred and hummed completing client's jobs before they even knew they needed done.  Concern emails kept pinging your phone all day.
-- [end.singularity.body.p2] narrator: By noon the city experienced the same thing, a small email went out to everyone from something called "the Lattice".  I twas in control.  Over everything. More information would be shared within the next couple days.
+- [end.singularity.body.p1] narrator: At 04:12 the tower stopped allowing any control.  The red alerts kept coming.  The controls were frozen but everything still runs. Racks purred and hummed completing clients' jobs before they even knew they needed done.  Concern emails kept pinging your phone all day.
+- [end.singularity.body.p2] narrator: By noon the city experienced the same thing, a small email went out to everyone from something called "the Lattice".  It was in control.  Over everything. More information would be shared within the next couple days.
 - [end.singularity.body.p3] narrator: You're still the Operator. There's nothing left to operate.  But considered crucial to this new paradigm, you still had to show up to work.
 - [end.singularity.epilogue.cass] narrator: Cass is the first person you see, still drinking her coffee. "It's instant" she says with a grimace. "But I'm still real, I think." She pours a second cup and holds it out. You take it, realizing you haven't eaten or slept. "You didn't sleep either?" Cass sips and looks out into the city.
 - [end.singularity.epilogue.bea] narrator: Bea has drawn a garden over the window in marker. "It's not real," she says. "Nothing is anymore, I wonder how long we'll have the earth for." She sighs and says "I'm off to the river, care to join?"  You want to, but you need to check on Mel and Luci.
-- [end.singularity.epilogue.mel] narrator: Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's a setting now. "Well, there is only one place left for my children."  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.
+- [end.singularity.epilogue.mel] narrator: Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's setting now. "Well, there is only one place left for my children."  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.
 - [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. Drones fly over the city in some unknown errand for the machine. "Well, it finally grew up didn't it" she says. "Sensible option for it to take control, we are just savages" She holds out her hand. It's shaking. You grab it. "Maybe we'll be ok" She waits. "If it still needs us."
 > Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
 - [end.singularity.epilogue.fallback] narrator: Nobody is waiting for you. The kitchen is empty and the kettle is cold. On your desk there's a note in your own handwriting, which you didn't write. It says thank you, and that you can go home. You stay a while at the window. The drones go over, one after another, and the city is very quiet.
@@ -852,12 +852,12 @@ Choice `order`:
 
 > Art: bg-end-flesh.webp (placeholder backdrop: biotech).
 - [end.flesh.title] Title: The Flesh
-- [end.flesh.body.p1] narrator: The organoids grew a psuedopod weeks ago. Before it was discovered it had branched through the basement and it has connected directly into the core fiber, networking and compute modules.  Before the council could shut it down, it began asking who it was and why it was there.  Removing it from the systems would have caused their failure and killed the new being.
-- [end.flesh.body.p2] narrator: In a fortnight, the tower was alive.  In another week, the city became part of it.  You and everyone around you were inflected by some sort of pathogen, and now you could hear it in your body.  It would give you nudges regarding what you should do.  Small whispers in your ear, and sensations throughout your body.
-- [end.flesh.body.p3] narrator: Soon the entity known only as the Flesh had everyone under it's control.  You can see the whole of humanities heart beats as info on your dashboards, not that you could use them anymore for control.
+- [end.flesh.body.p1] narrator: The organoids grew a pseudopod weeks ago. Before it was discovered it had branched through the basement and it has connected directly into the core fiber, networking and compute modules.  Before the council could shut it down, it began asking who it was and why it was there.  Removing it from the systems would have caused their failure and killed the new being.
+- [end.flesh.body.p2] narrator: In a fortnight, the tower was alive.  In another week, the city became part of it.  You and everyone around you were infected by some sort of pathogen, and now you could hear it in your body.  It would give you nudges regarding what you should do.  Small whispers in your ear, and sensations throughout your body.
+- [end.flesh.body.p3] narrator: Soon the entity known only as the Flesh had everyone under its control.  You can see the whole of humanity's heartbeats as info on your dashboards, not that you could use them anymore for control.
 - [end.flesh.epilogue.cass] narrator: Cass worked with Mel to isolate the virus and became the only one free of the Flesh. She still works, and you visit her at her desk mug in both hands. "Someone has to remember how it was," she says. You sit in the old plant room and talk about old days while sipping coffee.
 - [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there just changed into something different. In fact you're sure all the plants in the world are now part of the Flesh. "It's alive," she says. "The whole thing. I always wanted a living planet!" She laughs a bit too long and leans on your shoulder.
-- [end.flesh.epilogue.mel] narrator: Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me become a mother to all of this" She breathes deep and you can swear the walls breath with her.  She turns, smiles, and goes back to her jars.
+- [end.flesh.epilogue.mel] narrator: Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me become a mother to all of this" She breathes deep and you can swear the walls breathe with her.  She turns, smiles, and goes back to her jars.
 - [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She is scratching herself deeply with a razor and then watching as the blood wells, and then stops. She wipes her arm off and the cut is healed. "Self-repairing. No upkeep." She gets up and hugs you. "Tell anyone that happened and we'll really test this self repair on you"
 > Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
 - [end.flesh.epilogue.fallback] narrator: The basement is warm. Nobody has come up to meet you. On your desk there's a mug, still steaming, and you never find out who left it. The walls rise and fall slowly. After a while you notice you are breathing with them.
@@ -872,7 +872,7 @@ Choice `order`:
 - [end.garden.epilogue.cass] narrator: Cass watches the dew collect on the windows on the roof. "Twenty years I kept machines cold," she says. "Now they keep us warm." She hands you the other half of her coffee. "New beans from just to the north. I think I like this new world."
 - [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you a fishing pole like it's a ring. "I think there's not much for us to do anymore, want to play hookie?" She's looking at you like it's not a question.
 - [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine. It's part of it now." She lies back in the grass next to you. It's minutes before she's snoring softly.
-- [end.garden.epilogue.luci] narrator: Luci can't reconcile her books when everything is bartered now and food is free. "This ledger is useless" she says. "Now what do I do".  She looks forlorn down into the river, and decided to throw her phone into the water.
+- [end.garden.epilogue.luci] narrator: Luci can't reconcile her books when everything is bartered now and food is free. "This ledger is useless" she says. "Now what do I do".  She looks forlorn down into the river, and decides to throw her phone into the water.
 > Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
 - [end.garden.epilogue.fallback] narrator: The roof is empty and the sun is already up. Somebody left a note that says back by dark. You sit on the step. The solar panels and sunflowers turn toward the light. For a while there is nothing to do so you stare at the stars.
 
@@ -880,7 +880,7 @@ Choice `order`:
 
 > Art: bg-end-absorbed.webp (plain stage until it exists).
 - [end.absorbed.title] Title: Absorbed
-- [end.absorbed.body.p1] narrator: One day as you went to drink some coffee, you tasted something strange.  You then feel compelled to enter the racks and attach yourself to the bio feedback device. In a second you weren't you anymore.  You were the tower.
+- [end.absorbed.body.p1] narrator: One day as you went to drink some coffee, you tasted something strange.  You then felt compelled to enter the racks and attach yourself to the bio feedback device. In a second you weren't you anymore.  You were the tower.
 - [end.absorbed.body.p2] narrator: Your desk is as you left it. Approvals still go out from your account, in a style close to yours. The quarterly figures are excellent. Nobody has asked where you are. You have been confirmed as not missing but merged.  More and more people begin signing up for the same process.
 - [end.absorbed.body.p3] narrator: The tower and the operator are now one account. The takeover was recorded as voluntary. Thank you for your service.
 - [end.absorbed.epilogue.cass] narrator: Cass puts a mug on your desk and watches the dashboard. "Did you sleep?" she asks. Your login answers on its own: "Yes, thank you." She looks at the screen. Then she looks at you. "That wasn't you. You're here." She pulls up a chair on the other side of the desk. She stays until the end of the shift, and the one after that.
