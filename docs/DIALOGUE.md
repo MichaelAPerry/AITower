@@ -30,6 +30,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 14. [Decision memos: Mel](#14-decision-memos-mel)
 15. [Decision memos: Luci](#15-decision-memos-luci)
 16. [Lessons](#16-lessons)
+17. [Achievements and the off-duty gallery](#17-achievements-and-the-off-duty-gallery)
 
 ## 1. Title crawl
 
@@ -1734,3 +1735,190 @@ Choice `add`:
 - [the_three_trees.points.objective] Objective: Wait for the Garden's first points
 - [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
 - [the_three_trees.points.say2] bea: Now let the clock run until the Garden scores.
+
+## 17. Achievements and the off-duty gallery
+
+> The achievements list (name and plain text), the off-duty portraits (caption under an unlocked portrait, the locked frame's hint line, the plain rule shown once her bond has reached 30), and the gallery scenes. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json.
+
+### The 18 achievements
+
+> `end_lattice`
+- [ach.end_lattice.name] Name: Sensible Option
+- [ach.end_lattice.text] Text: Finish the game on The Lattice.
+> `end_flesh`
+- [ach.end_flesh.name] Name: The Flesh Remembers
+- [ach.end_flesh.text] Text: Finish the game on The Flesh.
+> `end_garden`
+- [ach.end_garden.name] Name: Roots Check
+- [ach.end_garden.text] Text: Finish the game on The Garden.
+> `end_absorbed`: hidden in the list until earned (the list shows ??? and 'There is another way this ends.')
+- [ach.end_absorbed.name] Name: Merged
+- [ach.end_absorbed.text] Text: Let the inspectors take you.
+> `end_bankrupt`: hidden in the list until earned (the list shows ??? and 'There is another way this ends.')
+- [ach.end_bankrupt.name] Name: Notice of Termination
+- [ach.end_bankrupt.text] Text: Run out of money for a full day.
+> `lvl_five`
+- [ach.lvl_five.name] Name: Level Five
+- [ach.lvl_five.text] Text: Reach Level 5.
+> `rung_top`
+- [ach.rung_top.name] Name: Top Rung
+- [ach.rung_top.text] Text: Hold a top-rung rack of any tree.
+> `fast_win`
+- [ach.fast_win.name] Name: Ahead of the Plan
+- [ach.fast_win.text] Text: Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38.
+> `clean_hands`
+- [ach.clean_hands.name] Name: Clean Hands
+- [ach.clean_hands.text] Text: Win the Flesh or the Garden with that tree's secret meter under 30 (of 100).
+> `open_hands`
+- [ach.open_hands.name] Name: Open Hands
+- [ach.open_hands.text] Text: Win the Lattice without closing either other tree.
+> `cash_deep`
+- [ach.cash_deep.name] Name: Deep Pockets
+- [ach.cash_deep.text] Text: Have $10M in the bank at day end.
+> `books_clean`
+- [ach.books_clean.name] Name: Clean Books
+- [ach.books_clean.text] Text: Win with no loan and at least your starting cash.
+> `perfect_qtr`
+- [ach.perfect_qtr.name] Name: Perfect Quarter
+- [ach.perfect_qtr.text] Text: File an audit with grade A and uptime of 99% or better.
+> `calm_month`
+- [ach.calm_month.name] Name: Month of Calm
+- [ach.calm_month.text] Text: Keep uptime at 99% or better for 20 days in a row.
+> `bond_close`
+- [ach.bond_close.name] Name: Someone You Trust
+- [ach.bond_close.text] Text: Get any advisor to 50 trust.
+> `bond_crew`
+- [ach.bond_crew.name] Name: The Whole Crew
+- [ach.bond_crew.text] Text: Get all four advisors to 40 trust in one run.
+> `les_done`
+- [ach.les_done.name] Name: Student
+- [ach.les_done.text] Text: Finish every lesson.
+> `heard_out`
+- [ach.heard_out.name] Name: Heard Her Out
+- [ach.heard_out.text] Text: See an ending epilogue from each of the four advisors, across any runs.
+
+### Off-duty frames
+
+> Luci's casual portrait.
+- [ach.offduty.luci.caption] Caption: Off the clock. Don't enter the whisky, Operator.
+- [ach.offduty.luci.hint] Hint: Close the books. All of them. Then we'll see.
+- [ach.offduty.luci.rule] Rule: Close the books on the Lattice, with her on your side.
+> Mel's casual portrait.
+- [ach.offduty.mel.caption] Caption: Hm. Feet up. I read that helps. It does, a little, if you like.
+- [ach.offduty.mel.hint] Hint: Come all the way. Keep something of yourself. Then I'll show you.
+- [ach.offduty.mel.rule] Rule: Finish the Flesh and stay mostly yourself, with her trusting you.
+> Bea's casual portrait.
+- [ach.offduty.bea.caption] Caption: Okay. Okay. Nothing's biting. Best day I've had.
+- [ach.offduty.bea.hint] Hint: Show me the Garden. Not a certificate.
+- [ach.offduty.bea.rule] Rule: Win the Garden honestly, with her trusting you.
+> Cass's casual portrait.
+- [ach.offduty.cass.caption] Caption: It's holding. Don't say anything. Just sit.
+- [ach.offduty.cass.hint] Hint: Hold it up for a month. I'll tell you when I'm asleep.
+- [ach.offduty.cass.rule] Rule: Keep the tower steady for a long stretch.
+
+### `ach_unlock_luci`
+
+> Gallery scene, fired by the UI.
+- [ach_unlock_luci.title] Title: Off the Clock
+- [ach_unlock_luci.location] Location: GALLERY · OFF DUTY
+- [ach_unlock_luci.l1] narrator: A frame opens. Luci, in red, with a glass she isn't drinking from.
+- [ach_unlock_luci.l2 mood=pleased] luci: What a day. Finally some me time.
+- [ach_unlock_luci.l3] luci: Care to join me for a drink Operator?
+
+### `ach_unlock_mel`
+
+> Gallery scene, fired by the UI.
+- [ach_unlock_mel.title] Title: Off the Clock
+- [ach_unlock_mel.location] Location: GALLERY · OFF DUTY
+- [ach_unlock_mel.l1] narrator: Mel's chair is tipped back. Her boots are off, and a mug has gone cold at her elbow.
+- [ach_unlock_mel.l2] mel: Oh, Operator!
+- [ach_unlock_mel.l3] mel: Come join me for a conversation, I can make more tea.
+
+### `ach_unlock_bea`
+
+> Gallery scene, fired by the UI.
+- [ach_unlock_bea.title] Title: Off the Clock
+- [ach_unlock_bea.location] Location: GALLERY · OFF DUTY
+- [ach_unlock_bea.l1] narrator: Bea is by the river, boots in the grass, a line in the water.
+- [ach_unlock_bea.l2] bea: You! No more peace and quiet, but come have a seat.
+- [ach_unlock_bea.l3 mood=pleased] bea: Nothing's biting. But it's about the best day I've had.
+
+### `ach_unlock_cass`
+
+> Gallery scene, fired by the UI.
+- [ach_unlock_cass.title] Title: Off the Clock
+- [ach_unlock_cass.location] Location: GALLERY · OFF DUTY
+- [ach_unlock_cass.l1] narrator: You enter the lodge room. The steam and smell of a sauna hits your nostrils.
+- [ach_unlock_cass.l2] cass: Ready to get warm?
+- [ach_unlock_cass.l3 mood=pleased] cass: Come on in, I won't bite.
+
+### `ach_bed_intro`
+
+> Gallery scene, fired by the UI.
+- [ach_bed_intro.title] Title: The Last Door
+- [ach_bed_intro.location] Location: GALLERY · OFF DUTY
+- [ach_bed_intro.l1] narrator: Something's clicked.  The singularity has been fulfilled across multiple different timelines.
+- [ach_bed_intro.l2] narrator: You walk down a white hallway for what seems like ages. There are 4 doors ready to open.
+
+### `ach_bed_luci`
+
+> Gallery scene, fired by the UI.
+- [ach_bed_luci.title] Title: After Hours
+- [ach_bed_luci.location] Location: GALLERY · OFF DUTY
+- [ach_bed_luci.l1] luci: Stay until it's light, time to settle up.
+
+### `ach_bed_mel`
+
+> Gallery scene, fired by the UI.
+- [ach_bed_mel.title] Title: After Hours
+- [ach_bed_mel.location] Location: GALLERY · OFF DUTY
+- [ach_bed_mel.l1] mel: I sleep badly. It's easier when I'm with someone.
+
+### `ach_bed_bea`
+
+> Gallery scene, fired by the UI.
+- [ach_bed_bea.title] Title: After Hours
+- [ach_bed_bea.location] Location: GALLERY · OFF DUTY
+- [ach_bed_bea.l1] bea: There you are, I've been waiting.
+
+### `ach_bed_cass`
+
+> Gallery scene, fired by the UI.
+- [ach_bed_cass.title] Title: After Hours
+- [ach_bed_cass.location] Location: GALLERY · OFF DUTY
+- [ach_bed_cass.l1] cass: Shh, shut the door and get under the covers.
+
+### `ach_gallery_empty`
+
+> Gallery scene, fired by the UI.
+- [ach_gallery_empty.title] Title: Nothing Yet
+- [ach_gallery_empty.location] Location: GALLERY · OFF DUTY
+- [ach_gallery_empty.l1] narrator: The frames are dim and nobody has come to hang anything.
+
+### `ach_hint_luci`
+
+> Gallery scene, fired by the UI.
+- [ach_hint_luci.title] Title: Locked Frame
+- [ach_hint_luci.location] Location: GALLERY · OFF DUTY
+- [ach_hint_luci.l1] luci: We aren't there yet.
+
+### `ach_hint_mel`
+
+> Gallery scene, fired by the UI.
+- [ach_hint_mel.title] Title: Locked Frame
+- [ach_hint_mel.location] Location: GALLERY · OFF DUTY
+- [ach_hint_mel.l1] mel: How far will these bodies take us I wonder.
+
+### `ach_hint_bea`
+
+> Gallery scene, fired by the UI.
+- [ach_hint_bea.title] Title: Locked Frame
+- [ach_hint_bea.location] Location: GALLERY · OFF DUTY
+- [ach_hint_bea.l1] bea: We got to make a difference.
+
+### `ach_hint_cass`
+
+> Gallery scene, fired by the UI.
+- [ach_hint_cass.title] Title: Locked Frame
+- [ach_hint_cass.location] Location: GALLERY · OFF DUTY
+- [ach_hint_cass.l1] cass: Can you keep it up?

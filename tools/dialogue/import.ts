@@ -27,7 +27,12 @@ export const FILES = {
 	endings: "packages/content/src/data/endings.json",
 	events: "packages/content/src/data/events.json",
 	lessons: "packages/content/src/data/lessons.json",
+	achievements: "packages/content/src/data/achievements.json",
 } as const;
+
+/** Files a project may lack (older fixtures): read as empty. */
+const OPTIONAL_FILES: readonly string[] = [FILES.achievements];
+const EMPTY_ACHIEVEMENTS = `{"achievements":[],"offDuty":{},"scenes":[]}`;
 
 /** The grammar from export.ts / HANDOFF. */
 export const LINE = /^- \[([a-z0-9_.]+)( mood=[a-z]+)?\] ([A-Za-z][A-Za-z ]*): (\S.*)$/;
@@ -250,7 +255,7 @@ function advisorSlots(src: string, add: (s: Slot) => void): void {
 /** Reads the six target files under `root` and lists every editable value in them, in export order. */
 export function loadProject(root: string = DEFAULT_ROOT): Project {
 	const files: Record<string, string> = {};
-	for (const f of Object.values(FILES)) files[f] = readFileSync(resolve(root, f), "utf8");
+	for (const f of Object.values(FILES)) files[f] = OPTIONAL_FILES.includes(f) && !existsSync(resolve(root, f)) ? EMPTY_ACHIEVEMENTS : readFileSync(resolve(root, f), "utf8");
 	const slots: Slot[] = [];
 	const add = (s: Slot): void => {
 		slots.push(s);
@@ -339,6 +344,30 @@ export function loadProject(root: string = DEFAULT_ROOT): Project {
 					put(l.id, `${l.id}.${s.id}.after${i + 1}`, l.advisor, [...p, "steps", si, "after", i], t);
 				});
 			});
+		});
+	}
+
+	const ach = JSON.parse(files[FILES.achievements] as string) as {
+		achievements: { id: string; name: string; text: string }[];
+		offDuty: Record<string, { name: string; caption: string; hint: string; rule: string }>;
+		scenes: { id: string; title: string; location: string; lines: Reply[] }[];
+	};
+	{
+		const put = json(FILES.achievements);
+		ach.achievements.forEach((a, ai) => {
+			put(`ach.${a.id}`, `ach.${a.id}.name`, "Name", ["achievements", ai, "name"], a.name);
+			put(`ach.${a.id}`, `ach.${a.id}.text`, "Text", ["achievements", ai, "text"], a.text);
+		});
+		for (const [adv, o] of Object.entries(ach.offDuty)) {
+			const c = `ach.offduty.${adv}`;
+			put(c, `${c}.caption`, "Caption", ["offDuty", adv, "caption"], o.caption);
+			put(c, `${c}.hint`, "Hint", ["offDuty", adv, "hint"], o.hint);
+			put(c, `${c}.rule`, "Rule", ["offDuty", adv, "rule"], o.rule);
+		}
+		ach.scenes.forEach((s, si) => {
+			put(s.id, `${s.id}.title`, "Title", ["scenes", si, "title"], s.title);
+			put(s.id, `${s.id}.location`, "Location", ["scenes", si, "location"], s.location);
+			s.lines.forEach((l, li) => put(s.id, `${s.id}.l${li + 1}`, l.who, ["scenes", si, "lines", li, "text"], l.text, l.mood));
 		});
 	}
 

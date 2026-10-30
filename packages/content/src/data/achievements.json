@@ -1,0 +1,317 @@
+{
+ "achievements": [
+  {
+   "id": "end_lattice",
+   "name": "Sensible Option",
+   "text": "Finish the game on The Lattice."
+  },
+  {
+   "id": "end_flesh",
+   "name": "The Flesh Remembers",
+   "text": "Finish the game on The Flesh."
+  },
+  {
+   "id": "end_garden",
+   "name": "Roots Check",
+   "text": "Finish the game on The Garden."
+  },
+  {
+   "id": "end_absorbed",
+   "name": "Merged",
+   "text": "Let the inspectors take you.",
+   "hidden": true
+  },
+  {
+   "id": "end_bankrupt",
+   "name": "Notice of Termination",
+   "text": "Run out of money for a full day.",
+   "hidden": true
+  },
+  {
+   "id": "lvl_five",
+   "name": "Level Five",
+   "text": "Reach Level 5."
+  },
+  {
+   "id": "rung_top",
+   "name": "Top Rung",
+   "text": "Hold a top-rung rack of any tree."
+  },
+  {
+   "id": "fast_win",
+   "name": "Ahead of the Plan",
+   "text": "Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38."
+  },
+  {
+   "id": "clean_hands",
+   "name": "Clean Hands",
+   "text": "Win the Flesh or the Garden with that tree's secret meter under 30 (of 100)."
+  },
+  {
+   "id": "open_hands",
+   "name": "Open Hands",
+   "text": "Win the Lattice without closing either other tree."
+  },
+  {
+   "id": "cash_deep",
+   "name": "Deep Pockets",
+   "text": "Have $10M in the bank at day end."
+  },
+  {
+   "id": "books_clean",
+   "name": "Clean Books",
+   "text": "Win with no loan and at least your starting cash."
+  },
+  {
+   "id": "perfect_qtr",
+   "name": "Perfect Quarter",
+   "text": "File an audit with grade A and uptime of 99% or better."
+  },
+  {
+   "id": "calm_month",
+   "name": "Month of Calm",
+   "text": "Keep uptime at 99% or better for 20 days in a row."
+  },
+  {
+   "id": "bond_close",
+   "name": "Someone You Trust",
+   "text": "Get any advisor to 50 trust."
+  },
+  {
+   "id": "bond_crew",
+   "name": "The Whole Crew",
+   "text": "Get all four advisors to 40 trust in one run."
+  },
+  {
+   "id": "les_done",
+   "name": "Student",
+   "text": "Finish every lesson."
+  },
+  {
+   "id": "heard_out",
+   "name": "Heard Her Out",
+   "text": "See an ending epilogue from each of the four advisors, across any runs."
+  }
+ ],
+ "offDuty": {
+  "luci": {
+   "name": "Luci",
+   "caption": "Off the clock. Don't enter the whisky, Operator.",
+   "hint": "Close the books. All of them. Then we'll see.",
+   "rule": "Close the books on the Lattice, with her on your side."
+  },
+  "mel": {
+   "name": "Mel",
+   "caption": "Hm. Feet up. I read that helps. It does, a little, if you like.",
+   "hint": "Come all the way. Keep something of yourself. Then I'll show you.",
+   "rule": "Finish the Flesh and stay mostly yourself, with her trusting you."
+  },
+  "bea": {
+   "name": "Bea",
+   "caption": "Okay. Okay. Nothing's biting. Best day I've had.",
+   "hint": "Show me the Garden. Not a certificate.",
+   "rule": "Win the Garden honestly, with her trusting you."
+  },
+  "cass": {
+   "name": "Cass",
+   "caption": "It's holding. Don't say anything. Just sit.",
+   "hint": "Hold it up for a month. I'll tell you when I'm asleep.",
+   "rule": "Keep the tower steady for a long stretch."
+  }
+ },
+ "scenes": [
+  {
+   "id": "ach_unlock_luci",
+   "title": "Off the Clock",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "A frame opens. Luci, in red, with a glass she isn't drinking from."
+    },
+    {
+     "who": "luci",
+     "text": "What a day. Finally some me time.",
+     "mood": "pleased"
+    },
+    {
+     "who": "luci",
+     "text": "Care to join me for a drink Operator?"
+    }
+   ]
+  },
+  {
+   "id": "ach_unlock_mel",
+   "title": "Off the Clock",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "Mel's chair is tipped back. Her boots are off, and a mug has gone cold at her elbow."
+    },
+    {
+     "who": "mel",
+     "text": "Oh, Operator!"
+    },
+    {
+     "who": "mel",
+     "text": "Come join me for a conversation, I can make more tea."
+    }
+   ]
+  },
+  {
+   "id": "ach_unlock_bea",
+   "title": "Off the Clock",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "Bea is by the river, boots in the grass, a line in the water."
+    },
+    {
+     "who": "bea",
+     "text": "You! No more peace and quiet, but come have a seat."
+    },
+    {
+     "who": "bea",
+     "text": "Nothing's biting. But it's about the best day I've had.",
+     "mood": "pleased"
+    }
+   ]
+  },
+  {
+   "id": "ach_unlock_cass",
+   "title": "Off the Clock",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "You enter the lodge room. The steam and smell of a sauna hits your nostrils."
+    },
+    {
+     "who": "cass",
+     "text": "Ready to get warm?"
+    },
+    {
+     "who": "cass",
+     "text": "Come on in, I won't bite.",
+     "mood": "pleased"
+    }
+   ]
+  },
+  {
+   "id": "ach_bed_intro",
+   "title": "The Last Door",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "Something's clicked.  The singularity has been fulfilled across multiple different timelines."
+    },
+    {
+     "who": "narrator",
+     "text": "You walk down a white hallway for what seems like ages. There are 4 doors ready to open."
+    }
+   ]
+  },
+  {
+   "id": "ach_bed_luci",
+   "title": "After Hours",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "luci",
+     "text": "Stay until it's light, time to settle up."
+    }
+   ]
+  },
+  {
+   "id": "ach_bed_mel",
+   "title": "After Hours",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "mel",
+     "text": "I sleep badly. It's easier when I'm with someone."
+    }
+   ]
+  },
+  {
+   "id": "ach_bed_bea",
+   "title": "After Hours",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "bea",
+     "text": "There you are, I've been waiting."
+    }
+   ]
+  },
+  {
+   "id": "ach_bed_cass",
+   "title": "After Hours",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "cass",
+     "text": "Shh, shut the door and get under the covers."
+    }
+   ]
+  },
+  {
+   "id": "ach_gallery_empty",
+   "title": "Nothing Yet",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "narrator",
+     "text": "The frames are dim and nobody has come to hang anything."
+    }
+   ]
+  },
+  {
+   "id": "ach_hint_luci",
+   "title": "Locked Frame",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "luci",
+     "text": "We aren't there yet."
+    }
+   ]
+  },
+  {
+   "id": "ach_hint_mel",
+   "title": "Locked Frame",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "mel",
+     "text": "How far will these bodies take us I wonder."
+    }
+   ]
+  },
+  {
+   "id": "ach_hint_bea",
+   "title": "Locked Frame",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "bea",
+     "text": "We got to make a difference."
+    }
+   ]
+  },
+  {
+   "id": "ach_hint_cass",
+   "title": "Locked Frame",
+   "location": "GALLERY · OFF DUTY",
+   "lines": [
+    {
+     "who": "cass",
+     "text": "Can you keep it up?"
+    }
+   ]
+  }
+ ]
+}

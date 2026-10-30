@@ -124,6 +124,11 @@ const story = load<Scene[]>("story.json");
 const events = load<EventDef[]>("events.json");
 const endings = load<Ending[]>("endings.json");
 const lessons = load<{ lessons: Lesson[] }>("lessons.json").lessons;
+const ach = load<{
+	achievements: { id: string; name: string; text: string; hidden?: boolean }[];
+	offDuty: Record<string, { name: string; caption: string; hint: string; rule: string }>;
+	scenes: { id: string; title: string; location: string; lines: Reply[] }[];
+}>("achievements.json");
 
 // ─── Line builders ──────────────────────────────────────────────────────
 
@@ -386,6 +391,33 @@ sections.push({
 			'Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).',
 		);
 		for (const l of lessons) lessonBlock(l);
+	},
+});
+
+sections.push({
+	title: "Achievements and the off-duty gallery",
+	body: () => {
+		meta("The achievements list (name and plain text), the off-duty portraits (caption under an unlocked portrait, the locked frame's hint line, the plain rule shown once her bond has reached 30), and the gallery scenes. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json.");
+		h(3, "The 18 achievements");
+		for (const a of ach.achievements) {
+			meta(`\`${a.id}\`${a.hidden ? ": hidden in the list until earned (the list shows ??? and 'There is another way this ends.')" : ""}`);
+			text(`ach.${a.id}.name`, "Name", a.name);
+			text(`ach.${a.id}.text`, "Text", a.text);
+		}
+		h(3, "Off-duty frames");
+		for (const [adv, o] of Object.entries(ach.offDuty)) {
+			meta(`${ADV_NAME[adv] ?? adv}'s casual portrait.`);
+			text(`ach.offduty.${adv}.caption`, "Caption", o.caption);
+			text(`ach.offduty.${adv}.hint`, "Hint", o.hint);
+			text(`ach.offduty.${adv}.rule`, "Rule", o.rule);
+		}
+		for (const s of ach.scenes) {
+			h(3, `\`${s.id}\``);
+			meta("Gallery scene, fired by the UI.");
+			text(`${s.id}.title`, "Title", s.title);
+			text(`${s.id}.location`, "Location", s.location);
+			for (const [i, l] of s.lines.entries()) text(`${s.id}.l${i + 1}`, l.who, l.text, l.mood);
+		}
 	},
 });
 
