@@ -112,7 +112,7 @@ async function run(url) {
 		assert((await page.locator("[data-ach-count]").innerText()).trim() === "0 / 18", "a new profile shows 0 / 18");
 		assert((await page.locator(".ach-row").count()) === 18, "eighteen achievement rows");
 		assert((await page.locator(".ach-row.is-hidden").count()) === 2, "two hidden rows (There is another way this ends.)");
-		await page.getByRole("tab", { name: "OFF DUTY" }).click();
+		await page.getByRole("tab", { name: "GALLERY" }).click();
 		await page.locator(".ach-frames").first().waitFor();
 		await page.locator(".gal-scene").waitFor(); // the first visit plays the one-line "nothing yet" moment
 		await page.keyboard.press("Escape"); // closes that scene only, not the menu behind it

@@ -146,15 +146,15 @@ The portrait captions are not separate lines: a caption is the last spoken line 
 > Name of the Achievements entry in the pause menu's side list.
 - [ach.ui.menu_label] Label: Achievements
 > Heading of the Achievements screen (pause menu and title screen).
-- [ach.ui.menu_title] Label: Achievements · and the off-duty gallery
+- [ach.ui.menu_title] Label: Achievements - Gallery
 > Title screen menu item, next to Lessons.
 - [ach.ui.title_item] Label: ACHIEVEMENTS
 > Small detail under the title menu item. It follows the counter: `11 / 18 earned · off-duty gallery`.
 - [ach.ui.title_detail] Label: earned · off-duty gallery
 > First tab on the Achievements screen (the list of 18).
-- [ach.ui.tab_list] Label: LIST
+- [ach.ui.tab_list] Label: ACHIEVEMENTS
 > Second tab on the Achievements screen (the portrait gallery).
-- [ach.ui.tab_off_duty] Label: OFF DUTY
+- [ach.ui.tab_off_duty] Label: GALLERY
 > Screen-reader label for the two tabs. Not visible.
 - [ach.ui.aria_pages] Label: Achievements pages
 > Screen-reader label for the list of achievements. Not visible.
