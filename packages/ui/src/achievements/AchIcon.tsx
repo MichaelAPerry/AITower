@@ -1,6 +1,7 @@
 import "./achievements.css";
 import type { IconRef } from "./achievements";
 import { ICON_SIZE, iconRows, iconRuns } from "./icons";
+import { SheetIcon } from "../components/SheetIcon";
 import { ICON_SHEETS, type IconSheet, sheetCellStyle } from "./sheets";
 
 export interface AchIconProps {
@@ -19,10 +20,7 @@ export function AchIcon({ icon, scale = 2, locked = false, hidden = false, class
 	const px = ICON_SIZE * Math.max(1, Math.round(scale));
 	if (icon && typeof icon === "object") {
 		const style = sheetCellStyle(icon, px, sheets);
-		if (style) {
-			const state = locked ? (hidden ? "is-hidden" : "is-locked") : "";
-			return <span className={`${className ?? "ui-ach-icon"} ui-ach-sheet ${state}`.trim()} style={{ ...style, ["--ach-px" as string]: `${px}px` }} aria-hidden="true" data-icon={`${icon.sheet}:${icon.col},${icon.row}`} data-locked={locked || undefined} />;
-		}
+		if (style) return <SheetIcon cell={icon} size={px} className={className ?? "ui-ach-icon"} locked={locked} hidden={hidden} sheets={sheets} />;
 	}
 	const id = typeof icon === "string" ? icon : "";
 	return (

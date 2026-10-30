@@ -1,10 +1,18 @@
 import achievementsSheet from "../art/achievement-icons.webp";
+import buildCooling from "../art/build-icons-cooling.webp";
+import buildPower from "../art/build-icons-power.webp";
+import buildRacks from "../art/build-icons-racks.webp";
+import buildSupport from "../art/build-icons-support.webp";
 
 /**
  * Image sprite sheets for achievement icons. An achievement row's `icon` may be `{ sheet, col, row }`: one cell of a grid image.
  * Register the sheet here when the owner supplies it (import the file and add an entry); nothing else changes.
  *
  *   import achievementsSheet from "../art/achievement-icons.webp";
+import buildCooling from "../art/build-icons-cooling.webp";
+import buildPower from "../art/build-icons-power.webp";
+import buildRacks from "../art/build-icons-racks.webp";
+import buildSupport from "../art/build-icons-support.webp";
  *   ICON_SHEETS.achievements = { url: achievementsSheet, cols: 6, rows: 3 };
  *
  * Make a sheet with `node tools/sprites/slice-sheet.mjs` (detects the plates, crops, downscales, packs a uniform atlas).
@@ -22,6 +30,11 @@ export interface IconSheet {
 /** The registered sheets. A row without an icon shows the "?" plate. */
 export const ICON_SHEETS: Record<string, IconSheet | undefined> = {
 	achievements: { url: achievementsSheet, cols: 6, rows: 3 },
+	// Build menu icons (see build/buildIcons.ts for which facility sits in which cell).
+	build_racks: { url: buildRacks, cols: 6, rows: 4 },
+	build_power: { url: buildPower, cols: 6, rows: 4 },
+	build_cooling: { url: buildCooling, cols: 6, rows: 3 },
+	build_support: { url: buildSupport, cols: 5, rows: 3 },
 };
 
 export interface SheetCell {

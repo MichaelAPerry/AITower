@@ -8,6 +8,7 @@
  *
  * --ids      comma list, row-major; used only for the preview labels and the printed `col,row` map.
  * --method   nearest (centre sample, default: crispest) or area (box average, softer).
+ * --stretch true  map each plate's own box (not a square crop) to the cell: for sheets whose plates are not square.
  * --preview  PNG: the atlas at 3x with ids. --compare PNG: first cells, nearest over area, each at 4x, for choosing.
  * No dependencies of its own: decoding, resampling and the lossless webp encode run in the pre-installed Playwright's Chromium
  * (global, PLAYWRIGHT_DIR, or the repo root). Nothing is downloaded.
@@ -40,7 +41,7 @@ function loadPlaywright() {
 }
 
 /** Runs in the page. Returns the atlas (and optional preview/compare) as data URLs plus the detected boxes. */
-async function work({ src, cols, rows, cell, method, ids, wantCompare }) {
+async function work({ src, cols, rows, cell, method, ids, wantCompare, stretch }) {
 	const img = new Image();
 	img.src = src;
 	await img.decode();
@@ -92,28 +93,32 @@ async function work({ src, cols, rows, cell, method, ids, wantCompare }) {
 			for (let y = y0; y <= y1; y++) n += gold[y * W + x];
 			return n;
 		});
-		const cs = runs(colCounts, 8, 6).filter(([a, b]) => b - a > 40);
+		const cs = runs(colCounts, 3, 6).filter(([a, b]) => b - a > 40);
 		if (cs.length !== cols) throw new Error(`found ${cs.length} plates in band at y=${y0}, expected ${cols}`);
 		for (const [x0, x1] of cs) boxes.push({ x0, y0, x1, y1 });
 	}
 	const area = (b) => {
-		const side = Math.round(((b.x1 - b.x0 + 1) + (b.y1 - b.y0 + 1)) / 2);
-		const sx = Math.round((b.x0 + b.x1 + 1) / 2 - side / 2);
-		const sy = Math.round((b.y0 + b.y1 + 1) / 2 - side / 2);
+		// Square crop about the plate centre; with `stretch` the plate's own box is mapped to the cell (for sheets whose plates are not square).
+		const bw = b.x1 - b.x0 + 1;
+		const bh = b.y1 - b.y0 + 1;
+		const side = Math.round((bw + bh) / 2);
+		const sx = stretch ? b.x0 : Math.round((b.x0 + b.x1 + 1) / 2 - side / 2);
+		const sy = stretch ? b.y0 : Math.round((b.y0 + b.y1 + 1) / 2 - side / 2);
 		const out = new Uint8ClampedArray(cell * cell * 4);
-		const k = side / cell;
+		const k = (stretch ? bw : side) / cell;
+		const ky = (stretch ? bh : side) / cell;
 		for (let y = 0; y < cell; y++)
 			for (let x = 0; x < cell; x++) {
 				const o = (y * cell + x) * 4;
 				if (method === "nearest") {
-					const i = (Math.min(H - 1, Math.floor(sy + (y + 0.5) * k)) * W + Math.min(W - 1, Math.floor(sx + (x + 0.5) * k))) * 4;
+					const i = (Math.min(H - 1, Math.floor(sy + (y + 0.5) * ky)) * W + Math.min(W - 1, Math.floor(sx + (x + 0.5) * k))) * 4;
 					for (let j = 0; j < 4; j++) out[o + j] = px[i + j];
 				} else {
 					let r = 0;
 					let gg = 0;
 					let bb = 0;
 					let n = 0;
-					for (let yy = Math.floor(sy + y * k); yy < Math.ceil(sy + (y + 1) * k); yy++)
+					for (let yy = Math.floor(sy + y * ky); yy < Math.ceil(sy + (y + 1) * ky); yy++)
 						for (let xx = Math.floor(sx + x * k); xx < Math.ceil(sx + (x + 1) * k); xx++) {
 							const i = (Math.min(H - 1, yy) * W + Math.min(W - 1, xx)) * 4;
 							r += px[i];
@@ -186,7 +191,7 @@ const browser = await chromium.launch();
 try {
 	const page = await browser.newPage();
 	const src = `data:image/png;base64,${readFileSync(args.in).toString("base64")}`;
-	const res = await page.evaluate(`(${work.toString()})(${JSON.stringify({ src, cols, rows, cell, method, ids, wantCompare: !!args.compare })})`);
+	const res = await page.evaluate(`(${work.toString()})(${JSON.stringify({ src, cols, rows, cell, method, ids, wantCompare: !!args.compare, stretch: args.stretch === "true" })})`);
 	const save = (path, url) => {
 		mkdirSync(dirname(resolve(path)), { recursive: true });
 		writeFileSync(path, Buffer.from(url.split(",")[1], "base64"));

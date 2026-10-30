@@ -5,6 +5,8 @@ import { pushNotice } from "../notices";
 import { techGate, techName } from "../research/tech";
 import { bandText } from "../bio/bio";
 import { Icon, Swatch } from "./common";
+import { SheetIcon } from "./SheetIcon";
+import { buildIcon } from "../build/buildIcons";
 import { findItem, structure } from "../build/catalog";
 import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { OutputBar, TierMark } from "../build/TierMark";
@@ -88,6 +90,12 @@ export function paletteDefs(content: ContentDB, view: SimView, cat: BuildCategor
 }
 
 
+/** The picture on a card: the owner's icon (64 px, 1:1 with the sheet cell), or the colour swatch when a facility has none. */
+function FacilityThumb({ d, locked }: { d: FacilityDef; locked: boolean }) {
+	const cell = buildIcon(d.id);
+	return (cell && <SheetIcon cell={cell} size={64} locked={locked} className="bld-icon" />) || <Swatch color={d.color} accent={d.accent} size={34} />;
+}
+
 /** A card in the catalog grid (a plain function, not a hook user). Hover previews it in the Inspector; click picks it. */
 function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plain?: boolean; item: CatalogItem; picked: boolean; poor: boolean; lock?: string; note?: string | null; onPick: () => void; onHover: (key: string | null) => void }) {
 	const d = item.def;
@@ -105,7 +113,7 @@ function Card({ item, picked, poor, lock, note, onPick, onHover, plain }: { plai
 			onFocus={() => onHover(item.key)}
 			onBlur={() => onHover(null)}
 		>
-			<span className="bld-thumb">{d ? <Swatch color={d.color} accent={d.accent} size={34} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
+			<span className="bld-thumb">{d ? <FacilityThumb d={d} locked={!!lock} /> : <Icon name={item.icon === "$" || !item.icon ? "slab" : item.icon} size={22} />}</span>
 			{item.tier && !item.tier.isPath && <TierMark t={item.tier} />}
 			<span className="bld-name">{item.name}</span>
 			{item.tier?.output && <OutputBar t={item.tier} />}

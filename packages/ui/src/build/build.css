@@ -107,7 +107,7 @@
 	display: grid;
 	place-items: center;
 	width: 100%;
-	height: 52px;
+	height: 72px;
 	border-radius: var(--radius-sm);
 	background: linear-gradient(135deg, var(--wall), var(--housing-lo));
 	color: var(--accent);
@@ -122,6 +122,13 @@
 }
 .aitower-hud .bld-cost.is-short {
 	color: var(--bad);
+}
+/* The owner's 64 px icon sits 1:1 on the thumb (crisp); a locked card dims it like the rest of the card. */
+.aitower-hud .bld-thumb .bld-icon {
+	display: block;
+}
+.aitower-hud .bld-card.is-locked .bld-thumb {
+	opacity: 0.5;
 }
 .aitower-hud .bld-card.is-poor .bld-thumb {
 	opacity: 0.6;
