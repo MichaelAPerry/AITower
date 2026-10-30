@@ -109,6 +109,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		contaminatedShare: 0,
 		irreversible: false,
 		corruption: 0,
+		uptimeStreak: 0,
 		sp: { synthetic: 0, biotech: 0, greentech: 0 },
 		sealScar: { biotech: 0, greentech: 0 },
 		sealResidue: { biotech: 0, greentech: 0 },

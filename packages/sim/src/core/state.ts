@@ -396,6 +396,8 @@ export interface SimState {
 	irreversible: boolean;
 	/** Body-horror scalar 0..1. */
 	corruption: number;
+	/** Days in a row with a day-mean uptime of 99% or better and pflops above 0 (snapshot v16; docs/ACHIEVEMENTS.md). */
+	uptimeStreak: number;
 	// ── The Soul (docs/SOUL.md, docs/REFRAME.md) ──
 	/** Singularity points per tree; the first to `soul.spTarget` ends the game. */
 	sp: { synthetic: number; biotech: number; greentech: number };

@@ -292,6 +292,7 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		contamination: state.contamination,
 		nutrientNets: state.nutrientNets.map((n) => ({ ...n })),
 		corruption: state.corruption,
+		uptimeStreak: state.uptimeStreak,
 		contaminatedShare: state.contaminatedShare,
 		irreversible: state.irreversible,
 		path: leadingTree(state, content),

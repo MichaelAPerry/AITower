@@ -140,7 +140,7 @@ export function validateState(content: ContentDB, raw: RawState): SimState {
 		scenarioId: "str", seed: "num", tick: "int", width: "int", floorMin: "int", floorMax: "int", powerNetCount: "int",
 		coolantNetCount: "int", netsDirty: "bool", topologyRev: "int", storageUtil: "num", nextOfferTick: "num", cash: "num",
 		tier: "int", bankrupt: "bool", negativeCashTicks: "num", ambientC: "num", nextDecisionTick: "num", lastDecisionDay: "int", decisionGate: "bool", researchPoints: "num", clerkAccepted: "int",
-		loanPrincipal: "num", nutrientNetCount: "int", contaminatedShare: "num", irreversible: "bool", corruption: "num",
+		loanPrincipal: "num", nutrientNetCount: "int", contaminatedShare: "num", irreversible: "bool", corruption: "num", uptimeStreak: "int",
 	}, "state");
 	if (!Object.hasOwn(content.scenarios, s.scenarioId as string)) fail(`unknown scenario '${String(s.scenarioId)}'`);
 	if ((s.tick as number) < 0) fail("tick is negative");
@@ -377,6 +377,7 @@ function validateBiotech(s: Obj): void {
 	const corruption = s.corruption as number;
 	if (share < 0 || share > 1) fail("contaminatedShare is outside 0..1");
 	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
+	if ((s.uptimeStreak as number) < 0) fail("uptimeStreak is negative");
 	validateSoul(s);
 }
 

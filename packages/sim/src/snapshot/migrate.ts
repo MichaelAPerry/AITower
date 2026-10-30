@@ -37,11 +37,12 @@
  *  - v14 → v15 (the reframe, docs/REFRAME.md): `path` (the commit), `route`, `sealedOut`, `bondGiven`, memory `flags`, After-hours,
  *    gift and inbox state all go. Racks no longer come from the menu: placed OC-0 / IM-2 / IM-3 / Mel's Cortex map to OC-1 / LC-4 / ML-1 /
  *    OC-3 on the same tiles, NT-1 is sold back at the demolish refund, and removed tech nodes are refunded as research points.
+ *  - v15 → v16 (achievements, docs/ACHIEVEMENTS.md): `uptimeStreak` starts at 0 (a save loaded mid-streak restarts the count).
  */
 import { defaultAutomation } from "../automation/policy";
 import { mixSeed } from "../core/rng";
 
-export const SNAPSHOT_VERSION = 15;
+export const SNAPSHOT_VERSION = 16;
 
 export type RawState = Record<string, unknown>;
 export type StateMigration = (state: RawState) => RawState;
@@ -432,7 +433,13 @@ function migrateV14(state: RawState): RawState {
 	return state;
 }
 
-export const migrations: Record<number, StateMigration> = { 14: migrateV14, 13: migrateV13, 12: migrateV12, 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
+/** Achievements: the uptime streak counter. */
+function migrateV15(state: RawState): RawState {
+	if (typeof state.uptimeStreak !== "number" || !Number.isFinite(state.uptimeStreak) || state.uptimeStreak < 0) state.uptimeStreak = 0;
+	return state;
+}
+
+export const migrations: Record<number, StateMigration> = { 15: migrateV15, 14: migrateV14, 13: migrateV13, 12: migrateV12, 11: migrateV11, 10: migrateV10, 9: migrateV9, 1: migrateV1, 2: migrateV2, 3: migrateV3, 4: migrateV4, 5: migrateV5, 6: migrateV6, 7: migrateV7, 8: migrateV8 };
 
 export function migrateState(state: RawState, from: number): RawState {
 	let s = state;

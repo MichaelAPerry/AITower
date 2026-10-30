@@ -19,6 +19,8 @@ export const AUDIT_PENALTY_SHARE_POINTS = 20;
 export const AUDIT_PUE_LIMIT = 1.6;
 export const AUDIT_PUE_POINTS = 10;
 export const AUDIT_LOSS_POINTS = 20;
+/** A day counts toward the uptime streak at this day-mean uptime (0..1) or better, with pflops above 0. */
+export const STREAK_UPTIME = 0.99;
 
 const GRADES: readonly AuditGrade[] = ["A", "B", "C", "D", "E"];
 
@@ -74,6 +76,9 @@ export function closeAuditDay(ctx: TickCtx, tier: number): void {
 	const a = state.audit;
 	const day = dayOf(state.tick);
 	const t = state.today;
+	// The streak counts before the irreversible early return: it is about the day just ended (docs/ACHIEVEMENTS.md section 2).
+	const dayMean = a.samples > 0 ? a.uptimeSum / a.samples : state.metrics.uptime;
+	state.uptimeStreak = dayMean >= STREAK_UPTIME && state.metrics.pflops > 0 ? state.uptimeStreak + 1 : 0;
 	if (state.irreversible) {
 		// The Ministry quietly stops sending inspectors: nothing is recorded or filed any more.
 		a.days = [];

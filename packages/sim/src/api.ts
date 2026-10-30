@@ -613,6 +613,8 @@ export interface SimView {
 	 * compute and growths; never decreases by more than a little per day (the building remembers).
 	 */
 	corruption: number;
+	/** Days in a row at 99% day-mean uptime or better with pflops above 0 (the Month of Calm and Cass's portrait). */
+	uptimeStreak: number;
 	/** Share of built cells with contamination ≥ 0.5. */
 	contaminatedShare: number;
 	/** The contaminated share crossed `balance.bio.irreversibleShare` at some point. */

@@ -217,6 +217,7 @@ function buildView(content: ContentDB, scenarioId?: string): SimView {
 		contamination: new Float32Array(n),
 		nutrientNets: [],
 		corruption: 0,
+		uptimeStreak: 0,
 		contaminatedShare: 0,
 		irreversible: false,
 		path: null,

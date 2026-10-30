@@ -221,7 +221,7 @@ describe("snapshot migrations", () => {
 	});
 
 	it("is at the current version and a v1 save (before bot routing fields) migrates", () => {
-		expect(SNAPSHOT_VERSION).toBe(15);
+		expect(SNAPSHOT_VERSION).toBe(16);
 		const snap = clone(savedJson()) as unknown as Json;
 		// Rewrite as a genuine v1 save: no topologyRev, no routing fields.
 		snap.version = 1;
@@ -232,6 +232,18 @@ describe("snapshot migrations", () => {
 		expect(sim.state.topologyRev).toBe(0);
 		expect(sim.state.bots[0]).toMatchObject({ stuck: 0, retryAt: 0, fails: 0, routeRev: 0, exitFloor: sim.state.bots[0].floor });
 		for (let i = 0; i < 300; i++) sim.step();
+	});
+
+	it("a v15 save (no uptimeStreak) loads with the streak at 0; a v16 save keeps it and rejects a negative one", () => {
+		const snap = clone(savedJson()) as unknown as Json;
+		snap.version = 15;
+		delete snap.state.uptimeStreak;
+		expect((load(snap) as SimImpl).state.uptimeStreak).toBe(0);
+		const v16 = clone(savedJson()) as unknown as Json;
+		v16.state.uptimeStreak = 12;
+		expect((load(v16) as SimImpl).state.uptimeStreak).toBe(12);
+		expectInvalid((s) => (s.state.uptimeStreak = -1), /uptimeStreak is negative/);
+		expectInvalid((s) => (s.state.uptimeStreak = 1.5), /uptimeStreak/);
 	});
 
 	it("a riding v1 bot keeps its destination as exit floor", () => {
