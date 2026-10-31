@@ -213,7 +213,7 @@ export function AdvisorStrip(props: PanelProps & { /** A lesson's teacher speaks
 			{answer && asking && (
 				<section className="adv-ask ui-panel" aria-live="polite" style={{ ["--adv" as string]: ADVISORS[asking].color }}>
 					<header className="adv-ask-head">
-						<Portrait id={asking} size={34} talking />
+						<Portrait id={asking} size={64} talking />
 						<div>
 							<b>{ADVISORS[asking].name}</b>
 							<small>{ADVISORS[asking].role}</small>
@@ -245,7 +245,7 @@ export function AdvisorStrip(props: PanelProps & { /** A lesson's teacher speaks
 							title={`${ADVISORS[id].name}: ${ADVISORS[id].role}. Click to ask what to worry about.`}
 							onClick={() => ask(id)}
 						>
-							<Portrait id={id} size={40} talking={speaking === id} />
+							<Portrait id={id} size={72} talking={speaking === id} />
 							{chips[id] && <i className="adv-dot" aria-hidden="true" />}
 						</button>
 					))}

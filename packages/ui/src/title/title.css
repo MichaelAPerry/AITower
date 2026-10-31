@@ -24,7 +24,7 @@
 	bottom: 14px;
 	left: 50%;
 	transform: translateX(-50%);
-	font: 14px/1 var(--f-stamp);
+	font: var(--fs-body)/1 var(--f-stamp);
 	letter-spacing: 0.6em;
 	color: var(--sodium);
 	text-shadow: 0 0 12px color-mix(in srgb, var(--sodium) 80%, transparent);
@@ -65,7 +65,7 @@
 	color: var(--housing-lo);
 }
 .aitower-hud .ui-title-sub {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.1em;
 	color: var(--beige);
 	text-align: center;
@@ -76,7 +76,7 @@
 }
 .aitower-hud .ui-title-wait {
 	margin: 0;
-	font: 24px/1 var(--f-crt);
+	font: var(--fs-num)/1 var(--f-crt);
 	color: var(--ph);
 	animation: ui-blink 1.1s steps(2) infinite;
 }
@@ -104,7 +104,7 @@
 }
 .aitower-hud .ui-title-cursor {
 	visibility: hidden;
-	font-size: 22px;
+	font-size: var(--fs-num);
 }
 .aitower-hud .ui-title-item:hover,
 .aitower-hud .ui-title-item:focus-visible {
@@ -119,7 +119,7 @@
 }
 .aitower-hud .ui-title-detail {
 	margin-left: auto;
-	font-size: 19px;
+	font-size: var(--fs-lead);
 	opacity: 0.85;
 	text-align: right;
 }
@@ -128,7 +128,7 @@
 	align-items: center;
 	gap: 9px;
 	margin: 2px 0 8px 40px;
-	font: 19px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	color: var(--ph-lo, var(--ph));
 	cursor: pointer;
 }
@@ -158,7 +158,7 @@
 	padding: 16px 14px 14px;
 }
 .aitower-hud.is-density-cramped .ui-title-item {
-	font-size: 24px;
+	font-size: var(--fs-num);
 }
 @media (prefers-reduced-motion: reduce) {
 	.aitower-hud .ui-title-wait {
@@ -192,7 +192,7 @@
 	padding: 8px 10px;
 	cursor: pointer;
 	color: var(--ink);
-	font: 14px/1.3 var(--f-type);
+	font: var(--fs-body)/1.3 var(--f-type);
 	background: color-mix(in srgb, var(--paper) 88%, transparent);
 	border: 1px solid var(--brass-dk);
 	border-left: 5px solid var(--brass-dk);
@@ -209,16 +209,16 @@
 	gap: 4px 10px;
 }
 .aitower-hud .ui-title-card-head b {
-	font: 18px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	letter-spacing: 0.04em;
 }
 .aitower-hud .ui-title-card-facts {
 	margin-left: auto;
-	font: 16px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	color: var(--paper-ink, var(--ink));
 }
 .aitower-hud .ui-title-card-desc {
-	font: 14px/1.3 var(--f-type);
+	font: var(--fs-body)/1.3 var(--f-type);
 }
 
 /* Cards wrap their text instead of running past the panel */
@@ -230,7 +230,7 @@
 	overflow-wrap: anywhere;
 }
 .aitower-hud .ui-title-sub {
-	font-size: 10px;
+	font-size: var(--fs-label);
 }
 /* The HUD chrome waits behind the title so the live world reads as a backdrop (the system menu still opens over it). */
 .aitower-hud:has(> .ui-title) > :not(.ui-title):not(.ui-menu-backdrop) {

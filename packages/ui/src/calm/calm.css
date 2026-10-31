@@ -73,7 +73,7 @@
 }
 .aitower-hud .ui-maint .ui-big {
 	white-space: nowrap;
-	font-size: 15px;
+	font-size: var(--fs-body);
 }
 .aitower-hud .ui-maint.is-warn {
 	border-color: color-mix(in srgb, var(--warn) 60%, var(--panel-edge));
@@ -138,6 +138,9 @@
 	gap: 4px;
 }
 .aitower-hud .ui-clearance .ui-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
 	display: flex;
 	justify-content: space-between;
 	gap: var(--gap);
@@ -288,7 +291,9 @@
 	justify-content: space-between;
 	gap: 8px;
 	width: var(--dtab-w);
-	font: 600 12px / 1 var(--f-body);
+	box-sizing: border-box;
+	min-height: var(--hit);
+	font: 600 var(--fs-small) / 1 var(--f-body);
 	letter-spacing: 0.02em;
 	background: var(--panel);
 	color: var(--text);
@@ -466,7 +471,7 @@
 	border-radius: var(--radius-sm);
 	background: var(--panel);
 	border: 1px solid var(--panel-edge);
-	font: 12px / 1.2 var(--f-body);
+	font: var(--fs-small) / 1.2 var(--f-body);
 	color: var(--text-dim);
 	pointer-events: none;
 }

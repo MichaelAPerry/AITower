@@ -2,9 +2,9 @@
 
 .aitower-hud .adv-strip {
 	position: absolute;
-	left: calc(76px + var(--gap) * 2);
+	left: calc(92px + var(--gap) * 2);
 	bottom: calc(var(--gap) * 2 + 30px);
-	width: min(720px, calc(100% - 76px - var(--dtab-w, 104px) - var(--gap) * 6));
+	width: min(1000px, calc(100% - 92px - var(--dtab-w, 136px) - var(--gap) * 6));
 	z-index: 6;
 	display: flex;
 	flex-direction: column;
@@ -15,15 +15,19 @@
 .aitower-hud .adv-strip > * {
 	pointer-events: auto;
 }
+.aitower-hud.has-drawer .adv-strip .adv-line {
+	display: none;
+}
 .aitower-hud.has-drawer .adv-strip {
-	width: min(720px, calc(100% - 76px - var(--drawer-w) - var(--dtab-w, 104px) - var(--gap) * 8));
+	min-width: 360px;
+	width: min(1000px, calc(100% - 92px - var(--drawer-w) - var(--dtab-w, 136px) - var(--gap) * 8));
 }
 .aitower-hud .adv-bar {
 	display: flex;
 	align-items: center;
 	gap: 10px;
 	padding: 5px 10px 5px 6px;
-	min-height: 50px;
+	min-height: 84px;
 }
 .aitower-hud .adv-faces {
 	display: flex;
@@ -90,7 +94,7 @@
 .aitower-hud .adv-line {
 	flex: 1;
 	min-width: 0;
-	font: var(--fs-body) / 1.3 var(--f-body);
+	font: var(--fs-lead) / 1.35 var(--f-body);
 	color: var(--text);
 }
 .aitower-hud .adv-quiet {
@@ -135,7 +139,7 @@
 	align-items: center;
 }
 .aitower-hud .adv-go {
-	padding: 3px 9px;
+	padding: 3px 12px;
 }
 .aitower-hud .adv-link {
 	background: none;
@@ -196,12 +200,14 @@
 	align-items: center;
 	justify-content: center;
 	gap: 0;
-	padding: 56px 84px 70px 84px;
+	padding: 72px calc(var(--dtab-w, 136px) + 12px) 70px 108px;
 	background: color-mix(in srgb, var(--ink) 38%, transparent);
 	pointer-events: auto;
 }
 .aitower-hud .adv-card {
-	width: min(560px, 100%);
+	flex: 0 1 760px;
+	min-width: 0;
+	width: min(760px, 100%);
 	max-height: 100%;
 	overflow-y: auto;
 	display: grid;
@@ -365,7 +371,7 @@
 		grid-template-columns: 1fr;
 	}
 	.aitower-hud .adv-scrim {
-		padding: 56px 8px 70px;
+		padding: 72px 8px 70px;
 	}
 }
 @media (prefers-reduced-motion: reduce) {
@@ -387,9 +393,9 @@
 .aitower-hud .adv-vn-figure {
 	flex: none;
 	align-self: flex-end;
-	width: min(300px, 26vw);
+	width: min(420px, 26vw, 52vh);
 	aspect-ratio: 1;
-	margin-right: -6px;
+	margin-right: 8px;
 	margin-bottom: 8px;
 	background: #eef0ff;
 	border: 3px solid var(--adv);
@@ -412,7 +418,7 @@
 /* While the build catalog is open the strip stays clear of the build inspector on the right, and no card opens above it
    (playtest: portraits and answers covered the catalog and the inspector). */
 .aitower-hud.is-building .adv-strip {
-	width: min(720px, calc(100% - 76px - var(--dtab-w, 104px) - var(--drawer-w) * 0.68 - var(--gap) * 8));
+	width: min(720px, calc(100% - 92px - var(--dtab-w, 136px) - var(--drawer-w) * 0.68 - var(--gap) * 8));
 }
 .aitower-hud.is-building .adv-strip .adv-ask {
 	display: none;

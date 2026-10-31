@@ -2,9 +2,8 @@
  * Synthetic look (docs/STYLE_SYNTHETIC.md): glass, graphite and cold light. This file is the only place that holds the
  * palette values for the HUD. Components and calm.css use these tokens, so a later restyle is a token swap.
  * It is imported last: it also remaps the legacy cassette tokens (ink, housing, brass, paper, ...) so older panels follow.
- * Fonts load from Google Fonts when online; the fallbacks keep the layout when offline.
+ * Fonts are bundled locally (@fontsource, imported in apps/web/src/main.tsx); nothing loads from a CDN.
  */
-@import url("https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap");
 
 .aitower-hud {
 	/* ── synthetic tokens ── */
@@ -28,19 +27,24 @@
 	--t-syn: #a99cff;
 	--radius: 6px;
 	--radius-sm: 4px;
-	--f-display: "Chakra Petch", system-ui, sans-serif;
-	--f-body: "IBM Plex Sans", system-ui, sans-serif;
-	--f-num: "IBM Plex Mono", ui-monospace, monospace;
+	--f-display: "DotGothic16", system-ui, sans-serif;
+	--f-body: "M PLUS Rounded 1c", system-ui, sans-serif;
+	--f-num: "DotGothic16", "M PLUS Rounded 1c", ui-monospace, monospace;
 	/* spacing and sizes */
 	--gap: 8px;
-	--strip-h: 52px;
+	--strip-h: 64px;
 	--drawer-w: 420px;
-	--dtab-w: 104px;
+	--dtab-w: 136px;
 	--dock-w: 224px;
-	--fs-label: 10px;
-	--fs-body: 14px;
-	--fs-num: 20px;
-	--fs-big: 24px;
+	/* type scale: floors are 14px labels, 16px+ body; VN dialogue uses --fs-vn */
+	--fs-label: 14px;
+	--fs-small: 15px;
+	--fs-body: 17px;
+	--fs-lead: 19px;
+	--fs-num: 22px;
+	--fs-big: 28px;
+	--fs-vn: 24px;
+	--hit: 40px;
 	--tracking: 0.08em;
 
 	/* ── legacy tokens remapped onto the synthetic ones ── */
