@@ -1,9 +1,11 @@
 /* The Soul HUD (docs/SOUL.md, docs/REFRAME.md): three Singularity bars in the top strip and the Trees panel. */
-.aitower-hud .soul-gauge {
+.aitower-hud .ui-chip.soul-gauge {
 	display: grid;
-	gap: 2px;
+	grid-template-columns: auto 1fr;
+	align-items: center;
+	gap: 2px 8px;
 	padding: 4px 8px;
-	min-width: 168px;
+	min-width: 0;
 	cursor: pointer;
 	background: #05051e;
 	border: 1px solid var(--pc-rule-in);
@@ -15,7 +17,7 @@
 }
 .aitower-hud .soul-bar {
 	display: grid;
-	grid-template-columns: 52px 1fr 40px;
+	grid-template-columns: 62px 1fr 40px;
 	align-items: center;
 	gap: 6px;
 }
@@ -242,4 +244,14 @@
 }
 .aitower-hud .trees-close {
 	justify-self: end;
+}
+.aitower-hud .soul-bars {
+	display: grid;
+	min-width: 124px;
+	gap: 2px;
+}
+.aitower-hud .soul-head {
+	display: grid;
+	justify-items: center;
+	gap: 1px;
 }

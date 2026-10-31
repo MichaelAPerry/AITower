@@ -2,6 +2,7 @@ import type { HorrorIntensity, OverlayMode } from "@aitower/shared";
 import { useState } from "react";
 import { bioWords } from "../bio/bio";
 import { heatRamp } from "../settings";
+import { PixelIcon } from "../icons/PixelIcon";
 import { Icon, Lamp } from "./common";
 import type { PanelProps } from "./context";
 
@@ -152,6 +153,7 @@ export function OverlaySwitcher({ store, state, embedded = false }: PanelProps &
 							onClick={() => store.setOverlay(m.id)}
 							title={overlayLabel(m, horror).title}
 						>
+							<PixelIcon name={m.id === "contamination" ? "growth" : m.id} />
 							<b>{m.key}</b>
 							{overlayLabel(m, horror).label}
 						</button>

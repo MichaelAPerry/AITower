@@ -1,7 +1,9 @@
 import { clock, type Speed } from "@aitower/shared";
 import { anyAutomation, autoLampTitle } from "../automation/automation";
 import { GrowthIndex } from "../bio/GrowthIndex";
-import { Icon, Lamp, Toggle } from "../components/common";
+import { Lamp, Toggle } from "../components/common";
+import { PixelIcon } from "../icons/PixelIcon";
+import type { PixelIconName } from "../icons/pixelIcons";
 import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
 import { saveLamp } from "../menu/slots";
@@ -11,6 +13,7 @@ import { currentObjective, isProblem } from "../objective/objective";
 import { clearanceProgress, fmtRateHour, maintenanceReadout, nextDrawer, perHour } from "./calm";
 
 export const SPEEDS: Speed[] = [0, 1, 3, 10, 30];
+const SPEED_ICON: Record<Speed, PixelIconName> = { 0: "pause", 1: "play", 3: "ff", 10: "fff", 30: "skip" };
 
 /**
  * The one thin strip: day and clock, speed, treasury, PER HOUR, Level bar, the Singularity bars, then the badges that appear when they
@@ -31,23 +34,37 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 	return (
 		<header className="ui-strip">
 			<div className="ui-chip ui-clock" data-help="day">
-				<span className="ui-label">DAY {view.day}</span>
-				<span className="ui-big">{clock(view.minuteOfDay)}</span>
+				<span className="ui-label ui-ic-label">
+					<PixelIcon name="day" />
+					DAY {view.day}
+				</span>
+				<span className="ui-big ui-ic-label">
+					<PixelIcon name="clock" />
+					{clock(view.minuteOfDay)}
+				</span>
 			</div>
 			{/* biome-ignore lint/a11y/useSemanticElements: a div group of buttons; a fieldset would bring unwanted default styling */}
 			<div className="ui-speeds" role="group" aria-label="Simulation speed" data-help="speed">
 				{SPEEDS.map((s, i) => (
-					<button key={s} type="button" data-tut={`speed-${s}`} className={`ui-speed ${speed === s ? "is-on" : ""}`} onClick={() => store.setSpeed(s)} aria-label={`${s === 0 ? "Pause" : `${s}× speed`} (key ${i + 1})`} aria-pressed={speed === s}>
-						<span className="ui-speed-cap">{s === 0 ? <Icon name="pause" size={12} /> : `${s}×`}</span>
+					<button key={s} type="button" data-tut={`speed-${s}`} className={`ui-speed ${speed === s ? "is-on" : ""}`} onClick={() => store.setSpeed(s)} aria-label={`${s === 0 ? "Pause" : `${s}× speed`} (key ${i + 1})`} title={`${s === 0 ? "Pause" : `${s}× speed`} (key ${i + 1})`} aria-pressed={speed === s}>
+						<span className="ui-speed-cap">
+							<PixelIcon name={SPEED_ICON[s]} />
+													</span>
 					</button>
 				))}
 			</div>
 			<div className={`ui-chip ui-cash ${view.cash < 0 ? "is-bad" : ""}`} data-help="treasury">
-				<span className="ui-label">TREASURY</span>
+				<span className="ui-label ui-ic-label">
+					<PixelIcon name="coin" />
+					TREASURY
+				</span>
 				<span className="ui-big">{fmtMoney(view.cash)}</span>
 			</div>
 			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" data-help="perhour">
-				<span className="ui-label">PER HOUR</span>
+				<span className="ui-label ui-ic-label">
+					<PixelIcon name="perhour" />
+					PER HOUR
+				</span>
 				<span className="ui-big">{fmtRateHour(rate)}</span>
 				{idleCost && <span className="ui-hint">Upkeep. Accept a contract to earn.</span>}
 			</div>
@@ -59,7 +76,10 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					title={maint.title}
 					onClick={() => setUi({ paletteOpen: true, paletteTab: "supplies" })}
 				>
-					<span className="ui-label">UPKEEP</span>
+					<span className="ui-label ui-ic-label">
+						<PixelIcon name="upkeep" />
+						UPKEEP
+					</span>
 					<span className="ui-big">
 						{maint.parts} parts · {maint.bots} bots · {maint.repairs} to fix
 					</span>
@@ -67,7 +87,10 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 			)}
 			<div className="ui-clearance" data-tut="clearance" data-help="level" title={cl.next ? `${Math.round(cl.have)} of ${cl.need} PF compute installed for Level ${cl.next}${cl.techs > 0 ? `; ${cl.techsDone} of ${cl.techs} research nodes done` : ""}` : "Top level reached"}>
 				<span className="ui-label">
-					<span>LEVEL {cl.tier}</span>
+					<span className="ui-ic-label">
+						<PixelIcon name="level" />
+						LEVEL {cl.tier}
+					</span>
 					<span className={cl.techsOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute${cl.techs > 0 && !cl.techsOk ? ` · research ${cl.techsDone}/${cl.techs}` : ""}` : "top"}</span>
 				</span>
 				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Level progress">
@@ -76,35 +99,49 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 			</div>
 			{view.sandbox && (
 				<div className="ui-chip ui-sandbox" title={SANDBOX_TITLE} role="status">
-					SANDBOX
+					<span className="ui-ic-label">
+						<PixelIcon name="sandbox" />
+						SANDBOX
+					</span>
 				</div>
 			)}
 			{auto && (
 				<button type="button" className="ui-chip ui-autolamp is-on" data-tut="auto-lamp" aria-pressed={ui.drawer === "automation"} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, "automation") })} title={autoLampTitle(view)}>
+					<PixelIcon name="auto" />
 					<Lamp on tone="green" />
 					AUTO
 				</button>
 			)}
 			{drought && (
 				<div className="ui-chip ui-drought is-warn" title={drought.title} role="status">
-					<span className="ui-label">{drought.label}</span>
+					<span className="ui-label ui-ic-label">
+						<PixelIcon name="drought" />
+						{drought.label}
+					</span>
 					<span className="ui-big">{drought.value}</span>
 				</div>
 			)}
 			<SoulGauge view={view} onOpen={() => setUi({ trees: true })} />
 			<GrowthIndex view={view} horror={state.settings.horrorIntensity} />
 			<div className="ui-sysbox">
-				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>
-					?
+				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" title="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>
+					<PixelIcon name="help" />
 				</button>
 				<button type="button" className="ui-btn ui-menu-btn" onClick={openMenu} title="System menu (Esc): save, load, settings, controls">
-					Menu
+					<PixelIcon name="menu" />
+					<span className="ui-menu-text">Menu</span>
 				</button>
 				<span className={`ui-savelamp tone-${lamp.tone}`} title={state.saveStatus.error ?? "Last successful save"} role="status">
 					<Lamp on={lamp.lit} tone={lamp.tone} blink={lamp.blink} />
 				</span>
 			</div>
-			<Toggle on={!muted} onClick={() => store.setMuted(!muted)} title={`${muted ? "Unmute" : "Mute"} (M)`} label="AUDIO" className="ui-mute" />
+			<Toggle on={!muted} onClick={() => store.setMuted(!muted)} title={`${muted ? "Unmute" : "Mute"} (M)`} label={
+					<span className="ui-ic-label">
+						<PixelIcon name={muted ? "mute" : "sound"} />
+						AUDIO
+					</span>
+				}
+				className="ui-mute" />
 		</header>
 	);
 }

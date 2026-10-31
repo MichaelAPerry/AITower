@@ -3,6 +3,8 @@ import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
 import { ADVISOR_ORDER, ADVISORS } from "../advisors/advisors";
 import { Portrait } from "../advisors/Portrait";
+import { PixelIcon } from "../icons/PixelIcon";
+import { TREE_ICON } from "../icons/pixelIcons";
 import { epilogueAdvisor, type TreeCard, treeCards } from "./soul";
 import "./soul.css";
 
@@ -14,7 +16,10 @@ export function TreeColumn({ card }: { card: TreeCard }) {
 			<header className="trees-head">
 				<Portrait id={card.champion} size={36} />
 				<div>
-					<h3>{card.name}</h3>
+					<h3 className="ui-ic-label">
+						<PixelIcon name={TREE_ICON[card.tree]} />
+						{card.name}
+					</h3>
 					<small>
 						{card.branch} racks · {champ.first} argues for it
 					</small>

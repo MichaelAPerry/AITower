@@ -1,0 +1,74 @@
+/* Pixel icons (icons/PixelIcon.tsx). Sized by --ic-size, which defaults to em so the icon follows the text (and the UI scale) it sits in; 20px floor. */
+.aitower-hud .ui-px {
+	display: inline-block;
+	flex: none;
+	width: max(20px, var(--ic-size, 1.5em));
+	height: max(20px, var(--ic-size, 1.5em));
+	vertical-align: middle;
+	line-height: 0;
+	image-rendering: pixelated;
+}
+.aitower-hud .ui-px svg {
+	display: block;
+	width: 100%;
+	height: 100%;
+	shape-rendering: crispEdges;
+	image-rendering: pixelated;
+}
+.aitower-hud .ui-px.is-lg {
+	--ic-size: 2.2em;
+}
+/* An icon in front of a text label or a button caption. */
+.aitower-hud .ui-ic-label {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
+}
+.aitower-hud .ui-chip > .ui-label.ui-ic-label,
+.aitower-hud .ui-clearance .ui-ic-label {
+	display: flex;
+}
+/* On a lit (accent-filled) button the pale icons would vanish: darken them to the ink. */
+.aitower-hud .ui-speed.is-on .ui-px svg,
+.aitower-hud .ui-dtab.is-on .ui-px svg {
+	filter: brightness(0.2);
+}
+/* The top strip is 64px high: icons there are the 20px floor, 24px beside the big numbers. */
+.aitower-hud .ui-strip .ui-px {
+	--ic-size: 20px;
+}
+.aitower-hud .ui-strip .ui-px.is-lg {
+	--ic-size: 32px;
+}
+.aitower-hud .ui-strip .ui-big .ui-px {
+	--ic-size: 24px;
+}
+.aitower-hud .ui-strip .ui-speed .ui-px {
+	--ic-size: 22px;
+}
+/* 1280 wide: the icons cost width, so the strip tightens (gaps, padding, the Upkeep line) to keep Level, Trees and Menu on screen. */
+@media (max-width: 1400px) {
+	.aitower-hud .ui-strip {
+		gap: 6px;
+		padding: 0 6px;
+	}
+	.aitower-hud .ui-strip .ui-chip {
+		padding: 4px 6px;
+	}
+	.aitower-hud .ui-strip .ui-maint .ui-big {
+		font-size: var(--fs-label);
+	}
+	.aitower-hud .ui-strip .ui-speeds .ui-speed {
+		padding: 0 4px;
+	}
+	.aitower-hud .ui-strip .ui-menu-text {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+	}
+	.aitower-hud .ui-strip .ui-ic-label {
+		gap: 0.25em;
+	}
+}

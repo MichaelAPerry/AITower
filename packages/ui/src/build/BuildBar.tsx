@@ -1,31 +1,9 @@
-import type { ReactNode } from "react";
 import type { PanelProps } from "../components/context";
+import { PixelIcon } from "../icons/PixelIcon";
+import type { PixelIconName } from "../icons/pixelIcons";
 import { CATEGORY_LABEL, type Tab } from "./plain";
 
-const svg = (children: ReactNode): ReactNode => (
-	<svg viewBox="0 0 32 32" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-		{children}
-	</svg>
-);
-
-const ICONS: Record<Tab, ReactNode> = {
-	structure: svg(<path d="M3 26h26M6 26V12h20v14M12 26V16h8" />),
-	rack: svg(
-		<>
-			<rect x="9" y="4" width="14" height="24" rx="2" />
-			<path d="M12 10h8M12 15h8M12 20h8" />
-		</>,
-	),
-	power: svg(<path d="M18 3 8 18h7l-2 11 11-16h-7z" />),
-	cooling: svg(<path d="M16 4c5 7 8 10 8 14a8 8 0 0 1-16 0c0-4 3-7 8-14z" />),
-	logistics: svg(
-		<>
-			<rect x="8" y="12" width="16" height="12" rx="2" />
-			<path d="M16 12V6M12 18h2M18 18h2" />
-		</>,
-	),
-	supplies: svg(<path d="M6 11h20l-2 15H8zM11 11V8a5 5 0 0 1 10 0v3" />),
-};
+const ICONS: Record<Tab, PixelIconName> = { structure: "structure", rack: "rack", power: "power", cooling: "coolant", logistics: "logistics", supplies: "supplies" };
 
 export const BAR_TABS: Tab[] = ["structure", "rack", "power", "cooling", "logistics", "supplies"];
 
@@ -45,7 +23,7 @@ export function BuildBar({ ui, setUi, tabs }: Pick<PanelProps, "ui" | "setUi"> &
 						title={`${CATEGORY_LABEL[id]} (B opens the last category)`}
 						onClick={() => setUi(on ? { paletteOpen: false, buildHover: null } : { paletteOpen: true, paletteTab: id, drawer: null, buildHover: null })}
 					>
-						{ICONS[id]}
+						<PixelIcon name={ICONS[id]} className="is-lg" />
 						<span>{CATEGORY_LABEL[id]}</span>
 					</button>
 				);
