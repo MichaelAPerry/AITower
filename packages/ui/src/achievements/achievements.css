@@ -144,9 +144,37 @@
 	image-rendering: pixelated;
 	background: #eef0ff;
 }
-.aitower-hud .ach-frame.is-locked img {
-	object-position: top;
+/* A locked portrait shows only a dimmed head box (--cx/--cy/--cw/--ch are fractions of the bust image), fading out below the neck. */
+.aitower-hud .ach-head {
+	position: relative;
+	display: block;
+	width: 100%;
+	overflow: hidden;
+	background: #05051e;
+	-webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+	mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+.aitower-hud .ach-frame .ach-head img,
+.aitower-hud .gal-scene .gal-figure .ach-head img {
+	position: absolute;
+	max-width: none;
+	width: calc(100% / var(--cw));
+	height: calc(100% / var(--ch));
+	left: calc(-100% * var(--cx) / var(--cw));
+	top: calc(-100% * var(--cy) / var(--ch));
+	aspect-ratio: auto;
+	object-fit: fill;
 	filter: brightness(0.35) grayscale(0.7);
+}
+.aitower-hud .ach-lock-tile {
+	display: grid;
+	place-items: center;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+	background: #05051e;
+	color: var(--text-dim, var(--text));
+	font: 28px/1 var(--f-display);
+	letter-spacing: 0.1em;
 }
 .aitower-hud .ach-frame-name {
 	color: var(--adv, var(--text));
@@ -197,7 +225,16 @@
 	object-fit: cover;
 	image-rendering: pixelated;
 }
-.aitower-hud .gal-scene .gal-figure.is-dim img {
+.aitower-hud .gal-scene .gal-figure.is-head {
+	aspect-ratio: 1 / 1;
+	height: min(300px, calc(100vh - 360px));
+	background: #05051e;
+}
+.aitower-hud .gal-scene .gal-figure.is-head .ach-head {
+	height: 100%;
+	width: 100%;
+}
+.aitower-hud .gal-scene .gal-figure.is-dim:not(.is-head) img {
 	object-position: top;
 	filter: brightness(0.4) grayscale(0.6);
 }

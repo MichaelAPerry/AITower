@@ -3,9 +3,10 @@ import { loadProfile, markProfileFlag, recordAchievement, recordBonds, recordOff
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { AchievementsPane } from "./AchievementsPane";
+import { AchievementsPane, Gallery } from "./AchievementsPane";
+import { LockedHead } from "./LockedHead";
 import { ACHIEVEMENTS } from "./achievements";
-import { HIDDEN_NAME, HIDDEN_TEXT, RULE_BOND, autoScene, counter, frames, listRows, newLines, pagesOf, sceneById, sceneIdFor } from "./gallery";
+import { DEFAULT_CROP, HIDDEN_NAME, HIDDEN_TEXT, LOCKED_LOOK, RULE_BOND, lockedLook, autoScene, counter, frames, listRows, newLines, pagesOf, sceneById, sceneIdFor } from "./gallery";
 
 const memory = () => {
 	const m = new Map<string, string>();
@@ -133,5 +134,34 @@ describe("the page", () => {
 		expect(html.match(/class="ach-row /g)).toHaveLength(18);
 		expect(html).toContain("There is another way this ends.");
 		expect(html).toContain("Export to file keeps it");
+	});
+});
+
+describe("locked portraits show only the head", () => {
+	it("every advisor has a head box inside the picture, cut above the shoulders (or is hidden)", () => {
+		for (const a of ["luci", "mel", "bea", "cass"] as const) {
+			const look = lockedLook(a);
+			expect(look).toBe(LOCKED_LOOK[a]);
+			if (look === "hide") continue;
+			expect(look.x).toBeGreaterThanOrEqual(0);
+			expect(look.y).toBeGreaterThanOrEqual(0);
+			expect(look.x + look.w).toBeLessThanOrEqual(1);
+			expect(look.y + look.h).toBeLessThanOrEqual(0.75);
+		}
+		expect(lockedLook("luci", {})).toBe(DEFAULT_CROP);
+	});
+
+	it("the gallery renders locked frames as a CSS head crop, never the plain full picture", () => {
+		const html = renderToStaticMarkup(createElement(Gallery, { onPlay: () => {} }));
+		const locked = html.match(/class="ach-frame is-locked"/g) ?? [];
+		expect(locked).toHaveLength(4);
+		expect(html.match(/data-crop="head"/g) ?? []).toHaveLength(4);
+		expect(html).toContain("--cw:");
+	});
+
+	it("a crop of 'hide' is a lock tile with no image", () => {
+		const html = renderToStaticMarkup(createElement(LockedHead, { src: "x.webp", look: "hide", alt: "Luci, locked" }));
+		expect(html).toContain('data-crop="hide"');
+		expect(html).not.toContain("<img");
 	});
 });
