@@ -117,6 +117,7 @@ export function lessonTabs(content: ContentDB, view: Pick<SimView, "lesson">): T
 	for (const id of ids) {
 		const d = content.facilities[id];
 		if (d) tabs.add(d.category as Tab);
+		else if (id.startsWith("conduit-")) tabs.add("structure");
 	}
 	return [...tabs];
 }
@@ -128,6 +129,7 @@ export function slotGhost(def: LessonDef, lv: LessonView, content: ContentDB): G
 	if (!s?.slot) return null;
 	const slot = s.slot;
 	const d = content.facilities[slot.defId];
+	if (!d && slot.defId.startsWith("conduit-") && slot.width) return { cells: Array.from({ length: slot.width }, (_, i) => ({ x: slot.x + i, floor: slot.floor })), valid: true, label: "DRAG A PIPE HERE" };
 	if (!d) return null;
 	const cells = Array.from({ length: d.width }, (_, i) => ({ x: slot.x + i, floor: slot.floor }));
 	return { cells, valid: true, defId: d.id, label: "BUILD HERE" };
@@ -138,6 +140,7 @@ export function pulseTargets(def: LessonDef, lv: LessonView, content: ContentDB,
 	if (lv.status !== "active") return [];
 	const s = def.steps[lv.current];
 	const d = s?.slot ? content.facilities[s.slot.defId] : undefined;
+	if (s?.slot?.defId.startsWith("conduit-")) return !ui.paletteOpen || ui.paletteTab !== "structure" ? [`[data-tut="cat-structure"]`] : [`[data-tut="card-${s.slot.defId}"]`];
 	if (!d) return [];
 	if (!ui.paletteOpen || ui.paletteTab !== d.category) return [`[data-tut="cat-${d.category}"]`];
 	return [`[data-tut="card-${d.id}"]`];

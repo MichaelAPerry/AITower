@@ -18,7 +18,7 @@ export interface Block {
 }
 export interface Chapter {
 	id: string;
-	group: "core" | "level" | "path";
+	group: "core" | "guide" | "level" | "path";
 	title: string;
 	blocks: Block[];
 	/** "Speak the language": ids of glossary terms this chapter teaches (see glossary/terms.ts). */
@@ -92,6 +92,47 @@ function core(c: ContentDB): Chapter[] {
 		k("break", "Why racks break", ["Hardware fails at a steady rate, and heat raises it. At fleet scale something is always broken, so operators plan around failure rather than against it.", `A failed part leaves the rack BROKEN and earning nothing. A maintenance bot repairs it, but needs a spare from a depot (${fmtMoney(c.structure.sparePart)} each). Reliability is MTBF, the mean time between failures. Repair speed is MTTR. Availability is roughly MTBF ÷ (MTBF + MTTR), so spares and bots shrink the half you control.`, "Training jobs survive failures by checkpointing: they save progress at intervals, so a dead rack costs the work since the last save, not the whole job."], "break", { label: "Open the Supplies tab", id: "parts" }, ["mtbf", "mttr", "checkpointing"]),
 		k("uptime", "Uptime", [`Uptime is the share of time capacity was available, and the industry counts it in nines: 99.9% allows about 8.8 hours of downtime a year, 99.99% about 53 minutes. Your Level targets run from ${pct(up[1] ?? 0)} at Level 2 to ${pct(up[4] ?? 0)} at Level 5.`, "Customers buy availability through an SLA, a contract with penalties. Inside the company the working target is the SLO, set tighter than the SLA so you breach the contract only after missing your own goal.", "The quarterly inspection grades your uptime against your Level's target, with a cash grant or fine."], "uptime", { label: "Open Insights", id: "insights" }, ["uptime", "nines", "sla", "slo"]),
 		k("money", "Money", [`You start with ${fmtMoney(b.startingCash)}. Building is capex, a one-time cost. Power, upkeep and repairs are opex, paid continuously. Every rack has to earn back its capex while covering its opex.`, "Utilisation is the lever: a rack with no job still costs opex. That is why PER HOUR at the top turns red when nothing is running and green once a contract is.", `Electricity is the biggest running cost. Large operators lock its price with a PPA, a long-term power purchase agreement, instead of paying the spot rate. At midnight the Ministry takes ${Math.round(b.tax.profitShare * 100)}% of the day's profit.`], "money", { label: "Open Contracts", id: "contracts" }, ["capex", "utilisation", "ppa"]),
+	];
+}
+
+/** Short extra pages that follow the core chapters: money in detail, and climbing a tree. No epigraph, no diagram. Placeholder text. */
+function guides(c: ContentDB): Chapter[] {
+	const loans = c.balance.loans;
+	const audit = c.balance.audit;
+	const pen = c.balance.economy.slaPenaltyFactor;
+	const g = (id: string, title: string, blocks: string[], tryIt: Chapter["tryIt"], terms: string[]): Chapter => ({
+		id: `ch:${id}`,
+		group: "guide",
+		title,
+		blocks: blocks.map((p) => ({ p })),
+		terms,
+		tryIt,
+		unlock: { kind: "always" },
+		keywords: `${title} ${blocks.join(" ")}`.toLowerCase(),
+	});
+	return [
+		g(
+			"books",
+			"Loans, penalties and the audit",
+			[
+				`Loans. Open Insights, then Finance. The Ministry lends up to a limit that rises with your Level: ${fmtMoney(loans.maxByTier[0] ?? 0)} at Level 1, ${fmtMoney(loans.maxByTier[loans.maxByTier.length - 1] ?? 0)} at the top. Every midnight you pay ${(loans.dailyRate * 100).toFixed(1)}% of what you owe. Repay whenever you like.`,
+				`Penalties. An inference contract is a promise to keep serving. While a running service falls short, you are fined ${pen} times its rate for each minute. Check the deadline and the penalty before you accept a contract.`,
+				`The audit. Every ${audit.periodDays} days an inspector grades your books from A to E: uptime against your Level's target, failed jobs, penalties and PUE. A and B earn cash. C is neutral. D and E cost you.`,
+			],
+			{ label: "Open Insights", id: "insights" },
+			["sla", "uptime", "pue"],
+		),
+		g(
+			"ladder",
+			"Climbing a tree's ladder",
+			[
+				"Each tree is a ladder of racks. Each step is a rung. A plain rack retrofits onto rung 1 of a tree. A rack that is already on a tree retrofits onto its next rung.",
+				"To go down a rung, retrofit the rack again. Select it, open Retrofit, and pick the same tree again. The panel shows the price: the new rack's cost, minus half the cost of the old one.",
+				"A rung also asks for your Level and for its research. The panel says which is missing. Some racks need more too, such as a coolant pipe under them.",
+			],
+			{ label: "Open Research", id: "research" },
+			["rack", "capex", "pflops"],
+		),
 	];
 }
 
@@ -205,7 +246,7 @@ export const CHAPTER_FLAVOR: Record<string, Flavor> = {
 /** Every chapter in reading order: core, then Levels, then paths. */
 export function buildChapters(c: ContentDB): Chapter[] {
 	const levels = Array.from({ length: c.balance.tiers.pflops.length }, (_, i) => levelChapter(i + 1, c));
-	return [...core(c), ...levels, ...(["biotech", "greentech", "synthetic"] as const).map((p) => pathChapter(p, c))].map((ch) => (CHAPTER_FLAVOR[ch.id] ? { ...ch, flavor: CHAPTER_FLAVOR[ch.id] } : ch));
+	return [...core(c), ...guides(c), ...levels, ...(["biotech", "greentech", "synthetic"] as const).map((p) => pathChapter(p, c))].map((ch) => (CHAPTER_FLAVOR[ch.id] ? { ...ch, flavor: CHAPTER_FLAVOR[ch.id] } : ch));
 }
 
 /** Old "More..." targets that now have a Handbook chapter. */

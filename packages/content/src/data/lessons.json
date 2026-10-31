@@ -1011,6 +1011,314 @@
 			"star3Text": "No minute without power, and no rack ran hotter than 80 degrees C."
 		},
 		{
+			"id": "liquid",
+			"number": 5,
+			"title": "Going Liquid",
+			"advisor": "cass",
+			"concept": "Liquid cooling: a dense rack is cooled by water from a chiller and a CDU, not by air.",
+			"goal": "Run a liquid-cooled rack for three hours without it overheating.",
+			"scenario": "lesson_liquid",
+			"speed": 3,
+			"meter": true,
+			"holdLabel": "hours running",
+			"starred": true,
+			"passed": "A liquid-cooled rack ran cool for three hours",
+			"failed": "A rack got too hot. The pipe, the chiller and the CDU all have to be in place and running. Have another go.",
+			"setup": [
+				{
+					"type": "failureRate",
+					"factor": 0,
+					"durationTicks": 100000000,
+					"label": "Lesson hall: nothing breaks today"
+				}
+			],
+			"commands": [
+				"place",
+				"setEnabled",
+				"markTip",
+				"decisionGate",
+				"resolveDecision",
+				"deferDecision",
+				"buildConduit",
+				"retrofit"
+			],
+			"steps": [
+				{
+					"id": "pipe",
+					"text": "Lay a coolant pipe along the glowing run",
+					"when": [
+						{
+							"metric": "coolantTiles",
+							"op": ">=",
+							"value": 14
+						}
+					],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						}
+					],
+					"say": [
+						"Cass. Cooling.",
+						"Air only goes so far. Past that, you need water. That's {{dlc|liquid cooling}}.",
+						"Water needs a pipe. Open Structure. Pick the Coolant pipe. Drag it along the glowing run."
+					],
+					"after": [
+						"Good. Now the water has somewhere to go."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 6,
+						"defId": "conduit-coolant",
+						"width": 14
+					},
+					"focus": {
+						"floor": 1,
+						"x": 12
+					},
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "chiller",
+					"text": "Place a Chiller on the glowing spot",
+					"when": [
+						{
+							"metric": "chillers",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						},
+						{
+							"defId": "chiller",
+							"max": 1
+						}
+					],
+					"say": [
+						"A {{chiller|chiller}} makes the water cold.",
+						"Open Cooling. Pick the Chiller. Click the glowing spot."
+					],
+					"after": [
+						"It's big. It'll hum. You get used to it."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 14,
+						"defId": "chiller"
+					},
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "cdu",
+					"text": "Place a CDU on the glowing spot",
+					"when": [
+						{
+							"metric": "cdus",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						},
+						{
+							"defId": "chiller",
+							"max": 1
+						},
+						{
+							"defId": "cdu",
+							"max": 1
+						}
+					],
+					"say": [
+						"Next, a {{cdu|CDU}}. It hands the cold water on to the racks.",
+						"Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot."
+					],
+					"after": [
+						"The loop is closed. Nothing is on it yet."
+					],
+					"slot": {
+						"floor": 1,
+						"x": 18,
+						"defId": "cdu"
+					},
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "rack",
+					"text": "Click the glowing rack and retrofit it to Synthetic",
+					"when": [
+						{
+							"metric": "liquidRacks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						},
+						{
+							"defId": "chiller",
+							"max": 1
+						},
+						{
+							"defId": "cdu",
+							"max": 1
+						}
+					],
+					"say": [
+						"Now the rack. Click the one that's glowing. Its panel opens on the right.",
+						"Find Retrofit. Pick Synthetic. It becomes an LC-2, a liquid-cooled rack."
+					],
+					"after": [
+						"There. It sits on the pipe, so it can drink."
+					],
+					"focus": {
+						"floor": 1,
+						"x": 6
+					},
+					"pulse": [
+						"[data-tut=\"retrofit\"]"
+					],
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "heat",
+					"text": "Watch the Heat view while the rack takes a job",
+					"when": [
+						{
+							"metric": "liquidBusy",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						},
+						{
+							"defId": "chiller",
+							"max": 1
+						},
+						{
+							"defId": "cdu",
+							"max": 1
+						}
+					],
+					"say": [
+						"I've put the heat view on. Warm colours are hot racks.",
+						"A job is coming for it. Let's see if it stays cool."
+					],
+					"after": [
+						"It's working and it's cool. That's what water buys you."
+					],
+					"overlay": "heat",
+					"handbook": "ch:heat",
+					"pause": true
+				},
+				{
+					"id": "steady",
+					"text": "Keep it running for three hours",
+					"when": [],
+					"allow": [
+						{
+							"defId": "conduit-coolant"
+						},
+						{
+							"defId": "chiller",
+							"max": 1
+						},
+						{
+							"defId": "cdu",
+							"max": 1
+						}
+					],
+					"say": [
+						"Three hours. Make sure it holds."
+					],
+					"handbook": "ch:heat"
+				}
+			],
+			"beats": [
+				{
+					"id": "job",
+					"when": [
+						{
+							"metric": "liquidRacks",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"effects": [
+						{
+							"type": "job",
+							"pflops": 100,
+							"durationTicks": 20000,
+							"payout": 300000
+						}
+					]
+				}
+			],
+			"win": {
+				"when": [
+					{
+						"metric": "liquidBusy",
+						"op": ">=",
+						"value": 1
+					},
+					{
+						"metric": "maxRackC",
+						"op": "<",
+						"value": 80
+					}
+				],
+				"holdTicks": 180
+			},
+			"lose": [
+				{
+					"metric": "cash",
+					"op": "<",
+					"value": 0
+				},
+				{
+					"metric": "hotTicks",
+					"op": ">=",
+					"value": 30
+				}
+			],
+			"stars2": [
+				{
+					"metric": "pue",
+					"op": "<=",
+					"value": 1.6
+				}
+			],
+			"star2Text": "The hall's PUE was 1.6 or lower at the end.",
+			"stars3": [
+				{
+					"metric": "hotTicks",
+					"op": "<=",
+					"value": 0
+				}
+			],
+			"star3Text": "No rack was throttled or tripped for heat.",
+			"learned": "A liquid rack needs a loop: a coolant pipe, a {{chiller|chiller}} to cool the water and a {{cdu|CDU}} to hand it out. With the loop in place, a dense rack runs cool.",
+			"handbook": [
+				"ch:heat"
+			],
+			"bonus": 25000,
+			"outro": "That's liquid. Pipe, chiller, CDU, rack. Keep the water cold."
+		},
+		{
 			"id": "lights_out",
 			"number": 6,
 			"title": "Lights Out",

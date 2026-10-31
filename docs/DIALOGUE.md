@@ -1736,6 +1736,62 @@ Choice `add`:
 - [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
 - [the_three_trees.points.say2] bea: Now let the clock run until the Garden scores.
 
+### Lesson 5: Going Liquid (`liquid`)
+
+> Speaker: Cass. Scenario `lesson_liquid`. Every line in the steps is spoken by the lesson's advisor.
+- [liquid.title] Title: Going Liquid
+- [liquid.concept] Concept: Liquid cooling: a dense rack is cooled by water from a chiller and a CDU, not by air.
+- [liquid.goal] Goal: Run a liquid-cooled rack for three hours without it overheating.
+- [liquid.learned] Learned: A liquid rack needs a loop: a coolant pipe, a {{chiller|chiller}} to cool the water and a {{cdu|CDU}} to hand it out. With the loop in place, a dense rack runs cool.
+- [liquid.outro] cass: That's liquid. Pipe, chiller, CDU, rack. Keep the water cold.
+
+#### Step `pipe`
+
+> Done when: [{"metric":"coolantTiles","op":">=","value":14}].
+- [liquid.pipe.objective] Objective: Lay a coolant pipe along the glowing run
+- [liquid.pipe.say1] cass: Cass. Cooling.
+- [liquid.pipe.say2] cass: Air only goes so far. Past that, you need water. That's {{dlc|liquid cooling}}.
+- [liquid.pipe.say3] cass: Water needs a pipe. Open Structure. Pick the Coolant pipe. Drag it along the glowing run.
+- [liquid.pipe.after1] cass: Good. Now the water has somewhere to go.
+
+#### Step `chiller`
+
+> Done when: [{"metric":"chillers","op":">=","value":1}].
+- [liquid.chiller.objective] Objective: Place a Chiller on the glowing spot
+- [liquid.chiller.say1] cass: A {{chiller|chiller}} makes the water cold.
+- [liquid.chiller.say2] cass: Open Cooling. Pick the Chiller. Click the glowing spot.
+- [liquid.chiller.after1] cass: It's big. It'll hum. You get used to it.
+
+#### Step `cdu`
+
+> Done when: [{"metric":"cdus","op":">=","value":1}].
+- [liquid.cdu.objective] Objective: Place a CDU on the glowing spot
+- [liquid.cdu.say1] cass: Next, a {{cdu|CDU}}. It hands the cold water on to the racks.
+- [liquid.cdu.say2] cass: Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot.
+- [liquid.cdu.after1] cass: The loop is closed. Nothing is on it yet.
+
+#### Step `rack`
+
+> Done when: [{"metric":"liquidRacks","op":">=","value":1}].
+- [liquid.rack.objective] Objective: Click the glowing rack and retrofit it to Synthetic
+- [liquid.rack.say1] cass: Now the rack. Click the one that's glowing. Its panel opens on the right.
+- [liquid.rack.say2] cass: Find Retrofit. Pick Synthetic. It becomes an LC-2, a liquid-cooled rack.
+- [liquid.rack.after1] cass: There. It sits on the pipe, so it can drink.
+
+#### Step `heat`
+
+> Done when: [{"metric":"liquidBusy","op":">=","value":1}].
+- [liquid.heat.objective] Objective: Watch the Heat view while the rack takes a job
+- [liquid.heat.say1] cass: I've put the heat view on. Warm colours are hot racks.
+- [liquid.heat.say2] cass: A job is coming for it. Let's see if it stays cool.
+- [liquid.heat.after1] cass: It's working and it's cool. That's what water buys you.
+
+#### Step `steady`
+
+> Done when: immediately.
+- [liquid.steady.objective] Objective: Keep it running for three hours
+- [liquid.steady.say1] cass: Three hours. Make sure it holds.
+
 ### Lesson 6: Lights Out (`lights_out`)
 
 > Speaker: Bea. Scenario `lesson_lights_out`. Every line in the steps is spoken by the lesson's advisor.

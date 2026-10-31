@@ -310,6 +310,8 @@ export interface LessonState {
 	stallTicks: number;
 	/** Game-minutes the Foreman was on. */
 	foremanTicks: number;
+	/** Game-minutes a rack stood throttled or tripped for heat. */
+	hotTicks: number;
 	/** The lesson's setup effects have been applied. */
 	setupDone: boolean;
 }

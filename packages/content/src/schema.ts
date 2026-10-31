@@ -575,7 +575,19 @@ export type LessonMetric =
 	/** Scripted beats fired so far. */
 	| "beats"
 	/** Grid import now, as % of what the intakes can give (0 while a feeder trip is on). */
-	| "gridPct";
+	| "gridPct"
+	/** Coolant conduit tiles built (all floors). */
+	| "coolantTiles"
+	/** Chillers standing. */
+	| "chillers"
+	/** Coolant distribution units standing. */
+	| "cdus"
+	/** Liquid-cooled racks standing. */
+	| "liquidRacks"
+	/** Liquid-cooled racks holding a job on a working coolant loop. */
+	| "liquidBusy"
+	/** Game-minutes during this lesson in which a rack was throttled or tripped for heat. */
+	| "hotTicks";
 export type LessonOp = ">=" | ">" | "<=" | "<";
 export interface LessonCond {
 	metric: LessonMetric;
@@ -607,12 +619,12 @@ export interface LessonStep {
 	text: string;
 	/** Done when all hold. */
 	when: LessonCond[];
-	/** What the player may build from this step on: facility ids, each with an optional cap on how many may exist. */
+	/** What the player may build from this step on: facility ids, each with an optional cap on how many may exist. A pipe tool is named `conduit-power`, `conduit-coolant` or `conduit-nutrient`. */
 	allow: { defId: string; max?: number }[];
 	/** The teacher's lines for this step, shown one at a time. Markup {{term|label}} links a Handbook term. */
 	say: string[];
 	/** Optional: the blueprint slot to highlight for a placement step. */
-	slot?: { floor: number; x: number; defId: string };
+	slot?: { floor: number; x: number; defId: string; /** For a pipe slot (`conduit-*`): how many tiles the marked run is. */ width?: number };
 	/** Lines the teacher says once the step is done (and `afterBeat`, if given, has fired). */
 	after?: string[];
 	afterBeat?: string;

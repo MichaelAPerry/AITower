@@ -127,6 +127,7 @@ export function HandbookDrawer(props: PanelProps) {
 	) : (
 		<>
 			{group("Start here", "core")}
+			{group("More guides", "guide")}
 			{group("Your Level", "level")}
 			{group("Your path", "path")}
 			<h3 className="pnl-lh">
@@ -174,7 +175,7 @@ function ChapterView({ c, n, next, onGo, focus, ...p }: { c: Chapter; n: number;
 		if (focus) root.current?.querySelector(`[data-term-row="${focus}"]`)?.scrollIntoView({ block: "center" });
 	}, [c.id, focus]);
 	const lock = lockText(c.unlock, p.state.view);
-	const kicker = c.group === "core" ? `CHAPTER ${n} OF 6 · 2 MIN` : c.group === "level" ? "LEVEL GUIDE" : "PATH GUIDE";
+	const kicker = c.group === "core" ? `CHAPTER ${n} OF 6 · 2 MIN` : c.group === "guide" ? "GUIDE" : c.group === "level" ? "LEVEL GUIDE" : "PATH GUIDE";
 	if (lock)
 		return (
 			<article className="pr-chap" data-chapter-view={c.id}>

@@ -30,7 +30,7 @@ export function startLesson(state: SimState, def: LessonDef): void {
 }
 
 export function newLessonState(def: LessonDef, tick: number, cash = 0): LessonState {
-	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, starBits: 0, minCash: cash, drainTicks: 0, stallTicks: 0, foremanTicks: 0, setupDone: true };
+	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, starBits: 0, minCash: cash, drainTicks: 0, stallTicks: 0, foremanTicks: 0, hotTicks: 0, setupDone: true };
 }
 
 export type LessonMetrics = Record<LessonMetric, number>;
@@ -51,10 +51,16 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 	let batteries = 0;
 	let storedKwh = 0;
 	let storageKwh = 0;
+	let chillers = 0;
+	let cdus = 0;
+	let liquidRacks = 0;
+	let liquidBusy = 0;
 	for (const f of state.facilities) {
 		const d = getDef(content, f.defId);
 		if (d.kind === "genset") gensets++;
 		if (d.kind === "crah" || d.kind === "chiller" || d.kind === "cdu") coolers++;
+		if (d.kind === "chiller") chillers++;
+		if (d.kind === "cdu") cdus++;
 		if (d.kind === "depot") parts += f.stored;
 		if (d.rack && d.rack.storageTB > 0) storageRacks++;
 		if (treeOf(d)) treeRacks++;
@@ -66,6 +72,10 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		}
 		if (!isComputeRack(d)) continue;
 		racks++;
+		if (d.rack?.cooling === "dlc") {
+			liquidRacks++;
+			if (f.busy && f.jobId >= 0 && !f.failed && !f.noCoolant && f.sat >= MIN_POWERED_SATISFACTION) liquidBusy++;
+		}
 		if (f.busy && f.jobId >= 0 && !f.failed && f.sat >= MIN_POWERED_SATISFACTION) busy++;
 		if (f.powerNet < 0 || f.sat < MIN_POWERED_SATISFACTION) dark++;
 		if (state.airTemp.length && f.tempC > maxRackC) maxRackC = f.tempC;
@@ -117,6 +127,12 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		foremanTicks: ls?.foremanTicks ?? 0,
 		beats: ls?.beatsFired.length ?? 0,
 		gridPct: modFactor(state, "gridCap") * 100,
+		coolantTiles: state.coolant.reduce((n, v) => n + v, 0),
+		chillers,
+		cdus,
+		liquidRacks,
+		liquidBusy,
+		hotTicks: ls?.hotTicks ?? 0,
 	};
 }
 
@@ -287,6 +303,7 @@ export function lessonStep(ctx: TickCtx): void {
 	// A storage stall: the datasets of the live jobs do not fit in the powered storage.
 	if (state.jobs.some((j) => isActive(j) && j.spec.storageTB > 0) && state.jobs.reduce((tb, j) => (isActive(j) ? tb + j.spec.storageTB : tb), 0) > storageCapacityTB(state, content)) ls.stallTicks++;
 	if (m.foreman > 0) ls.foremanTicks++;
+	if (state.facilities.some((f) => f.throttled || f.tripped)) ls.hotTicks++;
 	if (allHold(def.win.when, m)) {
 		ls.holdTicks++;
 		if (m.headroomPct < ls.minHeadroom) ls.minHeadroom = m.headroomPct;
