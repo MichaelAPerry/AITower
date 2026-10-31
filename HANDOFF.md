@@ -36,7 +36,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 - Icons and menu pictures: image sheets from ChatGPT. In-tower (world) sprites stay drawn in code; a one-rack image test (sheet 9 in `docs/ICON_PROMPTS.md`) is optional, later.
 - Locked gallery portraits: crop to the head (cut just below the neck) or hide completely. Not the full greyscale picture.
 - Credits: code by Claude; all art generated with ChatGPT, some sprites by Claude; inspired by SimTower, nothing borrowed; quotes credited with sources.
-- Win-by days for `fast_win`: keep 25 / 40 / 38 (Lattice / Flesh / Garden) for now; verify with a separate test.
+- Win-by days for `fast_win`: 40 / 40 / 40 (Lattice / Flesh / Garden), set by the owner; verify with a separate test.
 - Nothing goes to main until every item in section 3 is done, the owner has play-tested, and the owner says so. Then a new README for players.
 
 ## 3. Next, in order
@@ -46,7 +46,7 @@ b. Owner text: `docs/OWNER_TEXT.md` (starter description, `end_bankrupt_note`, c
 c. Credits screen (title menu): the lines in `docs/OWNER_TEXT.md` plus every quote with author and source. Two quotes are only confirmed on secondary sites (`reactor_licence` / Weinberg, `fuel_cell` / Verne, see `docs/QUOTES_CHECK.md`): find a primary source or mark them "attributed".
 d. Locked gallery portraits: crop to the head or hide (section 2). Sample one.
 e. Security: `npm audit` flags `vitest`, `tinypool`, `@vitest/mocker` (test tool only, never shipped to players). Upgrade vitest to the fixed major version, fix any test breakage, rerun everything.
-f. `fast_win` days: headless runs (`tools/sim-cli`) to confirm 25 / 40 / 38 are reachable but tight; report to the owner.
+f. `fast_win` days: headless runs (`tools/sim-cli`) to confirm 40 / 40 / 40 are reachable but tight; report to the owner.
 g. Do without asking:
    - DONE: `docs/DIALOGUE_NEW.md` deleted (dry-run import showed only `the_three_trees.*` differing; everything else imported);
    - add `starter` description from `docs/OWNER_TEXT.md` once approved;

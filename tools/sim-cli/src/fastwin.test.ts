@@ -14,8 +14,8 @@ import type { Tree } from "./player";
 import { scriptedRun } from "./soulRun";
 
 const ENABLED = !!process.env.FASTWIN;
-/** Win-by days (owner decision: 25 / 40 / 38). */
-const WIN_BY: Record<Tree, number> = { synthetic: 25, biotech: 40, greentech: 38 };
+/** Win-by days (owner decision: 40 / 40 / 40). */
+const WIN_BY: Record<Tree, number> = { synthetic: 40, biotech: 40, greentech: 40 };
 
 function seeds(): number[] {
 	const s = process.env.FASTWIN_SEEDS ?? "1-8";

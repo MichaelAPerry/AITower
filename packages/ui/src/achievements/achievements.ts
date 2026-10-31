@@ -28,8 +28,8 @@ export interface AchievementDef extends AchievementText {
 	check: (view: SimView, env: AchEnv) => boolean;
 }
 
-/** Days to win by (tools/sim-cli soulRun.ts `TARGET_DAYS`): Lattice 25, Flesh 40, Garden 38. */
-export const FAST_WIN_DAYS: Readonly<Record<string, number>> = { singularity: 25, flesh: 40, garden: 38 };
+/** Days to win by (tools/sim-cli soulRun.ts `TARGET_DAYS`): 40 days for all three trees. */
+export const FAST_WIN_DAYS: Readonly<Record<string, number>> = { singularity: 40, flesh: 40, garden: 40 };
 const TICKS_PER_DAY = 1440;
 /** Days of 99% uptime in a row for Month of Calm and Cass's portrait. */
 export const CALM_DAYS = 20;

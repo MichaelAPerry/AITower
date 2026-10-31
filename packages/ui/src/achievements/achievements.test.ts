@@ -115,15 +115,15 @@ describe("each check fires at its boundary, not just below it", () => {
 		expect(met("rung_top", view({ rungs: [4, 0, 0] }))).toBe(true);
 	});
 
-	it("Ahead of the Plan: day 25 / 40 / 38 is in time, one day later is not", () => {
-		expect(FAST_WIN_DAYS).toEqual({ singularity: 25, flesh: 40, garden: 38 });
-		for (const [end, d] of [["singularity", 25], ["flesh", 40], ["garden", 38]] as const) {
+	it("Ahead of the Plan: day 40 on every tree is in time, one day later is not", () => {
+		expect(FAST_WIN_DAYS).toEqual({ singularity: 40, flesh: 40, garden: 40 });
+		for (const [end, d] of [["singularity", 40], ["flesh", 40], ["garden", 40]] as const) {
 			expect(met("fast_win", view({ over: win(end, d) })), `${end} day ${d}`).toBe(true);
 			expect(met("fast_win", view({ over: win(end, d + 1) })), `${end} day ${d + 1}`).toBe(false);
 		}
 		// The very last tick of the day still counts as that day.
-		expect(met("fast_win", view({ over: { kind: "victory", tick: 25 * 1440 - 1, ending: "singularity" } }))).toBe(true);
-		expect(met("fast_win", view({ over: { kind: "victory", tick: 25 * 1440, ending: "singularity" } }))).toBe(false);
+		expect(met("fast_win", view({ over: { kind: "victory", tick: 40 * 1440 - 1, ending: "singularity" } }))).toBe(true);
+		expect(met("fast_win", view({ over: { kind: "victory", tick: 40 * 1440, ending: "singularity" } }))).toBe(false);
 		expect(met("fast_win", view({ over: { kind: "absorbed", tick: 100, ending: "absorbed" } }))).toBe(false);
 	});
 

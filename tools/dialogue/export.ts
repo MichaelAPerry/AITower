@@ -411,7 +411,7 @@ const ACH_WHEN: Record<string, string> = {
 	end_bankrupt: "Earned at game over, when the money runs out for a full day. Hidden in the list until earned.",
 	lvl_five: "Earned the moment the Operator reaches Level 5.",
 	rung_top: "Earned when any tree has a top-rung (rung 4) rack.",
-	fast_win: "Earned at game over on a win that is quick enough (Lattice by day 25, Flesh by day 40, Garden by day 38).",
+	fast_win: "Earned at game over on a win that is quick enough (day 40 on all three trees).",
 	clean_hands: "Earned at game over on a Flesh or Garden win with that tree's secret meter under 30 of 100.",
 	open_hands: "Earned at game over on a Lattice win with neither other tree closed.",
 	cash_deep: "Earned at day end with $10M in the bank.",

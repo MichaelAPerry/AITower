@@ -77,7 +77,7 @@ The portrait captions are not separate lines: a caption is the last spoken line 
 
 ### `fast_win`
 
-> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win that is quick enough (Lattice by day 25, Flesh by day 40, Garden by day 38).
+> Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win that is quick enough (day 40 on all three trees).
 - [ach.fast_win.name] Name: 40 days to save the world
 - [ach.fast_win.text] Text: Win with days to spare: Lattice by day 40, Flesh by day 40, Garden by day 40.
 

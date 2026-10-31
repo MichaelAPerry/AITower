@@ -13,7 +13,7 @@ import { createSim, TICKS_PER_DAY, type SimView } from "@aitower/sim";
 import { allAutomation, AUTO_ACCEPT_MARGIN, bestMemoChoice, PERMISSIVE_CLERK, runHeadless, shouldAccept } from "./run";
 import { Player, type Tree } from "./player";
 
-export const TARGET_DAYS: Record<Tree, number> = { synthetic: 25, biotech: 40, greentech: 38 };
+export const TARGET_DAYS: Record<Tree, number> = { synthetic: 40, biotech: 40, greentech: 40 };
 
 export interface TreeRun {
 	tree: Tree;

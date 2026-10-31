@@ -63,7 +63,7 @@ Legend: **Run** = the achievement can be earned in one run (the profile latches 
 | `end_bankrupt` | Notice of Termination | Run out of money for a full day. | `gameOver.kind==="bankrupt"` (cash below 0 for 1440 ticks) | game over | **yes** | no | 1 |
 | `lvl_five` | Level Five | Reach Level 5. | `state.tier>=5` (PFLOPS 3000, `balance.tiers.pflops`) | day close | no | no | 3 |
 | `rung_top` | Top Rung | Hold a top-rung rack of any tree. | `view.soul.trees[t].rung===4` for any t | day close | no | no | 2 |
-| `fast_win` | Ahead of the Plan | Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38. | at game over: `floor(gameOver.tick/1440)+1 <= {singularity:25, flesh:40, garden:38}` | game over | no | no | 4 |
+| `fast_win` | Ahead of the Plan | Win with days to spare: day 40 on all three trees. | at game over: `floor(gameOver.tick/1440)+1 <= {singularity:40, flesh:40, garden:40}` | game over | no | no | 4 |
 | `clean_hands` | Clean Hands | Win the Flesh or the Garden with that tree's secret meter under 30 (of 100). | `ending flesh/garden` and `soul.seal[biotech\|greentech] < 30` | game over | no | no | 3 |
 | `open_hands` | Open Hands | Win the Lattice without closing either other tree. | `ending==="singularity"` and `soul.seal.biotech<100` and `soul.seal.greentech<100` (`sealMax`) | game over | no | no | 4 |
 | `cash_deep` | Deep Pockets | Have $10M in the bank at day end. | `state.cash>=10_000_000` | day close | no | no | 3 |
@@ -77,7 +77,7 @@ Legend: **Run** = the achievement can be earned in one run (the profile latches 
 
 Notes on the harder ones:
 - `calm_month`: headless weekly uptime means were 98.3 to 99.3% even for a scripted player, so a 99% daily mean for 20 straight days (with `pflops > 0`) is a real task. The owner set 20 (30 is almost a whole run).
-- `fast_win` targets come from `tools/sim-cli/src/soulRun.ts` (`TARGET_DAYS` 25/40/38). These are the owner's current numbers (Lattice 25, Flesh 40, Garden 38); the older 25/38/44 is retired. The scripted player is 10-13% over target, so a skilled human should beat it.
+- `fast_win` targets come from `tools/sim-cli/src/soulRun.ts` (`TARGET_DAYS` 40/40/40). These are the owner's current numbers (day 40 on all three trees); the older 25/40/38 and 25/38/44 are retired. The scripted player is 10-13% over target, so a skilled human should beat it.
 - `open_hands` is the least certain: the scripted Lattice run closed both other trees. Verify with a purpose-built run before shipping. If it proves too hard, drop to "one tree closed at most".
 - `clean_hands`: scripted Flesh run ended with bio seal 0, scripted Garden run with green seal 40 (so the Garden is where this bites).
 - `books_clean`: the scripted Lattice run ended with $3.01M, right at the bar. Adjust once a human plays.
