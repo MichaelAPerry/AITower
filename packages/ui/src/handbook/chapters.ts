@@ -115,7 +115,7 @@ function guides(c: ContentDB): Chapter[] {
 			"books",
 			"Loans, penalties and the audit",
 			[
-				`Loans. Open Insights, then Finance. The Ministry lends up to a limit that rises with your Level: ${fmtMoney(loans.maxByTier[0] ?? 0)} at Level 1, ${fmtMoney(loans.maxByTier[loans.maxByTier.length - 1] ?? 0)} at the top. Every midnight you pay ${(loans.dailyRate * 100).toFixed(1)}% of what you owe. Repay whenever you like.`,
+				`Loans. Open Insights, then Finance. The Bank lends up to a limit that rises with your Level: ${fmtMoney(loans.maxByTier[0] ?? 0)} at Level 1, ${fmtMoney(loans.maxByTier[loans.maxByTier.length - 1] ?? 0)} at the top. Every midnight you pay ${(loans.dailyRate * 100).toFixed(1)}% of what you owe. Repay whenever you like.`,
 				`Penalties. An inference contract is a promise to keep serving. While a running service falls short, you are fined ${pen} times its rate for each minute. Check the deadline and the penalty before you accept a contract.`,
 				`The audit. Every ${audit.periodDays} days an inspector grades your books from A to E: uptime against your Level's target, failed jobs, penalties and PUE. A and B earn cash. C is neutral. D and E cost you.`,
 			],

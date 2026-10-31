@@ -7,7 +7,7 @@ Edit the text after the label, as in the dialogue files. Send it back and it get
 > Shown on the new-game screen under "Garage Cluster" (scenario `starter`). It is the only start with no description. The others have 2 or 3 sentences, e.g. Brownfield: "A half-built tower bought at auction with the debts attached. ..."
 > What it really is: 3 floors on a 48-tile lot, a grid intake in the basement, 4 air-cooled racks, 1 air handler, 1 storage array, a parts depot, a bot dock with one bot, 4 spare parts, $3M in the bank, Level 1.
 
-- [scenario.starter.description] Description: A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. The usual way to start.
+- [scenario.starter.description] Description: A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. This is a decent start for a new datacenter operator. Are you ready?
 
 ## 2. Bankrupt ending: the achievement line
 
@@ -21,7 +21,7 @@ Edit the text after the label, as in the dialogue files. Send it back and it get
 > A credits screen is being added (title menu). Draft below. Change anything.
 
 - [credits.title] Title: Credits
-- [credits.design] Line: Game design and direction: (your name or handle as you want it shown)
+- [credits.design] Line: Game design and direction: Perry
 - [credits.code] Line: Code: written with Claude (Anthropic).
 - [credits.art] Line: Art: portraits, backdrops, endings and icon sheets generated with ChatGPT. Some in-game sprites drawn in code with Claude.
 - [credits.inspired] Line: Inspired by SimTower. No code, art or text was taken from it.

@@ -10,7 +10,7 @@ export function CreditsPane({ content }: { content?: ContentDB }) {
 	return (
 		<div className="cr-pane" data-pane="credits">
 			<ul className="cr-lines">
-				{[U.creditsCode, U.creditsArt, U.creditsInspired, U.creditsFonts, U.creditsQuotes].map((l) => (
+				{[U.creditsDesign, U.creditsCode, U.creditsArt, U.creditsInspired, U.creditsFonts, U.creditsQuotes].map((l) => (
 					<li key={l}>{l}</li>
 				))}
 			</ul>

@@ -20,7 +20,7 @@ describe("the credits screen", () => {
 
 	it("renders the credit lines and every quote with its author and source", () => {
 		const html = renderToStaticMarkup(<CreditsPane content={content} />);
-		for (const l of [achievementContent.ui.creditsCode, achievementContent.ui.creditsArt, achievementContent.ui.creditsInspired]) expect(html).toContain(esc(l));
+		for (const l of [achievementContent.ui.creditsDesign, achievementContent.ui.creditsCode, achievementContent.ui.creditsArt, achievementContent.ui.creditsInspired]) expect(html).toContain(esc(l));
 		expect((html.match(/class="cr-quote"/g) ?? []).length).toBe(quotes.length);
 		for (const q of quotes) {
 			expect(html, q.item).toContain(esc(`“${q.flavor.quote}”`));

@@ -1750,26 +1750,26 @@ Choice `add`:
 
 > Done when: [{"metric":"coolantTiles","op":">=","value":14}].
 - [liquid.pipe.objective] Objective: Lay a coolant pipe along the glowing run
-- [liquid.pipe.say1] cass: Cass. Cooling.
-- [liquid.pipe.say2] cass: Air only goes so far. Past that, you need water. That's {{dlc|liquid cooling}}.
-- [liquid.pipe.say3] cass: Water needs a pipe. Open Structure. Pick the Coolant pipe. Drag it along the glowing run.
-- [liquid.pipe.after1] cass: Good. Now the water has somewhere to go.
+- [liquid.pipe.say1] cass: We're going to learn some cooling.
+- [liquid.pipe.say2] cass: Air only goes so far, after that we use water. That's {{dlc|liquid cooling}}.
+- [liquid.pipe.say3] cass: Water needs a plumping. So pick the Coolant pipe. Drag it along the glowing line.
+- [liquid.pipe.after1] cass: Excellent, now you got it flowing!
 
 #### Step `chiller`
 
 > Done when: [{"metric":"chillers","op":">=","value":1}].
 - [liquid.chiller.objective] Objective: Place a Chiller on the glowing spot
-- [liquid.chiller.say1] cass: A {{chiller|chiller}} makes the water cold.
+- [liquid.chiller.say1] cass: A {{chiller|chiller}} um... chills the water haha.
 - [liquid.chiller.say2] cass: Open Cooling. Pick the Chiller. Click the glowing spot.
-- [liquid.chiller.after1] cass: It's big. It'll hum. You get used to it.
+- [liquid.chiller.after1] cass: It's big. It'll hum. No more than usual in this place.
 
 #### Step `cdu`
 
 > Done when: [{"metric":"cdus","op":">=","value":1}].
 - [liquid.cdu.objective] Objective: Place a CDU on the glowing spot
-- [liquid.cdu.say1] cass: Next, a {{cdu|CDU}}. It hands the cold water on to the racks.
+- [liquid.cdu.say1] cass: Next, a {{cdu|CDU}}. It hands the cold water to the racks.
 - [liquid.cdu.say2] cass: Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot.
-- [liquid.cdu.after1] cass: The loop is done. Nothing is on it yet.
+- [liquid.cdu.after1] cass: Now we have the backbone we need to upgrade CPUs.
 
 #### Step `rack`
 
@@ -1791,7 +1791,7 @@ Choice `add`:
 
 > Done when: immediately.
 - [liquid.steady.objective] Objective: Keep it running for three hours
-- [liquid.steady.say1] cass: Three hours. Make sure it holds.
+- [liquid.steady.say1] cass: Make sure you watch the map.
 
 ### Lesson 6: Lights Out (`lights_out`)
 
@@ -1800,25 +1800,25 @@ Choice `add`:
 - [lights_out.concept] Concept: Backup: a battery bank bridges the minutes after the grid drops, and a genset carries the racks for hours.
 - [lights_out.goal] Goal: Ride out a grid failure with no dark racks.
 - [lights_out.learned] Learned: A {{ups|battery bank}} carries the racks for the minutes a {{genset|genset}} needs to start. The genset carries them for hours. Build both before the grid drops.
-- [lights_out.outro] bea: That's how you keep the lights on. Build the backup before you need it.
+- [lights_out.outro] bea: That's how you keep the lights on. Battery backup is a crucial concept.
 
 #### Step `battery`
 
 > Done when: [{"metric":"batteries","op":">=","value":1}].
 - [lights_out.battery.objective] Objective: Place a Battery Bank on the glowing spot
-- [lights_out.battery.say1] bea: Bea. Power again. Today the grid goes out.
-- [lights_out.battery.say2] bea: Not maybe. Today. So we get ready.
+- [lights_out.battery.say1] bea: We don't know when the power will go out.
+- [lights_out.battery.say2] bea: The point is to be prepared for any eventuality.
 - [lights_out.battery.say3] bea: A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot.
-- [lights_out.battery.after1] bea: Okay. Empty for now. It charges off the grid.
+- [lights_out.battery.after1] bea: Okay. My least favortie exercise X_X.
 
 #### Step `genset`
 
 > Done when: [{"metric":"gensets","op":">=","value":1}].
 - [lights_out.genset.objective] Objective: Place a Diesel Genset on the glowing spot
 - [lights_out.genset.say1] bea: Batteries don't last. Maybe an hour and a half at this load.
-- [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Loud, and it burns money.
+- [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Y'know dirty, loud, money grubbin' pollution.
 - [lights_out.genset.say3] bea: Open Power. Pick the Diesel Genset. Click the glowing spot.
-- [lights_out.genset.after1] bea: Right. It starts itself when the grid runs short. It needs a few minutes to get up to speed.
+- [lights_out.genset.after1] bea: Right. It starts itself when the grid runs fails. Chugging like a freakin' train.
 
 #### Step `watch`
 
@@ -1826,7 +1826,7 @@ Choice `add`:
 - [lights_out.watch.objective] Objective: Check the Power view while the battery fills
 - [lights_out.watch.say1] bea: I've put the power view on. That's where the load and the supply show.
 - [lights_out.watch.say2] bea: Let the battery fill. Don't touch anything.
-- [lights_out.watch.after1] bea: Full. Okay. Okay.
+- [lights_out.watch.after1] bea: Full. Okay. Okay!
 - [lights_out.watch.after2] bea: Hands off. Here it comes.
 
 #### Step `outage`
@@ -1834,10 +1834,10 @@ Choice `add`:
 > Done when: [{"metric":"beats","op":">=","value":2},{"metric":"gridPct","op":">=","value":100}].
 > Runs scripted beat `trip` after the lines.
 - [lights_out.outage.objective] Objective: Ride out the outage
-- [lights_out.outage.say1] bea: There. Grid's gone.
-- [lights_out.outage.say2] bea: The battery has the racks. The genset's waking up. Watch the load.
-- [lights_out.outage.after1] bea: Genset's carrying them. The battery's topping up. Nobody went dark.
-- [lights_out.outage.after2] bea: Grid's back. The genset stands down on its own.
+- [lights_out.outage.say1] bea: There. The grid's gone.
+- [lights_out.outage.say2] bea: The battery is doing it's job. The genset's waking up. Watch the load.
+- [lights_out.outage.after1] bea: Genset's carrying them. The battery's topping up. 100% uptime! Yay!
+- [lights_out.outage.after2] bea: Grid's back. The genset stops automatically!
 
 #### Step `steady`
 
@@ -1851,7 +1851,7 @@ Choice `add`:
 
 ### Garage Cluster (`starter`)
 
-- [scenario.starter.description] Description: A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. The usual way to start.
+- [scenario.starter.description] Description: A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. This is a decent start for a new datacenter operator. Are you ready?
 
 ### Brownfield Tower (`brownfield`)
 
@@ -1933,13 +1933,13 @@ Choice `add`:
 
 > Shows: LIST tab row, and the unlock strip when earned. Earned when any tree has a top-rung (rung 4) rack.
 - [ach.rung_top.name] Name: Top Rung
-- [ach.rung_top.text] Text: Hold a top-rung rack of any tree.
+- [ach.rung_top.text] Text: Reach a top-rung rack of any tree.
 
 ### `fast_win`
 
 > Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win that is quick enough (Lattice by day 25, Flesh by day 40, Garden by day 38).
-- [ach.fast_win.name] Name: Ahead of the Plan
-- [ach.fast_win.text] Text: Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38.
+- [ach.fast_win.name] Name: 40 days to save the world
+- [ach.fast_win.text] Text: Win with days to spare: Lattice by day 40, Flesh by day 40, Garden by day 40.
 
 ### `clean_hands`
 
@@ -1963,7 +1963,7 @@ Choice `add`:
 
 > Shows: LIST tab row, and the unlock strip when earned. Earned at game over on a win with no loan and at least the starting cash.
 - [ach.books_clean.name] Name: Clean Books
-- [ach.books_clean.text] Text: Win with no loan and at least your starting cash.
+- [ach.books_clean.text] Text: Win with no loan and holding your starting cash.
 
 ### `perfect_qtr`
 
@@ -2094,6 +2094,8 @@ Choice `add`:
 - [ach.ui.credits_menu_label] Label: CREDITS
 > Title screen: small text beside the Credits entry.
 - [ach.ui.credits_detail] Label: who made it · quotes
+> Credits screen: first line.
+- [ach.ui.credits_design] Label: Game design and direction: Perry
 > Credits screen: line.
 - [ach.ui.credits_code] Label: Code: written with Claude (Anthropic).
 > Credits screen: line.
@@ -2116,7 +2118,7 @@ Choice `add`:
 > Unlocks at game over (ending screen, after her epilogue) on a Lattice win with no loan and her trust at 50 or more.
 - [ach.offduty.luci.name] Name: Luci
 > Locked frame: her hint line, under her name.
-- [ach.offduty.luci.hint] Hint: Close the books. All of them. Then we'll see.
+- [ach.offduty.luci.hint] Hint: Can you measure up?
 > Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.luci.rule] Rule: Close the books on the Lattice, with her on your side.
 
@@ -2125,7 +2127,7 @@ Choice `add`:
 > Unlocks at game over on a Flesh win, staying mostly yourself (corruption under 0.5), with her trust at 40 or more.
 - [ach.offduty.mel.name] Name: Mel
 > Locked frame: her hint line, under her name.
-- [ach.offduty.mel.hint] Hint: Come all the way. Keep something of yourself. Then I'll show you.
+- [ach.offduty.mel.hint] Hint: We could make beautiful children.
 > Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.mel.rule] Rule: Finish the Flesh and stay mostly yourself, with her trusting you.
 
@@ -2134,7 +2136,7 @@ Choice `add`:
 > Unlocks at game over on a Garden win with the green seal under 50 and her trust at 50 or more.
 - [ach.offduty.bea.name] Name: Bea
 > Locked frame: her hint line, under her name.
-- [ach.offduty.bea.hint] Hint: Show me the Garden. Not a certificate.
+- [ach.offduty.bea.hint] Hint: Do you have a green thumb?
 > Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.bea.rule] Rule: Win the Garden honestly, with her trusting you.
 
@@ -2143,7 +2145,7 @@ Choice `add`:
 > Unlocks at day close, the day the 99%-uptime streak reaches 20, mid-run.
 - [ach.offduty.cass.name] Name: Cass
 > Locked frame: her hint line, under her name.
-- [ach.offduty.cass.hint] Hint: Hold it up for a month. I'll tell you when I'm asleep.
+- [ach.offduty.cass.hint] Hint: How long can you keep it up?
 > Locked frame: the plain rule, shown once her trust has reached 30.
 - [ach.offduty.cass.rule] Rule: Keep the tower steady for a long stretch.
 

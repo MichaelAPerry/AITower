@@ -16,10 +16,10 @@ describe("docs/OWNER_TEXT.md ids", () => {
 	});
 
 	it("the credits lines land on their ach.ui slots", () => {
-		const keys = { title: "creditsTitle", code: "creditsCode", art: "creditsArt", inspired: "creditsInspired", fonts: "creditsFonts", quotes: "creditsQuotes" } as const;
+		const keys = { title: "creditsTitle", design: "creditsDesign", code: "creditsCode", art: "creditsArt", inspired: "creditsInspired", fonts: "creditsFonts", quotes: "creditsQuotes" } as const;
 		const r = dry(Object.keys(keys).map((k) => `- [credits.${k}] Line: test ${k}`));
 		expect(r.errors).toEqual([]);
-		expect(r.changed).toHaveLength(6);
+		expect(r.changed).toHaveLength(7);
 		const out = JSON.parse(applyEdits(project.files, r.edits)[FILES.achievements] as string);
 		for (const [k, ui] of Object.entries(keys)) expect(out.ui[ui]).toBe(`test ${k}`);
 	});

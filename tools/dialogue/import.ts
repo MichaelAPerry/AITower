@@ -44,6 +44,7 @@ const OPTIONAL_FILES: Record<string, string> = {
 export const OWNER_ALIASES: Record<string, string> = {
 	end_bankrupt_note: "ach.ui.end_bankrupt_note",
 	"credits.title": "ach.ui.credits_title",
+	"credits.design": "ach.ui.credits_design",
 	"credits.code": "ach.ui.credits_code",
 	"credits.art": "ach.ui.credits_art",
 	"credits.inspired": "ach.ui.credits_inspired",

@@ -460,6 +460,7 @@ const UI_CONTEXT: Record<string, string> = {
 	creditsTitle: "Credits screen: heading, and the name of its entry in the menu.",
 	creditsMenuLabel: "Title screen: the Credits entry.",
 	creditsDetail: "Title screen: small text beside the Credits entry.",
+	creditsDesign: "Credits screen: first line.",
 	creditsCode: "Credits screen: line.",
 	creditsArt: "Credits screen: line.",
 	creditsInspired: "Credits screen: line.",
@@ -474,7 +475,7 @@ const UI_GROUPS: { title: string; note: string; keys: string[] }[] = [
 	{ title: "Gallery: headings", note: "The OFF DUTY tab.", keys: ["subOffDuty", "subAfterHours", "altOffDuty", "altLocked"] },
 	{ title: "Unlock strips", note: "A small strip at the top of the screen when something unlocks (4 seconds, the game keeps running).", keys: ["stripAchievement", "stripOffDuty", "stripPortrait", "stripBed", "stripBedText"] },
 	{ title: "Ending screen: new achievements and portraits", note: "Shown under the ending text on the ending screen and the game-over sheet, only if the run earned something.", keys: ["endNew", "endOffDuty", "endPortrait", "endBed", "endBankruptNote"] },
-	{ title: "Credits screen", note: "Title menu, Credits. Every quote in the game is listed below these lines with its author and source.", keys: ["creditsTitle", "creditsMenuLabel", "creditsDetail", "creditsCode", "creditsArt", "creditsInspired", "creditsFonts", "creditsQuotes", "creditsQuotesHead"] },
+	{ title: "Credits screen", note: "Title menu, Credits. Every quote in the game is listed below these lines with its author and source.", keys: ["creditsTitle", "creditsMenuLabel", "creditsDetail", "creditsDesign", "creditsCode", "creditsArt", "creditsInspired", "creditsFonts", "creditsQuotes", "creditsQuotesHead"] },
 ];
 
 const OFF_WHEN: Record<string, string> = {

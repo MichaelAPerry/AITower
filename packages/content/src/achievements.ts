@@ -75,6 +75,7 @@ export const UI_KEYS = [
 	"creditsTitle",
 	"creditsMenuLabel",
 	"creditsDetail",
+	"creditsDesign",
 	"creditsCode",
 	"creditsArt",
 	"creditsInspired",

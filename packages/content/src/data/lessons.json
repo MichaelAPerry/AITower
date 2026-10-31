@@ -1059,12 +1059,12 @@
 						}
 					],
 					"say": [
-						"Cass. Cooling.",
-						"Air only goes so far. Past that, you need water. That's {{dlc|liquid cooling}}.",
-						"Water needs a pipe. Open Structure. Pick the Coolant pipe. Drag it along the glowing run."
+						"We're going to learn some cooling.",
+						"Air only goes so far, after that we use water. That's {{dlc|liquid cooling}}.",
+						"Water needs a plumping. So pick the Coolant pipe. Drag it along the glowing line."
 					],
 					"after": [
-						"Good. Now the water has somewhere to go."
+						"Excellent, now you got it flowing!"
 					],
 					"slot": {
 						"floor": 1,
@@ -1099,11 +1099,11 @@
 						}
 					],
 					"say": [
-						"A {{chiller|chiller}} makes the water cold.",
+						"A {{chiller|chiller}} um... chills the water haha.",
 						"Open Cooling. Pick the Chiller. Click the glowing spot."
 					],
 					"after": [
-						"It's big. It'll hum. You get used to it."
+						"It's big. It'll hum. No more than usual in this place."
 					],
 					"slot": {
 						"floor": 1,
@@ -1137,11 +1137,11 @@
 						}
 					],
 					"say": [
-						"Next, a {{cdu|CDU}}. It hands the cold water on to the racks.",
+						"Next, a {{cdu|CDU}}. It hands the cold water to the racks.",
 						"Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot."
 					],
 					"after": [
-						"The loop is done. Nothing is on it yet."
+						"Now we have the backbone we need to upgrade CPUs."
 					],
 					"slot": {
 						"floor": 1,
@@ -1243,7 +1243,7 @@
 						}
 					],
 					"say": [
-						"Three hours. Make sure it holds."
+						"Make sure you watch the map."
 					],
 					"handbook": "ch:heat"
 				}
@@ -1365,12 +1365,12 @@
 						}
 					],
 					"say": [
-						"Bea. Power again. Today the grid goes out.",
-						"Not maybe. Today. So we get ready.",
+						"We don't know when the power will go out.",
+						"The point is to be prepared for any eventuality.",
 						"A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot."
 					],
 					"after": [
-						"Okay. Empty for now. It charges off the grid."
+						"Okay. My least favortie exercise X_X."
 					],
 					"slot": {
 						"floor": -1,
@@ -1402,11 +1402,11 @@
 					],
 					"say": [
 						"Batteries don't last. Maybe an hour and a half at this load.",
-						"For longer you want an engine. A {{genset|genset}}. Diesel. Loud, and it burns money.",
+						"For longer you want an engine. A {{genset|genset}}. Diesel. Y'know dirty, loud, money grubbin' pollution.",
 						"Open Power. Pick the Diesel Genset. Click the glowing spot."
 					],
 					"after": [
-						"Right. It starts itself when the grid runs short. It needs a few minutes to get up to speed."
+						"Right. It starts itself when the grid runs fails. Chugging like a freakin' train."
 					],
 					"slot": {
 						"floor": -1,
@@ -1441,7 +1441,7 @@
 						"Let the battery fill. Don't touch anything."
 					],
 					"after": [
-						"Full. Okay. Okay.",
+						"Full. Okay. Okay!",
 						"Hands off. Here it comes."
 					],
 					"overlay": "power",
@@ -1474,12 +1474,12 @@
 						}
 					],
 					"say": [
-						"There. Grid's gone.",
-						"The battery has the racks. The genset's waking up. Watch the load."
+						"There. The grid's gone.",
+						"The battery is doing it's job. The genset's waking up. Watch the load."
 					],
 					"after": [
-						"Genset's carrying them. The battery's topping up. Nobody went dark.",
-						"Grid's back. The genset stands down on its own."
+						"Genset's carrying them. The battery's topping up. 100% uptime! Yay!",
+						"Grid's back. The genset stops automatically!"
 					],
 					"afterBeat": "trip",
 					"overlay": "power",
@@ -1601,7 +1601,7 @@
 				"ch:power"
 			],
 			"bonus": 25000,
-			"outro": "That's how you keep the lights on. Build the backup before you need it."
+			"outro": "That's how you keep the lights on. Battery backup is a crucial concept."
 		}
 	]
 }

@@ -35,12 +35,12 @@
   {
    "id": "rung_top",
    "name": "Top Rung",
-   "text": "Hold a top-rung rack of any tree."
+   "text": "Reach a top-rung rack of any tree."
   },
   {
    "id": "fast_win",
-   "name": "Ahead of the Plan",
-   "text": "Win with days to spare: Lattice by day 25, Flesh by day 40, Garden by day 38."
+   "name": "40 days to save the world",
+   "text": "Win with days to spare: Lattice by day 40, Flesh by day 40, Garden by day 40."
   },
   {
    "id": "clean_hands",
@@ -60,7 +60,7 @@
   {
    "id": "books_clean",
    "name": "Clean Books",
-   "text": "Win with no loan and at least your starting cash."
+   "text": "Win with no loan and holding your starting cash."
   },
   {
    "id": "perfect_qtr",
@@ -96,22 +96,22 @@
  "offDuty": {
   "luci": {
    "name": "Luci",
-   "hint": "Close the books. All of them. Then we'll see.",
+   "hint": "Can you measure up?",
    "rule": "Close the books on the Lattice, with her on your side."
   },
   "mel": {
    "name": "Mel",
-   "hint": "Come all the way. Keep something of yourself. Then I'll show you.",
+   "hint": "We could make beautiful children.",
    "rule": "Finish the Flesh and stay mostly yourself, with her trusting you."
   },
   "bea": {
    "name": "Bea",
-   "hint": "Show me the Garden. Not a certificate.",
+   "hint": "Do you have a green thumb?",
    "rule": "Win the Garden honestly, with her trusting you."
   },
   "cass": {
    "name": "Cass",
-   "hint": "Hold it up for a month. I'll tell you when I'm asleep.",
+   "hint": "How long can you keep it up?",
    "rule": "Keep the tower steady for a long stretch."
   }
  },
@@ -151,6 +151,7 @@
   "creditsTitle": "Credits",
   "creditsMenuLabel": "CREDITS",
   "creditsDetail": "who made it · quotes",
+  "creditsDesign": "Game design and direction: Perry",
   "creditsCode": "Code: written with Claude (Anthropic).",
   "creditsArt": "Art: portraits, backdrops, endings and icon sheets generated with ChatGPT. Some in-game sprites drawn in code with Claude.",
   "creditsInspired": "Inspired by SimTower. No code, art or text was taken from it.",
