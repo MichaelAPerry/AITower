@@ -1769,7 +1769,7 @@ Choice `add`:
 - [liquid.cdu.objective] Objective: Place a CDU on the glowing spot
 - [liquid.cdu.say1] cass: Next, a {{cdu|CDU}}. It hands the cold water on to the racks.
 - [liquid.cdu.say2] cass: Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot.
-- [liquid.cdu.after1] cass: The loop is closed. Nothing is on it yet.
+- [liquid.cdu.after1] cass: The loop is done. Nothing is on it yet.
 
 #### Step `rack`
 

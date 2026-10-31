@@ -26,7 +26,7 @@ Lesson `liquid`, file `packages/content/src/data/lessons.json`, advisor cass. Ti
 - [liquid.cdu.objective] Objective: Place a CDU on the glowing spot
 - [liquid.cdu.say1] cass: Next, a {{cdu|CDU}}. It hands the cold water on to the racks.
 - [liquid.cdu.say2] cass: Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot.
-- [liquid.cdu.after1] cass: The loop is closed. Nothing is on it yet.
+- [liquid.cdu.after1] cass: The loop is done. Nothing is on it yet.
 - [liquid.rack.objective] Objective: Click the glowing rack and retrofit it to Synthetic
 - [liquid.rack.say1] cass: Now the rack. Click the one that's glowing. Its panel opens on the right.
 - [liquid.rack.say2] cass: Find Retrofit. Pick Synthetic. It becomes an LC-2, a liquid-cooled rack.

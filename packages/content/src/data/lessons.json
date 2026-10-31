@@ -1141,7 +1141,7 @@
 						"Cooling again. Pick the Coolant Distribution Unit. Click the glowing spot."
 					],
 					"after": [
-						"The loop is closed. Nothing is on it yet."
+						"The loop is done. Nothing is on it yet."
 					],
 					"slot": {
 						"floor": 1,
