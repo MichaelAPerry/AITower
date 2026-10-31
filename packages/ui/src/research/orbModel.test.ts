@@ -176,16 +176,16 @@ describe("opening view and states", () => {
 });
 
 describe("text size", () => {
-	it("every font size in the research CSS is 16 px or more", () => {
+	it("research CSS has no hard-coded font size under 16 px; sizes come from the --fs scale", () => {
 		const css = readFileSync(new URL("./research.css", import.meta.url), "utf8");
-		const sizes: number[] = [];
-		for (const m of css.matchAll(/font:\s*(?:\d+\s+)?(\d+)px/g)) sizes.push(Number(m[1]));
-		for (const m of css.matchAll(/font-size:\s*(?:max\()?(\d+)px/g)) sizes.push(Number(m[1]));
-		expect(sizes.length).toBeGreaterThan(10);
-		expect(Math.min(...sizes)).toBeGreaterThanOrEqual(16);
+		const px: number[] = [];
+		for (const m of css.matchAll(/font:\s*(?:\d+\s+)?(\d+)px/g)) px.push(Number(m[1]));
+		for (const m of css.matchAll(/font-size:\s*(?:max\()?(\d+)px/g)) px.push(Number(m[1]));
+		for (const m of px) expect(m).toBeGreaterThanOrEqual(16);
+		expect(css.match(/font(?:-size)?:[^;]*var\(--fs-/g)?.length).toBeGreaterThan(10);
 	});
-	it("globe labels are drawn at 16 px", () => {
+	it("globe labels are drawn from the small step of the scale (17 px)", () => {
 		const css = readFileSync(new URL("./research.css", import.meta.url), "utf8");
-		expect(css).toMatch(/\.orb-lab \{[^}]*font: 400 16px/);
+		expect(css).toMatch(/\.orb-lab \{[^}]*font: 400 var\(--fs-small\)/);
 	});
 });

@@ -27,7 +27,7 @@
 	align-items: center;
 	gap: 10px;
 	padding: 5px 10px 5px 6px;
-	min-height: 84px;
+	min-height: 124px;
 }
 .aitower-hud .adv-faces {
 	display: flex;
@@ -393,7 +393,7 @@
 .aitower-hud .adv-vn-figure {
 	flex: none;
 	align-self: flex-end;
-	width: min(420px, 26vw, 52vh);
+	width: min(520px, 28vw, 62vh);
 	aspect-ratio: 1;
 	margin-right: 8px;
 	margin-bottom: 8px;
@@ -422,4 +422,27 @@
 }
 .aitower-hud.is-building .adv-strip .adv-ask {
 	display: none;
+}
+
+/* Faces stay big, but give way a little when a drawer narrows the strip. */
+.aitower-hud.has-drawer .adv-face .adv-portrait {
+	--portrait: 80px;
+}
+.aitower-hud.is-building .adv-face .adv-portrait {
+	--portrait: 80px;
+}
+
+.aitower-hud.has-drawer .adv-faces,
+.aitower-hud.is-building .adv-faces {
+	gap: 2px;
+}
+.aitower-hud.has-drawer .adv-face,
+.aitower-hud.is-building .adv-face {
+	padding: 0;
+	border-width: 1px;
+}
+.aitower-hud.has-drawer .adv-bar,
+.aitower-hud.is-building .adv-bar {
+	padding: 5px 6px;
+	min-height: 0;
 }

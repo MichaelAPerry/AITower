@@ -9,7 +9,7 @@ import { ADVISORS } from "./advisors";
 export function Portrait({ id, size = 44, talking = false, mood = "neutral" }: { id: AdvisorId; size?: number; talking?: boolean; mood?: Expression }) {
 	const a = ADVISORS[id];
 	return (
-		<span className={`adv-portrait ${talking ? "is-talking" : ""}`} role="img" aria-label={a.name} style={{ ["--adv" as string]: a.color, width: size, height: size }} data-mood={mood}>
+		<span className={`adv-portrait ${talking ? "is-talking" : ""}`} role="img" aria-label={a.name} style={{ ["--adv" as string]: a.color, width: `var(--portrait, ${size}px)`, height: `var(--portrait, ${size}px)` }} data-mood={mood}>
 			<img src={PORTRAITS[id][mood]} alt="" draggable={false} />
 		</span>
 	);

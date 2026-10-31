@@ -12,7 +12,7 @@ export function TreeColumn({ card }: { card: TreeCard }) {
 	return (
 		<article className="trees-col" data-tree={card.tree} style={{ ["--tree" as string]: card.color }}>
 			<header className="trees-head">
-				<Portrait id={card.champion} size={36} />
+				<Portrait id={card.champion} size={48} />
 				<div>
 					<h3>{card.name}</h3>
 					<small>

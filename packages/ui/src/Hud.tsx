@@ -37,7 +37,7 @@ import { newSaveError } from "./menu/slots";
 import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
 import { configureSfx, playSfx } from "./sfx/sfx";
-import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
+import { densityFor, effectiveHudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
 // After ui.css, so these can refine its base rules.
 import "./clerk/clerk.css";
@@ -192,8 +192,8 @@ export function Hud({ store, content, title }: HudProps) {
 	}, [saveError]);
 
 	const { settings } = state;
-	const scale = hudScale(settings);
 	const viewport = useViewport();
+	const scale = effectiveHudScale(settings, viewport.width, viewport.height);
 	const density = densityFor(viewport.width, viewport.height, scale);
 	const [noticeDismissed, setNoticeDismissed] = useState(false);
 	const showNotice = settings.showDesktopNotice && !noticeDismissed && isSmallScreen(viewport.width, viewport.height);
@@ -243,7 +243,7 @@ export function Hud({ store, content, title }: HudProps) {
 		<TermProvider open={openHandbookAt}>
 		<div
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" ? "has-orb" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
-			style={settingsToCssVars(settings)}
+			style={settingsToCssVars(settings, viewport)}
 		>
 			<GameMusic active={!titleOpen} over={over} level={musicLevel(settings)} />
 			<TopStrip {...props} />

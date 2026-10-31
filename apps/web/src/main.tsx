@@ -2,8 +2,6 @@ import "@fontsource/dotgothic16/latin-400.css";
 import "@fontsource/m-plus-rounded-1c/latin-400.css";
 import "@fontsource/m-plus-rounded-1c/latin-700.css";
 import "@fontsource/vt323";
-import "@fontsource/special-elite";
-import "@fontsource/silkscreen";
 import { createAudio } from "@aitower/audio";
 import { loadContent } from "@aitower/content";
 import { createRenderer } from "@aitower/render";
@@ -26,7 +24,7 @@ async function boot() {
 	const content = loadContent();
 	// Pixi rasterises text once, so the retro fonts must be ready before the renderer starts.
 	await Promise.all(
-		['16px "VT323"', '16px "Special Elite"', '8px "Silkscreen"'].map((f) => document.fonts.load(f).catch(() => [])),
+		['16px "VT323"', '16px "DotGothic16"', '16px "M PLUS Rounded 1c"'].map((f) => document.fonts.load(f).catch(() => [])),
 	);
 	const worldEl = document.getElementById("world") as HTMLElement;
 	const hudEl = document.getElementById("hud") as HTMLElement;

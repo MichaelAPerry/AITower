@@ -1,6 +1,7 @@
+import "@fontsource/dotgothic16/latin-400.css";
+import "@fontsource/m-plus-rounded-1c/latin-400.css";
+import "@fontsource/m-plus-rounded-1c/latin-700.css";
 import "@fontsource/vt323";
-import "@fontsource/special-elite";
-import "@fontsource/silkscreen";
 import { createRoot } from "react-dom/client";
 import { Hud } from "../src/Hud";
 import { createFakeContent, createFakeStore, type FakeStoreWithEmit } from "../src/dev/fakeStore";
@@ -22,6 +23,7 @@ if (q.get("tab") || q.get("sel")) {
 // Settings and saves for screenshots: ?scale=1.5 &cb=1 &crt=0 &motion=1 &notice=0 &menu=save|load|settings|controls|new
 const num = (k: string): number | null => (q.has(k) ? Number(q.get(k)) : null);
 store.setSettings({
+	...(num("uiscale") !== null ? { uiScale: num("uiscale") as 1 } : {}),
 	...(num("scale") !== null ? { textScale: num("scale") as number } : {}),
 	...(q.get("cb") === "1" ? { colorBlind: true } : {}),
 	...(q.get("crt") === "0" ? { crtEffects: false } : {}),
@@ -40,6 +42,10 @@ if (q.get("decision")) {
 		store.advance(1);
 	}
 	store.issueDecision(q.get("decision") === "audit" ? "audit" : "heatwave");
+	if (q.get("story") === "1") {
+		const d = store.get().view.decision;
+		if (d) store.patchView({ decision: { ...d, category: "story", location: "Operations floor", lines: [{ who: d.advisor, text: "The chillers are holding, but the numbers on the east wall are not what I expected. Do you want to see them before we decide anything?", mood: "neutral" }, { who: "narrator", text: "The lights hum a half tone lower." }] } });
+	}
 }
 if (q.get("mod") === "1") {
 	const t = store.get().view.tick;

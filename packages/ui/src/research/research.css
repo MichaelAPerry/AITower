@@ -23,10 +23,10 @@
 	min-width: 0;
 	min-height: 0;
 	color: var(--o-text);
-	font: 400 16px/1.35 var(--f-body);
+	font: 400 var(--fs-label)/1.35 var(--f-body);
 }
 .aitower-hud .orb-wrap :is(.orb-top, .orb-side, .orb-tools, .orb-legend) *:not(svg):not(svg *) {
-	font-size: max(16px, 1em);
+	font-size: max(var(--fs-label), 1em);
 }
 
 /* Top bar: title, points, pinned goal */
@@ -45,14 +45,14 @@
 }
 .aitower-hud .orb-title h2 {
 	margin: 0;
-	font: 400 28px/1 var(--f-display);
+	font: 400 var(--fs-big)/1 var(--f-display);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: #fff;
 	text-shadow: 0 0 10px var(--o-cyan);
 }
 .aitower-hud .orb-wrap .orb-top .res-rp {
-	font: 400 22px/1 var(--f-num);
+	font: 400 var(--fs-num)/1 var(--f-num);
 	color: var(--o-gold);
 	white-space: nowrap;
 }
@@ -85,7 +85,7 @@
 	border: 0;
 	padding: 0;
 	color: var(--o-ready);
-	font: 400 18px/1.2 var(--f-display);
+	font: 400 var(--fs-body)/1.2 var(--f-display);
 	cursor: pointer;
 	text-align: left;
 }
@@ -178,14 +178,14 @@
 	stroke-width: 1;
 }
 .aitower-hud .orb-lv {
-	font: 400 16px var(--f-num);
+	font: 400 var(--fs-label) var(--f-num);
 	fill: #7fe6ff;
 	paint-order: stroke;
 	stroke: #03031a;
 	stroke-width: 4px;
 }
 .aitower-hud text.orb-rim {
-	font: 400 24px var(--f-display);
+	font: 400 var(--fs-num) var(--f-display);
 	letter-spacing: 4px;
 	paint-order: stroke;
 	stroke: #03031a;
@@ -203,7 +203,7 @@
 	filter: drop-shadow(0 0 6px #fff);
 }
 .aitower-hud .orb-lab {
-	font: 400 16px var(--f-body);
+	font: 400 var(--fs-small) var(--f-body);
 	fill: #dfe6ff;
 	paint-order: stroke;
 	stroke: #02021a;
@@ -224,7 +224,7 @@
 	fill: #c4cbf6;
 }
 .aitower-hud .orb-sub {
-	font: 400 16px var(--f-body);
+	font: 400 var(--fs-small) var(--f-body);
 	fill: #b4bbe6;
 	paint-order: stroke;
 	stroke: #02021a;
@@ -232,7 +232,7 @@
 	stroke-linejoin: round;
 }
 .aitower-hud .orb-cost {
-	font: 400 16px var(--f-num);
+	font: 400 var(--fs-small) var(--f-num);
 	fill: var(--o-gold);
 	paint-order: stroke;
 	stroke: #03031a;
@@ -242,7 +242,7 @@
 	fill: var(--o-no);
 }
 .aitower-hud .orb-count {
-	font: 400 22px var(--f-num);
+	font: 400 var(--fs-num) var(--f-num);
 	fill: #fff;
 	paint-order: stroke;
 	stroke: #03031a;
@@ -299,7 +299,7 @@
 	min-width: 40px;
 	height: 40px;
 	padding: 0 12px;
-	font: 400 20px/1 var(--f-display);
+	font: 400 var(--fs-body)/1 var(--f-display);
 	color: #cfd6ff;
 	background: rgba(4, 4, 28, 0.86);
 	border: 2px solid #4a5cc0;
@@ -311,12 +311,12 @@
 	color: #fff;
 }
 .aitower-hud .orb-wrap .orb-btn kbd {
-	font: 400 16px var(--f-num);
+	font: 400 var(--fs-label) var(--f-num);
 	color: #7fe6ff;
 	margin-left: 6px;
 }
 .aitower-hud .orb-wrap .orb-btn.orb-wide {
-	font-size: 18px;
+	font-size: var(--fs-body);
 }
 .aitower-hud .orb-legend {
 	position: absolute;
@@ -377,13 +377,13 @@
 	border-top: 1px dashed #2f4fb0;
 }
 .aitower-hud .orb-kicker {
-	font: 400 18px/1.2 var(--f-display);
+	font: 400 var(--fs-body)/1.2 var(--f-display);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 }
 .aitower-hud .orb-wrap .orb-side .orb-name {
 	margin: 2px 0 4px;
-	font: 400 26px/1.15 var(--f-display);
+	font: 400 var(--fs-big)/1.15 var(--f-display);
 	color: #fff;
 }
 .aitower-hud .orb-badge {
@@ -406,7 +406,7 @@
 }
 .aitower-hud .orb-wrap .orb-side .res-h {
 	margin: 12px 0 4px;
-	font: 400 18px/1.2 var(--f-display);
+	font: 400 var(--fs-body)/1.2 var(--f-display);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: #7fe6ff;
@@ -414,7 +414,7 @@
 	padding-bottom: 2px;
 }
 .aitower-hud .orb-wrap .orb-side :is(.bld-blurb, .res-get li, .res-chain li, .res-path) {
-	font: 400 16px/1.4 var(--f-body);
+	font: 400 var(--fs-label)/1.4 var(--f-body);
 	color: #e4e8ff;
 	margin: 0;
 }
@@ -491,7 +491,7 @@
 }
 .aitower-hud .orb-cost dd {
 	margin: 0;
-	font: 400 18px/1.2 var(--f-num);
+	font: 400 var(--fs-body)/1.2 var(--f-num);
 	color: var(--o-gold);
 }
 .aitower-hud .orb-cost dd.is-ok {
@@ -505,7 +505,7 @@
 	color: var(--o-dim);
 }
 .aitower-hud .orb-foot .pnl-primary {
-	font-size: 20px;
+	font-size: var(--fs-body);
 	min-height: 48px;
 }
 .aitower-hud .orb-foot .pnl-why {

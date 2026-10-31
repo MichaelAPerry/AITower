@@ -40,6 +40,10 @@ export interface CellPointerEvent {
 export type HorrorIntensity = "full" | "mild" | "off";
 
 /** Player preferences. Persisted by the app (localStorage), independent of save games. */
+/** UI size preset: "auto" picks from the window size, the numbers are fixed multipliers. */
+export type UiScale = "auto" | 1 | 1.25 | 1.5;
+export const UI_SCALES: readonly UiScale[] = ["auto", 1, 1.25, 1.5];
+
 export interface Settings {
 	/** 0..1 */
 	masterVolume: number;
@@ -50,6 +54,8 @@ export interface Settings {
 	crtEffects: boolean;
 	/** HUD text scale, 0.85..1.5. */
 	textScale: number;
+	/** UI size preset ("auto" = by window size; 1, 1.25, 1.5). Multiplies `textScale`; the world canvas is not scaled. */
+	uiScale: UiScale;
 	/** Colour-blind-safe heat ramp and status colours, plus glyphs on status lamps. */
 	colorBlind: boolean;
 	/** Body-horror presentation intensity (used from M3 onward). */
@@ -74,6 +80,7 @@ export const DEFAULT_SETTINGS: Settings = {
 	reducedMotion: false,
 	crtEffects: true,
 	textScale: 1,
+	uiScale: "auto",
 	colorBlind: false,
 	horrorIntensity: "full",
 	autosave: true,
@@ -96,6 +103,7 @@ export function normalizeSettings(raw: unknown): Settings {
 		reducedMotion: bool(r.reducedMotion, d.reducedMotion),
 		crtEffects: bool(r.crtEffects, d.crtEffects),
 		textScale: num(r.textScale, d.textScale, 0.85, 1.5),
+		uiScale: r.uiScale === 1 || r.uiScale === 1.25 || r.uiScale === 1.5 ? r.uiScale : "auto",
 		colorBlind: bool(r.colorBlind, d.colorBlind),
 		horrorIntensity: r.horrorIntensity === "mild" || r.horrorIntensity === "off" ? r.horrorIntensity : "full",
 		autosave: bool(r.autosave, d.autosave),

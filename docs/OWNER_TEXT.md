@@ -25,5 +25,5 @@ Edit the text after the label, as in the dialogue files. Send it back and it get
 - [credits.code] Line: Code: written with Claude (Anthropic).
 - [credits.art] Line: Art: portraits, backdrops, endings and icon sheets generated with ChatGPT. Some in-game sprites drawn in code with Claude.
 - [credits.inspired] Line: Inspired by SimTower. No code, art or text was taken from it.
-- [credits.fonts] Line: Fonts: DotGothic16 and VT323 (Google Fonts, SIL Open Font License).
+- [credits.fonts] Line: Fonts: DotGothic16, M PLUS Rounded 1c and VT323 (Google Fonts, SIL Open Font License).
 - [credits.quotes] Line: Quotes: each quote in the game names its author and source. Full list in the credits.
