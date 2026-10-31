@@ -1,5 +1,8 @@
-import type { ContentDB, Flavor } from "@aitower/content";
+import { achievementContent, type ContentDB, type Flavor } from "@aitower/content";
+import type { EndingId } from "@aitower/sim";
+import { ENDING_SONGS } from "../gamemusic/sceneMusic";
 import { CHAPTER_FLAVOR } from "../handbook/chapters";
+import { MUSIC_CREDIT, SONG_ORDER, SONGS, type SongId } from "../title/titleMusic";
 
 export interface CreditQuote {
 	/** Where it appears: "Facility", "Research", "Bot" or "Handbook". */
@@ -21,3 +24,23 @@ export function creditQuotes(content: ContentDB): CreditQuote[] {
 
 /** "Author, Source" for one quote. */
 export const citation = (f: Flavor): string => (f.source ? `${f.author}, ${f.source}` : f.author);
+
+/** The who-made-it lines, in order. The one source for the credits section and the ending roll. */
+export function creditLines(): string[] {
+	const U = achievementContent.ui;
+	return [U.creditsDesign, U.creditsCode, U.creditsArt, U.creditsInspired, U.creditsFonts, U.creditsQuotes];
+}
+
+/** The music lines: the credit, then one "Label: title" per song. */
+export function musicCreditLines(): { id: SongId | null; text: string }[] {
+	return [{ id: null, text: MUSIC_CREDIT }, ...SONG_ORDER.map((id) => ({ id, text: `${SONGS[id].label}: ${SONGS[id].title}` }))];
+}
+
+/** "Ending theme: <title as tagged>". */
+export const endingThemeLine = (song: SongId): string => `Ending theme: ${SONGS[song].title}`;
+
+/** The roll after a success ending: that tree's picture and ending song. Null for Absorbed, Bankrupt and anything else. */
+export function rollFor(ending: EndingId): { tree: "lattice" | "flesh" | "garden"; song: SongId } | null {
+	const song = ENDING_SONGS[ending];
+	return song === "lattice" || song === "flesh" || song === "garden" ? { tree: song, song } : null;
+}

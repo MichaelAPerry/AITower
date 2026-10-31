@@ -125,4 +125,4 @@ Only the strings Claude wrote: the title-menu button, its subtitle, and the head
 - [ach.ui.credits_menu_label] Label: CREDITS
 - [ach.ui.credits_detail] Label: who made it · quotes
 - [ach.ui.credits_quotes_head] Label: Quotes
-- Music credit line "Music: Perry, made with Suno." and the four song titles (`packages/ui/src/title/titleMusic.ts`, shown in `CreditsPane.tsx`). Song titles TO CONFIRM with the owner. The owner typed "まだない明日へ" (title) and "銀のホームを" (Lattice); the mp3 file tags say "まだ見ぬ世界へ" and "銀のホーム", which are what the credits use for now. Garden: "君の明日が晴れますように". Flesh: "雨のしずく".
+- Music credit line "Music: Perry, made with Suno." and the seven song titles (`packages/ui/src/title/titleMusic.ts`, shown in `CreditsPane.tsx`). RESOLVED (owner decision): song titles stay exactly as tagged in the files: "まだ見ぬ世界へ" (title), "君の明日が晴れますように" (Garden), "銀のホーム" (Lattice), "雨のしずく" (Flesh), "深夜のゲーム" (tower loop), "夕陽のメロディ" (warm scene song), "Noctune FM" (quiet scene song). The owner's typed variants ("まだない明日へ", "銀のホームを") are not used.

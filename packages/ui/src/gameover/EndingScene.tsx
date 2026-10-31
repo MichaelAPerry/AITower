@@ -6,6 +6,8 @@ import { endingBackdrop, PORTRAITS } from "../art";
 import { newLines } from "../achievements/gallery";
 import "../achievements/achievements.css";
 import { useRunAwards } from "../achievements/awardBus";
+import { CreditsRoll } from "../credits/CreditsRoll";
+import { rollFor } from "../credits/credits";
 import { StampBtn } from "../menu/parts";
 import { endingKicker, lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
@@ -43,12 +45,15 @@ export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { w
  * epilogue of the advisor the player is closest to (or, when no bond reaches the bar, the ending's narrated fallback), then the
  * service record and the buttons.
  */
-export function EndingScene({ ending, view, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {
+export function EndingScene({ ending, view, content, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {
 	const backdrop = endingBackdrop(ending);
 	const pages = endingPages(ending, view);
 	const [i, setI] = useState(0);
 	const root = useRef<HTMLDivElement>(null);
 	const done = i >= pages.length;
+	// A success ending rolls the credits after its last page and before the service record; failures go straight to the record.
+	const roll = rollFor(ending.id);
+	const [rolled, setRolled] = useState(false);
 	const fresh = newLines(useRunAwards());
 	useEffect(() => {
 		if (!menuOpen) root.current?.focus();
@@ -61,6 +66,7 @@ export function EndingScene({ ending, view, menuOpen, final = false, onContinue,
 			next();
 		}
 	};
+	if (done && roll && !rolled) return <CreditsRoll tree={roll.tree} song={roll.song} content={content} onDone={() => setRolled(true)} />;
 	const page = pages[i];
 	const speaker = page?.who ? ADVISORS[page.who] : null;
 	return (

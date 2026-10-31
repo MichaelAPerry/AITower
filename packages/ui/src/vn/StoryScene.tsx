@@ -5,6 +5,7 @@ import { type KeyboardEvent, useCallback, useEffect, useRef, useState } from "re
 import { ADVISORS } from "../advisors/advisors";
 import { PORTRAITS, sceneBackdrop } from "../art";
 import { pushNotice } from "../notices";
+import { useSceneMusic } from "../gamemusic/sceneMusic";
 import "./vn.css";
 
 /** Characters revealed per second by the typewriter (instant with reduced motion). */
@@ -54,6 +55,7 @@ export function StoryScene({ store, decision: d, reduced }: { store: GameStore; 
 		return () => clearInterval(t);
 	}, [typing, reduced]);
 	useEffect(() => root.current?.focus(), []);
+	useSceneMusic(d.eventId);
 
 	const file = useCallback(
 		(choiceId: string): void => {
