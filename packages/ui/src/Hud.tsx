@@ -228,7 +228,7 @@ export function Hud({ store, content, title }: HudProps) {
 	const openResearch = useCallback(
 		(techId?: string) => {
 			const node = typeof techId === "string" ? content.tech?.find((t) => t.id === techId) : undefined;
-			setUiState((u) => ({ ...u, drawer: "research", paletteOpen: false, buildHover: null, ...(node ? { researchSel: node.id, researchTab: node.branch } : {}) }));
+			setUiState((u) => ({ ...u, drawer: "research", paletteOpen: false, buildHover: null, ...(node ? { researchSel: node.id } : {}) }));
 		},
 		[content],
 	);
@@ -242,7 +242,7 @@ export function Hud({ store, content, title }: HudProps) {
 	return (
 		<TermProvider open={openHandbookAt}>
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" && ui.researchView !== "list" ? "has-tree" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" ? "has-orb" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
 			<GameMusic active={!titleOpen} over={over} level={musicLevel(settings)} />

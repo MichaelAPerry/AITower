@@ -14,7 +14,7 @@ import { Hud } from "./Hud";
 import { runKey } from "./keyboard";
 import { applyEscape, escapeStep } from "./menu/escape";
 import { createMenuController } from "./menu/menuController";
-import { ResearchPanel } from "./research/ResearchPanel";
+import { ResearchFooter, ResearchPanel } from "./research/ResearchPanel";
 
 /** Server-rendered HTML without React's text-node separators, so assertions read like the page. */
 const renderToString = (el: Parameters<typeof render>[0]): string => render(el).replace(/<!-- -->/g, "");
@@ -101,46 +101,61 @@ describe("Contract Automation panel", () => {
 
 describe("Research panel", () => {
 	const panel = (store: ReturnType<typeof setup>["store"], content: ReturnType<typeof setup>["content"], ui = {}) => renderToString(<ResearchPanel {...panelProps(store, content, { ui })} />);
-	it("opens on the tree: lanes, Level columns, node states, the Level requirement and the Inspector beside it", () => {
+	const tech = (content: ReturnType<typeof setup>["content"], id: string) => content.tech.find((t) => t.id === id) as (typeof content.tech)[number];
+	it("is one screen: points, rate, the Level requirement, the orb and the side panel with Start", () => {
 		const { content, store } = setup();
 		const html = panel(store, content);
-		expect(html).toContain('class="rt-svg"');
-		for (const t of ["LEVEL 1", "LEVEL 2", "LEVEL 3", "ADMINISTRATION", "COMPUTE"]) expect(html).toContain(t);
-		for (const c of ["s-avail", "s-locked", "s-lvl"]) expect(html).toContain(c);
-		expect(html).toContain('data-tech="cmp_burnin"');
+		expect(html).toContain("data-research-orb");
+		expect(html).toContain('class="orb-stage"');
 		expect(html).toContain("Level 2 needs 2 technologies researched");
-		expect(html).toContain("Start research");
-		expect(html).toContain("What you get");
-		expect(html).toContain("42 RP");
-		// The plain list stays one click away for keyboard and screen-reader use.
-		expect(html).toContain(">List</button>");
-	});
-	it("the List view keeps the points, branch tabs, what is ready and what comes next, in plain words", () => {
-		const { content, store } = setup();
-		const html = panel(store, content, { researchView: "list" });
-		expect(html).toContain("Research");
-		for (const b of ["Compute", "Cooling", "Power", "Logistics", "Admin"]) expect(html).toContain(b);
-		expect(html).toContain("Available now");
 		expect(html).toContain("Start research");
 		expect(html).toContain("What you get");
 		expect(html).toContain("Why it helps");
 		expect(html).toContain("42 RP");
+		// The Tree/List toggle is gone: one view.
+		expect(html).not.toContain(">List</button>");
+		expect(html).not.toContain("Available now");
+	});
+	it("shows the opening view's ready globes with their cost, and only a few globes", () => {
+		const { content, store } = setup();
+		const html = panel(store, content);
+		expect(html).toContain('data-tech="cmp_burnin"');
+		expect(html).toContain("20 RP");
+		expect((html.match(/data-tech="/g) ?? []).length + (html.match(/data-cluster="/g) ?? []).length).toBeLessThanOrEqual(20);
+	});
+	it("with nothing picked it shows the cheapest tech you can start; Start is a real, enabled button", () => {
+		const { content, store } = setup();
+		const html = panel(store, content);
+		expect(html).toContain("Burn-in Protocol");
+		expect(html).toMatch(/<button[^>]*pnl-primary[^>]*>Start research/);
+		expect(html).not.toMatch(/<button[^>]*pnl-primary[^>]*disabled/);
 	});
 	it("Start research on the picked node dispatches {type:'research'} and spends the points", () => {
 		const { content, store, sent } = setup();
-		const tree = ResearchPanel(panelProps(store, content, { ui: { researchSel: "cmp_burnin", researchTab: "compute", researchView: "list" } }));
-		const split = findAll(tree, (el) => "inspector" in el.props)[0];
-		click(findButton(split.props.inspector as never, /Start research/));
+		const foot = ResearchFooter({ node: tech(content, "cmp_burnin"), view: store.get().view, content, setUi: () => {}, start: (n) => store.dispatch({ type: "research", techId: n.id }) });
+		click(findButton(foot, /Start research/));
 		expect(sent).toEqual([{ type: "research", techId: "cmp_burnin" }]);
 		expect(store.get().view.techResearched).toEqual(["cmp_burnin"]);
 		expect(store.get().view.researchPoints).toBe(22);
 	});
-	it("too expensive: the button is off and says how many points are missing", () => {
+	it("too expensive: Start is off and says how many points are missing; the chain names what is needed first", () => {
 		const { content, store } = setup();
-		const html = panel(store, content, { researchSel: "cmp_binning", researchTab: "compute", researchView: "list" });
+		const html = panel(store, content, { researchSel: "cmp_binning" });
 		expect(html).toContain("disabled");
-		expect(html).toContain("You need first");
+		expect(html).toContain("Needs first");
 		expect(html).toContain("Burn-in Protocol");
+		expect(html).toContain("Short");
+	});
+	it("Pin as goal sets the UI goal; the goal bar shows the name and the progress", () => {
+		const { content, store } = setup();
+		const set: unknown[] = [];
+		const foot = ResearchFooter({ node: tech(content, "cmp_cluster"), view: store.get().view, content, setUi: (p) => set.push(p), start: () => {} });
+		click(findButton(foot, /Pin as goal/));
+		expect(set).toEqual([{ researchGoal: "cmp_cluster" }]);
+		const html = panel(store, content, { researchGoal: "cmp_cluster", researchSel: "cmp_cluster" });
+		expect(html).toContain("Goal: Cluster Fabric");
+		expect(html).toContain("Unpin goal");
+		expect(html).toContain("42 RP of 240 RP");
 	});
 	it("researching the clerk node unlocks the clerk", () => {
 		const { store } = setup();
