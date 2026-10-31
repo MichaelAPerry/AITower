@@ -46,8 +46,6 @@
 
 	/* ── STYLE.md §3 fonts ── */
 	--f-crt: "VT323", ui-monospace, monospace;
-	--f-type: "Special Elite", "Courier New", ui-monospace, monospace;
-	--f-stamp: "Silkscreen", ui-monospace, monospace;
 
 	/* Text size setting: scales the whole HUD (fonts, px sizes, gauges) from one variable. */
 	--hud-scale: 1;

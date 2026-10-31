@@ -31,14 +31,14 @@ export function MagiVote({ decision, content }: { decision: DecisionView; conten
 			<ul>
 				{votes.map((v) => (
 					<li key={v.advisor} className={v.approve ? "is-yes" : "is-no"} style={{ ["--adv" as string]: ADVISORS[v.advisor].color }}>
-						<Portrait id={v.advisor} size={44} />
+						<Portrait id={v.advisor} size={56} />
 						<span className="adv-vote-line">
 							<b>{ADVISORS[v.advisor].first}</b> <em>{v.approve ? "Approve" : "Reject"}</em> {v.line}
 						</span>
 					</li>
 				))}
 				<li className="is-price" style={{ ["--adv" as string]: ADVISORS.luci.color }}>
-					<Portrait id="luci" size={44} />
+					<Portrait id="luci" size={56} />
 					<span className="adv-vote-line">
 						<b>Luci</b> <em>Price</em> {priceLine(content, decision, fmtMoney)}
 					</span>
@@ -81,7 +81,7 @@ export function DecisionCard({ store, content, state, onHandbook }: { store: Gam
 			</div>
 			<article className={`adv-card ui-panel ${stain === "none" ? "" : `has-stain-${stain}`}`} role="dialog" aria-modal="false" aria-labelledby="adv-card-title" data-help="decision" style={{ ["--adv" as string]: a.color }} key={d.id}>
 				<header className="adv-card-head">
-					<Portrait id={d.advisor} size={96} talking />
+					<Portrait id={d.advisor} size={144} talking />
 					<div>
 						<small>Decision · game paused · {CATEGORY[d.category] ?? "Operations"}</small>
 						<h3 id="adv-card-title">{d.title}</h3>

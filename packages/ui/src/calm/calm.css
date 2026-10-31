@@ -476,3 +476,59 @@
 	pointer-events: none;
 }
 
+/* Strip numbers use the num step, so the strip fits one row at 1280 wide. */
+.aitower-hud .ui-strip .ui-big {
+	font-size: var(--fs-num);
+}
+.aitower-hud .ui-strip .ui-maint .ui-big {
+	font-size: var(--fs-body);
+}
+
+
+/* Tight windows (1280x720 at 100%, or 1920x1080 at 150%): the build rail drops its icons and the Inspector stops above the advisors, scrolling inside. */
+.aitower-hud.is-density-tight .bld-cat > :not(span),
+.aitower-hud.is-density-cramped .bld-cat > :not(span) {
+	display: none;
+}
+.aitower-hud.is-density-tight .ui-center > .ui-right,
+.aitower-hud.is-density-cramped .ui-center > .ui-right {
+	max-height: calc(100% - var(--gap) * 5 - 30px - var(--adv-h));
+}
+
+/* Tight: the strip must fit 1280 wide with Menu and Audio on it. */
+.aitower-hud.is-density-tight .ui-strip,
+.aitower-hud.is-density-cramped .ui-strip {
+	gap: var(--gap);
+	padding: 0 var(--gap);
+}
+.aitower-hud.is-density-tight .ui-strip .ui-maint .ui-big,
+.aitower-hud.is-density-cramped .ui-strip .ui-maint .ui-big {
+	font-size: var(--fs-small);
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance {
+	min-width: 80px;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-chip,
+.aitower-hud.is-density-cramped .ui-strip .ui-chip {
+	padding: 4px 8px;
+}
+
+.aitower-hud .ui-strip .ui-sysbox {
+	flex-direction: row;
+	align-items: center;
+	gap: var(--gap);
+}
+
+.aitower-hud .ui-strip .ui-maint {
+	flex: 0 1 auto;
+	min-width: 0;
+	overflow: hidden;
+}
+.aitower-hud .ui-strip .ui-maint .ui-big {
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.aitower-hud .ui-strip .ui-mute {
+	flex: none;
+}

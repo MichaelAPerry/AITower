@@ -28,9 +28,30 @@ export function hudScale(s: Pick<Settings, "textScale">): number {
 	return Math.min(TEXT_SCALE_MAX, Math.max(TEXT_SCALE_MIN, v));
 }
 
+/**
+ * UI scale multiplier. A fixed preset is used as is. "auto" measures the window against 1920x1080:
+ * 1.25 from about 2500x1400 (a 1440p screen), 1.5 from about 3400x1900 (4K); below that 100%.
+ */
+export function uiScaleFactor(s: Pick<Settings, "uiScale">, width: number, height: number): number {
+	const u = s.uiScale;
+	if (u === 1 || u === 1.25 || u === 1.5) return u;
+	const fit = Math.min(width / 1920, height / 1080);
+	if (fit >= 1.75) return 1.5;
+	if (fit >= 1.3) return 1.25;
+	return 1;
+}
+
+/** Whole HUD zoom: the Text size slider times the UI scale preset. */
+export function effectiveHudScale(s: Pick<Settings, "textScale" | "uiScale">, width: number, height: number): number {
+	return Math.round(hudScale(s) * uiScaleFactor(s, width, height) * 1000) / 1000;
+}
+
 /** Inline custom properties for the `.aitower-hud` root (consumed by ui.css as `zoom: var(--hud-scale)`). */
-export function settingsToCssVars(s: Pick<Settings, "textScale">): Record<string, string> {
-	return { "--hud-scale": String(Math.round(hudScale(s) * 100) / 100) };
+export function settingsToCssVars(s: Pick<Settings, "textScale"> & Partial<Pick<Settings, "uiScale">>, viewport?: { width: number; height: number }): Record<string, string> {
+	const w = viewport?.width ?? 1920;
+	const h = viewport?.height ?? 1080;
+	const k = uiScaleFactor({ uiScale: s.uiScale ?? 1 }, w, h);
+	return { "--hud-scale": String(Math.round(hudScale(s) * k * 100) / 100) };
 }
 
 /** Root classes that switch presentation features. Same stylesheet hooks as `prefers-reduced-motion`. */

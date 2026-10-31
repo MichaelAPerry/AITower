@@ -1,4 +1,4 @@
-import { type GameState, type GameStore, type HorrorIntensity, type SaveSlotInfo, type SaveSlotId, normalizeSettings } from "@aitower/shared";
+import { type GameState, type GameStore, type HorrorIntensity, type SaveSlotInfo, type SaveSlotId, UI_SCALES, normalizeSettings } from "@aitower/shared";
 import { useRef, useState } from "react";
 import { fmtMoney } from "../format";
 import { pushNotice } from "../notices";
@@ -232,6 +232,16 @@ export function SettingsPane({ store, state }: PaneProps) {
 			</SettingRow>
 			<SettingRow label="Text size" hint="Scales the whole control room, 85% to 150%.">
 				<Slider label="Text size" value={s.textScale} min={TEXT_SCALE_MIN} max={TEXT_SCALE_MAX} step={0.05} readout={`${Math.round(s.textScale * 100)}%`} onChange={(v) => set({ textScale: v })} />
+			</SettingRow>
+			<SettingRow label="UI scale" hint="Sizes text, faces and panels together; the tower view stays sharp. Auto picks 100% up to Full HD, 125% from about 1440p, 150% from 4K.">
+				<span className="ui-choice" role="radiogroup" aria-label="UI scale">
+					{UI_SCALES.map((u) => (
+						// biome-ignore lint/a11y/useSemanticElements: styled button group acts as a radio group; native radio inputs would change the markup and CSS
+						<button key={String(u)} type="button" role="radio" aria-checked={s.uiScale === u} className={`ui-btn ${s.uiScale === u ? "is-on" : ""}`} onClick={() => set({ uiScale: u })}>
+							{u === "auto" ? "Auto" : `${Math.round(u * 100)}%`}
+						</button>
+					))}
+				</span>
 			</SettingRow>
 			<SettingRow label="Advisor tips" hint="Short tips from the four advisors, once each per game. Decisions always appear, and clicking a portrait still answers.">
 				<Toggle on={s.advisorTips} onClick={() => set({ advisorTips: !s.advisorTips })} label="TIPS" />

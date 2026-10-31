@@ -32,19 +32,20 @@
 	--f-num: "DotGothic16", "M PLUS Rounded 1c", ui-monospace, monospace;
 	/* spacing and sizes */
 	--gap: 8px;
-	--strip-h: 64px;
-	--drawer-w: 420px;
-	--dtab-w: 136px;
-	--dock-w: 224px;
-	/* type scale: floors are 14px labels, 16px+ body; VN dialogue uses --fs-vn */
-	--fs-label: 14px;
-	--fs-small: 15px;
-	--fs-body: 17px;
-	--fs-lead: 19px;
-	--fs-num: 22px;
-	--fs-big: 28px;
-	--fs-vn: 24px;
-	--hit: 40px;
+	--strip-h: 84px;
+	--drawer-w: 520px;
+	--dtab-w: 164px;
+	--dock-w: 120px;
+	/* type scale: floors are 16px labels, 20px body; VN dialogue uses --fs-vn */
+	--fs-label: 16px;
+	--fs-small: 17px;
+	--fs-body: 20px;
+	--fs-lead: 22px;
+	--fs-num: 24px;
+	--fs-big: 32px;
+	--fs-vn: 28px;
+	--hit: 44px;
+	--adv-h: 136px;
 	--tracking: 0.08em;
 
 	/* ── legacy tokens remapped onto the synthetic ones ── */

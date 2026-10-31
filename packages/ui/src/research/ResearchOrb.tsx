@@ -87,7 +87,7 @@ function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; 
 	const cost = ready ? `${fmt(n.tech.cost)} RP` : null;
 	const lines = n.lines;
 	const total = lines.length + (cost ? 1 : 0);
-	const y0 = -((total - 1) * 19) / 2 + 5;
+	const y0 = -((total - 1) * 22) / 2 + 5;
 	return (
 		// biome-ignore lint/a11y/useSemanticElements: an SVG group cannot be a <button>
 		<g
@@ -141,12 +141,12 @@ function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; 
 				{labelled && (
 					<text x={lx} y={y0} textAnchor={side > 0 ? "start" : "end"}>
 						{lines.map((l, i) => (
-							<tspan key={l} x={lx} dy={i ? 19 : 0} className={`orb-lab is-${st}`}>
+							<tspan key={l} x={lx} dy={i ? 22 : 0} className={`orb-lab is-${st}`}>
 								{l}
 							</tspan>
 						))}
 						{cost && (
-							<tspan x={lx} dy={19} className={`orb-cost ${st === "poor" ? "is-short" : ""}`}>
+							<tspan x={lx} dy={22} className={`orb-cost ${st === "poor" ? "is-short" : ""}`}>
 								{cost}
 							</tspan>
 						)}
@@ -202,11 +202,11 @@ function Cluster({ cell, x, y, labelled, a }: { cell: Cell; x: number; y: number
 				</text>
 				{hot && <circle r={R + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}
 				{labelled && (
-					<text y={R + 24} textAnchor="middle">
+					<text y={R + 26} textAnchor="middle">
 						<tspan x={0} className={`orb-lab ${st.ready ? "is-avail" : "is-done"}`}>
 							{name}
 						</tspan>
-						<tspan x={0} dy={19} className="orb-sub">
+						<tspan x={0} dy={22} className="orb-sub">
 							{sub}
 						</tspan>
 					</text>

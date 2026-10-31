@@ -1,6 +1,6 @@
-import { DEFAULT_SETTINGS } from "@aitower/shared";
+import { DEFAULT_SETTINGS, normalizeSettings } from "@aitower/shared";
 import { describe, expect, it } from "vitest";
-import { HEAT_RAMP_COLORBLIND, HEAT_RAMP_TEMPS, densityFor, heatRamp, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
+import { HEAT_RAMP_COLORBLIND, HEAT_RAMP_TEMPS, densityFor, effectiveHudScale, uiScaleFactor, heatRamp, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 
 const s = (p: Partial<typeof DEFAULT_SETTINGS>) => ({ ...DEFAULT_SETTINGS, ...p });
 
@@ -55,5 +55,32 @@ describe("layout helpers", () => {
 		expect(isSmallScreen(1023, 900)).toBe(true);
 		expect(isSmallScreen(1440, 639)).toBe(true);
 		expect(isSmallScreen(390, 844)).toBe(true);
+	});
+});
+
+describe("UI scale", () => {
+	it("defaults to auto", () => {
+		expect(DEFAULT_SETTINGS.uiScale).toBe("auto");
+		expect(normalizeSettings({}).uiScale).toBe("auto");
+	});
+	it("keeps the three presets and repairs anything else to auto", () => {
+		for (const u of [1, 1.25, 1.5]) expect(normalizeSettings({ uiScale: u }).uiScale).toBe(u);
+		for (const bad of [2, "125", null, Number.NaN, "big"]) expect(normalizeSettings({ uiScale: bad }).uiScale).toBe("auto");
+		expect(normalizeSettings({ uiScale: "auto" }).uiScale).toBe("auto");
+	});
+	it("auto picks 100% at 1280x720 and 1920x1080, 125% at 2560x1440, 150% at 4K", () => {
+		const a = s({ uiScale: "auto" });
+		expect(uiScaleFactor(a, 1280, 720)).toBe(1);
+		expect(uiScaleFactor(a, 1920, 1080)).toBe(1);
+		expect(uiScaleFactor(a, 2560, 1440)).toBe(1.25);
+		expect(uiScaleFactor(a, 3840, 2160)).toBe(1.5);
+		expect(uiScaleFactor(a, 3840, 1080)).toBe(1);
+	});
+	it("a fixed preset ignores the window and multiplies the text scale into --hud-scale", () => {
+		expect(uiScaleFactor(s({ uiScale: 1.5 }), 1280, 720)).toBe(1.5);
+		expect(settingsToCssVars(s({ uiScale: 1.25 }), { width: 1280, height: 720 })).toEqual({ "--hud-scale": "1.25" });
+		expect(settingsToCssVars(s({ uiScale: 1.5, textScale: 1.1 }), { width: 1920, height: 1080 })).toEqual({ "--hud-scale": "1.65" });
+		expect(settingsToCssVars(s({ uiScale: "auto" }), { width: 2560, height: 1440 })).toEqual({ "--hud-scale": "1.25" });
+		expect(effectiveHudScale(s({ uiScale: 1.5 }), 1920, 1080)).toBe(1.5);
 	});
 });
