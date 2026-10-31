@@ -39,10 +39,9 @@ function doStep(sim: Sim, id: string, act: () => void): void {
 
 describe("every lesson in the content is scripted below", () => {
 	it("lists exactly these lessons, numbered 1 to n, each with its own scenario", () => {
-		expect(content.lessons.map((l) => l.id)).toEqual(["first_watt", "earn_your_keep", "grow_the_tower", "the_three_trees", "lights_out"]);
-		// Lesson 5 (Going Liquid) is not built yet, so the numbers skip it.
+		expect(content.lessons.map((l) => l.id)).toEqual(["first_watt", "earn_your_keep", "grow_the_tower", "the_three_trees", "liquid", "lights_out"]);
 		content.lessons.forEach((l, i) => {
-			expect(l.number).toBe(i < 4 ? i + 1 : 6);
+			expect(l.number).toBe(i + 1);
 			expect(content.scenarios[l.scenario]?.lesson).toBe(l.id);
 		});
 	});
@@ -136,6 +135,44 @@ describe("Lesson 4: the three trees", () => {
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 6000);
 		expect(sim.view().soul?.trees.greentech.sp).toBeGreaterThan(0);
 		expect(lessonOf(sim).stars).toBe(3);
+	});
+});
+
+describe("Lesson 5: going liquid", () => {
+	const play = () => {
+		const sim = createSim(content, "lesson_liquid", 7);
+		run(sim, 3);
+		const pipe = Array.from({ length: 14 }, (_, i) => ({ x: 6 + i, floor: 1 }));
+		doStep(sim, "pipe", () => ok(sim, { type: "buildConduit", layer: "coolant", cells: pipe }));
+		doStep(sim, "chiller", () => ok(sim, { type: "place", defId: "chiller", floor: 1, x: 14 }));
+		doStep(sim, "cdu", () => ok(sim, { type: "place", defId: "cdu", floor: 1, x: 18 }));
+		return sim;
+	};
+	const retrofit = (sim: Sim) => {
+		const rack = sim.view().facilities.find((f) => f.defId === "rack_air_gpu" && f.x === 6);
+		if (!rack) throw new Error("no rack to retrofit");
+		doStep(sim, "rack", () => ok(sim, { type: "retrofit", facilityId: rack.id, tree: "synthetic" }));
+	};
+	it("is won with a pipe, a chiller, a CDU and an LC-2 rack, three stars", () => {
+		const sim = play();
+		retrofit(sim);
+		doStep(sim, "heat", () => undefined);
+		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
+		const l = lessonOf(sim);
+		expect(sim.view().facilities.some((f) => f.defId === "rack_dlc_gpu")).toBe(true);
+		expect(l.star2).toBe(true);
+		expect(l.star3).toBe(true);
+		expect(l.stars).toBe(3);
+	});
+	it("is lost when the chiller is switched off while the rack runs: it trips from heat", () => {
+		const sim = play();
+		retrofit(sim);
+		doStep(sim, "heat", () => undefined);
+		const chiller = sim.view().facilities.find((f) => f.defId === "chiller");
+		if (!chiller) throw new Error("no chiller");
+		ok(sim, { type: "setEnabled", facilityId: chiller.id, enabled: false });
+		until(sim, "the lesson is lost", () => lessonOf(sim).status === "lost", 1500);
+		expect(lessonOf(sim).stars).toBe(0);
 	});
 });
 

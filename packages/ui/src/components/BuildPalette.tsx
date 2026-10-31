@@ -146,7 +146,11 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
-	if (tab === "structure" && !allowedIds(view)) {
+	if (tab === "structure" && allowedIds(view)) {
+		// A lesson shows only the pipe it teaches.
+		const lesson = allowedIds(view);
+		cards = structure(content).filter((i) => lesson?.has(i.key));
+	} else if (tab === "structure") {
 		// Coolant and nutrient piping wait for the research that brings liquid cooling / wetware: a "Coming at" row instead of a card.
 		const all = structure(content);
 		cards = all.filter((i) => !structureGate(i, view, content));

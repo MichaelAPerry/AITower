@@ -71,11 +71,22 @@ describe("goal bar and catalog", () => {
 describe("the lesson list", () => {
 	it("lists exactly the lessons that exist, in order, with a next lesson for all but the last", () => {
 		const list = lessonsInOrder(content);
-		expect(list.map((l) => l.number)).toEqual([1, 2, 3, 4, 6]);
+		expect(list.map((l) => l.number)).toEqual([1, 2, 3, 4, 5, 6]);
 		expect(nextLessonOf(content, list[0])?.id).toBe(list[1].id);
-		// Lesson 5 is not built yet: the next one after 4 is 6.
-		expect(nextLessonOf(content, list[3])?.number).toBe(6);
-		expect(nextLessonOf(content, list[4])).toBeUndefined();
+		// Numbered 1 to 6 with no gap: 4 leads to 5, 5 leads to 6.
+		expect(nextLessonOf(content, list[3])?.number).toBe(5);
+		expect(nextLessonOf(content, list[4])?.number).toBe(6);
+		expect(nextLessonOf(content, list[5])).toBeUndefined();
+	});
+});
+
+describe("lesson 5 pipe step", () => {
+	const liquid = content.lessons.find((l) => l.id === "liquid");
+	it("marks the pipe run on the floor and shows the Structure tab with the coolant pipe", () => {
+		if (!liquid) throw new Error("no liquid lesson");
+		const g = slotGhost(liquid, lv({ id: "liquid", current: 0 }), content);
+		expect(g?.cells.length).toBe(liquid.steps[0].slot?.width);
+		expect(lessonTabs(content, { lesson: lv({ id: "liquid", allowed: [{ defId: "conduit-coolant" }] }) })).toContain("structure");
 	});
 });
 

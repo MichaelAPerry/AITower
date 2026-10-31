@@ -805,5 +805,88 @@
 		],
 		"bots": [],
 		"spareParts": 0
+	},
+	"lesson_liquid": {
+		"id": "lesson_liquid",
+		"name": "Lesson 5: Going Liquid",
+		"description": "A small working hall with Level 2 and the liquid-loop research done. Cass shows you a coolant pipe, a chiller, a CDU and a liquid-cooled rack.",
+		"width": 48,
+		"floorMin": -5,
+		"floorMax": 40,
+		"startingCash": 5000000,
+		"sandbox": true,
+		"lesson": "liquid",
+		"slabs": [
+			[
+				-1,
+				4,
+				43
+			],
+			[
+				0,
+				0,
+				47
+			],
+			[
+				1,
+				4,
+				43
+			]
+		],
+		"facilities": [
+			{
+				"defId": "grid_tie",
+				"floor": -1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 6
+			},
+			{
+				"defId": "rack_air_gpu",
+				"floor": 1,
+				"x": 8
+			},
+			{
+				"defId": "crah_unit",
+				"floor": 1,
+				"x": 10
+			}
+		],
+		"conduits": [
+			[
+				"power",
+				-1,
+				4,
+				43
+			],
+			[
+				"power",
+				0,
+				4,
+				43
+			],
+			[
+				"power",
+				1,
+				4,
+				43
+			]
+		],
+		"lifts": [
+			{
+				"x": 24,
+				"floorMin": -1,
+				"floorMax": 1
+			}
+		],
+		"bots": [],
+		"spareParts": 0,
+		"startTier": 2,
+		"researched": [
+			"chilled_loop"
+		]
 	}
 }

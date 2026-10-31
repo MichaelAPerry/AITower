@@ -36,6 +36,25 @@ describe("chapters", () => {
 	});
 });
 
+describe("guide pages", () => {
+	const guides = chapters.filter((c) => c.group === "guide");
+	it("has the Money and the ladder pages, always open, short and plain", () => {
+		expect(guides.map((c) => c.id)).toEqual(["ch:books", "ch:ladder"]);
+		for (const c of guides) {
+			expect(isUnlocked(c.unlock, view(1)), c.id).toBe(true);
+			expect(wordCount(c), c.id).toBeLessThanOrEqual(190);
+			expect(c.blocks.length, c.id).toBeGreaterThanOrEqual(3);
+		}
+		const text = (id: string) => (guides.find((c) => c.id === id)?.blocks.map((b) => b.p).join(" ") ?? "").toLowerCase();
+		for (const w of ["loan", "penalt", "audit"]) expect(text("ch:books")).toContain(w);
+		for (const w of ["rung", "retrofit", "half", "level", "research"]) expect(text("ch:ladder")).toContain(w);
+	});
+	it("says nothing about seals, closed trees, bonds, epilogues or endings", () => {
+		const all = guides.flatMap((c) => c.blocks.map((b) => b.p)).join(" ").toLowerCase();
+		for (const w of ["seal", "closed", "bond", "epilogue", "ending", "residue"]) expect(all, w).not.toContain(w);
+	});
+});
+
 describe("unlock rules", () => {
 	it("core chapters are always open; Level chapters open at their Level", () => {
 		expect(unlockedIds(chapters, view(1)).filter((id) => id.startsWith("ch:level"))).toEqual(["ch:level1"]);
@@ -113,7 +132,7 @@ describe("chapter epigraphs", () => {
 	it("every chapter has a real quote that is recorded in docs/QUOTES.md with a URL", async () => {
 		const { readFileSync } = await import("node:fs");
 		const docs = readFileSync(new URL("../../../../docs/QUOTES.md", import.meta.url), "utf8");
-		for (const c of chapters) {
+		for (const c of chapters.filter((x) => x.group !== "guide")) {
 			expect(c.flavor, c.id).toBeDefined();
 			const row = docs.split("\n").find((l) => l.startsWith(`| \`${c.id}\` |`));
 			expect(row, c.id).toContain(c.flavor?.quote);
