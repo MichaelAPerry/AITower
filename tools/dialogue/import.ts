@@ -28,11 +28,28 @@ export const FILES = {
 	events: "packages/content/src/data/events.json",
 	lessons: "packages/content/src/data/lessons.json",
 	achievements: "packages/content/src/data/achievements.json",
+	scenarios: "packages/content/src/data/scenarios.json",
 } as const;
 
-/** Files a project may lack (older fixtures): read as empty. */
-const OPTIONAL_FILES: readonly string[] = [FILES.achievements];
-const EMPTY_ACHIEVEMENTS = `{"achievements":[],"offDuty":{},"scenes":[]}`;
+/** Files a project may lack (older fixtures): read as these empty forms. */
+const OPTIONAL_FILES: Record<string, string> = {
+	[FILES.achievements]: `{"achievements":[],"offDuty":{},"scenes":[]}`,
+	[FILES.scenarios]: "{}",
+};
+
+/**
+ * Ids the owner's short file docs/OWNER_TEXT.md uses, mapped to the slots they land on, so the owner never has to rename a
+ * line. (`scenario.<id>.description` is a slot id of its own and needs no alias.)
+ */
+export const OWNER_ALIASES: Record<string, string> = {
+	end_bankrupt_note: "ach.ui.end_bankrupt_note",
+	"credits.title": "ach.ui.credits_title",
+	"credits.code": "ach.ui.credits_code",
+	"credits.art": "ach.ui.credits_art",
+	"credits.inspired": "ach.ui.credits_inspired",
+	"credits.fonts": "ach.ui.credits_fonts",
+	"credits.quotes": "ach.ui.credits_quotes",
+};
 
 /** The grammar from export.ts / HANDOFF. */
 export const LINE = /^- \[([a-z0-9_.]+)( mood=[a-z]+)?\] ([A-Za-z][A-Za-z ]*): (\S.*)$/;
@@ -255,7 +272,7 @@ function advisorSlots(src: string, add: (s: Slot) => void): void {
 /** Reads the six target files under `root` and lists every editable value in them, in export order. */
 export function loadProject(root: string = DEFAULT_ROOT): Project {
 	const files: Record<string, string> = {};
-	for (const f of Object.values(FILES)) files[f] = OPTIONAL_FILES.includes(f) && !existsSync(resolve(root, f)) ? EMPTY_ACHIEVEMENTS : readFileSync(resolve(root, f), "utf8");
+	for (const f of Object.values(FILES)) files[f] = f in OPTIONAL_FILES && !existsSync(resolve(root, f)) ? (OPTIONAL_FILES[f] as string) : readFileSync(resolve(root, f), "utf8");
 	const slots: Slot[] = [];
 	const add = (s: Slot): void => {
 		slots.push(s);
@@ -375,6 +392,12 @@ export function loadProject(root: string = DEFAULT_ROOT): Project {
 		});
 	}
 
+	{
+		const put = json(FILES.scenarios);
+		const scenarios = JSON.parse(files[FILES.scenarios] as string) as Record<string, { description?: string }>;
+		for (const [id, sc] of Object.entries(scenarios)) put(`scenario.${id}`, `scenario.${id}.description`, "Description", [id, "description"], sc.description);
+	}
+
 	return { root, files, slots };
 }
 
@@ -446,7 +469,7 @@ export function importDialogue(project: Project, md: string, opts: ImportOptions
 			else r.errors.push(`line ${n}: does not match the editable-line grammar: ${raw.slice(0, 100)}`);
 			return;
 		}
-		const id = m[1] as string;
+		const id = OWNER_ALIASES[m[1] as string] ?? (m[1] as string);
 		if (byId.has(id)) {
 			r.errors.push(`line ${n}: duplicate id ${id} (first on line ${byId.get(id)?.n})`);
 			return;

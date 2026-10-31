@@ -406,7 +406,7 @@ The portrait captions are not separate lines: a caption is the last spoken line 
 > Credits screen: line.
 - [ach.ui.credits_fonts] Label: Fonts: DotGothic16 and VT323 (Google Fonts, SIL Open Font License).
 > Credits screen: line above the list of quotes. The list itself is built from the game's quotes (docs/QUOTES.md), not edited here.
-- [ach.ui.credits_quotes] Label: Quotes: each quote in the game names its author and source. Full list below.
+- [ach.ui.credits_quotes] Label: Quotes: each quote in the game names its author and source. Full list in the credits.
 > Credits screen: heading of the quote list.
 - [ach.ui.credits_quotes_head] Label: Quotes
 

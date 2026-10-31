@@ -133,6 +133,8 @@ const ach = load<{
 	scenes: { id: string; title: string; location: string; lines: Reply[] }[];
 }>("achievements.json");
 
+const scenarios = load<Record<string, { name: string; description?: string }>>("scenarios.json");
+
 // ─── Line builders ──────────────────────────────────────────────────────
 
 const seen = new Set<string>();
@@ -566,6 +568,18 @@ function achievementsDialogueSection(): void {
 	offDutyFrames();
 	for (const s of ach.scenes) galleryScene(s);
 }
+
+sections.push({
+	title: "New-game screen: site descriptions",
+	body: () => {
+		meta("Shown on the new-game screen under each site's name (scenario ids).");
+		for (const [id, sc] of Object.entries(scenarios)) {
+			if (!sc.description?.trim()) continue;
+			h(3, `${sc.name} (\`${id}\`)`);
+			text(`scenario.${id}.description`, "Description", sc.description);
+		}
+	},
+});
 
 sections.push({ title: "Achievements and the off-duty gallery", body: achievementsDialogueSection });
 
