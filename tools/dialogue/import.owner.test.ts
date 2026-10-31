@@ -32,11 +32,11 @@ describe("docs/OWNER_TEXT.md ids", () => {
 		expect(out.starter.description).toBe("test");
 	});
 
-	it("the owner's current file matches the data: no changes, only the empty note", () => {
+	it("the owner's current file matches the data: no changes, no empty slots", () => {
 		const md = readFileSync(new URL("../../docs/OWNER_TEXT.md", import.meta.url), "utf8");
 		const r = importDialogue(project, md, {});
 		expect(r.errors).toEqual([]);
 		expect(r.edits).toEqual([]);
-		expect(r.empty).toContain("end_bankrupt_note");
+		expect(r.empty).toEqual([]);
 	});
 });

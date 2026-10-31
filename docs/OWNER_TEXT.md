@@ -14,7 +14,7 @@ Edit the text after the label, as in the dialogue files. Send it back and it get
 > Shown on the Bankrupt ending screen when the hidden achievement "Notice of Termination" unlocks for the first time (spec id `end_bankrupt_note`, not built yet). One or two short lines, narrator or one advisor. It should match the tone of the ending (the receiver, the locks, the red lamp).
 > For reference, the achievement's own text is: "Run out of money for a full day."
 
-- [end_bankrupt_note] narrator: 
+- [end_bankrupt_note] narrator: The world moves on without you.
 
 ## 3. Credits screen
 

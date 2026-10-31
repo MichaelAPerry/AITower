@@ -386,7 +386,7 @@ The portrait captions are not separate lines: a caption is the last spoken line 
 > Ending screen: in the `Off duty:` line, when the 18th achievement unlocked the after-hours set.
 - [ach.ui.end_bed] Label: the after-hours set
 > Bankrupt ending screen, under the record, the first time "Notice of Termination" unlocks. One or two short lines (spec id `end_bankrupt_note`). PLACEHOLDER: write your own.
-- [ach.ui.end_bankrupt_note] Label: The lamp in the control room stays on.
+- [ach.ui.end_bankrupt_note] Label: The world moves on without you.
 
 ## 11. Credits screen
 

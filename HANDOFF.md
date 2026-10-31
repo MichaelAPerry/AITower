@@ -20,11 +20,11 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
   - Lesson 4 outro = owner's new words. Lesson 3 outro and lesson 4 opening ("Bea again. Last lesson...") kept by owner's choice.
   - Handbook "More guides": two pages (Loans, penalties and the audit; Climbing a tree's ladder).
   - Credits screen (title menu + system drawers): owner lines incl. "Game design and direction: Perry", plus all 168 quotes read from content data. Both doubtful quotes now have primary sources (Weinberg, Science 177, 1972, p.33; Verne, The Mysterious Island Part 2 ch. 11). `docs/QUOTES_CHECK.md` updated.
-  - Bankrupt note slot `ach.ui.end_bankrupt_note`, shown in the ending's service-record panel when `end_bankrupt` unlocks. The owner left it EMPTY in `docs/OWNER_TEXT.md`, so the placeholder "The lamp in the control room stays on." is still in the game.
+  - Bankrupt note slot `ach.ui.end_bankrupt_note`, shown in the ending's service-record panel when `end_bankrupt` unlocks. The owner left it EMPTY in `docs/OWNER_TEXT.md`, the owner has since set it to "The world moves on without you."
   - Importer (`tools/dialogue/import.ts`): OWNER_ALIASES (end_bankrupt_note, credits.*) and `scenario.<id>.description` slots. Starter description imported.
   - Locked gallery portraits: dimmed head crop (per-advisor box `LOCKED_LOOK` in `packages/ui/src/achievements/gallery.ts`; "hide" gives a lock tile). Locked frames show the owner's hint lines.
   - vitest 3.2.7 -> 5.0.5; `npm audit` clean.
-  - `fast_win`: the owner's new text says day 40 for all three trees. The owner's note read "not the 40 day change"; Opus took it as "note the 40 day change". So `FAST_WIN_DAYS` is now 40/40/40 (`packages/ui/src/achievements/achievements.ts`; also `tools/sim-cli` soulRun TARGET_DAYS and `tools/sim-cli/src/fastwin.test.ts`). CONFIRM WITH OWNER. Revert is commit 422328d. Headless check before the change (24 seeds, scripted player), best/median days: Lattice 23/28, Flesh 39/42, Garden 37/41. At 40, Lattice is easy, Flesh and Garden are fair. Opt-in test: `FASTWIN=1 npx vitest run tools/sim-cli/src/fastwin.test.ts`.
+  - `fast_win`: the owner's new text says day 40 for all three trees. The owner's note read "not the 40 day change"; Opus took it as "note the 40 day change". So `FAST_WIN_DAYS` is now 40/40/40 (`packages/ui/src/achievements/achievements.ts`; also `tools/sim-cli` soulRun TARGET_DAYS and `tools/sim-cli/src/fastwin.test.ts`). Confirmed by owner Oct 31. Revert is commit 422328d. Headless check before the change (24 seeds, scripted player), best/median days: Lattice 23/28, Flesh 39/42, Garden 37/41. At 40, Lattice is easy, Flesh and Garden are fair. Opt-in test: `FASTWIN=1 npx vitest run tools/sim-cli/src/fastwin.test.ts`.
   - Owner imported their edits of `docs/ACHIEVEMENTS_TEXT.md`, `docs/OWNER_TEXT.md`, `docs/PLACEHOLDER_TEXT.md` (dry-run, then `--write`). Plain line `ch:books.p1` "The Bank lends" applied by hand.
   - Cleanup: `docs/DIALOGUE_NEW.md` deleted, stale docs and comments fixed, `docs/ROADMAP_1.0.md` marked historic, reputation notes fixed.
 
@@ -41,16 +41,16 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 - Icons and menu pictures: image sheets from ChatGPT. In-tower (world) sprites stay drawn in code; a one-rack image test (sheet 9 in `docs/ICON_PROMPTS.md`) is optional, later.
 - Locked gallery portraits = head crop (done).
 - Credits: code by Claude; all art generated with ChatGPT, some sprites by Claude; inspired by SimTower, nothing borrowed; quotes credited with sources. Design line = "Perry".
-- `fast_win` days 40 / 40 / 40 (to confirm, see section 1).
+- `fast_win` days 40 / 40 / 40 (confirmed by owner Oct 31).
 - Nothing goes to main until the owner has play-tested and says so. Then a new README for players.
 
 ## 3. Next, in order
 
 a. Ask the owner, in one short message:
-   1. Confirm `fast_win` 40/40/40.
-   2. The bankrupt note line (still placeholder).
-   3. Possible typos in their lines. Fix only on a yes: "Water needs a plumping" (`liquid.pipe.say3`), "favortie" (`lights_out.battery.after1`), "when the grid runs fails" (`lights_out.genset.after1`), "doing it's job" (`lights_out.outage.say2`).
-   4. The Handbook Level chapter line "Ignoring a tree's seal until it closes." (`packages/ui/src/handbook/chapters.ts`, `levelAdvice`) mentions the seal: keep or new words.
+   1. DONE: `fast_win` 40/40/40 confirmed.
+   2. DONE: bankrupt note = "The world moves on without you."
+   3. DONE: all four typos fixed. Were: "Water needs a plumping" (`liquid.pipe.say3`), "favortie" (`lights_out.battery.after1`), "when the grid runs fails" (`lights_out.genset.after1`), "doing it's job" (`lights_out.outage.say2`).
+   4. DONE: Handbook levelAdvice seal line kept.
    5. Keep or drop branches `wip/gallery-art` and `wip/off-duty` (each 1 commit not in main) and `claude/serene-ramanujan-ojshkh` (six 2-3 MB concept PNGs).
 b. The owner deletes these merged remote branches by hand on GitHub (agents get HTTP 403 on delete): `wip/dialogue-import`, `wip/endings`, `wip/lessons`, `wip/owner-art`, `wip/owner-dialogue`, `wip/tree-sprites`.
 c. Give the owner a playable build to play-test. Fix what they report.

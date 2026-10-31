@@ -1752,7 +1752,7 @@ Choice `add`:
 - [liquid.pipe.objective] Objective: Lay a coolant pipe along the glowing run
 - [liquid.pipe.say1] cass: We're going to learn some cooling.
 - [liquid.pipe.say2] cass: Air only goes so far, after that we use water. That's {{dlc|liquid cooling}}.
-- [liquid.pipe.say3] cass: Water needs a plumping. So pick the Coolant pipe. Drag it along the glowing line.
+- [liquid.pipe.say3] cass: Water needs a plumbing. So pick the Coolant pipe. Drag it along the glowing line.
 - [liquid.pipe.after1] cass: Excellent, now you got it flowing!
 
 #### Step `chiller`
@@ -1809,7 +1809,7 @@ Choice `add`:
 - [lights_out.battery.say1] bea: We don't know when the power will go out.
 - [lights_out.battery.say2] bea: The point is to be prepared for any eventuality.
 - [lights_out.battery.say3] bea: A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot.
-- [lights_out.battery.after1] bea: Okay. My least favortie exercise X_X.
+- [lights_out.battery.after1] bea: Okay. My least favorite exercise X_X.
 
 #### Step `genset`
 
@@ -1818,7 +1818,7 @@ Choice `add`:
 - [lights_out.genset.say1] bea: Batteries don't last. Maybe an hour and a half at this load.
 - [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Y'know dirty, loud, money grubbin' pollution.
 - [lights_out.genset.say3] bea: Open Power. Pick the Diesel Genset. Click the glowing spot.
-- [lights_out.genset.after1] bea: Right. It starts itself when the grid runs fails. Chugging like a freakin' train.
+- [lights_out.genset.after1] bea: Right. It starts itself when the grid fails. Chugging like a freakin' train.
 
 #### Step `watch`
 
@@ -1835,7 +1835,7 @@ Choice `add`:
 > Runs scripted beat `trip` after the lines.
 - [lights_out.outage.objective] Objective: Ride out the outage
 - [lights_out.outage.say1] bea: There. The grid's gone.
-- [lights_out.outage.say2] bea: The battery is doing it's job. The genset's waking up. Watch the load.
+- [lights_out.outage.say2] bea: The battery is doing its job. The genset's waking up. Watch the load.
 - [lights_out.outage.after1] bea: Genset's carrying them. The battery's topping up. 100% uptime! Yay!
 - [lights_out.outage.after2] bea: Grid's back. The genset stops automatically!
 
@@ -2083,7 +2083,7 @@ Choice `add`:
 > Ending screen: in the `Off duty:` line, when the 18th achievement unlocked the after-hours set.
 - [ach.ui.end_bed] Label: the after-hours set
 > Bankrupt ending screen, under the record, the first time "Notice of Termination" unlocks. One or two short lines (spec id `end_bankrupt_note`). PLACEHOLDER: write your own.
-- [ach.ui.end_bankrupt_note] Label: The lamp in the control room stays on.
+- [ach.ui.end_bankrupt_note] Label: The world moves on without you.
 
 ### Credits screen
 

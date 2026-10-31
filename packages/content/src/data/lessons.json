@@ -1061,7 +1061,7 @@
 					"say": [
 						"We're going to learn some cooling.",
 						"Air only goes so far, after that we use water. That's {{dlc|liquid cooling}}.",
-						"Water needs a plumping. So pick the Coolant pipe. Drag it along the glowing line."
+						"Water needs a plumbing. So pick the Coolant pipe. Drag it along the glowing line."
 					],
 					"after": [
 						"Excellent, now you got it flowing!"
@@ -1370,7 +1370,7 @@
 						"A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot."
 					],
 					"after": [
-						"Okay. My least favortie exercise X_X."
+						"Okay. My least favorite exercise X_X."
 					],
 					"slot": {
 						"floor": -1,
@@ -1406,7 +1406,7 @@
 						"Open Power. Pick the Diesel Genset. Click the glowing spot."
 					],
 					"after": [
-						"Right. It starts itself when the grid runs fails. Chugging like a freakin' train."
+						"Right. It starts itself when the grid fails. Chugging like a freakin' train."
 					],
 					"slot": {
 						"floor": -1,
@@ -1475,7 +1475,7 @@
 					],
 					"say": [
 						"There. The grid's gone.",
-						"The battery is doing it's job. The genset's waking up. Watch the load."
+						"The battery is doing its job. The genset's waking up. Watch the load."
 					],
 					"after": [
 						"Genset's carrying them. The battery's topping up. 100% uptime! Yay!",

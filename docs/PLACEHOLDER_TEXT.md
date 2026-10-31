@@ -17,7 +17,7 @@ Lesson `liquid`, file `packages/content/src/data/lessons.json`, advisor cass. Ti
 - [liquid.pipe.objective] Objective: Lay a coolant pipe along the glowing run
 - [liquid.pipe.say1] cass: We're going to learn some cooling.
 - [liquid.pipe.say2] cass: Air only goes so far, after that we use water. That's {{dlc|liquid cooling}}.
-- [liquid.pipe.say3] cass: Water needs a plumping. So pick the Coolant pipe. Drag it along the glowing line.
+- [liquid.pipe.say3] cass: Water needs a plumbing. So pick the Coolant pipe. Drag it along the glowing line.
 - [liquid.pipe.after1] cass: Excellent, now you got it flowing!
 - [liquid.chiller.objective] Objective: Place a Chiller on the glowing spot
 - [liquid.chiller.say1] cass: A {{chiller|chiller}} um... chills the water haha. 
@@ -58,12 +58,12 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 - [lights_out.battery.say1] bea: We don't know when the power will go out. 
 - [lights_out.battery.say2] bea: The point is to be prepared for any eventuality. 
 - [lights_out.battery.say3] bea: A {{ups|battery bank}} holds power for when the grid drops. Open Power. Pick the Battery Bank. Click the glowing spot.
-- [lights_out.battery.after1] bea: Okay. My least favortie exercise X_X. 
+- [lights_out.battery.after1] bea: Okay. My least favorite exercise X_X. 
 - [lights_out.genset.objective] Objective: Place a Diesel Genset on the glowing spot
 - [lights_out.genset.say1] bea: Batteries don't last. Maybe an hour and a half at this load.
 - [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Y'know dirty, loud, money grubbin' pollution. 
 - [lights_out.genset.say3] bea: Open Power. Pick the Diesel Genset. Click the glowing spot.
-- [lights_out.genset.after1] bea: Right. It starts itself when the grid runs fails. Chugging like a freakin' train. 
+- [lights_out.genset.after1] bea: Right. It starts itself when the grid fails. Chugging like a freakin' train. 
 - [lights_out.watch.objective] Objective: Check the Power view while the battery fills
 - [lights_out.watch.say1] bea: I've put the power view on. That's where the load and the supply show.
 - [lights_out.watch.say2] bea: Let the battery fill. Don't touch anything.
@@ -71,7 +71,7 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 - [lights_out.watch.after2] bea: Hands off. Here it comes.
 - [lights_out.outage.objective] Objective: Ride out the outage
 - [lights_out.outage.say1] bea: There. The grid's gone.
-- [lights_out.outage.say2] bea: The battery is doing it's job. The genset's waking up. Watch the load.
+- [lights_out.outage.say2] bea: The battery is doing its job. The genset's waking up. Watch the load.
 - [lights_out.outage.after1] bea: Genset's carrying them. The battery's topping up. 100% uptime! Yay!
 - [lights_out.outage.after2] bea: Grid's back. The genset stops automatically!
 - [lights_out.steady.objective] Objective: Keep the racks lit for half an hour
@@ -141,12 +141,6 @@ Two short pages after the six core chapters, `guides()` in `packages/ui/src/hand
 - `ch:ladder.p2` (packages/ui/src/handbook/chapters.ts): To go down a rung, retrofit the rack again. Select it, open Retrofit, and pick the same tree again. The panel shows the price: the new rack's cost, minus half the cost of the old one.
 - `ch:ladder.p3` (packages/ui/src/handbook/chapters.ts): A rung also asks for your Level and for its research. The panel says which is missing. Some racks need more too, such as a coolant pipe under them.
 - `ch:ladder.tryIt.label` (packages/ui/src/handbook/chapters.ts): Open Research
-
-## Bankrupt ending: achievement line
-
-Shown on the Bankrupt ending screen when "Notice of Termination" unlocks. In `docs/OWNER_TEXT.md` it is `end_bankrupt_note`, which the importer accepts too.
-
-- [ach.ui.end_bankrupt_note] Label: The lamp in the control room stays on.
 
 ## Credits screen
 
