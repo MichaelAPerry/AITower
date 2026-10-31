@@ -1,4 +1,5 @@
 import type { SimView } from "@aitower/sim";
+import { PixelIcon } from "../icons/PixelIcon";
 import { TREE_COLOR, treeBars } from "./soul";
 import "./soul.css";
 
@@ -8,6 +9,11 @@ export function SoulGauge({ view, onOpen }: { view: Pick<SimView, "soul">; onOpe
 	const bars = treeBars(view.soul);
 	return (
 		<button type="button" className="ui-chip soul-gauge" data-help="singularity" onClick={onOpen} title="Singularity points, one bar per tree. Click for the Trees panel.">
+			<span className="soul-head">
+				<PixelIcon name="tree" className="is-lg" />
+				<span className="ui-label">TREES</span>
+			</span>
+			<span className="soul-bars">
 			{bars.map((b) => (
 				<span key={b.tree} className={`soul-bar is-${b.state}`} title={b.title} style={{ ["--tree" as string]: TREE_COLOR[b.tree] }} data-tree={b.tree}>
 					<span className="soul-bar-label">{b.label}</span>
@@ -17,6 +23,7 @@ export function SoulGauge({ view, onOpen }: { view: Pick<SimView, "soul">; onOpe
 					<span className="soul-bar-pct">{b.state === "closed" ? "CLOSED" : `${Math.floor(b.frac * 100)}%`}</span>
 				</span>
 			))}
+			</span>
 		</button>
 	);
 }

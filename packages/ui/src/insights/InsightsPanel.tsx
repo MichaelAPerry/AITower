@@ -10,6 +10,8 @@ import { ModifierChips } from "../status/Status";
 import { PanelHead, PanelTabs } from "../panel/PanelShell";
 import { Telemetry } from "../calm/Panels";
 import { moneyFlow, pueExplain, uptimeVerdict } from "./insights";
+import { PixelIcon } from "../icons/PixelIcon";
+import { TREE_ICON } from "../icons/pixelIcons";
 import { TREE_COLOR, TREE_LONG, treeBars } from "../soul/soul";
 
 const hourly = (n: number | null): string => (n === null ? "—" : `${fmtMoney(n)}/h`);
@@ -72,7 +74,8 @@ export function InsightsPanel(props: PanelProps) {
 							<h3 className="ins-h">The Singularity</h3>
 							{treeBars(view.soul).map((t) => (
 								<div key={t.tree} className="ins-tree" title={t.title}>
-									<span className="ins-k" style={{ color: TREE_COLOR[t.tree] }}>
+									<span className="ins-k ui-ic-label" style={{ color: TREE_COLOR[t.tree] }}>
+										<PixelIcon name={TREE_ICON[t.tree]} />
 										{TREE_LONG[t.tree]} {t.state === "closed" ? "· closed" : ""}
 									</span>
 									<Meter value={t.frac} tone={t.tree === "synthetic" ? "warn" : "good"} height={6} />

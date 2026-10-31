@@ -1,6 +1,8 @@
 import type { ContentDB } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { type CSSProperties, type KeyboardEvent, type PointerEvent as RPointerEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { PixelIconSvg } from "../icons/PixelIcon";
+import { TREE_ICON } from "../icons/pixelIcons";
 import { lanesOf } from "./lanes";
 import {
 	type Cell,
@@ -197,7 +199,8 @@ function Cluster({ cell, x, y, labelled, a }: { cell: Cell; x: number; y: number
 				<circle r={R - 5} fill="none" stroke={c} strokeOpacity={0.25} strokeWidth={5} />
 				<circle r={R - 5} fill="none" stroke="#fff" strokeWidth={5} strokeDasharray={`${doneArc} ${circ}`} transform="rotate(-90)" opacity={0.9} />
 				<circle r={R - 14} fill={c} opacity={0.2} />
-				<text className="orb-count" y={7} textAnchor="middle">
+				{isRoot && cell.tree !== "core" && <PixelIconSvg name={TREE_ICON[cell.tree]} x={-16} y={-R + 12} size={32} />}
+				<text className="orb-count" y={isRoot && cell.tree !== "core" ? 24 : 7} textAnchor="middle">
 					{st.total}
 				</text>
 				{hot && <circle r={R + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}
@@ -289,9 +292,12 @@ function Scene({ a }: { a: DrawArgs }) {
 				const ang = (T.deg * Math.PI) / 180;
 				const [x, y] = toScreen(v, Math.cos(ang) * RA[5] * 1.06, Math.sin(ang) * RB[5] * 1.06);
 				return (
-					<text key={r.tree} x={x} y={y} textAnchor="middle" className="orb-rim" fill={T.color}>
-						{T.name.toUpperCase()}
-					</text>
+					<g key={r.tree}>
+						<PixelIconSvg name={TREE_ICON[r.tree]} x={x - 14} y={y - 46} size={28} />
+						<text x={x} y={y} textAnchor="middle" className="orb-rim" fill={T.color}>
+							{T.name.toUpperCase()}
+						</text>
+					</g>
 				);
 			})}
 			<g>{edges}</g>

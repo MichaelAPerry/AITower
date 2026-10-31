@@ -9,6 +9,8 @@ import { rackProblem } from "../objective/diagnose";
 import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { Dial } from "./Dial";
+import { PixelIcon } from "../icons/PixelIcon";
+import { TREE_ICON } from "../icons/pixelIcons";
 import { TREE_COLOR, TREE_LONG } from "../soul/soul";
 
 const botStateLabel: Record<BotState, string> = {
@@ -205,6 +207,7 @@ export function RetrofitSection({ store, content, f, onTrees }: { store: GameSto
 					return (
 						<div key={tree} className="ui-retrofit-row is-done" data-tree={tree} style={{ ["--tree" as string]: TREE_COLOR[tree] }}>
 							<button type="button" className="ui-btn ui-retrofit-btn" disabled>
+								<PixelIcon name={TREE_ICON[tree]} />
 								{name}
 							</button>
 							<p className="ui-upgrade-why">Already the last rung of {TREE_LONG[tree]}.</p>
@@ -226,6 +229,7 @@ export function RetrofitSection({ store, content, f, onTrees }: { store: GameSto
 								if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `retrofit:${r.reason}` });
 							}}
 						>
+							<PixelIcon name={TREE_ICON[tree]} />
 							<b>{name}</b> → {t.to.name} · {fmtMoney(cost)}
 						</button>
 						<p className="ui-retrofit-what">

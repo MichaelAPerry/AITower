@@ -9,7 +9,11 @@ import { BuildPalette } from "../components/BuildPalette";
 import { HandbookDrawer } from "../handbook/HandbookDrawer";
 import { useUnreadHandbook } from "../handbook/unread";
 import { DRAWER_TABS, type DrawerId, feedLines, isRoutine, nextDrawer } from "./calm";
-import { Icon } from "../components/common";
+import { PixelIcon } from "../icons/PixelIcon";
+import type { PixelIconName } from "../icons/pixelIcons";
+
+/** The picture on each drawer tab. */
+export const DRAWER_ICON: Record<Exclude<DrawerId, "log">, PixelIconName> = { contracts: "contracts", research: "research", automation: "automation", insights: "insights", handbook: "handbook" };
 
 /** NEXT: one line from the current objective, with the key to press. The detail is its tooltip. */
 export function NextChip({ store, content, state, setUi }: PanelProps) {
@@ -47,6 +51,7 @@ export function Ticker({ content, state, ui, setUi }: PanelProps) {
 	const glyph = { good: "✓", info: "·", warn: "▲", error: "✕" } as const;
 	return (
 		<button type="button" className="ui-ticker" onClick={() => setUi({ drawer: ui.drawer === "log" ? null : "log" })} title="Open the alert log" aria-live="polite">
+			<PixelIcon name="log" />
 			<span className={`ui-tag ${unseen ? "is-alert" : ""}`}>{unseen || "LOG"}</span>
 			{items.length === 0 && <span className="ui-dim">All quiet</span>}
 			{items.map((l) => (
@@ -65,7 +70,10 @@ export function DrawerTabs({ ui, setUi, content, state, only }: Pick<PanelProps,
 		<div className="ui-dtabs" role="tablist" aria-label="Drawers">
 			{DRAWER_TABS.filter((d) => !only || only.includes(d.id)).map((d) => (
 				<button key={d.id} type="button" role="tab" data-tut={`dtab-${d.id}`} data-help={`tab-${d.id}`} aria-selected={ui.drawer === d.id} className={`ui-dtab ${ui.drawer === d.id ? "is-on" : ""}`} onClick={() => setUi({ drawer: nextDrawer(ui.drawer, d.id) })} aria-label={`${d.label} (${d.key})`}>
-					<span className="ui-dtab-name">{d.label}</span>
+					<span className="ui-dtab-name ui-ic-label">
+						<PixelIcon name={DRAWER_ICON[d.id]} />
+						{d.label}
+					</span>
 					{d.id === "handbook" && unreadHandbook && <span className="pr-dot" role="img" aria-label="New chapter" />}
 					<kbd>{d.key}</kbd>
 				</button>
@@ -85,7 +93,7 @@ export function Drawer(props: PanelProps) {
 	return (
 		<section className={`ui-edge ui-glass is-${d} ${WIDE.has(d) ? "is-wide" : ""}`} aria-label={title} data-drawer={d}>
 			<button type="button" className="ui-btn ui-icon-btn ui-drawer-x" aria-label="Close drawer" title="Close (Esc)" onClick={() => props.setUi({ drawer: null })}>
-				<Icon name="close" size={11} />
+				<PixelIcon name="close" />
 			</button>
 			{d === "contracts" && <ContractsDrawer {...props} />}
 			{d === "research" && <ResearchPanel {...props} />}
