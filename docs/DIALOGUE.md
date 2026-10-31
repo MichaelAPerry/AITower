@@ -30,7 +30,8 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 14. [Decision memos: Mel](#14-decision-memos-mel)
 15. [Decision memos: Luci](#15-decision-memos-luci)
 16. [Lessons](#16-lessons)
-17. [Achievements and the off-duty gallery](#17-achievements-and-the-off-duty-gallery)
+17. [New-game screen: site descriptions](#17-new-game-screen-site-descriptions)
+18. [Achievements and the off-duty gallery](#18-achievements-and-the-off-duty-gallery)
 
 ## 1. Title crawl
 
@@ -1788,7 +1789,43 @@ Choice `add`:
 - [lights_out.steady.objective] Objective: Keep the racks lit for half an hour
 - [lights_out.steady.say1] bea: Give it half an hour. Make sure it holds.
 
-## 17. Achievements and the off-duty gallery
+## 17. New-game screen: site descriptions
+
+> Shown on the new-game screen under each site's name (scenario ids).
+
+### Garage Cluster (`starter`)
+
+- [scenario.starter.description] Description: A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. The usual way to start.
+
+### Brownfield Tower (`brownfield`)
+
+- [scenario.brownfield.description] Description: A half-built tower bought at auction with the debts attached. Six floors of slab, six air cabinets sharing one underpowered air handler, three empty storeys above them and $350k in the account. Starts at Level 2.
+
+### Sandbox Annex (`sandbox`)
+
+- [scenario.sandbox.description] Description: The standard starter lot with $500M and Level 5, for trying anything once. It starts paused, with no deadlines and no failures. No bankruptcy; audits are still filed, for the record.
+
+### Lesson 1: Your First Rack (`lesson_first_watt`)
+
+- [scenario.lesson_first_watt.description] Description: A bare hall with a lift and nothing else. Bea and Cass help you place a rack, power it, cool it and run it.
+
+### Lesson 2: Earn Your Keep (`lesson_earn`)
+
+- [scenario.lesson_earn.description] Description: A small working hall: three racks, an air handler, a parts depot and a bot dock. Luci and Cass show you how contracts, storage, parts and bots fit together.
+
+### Lesson 3: Grow the Tower (`lesson_grow`)
+
+- [scenario.lesson_grow.description] Description: Four racks and two air handlers. Mel and Luci show you research, Levels and the Foreman.
+
+### Lesson 4: The Three Trees (`lesson_trees`)
+
+- [scenario.lesson_trees.description] Description: Three plain racks, Level 2 and the Garden research done. Bea shows you how to retrofit a rack and read the Trees panel.
+
+### Lesson 6: Lights Out (`lesson_lights_out`)
+
+- [scenario.lesson_lights_out.description] Description: A small working hall: three racks, an air handler and a grid intake. Bea shows you what happens when the grid drops, and what keeps the racks lit.
+
+## 18. Achievements and the off-duty gallery
 
 > The achievements list, the off-duty portraits and gallery scenes, and the words around them. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json. For a short file with only these, run `npx tsx tools/dialogue/export.ts --achievements`.
 
@@ -2006,7 +2043,7 @@ Choice `add`:
 > Credits screen: line.
 - [ach.ui.credits_fonts] Label: Fonts: DotGothic16 and VT323 (Google Fonts, SIL Open Font License).
 > Credits screen: line above the list of quotes. The list itself is built from the game's quotes (docs/QUOTES.md), not edited here.
-- [ach.ui.credits_quotes] Label: Quotes: each quote in the game names its author and source. Full list below.
+- [ach.ui.credits_quotes] Label: Quotes: each quote in the game names its author and source. Full list in the credits.
 > Credits screen: heading of the quote list.
 - [ach.ui.credits_quotes_head] Label: Quotes
 
