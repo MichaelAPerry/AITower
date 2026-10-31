@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Research rework mockup (Option A: Level ladder)</title>
+<!-- Static mockup, 1600x900. Real item names and costs from packages/content/src/data/tech.json. Not wired to the game. -->
+<style>
+@font-face { font-family: "DotGothic16"; src: url("../node_modules/@fontsource/dotgothic16/files/dotgothic16-latin-400-normal.woff2") format("woff2"); }
+:root {
+	--bg: #07072a; --panel: #0d0d3a; --panel2: #14144e; --text: #f0f0ff; --dim: #9d9fd0;
+	--accent: #5ce1ff; --research: #ff6ad5; --good: #6cf08f; --warn: #ffb347; --bad: #ff4d5e; --money: #ffd75e;
+	--lat: #6fd3ff; --flesh: #ff4f6d; --garden: #9be564;
+}
+* { box-sizing: border-box; margin: 0; }
+html, body { width: 1600px; height: 900px; background: #02021a; overflow: hidden; }
+body { font: 16px/1.3 "DotGothic16", "MS Gothic", monospace; color: var(--text); padding: 12px; }
+.frame { width: 1576px; height: 876px; position: relative; background: repeating-conic-gradient(rgba(255,255,255,.04) 0 25%, transparent 0 50%) 0 0/4px 4px, var(--bg);
+	border: 2px solid var(--text); outline: 1px solid #3a3a90; outline-offset: -5px; box-shadow: 3px 3px 0 #000; padding: 10px 14px; }
+.row { display: flex; align-items: center; }
+/* header */
+.head { height: 52px; justify-content: space-between; }
+.head h1 { font-size: 32px; font-weight: 400; letter-spacing: 2px; }
+.head .kick { color: var(--research); font-size: 16px; letter-spacing: 1px; }
+.rp { text-align: right; }
+.rp b { font-weight: 400; font-size: 32px; color: var(--money); }
+.rp span { color: var(--good); font-size: 18px; margin-left: 14px; }
+.close { width: 36px; height: 36px; border: 2px solid var(--text); text-align: center; line-height: 32px; font-size: 20px; margin-left: 16px; }
+/* goal strip */
+.goal { margin-top: 6px; height: 64px; border: 2px solid var(--research); background: var(--panel2); padding: 8px 14px; gap: 18px; }
+.goal .t { font-size: 20px; width: 420px; }
+.goal .t small { display: block; color: var(--research); font-size: 16px; }
+.bar { flex: 1; height: 22px; border: 2px solid var(--text); background: #05051c; position: relative; }
+.bar i { position: absolute; inset: 0 auto 0 0; width: 78%; background: repeating-linear-gradient(90deg, var(--research) 0 8px, #c04aa0 8px 10px); }
+.goal .n { width: 330px; text-align: right; font-size: 18px; }
+.goal .n em { font-style: normal; color: var(--dim); display: block; font-size: 16px; }
+/* tabs */
+.tabs { margin-top: 8px; height: 44px; gap: 8px; }
+.tab { height: 40px; padding: 0 18px; border: 2px solid var(--c, var(--text)); color: var(--c, var(--text)); font-size: 20px; display: flex; align-items: center; gap: 10px; background: var(--panel); }
+.tab.on { background: var(--c, var(--text)); color: #07072a; }
+.tab .ct { font-size: 16px; padding: 0 6px; background: var(--good); color: #07072a; }
+.tabs .lvl { margin-left: auto; color: var(--dim); font-size: 18px; }
+.tabs .lvl b { color: var(--text); font-weight: 400; }
+/* body */
+.body { margin-top: 8px; display: flex; gap: 14px; height: 676px; }
+.left { width: 1040px; }
+.right { width: 484px; border: 2px solid var(--text); background: var(--panel); padding: 14px 16px; }
+.band { height: 34px; display: flex; align-items: center; gap: 14px; font-size: 20px; letter-spacing: 1px; border-bottom: 2px solid #3a3a90; margin: 6px 0 6px; }
+.band .tag { font-size: 16px; padding: 0 8px; border: 2px solid currentColor; }
+.band.done { color: var(--dim); }
+.band.now { color: var(--accent); }
+.band.later { color: var(--dim); }
+.grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.card { height: 84px; border: 2px solid var(--c); background: var(--panel); padding: 6px 10px 6px 14px; position: relative; display: flex; flex-direction: column; justify-content: space-between; }
+.card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 6px; background: var(--c); }
+.card .n { font-size: 20px; white-space: nowrap; overflow: hidden; }
+.card .e { font-size: 16px; color: var(--dim); white-space: nowrap; overflow: hidden; }
+.card .s { display: flex; justify-content: space-between; font-size: 16px; }
+.card .cost { color: var(--money); }
+.card.ready { box-shadow: 0 0 0 2px var(--good) inset; }
+.card.ready .st { color: var(--good); }
+.card.poor .st { color: var(--warn); }
+.card.lock { opacity: .62; border-style: dashed; }
+.card.lock .st { color: var(--dim); }
+.card.sel { outline: 3px solid var(--research); outline-offset: 2px; background: #241450; }
+.card.path { --c: var(--text); }
+.cool { --c: #5fb6ff; } .comp { --c: #8fd1b0; } .pow { --c: #f0d24a; } .log { --c: #e8955a; } .adm { --c: #c9b98f; }
+.lat { --c: var(--lat); } .flesh { --c: var(--flesh); } .garden { --c: var(--garden); }
+/* fork strip */
+.fork { margin-top: 10px; border: 2px solid var(--text); padding: 8px 10px 10px; background: var(--panel2); }
+.fork h4 { font-weight: 400; font-size: 18px; color: var(--text); margin-bottom: 6px; }
+.fork h4 span { color: var(--dim); }
+.fork .grid .card { background: #07072a; height: 78px; }
+.fork .tg { font-size: 16px; color: var(--c); }
+/* detail */
+.d-head { gap: 14px; }
+.ico { width: 72px; height: 72px; border: 2px solid var(--c); background: #05051c; display: flex; align-items: center; justify-content: center; font-size: 28px; color: var(--c); }
+.d-head .k { color: var(--research); font-size: 16px; }
+.d-head h2 { font-weight: 400; font-size: 28px; line-height: 1.1; }
+.chip { display: inline-block; margin-top: 10px; font-size: 16px; padding: 0 8px; color: var(--lat); border: 2px solid var(--lat); }
+.d-p { margin-top: 10px; font-size: 18px; line-height: 1.4; }
+.d-h { margin: 12px 0 4px; font-size: 16px; color: var(--accent); letter-spacing: 1px; }
+.chain { display: flex; align-items: center; gap: 8px; font-size: 18px; }
+.chain .b { border: 2px solid var(--good); color: var(--good); padding: 2px 8px; }
+.chain .b.this { border-color: var(--research); color: var(--text); }
+.chain .a { color: var(--dim); }
+ul { list-style: none; padding: 0; font-size: 18px; line-height: 1.5; }
+ul li::before { content: "+ "; color: var(--good); }
+.cost-box { margin-top: 12px; border: 2px solid var(--text); padding: 8px 12px; display: grid; grid-template-columns: 1fr auto; font-size: 18px; row-gap: 2px; }
+.cost-box .r { text-align: right; }
+.cost-box .m { color: var(--money); } .cost-box .w { color: var(--warn); }
+.btns { margin-top: 10px; display: flex; gap: 10px; }
+.btn { flex: 1; height: 44px; border: 2px solid var(--text); font-size: 20px; display: flex; align-items: center; justify-content: center; }
+.btn.pin { border-color: var(--research); color: var(--research); }
+.btn.off { border-color: #55579a; color: #7b7dbd; border-style: dashed; }
+.foot { position: absolute; left: 16px; width: 1040px; bottom: 8px; color: var(--dim); font-size: 16px; display: flex; gap: 18px; }
+.foot b { font-weight: 400; color: var(--good); }
+</style>
+</head>
+<body>
+<div class="frame">
+	<div class="row head">
+		<div><div class="kick">UNLOCK NEW MACHINES AND BONUSES</div><h1>Research</h1></div>
+		<div class="row"><div class="rp"><b>1,320 RP</b><span>+14 RP / hour</span></div><div class="close">x</div></div>
+	</div>
+
+	<div class="row goal">
+		<div class="t"><small>GOAL (pinned)</small>Chilled-Water Loop Design</div>
+		<div class="bar"><i></i></div>
+		<div class="n">1,320 / 1,700 RP<em>about 27 h to go</em></div>
+	</div>
+
+	<div class="row tabs">
+		<div class="tab on" style="--c:#e9eaff">SHARED <span class="ct">4 ready</span></div>
+		<div class="tab lat" style="--c:var(--lat)">LATTICE</div>
+		<div class="tab" style="--c:var(--flesh)">FLESH</div>
+		<div class="tab" style="--c:var(--garden)">GARDEN</div>
+		<div class="lvl">Level 2 now. Level 3 needs <b>12</b> researched: <b>9</b> done</div>
+	</div>
+
+	<div class="body">
+		<div class="left">
+			<div class="band done">LEVEL 1 <span class="tag">ALL 9 DONE</span> <span style="font-size:16px">click to open</span></div>
+
+			<div class="band now">LEVEL 2 <span class="tag">NOW</span></div>
+			<div class="grid">
+				<div class="card comp ready"><div class="n">Tape Library Engineering</div><div class="e">Unlocks bigger storage racks</div><div class="s"><span class="st">READY</span><span class="cost">1,150 RP</span></div></div>
+				<div class="card comp ready"><div class="n">Rear-Door Cabinet Design</div><div class="e">Unlocks the AC-3 rear-door rack</div><div class="s"><span class="st">READY</span><span class="cost">1,300 RP</span></div></div>
+				<div class="card log ready"><div class="n">Central Warehousing</div><div class="e">Unlocks the big parts depot</div><div class="s"><span class="st">READY</span><span class="cost">1,300 RP</span></div></div>
+
+				<div class="card adm ready"><div class="n">Preferred Vendor Status</div><div class="e">Cheaper to buy, small cash perk</div><div class="s"><span class="st">READY</span><span class="cost">1,300 RP</span></div></div>
+				<div class="card cool poor"><div class="n">Rear-Door Exchanger Licence</div><div class="e">Unlocks the rear-door exchanger</div><div class="s"><span class="st">NEED 130 MORE</span><span class="cost">1,450 RP</span></div></div>
+				<div class="card cool poor sel lat" style="--c:#5fb6ff"><div class="n">Chilled-Water Loop Design &#9733;</div><div class="e">Opens the Lattice: CH-600, CDU, LC-2</div><div class="s"><span class="st">NEED 380 MORE</span><span class="cost">1,700 RP</span></div></div>
+
+				<div class="card pow poor"><div class="n">Substation Licence</div><div class="e">Unlocks a stronger grid tie</div><div class="s"><span class="st">NEED 130 MORE</span><span class="cost">1,450 RP</span></div></div>
+				<div class="card pow poor"><div class="n">Flywheel Licence</div><div class="e">Unlocks the flywheel UPS</div><div class="s"><span class="st">NEED 230 MORE</span><span class="cost">1,550 RP</span></div></div>
+				<div class="card log poor"><div class="n">Aerial Survey Drones</div><div class="e">Unlocks survey drones</div><div class="s"><span class="st">NEED 130 MORE</span><span class="cost">1,450 RP</span></div></div>
+			</div>
+
+			<div class="band later">LEVEL 3 <span class="tag">LOCKED</span> <span style="font-size:16px">reach Level 3 to start these</span></div>
+			<div class="grid">
+				<div class="card cool lock"><div class="n">Cooling Tower Hydraulics</div><div class="e">First: Chilled-Water Loop Design</div><div class="s"><span class="st">LOCKED</span><span class="cost">3,800 RP</span></div></div>
+				<div class="card cool lock"><div class="n">High-Capacity Air Handling</div><div class="e">First: Rear-Door Exchanger</div><div class="s"><span class="st">LOCKED</span><span class="cost">3,300 RP</span></div></div>
+				<div class="card comp lock"><div class="n">Cold-Plate Generation 3</div><div class="e">First: Rear-Door Cabinet, Loop</div><div class="s"><span class="st">LOCKED</span><span class="cost">4,200 RP</span></div></div>
+			</div>
+
+			<div class="fork">
+				<h4>THREE ROADS OPEN AT LEVEL 2 <span>pick one later; each road has its own tab</span></h4>
+				<div class="grid">
+					<div class="card lat path"><div class="tg">LATTICE (cyan)</div><div class="n">Chilled-Water Loop Design</div><div class="s"><span class="st" style="color:var(--warn)">NEED 380</span><span class="cost">1,700 RP</span></div></div>
+					<div class="card flesh path"><div class="tg">FLESH (red)</div><div class="n">Culture Media Procurement</div><div class="s"><span class="st" style="color:var(--good)">READY</span><span class="cost">1,150 RP</span></div></div>
+					<div class="card garden path"><div class="tg">GARDEN (green)</div><div class="n">Neuromorphic Bench</div><div class="s"><span class="st" style="color:var(--warn)">NEED 1,880</span><span class="cost">3,200 RP</span></div></div>
+				</div>
+			</div>
+		</div>
+
+		<div class="right">
+			<div class="row d-head cool" style="gap:14px">
+				<div class="ico">CL</div>
+				<div><div class="k">RESEARCH . COOLING . LEVEL 2</div><h2>Chilled-Water Loop Design</h2></div>
+			</div>
+			<span class="chip">STARTS THE LATTICE</span>
+			<p class="d-p">Water carries heat far better than air. This opens the way to chillers and liquid-cooled racks.</p>
+			<div class="d-h">YOU GET</div>
+			<ul>
+				<li>Retrofit racks to LC-2</li>
+				<li>Chiller CH-600 and CDU</li>
+				<li>Cooling capacity +5 %</li>
+			</ul>
+			<div class="d-h">NEEDS FIRST</div>
+			<div class="chain"><span class="b">&#10003; Airflow Standardisation</span><span class="a">&gt;</span><span class="b this">This</span></div>
+			<div class="d-h">LEADS TO</div>
+			<div style="font-size:18px">Cooling Tower Hydraulics, Cold-Plate Generation 3</div>
+			<div class="cost-box">
+				<span>Cost</span><span class="r m">1,700 RP</span>
+				<span>You have</span><span class="r">1,320 RP</span>
+				<span>Short by</span><span class="r w">380 RP</span>
+				<span>At +14 RP / hour</span><span class="r">about 27 h</span>
+			</div>
+			<div class="btns"><div class="btn pin">&#9733; PIN AS GOAL</div><div class="btn off">START . 1,700 RP</div></div>
+		</div>
+	</div>
+	<div class="foot"><span><b>READY</b> you can start it</span><span style="color:var(--warn)">NEED n MORE: points short</span><span>dashed: locked</span><span>left stripe: lane colour</span></div>
+</div>
+</body>
+</html>
