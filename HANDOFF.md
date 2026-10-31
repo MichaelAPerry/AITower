@@ -10,23 +10,16 @@ Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The si
 
 Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots).
 
-## 1. State on Oct 31 (end of session 3)
+## 1. State on Oct 31 (end of session 4)
 
-- Live main = `2a99835` (unchanged). Branch `claude/youthful-ramanujan-msqcy9` head `422328d` (+ this handoff commit). UNRELEASED.
-- All checks pass: `npm run check` (1677 tests), build, budget 1769/3000 kB, e2e, dialogue `--check`, `npm audit` 0.
-- Done on the branch this session:
-  - Per-lesson star rules (`stars2`/`stars3` + `star2Text`/`star3Text`) for lessons 1-6, lesson `failed` text, `nextLessonOf`, `lessonTotal`.
-  - New lesson 5 Going Liquid (Cass, scenario `lesson_liquid`, coolant-pipe build step with "DRAG A PIPE HERE" ghost) and lesson 6 Lights Out (Bea, scenario `lesson_lights_out`, scripted grid trip). Lessons 1-6, no gap.
-  - Lesson 4 outro = owner's new words. Lesson 3 outro and lesson 4 opening ("Bea again. Last lesson...") kept by owner's choice.
-  - Handbook "More guides": two pages (Loans, penalties and the audit; Climbing a tree's ladder).
-  - Credits screen (title menu + system drawers): owner lines incl. "Game design and direction: Perry", plus all 168 quotes read from content data. Both doubtful quotes now have primary sources (Weinberg, Science 177, 1972, p.33; Verne, The Mysterious Island Part 2 ch. 11). `docs/QUOTES_CHECK.md` updated.
-  - Bankrupt note slot `ach.ui.end_bankrupt_note`, shown in the ending's service-record panel when `end_bankrupt` unlocks. The owner left it EMPTY in `docs/OWNER_TEXT.md`, the owner has since set it to "The world moves on without you."
-  - Importer (`tools/dialogue/import.ts`): OWNER_ALIASES (end_bankrupt_note, credits.*) and `scenario.<id>.description` slots. Starter description imported.
-  - Locked gallery portraits: dimmed head crop (per-advisor box `LOCKED_LOOK` in `packages/ui/src/achievements/gallery.ts`; "hide" gives a lock tile). Locked frames show the owner's hint lines.
-  - vitest 3.2.7 -> 5.0.5; `npm audit` clean.
-  - `fast_win`: the owner's new text says day 40 for all three trees. The owner's note read "not the 40 day change"; Opus took it as "note the 40 day change". So `FAST_WIN_DAYS` is now 40/40/40 (`packages/ui/src/achievements/achievements.ts`; also `tools/sim-cli` soulRun TARGET_DAYS and `tools/sim-cli/src/fastwin.test.ts`). Confirmed by owner Oct 31. Revert is commit 422328d. Headless check before the change (24 seeds, scripted player), best/median days: Lattice 23/28, Flesh 39/42, Garden 37/41. At 40, Lattice is easy, Flesh and Garden are fair. Opt-in test: `FASTWIN=1 npx vitest run tools/sim-cli/src/fastwin.test.ts`.
-  - Owner imported their edits of `docs/ACHIEVEMENTS_TEXT.md`, `docs/OWNER_TEXT.md`, `docs/PLACEHOLDER_TEXT.md` (dry-run, then `--write`). Plain line `ch:books.p1` "The Bank lends" applied by hand.
-  - Cleanup: `docs/DIALOGUE_NEW.md` deleted, stale docs and comments fixed, `docs/ROADMAP_1.0.md` marked historic, reputation notes fixed.
+- `main` = branch `claude/youthful-ramanujan-msqcy9` = `61dc193` (plus this docs commit). Merged to main on the owner's word, FOR PLAY-TEST. GitHub Pages deploys on push to main (`.github/workflows/pages.yml`).
+- Checks at `61dc193`: `npm run check` (1686 tests pass), build, budget 1773.7/3000 kB, e2e pass.
+- Done this session:
+  - Owner answers applied: bankrupt note "The world moves on without you."; typo fixes (plumbing, favorite, "when the grid fails", "its job"); `fast_win` 40/40/40 confirmed; Handbook seal line kept by owner's choice.
+  - Title screen ending pictures: after a tree's success ending (`end_lattice`, `end_flesh`, `end_garden`) the title shows that tree's picture (owner concept art, 64-colour lossless WebP, each under 1 MB, `packages/ui/src/art/title-end-*.webp`). Most recent first (profile earned entries now carry an optional `at` timestamp). A small "◀ ▶ ENDING n/N" button bottom-right cycles when there are 2 or more. Failure endings do not change it.
+  - "AI TOWER" logo cut from the original title art (`packages/ui/src/art/title-logo.webp`), shown over the ending pictures.
+  - Title music (owner's Suno songs, mono 32 kbps MP3, about 1 MB each, `packages/ui/src/music/`): title まだ見ぬ世界へ, Garden 君の明日が晴れますように, Lattice 銀のホーム, Flesh 雨のしずく. Plays per picture, starts on first click, fades on leaving the title, uses the existing Master/Music/Mute settings.
+  - Credits: "Music: Perry, made with Suno." plus song lines (in `packages/ui/src/title/titleMusic.ts`).
 
 ## 2. Owner decisions on record
 
@@ -42,23 +35,22 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 - Locked gallery portraits = head crop (done).
 - Credits: code by Claude; all art generated with ChatGPT, some sprites by Claude; inspired by SimTower, nothing borrowed; quotes credited with sources. Design line = "Perry".
 - `fast_win` days 40 / 40 / 40 (confirmed by owner Oct 31).
-- Nothing goes to main until the owner has play-tested and says so. Then a new README for players.
+- Ending title pictures and per-picture songs as in section 1. The owner approved songs near 1 MB: "small as possible, quality doesn't have to be too high".
+- Main was merged for the final play-test on the owner's word. Future pushes to main still need the owner's say-so.
 
 ## 3. Next, in order
 
-a. Ask the owner, in one short message:
-   1. DONE: `fast_win` 40/40/40 confirmed.
-   2. DONE: bankrupt note = "The world moves on without you."
-   3. DONE: all four typos fixed. Were: "Water needs a plumping" (`liquid.pipe.say3`), "favortie" (`lights_out.battery.after1`), "when the grid runs fails" (`lights_out.genset.after1`), "doing it's job" (`lights_out.outage.say2`).
-   4. DONE: Handbook levelAdvice seal line kept.
-   5. Keep or drop branches `wip/gallery-art` and `wip/off-duty` (each 1 commit not in main) and `claude/serene-ramanujan-ojshkh` (six 2-3 MB concept PNGs).
-b. The owner deletes these merged remote branches by hand on GitHub (agents get HTTP 403 on delete): `wip/dialogue-import`, `wip/endings`, `wip/lessons`, `wip/owner-art`, `wip/owner-dialogue`, `wip/tree-sprites`.
-c. Give the owner a playable build to play-test. Fix what they report.
-d. Optional, the owner sets priority:
-   - Achievement balance in real play (`calm_month`, `open_hands`, `books_clean`, bond bars).
-   - `docs/BALANCE_AUDIT.md` open items: L4 research wall now ~3.5x L3 per node; AC-3 `rack_air_gpu2` dominated by LC-2.
-   - 17 support items and ML-1 use a tinted base sprite (list in `docs/ART_NEEDED.md` A2).
-e. When the owner says yes: full verify (Haiku), push the branch to main, check the live Pages links, then write a new README for players and visitors (what it is, how to play in the browser, screenshots, controls, credits; dev notes to a short section or `docs/`).
+a. The owner play-tests the live game. Fix what they report.
+b. Known fix: the logo cutout has a small gap in the ring at about 7 o'clock (visible on the Flesh picture). Re-cut `title-logo.webp`.
+c. Ask the owner:
+   - Song title spelling for the credits. The owner typed "まだない明日へ" and "銀のホームを"; the file tags say "まだ見ぬ世界へ" and "銀のホーム". Flagged in `docs/PLACEHOLDER_TEXT.md`.
+   - Do the 32 kbps songs sound OK?
+   - The single-file build (`build-single.mjs`, `AItower.html`) would inline the songs (about 5 MB base64). Exclude music there?
+d. Branches: the owner deletes the merged `wip/*` branches by hand (agents get 403). `claude/serene-ramanujan-ojshkh` (concept art; the three ending pictures are now in the game): the owner has not decided keep or delete.
+e. Then the presentation work (the new window's job):
+   - A dynamic trailer video using the game's sprites. The owner wants more than plain gameplay footage: animated sprites, the ending pictures, the owner's songs. Plan the video with the owner first.
+   - A GitHub Pages landing page. It must not break the current game URL.
+   - A new README for players and visitors: what it is, how to play in the browser, video, screenshots, controls, credits incl. music. Dev notes go to a short section or `docs/`.
 
 ## 4. How to work
 
@@ -73,8 +65,11 @@ e. When the owner says yes: full verify (Haiku), push the branch to main, check 
 - e2e: when other agents run, use a private port: `E2E_PORT=<free port> npm run e2e`. Never kill other servers. "Port 4173 in use" means a server is already there; pick another port.
 - Images: recipe is in `docs/HANDOFF_ARCHIVE.md`, section "How to drop in an image".
 - Dialogue: `npx tsx tools/dialogue/export.ts` -> edit -> `npx tsx tools/dialogue/import.ts <file>` (dry-run is the default; `--write` to apply). `export.ts --check` verifies the grammar.
+- A fresh clone may be single-branch. Run `git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'` and fetch main before creating worktree agents. Worktrees base on origin/main, so worktree agents should `git reset --hard origin/<branch>` first.
+- Agents' screenshots go in /tmp. To show the owner, copy them into the repo's `.claude/` (gitignored via `.git/info/exclude`).
 
 ## 5. Known issues
 
 - Bond 50 is hard for Mel and Cass in headless runs (scripted player does not follow advice). Check with a human.
 - The full test run can fail on timing (perf, snapshot, economy, ministry, determinism) when several agents run at once. Rerun alone, or verify on a quiet machine.
+- iOS Safari ignores audio volume (mute works).
