@@ -4,7 +4,7 @@ Every flavour quote added in commit 598d449 (39 in total: 24 facilities, 15 tech
 
 Verdicts: **Confirmed** means the exact wording was found in a source. **Corrected** means the quote was kept but its wording or citation was fixed. **Replaced** means the quote could not be confirmed, or it duplicated another quote, so a confirmed replacement was used. No quote was left unattributed.
 
-Several confirmations rest on secondary quotation sites, not on the primary text. Those rows say so.
+Two confirmations that rested on secondary sites (`fuel_cell`, `reactor_licence`) were later checked against the primary text; see their rows. No quote is shown as "attributed" in the credits.
 
 | Item | Quote start | Verdict | Source URL |
 |---|---|---|---|
@@ -25,7 +25,7 @@ Several confirmations rest on secondary quotation sites, not on the primary text
 | rack_photonic2 | Are not the Rays of Light very small Bodies | Replaced: Opticks Query 29 not found; now Feynman (1982) | https://en.wikiquote.org/wiki/Richard_Feynman |
 | crah_econ | Nature, to be commanded, must be obeyed | Confirmed (Novum Organum, Book I, aphorism 3) | https://en.wikiquote.org/wiki/Francis_Bacon |
 | crah_adiabatic | Everybody talks about the weather | Replaced: attribution contested (Warner or Twain); now Kelvin, 1852 | https://en.wikiquote.org/wiki/William_Thomson,_1st_Baron_Kelvin |
-| fuel_cell | I believe that water will one day be employed as fuel | Confirmed (the row quotes the opening clause of the sentence) | https://www.intratext.com/IXT/ENG2092/S8.HTM |
+| fuel_cell (facility) | I believe that water will one day be employed as fuel | Confirmed in a primary text: Project Gutenberg #1268 (Agnes Kinloch Kingston translation), The Mysterious Island, Part 2, Chapter 11, spoken by Cyrus Harding: "Yes, my friends, I believe that water will one day be employed as fuel, that hydrogen and oxygen which constitute it...". The row quotes the opening clause. Citation updated to "Part 2, ch. 11, 1874" (serialised 1874, book 1875). The earlier intratext.com page gave a different chapter; the Gutenberg text settles it | https://www.gutenberg.org/ebooks/1268 |
 | ups_iron_air | It is always darkest just before the day dawneth | Confirmed (A Pisgah-Sight of Palestine, 1650) | https://en.wikiquote.org/wiki/Thomas_Fuller |
 | geothermal | We find no vestige of a beginning | Confirmed (Wikiquote gives the 1795 edition; the row keeps 1788, the year of the Transactions paper) | https://en.wikiquote.org/wiki/James_Hutton |
 | grid_tie_lucy | A cynic is a man who knows the price | Corrected: the play reads "A man who knows the price of everything and the value of nothing" (Lord Darlington, Act III) | https://en.wikiquote.org/wiki/Oscar_Wilde |
@@ -46,7 +46,7 @@ Several confirmations rest on secondary quotation sites, not on the primary text
 | photonic_mesh (tech) | I have heard articulate speech produced by sunlight | Replaced: the letter was not found (secondary quotations only); now Dickinson, "There's a certain Slant of light" | https://en.wikisource.org/wiki/Popular_Science_Monthly/Volume_19/June_1881/Production_of_Sound_by_Radiant_Energy_I |
 | combined_cycle (tech) | The energy of the universe is constant | Replaced: duplicates two_phase_immersion; now Clausius, Fourth Memoir, 1854 | https://en.wikiquote.org/wiki/Rudolf_Clausius |
 | cryo_plant (tech) | The ice was here, the ice was there | Confirmed (Rime of the Ancient Mariner, part I) | https://www.gutenberg.org/ebooks/151 |
-| reactor_licence (tech) | We nuclear people have made a Faustian bargain | Confirmed text via a quotation site (p. 33, Science, 7 July 1972); citation corrected (Social Institutions and Nuclear Energy). The primary article was not opened | https://todayinsci.com/W/Weinberg_Alvin/WeinbergAlvin-Quotations.htm |
+| reactor_licence (tech) | We nuclear people have made a Faustian bargain | Confirmed in a primary text: a scan of the Science article itself (vol. 177, 7 July 1972, pp. 27-34; the Rutherford Centennial Lecture, AAAS, 27 Dec 1971). Section "Social Institutions - Nuclear Energy" reads "We nuclear people have made a Faustian bargain with society. On the one hand, we offer ... an inexhaustible source of energy." It sits on the page numbered 33. The page was read from a copy hosted by IPPNW Switzerland; DOI 10.1126/science.177.4043.27 (PubMed 5041772) | https://ippnw.ch/wp-content/uploads/2020/11/weinberg1972.pdf |
 | two_phase_immersion (tech, pre-existing) | The energy of the universe is constant | Confirmed (Ninth Memoir, 1865); kept as the only Clausius copy of this line | https://en.wikiquote.org/wiki/Rudolf_Clausius |
 
 Summary for the 39 quotes added in 598d449: 21 confirmed unchanged, 6 corrected, 12 replaced, 0 made unattributed.

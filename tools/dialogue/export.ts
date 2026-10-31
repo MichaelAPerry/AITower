@@ -454,6 +454,16 @@ const UI_CONTEXT: Record<string, string> = {
 	endOffDuty: "Ending screen, one line when the run unlocked a portrait. Followed by the portraits: `Off duty: Mel's portrait`.",
 	endPortrait: "Ending screen: added after an advisor's name in the `Off duty:` line (`Mel` + this).",
 	endBed: "Ending screen: in the `Off duty:` line, when the 18th achievement unlocked the after-hours set.",
+	endBankruptNote: "Bankrupt ending screen, under the record, the first time \"Notice of Termination\" unlocks. One or two short lines (spec id `end_bankrupt_note`). PLACEHOLDER: write your own.",
+	creditsTitle: "Credits screen: heading, and the name of its entry in the menu.",
+	creditsMenuLabel: "Title screen: the Credits entry.",
+	creditsDetail: "Title screen: small text beside the Credits entry.",
+	creditsCode: "Credits screen: line.",
+	creditsArt: "Credits screen: line.",
+	creditsInspired: "Credits screen: line.",
+	creditsFonts: "Credits screen: line.",
+	creditsQuotes: "Credits screen: line above the list of quotes. The list itself is built from the game's quotes (docs/QUOTES.md), not edited here.",
+	creditsQuotesHead: "Credits screen: heading of the quote list.",
 };
 
 const UI_GROUPS: { title: string; note: string; keys: string[] }[] = [
@@ -461,7 +471,8 @@ const UI_GROUPS: { title: string; note: string; keys: string[] }[] = [
 	{ title: "The hidden achievements", note: "Until the two failure-ending achievements are earned, the list shows this instead of their name and text.", keys: ["hiddenName", "hiddenText"] },
 	{ title: "Gallery: headings", note: "The OFF DUTY tab.", keys: ["subOffDuty", "subAfterHours", "altOffDuty", "altLocked"] },
 	{ title: "Unlock strips", note: "A small strip at the top of the screen when something unlocks (4 seconds, the game keeps running).", keys: ["stripAchievement", "stripOffDuty", "stripPortrait", "stripBed", "stripBedText"] },
-	{ title: "Ending screen: new achievements and portraits", note: "Shown under the ending text on the ending screen and the game-over sheet, only if the run earned something.", keys: ["endNew", "endOffDuty", "endPortrait", "endBed"] },
+	{ title: "Ending screen: new achievements and portraits", note: "Shown under the ending text on the ending screen and the game-over sheet, only if the run earned something.", keys: ["endNew", "endOffDuty", "endPortrait", "endBed", "endBankruptNote"] },
+	{ title: "Credits screen", note: "Title menu, Credits. Every quote in the game is listed below these lines with its author and source.", keys: ["creditsTitle", "creditsMenuLabel", "creditsDetail", "creditsCode", "creditsArt", "creditsInspired", "creditsFonts", "creditsQuotes", "creditsQuotesHead"] },
 ];
 
 const OFF_WHEN: Record<string, string> = {
@@ -571,7 +582,7 @@ const achSections: Section[] = [
 			for (const s of ach.scenes.filter((x) => g.pick(x.id))) galleryScene(s);
 		},
 	})),
-	...UI_GROUPS.filter((g) => g.title.startsWith("Unlock strips") || g.title.startsWith("Ending screen")).map((g) => ({ title: g.title, body: () => uiGroup(g) })),
+	...UI_GROUPS.filter((g) => g.title.startsWith("Unlock strips") || g.title.startsWith("Ending screen") || g.title.startsWith("Credits")).map((g) => ({ title: g.title, body: () => uiGroup(g) })),
 	{
 		title: "Code text (change by hand)",
 		body: () => {

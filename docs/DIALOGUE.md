@@ -1985,6 +1985,30 @@ Choice `add`:
 - [ach.ui.end_portrait] Label: 's portrait
 > Ending screen: in the `Off duty:` line, when the 18th achievement unlocked the after-hours set.
 - [ach.ui.end_bed] Label: the after-hours set
+> Bankrupt ending screen, under the record, the first time "Notice of Termination" unlocks. One or two short lines (spec id `end_bankrupt_note`). PLACEHOLDER: write your own.
+- [ach.ui.end_bankrupt_note] Label: The lamp in the control room stays on.
+
+### Credits screen
+
+> Title menu, Credits. Every quote in the game is listed below these lines with its author and source.
+> Credits screen: heading, and the name of its entry in the menu.
+- [ach.ui.credits_title] Label: Credits
+> Title screen: the Credits entry.
+- [ach.ui.credits_menu_label] Label: CREDITS
+> Title screen: small text beside the Credits entry.
+- [ach.ui.credits_detail] Label: who made it · quotes
+> Credits screen: line.
+- [ach.ui.credits_code] Label: Code: written with Claude (Anthropic).
+> Credits screen: line.
+- [ach.ui.credits_art] Label: Art: portraits, backdrops, endings and icon sheets generated with ChatGPT. Some in-game sprites drawn in code with Claude.
+> Credits screen: line.
+- [ach.ui.credits_inspired] Label: Inspired by SimTower. No code, art or text was taken from it.
+> Credits screen: line.
+- [ach.ui.credits_fonts] Label: Fonts: DotGothic16 and VT323 (Google Fonts, SIL Open Font License).
+> Credits screen: line above the list of quotes. The list itself is built from the game's quotes (docs/QUOTES.md), not edited here.
+- [ach.ui.credits_quotes] Label: Quotes: each quote in the game names its author and source. Full list below.
+> Credits screen: heading of the quote list.
+- [ach.ui.credits_quotes_head] Label: Quotes
 
 ### Off-duty frames
 

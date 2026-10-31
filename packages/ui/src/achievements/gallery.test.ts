@@ -124,6 +124,18 @@ describe("the ending screen line", () => {
 		expect(newLines({ achievements: ["end_flesh", "clean_hands"], portraits: ["mel"], bed: false })).toEqual(["New: The Flesh Remembers, Clean Hands", "Off duty: Mel's portrait"]);
 		expect(newLines({ achievements: [], portraits: [], bed: true })).toEqual(["Off duty: the after-hours set"]);
 	});
+	it("adds the Bankrupt note only when Notice of Termination unlocks", () => {
+		const note = achievementContent.ui.endBankruptNote;
+		expect(note.trim()).not.toBe("");
+		expect(newLines({ achievements: ["end_bankrupt"], portraits: [], bed: false })).toContain(note);
+		expect(newLines({ achievements: ["end_absorbed"], portraits: [], bed: false })).not.toContain(note);
+	});
+	it("adds the Bankrupt note only when Notice of Termination unlocks", () => {
+		const note = achievementContent.ui.endBankruptNote;
+		expect(note.trim()).not.toBe("");
+		expect(newLines({ achievements: ["end_bankrupt"], portraits: [], bed: false })).toContain(note);
+		expect(newLines({ achievements: ["end_absorbed"], portraits: [], bed: false })).not.toContain(note);
+	});
 });
 
 describe("the page", () => {

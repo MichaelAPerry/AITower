@@ -146,7 +146,17 @@
   "endNew": "New:",
   "endOffDuty": "Off duty:",
   "endPortrait": "'s portrait",
-  "endBed": "the after-hours set"
+  "endBed": "the after-hours set",
+  "endBankruptNote": "The lamp in the control room stays on.",
+  "creditsTitle": "Credits",
+  "creditsMenuLabel": "CREDITS",
+  "creditsDetail": "who made it · quotes",
+  "creditsCode": "Code: written with Claude (Anthropic).",
+  "creditsArt": "Art: portraits, backdrops, endings and icon sheets generated with ChatGPT. Some in-game sprites drawn in code with Claude.",
+  "creditsInspired": "Inspired by SimTower. No code, art or text was taken from it.",
+  "creditsFonts": "Fonts: DotGothic16 and VT323 (Google Fonts, SIL Open Font License).",
+  "creditsQuotes": "Quotes: each quote in the game names its author and source. Full list below.",
+  "creditsQuotesHead": "Quotes"
  },
  "scenes": [
   {

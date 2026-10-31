@@ -24,7 +24,7 @@ export interface TitleScreenProps {
 	content?: ContentDB;
 }
 
-const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", lesson: "START LESSON 1", new: "FREE BUILD", load: "LOAD GAME", achievements: achievementContent.ui.titleItem, settings: "SETTINGS", controls: "CONTROLS" };
+const LABEL: Record<TitleItem, string> = { continue: "CONTINUE", lesson: "START LESSON 1", new: "FREE BUILD", load: "LOAD GAME", achievements: achievementContent.ui.titleItem, settings: "SETTINGS", controls: "CONTROLS", credits: achievementContent.ui.creditsMenuLabel };
 
 /**
  * The title screen: the AITOWER nameplate and the menu. The game stays paused
@@ -123,6 +123,7 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 										{item === "continue" && auto && <span className="ui-title-detail">{continueSummary(auto, now)}</span>}
 										{item === "load" && <span className="ui-title-detail">{saves.length} saved</span>}
 										{item === "achievements" && <span className="ui-title-detail">{counter(loadProfile())} {achievementContent.ui.titleDetail}</span>}
+										{item === "credits" && <span className="ui-title-detail">{achievementContent.ui.creditsDetail}</span>}
 										{item === "lesson" && <span className="ui-title-detail">{lessonDone ? "replay or pick one" : "build a rack · 4 min · recommended"}</span>}
 										{item === "new" && <span className="ui-title-detail">{bonus > 0 ? `sandbox sites · +${fmtMoney(bonus)} head start` : "sandbox sites, no teacher"}</span>}
 									</button>

@@ -99,5 +99,7 @@ export function newLines(run: { achievements: readonly string[]; portraits: read
 	const off = run.portraits.map((a) => `${achievementContent.offDuty[a].name}${U.endPortrait}`);
 	if (run.bed) off.push(U.endBed);
 	if (off.length) out.push(`${U.endOffDuty} ${off.join(", ")}`);
+	// The hidden failure achievement comes with a line of its own (docs/OWNER_TEXT.md, end_bankrupt_note).
+	if (run.achievements.includes("end_bankrupt")) out.push(U.endBankruptNote);
 	return out;
 }
