@@ -7,12 +7,16 @@ What plays when. Source of truth is `packages/ui/src/gamemusic/sceneMusic.ts` (r
 - Tower loop: plays during normal play (building the tower). Loops.
 - Warm scene song: friendly, hopeful, bonding scenes.
 - Quiet scene song (Noctune FM): tense, closing, late-night scenes.
-- Title songs (title, Garden, Lattice, Flesh): the title screen only, unchanged. They stop when a game starts.
+- Title song: the title screen only, unchanged. It stops when a game starts.
+- Ending songs (Garden ending song, Lattice ending song, Flesh ending song): also used on the title screen (when it shows that tree's ending picture), and now in the game on that tree's success ending.
 
 ## Behaviour
 
 - Music starts at the first click or key (browser rule). The tower loop plays in the game. When a scene opens, its song fades in while the tower loop fades out (about 0.6 s); when the scene closes they swap back, and each song resumes where it left off.
-- The tower loop stops on the ending / game-over screen. Ending scenes have no song of their own today, so they were left alone (silent). Continuing a game after game over brings the tower loop back.
+- Success endings: when a tree's ending plays (Lattice, Flesh or Garden), the music crossfades (about 0.6 s) from the tower loop or scene song to that tree's ending song. It keeps playing, without restarting, through the ending scene, the service record screen, and the system menu / Credits opened on top of it. Songs loop, so a long stay is fine.
+- Failure endings (Absorbed, Bankrupt): the quiet scene song, same behaviour.
+- "Continue in sandbox" after a success ending fades back to the tower loop. A New game or Load replaces the game and returns to the tower loop too.
+- Credits opened from the title or the menu before a game: the title song plays as before (the title is unchanged).
 - Volume = Master x Music; Mute silences it. Event cards (heat wave, audit, etc.) are not scenes and stay on the tower loop.
 
 ## Rule

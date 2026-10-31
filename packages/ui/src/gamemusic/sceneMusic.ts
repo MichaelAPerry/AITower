@@ -1,5 +1,6 @@
 /** In-game music: which song a visual-novel scene gets, and which song the game wants right now. Pure; docs/MUSIC_MAP.md lists the result. */
 import { useEffect, useSyncExternalStore } from "react";
+import type { EndingId, GameOverKind } from "@aitower/sim";
 import type { SongId } from "../title/titleMusic";
 
 export type SceneTrack = "warm" | "quiet";
@@ -28,9 +29,23 @@ export function trackForScene(id: string): SceneTrack {
 	return SCENE_RULES.find((r) => id.startsWith(r.prefix))?.track ?? DEFAULT_SCENE_TRACK;
 }
 
-/** The song the game wants: nothing on the title and on the ending/game-over screen; a scene's song while a scene is open; else the tower loop. */
-export function wantedSong(s: { active: boolean; sceneId: string | null }): SongId | null {
+/** Which song each success ending plays (the Lattice tree's ending id is "singularity"). */
+export const ENDING_SONGS: Readonly<Partial<Record<EndingId, SongId>>> = { singularity: "lattice", flesh: "flesh", garden: "garden" };
+
+/** The song for a game-over screen: the tree's ending song for a success ending, the quiet scene song for Absorbed and Bankrupt, else silence. */
+export function overSong(over: { kind: GameOverKind; ending?: EndingId }): SongId | null {
+	const id: EndingId | undefined = over.ending ?? (over.kind === "absorbed" || over.kind === "bankrupt" ? over.kind : undefined);
+	if (!id) return null;
+	return ENDING_SONGS[id] ?? (id === "absorbed" || id === "bankrupt" ? "quiet" : null);
+}
+
+/**
+ * The song the game wants: nothing on the title; on a game-over / ending screen its song (kept while the menu or credits open over it);
+ * a scene's song while a scene is open; else the tower loop.
+ */
+export function wantedSong(s: { active: boolean; sceneId: string | null; over?: { kind: GameOverKind; ending?: EndingId } | null }): SongId | null {
 	if (!s.active) return null;
+	if (s.over) return overSong(s.over);
 	return s.sceneId ? trackForScene(s.sceneId) : "tower";
 }
 

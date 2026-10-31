@@ -1,7 +1,7 @@
 import { achievementContent, loadContent } from "@aitower/content";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { SONGS, createTitleMusic } from "../title/titleMusic";
-import { currentScene, enterScene, trackForScene, wantedSong } from "./sceneMusic";
+import { currentScene, enterScene, overSong, trackForScene, wantedSong } from "./sceneMusic";
 
 const storyIds = (): string[] =>
 	Object.values(loadContent().events)
@@ -35,6 +35,22 @@ describe("scene -> track mapping", () => {
 		expect(wantedSong({ active: true, sceneId: "seal_biotech" })).toBe("quiet");
 		expect(wantedSong({ active: true, sceneId: "bond50_luci" })).toBe("warm");
 		expect(wantedSong({ active: false, sceneId: "bond50_luci" })).toBeNull();
+	});
+	it("plays each tree's ending song on a success ending, and the quiet song on a failure", () => {
+		expect(overSong({ kind: "victory", ending: "singularity" })).toBe("lattice");
+		expect(overSong({ kind: "victory", ending: "flesh" })).toBe("flesh");
+		expect(overSong({ kind: "victory", ending: "garden" })).toBe("garden");
+		expect(overSong({ kind: "absorbed", ending: "absorbed" })).toBe("quiet");
+		expect(overSong({ kind: "absorbed" })).toBe("quiet");
+		expect(overSong({ kind: "bankrupt" })).toBe("quiet");
+		expect(overSong({ kind: "victory" })).toBeNull();
+	});
+	it("the ending song wins over scenes and the tower loop, and stays while the menu or credits are open", () => {
+		const over = { kind: "victory", ending: "garden" } as const;
+		expect(wantedSong({ active: true, sceneId: null, over })).toBe("garden");
+		expect(wantedSong({ active: true, sceneId: "seal_biotech", over })).toBe("garden");
+		expect(wantedSong({ active: false, sceneId: null, over })).toBeNull(); // the title shows its own music
+		expect(wantedSong({ active: true, sceneId: null, over: null })).toBe("tower"); // continued in the sandbox
 	});
 	it("tracks open scenes as a stack", () => {
 		expect(currentScene()).toBeNull();
