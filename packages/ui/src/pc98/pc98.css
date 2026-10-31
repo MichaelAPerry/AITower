@@ -22,9 +22,9 @@
 	--t-syn: #7fb4ff;
 	--radius: 0;
 	--radius-sm: 0;
-	--f-display: "DotGothic16", "IBM Plex Sans", system-ui, sans-serif;
-	--f-body: "DotGothic16", "IBM Plex Sans", system-ui, sans-serif;
-	--f-num: "DotGothic16", "IBM Plex Mono", ui-monospace, monospace;
+	--f-display: "DotGothic16", "M PLUS Rounded 1c", system-ui, sans-serif;
+	--f-body: "M PLUS Rounded 1c", system-ui, sans-serif;
+	--f-num: "DotGothic16", "M PLUS Rounded 1c", ui-monospace, monospace;
 	--pc-rule: #e9eaff;
 	--pc-rule-in: #6b72c9;
 	--pc-dither: repeating-conic-gradient(rgba(255, 255, 255, 0.04) 0 25%, transparent 0 50%) 0 0 / 4px 4px;

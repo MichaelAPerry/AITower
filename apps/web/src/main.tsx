@@ -1,4 +1,6 @@
 import "@fontsource/dotgothic16/latin-400.css";
+import "@fontsource/m-plus-rounded-1c/latin-400.css";
+import "@fontsource/m-plus-rounded-1c/latin-700.css";
 import "@fontsource/vt323";
 import "@fontsource/special-elite";
 import "@fontsource/silkscreen";

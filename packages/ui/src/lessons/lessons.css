@@ -4,7 +4,7 @@
 	position: absolute;
 	top: var(--gap);
 	left: var(--gap);
-	right: calc(var(--dtab-w, 104px) + var(--gap) * 2);
+	right: calc(var(--dtab-w, 136px) + var(--gap) * 2);
 	z-index: 4;
 	display: flex;
 	align-items: center;
@@ -15,7 +15,7 @@
 	transition: right 0.2s ease;
 }
 .aitower-hud.has-drawer .les-goal {
-	right: calc(var(--dtab-w, 104px) + var(--drawer-w) + var(--gap) * 3);
+	right: calc(var(--dtab-w, 136px) + var(--drawer-w) + var(--gap) * 3);
 }
 .aitower-hud .les-goal-head {
 	display: grid;
@@ -136,7 +136,7 @@
 	display: grid;
 	place-items: center;
 	border: 1px solid var(--panel-edge);
-	font: 600 11px / 1 var(--f-num);
+	font: 600 var(--fs-label) / 1 var(--f-num);
 }
 .aitower-hud .les-steps li.is-now .les-tick {
 	border-color: var(--accent);
@@ -294,7 +294,7 @@
 	opacity: 0.55;
 }
 .les-list .les-n {
-	font: 600 16px / 1 var(--f-num);
+	font: 600 var(--fs-body) / 1 var(--f-num);
 	color: var(--accent);
 }
 .les-list small {
@@ -302,7 +302,7 @@
 	color: var(--text-dim);
 }
 .les-list .les-stars {
-	font-size: 16px;
+	font-size: var(--fs-body);
 	letter-spacing: 1px;
 }
 

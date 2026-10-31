@@ -8,7 +8,7 @@
 	background: #05051e;
 	border: 1px solid var(--pc-rule-in);
 	color: var(--text);
-	font: 11px/1 var(--f-display);
+	font: var(--fs-label)/1 var(--f-display);
 }
 .aitower-hud .soul-gauge:hover {
 	border-color: var(--pc-rule);
@@ -55,7 +55,7 @@
 .aitower-hud .soul-gauge {
 	flex: none;
 	min-width: 136px;
-	font-size: 10px;
+	font-size: var(--fs-label);
 }
 .aitower-hud .soul-bar {
 	grid-template-columns: 44px 1fr 34px;
@@ -69,7 +69,7 @@
 	margin: 2px 0 4px;
 }
 .aitower-hud .soul-line {
-	font: 12px/1 var(--f-display);
+	font: var(--fs-small)/1 var(--f-display);
 	letter-spacing: 0.1em;
 }
 
@@ -92,12 +92,12 @@
 	gap: 12px;
 	width: min(1180px, 100%);
 	padding: 14px 18px 16px;
-	font: 14px/1.35 var(--f-body);
+	font: var(--fs-body)/1.35 var(--f-body);
 	color: var(--text);
 }
 .aitower-hud .trees-title h2 {
 	margin: 0 0 2px;
-	font: 18px/1 var(--f-display);
+	font: var(--fs-lead)/1 var(--f-display);
 	letter-spacing: 0.1em;
 }
 .aitower-hud .trees-title p {
@@ -130,20 +130,20 @@
 .aitower-hud .trees-head h3 {
 	margin: 0;
 	color: var(--tree);
-	font: 16px/1 var(--f-display);
+	font: var(--fs-body)/1 var(--f-display);
 	letter-spacing: 0.08em;
 }
 .aitower-hud .trees-head small,
 .aitower-hud .trees-sp small {
 	color: var(--text-dim);
-	font-size: 12px;
+	font-size: var(--fs-small);
 }
 .aitower-hud .trees-sp {
 	display: grid;
 	gap: 4px;
 }
 .aitower-hud .trees-sp b {
-	font: 20px/1 var(--f-display);
+	font: var(--fs-num)/1 var(--f-display);
 }
 .aitower-hud .trees-track {
 	display: block;
@@ -189,10 +189,10 @@
 }
 .aitower-hud .trees-rung {
 	color: var(--tree);
-	font: 12px/1 var(--f-display);
+	font: var(--fs-small)/1 var(--f-display);
 }
 .aitower-hud .trees-meta {
-	font-size: 12px;
+	font-size: var(--fs-small);
 	white-space: nowrap;
 }
 .aitower-hud .trees-next {
@@ -225,7 +225,7 @@
 	grid-template-columns: 40px 1fr auto;
 	align-items: center;
 	gap: 8px;
-	font: 12px/1 var(--f-display);
+	font: var(--fs-small)/1 var(--f-display);
 }
 .aitower-hud .trees-seal.is-closed .trees-seal-row b {
 	color: var(--bad);
@@ -235,7 +235,7 @@
 	flex-wrap: wrap;
 	gap: 6px 14px;
 	color: var(--text-dim);
-	font-size: 13px;
+	font-size: var(--fs-small);
 }
 .aitower-hud .trees-bond {
 	color: var(--text);

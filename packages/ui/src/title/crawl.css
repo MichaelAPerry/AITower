@@ -19,7 +19,7 @@
 }
 .aitower-hud .ui-crawl-line {
 	margin: 0;
-	font: 20px/1.4 var(--f-type, var(--f-body));
+	font: var(--fs-num)/1.4 var(--f-type, var(--f-body));
 	letter-spacing: 0.04em;
 	color: var(--sodium, var(--warn));
 	text-shadow: 0 0 10px color-mix(in srgb, var(--sodium, var(--warn)) 60%, transparent);

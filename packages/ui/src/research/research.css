@@ -1,6 +1,6 @@
 /* Research panel extras (the rest is the shared panel shell). */
 .aitower-hud .res-rp {
-	font: 600 18px/1 var(--f-num);
+	font: 600 var(--fs-lead)/1 var(--f-num);
 	color: var(--amber, #f2b24a);
 	white-space: nowrap;
 }
@@ -9,7 +9,7 @@
 }
 .aitower-hud .res-h {
 	margin: 12px 0 4px;
-	font: 600 11px/1.2 var(--f-display);
+	font: 600 var(--fs-label)/1.2 var(--f-display);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--text-dim);
@@ -24,7 +24,7 @@
 .aitower-hud .res-get li {
 	display: grid;
 	gap: 2px;
-	font: 12px/1.4 var(--f-body);
+	font: var(--fs-small)/1.4 var(--f-body);
 	color: var(--text-dim);
 }
 .aitower-hud .res-get li b {
@@ -35,7 +35,7 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	font: 12px/1.6 var(--f-body);
+	font: var(--fs-small)/1.6 var(--f-body);
 }
 .aitower-hud .res-chain li.is-done {
 	color: var(--ok, #6fdc8c);
@@ -51,7 +51,7 @@
 	gap: 8px;
 	align-items: center;
 	margin: 6px 0;
-	font: 12px/1.4 var(--f-body);
+	font: var(--fs-small)/1.4 var(--f-body);
 	color: var(--text-dim);
 }
 .aitower-hud .res-later {
@@ -60,7 +60,7 @@
 .aitower-hud .res-top {
 	display: grid;
 	gap: 4px;
-	font: 12px/1.3 var(--f-body);
+	font: var(--fs-small)/1.3 var(--f-body);
 	color: var(--text-dim);
 }
 
@@ -116,7 +116,7 @@
 }
 .aitower-hud .rt-btn,
 .aitower-hud .rt-chip {
-	font: 500 11.5px/1 var(--f-num);
+	font: 500 var(--fs-label)/1 var(--f-num);
 	letter-spacing: 0.04em;
 	color: var(--text);
 	background: var(--housing-hi);
@@ -148,13 +148,13 @@
 .aitower-hud .rt-pct {
 	min-width: 36px;
 	text-align: center;
-	font: 12px/1 var(--f-num);
+	font: var(--fs-small)/1 var(--f-num);
 	color: var(--text-dim);
 }
 .aitower-hud .rt-pitch {
 	margin: 0;
 	min-height: 18px;
-	font: 12.5px/1.4 var(--f-body);
+	font: var(--fs-small)/1.4 var(--f-body);
 	color: var(--text-dim);
 }
 .aitower-hud .rt-main {
@@ -201,7 +201,7 @@
 	stroke-opacity: 0.45;
 }
 .aitower-hud .rt-colh {
-	font: 600 12px var(--f-num);
+	font: 600 var(--fs-small) var(--f-num);
 	letter-spacing: 0.14em;
 	fill: var(--text-dim);
 }
@@ -216,12 +216,12 @@
 	fill: var(--lc);
 }
 .aitower-hud .rt-lt {
-	font: 600 12.5px var(--f-display);
+	font: 600 var(--fs-small) var(--f-display);
 	letter-spacing: 0.06em;
 	fill: var(--lc);
 }
 .aitower-hud .rt-lsub {
-	font: 500 9.5px var(--f-num);
+	font: 500 var(--fs-label) var(--f-num);
 	letter-spacing: 0.14em;
 	fill: var(--text-dim);
 }
@@ -265,12 +265,12 @@
 	fill: var(--lc);
 }
 .aitower-hud .rt-nt {
-	font: 500 12px var(--f-body);
+	font: 500 var(--fs-small) var(--f-body);
 	fill: var(--text);
 }
 .aitower-hud .rt-ns,
 .aitower-hud .rt-nc {
-	font: 500 9.5px var(--f-num);
+	font: 500 var(--fs-label) var(--f-num);
 	letter-spacing: 0.06em;
 	fill: var(--text-dim);
 }
@@ -320,7 +320,7 @@
 	display: flex;
 	flex-wrap: wrap;
 	gap: 6px 16px;
-	font: 11.5px/1 var(--f-body);
+	font: var(--fs-label)/1 var(--f-body);
 	color: var(--text-dim);
 }
 .aitower-hud .rt-legend span {

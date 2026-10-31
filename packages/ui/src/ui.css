@@ -61,7 +61,7 @@
 	gap: 8px;
 	padding: 8px;
 	box-sizing: border-box;
-	font: 17px/1.15 var(--f-crt);
+	font: var(--fs-lead)/1.15 var(--f-crt);
 	font-variant-numeric: tabular-nums;
 	color: var(--paper);
 	user-select: none;
@@ -151,12 +151,12 @@
 	overflow: hidden;
 }
 .aitower-hud .ui-formlabel-no {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	color: var(--red);
 	letter-spacing: 0.04em;
 }
 .aitower-hud .ui-formlabel-text {
-	font: 14px/1.1 var(--f-type);
+	font: var(--fs-body)/1.1 var(--f-type);
 	text-transform: uppercase;
 	letter-spacing: 0.03em;
 	overflow: hidden;
@@ -170,7 +170,7 @@
 	padding: 3px 5px 2px;
 	background: linear-gradient(180deg, color-mix(in srgb, var(--housing-hi) 40%, var(--ink)), var(--ink));
 	color: var(--paper);
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.12em;
 	text-transform: uppercase;
 	white-space: nowrap;
@@ -244,14 +244,14 @@
 	}
 }
 .aitower-hud .ui-label {
-	font: 15px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--ph-lo, var(--beige));
 	white-space: nowrap;
 }
 .aitower-hud .ui-big {
-	font: 24px/1 var(--f-crt);
+	font: var(--fs-num)/1 var(--f-crt);
 	white-space: nowrap;
 	letter-spacing: 0.01em;
 }
@@ -280,7 +280,7 @@
 }
 .aitower-hud .ui-empty {
 	color: var(--beige);
-	font: 15px/1.35 var(--f-type);
+	font: var(--fs-body)/1.35 var(--f-type);
 	padding: 4px 0;
 }
 .aitower-hud .ui-pad {
@@ -295,7 +295,7 @@
 	color: var(--ink);
 	border-radius: 2px;
 	box-shadow: 0 1px 0 var(--beige), 0 2px 0 var(--ink);
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	text-align: center;
 }
 
@@ -341,14 +341,15 @@
 /* ─── Push buttons ──────────────────────────────────────────────────── */
 
 .aitower-hud .ui-btn {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--paper);
 	background: linear-gradient(180deg, color-mix(in srgb, var(--putty) 14%, var(--housing-hi)), var(--housing));
 	border: 1px solid var(--ink);
 	border-radius: 3px;
-	padding: 6px 9px 5px;
+	padding: 6px 12px 5px;
+	min-height: var(--hit, 40px);
 	cursor: pointer;
 	display: inline-flex;
 	align-items: center;
@@ -436,7 +437,7 @@
 .aitower-hud .ui-toggle-eng {
 	position: absolute;
 	left: 4px;
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	color: color-mix(in srgb, var(--paper) 30%, var(--housing));
 	text-shadow: 0 1px 0 var(--ink);
 	transition: color 0.1s;
@@ -503,7 +504,7 @@
 	padding: 3px 4px 2px;
 	background: var(--ink);
 	color: var(--paper);
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	white-space: nowrap;
@@ -536,7 +537,7 @@
 .aitower-hud .ui-stamp {
 	display: inline-block;
 	padding: 3px 6px 2px;
-	font: 13px/1 var(--f-type);
+	font: var(--fs-small)/1 var(--f-type);
 	text-transform: uppercase;
 	letter-spacing: 0.14em;
 	white-space: nowrap;
@@ -569,7 +570,7 @@
 	padding: 3px 5px 2px;
 	border-radius: 2px;
 	border: 1px solid currentColor;
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	white-space: nowrap;
@@ -627,7 +628,7 @@
 	display: inline-block;
 	min-width: 10px;
 	padding: 1px 1px 0;
-	font: 17px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	text-align: center;
 	color: var(--paper);
 	background: linear-gradient(180deg, var(--housing-hi), var(--ink) 30%, var(--ink) 70%, var(--housing-hi));
@@ -647,7 +648,7 @@
 	align-items: baseline;
 	gap: 10px;
 	padding: 1px 0;
-	font: 18px/1.1 var(--f-crt);
+	font: var(--fs-lead)/1.1 var(--f-crt);
 }
 .aitower-hud .ui-k {
 	color: var(--ph-lo, var(--beige));
@@ -686,7 +687,7 @@
 
 /* Folder tabs */
 .aitower-hud .ui-tab {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--etch);
@@ -694,7 +695,8 @@
 	border: 1px solid var(--ink);
 	border-bottom: 0;
 	border-radius: 5px 5px 0 0;
-	padding: 7px 4px 6px;
+	padding: 7px 8px 6px;
+	min-height: var(--hit, 40px);
 	cursor: pointer;
 	white-space: nowrap;
 	display: inline-flex;
@@ -717,7 +719,7 @@
 	border-radius: 8px;
 	background: var(--ink);
 	color: var(--amber);
-	font: 15px/13px var(--f-crt);
+	font: var(--fs-body)/13px var(--f-crt);
 	text-align: center;
 	letter-spacing: 0;
 	text-shadow: 0 0 4px color-mix(in srgb, var(--amber) 60%, transparent);
@@ -753,7 +755,7 @@
 }
 .aitower-hud .ui-brand-plate {
 	padding: 4px 9px 3px 10px;
-	font: 17px/1 var(--f-type);
+	font: var(--fs-lead)/1 var(--f-type);
 	letter-spacing: 0.16em;
 	color: var(--ink);
 	background:
@@ -772,7 +774,7 @@
 	color: var(--housing-lo);
 }
 .aitower-hud .ui-brand-sub {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	color: var(--beige);
 	letter-spacing: 0.06em;
 	white-space: nowrap;
@@ -842,7 +844,7 @@
 	display: grid;
 	place-items: center;
 	border-radius: 3px;
-	font: 21px/1 var(--f-crt);
+	font: var(--fs-num)/1 var(--f-crt);
 	color: color-mix(in srgb, var(--amber) 55%, var(--housing-hi));
 	background: linear-gradient(180deg, color-mix(in srgb, var(--amber-dim) 34%, var(--housing-hi)), color-mix(in srgb, var(--amber-dim) 22%, var(--housing)));
 	box-shadow:
@@ -891,11 +893,11 @@
 	filter: drop-shadow(0 2px 2px var(--shade-hard));
 }
 .aitower-hud .ui-dial-face {
-	font: 7px var(--f-type);
+	font: var(--fs-label) var(--f-type);
 	fill: var(--paper-ink);
 }
 .aitower-hud .ui-dial-end {
-	font: 6px var(--f-type);
+	font: var(--fs-label) var(--f-type);
 	fill: var(--paper-ink);
 }
 .aitower-hud .ui-dial-needle {
@@ -954,7 +956,7 @@
 /* Index card */
 .aitower-hud .ui-item {
 	position: relative;
-	font: 15px/1.15 var(--f-type);
+	font: var(--fs-body)/1.15 var(--f-type);
 	color: var(--ink);
 	text-align: left;
 	display: grid;
@@ -1057,7 +1059,7 @@
 }
 .aitower-hud .ui-item-name {
 	min-width: 0;
-	font-size: 15px;
+	font-size: var(--fs-body);
 	line-height: 1.15;
 	display: flex;
 	flex-wrap: wrap;
@@ -1076,7 +1078,7 @@
 .aitower-hud .ui-item-sub {
 	flex: 1 1 96px;
 	min-width: 0;
-	font-size: 12.5px;
+	font-size: var(--fs-small);
 	line-height: 1.2;
 	color: var(--paper-ink);
 }
@@ -1084,7 +1086,7 @@
 	flex: none;
 	margin-left: auto;
 	white-space: nowrap;
-	font: 14px/1.15 var(--f-type);
+	font: var(--fs-body)/1.15 var(--f-type);
 	color: var(--ink);
 	padding: 0 3px;
 	background: color-mix(in srgb, var(--putty) 45%, var(--paper));
@@ -1098,7 +1100,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 2px;
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	color: var(--red);
 }
 .aitower-hud .ui-supplies {
@@ -1118,7 +1120,7 @@
 	gap: 9px;
 }
 .aitower-hud .ui-supply .ui-k {
-	font: 14px/1.15 var(--f-type);
+	font: var(--fs-body)/1.15 var(--f-type);
 	min-width: 0;
 	white-space: normal;
 	overflow-wrap: anywhere;
@@ -1128,7 +1130,7 @@
 	min-width: 34px;
 	padding: 2px 6px 1px;
 	text-align: right;
-	font: 20px/1 var(--f-crt);
+	font: var(--fs-num)/1 var(--f-crt);
 	border-radius: 4px;
 }
 .aitower-hud .ui-supply .ui-btn {
@@ -1156,14 +1158,14 @@
 	display: none;
 }
 .aitower-hud .ui-tooltip-title {
-	font: 600 15px/1.2 var(--f-display);
+	font: 600 var(--fs-body)/1.2 var(--f-display);
 	letter-spacing: 0.04em;
 	color: var(--accent);
 	margin-bottom: 6px;
 }
 .aitower-hud .ui-tooltip p {
 	margin: 0 0 8px;
-	font: 13px/1.35 var(--f-body);
+	font: var(--fs-small)/1.35 var(--f-body);
 	color: #c9d8df;
 }
 .aitower-hud .ui-tooltip-specs {
@@ -1171,7 +1173,7 @@
 	padding-top: 6px;
 }
 .aitower-hud .ui-tooltip .ui-row {
-	font: 12.5px/1.4 var(--f-num);
+	font: var(--fs-small)/1.4 var(--f-num);
 	color: #eef5f8;
 }
 .aitower-hud .ui-tooltip .ui-k {
@@ -1184,7 +1186,7 @@
 	color: var(--warn);
 	border: 1px solid var(--warn);
 	border-radius: var(--radius-sm);
-	font: 600 12px/1.2 var(--f-body);
+	font: 600 var(--fs-small)/1.2 var(--f-body);
 }
 
 /* ─── Centre column ─────────────────────────────────────────────────── */
@@ -1226,7 +1228,7 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 7px;
-	font: 17px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	text-transform: uppercase;
 	letter-spacing: 0.06em;
 	color: var(--amber);
@@ -1268,7 +1270,7 @@
 	position: relative;
 	height: 17px;
 	margin: 2px 6px 0;
-	font: 15px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	color: var(--ph-lo);
 }
 .aitower-hud .ui-legend-ticks span {
@@ -1305,7 +1307,7 @@
 	border: 1px solid var(--panel-edge);
 	border-radius: 999px;
 	box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
-	font: 13px/1.3 var(--f-body);
+	font: var(--fs-small)/1.3 var(--f-body);
 	animation: ui-toast-in 180ms ease-out both;
 }
 .aitower-hud .ui-toast-glyph {
@@ -1317,7 +1319,7 @@
 }
 .aitower-hud .ui-toast-count {
 	color: var(--text-dim);
-	font: 12px/1 var(--f-num);
+	font: var(--fs-small)/1 var(--f-num);
 }
 .aitower-hud .ui-toast.sev-good {
 	border-color: color-mix(in srgb, var(--good) 55%, transparent);
@@ -1344,7 +1346,7 @@
 	left: 0;
 	z-index: 60;
 	padding: 3px 7px;
-	font: 12px/1 var(--f-type);
+	font: var(--fs-small)/1 var(--f-type);
 	color: var(--paper);
 	background: color-mix(in srgb, var(--panel, #111) 88%, transparent);
 	border: 1px solid var(--panel-edge);
@@ -1414,7 +1416,7 @@
 	gap: 2px;
 }
 .aitower-hud .ui-insp-name > span:first-child {
-	font: 17px/1.1 var(--f-type);
+	font: var(--fs-lead)/1.1 var(--f-type);
 	color: var(--paper);
 	display: -webkit-box;
 	-webkit-line-clamp: 2;
@@ -1422,7 +1424,7 @@
 	overflow: hidden;
 }
 .aitower-hud .ui-insp-name > span:last-child {
-	font: 16px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	color: var(--beige);
 }
 .aitower-hud .ui-section {
@@ -1433,7 +1435,7 @@
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	font: 16px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
 	color: var(--ph-lo);
@@ -1479,7 +1481,7 @@
 .aitower-hud .ui-liftshaft span {
 	min-width: 24px;
 	text-align: center;
-	font: 17px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	padding: 2px 0 1px;
 	border: 1px solid var(--ph-grid);
 	border-radius: 50%;
@@ -1511,7 +1513,7 @@
 	font-size: 28px;
 }
 .aitower-hud .ui-tempgauge-legend {
-	font: 15px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	color: var(--ph-lo);
 	white-space: nowrap;
 	overflow: hidden;
@@ -1612,16 +1614,16 @@
 	border-bottom: 3px double var(--ink);
 }
 .aitower-hud .ui-form-head span:first-child {
-	font: 16px/1 var(--f-type);
+	font: var(--fs-body)/1 var(--f-type);
 	letter-spacing: 0.04em;
 }
 .aitower-hud .ui-form-head span:last-child {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	color: var(--red);
 	letter-spacing: 0.06em;
 }
 .aitower-hud .ui-form .ui-table th {
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--paper-ink);
@@ -1629,12 +1631,12 @@
 	border-bottom: 1px solid var(--ink);
 }
 .aitower-hud .ui-form .ui-table td {
-	font: 15px/1.1 var(--f-type);
+	font: var(--fs-body)/1.1 var(--f-type);
 	padding: 5px 8px;
 	border-bottom: 1px dotted var(--paper-ink);
 }
 .aitower-hud .ui-form .ui-table td.strong {
-	font-size: 15px;
+	font-size: var(--fs-body);
 	text-decoration: underline;
 	text-decoration-color: var(--beige);
 	text-underline-offset: 3px;
@@ -1677,7 +1679,7 @@
 	min-width: 96px;
 	padding: 4px 6px 3px;
 	margin-left: 4px;
-	font: 13px/1 var(--f-type);
+	font: var(--fs-small)/1 var(--f-type);
 	text-transform: uppercase;
 	letter-spacing: 0.1em;
 	background: transparent;
@@ -1727,7 +1729,7 @@
 	padding: 2px 6px;
 }
 .aitower-hud .ui-crt-table th {
-	font: 15px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 	color: var(--ph-lo);
@@ -1735,7 +1737,7 @@
 	border-bottom: 1px dashed var(--ph-grid);
 }
 .aitower-hud .ui-crt-table td {
-	font: 18px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	padding: 5px 8px;
 	border-bottom: 1px solid color-mix(in srgb, var(--ph-grid) 45%, transparent);
 }
@@ -1778,7 +1780,7 @@
 	margin-bottom: 4px;
 }
 .aitower-hud .ui-spark-head .ui-big {
-	font-size: 22px;
+	font-size: var(--fs-num);
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
@@ -1804,7 +1806,7 @@
 	justify-content: space-between;
 	gap: 6px;
 	margin-top: 4px;
-	font: 15px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	color: var(--ph-lo);
 	white-space: nowrap;
 	overflow: hidden;
@@ -1831,14 +1833,14 @@
 	caption-side: top;
 	padding: 6px 10px 5px;
 	text-align: left;
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.08em;
 	color: var(--paper-ink);
 	background: var(--paper);
 	border-bottom: 1px dashed var(--paper-ink);
 }
 .aitower-hud .ui-ledger th {
-	font: 16px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;
 	color: var(--paper-ink);
@@ -1846,7 +1848,7 @@
 	border-bottom: 1px solid var(--ink);
 }
 .aitower-hud .ui-ledger td {
-	font: 19px/1 var(--f-crt);
+	font: var(--fs-lead)/1 var(--f-crt);
 	padding: 4px 10px 3px;
 }
 .aitower-hud .ui-ledger tbody tr:nth-child(odd) td {
@@ -1874,7 +1876,7 @@
 	align-items: center;
 	gap: 10px;
 	padding: 3px 10px;
-	font: 18px/1.1 var(--f-crt);
+	font: var(--fs-lead)/1.1 var(--f-crt);
 	border-bottom: 1px solid color-mix(in srgb, var(--ph-grid) 40%, transparent);
 }
 .aitower-hud .ui-alerts li.is-click {
@@ -1950,11 +1952,11 @@
 		padding-right: 5px;
 	}
 	.aitower-hud .ui-form .ui-table td {
-		font-size: 14px;
+		font-size: var(--fs-body);
 	}
 	.aitower-hud .ui-stampbtn {
 		min-width: 84px;
-		font-size: 12px;
+		font-size: var(--fs-small);
 		letter-spacing: 0.06em;
 	}
 }
@@ -1989,7 +1991,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: 6px;
-	font: 8px/1 var(--f-stamp);
+	font: var(--fs-label)/1 var(--f-stamp);
 	letter-spacing: 0.06em;
 	white-space: nowrap;
 	color: var(--beige);
@@ -2024,14 +2026,14 @@
 		0 10px 26px var(--shade);
 }
 .aitower-hud .ui-desknotice .ui-desknotice-stamp {
-	font-size: 12px;
+	font-size: var(--fs-small);
 }
 .aitower-hud .ui-desknotice-check {
 	display: flex;
 	align-items: center;
 	gap: 8px;
 	margin-top: 8px;
-	font: 14px/1.2 var(--f-type);
+	font: var(--fs-body)/1.2 var(--f-type);
 	cursor: pointer;
 }
 .aitower-hud .ui-desknotice-check input {
@@ -2085,13 +2087,13 @@
 	height: 15px;
 	display: inline-grid;
 	place-items: center;
-	font: 700 10px/1 var(--f-crt);
+	font: 700 var(--fs-label)/1 var(--f-crt);
 	color: var(--ink);
 }
 .aitower-hud.is-colorblind .ui-lamp:not(.is-plain)::before {
 	content: "○";
 	color: var(--lamp);
-	font-size: 11px;
+	font-size: var(--fs-label);
 }
 .aitower-hud.is-colorblind .ui-lamp.lamp-green.is-lit::before {
 	content: "✓";
@@ -2108,7 +2110,7 @@
 .aitower-hud.is-colorblind .ui-pill.is-status::before {
 	margin-right: 4px;
 	font-family: var(--f-crt);
-	font-size: 12px;
+	font-size: var(--fs-small);
 }
 .aitower-hud.is-colorblind .ui-pill.is-status.tone-good::before {
 	content: "✓";
@@ -2191,10 +2193,10 @@
 }
 .aitower-hud.is-density-cramped .ui-clock .ui-big,
 .aitower-hud.is-density-cramped .ui-cash .ui-big {
-	font-size: 24px;
+	font-size: var(--fs-num);
 }
 .aitower-hud.is-density-cramped .ui-big {
-	font-size: 21px;
+	font-size: var(--fs-num);
 }
 .aitower-hud.is-density-cramped .ui-tabs {
 	padding: 6px 6px 0;
@@ -2202,7 +2204,7 @@
 .aitower-hud.is-density-cramped .ui-tab {
 	letter-spacing: 0;
 	padding: 7px 1px 6px;
-	font-size: 7px;
+	font-size: var(--fs-label);
 }
 .aitower-hud.is-density-cramped .ui-formlabel-no {
 	display: none;
@@ -2227,7 +2229,7 @@
 	gap: 6px;
 }
 .aitower-hud.is-density-cramped .ui-supply .ui-k {
-	font-size: 12px;
+	font-size: var(--fs-small);
 }
 .aitower-hud.is-density-cramped .ui-supply .ui-btn {
 	min-width: 0;
@@ -2247,7 +2249,7 @@
 .aitower-hud .ui-offer-why,
 .aitower-hud .ui-offer-ok {
 	display: block;
-	font: 13px/1.2 var(--f-crt);
+	font: var(--fs-small)/1.2 var(--f-crt);
 	letter-spacing: 0.02em;
 }
 .aitower-hud .ui-offer-why {
@@ -2276,7 +2278,7 @@
 	border-left: 6px solid var(--brass);
 	box-shadow: 0 0 0 2px var(--housing), 0 6px 16px color-mix(in srgb, var(--ink) 60%, transparent);
 	padding: 8px 12px 9px;
-	font: 15px/1.3 var(--f-type);
+	font: var(--fs-body)/1.3 var(--f-type);
 }
 .aitower-hud .ui-objective.tone-alert {
 	border-left-color: var(--red);
@@ -2292,7 +2294,7 @@
 	margin-bottom: 4px;
 }
 .aitower-hud .ui-objective-net {
-	font: 16px/1 var(--f-crt);
+	font: var(--fs-body)/1 var(--f-crt);
 	letter-spacing: 0.03em;
 }
 .aitower-hud .ui-objective-net.is-neg {
@@ -2303,7 +2305,7 @@
 }
 .aitower-hud .ui-objective-title {
 	display: block;
-	font-size: 17px;
+	font-size: var(--fs-lead);
 	margin-bottom: 2px;
 }
 .aitower-hud .ui-objective-detail,
@@ -2312,7 +2314,7 @@
 }
 .aitower-hud .ui-objective-costs {
 	margin-top: 3px;
-	font: 14px/1.2 var(--f-crt);
+	font: var(--fs-body)/1.2 var(--f-crt);
 	color: var(--brass-dk);
 }
 
@@ -2322,12 +2324,12 @@
 	padding: 6px 8px;
 	border-left: 3px solid currentColor;
 	background: rgba(0, 0, 0, 0.25);
-	font-size: 12px;
+	font-size: var(--fs-small);
 	line-height: 1.35;
 }
 
 .aitower-hud .ui-panel-name {
-	font: 600 14px/1 var(--f-display);
+	font: 600 var(--fs-body)/1 var(--f-display);
 	letter-spacing: var(--tracking);
 	text-transform: uppercase;
 	color: var(--text);
@@ -2346,7 +2348,7 @@
 	grid-template-columns: 96px minmax(0, 1fr) 38px;
 	align-items: center;
 	gap: 8px;
-	font: 12px/1.2 var(--f-num);
+	font: var(--fs-small)/1.2 var(--f-num);
 }
 .aitower-hud .ui-affinity-bar {
 	height: 8px;
@@ -2395,7 +2397,7 @@
 	border: 2px solid var(--money, #ffd75e);
 	outline: 1px solid var(--bg, #07072a);
 	box-shadow: 0 0 0 1px var(--text), 4px 4px 0 rgba(0, 0, 0, 0.55);
-	font: 15px/1.3 var(--f-crt);
+	font: var(--fs-body)/1.3 var(--f-crt);
 	pointer-events: none;
 	z-index: 200; /* above the menu (60) and the ending and gallery stages (120) */
 	animation: ui-toast-in 180ms ease-out both;
@@ -2411,13 +2413,13 @@
 	padding: 1px 6px;
 	color: var(--bg, #07072a);
 	background: var(--money, #ffd75e);
-	font: 10px/1.4 var(--f-stamp);
+	font: var(--fs-label)/1.4 var(--f-stamp);
 	letter-spacing: 0.08em;
 }
 .aitower-hud .ui-ach-name {
 	flex: none;
 	color: var(--money, #ffd75e);
-	font-size: 18px;
+	font-size: var(--fs-lead);
 }
 .aitower-hud .ui-ach-text {
 	color: var(--text-dim, var(--text));
