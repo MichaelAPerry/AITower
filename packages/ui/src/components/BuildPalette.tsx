@@ -10,7 +10,6 @@ import { buildIcon } from "../build/buildIcons";
 import { findItem, structure } from "../build/catalog";
 import { CATEGORY_LABEL, type CatalogItem, type Tab, lockReason, lockedSummary, structureGate } from "../build/plain";
 import { OutputBar, TierMark } from "../build/TierMark";
-import { allowedIds } from "../lessons/lessons";
 import { toolKey } from "../tools/controller";
 import type { PanelProps } from "./context";
 
@@ -146,11 +145,7 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 
 	let cards: CatalogItem[] = [];
 	let lockedLines: string[] = [];
-	if (tab === "structure" && allowedIds(view)) {
-		// A lesson shows only the pipe it teaches.
-		const lesson = allowedIds(view);
-		cards = structure(content).filter((i) => lesson?.has(i.key));
-	} else if (tab === "structure") {
+	if (tab === "structure") {
 		// Coolant and nutrient piping wait for the research that brings liquid cooling / wetware: a "Coming at" row instead of a card.
 		const all = structure(content);
 		cards = all.filter((i) => !structureGate(i, view, content));
@@ -162,12 +157,9 @@ export function BuildPalette({ store, content, state, ui, setUi }: PanelProps) {
 		const defs = Object.values(content.facilities)
 			.filter((d) => d.category === tab && !d.growth && !d.retired && !isRetrofitOnly(d))
 			.sort((a, b) => a.unlockTier - b.unlockTier || a.cost - b.cost || a.id.localeCompare(b.id));
-		// A lesson shows only what it teaches: the rest is not even listed.
-		const lesson = allowedIds(view);
-		const shelf = (d: FacilityDef): boolean => !lesson || lesson.has(d.id);
-		const open = defs.filter((d) => !lockReason(d, view, content) && shelf(d));
+		const open = defs.filter((d) => !lockReason(d, view, content));
 		cards = open.map((d) => findItem(d.id, content) as CatalogItem);
-		lockedLines = lesson ? [] : lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
+		lockedLines = lockedSummary(defs.filter((d) => lockReason(d, view, content)), view, content);
 	}
 
 	const buy = (cmd: SimCommand): void => {

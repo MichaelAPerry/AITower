@@ -8,7 +8,6 @@
 			"concept": "Build: a rack needs power and cooling to run. Power is counted in kW, and PUE shows how much extra the hall burns.",
 			"goal": "Power a rack, cool it, and run it for three hours.",
 			"scenario": "lesson_first_watt",
-			"speed": 3,
 			"meter": true,
 			"holdLabel": "hours running",
 			"passed": "A powered, cooled rack ran a job",
@@ -20,15 +19,26 @@
 					"label": "Lesson hall: nothing breaks today"
 				}
 			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision"
-			],
 			"steps": [
+				{
+					"id": "clock",
+					"text": "Press 1× to start the clock",
+					"when": [
+						{
+							"metric": "tips",
+							"op": ">=",
+							"value": 1
+						}
+					],
+					"say": [
+						"Hi. I'm Bea. I do power. Welcome to the hall.",
+						"Time is stopped. Press 1× in the speed controls at the top to start the clock."
+					],
+					"wait": "play",
+					"pulse": [
+						"[data-tut=\"speed-1\"]"
+					]
+				},
 				{
 					"id": "rack",
 					"text": "Place a rack on the glowing spot",
@@ -39,28 +49,16 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 1
-						}
-					],
 					"say": [
-						"Hi. I'm Bea. I do power. Welcome to the hall.",
-						"It's empty. Let's build a working computer room, one piece at a time.",
-						"First piece: a {{rack|rack}}. It's a tall cabinet full of GPU chips. The chips do the computing that clients pay for.",
-						"Open Racks in the build bar. Pick the AC-1. Click the glowing spot."
-					],
-					"after": [
-						"There. Look at it. Dark. It has a cable under it, but nothing feeding the cable."
+						"First piece: a {{rack|rack}}. A tall cabinet of GPU chips that does the work clients pay for.",
+						"Click Racks in the build bar, then the AC-1, then the glowing spot."
 					],
 					"slot": {
 						"floor": 1,
 						"x": 11,
 						"defId": "rack_air_gpu"
 					},
-					"handbook": "ch:what",
-					"pause": true
+					"handbook": "ch:what"
 				},
 				{
 					"id": "power",
@@ -72,33 +70,19 @@
 							"value": 0
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 1
-						},
-						{
-							"defId": "grid_tie",
-							"max": 1
-						}
-					],
 					"say": [
-						"A rack needs power. Power comes in through a Grid Intake. It's the plug into the city.",
-						"Open Power in the build bar. Pick Grid Intake. Click the glowing spot in the basement."
+						"A rack needs power. A Grid Intake is the plug into the city.",
+						"Click Power in the build bar, then Grid Intake, then the glowing spot in the basement."
 					],
 					"after": [
-						"Lights on. The intake can give 1,500 kW.",
-						"A {{kw|kW}} is how hard something pulls right now. Your rack pulls up to 40 kW when it works.",
-						"The goal bar at the top shows it. LOAD is what the hall pulls. CAPACITY is what the intake can give."
+						"Lights on. {{kw|kW}} is how hard something pulls. The bar at the top shows LOAD against CAPACITY."
 					],
 					"slot": {
 						"floor": -1,
 						"x": 6,
 						"defId": "grid_tie"
 					},
-					"overlay": "power",
-					"handbook": "ch:power",
-					"pause": true
+					"handbook": "ch:power"
 				},
 				{
 					"id": "cool",
@@ -110,43 +94,24 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 1
-						},
-						{
-							"defId": "grid_tie",
-							"max": 1
-						},
-						{
-							"defId": "crah_unit",
-							"max": 1
-						}
-					],
 					"say": [
-						"Cass. Cooling. Did you sleep? Never mind.",
-						"Every kW a rack uses turns into heat. A 40 kW rack is a 40 kW heater.",
-						"Too hot, and it slows down. Hotter still, and it shuts itself off.",
-						"An {{crah|air handler}} pulls the hot air away. Open Cooling. Pick the Air Handler. Click the glowing spot."
+						"Cass. Cooling. Every kW a rack uses turns into heat. Too hot, and it slows down.",
+						"Click Cooling in the build bar, then Air Handler, then the glowing spot."
 					],
 					"after": [
-						"Good. The heat view is on. Red is hot, blue is cool.",
-						"Heat counts in kW too. Whatever the rack pulls, the air handler has to carry away."
+						"Good. An {{crah|air handler}} carries the heat away."
 					],
 					"slot": {
 						"floor": 1,
 						"x": 8,
 						"defId": "crah_unit"
 					},
-					"overlay": "heat",
 					"advisor": "cass",
-					"handbook": "ch:heat",
-					"pause": true
+					"handbook": "ch:heat"
 				},
 				{
 					"id": "run",
-					"text": "Watch the rack pick up its first job",
+					"text": "Wait for the rack's first job",
 					"when": [
 						{
 							"metric": "racksBusy",
@@ -154,53 +119,58 @@
 							"value": 1
 						}
 					],
-					"allow": [
+					"say": [
+						"A client just sent a job. Watch the rack pick it up."
+					],
+					"after": [
+						"Running. Power in, work done, heat out.",
+						"See PUE at the top? {{pue|PUE}} is the hall's total power over what the racks use. Lower is better."
+					],
+					"handbook": "ch:heat"
+				},
+				{
+					"id": "pause",
+					"text": "Press Pause",
+					"when": [
 						{
-							"defId": "rack_air_gpu",
-							"max": 1
-						},
-						{
-							"defId": "grid_tie",
-							"max": 1
-						},
-						{
-							"defId": "crah_unit",
-							"max": 1
+							"metric": "tips",
+							"op": ">=",
+							"value": 2
 						}
 					],
 					"say": [
-						"A client just sent a job. A job is work for your racks to do.",
-						"Watch the rack pick it up."
+						"You can stop time whenever you like. Press the Pause button, the left-most of the speed controls.",
+						"Building still works while time is stopped."
 					],
-					"after": [
-						"Running. That's the whole loop. Power in, work done, heat out.",
-						"See PUE in the goal bar? {{pue|PUE}} is the hall's total power divided by what the racks use. 1.0 would be no waste.",
-						"Yours is higher. The air handler and the lift burn power too. Good halls keep PUE low."
+					"wait": "pause",
+					"pulse": [
+						"[data-tut=\"speed-0\"]"
+					]
+				},
+				{
+					"id": "fast",
+					"text": "Press 3× to run faster",
+					"when": [
+						{
+							"metric": "tips",
+							"op": ">=",
+							"value": 3
+						}
 					],
-					"handbook": "ch:heat",
-					"pause": true
+					"say": [
+						"Now speed things up. Press 3× in the speed controls."
+					],
+					"wait": "fast",
+					"pulse": [
+						"[data-tut=\"speed-3\"]"
+					]
 				},
 				{
 					"id": "hold",
 					"text": "Keep it running cool for three hours",
 					"when": [],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 1
-						},
-						{
-							"defId": "grid_tie",
-							"max": 1
-						},
-						{
-							"defId": "crah_unit",
-							"max": 1
-						}
-					],
 					"say": [
-						"Let the clock run for three hours. Keep the rack busy and the temperature down.",
-						"I'll watch the meter. Cass will watch the heat."
+						"Three hours of game time. Keep the rack busy and watch the bar fill."
 					],
 					"handbook": "ch:power"
 				}
@@ -263,7 +233,8 @@
 				"ch:heat"
 			],
 			"bonus": 50000,
-			"outro": "That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays."
+			"outro": "That's a working hall. Power in, work done, heat out. Next, Luci will show you how it pays.",
+			"startRunning": false
 		},
 		{
 			"id": "earn_your_keep",
@@ -273,7 +244,6 @@
 			"concept": "Earn: contracts pay for work. Jobs need running racks, storage for their data, and spare parts and bots to stay up.",
 			"goal": "Finish two contracts.",
 			"scenario": "lesson_earn",
-			"speed": 3,
 			"passed": "Two contracts finished and paid",
 			"setup": [
 				{
@@ -283,21 +253,10 @@
 					"label": "Lesson hall: nothing breaks today"
 				}
 			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision",
-				"acceptContract",
-				"buyParts",
-				"buyBot"
-			],
 			"steps": [
 				{
 					"id": "accept",
-					"text": "Accept the contract on the board",
+					"text": "Take the contract on the board",
 					"when": [
 						{
 							"metric": "jobsLive",
@@ -305,24 +264,18 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
 						"Luci Ferro. CFO. Call me Luci, Operator.",
-						"A rack that sits idle costs you. A rack that works pays you. That's the whole business.",
-						"Clients post contracts on the board. Open Contracts. Press C, or use the tab on the right.",
-						"This one is {{inference|inference}}. A client keeps asking a model questions, and pays every minute you keep up. Press Accept."
+						"Clients post contracts on the board. Open Contracts, the tab on the right (or press C), and press Take job. This one is {{inference|inference}}: a client keeps asking a model questions, and pays every minute you keep up."
 					],
 					"after": [
 						"Once signed, your racks pick it up on their own. Money flows as soon as they run."
 					],
-					"drawers": [
-						"contracts"
-					],
 					"pulse": [
-						"[data-tut=\"dtab-contracts\"]"
+						"[data-tut=\"dtab-contracts\"]",
+						"[data-tut=\"take\"]"
 					],
-					"handbook": "ch:money",
-					"pause": true
+					"handbook": "ch:money"
 				},
 				{
 					"id": "paid",
@@ -334,17 +287,17 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
-						"Now the only job is not breaking anything.",
-						"Power on, cooling on, racks working. Watch TREASURY at the top. Wait for the contract to end."
+						"Now the only job is not breaking anything. Watch TREASURY at the top until the contract ends."
 					],
 					"after": [
 						"There. Paid. We need the revenue for our power and upkeep.",
 						"The PER HOUR figure at the top shows what's left."
 					],
-					"handbook": "ch:money",
-					"pause": true
+					"pulse": [
+						"[data-tut=\"perhour\"]"
+					],
+					"handbook": "ch:money"
 				},
 				{
 					"id": "storage",
@@ -356,17 +309,10 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_storage",
-							"max": 1
-						}
-					],
 					"say": [
-						"Cass. Did you see the new contract on the board? {{training|Training}}. One big job, paid when it's done.",
-						"It's worth more, and it brings a dataset: 1,000 TB. Try to accept it. Go on.",
-						"Refused? That's why: there's no room for the data. A job's data lives on a Storage Array.",
-						"Open Racks. Pick the Storage Array. It does no computing. It only holds data. Click the glowing spot."
+						"Cass. A new contract on the board: {{training|Training}}. One big job, paid when it's done, with a 1,000 TB dataset.",
+						"Try to take it in Contracts. It refuses: a job's data lives on a Storage Array, and you have none.",
+						"Click Racks in the build bar, then Storage Array, then the glowing spot."
 					],
 					"after": [
 						"Now there's room. Storage doesn't earn by itself. It lets the racks earn."
@@ -376,16 +322,11 @@
 						"x": 14,
 						"defId": "rack_storage"
 					},
-					"advisor": "cass",
-					"drawers": [
-						"contracts"
-					],
-					"handbook": "ch:what",
-					"pause": true
+					"advisor": "cass"
 				},
 				{
 					"id": "train",
-					"text": "Accept the training contract",
+					"text": "Take the training contract",
 					"when": [
 						{
 							"metric": "jobsLive",
@@ -393,27 +334,17 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_storage",
-							"max": 1
-						}
-					],
 					"say": [
-						"Luci. Good. Now open Contracts and accept it.",
-						"A training job pays when it's finished, so be patient. If the storage ever goes dark, the job stalls. No data, no work."
+						"Luci. Good. Now open Contracts and take it."
 					],
 					"after": [
-						"Signed. The racks are on it."
-					],
-					"drawers": [
-						"contracts"
+						"Signed. The racks are on it.",
+						"If the storage ever goes dark, the job stalls. No data, no work."
 					],
 					"pulse": [
-						"[data-tut=\"dtab-contracts\"]"
-					],
-					"handbook": "ch:money",
-					"pause": true
+						"[data-tut=\"dtab-contracts\"]",
+						"[data-tut=\"take\"]"
+					]
 				},
 				{
 					"id": "parts",
@@ -425,22 +356,17 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
 						"Racks break. Something will break today. Something will tomorrow.",
-						"A broken rack earns nothing until it's fixed. A fix uses one spare part.",
-						"Open Supplies in the build bar. Buy 5 spare parts."
+						"A fix uses one spare part. Click Supplies in the build bar and buy 5 spare parts."
 					],
 					"after": [
 						"Good. They wait in the depot until they're needed."
 					],
-					"supplies": true,
 					"pulse": [
 						"[data-tut=\"cat-supplies\"]"
 					],
-					"advisor": "cass",
-					"handbook": "ch:break",
-					"pause": true
+					"advisor": "cass"
 				},
 				{
 					"id": "bot",
@@ -452,7 +378,6 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
 						"Parts sit in a depot. A bot carries one to the broken rack and fixes it.",
 						"Same tab. Buy a bot."
@@ -460,23 +385,22 @@
 					"after": [
 						"That's your repair crew. Parts in the depot. A bot to carry them."
 					],
-					"supplies": true,
 					"pulse": [
 						"[data-tut=\"cat-supplies\"]"
 					],
-					"advisor": "cass",
-					"handbook": "ch:break",
-					"pause": true
+					"advisor": "cass"
 				},
 				{
 					"id": "finish",
 					"text": "Let the training job finish",
 					"when": [],
-					"allow": [],
 					"say": [
-						"Last thing. Let the big job finish and take the money."
+						"Last thing. Let the big job finish and take the money.",
+						"It takes a while. The speed controls at the top will get you there sooner."
 					],
-					"handbook": "ch:money"
+					"pulse": [
+						"[data-tut=\"speed-10\"]"
+					]
 				}
 			],
 			"beats": [
@@ -539,7 +463,8 @@
 				"ch:break"
 			],
 			"bonus": 25000,
-			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. Next, Mel will show you how it grows."
+			"outro": "Two contracts paid. Racks busy, data stored, a crew on call. Next, Mel will show you how it grows.",
+			"startRunning": true
 		},
 		{
 			"id": "grow_the_tower",
@@ -549,7 +474,6 @@
 			"concept": "Grow: research unlocks new ideas, Levels unlock bigger machines, and the Foreman builds for you.",
 			"goal": "Research two ideas, reach Level 2, and switch on the Foreman.",
 			"scenario": "lesson_grow",
-			"speed": 10,
 			"passed": "Level 2 reached and the Foreman at work",
 			"setup": [
 				{
@@ -558,20 +482,6 @@
 					"durationTicks": 100000000,
 					"label": "Lesson hall: nothing breaks today"
 				}
-			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision",
-				"research",
-				"setAutomation"
-			],
-			"research": [
-				"contracts_clerk",
-				"works_foreman"
 			],
 			"steps": [
 				{
@@ -584,23 +494,17 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
 						"Hello. I'm Mel. Research. Sorry, I get nervous around new people.",
 						"Your racks earn research points, {{rp|RP}}. You spend them on new ideas. I've put 1,500 in the account to start.",
-						"Open Research. Press R, or use the tab on the right. Pick Contract Automation, then press Research."
+						"Open Research, the tab on the right (or press R). Pick Contract Automation, then press Research."
 					],
 					"after": [
 						"Mm. Noted. That one is done. Ideas are permanent."
 					],
-					"drawers": [
-						"research"
-					],
 					"pulse": [
 						"[data-tut=\"dtab-research\"]"
-					],
-					"handbook": "ch:what",
-					"pause": true
+					]
 				},
 				{
 					"id": "research2",
@@ -612,22 +516,16 @@
 							"value": 2
 						}
 					],
-					"allow": [],
 					"say": [
 						"Ideas open other ideas. The next one is the Works Foreman. A builder who works for you.",
-						"It needs the first idea done, and it costs more. You have enough."
+						"Same panel. It costs more, but you have enough."
 					],
 					"after": [
 						"Two ideas done. Keep that in mind. You'll need exactly two for something else."
 					],
-					"drawers": [
-						"research"
-					],
 					"pulse": [
 						"[data-tut=\"dtab-research\"]"
-					],
-					"handbook": "ch:what",
-					"pause": true
+					]
 				},
 				{
 					"id": "racks",
@@ -639,16 +537,10 @@
 							"value": 6
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 6
-						}
-					],
 					"say": [
 						"Luci. Levels. They're your company's rank. A higher Level opens bigger machines and pays a bonus.",
-						"Find the LEVEL bar at the top. Level 2 asks for two things. 120 PF of racks, and two ideas researched.",
-						"{{pflops|PF}} is how much computing a rack does. You have 80 PF. Two more racks make 120. Place two racks."
+						"Find the LEVEL bar at the top. Level 2 asks for 120 PF of racks and two ideas researched. {{pflops|PF}} is how much computing a rack does.",
+						"You have 80 PF. Click Racks in the build bar and place two more AC-1 racks."
 					],
 					"after": [
 						"That's 120 PF. Both asks are met."
@@ -659,8 +551,9 @@
 						"defId": "rack_air_gpu"
 					},
 					"advisor": "luci",
-					"handbook": "ch:what",
-					"pause": true
+					"pulse": [
+						"[data-tut=\"clearance\"]"
+					]
 				},
 				{
 					"id": "level",
@@ -672,45 +565,30 @@
 							"value": 2
 						}
 					],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 6
-						}
-					],
 					"say": [
-						"Levels are awarded at midnight. Let the clock run."
+						"Levels are awarded at midnight. Let the clock run; the speed controls at the top will get you there sooner."
 					],
 					"after": [
 						"Level 2. For the record, that's a $3.75 million bonus. Spend it well."
 					],
 					"advisor": "luci",
-					"handbook": "ch:what",
-					"pause": true
+					"pulse": [
+						"[data-tut=\"speed-10\"]"
+					]
 				},
 				{
 					"id": "foreman",
 					"text": "Switch on the Foreman in Automation",
 					"when": [],
-					"allow": [
-						{
-							"defId": "rack_air_gpu",
-							"max": 6
-						}
-					],
 					"say": [
-						"Now the Foreman. Open Automation. Press T, or use the tab on the right.",
+						"Now the Foreman. Open Automation, the tab on the right (or press T).",
 						"He builds for you. Racks when contracts need them. An air handler when racks run hot. Power when it runs short.",
 						"He spends your money, so he keeps a reserve you set. Switch him on but watch him."
 					],
-					"drawers": [
-						"automation"
-					],
+					"advisor": "luci",
 					"pulse": [
 						"[data-tut=\"dtab-automation\"]"
-					],
-					"advisor": "luci",
-					"handbook": "ch:what"
+					]
 				}
 			],
 			"beats": [
@@ -747,7 +625,8 @@
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "Hm. It's growing. That's what it wants. Where it goes is up to you."
+			"outro": "Hm. It's growing. That's what it wants. Where it goes is up to you.",
+			"startRunning": true
 		},
 		{
 			"id": "the_three_trees",
@@ -757,7 +636,6 @@
 			"concept": "The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step.",
 			"goal": "Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.",
 			"scenario": "lesson_trees",
-			"speed": 3,
 			"passed": "A Garden rack earned its first points",
 			"setup": [
 				{
@@ -767,50 +645,39 @@
 					"label": "Lesson hall: nothing breaks today"
 				}
 			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision",
-				"retrofit"
-			],
 			"steps": [
 				{
 					"id": "retrofit",
-					"text": "Click a rack and retrofit it to Green",
+					"text": "Click the glowing rack and retrofit it to Green",
 					"when": [
 						{
-							"metric": "treeRacks",
+							"metric": "greenRacks",
 							"op": ">=",
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
-						"Bea again. Last lesson. This one's about how the whole ball of wax goes. That's the world, you idiot.",
+						"Bea again. This one's about how the whole ball of wax goes. That's the world, you idiot.",
 						"There are three ways, called trees. The Lattice: pure machines. The Flesh: living tissue. The Garden: clean power.",
-						"Each tree is a line of better racks. You join one by retrofitting. Click the rack that's glowing in the world. Its panel opens on the right.",
-						"Find Retrofit. Pick an upgrade path. The rack changes right where it stands."
+						"You join one by retrofitting. Click the glowing rack. Its panel opens on the right.",
+						"Find Retrofit. Pick Green, the Garden's button. The rack changes right where it stands."
 					],
 					"after": [
-						"There. An NM-1. It does 50 PF on 12 kW. The old one did 20 PF on 40 kW.",
+						"There. A better rack, right where the old one stood.",
 						"And now it counts. A plain rack scores for no tree. Only a retrofitted rack earns points."
 					],
-					"focus": {
+					"target": {
 						"floor": 1,
-						"x": 6
+						"x": 6,
+						"width": 2
 					},
 					"pulse": [
 						"[data-tut=\"retrofit\"]"
-					],
-					"handbook": "ch:what",
-					"pause": true
+					]
 				},
 				{
 					"id": "trees",
-					"text": "Open the Trees panel from the three bars at the top",
+					"text": "Open the Trees panel: click the three coloured bars at the top",
 					"when": [
 						{
 							"metric": "tips",
@@ -818,21 +685,18 @@
 							"value": 1
 						}
 					],
-					"allow": [],
 					"say": [
 						"Now the scoreboard. Click the three coloured bars at the top of the screen."
 					],
 					"after": [
 						"Three columns, one per tree. Each has its points, a ladder of racks, and a line that starts with Next.",
 						"That Next line is your to-do list. It names the research and the retrofit that come next.",
-						"The first tree to 1,000 points ends the game its way. Close the panel when you're done reading."
+						"Close the panel when you're done reading."
 					],
 					"panel": "trees",
 					"pulse": [
-						".soul-gauge"
-					],
-					"handbook": "ch:what",
-					"pause": true
+						"[data-tut=\"trees\"]"
+					]
 				},
 				{
 					"id": "clean",
@@ -844,16 +708,10 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "solar_skin",
-							"max": 1
-						}
-					],
 					"say": [
 						"Look at the Garden column again. It has a line about clean power.",
 						"Garden racks run at half speed on any power. Full speed only on clean power: sun and wind.",
-						"So give it some. Open Power. Pick PV Wall Panels. Click the glowing spot."
+						"Click Power in the build bar, then PV Wall Panels, then the glowing spot."
 					],
 					"after": [
 						"Panels in. The clean share climbs slowly. Check the Garden column later and watch the speed rise."
@@ -862,20 +720,19 @@
 						"floor": 1,
 						"x": 40,
 						"defId": "solar_skin"
-					},
-					"handbook": "ch:power",
-					"pause": true
+					}
 				},
 				{
 					"id": "points",
 					"text": "Wait for the Garden's first points",
 					"when": [],
-					"allow": [],
 					"say": [
 						"Points come in once an hour, from racks that are busy.",
-						"Now let the clock run until the Garden scores."
+						"Let the clock run until the Garden scores. The speed controls at the top will hurry it."
 					],
-					"handbook": "ch:what"
+					"pulse": [
+						"[data-tut=\"speed-10\"]"
+					]
 				}
 			],
 			"beats": [
@@ -920,7 +777,8 @@
 				"ch:what"
 			],
 			"bonus": 25000,
-			"outro": "That's everything I got. Where you go is up to you. Nobody's stopping you. Go build your tower."
+			"outro": "That's the trees. Pick a road, or mix them. Nobody's stopping you.",
+			"startRunning": true
 		},
 		{
 			"id": "liquid",
@@ -930,7 +788,6 @@
 			"concept": "Liquid cooling: a dense rack is cooled by water from a chiller and a CDU, not by air.",
 			"goal": "Run a liquid-cooled rack for three hours without it overheating.",
 			"scenario": "lesson_liquid",
-			"speed": 3,
 			"meter": true,
 			"holdLabel": "hours running",
 			"passed": "A liquid-cooled rack ran cool for three hours",
@@ -943,16 +800,6 @@
 					"label": "Lesson hall: nothing breaks today"
 				}
 			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision",
-				"buildConduit",
-				"retrofit"
-			],
 			"steps": [
 				{
 					"id": "pipe",
@@ -962,11 +809,6 @@
 							"metric": "coolantTiles",
 							"op": ">=",
 							"value": 14
-						}
-					],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
 						}
 					],
 					"say": [
@@ -983,12 +825,7 @@
 						"defId": "conduit-coolant",
 						"width": 14
 					},
-					"focus": {
-						"floor": 1,
-						"x": 12
-					},
-					"handbook": "ch:heat",
-					"pause": true
+					"handbook": "ch:heat"
 				},
 				{
 					"id": "chiller",
@@ -998,15 +835,6 @@
 							"metric": "chillers",
 							"op": ">=",
 							"value": 1
-						}
-					],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
-						},
-						{
-							"defId": "chiller",
-							"max": 1
 						}
 					],
 					"say": [
@@ -1021,8 +849,7 @@
 						"x": 14,
 						"defId": "chiller"
 					},
-					"handbook": "ch:heat",
-					"pause": true
+					"handbook": "ch:heat"
 				},
 				{
 					"id": "cdu",
@@ -1032,19 +859,6 @@
 							"metric": "cdus",
 							"op": ">=",
 							"value": 1
-						}
-					],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
-						},
-						{
-							"defId": "chiller",
-							"max": 1
-						},
-						{
-							"defId": "cdu",
-							"max": 1
 						}
 					],
 					"say": [
@@ -1059,8 +873,7 @@
 						"x": 18,
 						"defId": "cdu"
 					},
-					"handbook": "ch:heat",
-					"pause": true
+					"handbook": "ch:heat"
 				},
 				{
 					"id": "rack",
@@ -1072,19 +885,6 @@
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
-						},
-						{
-							"defId": "chiller",
-							"max": 1
-						},
-						{
-							"defId": "cdu",
-							"max": 1
-						}
-					],
 					"say": [
 						"Now the rack. Click the one that's glowing. Its panel opens on the right.",
 						"Find Retrofit. Pick Synthetic. It becomes an LC-2, a liquid-cooled rack."
@@ -1092,67 +892,44 @@
 					"after": [
 						"There. It sits on the pipe, so it can drink."
 					],
-					"focus": {
-						"floor": 1,
-						"x": 6
-					},
 					"pulse": [
 						"[data-tut=\"retrofit\"]"
 					],
 					"handbook": "ch:heat",
-					"pause": true
+					"target": {
+						"floor": 1,
+						"x": 6,
+						"width": 2
+					}
 				},
 				{
 					"id": "heat",
-					"text": "Watch the Heat view while the rack takes a job",
+					"text": "Switch on the Heat view",
 					"when": [
 						{
-							"metric": "liquidBusy",
+							"metric": "tips",
 							"op": ">=",
 							"value": 1
 						}
 					],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
-						},
-						{
-							"defId": "chiller",
-							"max": 1
-						},
-						{
-							"defId": "cdu",
-							"max": 1
-						}
-					],
 					"say": [
-						"I've put the heat view on. Warm colours are hot racks.",
+						"Let's watch the heat. Press E, or open Insights and pick Heat. Warm colours are hot racks.",
 						"A job is coming for it. Let's see if it stays cool."
 					],
 					"after": [
 						"It's working and it's cool. That's what water buys you."
 					],
-					"overlay": "heat",
 					"handbook": "ch:heat",
-					"pause": true
+					"wait": "heat",
+					"pulse": [
+						"[data-tut=\"dtab-insights\"]",
+						"[data-tut=\"overlay-heat\"]"
+					]
 				},
 				{
 					"id": "steady",
 					"text": "Keep it running for three hours",
 					"when": [],
-					"allow": [
-						{
-							"defId": "conduit-coolant"
-						},
-						{
-							"defId": "chiller",
-							"max": 1
-						},
-						{
-							"defId": "cdu",
-							"max": 1
-						}
-					],
 					"say": [
 						"Make sure you watch the map."
 					],
@@ -1211,7 +988,8 @@
 				"ch:heat"
 			],
 			"bonus": 25000,
-			"outro": "That's liquid. Pipe, chiller, CDU, rack. Keep the water cold."
+			"outro": "That's liquid. Pipe, chiller, CDU, rack. Keep the water cold.",
+			"startRunning": true
 		},
 		{
 			"id": "lights_out",
@@ -1221,7 +999,6 @@
 			"concept": "Backup: a battery bank bridges the minutes after the grid drops, and a genset carries the racks for hours.",
 			"goal": "Ride out a grid failure with no dark racks.",
 			"scenario": "lesson_lights_out",
-			"speed": 3,
 			"meter": true,
 			"passed": "The racks stayed lit through the outage",
 			"failed": "The racks stayed dark too long. The battery and the genset have to be up and running before the grid drops. Have another go.",
@@ -1233,14 +1010,6 @@
 					"label": "Lesson hall: nothing breaks today"
 				}
 			],
-			"commands": [
-				"place",
-				"setEnabled",
-				"markTip",
-				"decisionGate",
-				"resolveDecision",
-				"deferDecision"
-			],
 			"steps": [
 				{
 					"id": "battery",
@@ -1250,12 +1019,6 @@
 							"metric": "batteries",
 							"op": ">=",
 							"value": 1
-						}
-					],
-					"allow": [
-						{
-							"defId": "ups_battery",
-							"max": 1
 						}
 					],
 					"say": [
@@ -1271,8 +1034,7 @@
 						"x": 12,
 						"defId": "ups_battery"
 					},
-					"handbook": "ch:power",
-					"pause": true
+					"handbook": "ch:power"
 				},
 				{
 					"id": "genset",
@@ -1282,16 +1044,6 @@
 							"metric": "gensets",
 							"op": ">=",
 							"value": 1
-						}
-					],
-					"allow": [
-						{
-							"defId": "ups_battery",
-							"max": 1
-						},
-						{
-							"defId": "genset",
-							"max": 1
 						}
 					],
 					"say": [
@@ -1307,40 +1059,37 @@
 						"x": 16,
 						"defId": "genset"
 					},
-					"handbook": "ch:power",
-					"pause": true
+					"handbook": "ch:power"
 				},
 				{
 					"id": "watch",
-					"text": "Check the Power view while the battery fills",
+					"text": "Switch on the Power view while the battery fills",
 					"when": [
+						{
+							"metric": "tips",
+							"op": ">=",
+							"value": 1
+						},
 						{
 							"metric": "upsPct",
 							"op": ">=",
 							"value": 99
 						}
 					],
-					"allow": [
-						{
-							"defId": "ups_battery",
-							"max": 1
-						},
-						{
-							"defId": "genset",
-							"max": 1
-						}
-					],
 					"say": [
-						"I've put the power view on. That's where the load and the supply show.",
+						"Press P, or open Insights and pick Power. That's where the load and the supply show.",
 						"Let the battery fill. Don't touch anything."
 					],
 					"after": [
 						"Full. Okay. Okay!",
 						"Hands off. Here it comes."
 					],
-					"overlay": "power",
 					"handbook": "ch:power",
-					"pause": true
+					"wait": "power",
+					"pulse": [
+						"[data-tut=\"dtab-insights\"]",
+						"[data-tut=\"overlay-power\"]"
+					]
 				},
 				{
 					"id": "outage",
@@ -1357,16 +1106,6 @@
 							"value": 100
 						}
 					],
-					"allow": [
-						{
-							"defId": "ups_battery",
-							"max": 1
-						},
-						{
-							"defId": "genset",
-							"max": 1
-						}
-					],
 					"say": [
 						"There. The grid's gone.",
 						"The battery is doing its job. The genset's waking up. Watch the load."
@@ -1376,24 +1115,12 @@
 						"Grid's back. The genset stops automatically!"
 					],
 					"afterBeat": "trip",
-					"overlay": "power",
-					"handbook": "ch:power",
-					"pause": true
+					"handbook": "ch:power"
 				},
 				{
 					"id": "steady",
 					"text": "Keep the racks lit for half an hour",
 					"when": [],
-					"allow": [
-						{
-							"defId": "ups_battery",
-							"max": 1
-						},
-						{
-							"defId": "genset",
-							"max": 1
-						}
-					],
 					"say": [
 						"Give it half an hour. Make sure it holds."
 					],
@@ -1430,6 +1157,11 @@
 							"metric": "upsPct",
 							"op": ">=",
 							"value": 99
+						},
+						{
+							"metric": "tips",
+							"op": ">=",
+							"value": 1
 						}
 					],
 					"effects": [
@@ -1479,7 +1211,8 @@
 				"ch:power"
 			],
 			"bonus": 25000,
-			"outro": "That's how you keep the lights on. Battery backup is a crucial concept."
+			"outro": "That's how you keep the lights on. Battery backup is a crucial concept.",
+			"startRunning": true
 		}
 	]
 }

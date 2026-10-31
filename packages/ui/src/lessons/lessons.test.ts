@@ -5,11 +5,11 @@ import { parseMarkup } from "../advisors/advisors";
 import { buildChapters } from "../handbook/chapters";
 import { buildEntries } from "../encyclopedia/entries";
 import { termById } from "../glossary/terms";
-import { allowedIds, articleTitle, baselineAck, goalModel, lessonTabs, lessonTotal, lessonsInOrder, nextLessonOf, pendingMessage, resultModel, slotGhost } from "./lessons";
+import { articleTitle, baselineAck, goalModel, lessonTotal, lessonsInOrder, nextLessonOf, pendingMessage, resultModel, slotGhost, stepPulse, waitMet } from "./lessons";
 
 const content = loadContent();
 const def = content.lessons[0];
-const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, allowed: [{ defId: "rack_air_gpu", max: 2 }], pue: 1.2, drawers: [], supplies: false, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
+const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, pue: 1.2, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
 
 describe("teacher lines", () => {
 	it("walks the intro, then waits for the player", () => {
@@ -18,19 +18,18 @@ describe("teacher lines", () => {
 		expect(first?.kind).toBe("say");
 		expect(first?.n).toBe(1);
 		expect(first?.advisor).toBe("bea");
-		ack = { "rack:say": def.steps[0].say.length };
+		ack = { "clock:say": def.steps[0].say.length };
 		expect(pendingMessage(def, lv(), ack)).toBeNull();
 	});
 	it("speaks the after-lines of a finished step before the next step", () => {
-		const done = { "rack:say": 9 };
-		const m = pendingMessage(def, lv({ stepsDone: ["rack"], current: 1 }), done);
+		const done = { "clock:say": 9, "rack:say": 9, "power:say": 9 };
+		const m = pendingMessage(def, lv({ stepsDone: ["clock", "rack", "power"], current: 3 }), done);
 		expect(m?.kind).toBe("after");
-		expect(m?.stepId).toBe("rack");
-		expect(m?.pause).toBe(true);
+		expect(m?.stepId).toBe("power");
 	});
 	it("a step can hand the talking to another advisor", () => {
-		const done = { "rack:say": 9, "rack:after": 9, "power:say": 9, "power:after": 9 };
-		const m = pendingMessage(def, lv({ stepsDone: ["rack", "power"], current: 2 }), done);
+		const done = { "clock:say": 9, "rack:say": 9, "rack:after": 9, "power:say": 9, "power:after": 9 };
+		const m = pendingMessage(def, lv({ stepsDone: ["clock", "rack", "power"], current: 3 }), done);
 		expect(m?.stepId).toBe("cool");
 		expect(m?.advisor).toBe("cass");
 	});
@@ -40,8 +39,8 @@ describe("teacher lines", () => {
 		expect(pendingMessage(earn, lv({ id: earn.id, stepsDone: ["accept"], current: 1 }), done)?.stepId).toBe("paid");
 	});
 	it("a game loaded mid-lesson does not replay what the player already passed", () => {
-		const ack = baselineAck(def, lv({ stepsDone: ["rack", "power"], current: 2 }));
-		const m = pendingMessage(def, lv({ stepsDone: ["rack", "power"], current: 2, beatsFired: [] }), ack);
+		const ack = baselineAck(def, lv({ stepsDone: ["clock", "rack", "power"], current: 3 }));
+		const m = pendingMessage(def, lv({ stepsDone: ["clock", "rack", "power"], current: 3, beatsFired: [] }), ack);
 		expect(m?.stepId).toBe("cool");
 	});
 });
@@ -53,18 +52,11 @@ describe("goal bar and catalog", () => {
 		expect(goalModel(lv({ headroomPct: 4 })).tone).toBe("warn");
 		expect(goalModel(lv({ holdTicks: 90, holdGoal: 180 })).hold).toBe(0.5);
 	});
-	it("shows only what the lesson allows", () => {
-		const view = { lesson: lv() };
-		expect([...(allowedIds(view) ?? [])]).toEqual(["rack_air_gpu"]);
-		expect(lessonTabs(content, view)).toEqual(["rack"]);
-		expect(lessonTabs(content, { lesson: lv({ supplies: true }) })).toContain("supplies");
-		expect(allowedIds({ lesson: lv({ status: "won", allowed: [] }) })).toBeNull();
-		expect(allowedIds({ lesson: null })).toBeNull();
-	});
 	it("highlights the current step's slot", () => {
 		const g = slotGhost(def, lv(), content);
-		expect(g?.cells).toEqual([{ x: 11, floor: 1 }, { x: 12, floor: 1 }]);
-		expect(slotGhost(def, lv({ current: 3 }), content)).toBeNull();
+		expect(slotGhost(def, lv({ current: 0 }), content)).toBeNull();
+		expect(slotGhost(def, lv({ current: 1 }), content)?.cells).toEqual([{ x: 11, floor: 1 }, { x: 12, floor: 1 }]);
+		expect(g).toBeNull();
 	});
 });
 
@@ -86,7 +78,6 @@ describe("lesson 5 pipe step", () => {
 		if (!liquid) throw new Error("no liquid lesson");
 		const g = slotGhost(liquid, lv({ id: "liquid", current: 0 }), content);
 		expect(g?.cells.length).toBe(liquid.steps[0].slot?.width);
-		expect(lessonTabs(content, { lesson: lv({ id: "liquid", allowed: [{ defId: "conduit-coolant" }] }) })).toContain("structure");
 	});
 });
 
@@ -127,5 +118,79 @@ describe("lesson text links into the Handbook", () => {
 				if (word) expect(termById(word), id).toBeDefined();
 			}
 		}
+	});
+});
+
+describe("the full game UI in lessons", () => {
+	it("a lesson no longer carries a restricted catalog, drawer list or command list", () => {
+		for (const l of content.lessons) {
+			const raw = l as unknown as Record<string, unknown>;
+			expect(raw.commands, l.id).toBeUndefined();
+			expect(raw.research, l.id).toBeUndefined();
+			expect(raw.speed, l.id).toBeUndefined();
+			for (const st of l.steps) for (const k of ["allow", "drawers", "supplies", "pause", "focus"]) expect((st as unknown as Record<string, unknown>)[k], `${l.id}.${st.id}.${k}`).toBeUndefined();
+		}
+	});
+	it("only Lesson 1 starts with the clock stopped", () => {
+		expect(content.lessons.filter((l) => !l.startRunning).map((l) => l.id)).toEqual(["first_watt"]);
+	});
+});
+
+describe("speed steps wait for the player", () => {
+	it("each wait is met only by the matching speed or overlay", () => {
+		const idle = { trees: false, speed: 0, overlay: "normal" };
+		expect(waitMet({ wait: "play" }, idle)).toBe(false);
+		expect(waitMet({ wait: "play" }, { ...idle, speed: 1 })).toBe(true);
+		expect(waitMet({ wait: "pause" }, idle)).toBe(true);
+		expect(waitMet({ wait: "pause" }, { ...idle, speed: 3 })).toBe(false);
+		expect(waitMet({ wait: "fast" }, { ...idle, speed: 1 })).toBe(false);
+		expect(waitMet({ wait: "fast" }, { ...idle, speed: 3 })).toBe(true);
+		expect(waitMet({ wait: "heat" }, { ...idle, overlay: "heat" })).toBe(true);
+		expect(waitMet({ wait: "power" }, { ...idle, overlay: "heat" })).toBe(false);
+		expect(waitMet({ panel: "trees" }, { ...idle, trees: true })).toBe(true);
+		expect(waitMet(undefined, idle)).toBe(false);
+	});
+	it("Lesson 1 asks for Play, Pause and a faster speed, each with its real speed button pulsed", () => {
+		const waits = def.steps.filter((s) => s.wait).map((s) => [s.id, s.wait, s.pulse]);
+		expect(waits).toEqual([
+			["clock", "play", ['[data-tut="speed-1"]']],
+			["pause", "pause", ['[data-tut="speed-0"]']],
+			["fast", "fast", ['[data-tut="speed-3"]']],
+		]);
+	});
+	it("a step that waits has a matching tip condition, and the wait never changes the speed itself", () => {
+		for (const l of content.lessons)
+			for (const st of l.steps) if (st.wait || st.panel) expect(st.when.some((c) => c.metric === "tips"), `${l.id}.${st.id}`).toBe(true);
+	});
+});
+
+describe("highlight targets", () => {
+	it("every step pulses something real: a stable data-tut, a build category or a card", () => {
+		const known = new Set(["speed-0", "speed-1", "speed-3", "speed-10", "dtab-contracts", "dtab-research", "dtab-automation", "dtab-insights", "take", "perhour", "clearance", "retrofit", "trees", "cat-supplies", "overlay-heat", "overlay-power"]);
+		for (const l of content.lessons)
+			for (const st of l.steps)
+				for (const sel of st.pulse ?? []) {
+					const m = /^\[data-tut="([^"]+)"\]$/.exec(sel);
+					expect(m, `${l.id}.${st.id}: ${sel}`).not.toBeNull();
+					expect(known.has((m as RegExpExecArray)[1]), `${l.id}.${st.id}: ${sel}`).toBe(true);
+				}
+	});
+	it("a placement step pulses its build category, then its card", () => {
+		const sl = def.steps[1];
+		const none = { paletteOpen: false, paletteTab: "rack" };
+		expect(stepPulse(def, lv({ current: 1 }), content, none)).toEqual(['[data-tut="cat-rack"]']);
+		expect(stepPulse(def, lv({ current: 1 }), content, { paletteOpen: true, paletteTab: "rack" })).toEqual([`[data-tut="card-${sl.slot?.defId}"]`]);
+	});
+	it("the rack to click is marked in the world", () => {
+		const trees = content.lessons.find((l) => l.id === "the_three_trees");
+		if (!trees) throw new Error("no trees lesson");
+		expect(slotGhost(trees, lv({ id: trees.id, current: 0 }), content)?.label).toBe("CLICK THIS RACK");
+	});
+});
+
+describe("lessons keep the plot out", () => {
+	it("no lesson line names the seal, closed trees, bonds, epilogues or endings", () => {
+		const lines = content.lessons.flatMap((l) => [l.title, l.concept, l.goal, l.learned, l.outro, ...l.steps.flatMap((s) => [s.text, ...s.say, ...(s.after ?? [])])]);
+		for (const line of lines) expect(line, line).not.toMatch(/\bseal|closed|\bbond|epilogue|ending|ends the game|1,000 points/i);
 	});
 });

@@ -194,10 +194,9 @@ export function lockReason(def: FacilityDef, view: SimView, content: ContentDB):
 /**
  * Which panel the right column shows. A catalog card under the pointer (or the picked item) previews in the build Inspector.
  * Otherwise a selected building keeps its own Inspector while the catalog is open, so its Retrofit and Upgrade buttons work.
- * During a lesson the catalog preview shows only while a card is hovered.
  */
-export function rightPanelFor(o: { paletteOpen: boolean; inLesson: boolean; hovering: boolean; selected: boolean }): "build" | "inspector" {
-	if (!o.paletteOpen || (o.inLesson && !o.hovering)) return "inspector";
+export function rightPanelFor(o: { paletteOpen: boolean; hovering: boolean; selected: boolean }): "build" | "inspector" {
+	if (!o.paletteOpen) return "inspector";
 	if (o.hovering) return "build";
 	return o.selected ? "inspector" : "build";
 }

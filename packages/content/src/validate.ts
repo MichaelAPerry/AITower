@@ -421,9 +421,8 @@ function validateBalance(p: Problems, db: ContentDB): void {
 	if (n > 0 && (tr.pflops[0] !== 0 || tr.uptime[0] !== 0)) p.push("balance.tiers: tier 1 must be free (pflops[0] = uptime[0] = 0)");
 }
 
-const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day", "coolers", "storageRacks", "jobsLive", "jobsStalled", "jobsDone", "offers", "parts", "bots", "techs", "rp", "tier", "foreman", "treeRacks", "pue", "cleanPower", "greenSp", "tips", "batteries", "upsPct", "downTicks", "minHeadroom", "minCash", "drainTicks", "stallTicks", "foremanTicks", "beats", "gridPct", "coolantTiles", "chillers", "cdus", "liquidRacks", "liquidBusy", "hotTicks"];
+const LESSON_METRICS = ["racks", "racksBusy", "racksDark", "gensets", "headroomPct", "demandKw", "supplyKw", "shortKw", "maxRackC", "uptime", "cash", "pflops", "day", "coolers", "storageRacks", "jobsLive", "jobsStalled", "jobsDone", "offers", "parts", "bots", "techs", "rp", "tier", "foreman", "treeRacks", "greenRacks", "pue", "cleanPower", "greenSp", "tips", "batteries", "upsPct", "downTicks", "minHeadroom", "minCash", "drainTicks", "stallTicks", "foremanTicks", "beats", "gridPct", "coolantTiles", "chillers", "cdus", "liquidRacks", "liquidBusy", "hotTicks"];
 const LESSON_PIPES = ["conduit-power", "conduit-coolant", "conduit-nutrient"];
-const LESSON_DRAWERS = ["contracts", "research", "automation", "insights"];
 const LESSON_OPS = [">=", ">", "<=", "<"];
 
 function validateLessons(p: Problems, db: ContentDB): void {
@@ -479,14 +478,12 @@ function validateLessons(p: Problems, db: ContentDB): void {
 		const beatIds = new Set((l.beats ?? []).map((b) => b.id));
 		for (const s of l.steps ?? []) {
 			conds(`${w}.steps.${s.id}.when`, s.when);
-			for (const a of s.allow ?? []) if (!db.facilities[a.defId] && !LESSON_PIPES.includes(a.defId)) p.push(`${w}.steps.${s.id}.allow: unknown facility '${a.defId}'`);
 			if (s.slot && !db.facilities[s.slot.defId] && !(LESSON_PIPES.includes(s.slot.defId) && (s.slot.width ?? 0) > 0)) p.push(`${w}.steps.${s.id}.slot: unknown facility '${s.slot.defId}'`);
 			if (!Array.isArray(s.say) || s.say.length === 0) p.push(`${w}.steps.${s.id}.say: the teacher needs a line`);
 			if (s.advisor !== undefined && !["cass", "bea", "mel", "luci"].includes(s.advisor)) p.push(`${w}.steps.${s.id}.advisor: unknown advisor`);
-			for (const d of s.drawers ?? []) if (!LESSON_DRAWERS.includes(d)) p.push(`${w}.steps.${s.id}.drawers: unknown drawer '${d}'`);
+			if (s.wait !== undefined && !["pause", "play", "fast", "heat", "power"].includes(s.wait)) p.push(`${w}.steps.${s.id}.wait: expected pause, play, fast, heat or power`);
 			if (s.afterBeat && !beatIds.has(s.afterBeat)) p.push(`${w}.steps.${s.id}.afterBeat: unknown beat '${s.afterBeat}'`);
 		}
-		for (const t of l.research ?? []) if (!db.tech.some((n) => n.id === t)) p.push(`${w}.research: unknown tech '${t}'`);
 		for (const b of l.beats ?? []) {
 			conds(`${w}.beats.${b.id}.when`, b.when);
 			effects(`${w}.beats.${b.id}.effects`, b.effects);
@@ -496,7 +493,6 @@ function validateLessons(p: Problems, db: ContentDB): void {
 		num(p, `${w}.win.holdTicks`, l.win?.holdTicks, { min: 1, int: true });
 		conds(`${w}.lose`, l.lose);
 		num(p, `${w}.bonus`, l.bonus, { min: 0 });
-		if (!Array.isArray(l.commands) || l.commands.length === 0) p.push(`${w}.commands: expected a list of command types`);
 	}
 }
 

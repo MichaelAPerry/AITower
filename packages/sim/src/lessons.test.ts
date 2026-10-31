@@ -52,18 +52,25 @@ describe("Lesson 1: your first rack", () => {
 		const sim = createSim(content, "lesson_first_watt", 7);
 		run(sim, 3);
 		expect(lessonOf(sim).status).toBe("active");
-		// The catalog is locked to the step: the intake is refused before its step.
-		expect(sim.submit({ type: "place", defId: "grid_tie", floor: -1, x: 6 }).ok).toBe(false);
+		// The clock starts stopped: the first step waits for the player to press Play (the UI marks the tip).
+		run(sim, 50);
+		expect(lessonOf(sim).stepsDone).toEqual([]);
+		doStep(sim, "clock", () => ok(sim, { type: "markTip", tipId: "les:clock" }));
 		doStep(sim, "rack", () => ok(sim, { type: "place", defId: "rack_air_gpu", floor: 1, x: 11 }));
 		// A rack with no power is dark: the checklist does not move.
 		run(sim, 30);
-		expect(lessonOf(sim).stepsDone).toEqual(["rack"]);
+		expect(lessonOf(sim).stepsDone).toEqual(["clock", "rack"]);
 		expect(sim.view().facilities.find((f) => f.defId === "rack_air_gpu")?.jobId).toBeNull();
 		doStep(sim, "power", () => ok(sim, { type: "place", defId: "grid_tie", floor: -1, x: 6 }));
 		doStep(sim, "cool", () => ok(sim, { type: "place", defId: "crah_unit", floor: 1, x: 8 }));
 		// The scripted job arrives once the rack is cooled, and the rack picks it up.
 		doStep(sim, "run", () => undefined);
 		expect(lessonOf(sim).beatsFired).toContain("job");
+		// Pause and a faster speed are the player's to press; the lesson waits for both.
+		run(sim, 50);
+		expect(stepNow(sim)).toBe("pause");
+		doStep(sim, "pause", () => ok(sim, { type: "markTip", tipId: "les:pause" }));
+		doStep(sim, "fast", () => ok(sim, { type: "markTip", tipId: "les:fast" }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 600);
 	});
 });
@@ -98,9 +105,6 @@ describe("Lesson 3: grow the tower", () => {
 		const sim = createSim(content, "lesson_grow", 7);
 		run(sim, 3);
 		expect(sim.view().researchPoints).toBeGreaterThanOrEqual(1500);
-		// Only the two ideas the lesson teaches can be bought.
-		expect(sim.submit({ type: "research", techId: "batch_cards" }).ok).toBe(false);
-		expect(sim.submit({ type: "setAutomation", policy: { ...sim.view().automation.policy, foreman: { ...sim.view().automation.policy.foreman, enabled: true } } }).ok).toBe(false);
 		doStep(sim, "research1", () => ok(sim, { type: "research", techId: "contracts_clerk" }));
 		doStep(sim, "research2", () => ok(sim, { type: "research", techId: "works_foreman" }));
 		doStep(sim, "racks", () => {
@@ -152,7 +156,7 @@ describe("Lesson 5: going liquid", () => {
 	it("is won with a pipe, a chiller, a CDU and an LC-2 rack", () => {
 		const sim = play();
 		retrofit(sim);
-		doStep(sim, "heat", () => undefined);
+		doStep(sim, "heat", () => ok(sim, { type: "markTip", tipId: "les:heat" }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
 		const l = lessonOf(sim);
 		expect(sim.view().facilities.some((f) => f.defId === "rack_dlc_gpu")).toBe(true);
@@ -160,7 +164,7 @@ describe("Lesson 5: going liquid", () => {
 	it("is lost when the chiller is switched off while the rack runs: it trips from heat", () => {
 		const sim = play();
 		retrofit(sim);
-		doStep(sim, "heat", () => undefined);
+		doStep(sim, "heat", () => ok(sim, { type: "markTip", tipId: "les:heat" }));
 		const chiller = sim.view().facilities.find((f) => f.defId === "chiller");
 		if (!chiller) throw new Error("no chiller");
 		ok(sim, { type: "setEnabled", facilityId: chiller.id, enabled: false });
@@ -178,7 +182,7 @@ describe("Lesson 6: lights out", () => {
 	};
 	it("is won by a battery bank and a genset: the grid trips, the racks stay lit, the grid returns", () => {
 		const sim = play({ genset: true });
-		doStep(sim, "watch", () => undefined);
+		doStep(sim, "watch", () => ok(sim, { type: "markTip", tipId: "les:watch" }));
 		expect(lessonOf(sim).beatsFired).toContain("trip");
 		until(sim, "the grid is down", () => sim.view().modifiers.some((m) => m.label === "Grid failure"), 50);
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
@@ -190,6 +194,7 @@ describe("Lesson 6: lights out", () => {
 		const gen = sim.view().facilities.find((f) => f.defId === "genset");
 		if (!gen) throw new Error("no genset");
 		ok(sim, { type: "setEnabled", facilityId: gen.id, enabled: false });
+		ok(sim, { type: "markTip", tipId: "les:watch" });
 		until(sim, "the grid trips", () => sim.view().modifiers.some((m) => m.label === "Grid failure"), 400);
 		until(sim, "the lesson is lost", () => lessonOf(sim).status === "lost", 1200);
 	});

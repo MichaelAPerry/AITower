@@ -47,6 +47,7 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 	let storageRacks = 0;
 	let parts = 0;
 	let treeRacks = 0;
+	let greenRacks = 0;
 	let cleanPower = 0;
 	let batteries = 0;
 	let storedKwh = 0;
@@ -64,6 +65,7 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		if (d.kind === "depot") parts += f.stored;
 		if (d.rack && d.rack.storageTB > 0) storageRacks++;
 		if (treeOf(d)) treeRacks++;
+		if (treeOf(d) === "greentech") greenRacks++;
 		if (d.kind === "solar" || d.kind === "wind") cleanPower++;
 		if (d.kind === "ups") {
 			batteries++;
@@ -113,6 +115,7 @@ export function lessonMetrics(state: SimState, content: ContentDB): LessonMetric
 		tier: state.tier,
 		foreman: state.automation.foreman.enabled ? 1 : 0,
 		treeRacks,
+		greenRacks,
 		pue: state.metrics.pue,
 		cleanPower,
 		greenSp: state.sp.greentech,
@@ -156,45 +159,6 @@ export const currentStepIndex = (def: LessonDef, ls: LessonState): number => {
 	const i = def.steps.findIndex((s) => !ls.stepsDone.includes(s.id));
 	return i < 0 ? def.steps.length : i;
 };
-
-/** What the player may build right now: the `allow` lists of every step up to and including the current one. */
-export function lessonAllowed(def: LessonDef, ls: LessonState): { defId: string; max?: number }[] {
-	const upTo = Math.min(def.steps.length - 1, currentStepIndex(def, ls));
-	const out = new Map<string, number | undefined>();
-	for (let i = 0; i <= upTo; i++) for (const a of def.steps[i].allow) out.set(a.defId, a.max);
-	return [...out].map(([defId, max]) => ({ defId, max }));
-}
-
-/** Drawers the lesson has opened up to and including the current step. */
-export function lessonDrawers(def: LessonDef, ls: LessonState): string[] {
-	const upTo = Math.min(def.steps.length - 1, currentStepIndex(def, ls));
-	const out = new Set<string>();
-	for (let i = 0; i <= upTo; i++) for (const d of def.steps[i].drawers ?? []) out.add(d);
-	return [...out];
-}
-
-/** True once the lesson has opened the Supplies tab (spare parts, bots). */
-export function lessonSupplies(def: LessonDef, ls: LessonState): boolean {
-	const upTo = Math.min(def.steps.length - 1, currentStepIndex(def, ls));
-	return def.steps.slice(0, upTo + 1).some((s) => s.supplies);
-}
-
-/** Refusal text when the active lesson does not allow placing `defId` (or `type` of command), else null. */
-export function lessonBlocksPlace(state: SimState, content: ContentDB, defId: string): string | null {
-	const def = state.lesson?.status === "active" ? lessonDef(state, content) : undefined;
-	if (!def || !state.lesson) return null;
-	const a = lessonAllowed(def, state.lesson).find((x) => x.defId === defId);
-	if (!a) return "Not part of this lesson yet";
-	if (a.max !== undefined && state.facilities.filter((f) => f.defId === defId).length >= a.max) return `This lesson needs only ${a.max}`;
-	return null;
-}
-export function lessonBlocksCommand(state: SimState, content: ContentDB, type: string, techId?: string): string | null {
-	const def = state.lesson?.status === "active" ? lessonDef(state, content) : undefined;
-	if (!def) return null;
-	if (!def.commands.includes(type)) return "Not part of this lesson";
-	if (type === "research" && techId !== undefined && !(def.research ?? []).includes(techId)) return "Not part of this lesson";
-	return null;
-}
 
 function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	const { state } = ctx;
@@ -265,8 +229,11 @@ function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	void def;
 }
 
-/** Tick stage 10b: run the lesson's beats, steps, success and failure. A won or lost lesson stays on the state (for the result screen) but stops restricting. */
-export function lessonStep(ctx: TickCtx): void {
+/**
+ * Fire the beats that are due and tick off the steps that hold. Idempotent: it also runs when commands are applied while the clock
+ * is stopped, so a step the player finishes by pausing (or by building on a paused clock) is not left waiting for a tick.
+ */
+export function lessonAdvance(ctx: TickCtx): void {
 	const { state, content } = ctx;
 	const ls = state.lesson;
 	if (ls?.status !== "active") return;
@@ -284,6 +251,17 @@ export function lessonStep(ctx: TickCtx): void {
 		if (s.when.length === 0 || !allHold(s.when, m)) break;
 		ls.stepsDone.push(s.id);
 	}
+}
+
+/** Tick stage 10b: run the lesson's beats, steps, success and failure. A won or lost lesson stays on the state (for the result screen). */
+export function lessonStep(ctx: TickCtx): void {
+	const { state, content } = ctx;
+	const ls = state.lesson;
+	if (ls?.status !== "active") return;
+	const def = lessonDef(state, content);
+	if (!def) return;
+	lessonAdvance(ctx);
+	const m = lessonMetrics(state, content);
 	// Downtime after the second rack: any tick the racks are dark or the load exceeds capacity.
 	if (ls.beatsFired.length > 0 && m.racks > 0 && (m.racksDark > 0 || m.shortKw > 0)) ls.downTicks++;
 	// Running tallies the lesson conditions may read.

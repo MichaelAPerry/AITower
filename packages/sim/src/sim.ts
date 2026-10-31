@@ -12,7 +12,7 @@ import { cellCount } from "./core/grid";
 import type { SimState } from "./core/state";
 import { ambientAt } from "./core/time";
 import { automationStep } from "./automation/automationStep";
-import { lessonStep } from "./lesson/lesson";
+import { lessonAdvance, lessonStep } from "./lesson/lesson";
 import { weatherStep } from "./green/weather";
 import { decisionStep } from "./ministry/decisions";
 import { ambientOffset } from "./ministry/modifiers";
@@ -126,6 +126,7 @@ export class SimImpl implements Sim {
 		const events: SimEvent[] = [];
 		// Exactly stage 1 of step(): nothing runs before it, so applying it now is identical to applying it next tick.
 		applyCommands({ state: this.state, content: this.content, events, scratch: this.scratch });
+		lessonAdvance({ state: this.state, content: this.content, events, scratch: this.scratch });
 		return events;
 	}
 

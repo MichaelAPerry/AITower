@@ -8,7 +8,7 @@ export function SoulGauge({ view, onOpen }: { view: Pick<SimView, "soul">; onOpe
 	if (!view.soul) return null;
 	const bars = treeBars(view.soul);
 	return (
-		<button type="button" className="ui-chip soul-gauge" data-help="singularity" onClick={onOpen} title="Singularity points, one bar per tree. Click for the Trees panel.">
+		<button type="button" className="ui-chip soul-gauge" data-tut="trees" data-help="singularity" onClick={onOpen} title="Singularity points, one bar per tree. Click for the Trees panel.">
 			<span className="soul-head">
 				<PixelIcon name="tree" className="is-lg" />
 				<span className="ui-label">TREES</span>

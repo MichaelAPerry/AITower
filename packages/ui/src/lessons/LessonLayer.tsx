@@ -8,7 +8,7 @@ import { publishAwards } from "../achievements/awardBus";
 import { Say } from "../advisors/AdvisorStrip";
 import { Portrait } from "../advisors/Portrait";
 import type { PanelProps, UiState } from "../components/context";
-import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, lessonTotal, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse } from "./lessons";
+import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, lessonTotal, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse, waitMet } from "./lessons";
 import "./lessons.css";
 
 const HL = "data-lesson-pulse";
@@ -44,8 +44,6 @@ export interface LessonUi {
 	advisor: AdvisorId | undefined;
 	/** The teacher's line for the advisor strip, or null outside a lesson. */
 	teacher: ReactNode | null;
-	/** Drawers the lesson has opened so far (the Handbook is always open). */
-	drawers: string[];
 	/** Goal bar, checklist and result screen. */
 	layer: ReactNode | null;
 }
@@ -80,33 +78,26 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 	const active = lv?.status === "active";
 	const msg = enabled && def && lv && active ? pendingMessage(def, lv, ack) : null;
 
-	// The clock stops while a teacher line is up.
-	const msgKey = msg ? `${msg.key}:${msg.n}` : null;
-	// biome-ignore lint/correctness/useExhaustiveDependencies: stop once when a pausing line appears or the clock is restarted under it
-	useEffect(() => {
-		if (msg?.pause && state.speed !== 0) store.setSpeed(0);
-	}, [msgKey, state.speed]);
-
-	const runClock = useCallback(
-		(next: Ack) => {
-			if (def && lv && !pendingMessage(def, lv, next) && store.get().speed === 0 && !store.get().view.decision) store.setSpeed(def.speed);
-		},
-		[def, lv, store],
-	);
+	// The teacher never touches the clock: the speed controls are the player's. Lines only page forward.
 	const cont = (): void => {
-		if (!msg || !def || !lv) return;
-		const next = { ...ack, [msg.key]: msg.n };
-		setAck(next);
-		runClock(next);
+		if (!msg) return;
+		setAck({ ...ack, [msg.key]: msg.n });
 	};
 
-	// The step's overlay (the Power overlay lights up when the generator step begins).
+	// A lesson after the first starts with the clock running (the player already knows the speed controls); Lesson 1 starts stopped and asks.
+	const startKey = lv && def && enabled ? `${lv.id}:${lv.startTick}` : null;
+	const started = useRef<string | null>(null);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: once per fresh lesson
+	useEffect(() => {
+		if (!startKey || !def || !lv || started.current === startKey) return;
+		started.current = startKey;
+		if (def.startRunning && view.tick === lv.startTick && store.get().speed === 0) store.setSpeed(1);
+	}, [startKey]);
+
 	const stepId = def && lv && active ? stepOf(def, lv)?.id : null;
-	const overlay = def && lv && active ? stepOf(def, lv)?.overlay : undefined;
 	const prevStep = useRef<string | null | undefined>(undefined);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: only when the step changes
 	useEffect(() => {
-		if (overlay && enabled) store.setOverlay(overlay);
 		// A finished step puts the tool down and closes the catalog, so the next step starts from a quiet screen.
 		if (prevStep.current !== undefined && prevStep.current !== stepId && enabled) {
 			store.setTool({ kind: "select" });
@@ -135,20 +126,15 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		};
 	}, [ghostKey, tool.kind === "place" ? tool.defId : tool.kind]);
 	const curStep = def && lv && active ? def.steps[lv.current] : undefined;
-	// A step that asks for a panel counts the act of opening it (the sim cannot see the UI): mark a tip the step waits for.
-	const wantsTrees = curStep?.panel === "trees";
+	// The sim cannot see the UI, so the UI reports what the step waits for (a panel opened, a speed chosen, an overlay shown)
+	// by marking the tip `les:<step id>`; the step's `when` reads it (metric `tips`).
 	const tipId = curStep ? `les:${curStep.id}` : null;
-	// biome-ignore lint/correctness/useExhaustiveDependencies: when the panel opens during its step
+	const waited = waitMet(curStep, { trees: ui.trees === true, speed: state.speed, overlay: state.overlay });
+	// biome-ignore lint/correctness/useExhaustiveDependencies: when the wanted thing happens during its step
 	useEffect(() => {
-		if (wantsTrees && ui.trees && tipId && enabled) store.dispatch({ type: "markTip", tipId });
-	}, [wantsTrees, ui.trees, tipId, enabled]);
-	const slot = curStep?.slot ?? curStep?.focus;
-	const slotX = slot?.x;
-	const slotFloor = slot?.floor;
-	useEffect(() => {
-		if (slotX !== undefined && slotFloor !== undefined && enabled) store.focus({ x: slotX, floor: slotFloor });
-	}, [slotX, slotFloor, enabled, store]);
-	const pulse = def && lv && enabled && !msg ? stepPulse(def, lv, content, ui).join("|") : "";
+		if (waited && tipId && enabled) store.dispatch({ type: "markTip", tipId });
+	}, [waited, tipId, enabled]);
+	const pulse = def && lv && enabled ? stepPulse(def, lv, content, ui).join("|") : "";
 	useEffect(() => {
 		syncPulse(pulse ? pulse.split("|") : []);
 		return () => syncPulse([]);
@@ -170,7 +156,7 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		}
 	}, [done, enabled]);
 
-	if (!lv || !def) return { active: false, advisor: undefined, teacher: null, drawers: [], layer: null };
+	if (!lv || !def) return { active: false, advisor: undefined, teacher: null, layer: null };
 	const step = stepOf(def, lv);
 	const speaker = msg?.advisor ?? step?.advisor ?? def.advisor;
 	const adv = ADVISORS[speaker];
@@ -205,11 +191,12 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 	const layer = enabled ? (
 		<>
 			{active && <GoalBar def={def} lv={lv} total={lessonTotal(content)} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
+			{active && <PulseArrow />}
 			{active && <Steps content={content} def={def} lv={lv} onHandbook={openHandbook} />}
 			{!active && <LessonResult content={content} def={def} lv={lv} firstTime={firstTime} openHandbook={openHandbook} onReplay={() => onReplay(def.scenario)} onNext={onReplay} onFreeBuild={onFreeBuild} />}
 		</>
 	) : null;
-	return { active: true, advisor: speaker, teacher, drawers: active ? lv.drawers : [], layer };
+	return { active: true, advisor: speaker, teacher, layer };
 }
 
 function GoalBar({ def, lv, total, onSkip, onHandbook }: { def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; total: number; onSkip: () => void; onHandbook: () => void }) {
@@ -343,6 +330,36 @@ function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onN
 					</button>
 				</div>
 			</section>
+		</div>
+	);
+}
+
+/** A bouncing arrow beside whatever the step pulses, so the control is easy to find. It never blocks a click. */
+type ArrowSide = "above" | "below" | "right" | "left";
+function PulseArrow() {
+	const [pos, setPos] = useState<{ x: number; y: number; side: ArrowSide } | null>(null);
+	useEffect(() => {
+		const measure = (): void => {
+			const el = document.querySelector(`.aitower-hud [${HL}]`);
+			const r = el?.getBoundingClientRect();
+			if (!r || r.width === 0 || r.height === 0) {
+				setPos((p) => (p ? null : p));
+				return;
+			}
+			// The build bar runs down the left edge: point at it from the right. The top strip: from below. Everything else: from above.
+			const side: ArrowSide = r.left < 120 && r.width < 120 ? "right" : r.right > window.innerWidth - 160 && r.top > 70 && r.width < 200 ? "left" : r.top < 90 ? "below" : "above";
+			const x = Math.round(side === "right" ? r.right + 6 : side === "left" ? r.left - 6 : r.left + r.width / 2);
+			const y = Math.round(side === "right" || side === "left" ? r.top + r.height / 2 : side === "below" ? r.bottom + 6 : r.top - 6);
+			setPos((p) => (p && p.x === x && p.y === y && p.side === side ? p : { x, y, side }));
+		};
+		measure();
+		const iv = setInterval(measure, 250);
+		return () => clearInterval(iv);
+	}, []);
+	if (!pos) return null;
+	return (
+		<div className={`les-arrow is-${pos.side}`} style={{ left: pos.x, top: pos.y }} aria-hidden="true" data-lesson-arrow>
+			<span>{pos.side === "below" ? "▲" : pos.side === "right" ? "◀" : pos.side === "left" ? "▶" : "▼"}</span>
 		</div>
 	);
 }

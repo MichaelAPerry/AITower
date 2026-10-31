@@ -1523,55 +1523,64 @@ Choice `add`:
 - [first_watt.concept] Concept: Build: a rack needs power and cooling to run. Power is counted in kW, and PUE shows how much extra the hall burns.
 - [first_watt.goal] Goal: Power a rack, cool it, and run it for three hours.
 - [first_watt.learned] Learned: A {{rack|rack}} does the work. It needs power from the grid and cooling for its heat. Power is counted in {{kw|kW}}. {{pue|PUE}} shows how much extra the hall burns on top of the racks.
-- [first_watt.outro] bea: That's a working hall. Power in, work done, heat out. Everything else is more of the same, bigger. Next, Luci will show you how it pays.
+- [first_watt.outro] bea: That's a working hall. Power in, work done, heat out. Next, Luci will show you how it pays.
+
+#### Step `clock`
+
+> Done when: [{"metric":"tips","op":">=","value":1}].
+- [first_watt.clock.objective] Objective: Press 1× to start the clock
+- [first_watt.clock.say1] bea: Hi. I'm Bea. I do power. Welcome to the hall.
+- [first_watt.clock.say2] bea: Time is stopped. Press 1× in the speed controls at the top to start the clock.
 
 #### Step `rack`
 
 > Done when: [{"metric":"racks","op":">=","value":1}].
 - [first_watt.rack.objective] Objective: Place a rack on the glowing spot
-- [first_watt.rack.say1] bea: Hi. I'm Bea. I do power. Welcome to the hall.
-- [first_watt.rack.say2] bea: It's empty. Let's build a working computer room, one piece at a time.
-- [first_watt.rack.say3] bea: First piece: a {{rack|rack}}. It's a tall cabinet full of GPU chips. The chips do the computing that clients pay for.
-- [first_watt.rack.say4] bea: Open Racks in the build bar. Pick the AC-1. Click the glowing spot.
-- [first_watt.rack.after1] bea: There. Look at it. Dark. It has a cable under it, but nothing feeding the cable.
+- [first_watt.rack.say1] bea: First piece: a {{rack|rack}}. A tall cabinet of GPU chips that does the work clients pay for.
+- [first_watt.rack.say2] bea: Click Racks in the build bar, then the AC-1, then the glowing spot.
 
 #### Step `power`
 
 > Done when: [{"metric":"supplyKw","op":">","value":0}].
 - [first_watt.power.objective] Objective: Place the Grid Intake in the basement
-- [first_watt.power.say1] bea: A rack needs power. Power comes in through a Grid Intake. It's the plug into the city.
-- [first_watt.power.say2] bea: Open Power in the build bar. Pick Grid Intake. Click the glowing spot in the basement.
-- [first_watt.power.after1] bea: Lights on. The intake can give 1,500 kW.
-- [first_watt.power.after2] bea: A {{kw|kW}} is how hard something pulls right now. Your rack pulls up to 40 kW when it works.
-- [first_watt.power.after3] bea: The goal bar at the top shows it. LOAD is what the hall pulls. CAPACITY is what the intake can give.
+- [first_watt.power.say1] bea: A rack needs power. A Grid Intake is the plug into the city.
+- [first_watt.power.say2] bea: Click Power in the build bar, then Grid Intake, then the glowing spot in the basement.
+- [first_watt.power.after1] bea: Lights on. {{kw|kW}} is how hard something pulls. The bar at the top shows LOAD against CAPACITY.
 
 #### Step `cool`
 
 > Done when: [{"metric":"coolers","op":">=","value":1}].
 - [first_watt.cool.objective] Objective: Place an air handler next to the rack
-- [first_watt.cool.say1] bea: Cass. Cooling. Did you sleep? Never mind.
-- [first_watt.cool.say2] bea: Every kW a rack uses turns into heat. A 40 kW rack is a 40 kW heater.
-- [first_watt.cool.say3] bea: Too hot, and it slows down. Hotter still, and it shuts itself off.
-- [first_watt.cool.say4] bea: An {{crah|air handler}} pulls the hot air away. Open Cooling. Pick the Air Handler. Click the glowing spot.
-- [first_watt.cool.after1] bea: Good. The heat view is on. Red is hot, blue is cool.
-- [first_watt.cool.after2] bea: Heat counts in kW too. Whatever the rack pulls, the air handler has to carry away.
+- [first_watt.cool.say1] bea: Cass. Cooling. Every kW a rack uses turns into heat. Too hot, and it slows down.
+- [first_watt.cool.say2] bea: Click Cooling in the build bar, then Air Handler, then the glowing spot.
+- [first_watt.cool.after1] bea: Good. An {{crah|air handler}} carries the heat away.
 
 #### Step `run`
 
 > Done when: [{"metric":"racksBusy","op":">=","value":1}].
-- [first_watt.run.objective] Objective: Watch the rack pick up its first job
-- [first_watt.run.say1] bea: A client just sent a job. A job is work for your racks to do.
-- [first_watt.run.say2] bea: Watch the rack pick it up.
-- [first_watt.run.after1] bea: Running. That's the whole loop. Power in, work done, heat out.
-- [first_watt.run.after2] bea: See PUE in the goal bar? {{pue|PUE}} is the hall's total power divided by what the racks use. 1.0 would be no waste.
-- [first_watt.run.after3] bea: Yours is higher. The air handler and the lift burn power too. Good halls keep PUE low.
+- [first_watt.run.objective] Objective: Wait for the rack's first job
+- [first_watt.run.say1] bea: A client just sent a job. Watch the rack pick it up.
+- [first_watt.run.after1] bea: Running. Power in, work done, heat out.
+- [first_watt.run.after2] bea: See PUE at the top? {{pue|PUE}} is the hall's total power over what the racks use. Lower is better.
+
+#### Step `pause`
+
+> Done when: [{"metric":"tips","op":">=","value":2}].
+- [first_watt.pause.objective] Objective: Press Pause
+- [first_watt.pause.say1] bea: You can stop time whenever you like. Press the Pause button, the left-most of the speed controls.
+- [first_watt.pause.say2] bea: Building still works while time is stopped.
+
+#### Step `fast`
+
+> Done when: [{"metric":"tips","op":">=","value":3}].
+- [first_watt.fast.objective] Objective: Press 3× to run faster
+- [first_watt.fast.say1] bea: Now speed things up. Press 3× in the speed controls.
 
 #### Step `hold`
 
 > Done when: immediately.
 - [first_watt.hold.objective] Objective: Keep it running cool for three hours
-- [first_watt.hold.say1] bea: Let the clock run for three hours. Keep the rack busy and the temperature down.
-- [first_watt.hold.say2] bea: I'll watch the meter. Cass will watch the heat.
+- [first_watt.hold.say1] bea: Three hours of game time. Keep the rack busy and watch the bar fill.
 
 ### Lesson 2: Earn Your Keep (`earn_your_keep`)
 
@@ -1585,19 +1594,16 @@ Choice `add`:
 #### Step `accept`
 
 > Done when: [{"metric":"jobsLive","op":">=","value":1}].
-- [earn_your_keep.accept.objective] Objective: Accept the contract on the board
+- [earn_your_keep.accept.objective] Objective: Take the contract on the board
 - [earn_your_keep.accept.say1] luci: Luci Ferro. CFO. Call me Luci, Operator.
-- [earn_your_keep.accept.say2] luci: A rack that sits idle costs you. A rack that works pays you. That's the whole business.
-- [earn_your_keep.accept.say3] luci: Clients post contracts on the board. Open Contracts. Press C, or use the tab on the right.
-- [earn_your_keep.accept.say4] luci: This one is {{inference|inference}}. A client keeps asking a model questions, and pays every minute you keep up. Press Accept.
+- [earn_your_keep.accept.say2] luci: Clients post contracts on the board. Open Contracts, the tab on the right (or press C), and press Take job. This one is {{inference|inference}}: a client keeps asking a model questions, and pays every minute you keep up.
 - [earn_your_keep.accept.after1] luci: Once signed, your racks pick it up on their own. Money flows as soon as they run.
 
 #### Step `paid`
 
 > Done when: [{"metric":"jobsDone","op":">=","value":1}].
 - [earn_your_keep.paid.objective] Objective: Keep the racks running until the job pays
-- [earn_your_keep.paid.say1] luci: Now the only job is not breaking anything.
-- [earn_your_keep.paid.say2] luci: Power on, cooling on, racks working. Watch TREASURY at the top. Wait for the contract to end.
+- [earn_your_keep.paid.say1] luci: Now the only job is not breaking anything. Watch TREASURY at the top until the contract ends.
 - [earn_your_keep.paid.after1] luci: There. Paid. We need the revenue for our power and upkeep.
 - [earn_your_keep.paid.after2] luci: The PER HOUR figure at the top shows what's left.
 
@@ -1605,27 +1611,25 @@ Choice `add`:
 
 > Done when: [{"metric":"storageRacks","op":">=","value":1}].
 - [earn_your_keep.storage.objective] Objective: Place a Storage Array on the glowing spot
-- [earn_your_keep.storage.say1] luci: Cass. Did you see the new contract on the board? {{training|Training}}. One big job, paid when it's done.
-- [earn_your_keep.storage.say2] luci: It's worth more, and it brings a dataset: 1,000 TB. Try to accept it. Go on.
-- [earn_your_keep.storage.say3] luci: Refused? That's why: there's no room for the data. A job's data lives on a Storage Array.
-- [earn_your_keep.storage.say4] luci: Open Racks. Pick the Storage Array. It does no computing. It only holds data. Click the glowing spot.
+- [earn_your_keep.storage.say1] luci: Cass. A new contract on the board: {{training|Training}}. One big job, paid when it's done, with a 1,000 TB dataset.
+- [earn_your_keep.storage.say2] luci: Try to take it in Contracts. It refuses: a job's data lives on a Storage Array, and you have none.
+- [earn_your_keep.storage.say3] luci: Click Racks in the build bar, then Storage Array, then the glowing spot.
 - [earn_your_keep.storage.after1] luci: Now there's room. Storage doesn't earn by itself. It lets the racks earn.
 
 #### Step `train`
 
 > Done when: [{"metric":"jobsLive","op":">=","value":1}].
-- [earn_your_keep.train.objective] Objective: Accept the training contract
-- [earn_your_keep.train.say1] luci: Luci. Good. Now open Contracts and accept it.
-- [earn_your_keep.train.say2] luci: A training job pays when it's finished, so be patient. If the storage ever goes dark, the job stalls. No data, no work.
+- [earn_your_keep.train.objective] Objective: Take the training contract
+- [earn_your_keep.train.say1] luci: Luci. Good. Now open Contracts and take it.
 - [earn_your_keep.train.after1] luci: Signed. The racks are on it.
+- [earn_your_keep.train.after2] luci: If the storage ever goes dark, the job stalls. No data, no work.
 
 #### Step `parts`
 
 > Done when: [{"metric":"parts","op":">=","value":1}].
 - [earn_your_keep.parts.objective] Objective: Buy spare parts in Supplies
 - [earn_your_keep.parts.say1] luci: Racks break. Something will break today. Something will tomorrow.
-- [earn_your_keep.parts.say2] luci: A broken rack earns nothing until it's fixed. A fix uses one spare part.
-- [earn_your_keep.parts.say3] luci: Open Supplies in the build bar. Buy 5 spare parts.
+- [earn_your_keep.parts.say2] luci: A fix uses one spare part. Click Supplies in the build bar and buy 5 spare parts.
 - [earn_your_keep.parts.after1] luci: Good. They wait in the depot until they're needed.
 
 #### Step `bot`
@@ -1641,6 +1645,7 @@ Choice `add`:
 > Done when: immediately.
 - [earn_your_keep.finish.objective] Objective: Let the training job finish
 - [earn_your_keep.finish.say1] luci: Last thing. Let the big job finish and take the money.
+- [earn_your_keep.finish.say2] luci: It takes a while. The speed controls at the top will get you there sooner.
 
 ### Lesson 3: Grow the Tower (`grow_the_tower`)
 
@@ -1657,7 +1662,7 @@ Choice `add`:
 - [grow_the_tower.research1.objective] Objective: Research Contract Automation
 - [grow_the_tower.research1.say1] mel: Hello. I'm Mel. Research. Sorry, I get nervous around new people.
 - [grow_the_tower.research1.say2] mel: Your racks earn research points, {{rp|RP}}. You spend them on new ideas. I've put 1,500 in the account to start.
-- [grow_the_tower.research1.say3] mel: Open Research. Press R, or use the tab on the right. Pick Contract Automation, then press Research.
+- [grow_the_tower.research1.say3] mel: Open Research, the tab on the right (or press R). Pick Contract Automation, then press Research.
 - [grow_the_tower.research1.after1] mel: Mm. Noted. That one is done. Ideas are permanent.
 
 #### Step `research2`
@@ -1665,7 +1670,7 @@ Choice `add`:
 > Done when: [{"metric":"techs","op":">=","value":2}].
 - [grow_the_tower.research2.objective] Objective: Research Works Foreman
 - [grow_the_tower.research2.say1] mel: Ideas open other ideas. The next one is the Works Foreman. A builder who works for you.
-- [grow_the_tower.research2.say2] mel: It needs the first idea done, and it costs more. You have enough.
+- [grow_the_tower.research2.say2] mel: Same panel. It costs more, but you have enough.
 - [grow_the_tower.research2.after1] mel: Two ideas done. Keep that in mind. You'll need exactly two for something else.
 
 #### Step `racks`
@@ -1673,22 +1678,22 @@ Choice `add`:
 > Done when: [{"metric":"racks","op":">=","value":6}].
 - [grow_the_tower.racks.objective] Objective: Build two more racks
 - [grow_the_tower.racks.say1] mel: Luci. Levels. They're your company's rank. A higher Level opens bigger machines and pays a bonus.
-- [grow_the_tower.racks.say2] mel: Find the LEVEL bar at the top. Level 2 asks for two things. 120 PF of racks, and two ideas researched.
-- [grow_the_tower.racks.say3] mel: {{pflops|PF}} is how much computing a rack does. You have 80 PF. Two more racks make 120. Place two racks.
+- [grow_the_tower.racks.say2] mel: Find the LEVEL bar at the top. Level 2 asks for 120 PF of racks and two ideas researched. {{pflops|PF}} is how much computing a rack does.
+- [grow_the_tower.racks.say3] mel: You have 80 PF. Click Racks in the build bar and place two more AC-1 racks.
 - [grow_the_tower.racks.after1] mel: That's 120 PF. Both asks are met.
 
 #### Step `level`
 
 > Done when: [{"metric":"tier","op":">=","value":2}].
 - [grow_the_tower.level.objective] Objective: Wait for Level 2
-- [grow_the_tower.level.say1] mel: Levels are awarded at midnight. Let the clock run.
+- [grow_the_tower.level.say1] mel: Levels are awarded at midnight. Let the clock run; the speed controls at the top will get you there sooner.
 - [grow_the_tower.level.after1] mel: Level 2. For the record, that's a $3.75 million bonus. Spend it well.
 
 #### Step `foreman`
 
 > Done when: immediately.
 - [grow_the_tower.foreman.objective] Objective: Switch on the Foreman in Automation
-- [grow_the_tower.foreman.say1] mel: Now the Foreman. Open Automation. Press T, or use the tab on the right.
+- [grow_the_tower.foreman.say1] mel: Now the Foreman. Open Automation, the tab on the right (or press T).
 - [grow_the_tower.foreman.say2] mel: He builds for you. Racks when contracts need them. An air handler when racks run hot. Power when it runs short.
 - [grow_the_tower.foreman.say3] mel: He spends your money, so he keeps a reserve you set. Switch him on but watch him.
 
@@ -1699,27 +1704,27 @@ Choice `add`:
 - [the_three_trees.concept] Concept: The trees: racks are retrofitted down one of three trees. The Trees panel shows the next step.
 - [the_three_trees.goal] Goal: Retrofit a rack to Green, read the Trees panel, and earn your first Garden points.
 - [the_three_trees.learned] Learned: A plain rack scores for no tree. Retrofit it down a tree and it scores for that tree. The Trees panel lists each tree's next step. The Garden runs at half speed on any power and full speed on clean power.
-- [the_three_trees.outro] bea: That's everything I got. Where you go is up to you. Nobody's stopping you. Go build your tower.
+- [the_three_trees.outro] bea: That's the trees. Pick a road, or mix them. Nobody's stopping you.
 
 #### Step `retrofit`
 
-> Done when: [{"metric":"treeRacks","op":">=","value":1}].
-- [the_three_trees.retrofit.objective] Objective: Click a rack and retrofit it to Green
-- [the_three_trees.retrofit.say1] bea: Bea again. Last lesson. This one's about how the whole ball of wax goes. That's the world, you idiot.
+> Done when: [{"metric":"greenRacks","op":">=","value":1}].
+- [the_three_trees.retrofit.objective] Objective: Click the glowing rack and retrofit it to Green
+- [the_three_trees.retrofit.say1] bea: Bea again. This one's about how the whole ball of wax goes. That's the world, you idiot.
 - [the_three_trees.retrofit.say2] bea: There are three ways, called trees. The Lattice: pure machines. The Flesh: living tissue. The Garden: clean power.
-- [the_three_trees.retrofit.say3] bea: Each tree is a line of better racks. You join one by retrofitting. Click the rack that's glowing in the world. Its panel opens on the right.
-- [the_three_trees.retrofit.say4] bea: Find Retrofit. Pick an upgrade path. The rack changes right where it stands.
-- [the_three_trees.retrofit.after1] bea: There. An NM-1. It does 50 PF on 12 kW. The old one did 20 PF on 40 kW.
+- [the_three_trees.retrofit.say3] bea: You join one by retrofitting. Click the glowing rack. Its panel opens on the right.
+- [the_three_trees.retrofit.say4] bea: Find Retrofit. Pick Green, the Garden's button. The rack changes right where it stands.
+- [the_three_trees.retrofit.after1] bea: There. A better rack, right where the old one stood.
 - [the_three_trees.retrofit.after2] bea: And now it counts. A plain rack scores for no tree. Only a retrofitted rack earns points.
 
 #### Step `trees`
 
 > Done when: [{"metric":"tips","op":">=","value":1}].
-- [the_three_trees.trees.objective] Objective: Open the Trees panel from the three bars at the top
+- [the_three_trees.trees.objective] Objective: Open the Trees panel: click the three coloured bars at the top
 - [the_three_trees.trees.say1] bea: Now the scoreboard. Click the three coloured bars at the top of the screen.
 - [the_three_trees.trees.after1] bea: Three columns, one per tree. Each has its points, a ladder of racks, and a line that starts with Next.
 - [the_three_trees.trees.after2] bea: That Next line is your to-do list. It names the research and the retrofit that come next.
-- [the_three_trees.trees.after3] bea: The first tree to 1,000 points ends the game its way. Close the panel when you're done reading.
+- [the_three_trees.trees.after3] bea: Close the panel when you're done reading.
 
 #### Step `clean`
 
@@ -1727,7 +1732,7 @@ Choice `add`:
 - [the_three_trees.clean.objective] Objective: Place PV Wall Panels in Power
 - [the_three_trees.clean.say1] bea: Look at the Garden column again. It has a line about clean power.
 - [the_three_trees.clean.say2] bea: Garden racks run at half speed on any power. Full speed only on clean power: sun and wind.
-- [the_three_trees.clean.say3] bea: So give it some. Open Power. Pick PV Wall Panels. Click the glowing spot.
+- [the_three_trees.clean.say3] bea: Click Power in the build bar, then PV Wall Panels, then the glowing spot.
 - [the_three_trees.clean.after1] bea: Panels in. The clean share climbs slowly. Check the Garden column later and watch the speed rise.
 
 #### Step `points`
@@ -1735,7 +1740,7 @@ Choice `add`:
 > Done when: immediately.
 - [the_three_trees.points.objective] Objective: Wait for the Garden's first points
 - [the_three_trees.points.say1] bea: Points come in once an hour, from racks that are busy.
-- [the_three_trees.points.say2] bea: Now let the clock run until the Garden scores.
+- [the_three_trees.points.say2] bea: Let the clock run until the Garden scores. The speed controls at the top will hurry it.
 
 ### Lesson 5: Going Liquid (`liquid`)
 
@@ -1781,9 +1786,9 @@ Choice `add`:
 
 #### Step `heat`
 
-> Done when: [{"metric":"liquidBusy","op":">=","value":1}].
-- [liquid.heat.objective] Objective: Watch the Heat view while the rack takes a job
-- [liquid.heat.say1] cass: I've put the heat view on. Warm colours are hot racks.
+> Done when: [{"metric":"tips","op":">=","value":1}].
+- [liquid.heat.objective] Objective: Switch on the Heat view
+- [liquid.heat.say1] cass: Let's watch the heat. Press E, or open Insights and pick Heat. Warm colours are hot racks.
 - [liquid.heat.say2] cass: A job is coming for it. Let's see if it stays cool.
 - [liquid.heat.after1] cass: It's working and it's cool. That's what water buys you.
 
@@ -1822,9 +1827,9 @@ Choice `add`:
 
 #### Step `watch`
 
-> Done when: [{"metric":"upsPct","op":">=","value":99}].
-- [lights_out.watch.objective] Objective: Check the Power view while the battery fills
-- [lights_out.watch.say1] bea: I've put the power view on. That's where the load and the supply show.
+> Done when: [{"metric":"tips","op":">=","value":1},{"metric":"upsPct","op":">=","value":99}].
+- [lights_out.watch.objective] Objective: Switch on the Power view while the battery fills
+- [lights_out.watch.say1] bea: Press P, or open Insights and pick Power. That's where the load and the supply show.
 - [lights_out.watch.say2] bea: Let the battery fill. Don't touch anything.
 - [lights_out.watch.after1] bea: Full. Okay. Okay!
 - [lights_out.watch.after2] bea: Hands off. Here it comes.

@@ -20,42 +20,63 @@ const rack = (sim: Sim, x: number) => sim.submit({ type: "place", defId: "rack_a
 const tie = (sim: Sim) => sim.submit({ type: "place", defId: "grid_tie", floor: -1, x: 6 });
 const crah = (sim: Sim) => sim.submit({ type: "place", defId: "crah_unit", floor: 1, x: 8 });
 
-/** A scripted new player: rack, grid intake, air handler, then wait out the three hours. */
+/** The UI marks `les:<step>` when the player does what a speed step asks (the sim cannot see the speed controls). */
+const tip = (sim: Sim, step: string) => sim.submit({ type: "markTip", tipId: `les:${step}` });
+
+/** A scripted new player: press Play, rack, grid intake, air handler, then pause, speed up and wait out the three hours. */
 function play(sim: Sim, wait = 400): void {
 	run(sim, 3);
+	tip(sim, "clock");
+	run(sim, 1);
 	expect(rack(sim, 11).ok).toBe(true);
 	run(sim, 10);
 	expect(tie(sim).ok).toBe(true);
 	run(sim, 10);
 	expect(crah(sim).ok).toBe(true);
+	run(sim, 100);
+	tip(sim, "pause");
+	run(sim, 1);
+	tip(sim, "fast");
 	run(sim, wait);
 }
 
 describe("lesson engine", () => {
-	it("starts a quiet lesson: no offers, nothing but the first rack buildable", () => {
+	it("starts a quiet lesson with no offers", () => {
 		const sim = fresh();
 		run(sim, 2);
 		const v = sim.view();
 		expect(v.lesson?.status).toBe("active");
 		expect(v.offers).toHaveLength(0);
-		expect(v.lesson?.allowed).toEqual([{ defId: "rack_air_gpu", max: 1 }]);
 		expect(v.modifiers.map((m) => m.label)).toContain("Lesson hall: nothing breaks today");
 	});
 
-	it("restricts the catalog to what the step needs, and the rest of the command set", () => {
+	it("does not restrict the game: the whole catalog and command set are open", () => {
 		const sim = fresh();
 		run(sim, 2);
-		expect(tie(sim).ok).toBe(false);
-		expect(crah(sim).ok).toBe(false);
-		expect(sim.submit({ type: "buildSlab", floor: 2, x0: 4, x1: 10 }).ok).toBe(false);
-		expect(sim.submit({ type: "buyParts", count: 1 }).ok).toBe(false);
-		expect(sim.submit({ type: "research", techId: "batch_cards" }).ok).toBe(false);
-		expect(rack(sim, 11).ok).toBe(true);
-		run(sim, 1);
-		// max 1: a second rack is refused, and the intake opens once the first step is done.
-		expect(rack(sim, 15).ok).toBe(false);
 		expect(tie(sim).ok).toBe(true);
-		expect(tie(sim).ok).toBe(false);
+		expect(crah(sim).ok).toBe(true);
+		expect(rack(sim, 11).ok).toBe(true);
+		expect(rack(sim, 15).ok).toBe(true);
+		expect(sim.submit({ type: "buildSlab", floor: 2, x0: 4, x1: 10 }).ok).toBe(true);
+	});
+
+	it("a step that waits for the player's speed choice is not done until the UI reports it", () => {
+		const sim = fresh();
+		run(sim, 3);
+		expect(lesson(sim).stepsDone).toEqual([]);
+		tip(sim, "clock");
+		run(sim, 1);
+		expect(lesson(sim).stepsDone).toEqual(["clock"]);
+	});
+
+	it("a step finished while the clock is stopped is ticked off without a tick", () => {
+		const sim = fresh();
+		run(sim, 3);
+		tip(sim, "clock");
+		run(sim, 1);
+		rack(sim, 11);
+		sim.flush();
+		expect(lesson(sim).stepsDone).toEqual(["clock", "rack"]);
 	});
 
 	it("evaluates goal conditions on the values the sim tracks", () => {
@@ -74,11 +95,9 @@ describe("lesson engine", () => {
 		play(sim);
 		const l = lesson(sim);
 		expect(l.status).toBe("won");
-		expect(l.stepsDone).toEqual(["rack", "power", "cool", "run", "hold"]);
+		expect(l.stepsDone).toEqual(["clock", "rack", "power", "cool", "run", "pause", "fast", "hold"]);
 		expect(l.holdTicks).toBeGreaterThanOrEqual(l.holdGoal);
 		expect(sim.view().facilities.filter((f) => f.defId === "rack_air_gpu").every((f) => f.tempC < 80)).toBe(true);
-		// A finished lesson stops restricting the site.
-		expect(sim.view().lesson?.allowed).toEqual([]);
 	});
 
 	it("nothing breaks in the lesson hall: every seed finishes", () => {
@@ -103,6 +122,8 @@ describe("lesson engine", () => {
 	it("round-trips through a snapshot mid-lesson and stays deterministic", () => {
 		const a = fresh();
 		run(a, 3);
+		tip(a, "clock");
+		run(a, 1);
 		rack(a, 11);
 		run(a, 20);
 		const b = simFromSnapshot(content, a.snapshot());
@@ -114,7 +135,7 @@ describe("lesson engine", () => {
 			run(s, 100);
 		}
 		expect(b.hash()).toBe(a.hash());
-		expect(lesson(b).stepsDone).toEqual(["rack", "power", "cool", "run"]);
+		expect(lesson(b).stepsDone).toEqual(["clock", "rack", "power", "cool", "run"]);
 	});
 
 	it("leaves Free Build scenarios alone", () => {
