@@ -316,3 +316,64 @@
 .aitower-hud.is-lesson {
 	--adv-h: 118px;
 }
+
+/* A bouncing arrow beside the thing the step points at. It sits above the HUD and never takes a click. */
+.aitower-hud .les-arrow {
+	position: fixed;
+	z-index: 50;
+	pointer-events: none;
+	transform: translate(-50%, -100%);
+	font: 700 var(--fs-lead) / 1 var(--f-body);
+	color: var(--accent);
+	text-shadow: 0 0 6px var(--housing-lo), 0 0 2px var(--housing-lo);
+}
+.aitower-hud .les-arrow.is-below {
+	transform: translate(-50%, 0);
+}
+.aitower-hud .les-arrow.is-right {
+	transform: translate(0, -50%);
+}
+.aitower-hud .les-arrow.is-left {
+	transform: translate(-100%, -50%);
+}
+.aitower-hud .les-arrow > span {
+	display: block;
+	animation: les-bounce 0.9s ease-in-out infinite;
+}
+.aitower-hud .les-arrow.is-below > span {
+	animation-name: les-bounce-up;
+}
+.aitower-hud .les-arrow.is-right > span {
+	animation-name: les-bounce-left;
+}
+.aitower-hud .les-arrow.is-left > span {
+	animation-name: les-bounce-right;
+}
+@keyframes les-bounce-right {
+	50% {
+		transform: translateX(-8px);
+	}
+}
+@keyframes les-bounce-left {
+	50% {
+		transform: translateX(8px);
+	}
+}
+@keyframes les-bounce {
+	50% {
+		transform: translateY(8px);
+	}
+}
+@keyframes les-bounce-up {
+	50% {
+		transform: translateY(-8px);
+	}
+}
+@media (prefers-reduced-motion: reduce) {
+	.aitower-hud .les-arrow > span {
+		animation: none;
+	}
+}
+.aitower-hud.is-reduced-motion .les-arrow > span {
+	animation: none;
+}

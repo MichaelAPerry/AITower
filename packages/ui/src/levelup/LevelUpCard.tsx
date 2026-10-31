@@ -9,17 +9,18 @@ import "./levelUp.css";
 export function LevelUpCard({ content, state }: { content: ContentDB; state: GameState }) {
 	const level = state.view.tier;
 	const day = state.view.day;
-	const prev = useRef({ level, day });
+	const tick = state.view.tick;
+	const prev = useRef({ level, day, tick });
 	const [shown, setShown] = useState<number | null>(null);
 	useEffect(() => {
-		// A real Level-up is one step on the same game; a new game or a load (any other jump) shows nothing.
+		// A real Level-up is one step on the same game, with the clock moving; a new game or a load (any other jump) shows nothing.
 		const p = prev.current;
-		if (level === p.level + 1 && day >= p.day && day - p.day <= 1) {
+		if (level === p.level + 1 && day >= p.day && day - p.day <= 1 && tick > p.tick) {
 			setShown(level);
 			playSfx("complete");
 		}
-		prev.current = { level, day };
-	}, [level, day]);
+		prev.current = { level, day, tick };
+	}, [level, day, tick]);
 	if (shown === null) return null;
 	const info = levelUpInfo(content, shown);
 	return (

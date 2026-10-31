@@ -5,6 +5,71 @@ All text below is placeholder. Replace freely.
 Lines like `- [id] Tag: text` can be edited here and put in the game with `npx tsx tools/dialogue/import.ts docs/PLACEHOLDER_TEXT.md` (add `--write` to apply it; without it you get a dry run that only reports changes).
 Lines like ``- `key` (file): text`` are not read by the importer yet: edit the text and send the file back, and Claude will move it into the game. Keep any `{{term|label}}` markers as they are.
 
+## Lessons rebuilt on the full game UI (Lessons 1 to 4)
+
+Lessons now use the whole game screen. Each step names the control by its on-screen label, and the real button is outlined and pointed at with an arrow. The advisor no longer starts or stops the clock: Lesson 1 asks the player to press Play, Pause and a faster speed with the real speed buttons, and waits. Lines below are the new or changed ones only (placeholder). Lines not listed here are unchanged: the owner-written lines that still fit were kept as they were (for example Luci's "Once signed, your racks pick it up on their own." and "Racks break. Something will break today.", Mel's nervous hello, Bea's "ball of wax ... you idiot" and the tree names). Two owner-written lines were changed because they no longer fit and are flagged: Lesson 4 dropped "Last lesson." (lessons 5 and 6 follow) and its Retrofit line now says to pick Green (the lesson needs the Garden); the Lesson 4 outro lost "That's everything I've got." for the same reason.
+
+### Lesson 1: Your First Rack (`first_watt`, advisor bea)
+
+- [first_watt.outro] bea: That's a working hall. Power in, work done, heat out. Next, Luci will show you how it pays.
+- [first_watt.clock.objective] Objective: Press 1× to start the clock
+- [first_watt.clock.say1] bea: Hi. I'm Bea. I do power. Welcome to the hall.
+- [first_watt.clock.say2] bea: Time is stopped. Press 1× in the speed controls at the top to start the clock.
+- [first_watt.rack.say1] bea: First piece: a {{rack|rack}}. A tall cabinet of GPU chips that does the work clients pay for.
+- [first_watt.rack.say2] bea: Click Racks in the build bar, then the AC-1, then the glowing spot.
+- [first_watt.power.say1] bea: A rack needs power. A Grid Intake is the plug into the city.
+- [first_watt.power.say2] bea: Click Power in the build bar, then Grid Intake, then the glowing spot in the basement.
+- [first_watt.power.after1] bea: Lights on. {{kw|kW}} is how hard something pulls. The bar at the top shows LOAD against CAPACITY.
+- [first_watt.cool.say1] bea: Cass. Cooling. Every kW a rack uses turns into heat. Too hot, and it slows down.
+- [first_watt.cool.say2] bea: Click Cooling in the build bar, then Air Handler, then the glowing spot.
+- [first_watt.cool.after1] bea: Good. An {{crah|air handler}} carries the heat away.
+- [first_watt.run.objective] Objective: Wait for the rack's first job
+- [first_watt.run.say1] bea: A client just sent a job. Watch the rack pick it up.
+- [first_watt.run.after1] bea: Running. Power in, work done, heat out.
+- [first_watt.run.after2] bea: See PUE at the top? {{pue|PUE}} is the hall's total power over what the racks use. Lower is better.
+- [first_watt.pause.objective] Objective: Press Pause
+- [first_watt.pause.say1] bea: You can stop time whenever you like. Press the Pause button, the left-most of the speed controls.
+- [first_watt.pause.say2] bea: Building still works while time is stopped.
+- [first_watt.fast.objective] Objective: Press 3× to run faster
+- [first_watt.fast.say1] bea: Now speed things up. Press 3× in the speed controls.
+- [first_watt.hold.say1] bea: Three hours of game time. Keep the rack busy and watch the bar fill.
+
+### Lesson 2: Earn Your Keep (`earn_your_keep`, advisor luci)
+
+- [earn_your_keep.accept.objective] Objective: Take the contract on the board
+- [earn_your_keep.accept.say2] luci: Clients post contracts on the board. Open Contracts, the tab on the right (or press C), and press Take job. This one is {{inference|inference}}: a client keeps asking a model questions, and pays every minute you keep up.
+- [earn_your_keep.paid.say1] luci: Now the only job is not breaking anything. Watch TREASURY at the top until the contract ends.
+- [earn_your_keep.storage.say1] luci: Cass. A new contract on the board: {{training|Training}}. One big job, paid when it's done, with a 1,000 TB dataset.
+- [earn_your_keep.storage.say2] luci: Try to take it in Contracts. It refuses: a job's data lives on a Storage Array, and you have none.
+- [earn_your_keep.storage.say3] luci: Click Racks in the build bar, then Storage Array, then the glowing spot.
+- [earn_your_keep.train.objective] Objective: Take the training contract
+- [earn_your_keep.train.say1] luci: Luci. Good. Now open Contracts and take it.
+- [earn_your_keep.train.after2] luci: If the storage ever goes dark, the job stalls. No data, no work.
+- [earn_your_keep.parts.say2] luci: A fix uses one spare part. Click Supplies in the build bar and buy 5 spare parts.
+- [earn_your_keep.finish.say2] luci: It takes a while. The speed controls at the top will get you there sooner.
+
+### Lesson 3: Grow the Tower (`grow_the_tower`, advisor mel)
+
+- [grow_the_tower.research1.say3] mel: Open Research, the tab on the right (or press R). Pick Contract Automation, then press Research.
+- [grow_the_tower.research2.say2] mel: Same panel. It costs more, but you have enough.
+- [grow_the_tower.racks.say2] mel: Find the LEVEL bar at the top. Level 2 asks for 120 PF of racks and two ideas researched. {{pflops|PF}} is how much computing a rack does.
+- [grow_the_tower.racks.say3] mel: You have 80 PF. Click Racks in the build bar and place two more AC-1 racks.
+- [grow_the_tower.level.say1] mel: Levels are awarded at midnight. Let the clock run; the speed controls at the top will get you there sooner.
+- [grow_the_tower.foreman.say1] mel: Now the Foreman. Open Automation, the tab on the right (or press T).
+
+### Lesson 4: The Three Trees (`the_three_trees`, advisor bea)
+
+- [the_three_trees.outro] bea: That's the trees. Pick a road, or mix them. Nobody's stopping you.
+- [the_three_trees.retrofit.objective] Objective: Click the glowing rack and retrofit it to Green
+- [the_three_trees.retrofit.say1] bea: Bea again. This one's about how the whole ball of wax goes. That's the world, you idiot.
+- [the_three_trees.retrofit.say3] bea: You join one by retrofitting. Click the glowing rack. Its panel opens on the right.
+- [the_three_trees.retrofit.say4] bea: Find Retrofit. Pick Green, the Garden's button. The rack changes right where it stands.
+- [the_three_trees.retrofit.after1] bea: There. A better rack, right where the old one stood.
+- [the_three_trees.trees.objective] Objective: Open the Trees panel: click the three coloured bars at the top
+- [the_three_trees.trees.after3] bea: Close the panel when you're done reading.
+- [the_three_trees.clean.say3] bea: Click Power in the build bar, then PV Wall Panels, then the glowing spot.
+- [the_three_trees.points.say2] bea: Let the clock run until the Garden scores. The speed controls at the top will hurry it.
+
 ## Lesson 5: Going Liquid
 
 Lesson `liquid`, file `packages/content/src/data/lessons.json`, advisor cass. Title, concept, goal, learned, outro and step text are in the dialogue format; the rest is plain.
@@ -31,8 +96,8 @@ Lesson `liquid`, file `packages/content/src/data/lessons.json`, advisor cass. Ti
 - [liquid.rack.say1] cass: Now the rack. Click the one that's glowing. Its panel opens on the right.
 - [liquid.rack.say2] cass: Find Retrofit. Pick Synthetic. It becomes an LC-2, a liquid-cooled rack.
 - [liquid.rack.after1] cass: There. It sits on the pipe, so it can drink.
-- [liquid.heat.objective] Objective: Watch the Heat view while the rack takes a job
-- [liquid.heat.say1] cass: I've put the heat view on. Warm colours are hot racks. 
+- [liquid.heat.objective] Objective: Switch on the Heat view
+- [liquid.heat.say1] cass: Let's watch the heat. Press E, or open Insights and pick Heat. Warm colours are hot racks.
 - [liquid.heat.say2] cass: A job is coming for it. Let's see if it stays cool.
 - [liquid.heat.after1] cass: It's working and it's cool. That's what water buys you.
 - [liquid.steady.objective] Objective: Keep it running for three hours
@@ -62,8 +127,8 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 - [lights_out.genset.say2] bea: For longer you want an engine. A {{genset|genset}}. Diesel. Y'know dirty, loud, money grubbin' pollution. 
 - [lights_out.genset.say3] bea: Open Power. Pick the Diesel Genset. Click the glowing spot.
 - [lights_out.genset.after1] bea: Right. It starts itself when the grid fails. Chugging like a freakin' train. 
-- [lights_out.watch.objective] Objective: Check the Power view while the battery fills
-- [lights_out.watch.say1] bea: I've put the power view on. That's where the load and the supply show.
+- [lights_out.watch.objective] Objective: Switch on the Power view while the battery fills
+- [lights_out.watch.say1] bea: Press P, or open Insights and pick Power. That's where the load and the supply show.
 - [lights_out.watch.say2] bea: Let the battery fill. Don't touch anything.
 - [lights_out.watch.after1] bea: Full. Okay. Okay!
 - [lights_out.watch.after2] bea: Hands off. Here it comes.
@@ -82,9 +147,10 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 
 ## Lesson build ghost
 
-Label drawn over the glowing run while a lesson asks for a coolant pipe (`slotGhost` in `packages/ui/src/lessons/lessons.ts`). The label for placing a rack is still "BUILD HERE".
+Labels drawn in the world while a lesson asks for a coolant pipe or a rack click (`slotGhost` in `packages/ui/src/lessons/lessons.ts`). The label for placing a rack is still "BUILD HERE".
 
 - `ghost.pipe` (packages/ui/src/lessons/lessons.ts): DRAG A PIPE HERE
+- `ghost.rack` (packages/ui/src/lessons/lessons.ts): CLICK THIS RACK (marks the rack a lesson step wants clicked)
 
 ## New-game screen: lesson scenarios
 

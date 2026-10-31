@@ -549,6 +549,8 @@ export type LessonMetric =
 	| "foreman"
 	/** Racks retrofitted down a tree. */
 	| "treeRacks"
+	/** Racks retrofitted down the Green (Garden) tree. */
+	| "greenRacks"
 	/** Power Usage Effectiveness, as the sim computes it (0 until something runs). */
 	| "pue"
 	/** Solar panels and wind masts standing. */
@@ -620,8 +622,6 @@ export interface LessonStep {
 	text: string;
 	/** Done when all hold. */
 	when: LessonCond[];
-	/** What the player may build from this step on: facility ids, each with an optional cap on how many may exist. A pipe tool is named `conduit-power`, `conduit-coolant` or `conduit-nutrient`. */
-	allow: { defId: string; max?: number }[];
 	/** The teacher's lines for this step, shown one at a time. Markup {{term|label}} links a Handbook term. */
 	say: string[];
 	/** Optional: the blueprint slot to highlight for a placement step. */
@@ -633,18 +633,14 @@ export interface LessonStep {
 	overlay?: "normal" | "heat" | "power" | "coolant";
 	/** Who speaks this step's lines, when it is not the lesson's own advisor. */
 	advisor?: AdvisorId;
-	/** Drawers (tabs on the screen edge) the player may open from this step on: "contracts", "research", "automation", "insights". The Handbook is always open. */
-	drawers?: string[];
-	/** The Supplies tab (spare parts, bots) is open from this step on. */
-	supplies?: boolean;
 	/** While this step is current, opening this panel counts as the step's action: the UI marks the tip `les:<step id>` (metric `tips`). */
 	panel?: "trees";
-	/** Pan the camera here while this step is current (a rack to click, say). */
-	focus?: { floor: number; x: number };
+	/** A rack (or other thing already standing) to click: the world marks it "CLICK THIS". The camera is never moved for it. */
+	target?: { floor: number; x: number; width: number };
 	/** Extra things to pulse while this step is current: CSS selectors inside the HUD (e.g. `[data-tut="dtab-contracts"]`). */
 	pulse?: string[];
-	/** Pause the clock while the teacher talks (the player presses Continue). */
-	pause?: boolean;
+	/** The step waits for the player to use the real speed controls: "pause" (clock at 0), "play" (any running speed), "fast" (3x or more), or an overlay the player switches on ("heat", "power"). The UI marks the tip `les:<step id>` and the step's `when` reads it (metric `tips`). */
+	wait?: "pause" | "play" | "fast" | "heat" | "power";
 	/** Handbook article for the "?" chip on the checklist. */
 	handbook?: string;
 }
@@ -659,14 +655,10 @@ export interface LessonDef {
 	goal: string;
 	/** The scenario this lesson runs on (`Scenario.lesson` points back). */
 	scenario: string;
-	/** Speed the game runs at (the lesson sets it; the player may change it). */
-	speed: 1 | 3 | 10;
 	/** Effects applied when the lesson starts, before tick 0 (a permanent feeder limit, say). Only `gridCap` and `failureRate` are supported. */
 	setup?: LessonEffect[];
-	/** Command types the player may issue; any other is refused ("Not part of this lesson"). */
-	commands: string[];
-	/** Tech ids the player may research (any other is refused). Absent = research is not part of the lesson. */
-	research?: string[];
+	/** The clock is running from the first moment (every lesson after the first; Lesson 1 starts stopped and asks the player to press Play). */
+	startRunning?: boolean;
 	/** The goal bar shows the power meter (load, capacity, headroom). */
 	meter?: boolean;
 	/** Label for the success-hold bar in the goal bar (e.g. "hours running"); absent = no bar. */

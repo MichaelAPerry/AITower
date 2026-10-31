@@ -2,7 +2,6 @@
 import { type FacilityDef, isRetrofitOnly } from "@aitower/content";
 import { placeBlock } from "../progression/access";
 import { scarOnPlace } from "../progression/soul";
-import { lessonBlocksPlace } from "../lesson/lesson";
 import { cellIdx, inBounds } from "../core/grid";
 import type { SimState } from "../core/state";
 import { needsPower } from "../world/defs";
@@ -60,10 +59,6 @@ export function planPlace(ctx: PlanCtx, defId: string, floor: number, x: number,
 	const s = ctx.state;
 	const d = Object.hasOwn(ctx.content.facilities, defId) ? ctx.content.facilities[defId] : undefined;
 	if (!d) return reject(`unknown facility '${defId}'`);
-	if (!opts.ignoreTier) {
-		const blocked = lessonBlocksPlace(s, ctx.content, defId);
-		if (blocked) return reject(blocked);
-	}
 	if (d.growth && !opts.ignoreTier) return reject("growths cannot be built");
 	if (d.retired && !opts.ignoreTier) return reject(`${d.name} is no longer built`);
 	if (isRetrofitOnly(d) && !opts.ignoreTier) return reject(`${d.name} is reached by retrofitting a rack, not built from scratch`);

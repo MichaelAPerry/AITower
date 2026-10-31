@@ -131,13 +131,16 @@ async function run(url) {
 		await page.locator(".ui-menu").waitFor({ state: "detached" });
 		await page.getByRole("button", { name: /START LESSON 1/ }).click();
 		await page.locator("[data-lesson-goal]").waitFor();
-		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { id: l.id, status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });
+		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { id: l.id, status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, beats: l.beatsFired }; });
 		const ls = await lessonState();
 		assert(ls && ls.id === "first_watt" && ls.status === "active" && ls.speed === 0, `the lesson starts paused: ${JSON.stringify(ls)}`);
-		assert(ls.cap === 0 && ls.done.length === 0 && ls.allowed.length === 1 && ls.allowed[0] === "rack_air_gpu", `an empty hall with only the rack allowed: ${JSON.stringify(ls)}`);
-		assert((await page.locator("[data-lesson-steps] li").count()) === 5, "five checklist steps");
+		assert(ls.cap === 0 && ls.done.length === 0, `an empty hall: ${JSON.stringify(ls)}`);
+		assert((await page.locator("[data-lesson-steps] li").count()) === 8, "eight checklist steps");
 		assert((await page.locator(".ui-goals, .ui-next-btn").count()) === 0, "no Goals card or NEXT chip during a lesson (calm)");
-		assert((await page.locator(".ui-dtab").count()) === 1, "only the Handbook tab is shown during the lesson");
+		// The full game UI is there, as in normal play: every drawer tab, every build category, the speed controls.
+		assert((await page.locator(".ui-dtab").count()) === 5, "all five drawer tabs are shown during the lesson");
+		assert((await page.locator(".bld-bar .bld-cat").count()) === 6, "all six build categories are shown during the lesson");
+		assert((await page.locator('[data-tut^="speed-"]').count()) === 5, "the real speed controls are shown");
 		const talk = async () => { // the teacher's lines: press Next / Got it until nothing is left to say
 			for (let i = 0; i < 8 && (await page.locator("[data-lesson-continue]").count()) > 0; i++) {
 				await page.locator("[data-lesson-continue]").click();
@@ -145,29 +148,41 @@ async function run(url) {
 			}
 		};
 		await talk();
-		assert((await lessonState()).speed === 3, "the clock starts when Bea has finished her first lines");
-		assert((await page.locator(".bld-bar .bld-cat").count()) === 1, "only the Racks category is shown at first");
+		// The advisor does not touch the clock: Bea asks, the player presses the real button, the lesson waits for it.
+		await page.waitForTimeout(600);
+		assert((await lessonState()).speed === 0 && (await lessonState()).done.length === 0, "the clock stays stopped until the player presses Play");
+		assert((await page.locator('[data-tut="speed-1"][data-lesson-pulse]').count()) === 1, "the 1x button is highlighted");
+		assert((await page.locator("[data-lesson-arrow]").count()) === 1, "an arrow points at it");
+		await page.locator('[data-tut="speed-1"]').click();
+		const waitStep = (id) => page.waitForFunction((i) => window.aitower.store.get().view.lesson.stepsDone.includes(i), id, { timeout: 30_000 });
+		await waitStep("clock");
+		await talk();
 		await page.locator('[data-tut="cat-rack"]').click();
-		assert((await page.locator(".bld-catalog .bld-card, .bld-catalog [data-tut^=card-]").count()) === 1, "one rack card in the catalog");
-		const refused = await game(() => window.aitower.store.dispatch({ type: "place", defId: "grid_tie", floor: -1, x: 6 }));
-		assert(!refused.ok, "the grid intake is refused before its step");
+		assert((await page.locator(".bld-catalog [data-tut^=card-]").count()) >= 1, "the rack catalog opens");
 		await page.keyboard.press("Escape");
 		const place = (defId, floor, x) => game((c) => window.aitower.store.dispatch(c), { type: "place", defId, floor, x });
-		const waitStep = (id) => page.waitForFunction((i) => window.aitower.store.get().view.lesson.stepsDone.includes(i), id, { timeout: 30_000 });
 		assert((await place("rack_air_gpu", 1, 11)).ok, "first rack on the glowing slot");
 		await waitStep("rack");
-		await page.locator("[data-lesson-continue]").waitFor();
 		await talk();
-		assert((await place("grid_tie", -1, 6)).ok, "the grid intake, now allowed");
+		assert((await place("grid_tie", -1, 6)).ok, "the grid intake");
 		await waitStep("power");
-		await page.locator("[data-lesson-continue]").waitFor();
 		await talk();
 		assert((await lessonState()).cap === 1500, "the goal bar reads 1,500 kW of capacity");
-		assert((await place("crah_unit", 1, 8)).ok, "the air handler, now allowed");
+		assert((await place("crah_unit", 1, 8)).ok, "the air handler");
 		await waitStep("cool");
 		await talk();
 		await page.waitForFunction(() => window.aitower.store.get().view.lesson.beatsFired.includes("job"), null, { timeout: 30_000 });
+		await waitStep("run");
 		await talk();
+		// Pause and a faster speed: each waits for the real button.
+		assert((await page.locator('[data-tut="speed-0"][data-lesson-pulse]').count()) === 1, "the Pause button is highlighted");
+		await page.waitForTimeout(500);
+		assert(!(await lessonState()).done.includes("pause"), "the lesson waits for the player to press Pause");
+		await page.locator('[data-tut="speed-0"]').click();
+		await waitStep("pause");
+		assert((await lessonState()).speed === 0, "paused by the player");
+		await page.locator('[data-tut="speed-3"]').click();
+		await waitStep("fast");
 		await game(() => window.aitower.store.setSpeed(30));
 		await page.locator("[data-lesson-result]").waitFor({ timeout: 90_000 });
 		const won = await lessonState();

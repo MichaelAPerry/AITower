@@ -107,10 +107,6 @@ describe("the right column while the build menu is open", () => {
 		expect(rightPanelFor({ ...base, paletteOpen: false, hovering: true })).toBe("inspector");
 		expect(rightPanelFor({ ...base, paletteOpen: false })).toBe("inspector");
 	});
-	it("in a lesson the catalog preview shows only for a hovered card", () => {
-		expect(rightPanelFor({ ...base, inLesson: true })).toBe("inspector");
-		expect(rightPanelFor({ ...base, inLesson: true, hovering: true })).toBe("build");
-	});
 });
 
 describe("putting the tool down", () => {

@@ -38,8 +38,6 @@ export interface Message {
 	/** 1-based position and total, for "2 / 3". */
 	n: number;
 	of: number;
-	/** The clock stops while this line is up. */
-	pause: boolean;
 	/** Who says it: the step's own speaker, or the lesson's. */
 	advisor: AdvisorId;
 }
@@ -52,7 +50,7 @@ export function pendingMessage(def: LessonDef, lv: Pick<LessonView, "stepsDone" 
 		if (done && s.after?.length && (!s.afterBeat || lv.beatsFired.includes(s.afterBeat))) {
 			const k = `${s.id}:after`;
 			const a = ack[k] ?? 0;
-			if (a < s.after.length) return { key: k, stepId: s.id, kind: "after", line: s.after[a], n: a + 1, of: s.after.length, pause: s.pause !== false, advisor: s.advisor ?? def.advisor };
+			if (a < s.after.length) return { key: k, stepId: s.id, kind: "after", line: s.after[a], n: a + 1, of: s.after.length, advisor: s.advisor ?? def.advisor };
 		}
 		if (i === lv.current && !done) {
 			// The previous step's scripted moment has not landed yet: hold the next step's lines back.
@@ -60,7 +58,7 @@ export function pendingMessage(def: LessonDef, lv: Pick<LessonView, "stepsDone" 
 			if (prev?.after?.length && prev.afterBeat && !lv.beatsFired.includes(prev.afterBeat)) return null;
 			const k = `${s.id}:say`;
 			const a = ack[k] ?? 0;
-			if (a < s.say.length) return { key: k, stepId: s.id, kind: "say", line: s.say[a], n: a + 1, of: s.say.length, pause: true, advisor: s.advisor ?? def.advisor };
+			if (a < s.say.length) return { key: k, stepId: s.id, kind: "say", line: s.say[a], n: a + 1, of: s.say.length, advisor: s.advisor ?? def.advisor };
 		}
 	}
 	return null;
@@ -103,29 +101,32 @@ export function goalModel(lv: LessonView): GoalModel {
 	return { loadKw: lv.loadKw, capacityKw: lv.capacityKw, frac, headroomPct: lv.headroomPct, tone, hold: lv.holdGoal > 0 ? Math.min(1, lv.holdTicks / lv.holdGoal) : 0, holdText: `${hours} of ${goalHours} h`, pue: lv.pue };
 }
 
-// ─── The restricted catalog ───────────────────────────────────────────
+// ─── What the step waits for ──────────────────────────────────────────
 
-/** Ids the lesson lets the player build right now, or null when nothing is restricted. */
-export const allowedIds = (view: Pick<SimView, "lesson">): ReadonlySet<string> | null => (view.lesson?.status === "active" ? new Set(view.lesson.allowed.map((a) => a.defId)) : null);
-
-/** The build bar tabs that still hold something buildable; null = all (no lesson). */
-export function lessonTabs(content: ContentDB, view: Pick<SimView, "lesson">): Tab[] | null {
-	const ids = allowedIds(view);
-	if (!ids) return null;
-	const tabs = new Set<Tab>();
-	if (view.lesson?.supplies) tabs.add("supplies");
-	for (const id of ids) {
-		const d = content.facilities[id];
-		if (d) tabs.add(d.category as Tab);
-		else if (id.startsWith("conduit-")) tabs.add("structure");
+/** True while the player is doing what the step's `wait` asks for (the UI then marks the step's tip, see `useLesson`). */
+export function waitMet(step: Pick<LessonStep, "panel" | "wait"> | undefined, now: { trees: boolean; speed: number; overlay: string }): boolean {
+	if (!step) return false;
+	if (step.panel === "trees" && now.trees) return true;
+	switch (step.wait) {
+		case "pause":
+			return now.speed === 0;
+		case "play":
+			return now.speed > 0;
+		case "fast":
+			return now.speed >= 3;
+		case "heat":
+		case "power":
+			return now.overlay === step.wait;
+		default:
+			return false;
 	}
-	return [...tabs];
 }
 
 /** True when the lesson's current step still has something to place that the player has not (the slot to show). */
 export function slotGhost(def: LessonDef, lv: LessonView, content: ContentDB): Ghost | null {
 	if (lv.status !== "active") return null;
 	const s = def.steps[lv.current];
+	if (s?.target) return { cells: Array.from({ length: s.target.width }, (_, i) => ({ x: (s.target?.x ?? 0) + i, floor: s.target?.floor ?? 0 })), valid: true, label: "CLICK THIS RACK" };
 	if (!s?.slot) return null;
 	const slot = s.slot;
 	const d = content.facilities[slot.defId];

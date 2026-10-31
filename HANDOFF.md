@@ -31,6 +31,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 - Profile (achievements, gallery) goes into the save export/import file; import merges.
 - `end.flesh.title` and `heat_tariff_revision.vote.mel` are deliberately kept as the wip/endings wording.
 - Lessons must not spoil the plot: no seal, closed trees, bonds, epilogues or endings in lesson text.
+- Lessons run on the full game UI (same HUD, drawers, build bar, speed controls) with a scenario and guidance on top; nothing is hidden or locked by a lesson. The advisor never starts or stops the clock: Lesson 1 asks the player to press Play, Pause and a faster speed and waits (`wait` on a step, reported by the UI as a `les:<step>` tip). Controls are pointed at with `data-tut` selectors (outline plus arrow); the camera is never moved by a lesson.
 - Icons and menu pictures: image sheets from ChatGPT. In-tower (world) sprites stay drawn in code; a one-rack image test (sheet 9 in `docs/ICON_PROMPTS.md`) is optional, later.
 - Locked gallery portraits = head crop (done).
 - Credits: code by Claude; all art generated with ChatGPT, some sprites by Claude; inspired by SimTower, nothing borrowed; quotes credited with sources. Design line = "Perry".
