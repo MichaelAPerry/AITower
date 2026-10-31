@@ -15,15 +15,15 @@ describe("title screen state", () => {
 	});
 
 	it("first visit with no saves offers Start Lesson 1 first, then Free Build, Settings and Controls", () => {
-		expect(titleItems([])).toEqual(["lesson", "new", "achievements", "settings", "controls"]);
+		expect(titleItems([])).toEqual(["lesson", "new", "achievements", "settings", "controls", "credits"]);
 	});
 
 	it("with an autosave it offers Continue first, then the lesson, Free Build, Load, Settings, Controls", () => {
-		expect(titleItems([info("auto"), info("slot1")])).toEqual(["continue", "lesson", "new", "load", "achievements", "settings", "controls"]);
+		expect(titleItems([info("auto"), info("slot1")])).toEqual(["continue", "lesson", "new", "load", "achievements", "settings", "controls", "credits"]);
 	});
 
 	it("manual saves alone give Load but no Continue", () => {
-		expect(titleItems([info("slot2")])).toEqual(["lesson", "new", "load", "achievements", "settings", "controls"]);
+		expect(titleItems([info("slot2")])).toEqual(["lesson", "new", "load", "achievements", "settings", "controls", "credits"]);
 	});
 
 	it("describes how long ago the autosave was written", () => {

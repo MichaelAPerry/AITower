@@ -1,4 +1,6 @@
-import { loadContent } from "@aitower/content";
+import { achievementContent, loadContent } from "@aitower/content";
+import { ACHIEVEMENTS } from "./achievements/achievements";
+import { publishAwards, resetRunAwards } from "./achievements/awardBus";
 import { renderToString } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { createFakeContent, createFakeStore } from "./dev/fakeStore";
@@ -159,6 +161,19 @@ describe("SystemMenu (server render)", () => {
 		}
 		const clean = renderToString(<Hud store={createFakeStore(content)} content={content} />);
 		expect(clean).not.toContain("ui-over-memo");
+	});
+
+	it("a first Notice of Termination puts the Bankrupt note on the game-over notice", () => {
+		const content = createFakeContent();
+		const store = createFakeStore(content);
+		store.triggerGameOver("victory");
+		try {
+			publishAwards({ won: ACHIEVEMENTS.filter((a) => a.id === "end_bankrupt"), portraits: [], bed: false });
+			expect(renderToString(<Hud store={store} content={content} />)).toContain(achievementContent.ui.endBankruptNote);
+		} finally {
+			resetRunAwards();
+		}
+		expect(renderToString(<Hud store={store} content={content} />)).not.toContain(achievementContent.ui.endBankruptNote);
 	});
 
 	it("bankrupt (a game over with a kind and no ending id) plays the Bankrupt ending scene on its own painting, not the memo", () => {

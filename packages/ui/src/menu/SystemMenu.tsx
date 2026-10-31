@@ -4,12 +4,13 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Icon } from "../components/common";
 import { focusables, nextFocusIndex } from "./focus";
 import type { MenuController } from "./menuController";
+import { CreditsPane } from "../credits/CreditsPane";
 import { AchievementsPane } from "../achievements/AchievementsPane";
 import { ControlsPane, type Flash, LessonsPane, LoadPane, NewGamePane, SavePane, SettingsPane } from "./panes";
 import { useSaves } from "./useSaves";
 import "./menu.css";
 
-export type MenuSection = "save" | "load" | "settings" | "controls" | "new" | "lessons" | "achievements";
+export type MenuSection = "save" | "load" | "settings" | "controls" | "new" | "lessons" | "achievements" | "credits";
 
 const DRAWERS: { id: MenuSection; label: string; form: string; title: string }[] = [
 	{ id: "save", label: "Save game", form: "SAVE", title: "Save game" },
@@ -18,6 +19,7 @@ const DRAWERS: { id: MenuSection; label: string; form: string; title: string }[]
 	{ id: "controls", label: "Controls", form: "CONTROLS", title: "Controls · keys and mouse" },
 	{ id: "lessons", label: "Lessons", form: "LESSONS", title: "Lessons · learn by doing" },
 	{ id: "achievements", label: achievementContent.ui.menuLabel, form: "RECORD", title: achievementContent.ui.menuTitle },
+	{ id: "credits", label: achievementContent.ui.creditsTitle, form: "CREDITS", title: achievementContent.ui.creditsTitle },
 	{ id: "new", label: "New game", form: "NEW GAME", title: "New game" },
 ];
 
@@ -81,7 +83,7 @@ export function SystemMenu({ store, state, content, menu, initial = "save", from
 		setSection(id);
 		setFlash(null);
 	};
-	const drawers = fromTitle ? DRAWERS.filter((d) => d.id === "load" || d.id === "settings" || d.id === "controls" || d.id === "lessons" || d.id === "achievements") : DRAWERS;
+	const drawers = fromTitle ? DRAWERS.filter((d) => d.id === "load" || d.id === "settings" || d.id === "controls" || d.id === "lessons" || d.id === "achievements" || d.id === "credits") : DRAWERS;
 	const active = drawers.find((d) => d.id === section) ?? drawers[0];
 	const common = { store, state, content, menu, flash: setFlash, onReplaced };
 
@@ -138,6 +140,7 @@ export function SystemMenu({ store, state, content, menu, initial = "save", from
 							{section === "controls" && <ControlsPane />}
 							{section === "new" && <NewGamePane {...common} />}
 							{section === "achievements" && <AchievementsPane />}
+							{section === "credits" && <CreditsPane content={content} />}
 							{section === "lessons" && <LessonsPane {...common} fromTitle={fromTitle} />}
 						</div>
 						<div className={`ui-menu-note ${flash ? `is-${flash.tone}` : "is-idle"}`} role="status" aria-live="polite">

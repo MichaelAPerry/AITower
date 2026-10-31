@@ -2,6 +2,7 @@
 	"starter": {
 		"id": "starter",
 		"name": "Garage Cluster",
+		"description": "A small lot at the edge of the district with three floors, four air-cooled racks, one air handler and a storage array. $3M in the bank and a bot in the basement. The usual way to start.",
 		"width": 48,
 		"floorMin": -5,
 		"floorMax": 40,

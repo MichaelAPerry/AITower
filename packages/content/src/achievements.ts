@@ -71,6 +71,16 @@ export const UI_KEYS = [
 	"endOffDuty",
 	"endPortrait",
 	"endBed",
+	"endBankruptNote",
+	"creditsTitle",
+	"creditsMenuLabel",
+	"creditsDetail",
+	"creditsCode",
+	"creditsArt",
+	"creditsInspired",
+	"creditsFonts",
+	"creditsQuotes",
+	"creditsQuotesHead",
 ] as const;
 export type UiKey = (typeof UI_KEYS)[number];
 

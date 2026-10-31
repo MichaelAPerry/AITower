@@ -1,0 +1,36 @@
+.aitower-hud .cr-pane {
+	display: grid;
+	gap: 10px;
+	padding: 4px 6px 12px 2px;
+	font: 15px/1.35 var(--f-type);
+	color: var(--paper-ink);
+}
+.aitower-hud .cr-title,
+.aitower-hud .cr-head {
+	margin: 0;
+	font: 700 16px/1.2 var(--f-type);
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+.aitower-hud .cr-lines,
+.aitower-hud .cr-quotes {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: grid;
+	gap: 8px;
+}
+.aitower-hud .cr-quote {
+	padding: 6px 8px;
+	border-left: 3px solid var(--brass-dk, currentColor);
+	overflow-wrap: anywhere;
+}
+.aitower-hud .cr-quote blockquote {
+	margin: 0;
+	font-style: italic;
+}
+.aitower-hud .cr-quote p {
+	margin: 2px 0 0;
+	font-size: 13px;
+	opacity: 0.85;
+}

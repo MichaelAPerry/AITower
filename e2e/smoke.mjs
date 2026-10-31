@@ -122,6 +122,13 @@ async function run(url) {
 		assert((await page.locator('[data-set="bed"] .ach-frame.is-blank').count()) === 4, "four blank bed frames");
 		await page.keyboard.press("Escape");
 		await page.locator(".ui-menu").waitFor({ state: "detached" });
+		await page.getByRole("button", { name: /CREDITS/ }).click(); // the title menu's Credits screen: credit lines, then every quote
+		await page.locator("[data-pane=credits]").waitFor();
+		assert((await page.locator("[data-pane=credits]").innerText()).includes("SimTower"), "credits name SimTower");
+		assert((await page.locator(".cr-quote").count()) > 100, "credits list the quotes");
+		assert((await page.locator(".cr-quote", { hasText: "Faustian bargain" }).innerText()).includes("Alvin Weinberg"), "a credits quote names its author");
+		await page.keyboard.press("Escape");
+		await page.locator(".ui-menu").waitFor({ state: "detached" });
 		await page.getByRole("button", { name: /START LESSON 1/ }).click();
 		await page.locator("[data-lesson-goal]").waitFor();
 		const lessonState = () => game(() => { const g = window.aitower.store.get(); const l = g.view.lesson; return l && { id: l.id, status: l.status, done: l.stepsDone, load: l.loadKw, cap: l.capacityKw, speed: g.speed, allowed: l.allowed.map((a) => a.defId), beats: l.beatsFired }; });
