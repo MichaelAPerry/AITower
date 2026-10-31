@@ -239,7 +239,7 @@ export const clock = (minuteOfDay: number): string =>
 /** Where the campaign progress lives (best effort; the game works without it). */
 export const LESSON_PROGRESS_KEY = "aitower.lessons.v1";
 
-/** Best stars per completed lesson id. */
+/** Completed lessons by id. The value is always 1 (older saves stored a star count, which is ignored). */
 export interface LessonProgress {
 	done: Record<string, number>;
 }
@@ -258,7 +258,7 @@ export function loadLessonProgress(storage: LessonStorage | null = defaultLesson
 		if (raw) {
 			const p = JSON.parse(raw) as Partial<LessonProgress>;
 			const done: Record<string, number> = {};
-			if (p.done && typeof p.done === "object") for (const [k, v] of Object.entries(p.done)) if (typeof v === "number" && v >= 1 && v <= 3) done[k] = Math.floor(v);
+			if (p.done && typeof p.done === "object") for (const [k, v] of Object.entries(p.done)) if (typeof v === "number" && v >= 1) done[k] = 1;
 			return { done };
 		}
 	} catch {
@@ -267,11 +267,11 @@ export function loadLessonProgress(storage: LessonStorage | null = defaultLesson
 	return { done: {} };
 }
 
-/** Record a finished lesson (keeps the best stars). Returns the new progress and whether it was the first completion. */
-export function recordLesson(id: string, stars: number, storage: LessonStorage | null = defaultLessonStorage()): { progress: LessonProgress; first: boolean } {
+/** Record a finished lesson. Returns the new progress and whether it was the first completion. */
+export function recordLesson(id: string, storage: LessonStorage | null = defaultLessonStorage()): { progress: LessonProgress; first: boolean } {
 	const progress = loadLessonProgress(storage);
 	const first = progress.done[id] === undefined;
-	progress.done[id] = Math.max(progress.done[id] ?? 0, Math.min(3, Math.max(1, Math.floor(stars))));
+	progress.done[id] = 1;
 	try {
 		storage?.setItem(LESSON_PROGRESS_KEY, JSON.stringify(progress));
 	} catch {

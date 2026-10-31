@@ -154,7 +154,7 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		return () => syncPulse([]);
 	}, [pulse]);
 
-	// A finished lesson stops the clock and records its stars once.
+	// A finished lesson stops the clock and records its completion once.
 	const done = lv && lv.status !== "active" ? `${lv.id}:${lv.status}:${lv.endTick}` : null;
 	// biome-ignore lint/correctness/useExhaustiveDependencies: once per finish
 	useEffect(() => {
@@ -164,7 +164,7 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 		setUi({ paletteOpen: false, buildHover: null });
 		if (lv.status === "won" && recorded.current !== done) {
 			recorded.current = done;
-			setFirstTime(recordLesson(lv.id, lv.stars).first);
+			setFirstTime(recordLesson(lv.id).first);
 			// Student: every lesson finished (the one achievement a lesson can earn).
 			if (awardsAllowed()) publishAwards(awardFor("lessonEnd", state.view, { content }));
 		}
@@ -290,18 +290,6 @@ function Steps({ content, def, lv, onHandbook }: { content: ContentDB; def: Less
 	);
 }
 
-function Stars({ n }: { n: number }) {
-	return (
-		<span className="les-stars" role="img" aria-label={`${n} of 3 stars`}>
-			{[1, 2, 3].map((i) => (
-				<b key={i} className={i <= n ? "is-on" : ""}>
-					★
-				</b>
-			))}
-		</span>
-	);
-}
-
 function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onNext, onFreeBuild }: { content: ContentDB; def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; firstTime: boolean; openHandbook: (id: string) => void; onReplay: () => void; onNext: (scenario: string) => void; onFreeBuild: () => void }) {
 	const r = resultModel(def, lv, firstTime, (id) => articleTitle(content, id));
 	const nextLesson = r.won ? nextLessonOf(content, def) : undefined;
@@ -313,13 +301,12 @@ function LessonResult({ content, def, lv, firstTime, openHandbook, onReplay, onN
 					LESSON {def.number} · {def.title.toUpperCase()}
 				</span>
 				<h2>{r.won ? "Lesson complete" : "Not this time"}</h2>
-				{r.won && r.starred && <Stars n={r.stars} />}
 				{r.won && (
 					<ul className="les-rows">
 						{r.rows.map((x) => (
 							<li key={x.label} className={x.earned ? "is-on" : ""}>
-								<span className="les-star-dot" aria-hidden="true">
-									{x.earned ? "★" : "☆"}
+								<span className="les-done-dot" aria-hidden="true">
+									{x.earned ? "✓" : "–"}
 								</span>
 								<b>{x.label}</b>
 								<span>{x.value}</span>

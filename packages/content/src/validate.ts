@@ -495,12 +495,6 @@ function validateLessons(p: Problems, db: ContentDB): void {
 		conds(`${w}.win.when`, l.win?.when);
 		num(p, `${w}.win.holdTicks`, l.win?.holdTicks, { min: 1, int: true });
 		conds(`${w}.lose`, l.lose);
-		if (l.starred !== false) {
-			conds(`${w}.stars2`, l.stars2);
-			conds(`${w}.stars3`, l.stars3);
-			str(p, `${w}.star2Text`, l.star2Text);
-			str(p, `${w}.star3Text`, l.star3Text);
-		}
 		num(p, `${w}.bonus`, l.bonus, { min: 0 });
 		if (!Array.isArray(l.commands) || l.commands.length === 0) p.push(`${w}.commands: expected a list of command types`);
 	}

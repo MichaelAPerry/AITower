@@ -671,8 +671,6 @@ export interface LessonDef {
 	meter?: boolean;
 	/** Label for the success-hold bar in the goal bar (e.g. "hours running"); absent = no bar. */
 	holdLabel?: string;
-	/** False: no stars; finishing is the reward. Default true. */
-	starred?: boolean;
 	/** The result screen's line when the lesson is lost (default: ran out of money). */
 	failed?: string;
 	/** The result screen's "Passed" line. */
@@ -683,13 +681,6 @@ export interface LessonDef {
 	win: { when: LessonCond[]; holdTicks: number };
 	/** Failure: any holds. */
 	lose: LessonCond[];
-	/** Star 2: all hold when the lesson is won (the metrics include the lesson's running tallies, e.g. `downTicks`). Used when `starred` is not false. */
-	stars2: LessonCond[];
-	/** Star 3: all hold when the lesson is won. */
-	stars3: LessonCond[];
-	/** The result screen says in plain words what earns star 2 / star 3. */
-	star2Text: string;
-	star3Text: string;
 	/** One line on the result screen. */
 	learned: string;
 	/** Handbook article ids linked from the result screen. */

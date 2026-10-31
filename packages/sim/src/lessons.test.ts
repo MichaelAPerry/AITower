@@ -65,7 +65,6 @@ describe("Lesson 1: your first rack", () => {
 		doStep(sim, "run", () => undefined);
 		expect(lessonOf(sim).beatsFired).toContain("job");
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 600);
-		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -89,9 +88,8 @@ describe("Lesson 2: earn your keep", () => {
 		doStep(sim, "bot", () => ok(sim, { type: "buyBot", defId: "rover" }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 6000);
 		expect(sim.view().stats.jobsCompleted).toBeGreaterThanOrEqual(2);
-		// Both contracts paid, cash above the 2 million start, and the data always had room: three stars.
+		// Both contracts paid, cash above the 2 million start, and the data always had room.
 		expect(sim.view().cash).toBeGreaterThan(2_000_000);
-		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -115,8 +113,7 @@ describe("Lesson 3: grow the tower", () => {
 		const policy = sim.view().automation.policy;
 		ok(sim, { type: "setAutomation", policy: { ...policy, foreman: { ...policy.foreman, enabled: true } } });
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 50);
-		// Done inside two game days, with the Foreman on and cash above his $1M reserve all along: three stars.
-		expect(lessonOf(sim).stars).toBe(3);
+		// Done inside two game days, with the Foreman on and cash above his $1M reserve all along.
 	});
 });
 
@@ -134,7 +131,6 @@ describe("Lesson 4: the three trees", () => {
 		doStep(sim, "clean", () => ok(sim, { type: "place", defId: "solar_skin", floor: 1, x: 40 }));
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 6000);
 		expect(sim.view().soul?.trees.greentech.sp).toBeGreaterThan(0);
-		expect(lessonOf(sim).stars).toBe(3);
 	});
 });
 
@@ -153,16 +149,13 @@ describe("Lesson 5: going liquid", () => {
 		if (!rack) throw new Error("no rack to retrofit");
 		doStep(sim, "rack", () => ok(sim, { type: "retrofit", facilityId: rack.id, tree: "synthetic" }));
 	};
-	it("is won with a pipe, a chiller, a CDU and an LC-2 rack, three stars", () => {
+	it("is won with a pipe, a chiller, a CDU and an LC-2 rack", () => {
 		const sim = play();
 		retrofit(sim);
 		doStep(sim, "heat", () => undefined);
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
 		const l = lessonOf(sim);
 		expect(sim.view().facilities.some((f) => f.defId === "rack_dlc_gpu")).toBe(true);
-		expect(l.star2).toBe(true);
-		expect(l.star3).toBe(true);
-		expect(l.stars).toBe(3);
 	});
 	it("is lost when the chiller is switched off while the rack runs: it trips from heat", () => {
 		const sim = play();
@@ -172,7 +165,6 @@ describe("Lesson 5: going liquid", () => {
 		if (!chiller) throw new Error("no chiller");
 		ok(sim, { type: "setEnabled", facilityId: chiller.id, enabled: false });
 		until(sim, "the lesson is lost", () => lessonOf(sim).status === "lost", 1500);
-		expect(lessonOf(sim).stars).toBe(0);
 	});
 });
 
@@ -192,9 +184,6 @@ describe("Lesson 6: lights out", () => {
 		until(sim, "the lesson is won", () => lessonOf(sim).status === "won", 1200);
 		const l = lessonOf(sim);
 		expect(l.downTicks).toBe(0);
-		expect(l.star2).toBe(true);
-		expect(l.star3).toBe(true);
-		expect(l.stars).toBe(3);
 	});
 	it("is lost when the genset is switched off: the battery runs dry and the racks go dark", () => {
 		const sim = play({ genset: true });
@@ -203,18 +192,5 @@ describe("Lesson 6: lights out", () => {
 		ok(sim, { type: "setEnabled", facilityId: gen.id, enabled: false });
 		until(sim, "the grid trips", () => sim.view().modifiers.some((m) => m.label === "Grid failure"), 400);
 		until(sim, "the lesson is lost", () => lessonOf(sim).status === "lost", 1200);
-		expect(lessonOf(sim).stars).toBe(0);
-	});
-});
-
-describe("Per-lesson stars", () => {
-	it("lessons 1 to 4 and 6 are starred and say in words what each bonus star needs", () => {
-		for (const l of content.lessons) {
-			expect(l.starred, l.id).toBe(true);
-			expect(l.stars2.length, l.id).toBeGreaterThan(0);
-			expect(l.stars3.length, l.id).toBeGreaterThan(0);
-			expect(l.star2Text.length, l.id).toBeGreaterThan(10);
-			expect(l.star3Text.length, l.id).toBeGreaterThan(10);
-		}
 	});
 });

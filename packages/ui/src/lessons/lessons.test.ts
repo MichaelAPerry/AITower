@@ -9,7 +9,7 @@ import { allowedIds, articleTitle, baselineAck, goalModel, lessonTabs, lessonTot
 
 const content = loadContent();
 const def = content.lessons[0];
-const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, stars: 0, star2: false, star3: false, allowed: [{ defId: "rack_air_gpu", max: 2 }], pue: 1.2, drawers: [], supplies: false, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
+const lv = (p: Partial<LessonView> = {}): LessonView => ({ id: def.id, status: "active", stepsDone: [], current: 0, beatsFired: [], holdTicks: 0, holdGoal: 1440, minHeadroom: 100, downTicks: 0, allowed: [{ defId: "rack_air_gpu", max: 2 }], pue: 1.2, drawers: [], supplies: false, loadKw: 53, capacityKw: 120, headroomPct: 55, startTick: 0, endTick: -1, ...p });
 
 describe("teacher lines", () => {
 	it("walks the intro, then waits for the player", () => {
@@ -97,18 +97,14 @@ describe("lesson count", () => {
 });
 
 describe("result", () => {
-	it("passes the lesson with the Handbook links and says in words what earned each star", () => {
-		const r = resultModel(def, lv({ status: "won", stars: 2, star2: true, startTick: 0, endTick: 2000 }), true);
+	it("passes the lesson with the Handbook links ", () => {
+		const r = resultModel(def, lv({ status: "won", startTick: 0, endTick: 2000 }), true);
 		expect(r.won).toBe(true);
-		expect(r.starred).toBe(true);
 		expect(r.rows).toEqual([
 			{ label: "Passed", value: def.passed ?? def.goal, earned: true },
-			{ label: "Star 2", value: def.star2Text, earned: true },
-			{ label: "Star 3", value: def.star3Text, earned: false },
 		]);
-		expect(def.star2Text.length).toBeGreaterThan(10);
 		expect(r.bonus).toBe(def.bonus);
-		expect(resultModel(def, lv({ status: "won", stars: 1 }), false).bonus).toBe(0);
+		expect(resultModel(def, lv({ status: "won" }), false).bonus).toBe(0);
 		expect(r.handbook.map((h) => h.id)).toContain("ch:power");
 		expect(articleTitle(content, "ch:power")).toBe("Power");
 		expect(articleTitle(content, "ch:power#kw")).toBe("kW");

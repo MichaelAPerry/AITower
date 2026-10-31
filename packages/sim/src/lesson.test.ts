@@ -1,7 +1,7 @@
 import { loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { Sim } from "./api";
-import { condHolds, lessonMetrics, lessonStars } from "./lesson/lesson";
+import { condHolds, lessonMetrics } from "./lesson/lesson";
 import type { LessonMetrics } from "./lesson/lesson";
 import { type SimImpl, createSim, simFromSnapshot } from "./sim";
 
@@ -76,8 +76,6 @@ describe("lesson engine", () => {
 		expect(l.status).toBe("won");
 		expect(l.stepsDone).toEqual(["rack", "power", "cool", "run", "hold"]);
 		expect(l.holdTicks).toBeGreaterThanOrEqual(l.holdGoal);
-		expect(l.stars).toBe(3);
-		expect(l.star2 && l.star3).toBe(true);
 		expect(sim.view().facilities.filter((f) => f.defId === "rack_air_gpu").every((f) => f.tempC < 80)).toBe(true);
 		// A finished lesson stops restricting the site.
 		expect(sim.view().lesson?.allowed).toEqual([]);
@@ -100,15 +98,6 @@ describe("lesson engine", () => {
 		run(sim, 1500);
 		expect(lesson(sim).status).toBe("active");
 		expect(lesson(sim).stepsDone).not.toContain("cool");
-	});
-
-	it("awards one star for passing and one for each star rule that holds", () => {
-		const d = { ...def, stars2: [{ metric: "minHeadroom" as const, op: ">=" as const, value: 50 }], stars3: [{ metric: "downTicks" as const, op: "<=" as const, value: 100 }] };
-		const m = (minHeadroom: number, downTicks: number) => ({ minHeadroom, downTicks }) as LessonMetrics;
-		expect(lessonStars(d, m(89, 40))).toBe(3);
-		expect(lessonStars(d, m(20, 40))).toBe(2);
-		expect(lessonStars(d, m(89, 900))).toBe(2);
-		expect(lessonStars(d, m(20, 900))).toBe(1);
 	});
 
 	it("round-trips through a snapshot mid-lesson and stays deterministic", () => {
