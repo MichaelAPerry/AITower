@@ -10,7 +10,7 @@ export function SoulGauge({ view, onOpen }: { view: Pick<SimView, "soul">; onOpe
 	return (
 		<button type="button" className="ui-chip soul-gauge" data-tut="trees" data-help="singularity" onClick={onOpen} title="Singularity points, one bar per tree. Click for the Trees panel.">
 			<span className="soul-head">
-				<PixelIcon name="tree" className="is-lg" />
+				<PixelIcon name="branch" className="is-lg" />
 				<span className="ui-label">TREES</span>
 			</span>
 			<span className="soul-bars">
