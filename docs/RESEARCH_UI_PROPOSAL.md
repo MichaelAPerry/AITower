@@ -82,3 +82,26 @@ Cost: remove `treeLayout.ts` and `ResearchTree.tsx` (about 600 lines, plus tests
 - Stellaris tech progression guide: https://guildorder.com/ko/games/stellaris/wiki/tech-tree-progression
 - Oxygen Not Included wiki, Research: https://oxygennotincluded.wiki.gg/wiki/Research
 - Searches for Path of Exile, Against the Storm and Frostpunk tree design returned nothing usable; those lines are from general knowledge and should be treated as such.
+
+## 7. v2 mockup: the Orb (owner feedback on v1)
+
+Owner rejected v1 as "blocky and bad" and asked for a sphere of readable globes, a Tron-meets-PC-98 look, and trees that grow flavour (pixel plants, flesh) further out. Mockup: `docs/research_mockup_v2.html` (screenshot `docs/research_mockup_v2.png`, 1600x900). No game code changed.
+
+**Owner's question: are today's trees just in that wrapper?** Yes. Today there is one graph of all 77 techs. Lattice, Flesh and Garden (code names Synthetic, Wetware, Green) are three of its eight lanes, drawn as rows with Levels as columns; edges that cross lanes are dashed. So the three trees are not separate structures, and the sphere is a new layout of the same data (`tech.json` needs no change).
+
+What the mockup does:
+
+- **Layout:** an elliptical orb. The shared techs (Admin, Logistics, Power, Cooling, Compute, 39 nodes) sit in the middle, pulled toward the tree that needs them. Lattice (9 nodes), Flesh (13) and Garden (16) each own a wedge. Distance from the core is Level, shown by five neon rings (LV1 to LV5). A collision pass nudges globes apart, so a ring is approximate, not exact.
+- **Globes:** done = filled, glowing, with a tick. Ready = bright pulsing ring plus the RP cost under the name. Locked = dim ring and padlock, label still readable. State is shape and label weight, not colour alone. All names are 16 px (bold when done or ready) with a dark outline for contrast on the flora.
+- **Look:** dark ground, dithered radial glow (4x4 Bayer, five blues), neon ellipses and spokes, glowing arc edges (lit only where a prerequisite is done), scanlines, DotGothic16 for headings and numbers, M PLUS Rounded 1c for body.
+- **Flavour (drawn in code on a 4 px pixel canvas, no images):** Lattice = circuit traces with pads and crystal shards; Flesh = branching veins and dithered tissue cells; Garden = wavy vines with leaves, sprouts and small flowers. Each grows denser toward the rim.
+- **Side panel:** tree and Level tag, name, You get, Needs first (done or needed), cost/have/short, START, PIN AS GOAL, legend. Click any globe to update it.
+- **Zoom and pan:** wheel zooms (0.7x to 3x), drag pans, key 0 fits. The default view shows all 77 globes at once.
+
+Trade-offs:
+
+- 77 labelled globes on one screen is dense. 16 px names mean labels (up to 3 lines) outweigh the globes, and a few inner-ring labels sit close together (4 pairs still touch by a pixel or two in the static layout). A real build should use a proper layout pass or zoom levels (names only beyond a zoom threshold).
+- At 1280x720 the stage scales by 0.8, so names fall to about 12.8 px; the 16 px minimum only holds at 1600x900 or larger.
+- Flora competes with text. It is kept low in alpha and labels have a dark outline; stronger flavour would hurt locked-label contrast.
+- Lattice has no node before Level 4 in the data, so its wedge is empty near the core. That is the real shape of the data, but it makes the wedge look sparse and the shared nodes dominate the middle.
+- Fonts load from Google Fonts, so the HTML needs network access to render in the intended faces.

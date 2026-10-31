@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Research mockup v2: the Orb</title>
+<!-- Static mockup, 1600x900. Real names, costs, levels and prerequisites from packages/content/src/data/tech.json. Progress state is invented. Not wired to the game.
+     Fonts: DotGothic16 (headings, numbers) and M PLUS Rounded 1c (body) from Google Fonts. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=M+PLUS+Rounded+1c:wght@400;700&display=swap">
+<style>
+:root{--bg:#04041c;--panel:#0a0a30;--text:#eef2ff;--dim:#a6acdc;--lat:#6fd3ff;--flesh:#ff4f6d;--garden:#9be564;--gold:#ffd75e;--ready:#fff6a8;--magenta:#ff6ad5;
+ --dot:"DotGothic16","MS Gothic",monospace;--body:"M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+html,body{width:1600px;height:900px;background:#000;overflow:hidden}
+body{font:400 16px/1.35 var(--body);color:var(--text);position:relative}
+#stage{position:absolute;left:0;top:0;width:1250px;height:900px;overflow:hidden;background:var(--bg);cursor:grab}
+#stage.drag{cursor:grabbing}
+#world{position:absolute;left:0;top:0;width:1250px;height:900px;transform-origin:0 0}
+#bg,#flora{position:absolute;left:0;top:0;width:1250px;height:900px;image-rendering:pixelated}
+#svg{position:absolute;left:0;top:0}
+.scan{position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);mix-blend-mode:multiply}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 52%,transparent 70%,rgba(0,0,10,.35) 100%)}
+.lab{font:400 16px var(--body);fill:#dfe6ff;paint-order:stroke;stroke:#02021a;stroke-width:5px;stroke-linejoin:round}
+.lab.done{fill:#fff;font-weight:700}
+.lab.ready{fill:#fffbd0;font-weight:700}
+.lab.locked{fill:#b8c0f2}
+.cost{font:400 16px var(--dot);fill:var(--gold);paint-order:stroke;stroke:#03031a;stroke-width:4px}
+.cost.short{fill:#ff9a7a}
+.node{cursor:pointer}
+.node:hover .core{stroke:#fff}
+@keyframes pulse{0%,100%{stroke-opacity:1;transform:scale(1)}50%{stroke-opacity:.25;transform:scale(1.28)}}
+.ring{transform-box:fill-box;transform-origin:center;animation:pulse 1.6s steps(6) infinite}
+.edge{fill:none;stroke-linecap:round}
+.ringg{fill:none;stroke:#3fd8ff;stroke-opacity:.28;stroke-width:1}
+.spoke{stroke:#3fd8ff;stroke-opacity:.2;stroke-width:1}
+.lvl{font:400 16px var(--dot);fill:#7fe6ff;paint-order:stroke;stroke:#03031a;stroke-width:4px}
+.tree{font:400 34px var(--dot);paint-order:stroke;stroke:#03031a;stroke-width:3px;letter-spacing:4px}
+.treesub{font:400 16px var(--body);fill:var(--dim);paint-order:stroke;stroke:#03031a;stroke-width:4px}
+.hud{position:absolute;left:14px;top:10px;pointer-events:none}
+.hud h1{font:400 30px var(--dot);letter-spacing:3px;color:#fff;text-shadow:0 0 10px #3fd8ff,2px 2px 0 #000}
+.hud .rp{font:400 20px var(--dot);color:var(--gold);margin-top:2px}
+.hud .rp span{color:#6cf08f;margin-left:12px}
+.legend{margin-top:auto;position:relative;font:400 16px var(--body);color:var(--dim);background:rgba(4,4,28,.86);border:1px solid #2a3a8a;padding:8px 12px;display:flex;flex-direction:column;gap:5px}
+.legend i{display:inline-block;width:16px;height:16px;border-radius:50%;vertical-align:-3px;margin-right:8px}
+.hint{position:absolute;left:14px;top:84px;line-height:1.5;font:400 16px var(--body);color:var(--dim);background:rgba(4,4,28,.86);border:1px solid #2a3a8a;padding:8px 12px}
+.hint b{font:400 16px var(--dot);color:#7fe6ff}
+#panel{position:absolute;left:1262px;top:12px;width:326px;height:876px;background:linear-gradient(#0b0b36,#070724);border:2px solid #6fd3ff;box-shadow:0 0 18px rgba(63,216,255,.45),inset 0 0 0 3px #04041c,inset 0 0 0 4px #274a9a;padding:18px 18px 16px;display:flex;flex-direction:column;gap:12px}
+#panel:before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-conic-gradient(rgba(255,255,255,.035) 0 25%,transparent 0 50%) 0 0/4px 4px}
+#panel>*{position:relative}
+.tag{font:400 16px var(--dot);letter-spacing:2px}
+#pname{font:400 26px/1.15 var(--dot);color:#fff}
+.sec{font:400 16px var(--dot);color:#7fe6ff;letter-spacing:2px;border-bottom:1px dashed #2f4fb0;padding-bottom:3px;margin-bottom:5px}
+.txt{font:400 16px/1.4 var(--body);color:#e4e8ff}
+.need{font:400 16px/1.3 var(--body);display:flex;gap:8px;margin:3px 0}
+.need b{font:400 16px var(--dot);flex:none;width:44px}
+.ok{color:#6cf08f}.no{color:#ff9a7a}
+.cbox{border:1px solid #2f4fb0;background:rgba(20,30,90,.55);padding:8px 12px}
+.crow{display:flex;justify-content:space-between;font:400 16px var(--body);color:var(--dim);margin:2px 0}
+.crow b{font:400 20px var(--dot);color:var(--gold)}
+.crow b.g{color:#6cf08f}
+.btn{font:400 24px var(--dot);letter-spacing:4px;text-align:center;padding:10px 0 9px;border:2px solid #fff6a8;color:#06061c;background:#fff6a8;box-shadow:0 0 14px rgba(255,246,168,.6),3px 3px 0 #000;cursor:pointer}
+.btn.sec2{font-size:18px;padding:6px 0;background:transparent;color:#cfd6ff;border-color:#4a5cc0;box-shadow:none;letter-spacing:2px}
+.btn.off{background:#222650;color:#8d93c8;border-color:#3a4390;box-shadow:none}
+#quote{font:400 16px/1.35 var(--body);color:#aab2e8;font-style:italic}
+#quote span{display:block;font-style:normal;color:#7e87c4;margin-top:3px}
+</style>
+</head>
+<body>
+<div id="stage"><div id="world">
+ <canvas id="bg" width="312" height="225"></canvas>
+ <canvas id="flora" width="312" height="225"></canvas>
+ <svg id="svg" width="1250" height="900" viewBox="0 0 1250 900">
+  <defs>
+   <filter id="glow" x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+   <filter id="glow2" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+  <g id="grid"></g><g id="edges"></g><g id="nodes"></g><g id="titles"></g>
+ </svg>
+</div>
+<div class="scan"></div><div class="vig"></div>
+<div class="hud"><h1>RESEARCH</h1><div class="rp">4,200 RP<span>+38 / hour</span></div></div>
+<div class="hint"><b>WHEEL</b> zoom<br><b>DRAG</b> pan<br><b>0</b> fit</div>
+</div>
+<aside id="panel"></aside>
+<script>
+const TECH=[{"id":"contracts_clerk","name":"Contract Automation","d":"An automated bid desk that never sleeps. Switches on the Contracts Clerk: it accepts fitting offers for you and keeps 6% of what those jobs earn.","lane":"adm","t":1,"c":180,"r":[],"q":["The division of labour can be applied with equal success to mental as to mechanical operations","Charles Babbage, On the Economy of Machinery and Manufactures, 1832"]},{"id":"reading_room","name":"Research Library Access","d":"Licensed journal access for the research team. Research points earned +10%.","lane":"adm","t":1,"c":330,"r":["contracts_clerk"],"q":["Self-education is, I firmly believe, the only kind of education there is.","Isaac Asimov, Science Past, Science Future, 1975"]},{"id":"vendor_stamp","name":"Preferred Vendor Status","d":"Your invoices are paid ahead of the queue. Contract payouts +5%.","lane":"adm","t":2,"c":1300,"r":["reading_room"],"q":["How not to do it was the great study and object of all public departments and professional politicians all round the Circumlocution Office.","Charles Dickens, Little Dorrit, book 1, ch. 10"]},{"id":"ledger_audit","name":"Cost Accounting Reform","d":"Costs are now allocated per rack. Facility upkeep -8%.","lane":"adm","t":2,"c":1550,"r":["contracts_clerk"],"q":["When you can measure what you are speaking about, and express it in numbers, you know something about it","Lord Kelvin, Electrical Units of Measurement, lecture of 3 May 1883"]},{"id":"grand_concordat","name":"Open Door","d":"An open-door policy for your advisors. Taking an advisor's advice earns +1 extra bond. Contract payouts +4%.","lane":"adm","t":4,"c":12000,"r":["vendor_stamp","ledger_audit"],"q":["In this world nothing can be said to be certain, except death and taxes.","Benjamin Franklin, Letter to Jean-Baptiste Le Roy, 13 November 1789"]},{"id":"batch_cards","name":"Batch Scheduler Upgrade","d":"Better packing for the job queue. Contract payouts +3%.","lane":"comp","t":1,"c":450,"r":[],"q":["We may say most aptly that the Analytical Engine weaves algebraical patterns just as the Jacquard-loom weaves flowers and leaves.","Ada Lovelace, Notes on the Analytical Engine, 1843"]},{"id":"rear_door_drawings","name":"Rear-Door Cabinet Design","d":"A reference design for a heat exchanger on the cabinet door. Unlocks the AC-3 Rear-Door Rack: 42 PFLOPS at 55 kW.","lane":"comp","t":2,"c":1300,"r":["batch_cards"],"q":["Premature optimization is the root of all evil (or at least most of it) in programming.","Donald Knuth, Computer Programming as an Art, CACM, 1974"]},{"id":"tape_silo","name":"Tape Library Engineering","d":"Robotic retrieval for bulk datasets. Unlocks the Tape Library TL-8000: 8,000 TB at 30 kW.","lane":"comp","t":2,"c":1150,"r":["batch_cards"],"q":["Science is what we understand well enough to explain to a computer. Art is everything else we do.","Donald Knuth, Foreword to A=B, 1996"]},{"id":"cold_plate_gen3","name":"Cold-Plate Generation 3","d":"Machined cold plates rated for 160 kW per cabinet. Rung 2 of The Lattice: unlocks the LC-3 Cold-Plate Rack (230 PFLOPS at 160 kW).","lane":"comp","t":3,"c":4200,"r":["rear_door_drawings","chilled_loop"],"q":["Nothing is too wonderful to be true, if it be consistent with the laws of nature","Michael Faraday, Laboratory journal, 19 March 1849"]},{"id":"inference_foundry","name":"Specialist Cards Programme","d":"Fixed-function cards from a contract foundry, and event-driven silicon that idles when there is nothing to say. Unlocks the IA-1 Inference Accelerator (95 PFLOPS at 36 kW) and the NM-1 Neuromorphic Rack (50 PFLOPS at 12 kW).","lane":"comp","t":3,"c":3600,"r":["batch_cards"],"q":["The Analytical Engine has no pretensions whatever to originate any thing.","Ada Lovelace, Notes by the Translator, Scientific Memoirs, 1843"]},{"id":"manifold_blade","name":"Blade Manifold Architecture","d":"Rack-scale blades that blind-mate to the coolant manifold. Rung 3 of The Lattice: unlocks the LC-4 Blade Rack (420 PFLOPS at 240 kW).","lane":"comp","t":4,"c":15000,"r":["cold_plate_gen3"],"q":["The art of programming is the art of organizing complexity","Edsger W. Dijkstra, EWD249, 1970"]},{"id":"desk_fan_standard","name":"Airflow Standardisation","d":"One fan model, one mounting spec, fewer surprises. CRAH, chiller and CDU capacity +5%.","lane":"cool","t":1,"c":360,"r":[],"q":["Humans are allergic to change.","Grace Hopper, OCLC Newsletter, March/April 1987"]},{"id":"rear_door_exchanger","name":"Rear-Door Exchanger Licence","d":"A heat exchanger on the cabinet door. Cooling capacity of every air handler, chiller and CDU +5%. Unlocks the Row Air Handler AH-320.","lane":"cool","t":2,"c":1450,"r":["desk_fan_standard"],"q":["There cannot be a greater mistake than that of looking superciliously upon the practical applications of science.","Lord Kelvin, Electrical Units of Measurement, lecture of 3 May 1883"]},{"id":"chilled_loop","name":"Chilled-Water Loop Design","d":"Pump curves and loop balancing, done properly. CRAH, chiller and CDU capacity +5%. Rung 1 of The Lattice: unlocks retrofitting racks to the LC-2 Liquid-Cooled Rack, plus the Coolant Distribution Unit and the Chiller CH-600; without it a tower stays on air.","lane":"cool","t":2,"c":1700,"r":["desk_fan_standard"],"q":["I counted everything.","Katherine Johnson, Interview remarks, as collected by Wikiquote"]},{"id":"high_capacity_air","name":"High-Capacity Air Handling","d":"A fan wall sized for a whole hall. Unlocks the High-Capacity Air Handler AH-700.","lane":"cool","t":3,"c":3300,"r":["rear_door_exchanger"],"q":["Just moving the little trim tab builds a low pressure that pulls the rudder around.","Buckminster Fuller, Playboy interview, February 1972"]},{"id":"tower_hydraulics","name":"Cooling Tower Hydraulics","d":"A tower, a basin and a water-use permit. Unlocks the Cooling-Tower Chiller CH-2400. Unlocks the Row Coolant Distribution Unit.","lane":"cool","t":3,"c":3800,"r":["chilled_loop"],"q":["Basic research is what I am doing when I don't know what I am doing.","Wernher von Braun, The New York Times, 16 December 1957"]},{"id":"adiabatic_cooling","name":"Adiabatic Free Cooling","d":"Evaporate the loop in open air and let the sky take the heat. CRAH, chiller and CDU capacity +5%. Unlocks the Adiabatic Chiller CH-5000 and AD-1500 Adiabatic Unit.","lane":"green","t":4,"c":13000,"r":["event_array"],"q":["In math, you're either right or you're wrong.","Katherine Johnson, Interview remarks, as collected by Wikiquote"]},{"id":"surge_memo","name":"Surge Protection Standard","d":"Fuses on every circuit, in writing. Rack failure rate -5%.","lane":"pow","t":1,"c":300,"r":[],"q":["If you believe too much you'll never notice the flaws; if you doubt too much you won't get started.","Richard Hamming, You and Your Research, 1986"]},{"id":"offpeak_petition","name":"Off-Peak Tariff Agreement","d":"A negotiated night rate with the utility. Grid energy price -5%.","lane":"pow","t":1,"c":420,"r":[],"q":["Simplicity is a great virtue but it requires hard work to achieve it and education to appreciate it.","Edsger W. Dijkstra, EWD896, 1984"]},{"id":"substation_licence","name":"Substation Licence","d":"Permission to connect a dedicated 11 kV feeder. Unlocks the Grid Intake 3.5 MW.","lane":"pow","t":2,"c":1450,"r":["offpeak_petition"],"q":["Talk is cheap. Show me the code.","Linus Torvalds, linux-kernel mailing list, 25 August 2000"]},{"id":"flywheel_patent","name":"Flywheel Licence","d":"Rotor storage that bridges a minute of load in a second. Unlocks the Flywheel UPS 60 kWh.","lane":"pow","t":2,"c":1550,"r":["surge_memo"],"q":["Genius is one per cent inspiration, ninety-nine per cent perspiration","Thomas Edison, Quoted in Harper's Monthly, September 1932"]},{"id":"gas_concession","name":"Gas Turbine Concession","d":"A pipeline tap and a turbine to go with it. Grid energy price -3%. Unlocks the Gas Turbine 3 MW.","lane":"pow","t":3,"c":3600,"r":["substation_licence"],"q":["The world of the future will be an ever more demanding struggle against the limitations of our intelligence","Norbert Wiener, God & Golem, Inc., 1964, p. 69"]},{"id":"accumulator_charter","name":"Battery Hall Permit","d":"Fire-code sign-off for a thousand cells in one room. Unlocks the Battery Hall 2.4 MWh.","lane":"pow","t":3,"c":3300,"r":["flywheel_patent"],"q":["One never notices what has been done; one can only see what remains to be done.","Marie Curie, Letter to her brother, 1894"]},{"id":"feeder_treaty","name":"Transmission Feeder Agreement","d":"A private line to the transmission grid. Grid energy price -5%. Unlocks the Grid Intake 9 MW.","lane":"pow","t":4,"c":14000,"r":["gas_concession","accumulator_charter"],"q":["I hear America singing, the varied carols I hear","Walt Whitman, Leaves of Grass"]},{"id":"pit_crew","name":"Rapid Swap Procedures","d":"GPU tray swaps timed to the minute. Bot repairs 15% faster.","lane":"log","t":1,"c":340,"r":[],"q":["Everyone knows that debugging is twice as hard as writing a program in the first place.","Brian Kernighan, The Elements of Programming Style, 2nd ed., ch. 2"]},{"id":"brass_gearing","name":"Bot Drivetrain Upgrade","d":"Faster actuators and louder fans. Bot speed +10%.","lane":"log","t":1,"c":390,"r":["pit_crew"],"q":["I wish to God these calculations had been executed by steam.","Charles Babbage, Recalled 1839 (of 1821); Buxton and Hyman, 1988"]},{"id":"logistics_drone","name":"Aerial Survey Drones","d":"Rotors that skip the lift entirely. Unlocks the Survey Drone (flies between floors, 0.5 tiles per tick).","lane":"log","t":2,"c":1450,"r":["brass_gearing"],"q":["The universe is wider than our views of it.","Henry David Thoreau, Walden, 1854"]},{"id":"central_stores","name":"Central Warehousing","d":"Bin locations, barcodes and a stock count. Unlocks the Central Parts Warehouse.","lane":"log","t":2,"c":1300,"r":["pit_crew"],"q":["It's the equivalent of a bicycle for our minds.","Steve Jobs, Memory and Imagination, 1991"]},{"id":"fast_charge","name":"Fast Charging","d":"Twenty-five kilowatts per berth. Unlocks the Fast-Charge Bay.","lane":"log","t":3,"c":3000,"r":["logistics_drone"],"q":["Please cut off a nanosecond and send it over to me.","Grace Hopper, 60 Minutes interview, 24 August 1986"]},{"id":"logistics_lifter","name":"Heavy Lifter Chassis","d":"A reinforced bot with room for three spare parts. Unlocks the Heavy Lifter Bot (carries 3 spare parts per trip).","lane":"log","t":3,"c":3500,"r":["brass_gearing","central_stores"],"q":["Thinking is the hardest work there is, which is the probable reason why so few engage in it.","Henry Ford, The Forum, April 1928 (interview with Fay Leone Faurote)"]},{"id":"maintenance_corps","name":"Autonomous Maintenance Corps","d":"A coordinated fleet instead of a loose group. Bot repairs 10% faster. Bot speed +5%.","lane":"log","t":4,"c":10000,"r":["fast_charge","logistics_lifter"],"q":["Clearly, we must break away from the sequential and not limit the computers.","Grace Hopper, Management and the Computer of the Future, 1962"]},{"id":"wetware_annex","name":"Wetware Annex Programme","d":"A new annex off the plant room, with a floor drain and a risk assessment. Rung 1 of The Flesh: unlocks retrofitting racks to the OC-1 Organoid Cabinet, plus the Perfusion Bath PB-60 and the Nutrient Medium Plant it needs.","lane":"wet","t":2,"c":3200,"r":["culture_media"],"q":["I had worked hard for nearly two years, for the sole purpose of infusing life into an inanimate body.","Mary Shelley, Frankenstein, ch. 5"]},{"id":"sterile_protocols","name":"Sterile Protocols","d":"Gowning, wash-down and a laminated chart. Unlocks the Sterile Bay.","lane":"wet","t":3,"c":7000,"r":["wetware_annex"],"q":["From then on, when anything went wrong with a computer, we said it had bugs in it.","Grace Hopper, Time, 16 April 1984"]},{"id":"quarantine_doctrine","name":"Quarantine Procedure","d":"Doors that interlock before you finish the sentence. Unlocks the Quarantine Lock.","lane":"wet","t":4,"c":12500,"r":["sterile_protocols"],"q":["I think the major good idea in Unix was its clean and simple interface: open, close, read, and write.","Ken Thompson, Unix and Beyond: An Interview with Ken Thompson, 1999"]},{"id":"culling_licence","name":"Disposal Licence","d":"A permit with a very short distribution list. Unlocks the Biomass Disposal Suite.","lane":"wet","t":4,"c":13000,"r":["quarantine_doctrine"],"q":["Out, out, brief candle!","William Shakespeare, Macbeth, act 5, scene 5"]},{"id":"dna_archive_charter","name":"DNA Archive Licence","d":"Storage that grows its own shelves. Unlocks the DNA Storage Vault: 16,000 TB per cabinet.","lane":"wet","t":4,"c":13000,"r":["wetware_annex"],"q":["Information is information, not matter or energy.","Norbert Wiener, Cybernetics, 1948, p. 132"]},{"id":"bioreactor_permit","name":"Bio-Reactor Permit","d":"Power from fermentation, under licence 41-C. Unlocks the Bio-Reactor BR-500: 500 kW for 14 units of nutrient medium a tick.","lane":"wet","t":4,"c":14000,"r":["wetware_annex","sterile_protocols"],"q":["Drive out fear, so that everyone may work effectively for the company.","W. Edwards Deming, Quality, Productivity and Competitive Position, 1982"]},{"id":"neural_pit_dossier","name":"Neural Vat Dossier","d":"Forty pages, none of them dated. Rung 4 of The Flesh: unlocks the OC-4 Neural Vat (850 PFLOPS from 110 kW) and the Vascular Plant VP-1000.","lane":"wet","t":5,"c":70000,"r":["tissue_scaffolds"],"q":["Beware, for I am fearless and therefore powerful.","Mary Shelley, Frankenstein, ch. 20"]},{"id":"tissue_scaffolds","name":"Tissue Scaffolds","d":"Lattices that keep the tissue where it was put. Rack failure rate -7%. Rung 3 of The Flesh: unlocks the OC-3 Perfused Cortex (520 PFLOPS) and the Nutrient Works NW-60.","lane":"wet","t":4,"c":26000,"r":["organoid_vats"],"q":["The web is more a social creation than a technical one.","Tim Berners-Lee, Weaving the Web, 1999"]},{"id":"asset_register","name":"Asset Register","d":"Everything the Authority now considers yours, indexed. Research points earned +10%.","lane":"wet","t":5,"c":22000,"r":["neural_pit_dossier"],"q":["Rather little mechanism, and lots of blank sheets.","Alan Turing, Computing Machinery and Intelligence, Mind, 1950"]},{"id":"works_foreman","name":"Works Foreman","d":"An automated build planner. Switches on the Works Foreman: once ordered, it builds racks, cooling and spare power where the capacity model says you are short, at most 1 facility per game-hour.","lane":"adm","t":1,"c":1200,"r":["contracts_clerk"],"q":["Management has authority only as long as it performs.","Peter Drucker, Management: Tasks, Responsibilities, Practices, 1973"]},{"id":"standing_orders_binder","name":"Fleet Policy Update","d":"A policy document the bots have, against expectations, begun to read. Bot walking and flying speed +8%. The Works Foreman places 2 facilities per game-hour instead of 1.","lane":"adm","t":3,"c":3600,"r":["works_foreman"],"q":["A system must be managed. It will not manage itself.","W. Edwards Deming, The New Economics, 1993"]},{"id":"wind_permit","name":"Wind Mast Permit","d":"Planning consent for a mast on an upper floor. Unlocks the Wind Mast WM-300: up to 300 kW, on the third floor or above.","lane":"green","t":4,"c":9500,"r":["substation_licence"],"q":["The nice thing about standards is that you have so many to choose from.","Andrew Tanenbaum, Computer Networks, 2nd ed., p. 254"]},{"id":"district_heat_accord","name":"District Heat Agreement","d":"Your waste heat is formally recognised as saleable. Unlocks the Heat Recovery Unit 400 kW: 400 kW of heat sold at $3 a kWh.","lane":"green","t":3,"c":3800,"r":["chilled_loop"],"q":["The Web does not just connect machines, it connects people.","Tim Berners-Lee, Knight Foundation speech, 14 September 2008"]},{"id":"algae_licence","name":"Algae Cultivation Licence","d":"Permission to grow algae on the building envelope. Unlocks the Algae Bioreactor Facade: 160 carbon credits a day.","lane":"green","t":3,"c":3500,"r":["desk_fan_standard"],"q":["Once you get your courage up and believe that you can do important problems, then you can.","Richard Hamming, You and Your Research, 1986"]},{"id":"canopy_array","name":"Canopy Array Study","d":"Load calculations for a roof-mounted panel field. Unlocks the PV Roof Canopy 420 kW: 420 kW at noon on a clear day.","lane":"green","t":4,"c":16000,"r":["wind_permit","neuromorphic_bench"],"q":["Great cities are not like towns, only larger. They are not like suburbs, only denser.","Jane Jacobs, The Death and Life of Great American Cities, 1961, p. 30"]},{"id":"heat_pipeline_franchise","name":"Heat Link Franchise","d":"An exclusive right to supply the district network. Unlocks the District Heat Link 1.6 MW: 1,600 kW of heat sold at $3 a kWh.","lane":"green","t":5,"c":36000,"r":["district_heat_accord"],"q":["The power of the Web is in its universality.","Tim Berners-Lee, W3C accessibility page"]},{"id":"carbon_capture_dossier","name":"Carbon Capture Study","d":"Proof that the carbon removed was carbon that was there. Unlocks the Carbon Capture Stack: 1,100 carbon credits a day.","lane":"green","t":5,"c":34000,"r":["algae_licence"],"q":["The “control of nature” is a phrase conceived in arrogance","Rachel Carson, Silent Spring, 1962"]},{"id":"green_ledger","name":"Green Tariff","d":"Every kilowatt-hour tracked by source and priced accordingly. Grid energy price -8%.","lane":"green","t":5,"c":22000,"r":["carbon_capture_dossier","heat_pipeline_franchise"],"q":["The cost of a thing is the amount of what I will call life which is required to be exchanged for it","Henry David Thoreau, Walden, 1854"]},{"id":"photonic_bench","name":"Photonic Bench Study","d":"An optical bench and a long qualification run. Rung 3 of The Garden: unlocks the PH-1 Photonic Rack (300 PFLOPS from 40 kW).","lane":"green","t":4,"c":26000,"r":["event_array"],"q":["Any sufficiently advanced technology is indistinguishable from magic.","Arthur C. Clarke, Profiles of the Future, rev. ed., 1973"]},{"id":"cryo_core_dossier","name":"Cryo Chiller Study","d":"A refrigeration schematic with a margin note reading \"colder\". Unlocks the Cryo Chiller CC-3000: 3,000 kW of heat removed at a COP of 16.","lane":"syn","t":4,"c":28000,"r":["tower_hydraulics","manifold_blade"],"q":["The first principle is that you must not fool yourself — and you are the easiest person to fool.","Richard Feynman, Cargo Cult Science, Caltech commencement address, 1974"]},{"id":"continuity_form","name":"Continuity of Service Spec","d":"Certifies that the process which began is the process which ends. Unlocks the Continuity Monitor: 800 kW and 400 kWh of ride-through.","lane":"syn","t":5,"c":30000,"r":["accumulator_charter"],"q":["For a successful technology, reality must take precedence over public relations, for nature cannot be fooled.","Richard Feynman, Rogers Commission Report, Appendix F, 1986"]},{"id":"backup_vault_charter","name":"Backup Vault Charter","d":"Cold storage for everything that should not be lost, and some things that should. Unlocks the Process Backup Vault: 20,000 TB.","lane":"syn","t":5,"c":30000,"r":["tape_silo"],"q":["I can visualize a time in the future when we will be to robots as dogs are to humans.","Claude Shannon, Omni, August 1987"]},{"id":"mind_lattice_dossier","name":"Mind Lattice Dossier","d":"A specification for a rack that would prefer to be called a resident. Rung 4 of The Lattice: unlocks the ML-1 Mind Lattice Rack (1,400 PFLOPS from 520 kW). Research points earned +10%, from the register of every hosted process.","lane":"syn","t":5,"c":44000,"r":["cryo_core_dossier","manifold_blade"],"q":["The stuff of the world is mind-stuff.","Arthur Eddington, The Nature of the Physical World, 1928"]},{"id":"continuity_doctrine","name":"Continuity Policy","d":"No process is ever finished, only archived. Rack failure rate -8%.","lane":"syn","t":5,"c":24000,"r":["continuity_form","backup_vault_charter"],"q":["The saddest aspect of life right now is that science gathers knowledge faster than society gathers wisdom.","Isaac Asimov, Isaac Asimov's Book of Science and Nature Quotations, 1988"]},{"id":"culture_media","name":"Culture Media Procurement","d":"Sterile media, in a standing order. Rack failure rate -3%.","lane":"wet","t":2,"c":1150,"r":["desk_fan_standard"],"q":["Our life is frittered away by detail.","Henry David Thoreau, Walden, 1854"]},{"id":"fleet_command","name":"Fleet Command Desk","d":"A rota, a radio and a whiteboard for the bots. Unlocks the Fleet Coordinator Bot: carries 5 spare parts a trip and works a repair in 14 ticks.","lane":"log","t":4,"c":12000,"r":["logistics_lifter","fast_charge"],"q":["It is better to pick the wrong priority than none at all.","Peter Drucker, Management: Tasks, Responsibilities, Practices, 1973"]},{"id":"grid_autonomy","name":"Grid Autonomy Charter","d":"Permission to disagree with the utility in writing. Unlocks the Grid Intake 20 MW.","lane":"pow","t":5,"c":28000,"r":["feeder_treaty"],"q":["I went to the woods because I wished to live deliberately","Henry David Thoreau, Walden, 1854"]},{"id":"immersion_vault","name":"Facility CDU Skid","d":"A skid-mounted coolant distribution hall for a whole floor. Unlocks the CDU Hall 6 MW.","lane":"cool","t":5,"c":30000,"r":["manifold_blade","tower_hydraulics"],"q":["Software gets slower faster than hardware gets faster.","Niklaus Wirth, A Plea for Lean Software, Computer, February 1995"]},{"id":"authority_charter","name":"Research Charter","d":"A standing charter for the research office. Research points earned +20%.","lane":"adm","t":5,"c":26000,"r":["grand_concordat"],"q":["The law’s delay, the insolence of office","William Shakespeare, Hamlet, act 3, scene 1"]},{"id":"organoid_vats","name":"Organoid Vat Programme","d":"Cabinets scaled up to vats, with the same drain. Rung 2 of The Flesh: unlocks the OC-2 Organoid Vat Bank (300 PFLOPS from 45 kW) and the Perfusion Manifold PM-250.","lane":"wet","t":3,"c":8000,"r":["wetware_annex"],"q":["Look on my works ye Mighty, and despair!","Percy Bysshe Shelley, Ozymandias, The Examiner, 1818"]},{"id":"synaptic_mesh","name":"Synaptic Mesh","d":"A grid of fine wire through the tissue, so that failures are noticed earlier than they happen. Rack failure rate -10%.","lane":"wet","t":5,"c":32000,"r":["neural_pit_dossier"],"q":["I am large, I contain multitudes.","Walt Whitman, Song of Myself, Leaves of Grass"]},{"id":"biogas_digester","name":"Biogas Digester","d":"An anaerobic digestion plant. Unlocks the Biogas Digester BG-2000.","lane":"wet","t":5,"c":30000,"r":["bioreactor_permit"],"q":["We abuse land because we regard it as a commodity belonging to us.","Aldo Leopold, A Sand County Almanac, 1949, foreword"]},{"id":"event_array","name":"Event-Driven Arrays","d":"Spiking arrays for sparse work. Rung 2 of The Garden: unlocks the NM-2 Event-Driven Array (150 PFLOPS from 28 kW) and the AD-1500 Adiabatic Unit.","lane":"green","t":3,"c":8000,"r":["neuromorphic_bench"],"q":["The purpose of computing is insight, not numbers.","Richard Hamming, Numerical Methods for Scientists and Engineers, 1962, Preface"]},{"id":"hydrogen_cell","name":"Hydrogen Fuel Cells","d":"Hydrogen in place of diesel. Unlocks the Hydrogen Fuel-Cell FC-1000.","lane":"green","t":4,"c":14000,"r":["neuromorphic_bench"],"q":["There is no more open door by which you can enter into the study of natural philosophy","Michael Faraday, The Chemical History of a Candle, 1860"]},{"id":"iron_air_charter","name":"Iron-Air Charter","d":"Slow, cheap, long-lived batteries. Unlocks the Iron-Air Store IA-20.","lane":"green","t":5,"c":28000,"r":["hydrogen_cell"],"q":["To travel hopefully is a better thing than to arrive","Robert Louis Stevenson, El Dorado, Virginibus Puerisque, 1881"]},{"id":"geothermal_charter","name":"Geothermal Charter","d":"A drilling licence and a very deep hole. Unlocks the Geothermal Well GW-2000.","lane":"green","t":5,"c":30000,"r":["iron_air_charter"],"q":["Down, down, down. Would the fall never come to an end?","Lewis Carroll, Alice's Adventures in Wonderland, ch. 1, 1865"]},{"id":"photonic_mesh","name":"Photonic Mesh","d":"Chip-to-chip light. Rung 4 of The Garden: unlocks the PH-2 Photonic Mesh (600 PFLOPS from 70 kW) and the Adiabatic Chiller CH-5000.","lane":"green","t":5,"c":70000,"r":["photonic_bench"],"q":["There's a certain Slant of light","Emily Dickinson, The Complete Poems, ed. Thomas H. Johnson, 1960"]},{"id":"combined_cycle","name":"Combined-Cycle Permit","d":"A gas plant behind the fence. Unlocks the Combined-Cycle Block 12 MW.","lane":"syn","t":5,"c":24000,"r":["feeder_treaty"],"q":["heat everywhere manifests a tendency to equalize existing differences of temperature","Rudolf Clausius, Fourth Memoir, 1854"]},{"id":"cryo_plant","name":"Cryo Plant Design","d":"A central refrigerant plant. Unlocks the CC-8000 Cryo Plant.","lane":"syn","t":5,"c":30000,"r":["cryo_core_dossier"],"q":["The ice was here, the ice was there, The ice was all around","Samuel Taylor Coleridge, The Rime of the Ancient Mariner, part 1, 1798"]},{"id":"reactor_licence","name":"Reactor Licence","d":"A licence to run a small modular reactor on site. Unlocks the Small Modular Reactor 10 MW.","lane":"syn","t":5,"c":40000,"r":["grid_autonomy","combined_cycle"],"q":["We nuclear people have made a Faustian bargain with society.","Alvin Weinberg, Social Institutions and Nuclear Energy, Science, 7 July 1972, p. 33"]},{"id":"neuromorphic_bench","name":"Neuromorphic Bench","d":"Spiking-neuron boards on a test bench, a roof permit and a louvre. Rung 1 of The Garden: unlocks retrofitting racks to the NM-1 Neuromorphic Rack (50 PFLOPS from 12 kW), plus the PV Wall Panels 150 kW and the OA-400 Outside-Air Economizer.","lane":"green","t":2,"c":3200,"r":["batch_cards"],"q":["The best way to predict the future is to invent it.","Alan Kay, Meeting at Xerox PARC, 1971"]},{"id":"rate_card","name":"Rate Card Negotiation","d":"Luci reads the tariff schedule aloud, and then reads the footnotes. Unlocks Luci's Rate Card: a 9 MW grid intake at a quarter off.","lane":"pow","t":3,"c":3600,"r":["substation_licence"],"q":["The energy of the universe is constant. The entropy of the universe tends to a maximum.","Rudolf Clausius, Ninth Memoir, 1865"]},{"id":"leaf_bolt","name":"Leaf-Bolt Microgrid","d":"Panels and a controller in one cabinet, drawn on a napkin. Unlocks Bea's Leaf-Bolt Microgrid: 600 kW of solar in one block.","lane":"green","t":3,"c":3800,"r":["substation_licence"],"q":["The clearest way into the Universe is through a forest wilderness.","John Muir, John of the Mountains, 1938 (journal, July 1890)"]},{"id":"ice_battery","name":"Ice Thermal Storage","d":"Chill water when power is cheap, spend it when it is not. Unlocks Cass's Ice Thermal Battery: an 800 kW air handler.","lane":"cool","t":3,"c":3000,"r":["rear_door_exchanger"],"q":["Into each life some rain must fall","Henry Wadsworth Longfellow, The Rainy Day, 1842"]},{"id":"cold_room_spec","name":"Cold Room Specification","d":"A room kept cold on purpose. Unlocks Cass's Cold Room: a 60 kW air handler that cuts the failure rate of racks near it by 20%.","lane":"cool","t":4,"c":9000,"r":["ice_battery"],"q":["All things are poison, and nothing is without poison; but the dose makes it clear that a thing is not a poison.","Paracelsus, Third Defense, Septem Defensiones, 1538"]},{"id":"transfer_protocol","name":"Transfer Protocol","d":"A consent form, a pod and a door. Unlocks the CT-1 Consciousness Transfer Unit: every six hours one person is carried over, worth about one ML-1 in Singularity points. The Garden and the Flesh will remember it.","lane":"syn","t":5,"c":46000,"r":["mind_lattice_dossier"],"q":["I think, therefore I am.","Rene Descartes, Discourse on the Method, 1637"]}];
+const LEG="\n <div><i style=\"background:#fff;box-shadow:0 0 8px #6fd3ff\"></i>Done: filled, glowing</div>\n <div><i style=\"border:3px solid var(--ready);box-shadow:0 0 8px var(--ready)\"></i>Ready: pulsing ring, cost shown</div>\n <div><i style=\"border:2px solid #5c66b0\"></i>Locked: dim, still readable</div>\n \n";
+const PLAYER_LEVEL=2, RP=4200;
+const TREE={syn:{name:"LATTICE",sub:"synthetic",c:"#6fd3ff",deg:270,w:76},wet:{name:"FLESH",sub:"biotech",c:"#ff6a84",deg:140,w:84},green:{name:"GARDEN",sub:"greentech",c:"#b0f070",deg:40,w:96}};
+const LANE={adm:["Administration","#c9b98f"],log:["Logistics","#e8955a"],pow:["Power","#f0d24a"],cool:["Cooling","#5fb6ff"],comp:["Compute","#8fd1b0"]};
+const CX=620,CY=478,RA=[0,125,255,375,470,560],RB=[0,95,195,285,355,395];
+const byId=Object.fromEntries(TECH.map(n=>[n.id,n]));
+const rad=d=>d*Math.PI/180;
+const col=n=>TREE[n.lane]?TREE[n.lane].c:LANE[n.lane][1];
+const done=new Set(TECH.filter(n=>n.t===1).map(n=>n.id));
+done.add("culture_media");
+TECH.filter(n=>n.t===2&&!TREE[n.lane]&&n.r.every(r=>done.has(r))).slice(0,-3).forEach(n=>done.add(n.id));
+TECH.filter(n=>n.t===2&&!TREE[n.lane]&&n.r.every(r=>done.has(r))).slice(0,-3);
+const state=n=>done.has(n.id)?"done":(n.r.every(r=>done.has(r))&&n.t<=PLAYER_LEVEL?"ready":"locked");
+const pol=(t,deg,k=0)=>{const a=rad(deg),x=RA[t]*(1+k),y=RB[t]*(1+k);return[CX+Math.cos(a)*x,CY+Math.sin(a)*y]};
+const dependents={};TECH.forEach(n=>n.r.forEach(r=>(dependents[r]=dependents[r]||[]).push(n.id)));
+const treeOf=id=>{const n=byId[id];if(TREE[n.lane])return[n.lane];const s=new Set();(dependents[id]||[]).forEach(d=>treeOf(d).forEach(x=>s.add(x)));return[...s]};
+const LANEDEG={adm:205,log:340,pow:0,cool:92,comp:255};
+const angDiff=(a,b)=>Math.abs(((a-b+540)%360)-180);
+const meanDeg=a=>{let x=0,y=0;a.forEach(d=>{x+=Math.cos(rad(d));y+=Math.sin(rad(d))});return(Math.atan2(y,x)*180/Math.PI+360)%360};
+const pos={};
+Object.entries(TREE).forEach(([k,T])=>{
+ for(let t=2;t<=5;t++){
+  const ns=TECH.filter(n=>n.lane===k&&n.t===t);
+  ns.sort((a,b)=>(a.r.length&&byId[a.r[0]].a||0)-(b.r.length&&byId[b.r[0]].a||0));
+  ns.forEach((n,i)=>{const f=ns.length===1?0:(i/(ns.length-1)-.5);const d=T.deg+f*(T.w-14);n.a=d;pos[n.id]=pol(t,d,((i%2)?.045:-.03))});
+ }
+});
+const sh=TECH.filter(n=>!TREE[n.lane]);
+sh.forEach(n=>{
+ const tr=treeOf(n.id);let d;
+ if(n.t>=4){
+  const seams=[330,93,207];const want=tr.length?meanDeg(tr.map(x=>TREE[x].deg)):LANEDEG[n.lane];
+  d=seams.reduce((b,s)=>angDiff(s,want)<angDiff(b,want)?s:b);
+ } else d=tr.length?meanDeg(tr.map(x=>TREE[x].deg).concat([LANEDEG[n.lane]])):LANEDEG[n.lane];
+ n.a=d;
+});
+for(let t=1;t<=5;t++){
+ const ns=sh.filter(n=>n.t===t).sort((a,b)=>a.a-b.a);
+ const gap=t===1?34:t===2?24:t===3?20:16;
+ for(let it=0;it<60;it++)for(let i=0;i<ns.length;i++){const j=(i+1)%ns.length;let d=((ns[j].a-ns[i].a)+360)%360;if(ns.length>1&&d<gap){const m=(gap-d)/2;ns[i].a-=m;ns[j].a+=m}}
+ ns.forEach((n,i)=>{pos[n.id]=pol(t,n.a,(i%2?.07:-.06))});
+}
+const nodes=TECH.map(n=>({n,id:n.id,x:pos[n.id][0],y:pos[n.id][1],tx:pos[n.id][0],ty:pos[n.id][1]}));
+const CH=8.4;
+function wrap(s,max){const w=s.split(" "),L=[];let c="";w.forEach(x=>{if((c+" "+x).trim().length>max&&c){L.push(c);c=x}else c=(c+" "+x).trim()});L.push(c);return L}
+const fmt=v=>v.toLocaleString("en-US");
+nodes.forEach(o=>{
+ const st=state(o.n);o.st=st;
+ o.lines=wrap(o.n.name,13);
+ if(st==="ready")o.lines.push(fmt(o.n.c)+" RP");
+ o.lw=Math.max(...o.lines.map(l=>l.length))*CH+4;
+ o.lh=o.lines.length*19;
+ o.R=st==="ready"?14:13;
+});
+const O_PAD=12;
+const LVB=[1,2,3,4,5].map(t=>{const[x,y]=pol(t,312);return{t,x0:x-12,x1:x+34,y0:y-12,y1:y+10}});
+function side(o){return o.x>=CX-6?1:-1}
+function box(o){const s=side(o);return{x0:s>0?o.x-o.R-3:o.x-o.R-8-o.lw,x1:s>0?o.x+o.R+8+o.lw:o.x+o.R+3,y0:o.y-Math.max(o.R,o.lh/2)-1,y1:o.y+Math.max(o.R,o.lh/2)+1}}
+for(let it=0;it<4000;it++){const SP=it<800?.01:it<1800?.002:0;
+ for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){
+  const A=nodes[i],B=nodes[j],a=box(A),b=box(B),P=5;
+  const ox=Math.min(a.x1,b.x1)-Math.max(a.x0,b.x0)+P,oy=Math.min(a.y1,b.y1)-Math.max(a.y0,b.y0)+P;
+  if(ox>0&&oy>0){
+   if(oy<ox){const s=(A.y<B.y?-1:1)*oy/2;A.y+=s;B.y-=s}
+   else{const s=(A.x<B.x?-1:1)*ox/2;A.x+=s;B.x-=s}
+  }
+ }
+ nodes.forEach(o=>{o.x+=(o.tx-o.x)*SP;o.y+=(o.ty-o.y)*SP;const s=side(o);o.x=Math.max(16+(s<0?o.lw+O_PAD:0)+o.R,Math.min(1234-(s>0?o.lw+O_PAD:0)-o.R,o.x));o.y=Math.max(70,Math.min(865,o.y))});
+ nodes.forEach(o=>LVB.forEach(L=>{const b=box(o);const ox=Math.min(b.x1,L.x1)-Math.max(b.x0,L.x0)+4,oy=Math.min(b.y1,L.y1)-Math.max(b.y0,L.y0)+4;if(ox>0&&oy>0){if(oy<ox)o.y+=(o.y<(L.y0+L.y1)/2?-1:1)*oy;else o.x+=(o.x<(L.x0+L.x1)/2?-1:1)*ox}}));
+}
+let overlaps=0;for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=box(nodes[i]),b=box(nodes[j]);if(Math.min(a.x1,b.x1)>Math.max(a.x0,b.x0)&&Math.min(a.y1,b.y1)>Math.max(a.y0,b.y0))overlaps++}
+window.__overlaps=overlaps;window.__pairs=[];for(let i=0;i<nodes.length;i++)for(let j=i+1;j<nodes.length;j++){const a=box(nodes[i]),b=box(nodes[j]);if(Math.min(a.x1,b.x1)>Math.max(a.x0,b.x0)&&Math.min(a.y1,b.y1)>Math.max(a.y0,b.y0))window.__pairs.push(nodes[i].id+" / "+nodes[j].id)};
+const N=Object.fromEntries(nodes.map(o=>[o.id,o]));
+const NS="http://www.w3.org/2000/svg";
+const el=(p,t,a={},txt)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(txt!=null)e.textContent=txt;p.appendChild(e);return e};
+const gGrid=document.getElementById("grid"),gE=document.getElementById("edges"),gN=document.getElementById("nodes"),gT=document.getElementById("titles");
+for(let t=1;t<=5;t++)el(gGrid,"ellipse",{cx:CX,cy:CY,rx:RA[t],ry:RB[t],class:"ringg"});
+[330,93,207].forEach(d=>{const a=rad(d);el(gGrid,"line",{x1:CX,y1:CY,x2:CX+Math.cos(a)*(RA[5]+30),y2:CY+Math.sin(a)*(RB[5]+30),class:"spoke","stroke-dasharray":"3 5"})});
+LVB.forEach(L=>el(gGrid,"text",{x:L.x0+2,y:L.y0+17,class:"lvl"},"LV"+L.t))
+const core=el(gGrid,"g");
+el(core,"circle",{cx:CX,cy:CY,r:30,fill:"#0a1a4a",stroke:"#7fe6ff","stroke-width":2,filter:"url(#glow)"});
+el(core,"circle",{cx:CX,cy:CY,r:18,fill:"#bff3ff",opacity:.9,filter:"url(#glow2)"});
+el(core,"text",{x:CX,y:CY+6,"text-anchor":"middle",style:"font:400 16px var(--dot);fill:#04041c"},"CORE");
+function edgePath(a,b){
+ const dx=b.x-a.x,dy=b.y-a.y,L=Math.hypot(dx,dy)||1;
+ const sx=a.x+dx/L*a.R,sy=a.y+dy/L*a.R,ex=b.x-dx/L*(b.R+2),ey=b.y-dy/L*(b.R+2);
+ const mx=(sx+ex)/2,my=(sy+ey)/2;const cx=mx+(CX-mx)*.22,cy=my+(CY-my)*.22;
+ return`M${sx.toFixed(1)},${sy.toFixed(1)}Q${cx.toFixed(1)},${cy.toFixed(1)} ${ex.toFixed(1)},${ey.toFixed(1)}`;
+}
+const edgeEls=[];
+TECH.forEach(n=>n.r.forEach(r=>{
+ const a=N[r],b=N[n.id];const d=edgePath(a,b);
+ const c=col(n);const st=b.st,pd=a.st==="done";
+ const live=pd&&st!=="locked"; const lit=a.st==="done"&&st==="done";
+ const g=el(gE,"g");
+ if(lit||(st==="ready"&&pd)){el(g,"path",{d,class:"edge",stroke:c,"stroke-width":5,"stroke-opacity":.28,filter:"url(#glow2)"})}
+ const p=el(g,"path",{d,class:"edge",stroke:c,"stroke-width":lit?2.4:(live?2:1.4),"stroke-opacity":lit?.95:(live?.9:.38),"stroke-dasharray":lit||live?"none":"2 5"});
+ edgeEls.push({g,p,from:r,to:n.id,w:p.getAttribute("stroke-width")});
+}));
+const nodeEls={};
+nodes.forEach(o=>{
+ const n=o.n,c=col(n),g=el(gN,"g",{class:"node","data-id":o.id});nodeEls[o.id]=g;
+ const s=side(o),R=o.R;
+ g.setAttribute("transform","translate("+o.x.toFixed(1)+","+o.y.toFixed(1)+")");
+ if(o.st==="done"){
+  el(g,"circle",{r:R+5,fill:c,opacity:.35,filter:"url(#glow)"});
+  el(g,"circle",{r:R,fill:c,stroke:"#fff","stroke-width":2,class:"core"});
+  el(g,"circle",{r:R-6,fill:"none",stroke:"#04041c","stroke-width":2,opacity:.45});
+  el(g,"path",{d:"M-6,0 L-2,5 L6,-5",fill:"none",stroke:"#04041c","stroke-width":3,"stroke-linecap":"square"});
+ }else if(o.st==="ready"){
+  el(g,"circle",{r:R+4,fill:"none",stroke:"#fff6a8","stroke-width":3,class:"ring"});
+  el(g,"circle",{r:R,fill:"#101248",stroke:"#fff6a8","stroke-width":3,class:"core",filter:"url(#glow)"});
+  el(g,"circle",{r:R-6,fill:c});
+ }else{
+  el(g,"circle",{r:R,fill:"#080826",stroke:c,"stroke-opacity":.55,"stroke-width":2,class:"core"});
+  el(g,"rect",{x:-4,y:-1,width:8,height:6,fill:c,opacity:.6});el(g,"path",{d:"M-3,-1 v-3 h6 v3",fill:"none",stroke:c,"stroke-opacity":.6,"stroke-width":2});
+ }
+ const lx=s*(R+9);const t=el(g,"text",{x:lx,y:-(o.lines.length-1)*9.5+5,"text-anchor":s>0?"start":"end"});
+ o.lines.forEach((l,i)=>{const isCost=o.st==="ready"&&i===o.lines.length-1;el(t,"tspan",{x:lx,dy:i?19:0,class:isCost?"cost"+(o.n.c>RP?" short":""):"lab "+o.st},l)});
+ g.addEventListener("click",ev=>{ev.stopPropagation();select(o.id)});
+});
+[[TREE.syn,CX,44,"middle"],[TREE.wet,18,830,"start"],[TREE.green,1232,830,"end"]].forEach(([T,x,y,a])=>{
+ el(gT,"text",{x,y,"text-anchor":a,class:"tree",fill:T.c,style:"filter:drop-shadow(0 0 8px "+T.c+")"},T.name);
+ if(T!==TREE.syn)el(gT,"text",{x,y:y+22,"text-anchor":a,class:"treesub"},T.sub+" tree");
+});
+let sel=null;
+function select(id){
+ sel=id;const n=byId[id],st=N[id].st,c=col(n);
+ const treeName=TREE[n.lane]?TREE[n.lane].name+" tree":LANE[n.lane][0]+" (shared)";
+ const needs=n.r.map(r=>{const d=done.has(r);return`<div class="need"><b class="${d?"ok":"no"}">${d?"DONE":"NEED"}</b><span>${byId[r].name}</span></div>`}).join("")||`<div class="need"><b class="ok">OPEN</b><span>No prerequisite</span></div>`;
+ const short=Math.max(0,n.c-RP);
+ const lvlNote=n.t>PLAYER_LEVEL?`<div class="need"><b class="no">LV${n.t}</b><span>Needs Level ${n.t}; you are Level ${PLAYER_LEVEL}</span></div>`:"";
+ const q=n.q;
+ const btn=st==="done"?`<div class="btn off">RESEARCHED</div>`:st==="ready"&&!short?`<div class="btn">START</div>`:st==="ready"?`<div class="btn off">NEED ${fmt(short)} MORE RP</div>`:`<div class="btn off">LOCKED</div>`;
+ document.getElementById("panel").innerHTML=`
+  <div class="tag" style="color:${c};text-shadow:0 0 8px ${c}">${treeName.toUpperCase()} &middot; LV${n.t}</div>
+  <div id="pname">${n.name}</div>
+  <div><div class="sec">YOU GET</div><div class="txt">${n.d}</div></div>
+  <div><div class="sec">NEEDS FIRST</div>${needs}${lvlNote}</div>
+  <div class="cbox"><div class="crow">Cost<b>${fmt(n.c)} RP</b></div><div class="crow">You have<b>${fmt(RP)} RP</b></div><div class="crow">Short<b class="${short?"":"g"}">${short?fmt(short):"none"}</b></div></div>
+  ${btn}<div class="btn sec2">PIN AS GOAL</div>
+  <div class="legend">${LEG}</div>
+  <div id="quote">&ldquo;${q[0]}&rdquo;<span>${q[1]}</span></div>`;
+ edgeEls.forEach(e=>{const on=e.from===id||e.to===id;e.g.style.opacity=on?1:.55;e.p.setAttribute("stroke-width",on?3.6:e.w)});
+ document.querySelectorAll(".sel").forEach(e=>e.remove());
+ el(nodeEls[id],"circle",{r:N[id].R+9,fill:"none",stroke:"#ff6ad5","stroke-width":2,"stroke-dasharray":"4 3",class:"sel"});
+}
+const stage=document.getElementById("stage"),world=document.getElementById("world");
+let S=1,TX=0,TY=0;const apply=()=>world.style.transform=`translate(${TX}px,${TY}px) scale(${S})`;
+stage.addEventListener("wheel",e=>{e.preventDefault();const r=stage.getBoundingClientRect(),mx=e.clientX-r.left,my=e.clientY-r.top;const k=e.deltaY<0?1.15:1/1.15,ns=Math.max(.7,Math.min(3,S*k));TX=mx-(mx-TX)*ns/S;TY=my-(my-TY)*ns/S;S=ns;apply()},{passive:false});
+let dr=null;stage.addEventListener("pointerdown",e=>{dr={x:e.clientX-TX,y:e.clientY-TY};stage.classList.add("drag")});
+addEventListener("pointermove",e=>{if(dr){TX=e.clientX-dr.x;TY=e.clientY-dr.y;apply()}});
+addEventListener("pointerup",()=>{dr=null;stage.classList.remove("drag")});
+addEventListener("keydown",e=>{if(e.key==="0"){S=1;TX=TY=0;apply()}});
+const U=4,W=312,H=225;
+function rng(seed){let s=seed>>>0;return()=>((s=Math.imul(s^s>>>15,2246822507)+1013904223>>>0)/4294967296)}
+const bgc=document.getElementById("bg").getContext("2d"),fc=document.getElementById("flora").getContext("2d");
+const BAYER=[0,8,2,10,12,4,14,6,3,11,1,9,15,7,13,5];
+const PAL=["#04041c","#070730","#0a0a44","#0e0e58","#13136c"];
+for(let y=0;y<H;y++)for(let x=0;x<W;x++){
+ const dx=(x*U+2-CX)/RA[5],dy=(y*U+2-CY)/RB[5],r=Math.hypot(dx,dy);
+ let v=Math.max(0,1-r*0.95);v=v*v*0.95+(r<1.02?0.06:0);
+ const lvl=v*4.2,b=BAYER[(y&3)*4+(x&3)]/16;const idx=Math.min(4,Math.floor(lvl+b));
+ bgc.fillStyle=PAL[idx];bgc.fillRect(x,y,1,1);
+}
+const px=(ctx,x,y,c,a=1)=>{x=Math.round(x);y=Math.round(y);if(x<0||y<0||x>=W||y>=H)return;ctx.globalAlpha=a;ctx.fillStyle=c;ctx.fillRect(x,y,1,1)};
+const inWedge=(T,x,y,pad=0)=>{const dx=(x*U-CX)/RA[5],dy=(y*U-CY)/RB[5];const a=(Math.atan2(dy,dx)*180/Math.PI+360)%360;return angDiff(a,T.deg)<=T.w/2+pad};
+const rho=(x,y)=>Math.hypot((x*U-CX)/RA[5],(y*U-CY)/RB[5]);
+function start(T,r,k){const a=rad(T.deg+(r()-.5)*T.w*.95);return[(CX+Math.cos(a)*RA[5]*k)/U,(CY+Math.sin(a)*RB[5]*k)/U]}
+{const T=TREE.syn,r=rng(7),c="#6fd3ff";
+ for(let i=0;i<46;i++){
+  let[x,y]=start(T,r,.3+r()*.25);x|=0;y|=0;let dir=[[1,0],[0,1],[-1,0],[0,-1]][(r()*4)|0];
+  const steps=10+r()*46;
+  for(let s=0;s<steps;s++){
+   const k=rho(x,y);if(k>1.12||!inWedge(T,x,y,8))break;
+   px(fc,x,y,c,.16+k*.26);
+   if(s%9===8&&r()<.7){
+    const ang=Math.atan2((y*U-CY)/RB[5],(x*U-CX)/RA[5]);const opts=[[1,0],[0,1],[-1,0],[0,-1],[1,1],[-1,1],[1,-1],[-1,-1]];
+    const sc=p=>Math.cos(ang)*p[0]*RA[5]/U+Math.sin(ang)*p[1]*RB[5]/U;
+    opts.sort((p,q)=>sc(q)-sc(p));dir=opts[(r()*3)|0];}
+   x+=dir[0];y+=dir[1];
+  }
+  px(fc,x,y,"#bff3ff",.8);px(fc,x+1,y,c,.6);px(fc,x-1,y,c,.6);px(fc,x,y+1,c,.6);px(fc,x,y-1,c,.6);
+ }
+ for(let i=0;i<20;i++){
+  let[x,y]=start(T,r,.6+r()*.45);x|=0;y|=0;const h=4+(r()*9|0);
+  for(let j=0;j<h;j++){const w=Math.max(0,Math.round((h-Math.abs(j-h*.45)*1.4)*.45));for(let q=-w;q<=w;q++)px(fc,x+q,y-j,q===0?"#e6fbff":c,.35+.35*(1-j/h))}
+  px(fc,x,y-h,"#ffffff",.8);
+ }
+}
+{const T=TREE.wet,r=rng(11);
+ function vein(x,y,ang,len,w,depth){
+  for(let s=0;s<len;s++){
+   if(!inWedge(T,x,y,10)||rho(x,y)>1.12)return;
+   const k=rho(x,y);
+   for(let q=0;q<w;q++)px(fc,x,y+q,q===0?"#ff9ab0":"#c2243f",.14+k*.22);
+   ang+=(r()-.5)*.55;x+=Math.cos(ang);y+=Math.sin(ang);
+   if(depth<3&&r()<.05)vein(x,y,ang+(r()<.5?-1:1)*(.5+r()*.6),len*.65|0,Math.max(1,w-1),depth+1);
+  }
+ }
+ for(let i=0;i<12;i++){const[x,y]=start(T,r,.36+r()*.1);const a=rad(T.deg+(r()-.5)*T.w);vein(x,y,a,90+r()*60,3,0)}
+ for(let i=0;i<14;i++){
+  const[x0,y0]=start(T,r,.55+r()*.5);const rx=2+r()*5,ry=2+r()*4;
+  for(let y=-ry-1;y<=ry+1;y++)for(let x=-rx-1;x<=rx+1;x++){const d=(x*x)/(rx*rx)+(y*y)/(ry*ry);
+   if(d<=1){const e=d>.62;if(e||BAYER[((y+40)&3)*4+((x+40)&3)]/16<.55)px(fc,x0+x,y0+y,e?"#ff6f8c":"#7a1530",e?.24:.22)}}
+  px(fc,x0,y0,"#ffd0da",.7);
+ }
+}
+{const T=TREE.green,r=rng(23),c="#9be564";
+ function leaf(x,y,dx,dy){px(fc,x+dx,y+dy,"#5fbf3f",.7);px(fc,x+dx*2,y+dy*2-(dy?0:1),c,.75);px(fc,x+dx*2,y+dy*2,"#d4ff9a",.6);px(fc,x+dx*3,y+dy*2-(dy?0:1),c,.55)}
+ for(let i=0;i<20;i++){
+  let[x,y]=start(T,r,.3+r()*.2);const a0=Math.atan2((y*U-CY)/RB[5],(x*U-CX)/RA[5]);const ph=r()*6,amp=2+r()*3.5,len=60+r()*90;
+  const ux=Math.cos(a0)*RA[5]/U,uy=Math.sin(a0)*RB[5]/U,L=Math.hypot(ux,uy),nx=-uy/L,ny=ux/L;
+  for(let s=0;s<len;s++){
+   const wob=Math.sin(s*.22+ph)*amp;const X=Math.round(x+ux/L*s+nx*wob),Y=Math.round(y+uy/L*s+ny*wob);
+   if(!inWedge(T,X,Y,10)||rho(X,Y)>1.12)break;
+   px(fc,X,Y,"#4aa83a",.22+rho(X,Y)*.3);
+   if(s%7===3){leaf(X,Y,(s%14<7)?1:-1,-1)}
+  }
+ }
+ for(let i=0;i<24;i++){
+  const[x0,y0]=start(T,r,.62+r()*.5);const x=x0|0,y=y0|0,h=4+(r()*7|0);
+  for(let j=0;j<h;j++)px(fc,x,y-j,"#4aa83a",.8);
+  leaf(x,y-(h>>1),1,-1);leaf(x,y-(h>>2),-1,-1);
+  const fl=["#ffd75e","#ff9ad5","#ffffff"][i%3];if(i%2===0){px(fc,x,y-h,fl,.95);px(fc,x-1,y-h,fl,.7);px(fc,x+1,y-h,fl,.7);px(fc,x,y-h-1,fl,.7);px(fc,x,y-h+1,"#ffd75e",.8)}else{px(fc,x,y-h,c,.9);px(fc,x+1,y-h-1,c,.8);px(fc,x-1,y-h-1,"#d4ff9a",.8)}
+ }
+}
+fc.globalAlpha=1;
+document.fonts.ready.then(()=>{select("wetware_annex");document.body.dataset.ready=1});
+</script>
+</body>
+</html>
