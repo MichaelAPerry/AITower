@@ -2,16 +2,19 @@
 import type { Settings } from "@aitower/shared";
 import type { TitleEndingTree } from "./titleState";
 
-export type SongId = "title" | TitleEndingTree;
+export type SongId = "title" | TitleEndingTree | "tower" | "warm" | "quiet";
 
-/** Song titles are placeholders: the owner's spelling is still to be confirmed (docs/PLACEHOLDER_TEXT.md). */
+/** Song titles are exactly as tagged in the files (owner decision). */
 export const SONGS: Record<SongId, { title: string; label: string; load: () => Promise<string> }> = {
 	title: { title: "まだ見ぬ世界へ", label: "Title", load: async () => (await import("../music/title.mp3")).default },
 	garden: { title: "君の明日が晴れますように", label: "Garden", load: async () => (await import("../music/garden.mp3")).default },
 	lattice: { title: "銀のホーム", label: "Lattice", load: async () => (await import("../music/lattice.mp3")).default },
 	flesh: { title: "雨のしずく", label: "Flesh", load: async () => (await import("../music/flesh.mp3")).default },
+	tower: { title: "深夜のゲーム", label: "Tower", load: async () => (await import("../music/tower.mp3")).default },
+	warm: { title: "夕陽のメロディ", label: "Warm scenes", load: async () => (await import("../music/warm.mp3")).default },
+	quiet: { title: "Noctune FM", label: "Quiet scenes", load: async () => (await import("../music/quiet.mp3")).default },
 };
-export const SONG_ORDER: readonly SongId[] = ["title", "garden", "lattice", "flesh"];
+export const SONG_ORDER: readonly SongId[] = ["title", "garden", "lattice", "flesh", "tower", "warm", "quiet"];
 export const MUSIC_CREDIT = "Music: Perry, made with Suno.";
 
 /** The normal title plays the title song; an ending picture plays that tree's song. */
@@ -32,6 +35,8 @@ export function createTitleMusic() {
 	let level = 0;
 	let wanted: SongId | null = null;
 	let token = 0;
+	/** Where each song was left, so a song that fades out and comes back (the tower loop around a scene) resumes instead of restarting. */
+	const resume = new Map<SongId, number>();
 
 	const fade = (a: HTMLAudioElement, to: number, ms: number, done?: () => void): void => {
 		const from = a.volume;
@@ -89,12 +94,28 @@ export function createTitleMusic() {
 				return;
 			}
 			if (my !== token || wanted !== song) return;
-			if (el) retire(el);
+			if (el) {
+				if (current) resume.set(current, el.currentTime || 0);
+				retire(el);
+			}
 			const a = new Audio();
 			a.loop = true;
 			a.preload = "auto";
 			a.volume = 0;
 			a.src = url;
+			const at = resume.get(song) ?? 0;
+			if (at > 0)
+				a.addEventListener(
+					"loadedmetadata",
+					() => {
+						try {
+							a.currentTime = a.duration > 0 ? at % a.duration : at;
+						} catch {
+							/* not seekable yet */
+						}
+					},
+					{ once: true },
+				);
 			el = a;
 			current = song;
 			if (level > 0) {

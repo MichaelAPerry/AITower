@@ -3,6 +3,7 @@ import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
 import { type LockedLook, pagesOf } from "./gallery";
 import { LockedHead } from "./LockedHead";
+import { useSceneMusic } from "../gamemusic/sceneMusic";
 import "../vn/vn.css";
 import "./achievements.css";
 
@@ -39,6 +40,7 @@ export function GalleryScene({ scene, figure, onClose }: { scene: Scene; figure?
 	const speaker = page && page.who !== "narrator" ? ADVISORS[page.who] : null;
 
 	useEffect(() => root.current?.focus(), []);
+	useSceneMusic(scene.id);
 	// biome-ignore lint/correctness/useExhaustiveDependencies: a new page restarts the typewriter
 	useEffect(() => setShown(prefersReduced() ? Number.POSITIVE_INFINITY : 0), [i]);
 	useEffect(() => {

@@ -14,7 +14,7 @@ describe("title music", () => {
 		expect(musicLevel({ masterVolume: 2, musicVolume: 2, muted: false })).toBe(1);
 	});
 	it("has a titled song for each tree", () => {
-		expect(SONG_ORDER).toEqual(["title", "garden", "lattice", "flesh"]);
+		expect(SONG_ORDER).toEqual(["title", "garden", "lattice", "flesh", "tower", "warm", "quiet"]);
 		for (const id of SONG_ORDER) expect(SONGS[id].title.length).toBeGreaterThan(0);
 		expect(MUSIC_CREDIT).toContain("Suno");
 	});

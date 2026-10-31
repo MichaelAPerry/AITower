@@ -43,7 +43,7 @@ Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md`
 a. The owner play-tests the live game. Fix what they report.
 b. Known fix: the logo cutout has a small gap in the ring at about 7 o'clock (visible on the Flesh picture). Re-cut `title-logo.webp`.
 c. Ask the owner:
-   - Song title spelling for the credits. The owner typed "まだない明日へ" and "銀のホームを"; the file tags say "まだ見ぬ世界へ" and "銀のホーム". Flagged in `docs/PLACEHOLDER_TEXT.md`.
+   - (Resolved) Song titles stay as tagged in the files; in-game music added (tower loop, warm and quiet scene songs): see `docs/MUSIC_MAP.md`.
    - Do the 32 kbps songs sound OK?
    - The single-file build (`build-single.mjs`, `AItower.html`) would inline the songs (about 5 MB base64). Exclude music there?
 d. Branches: the owner deletes the merged `wip/*` branches by hand (agents get 403). `claude/serene-ramanujan-ojshkh` (concept art; the three ending pictures are now in the game): the owner has not decided keep or delete.

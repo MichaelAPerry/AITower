@@ -52,6 +52,8 @@ import "./panel/panel.css";
 import "./help/help.css";
 // The PC-98 look goes last: it swaps the theme tokens and frames (docs/SOUL.md §5).
 import "./pc98/pc98.css";
+import { GameMusic } from "./gamemusic/GameMusic";
+import { musicLevel } from "./title/titleMusic";
 
 export interface HudProps {
 	store: GameStore;
@@ -229,6 +231,7 @@ export function Hud({ store, content, title }: HudProps) {
 			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" && ui.researchView !== "list" ? "has-tree" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings)}
 		>
+			<GameMusic active={!titleOpen && !over} level={musicLevel(settings)} />
 			<TopStrip {...props} />
 			<HelpLayer ui={ui} setUi={setUi} scale={scale} />
 			<div className="ui-center">
