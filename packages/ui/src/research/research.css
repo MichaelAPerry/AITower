@@ -1,6 +1,6 @@
 /* Research: the orb (Tron neon on a PC-98 dither). Body text uses --f-body, headings --f-display, numbers --f-num. All text is 16 px or more. */
 .aitower-hud.has-wide.has-orb {
-	--drawer-w: min(1480px, calc(100vw - var(--dtab-w) - var(--gap) * 4));
+	--drawer-w: min(1480px, calc(100vw / var(--hud-scale) - var(--rail-w) - var(--dtab-w) - var(--gap) * 3));
 }
 .aitower-hud .ui-edge > .orb-wrap {
 	flex: 1 1 0;

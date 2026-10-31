@@ -9,6 +9,8 @@ import { Say } from "../advisors/AdvisorStrip";
 import { Portrait } from "../advisors/Portrait";
 import type { PanelProps, UiState } from "../components/context";
 import { type Ack, articleTitle, baselineAck, goalModel, lessonDefOf, lessonTotal, nextLessonOf, pendingMessage, resultModel, slotGhost, stepOf, stepPulse, waitMet } from "./lessons";
+import { useViewport } from "../hooks";
+import { densityFor, effectiveHudScale } from "../settings";
 import "./lessons.css";
 
 const HL = "data-lesson-pulse";
@@ -56,6 +58,9 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 	const view = state.view;
 	const lv = view.lesson;
 	const def = lessonDefOf(content, view);
+	// Tight windows start with the checklist folded to the current step.
+	const viewport = useViewport();
+	const tight = densityFor(viewport.width, viewport.height, effectiveHudScale(state.settings, viewport.width, viewport.height)) !== "normal";
 	const [ack, setAck] = useState<Ack>({});
 	const lastTick = useRef(-1);
 	const seeded = useRef(false);
@@ -190,9 +195,13 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 
 	const layer = enabled ? (
 		<>
-			{active && <GoalBar def={def} lv={lv} total={lessonTotal(content)} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />}
+			{active && (
+				<div className="les-dock">
+					<GoalBar def={def} lv={lv} total={lessonTotal(content)} onSkip={onFreeBuild} onHandbook={() => handbookTarget && openHandbook(handbookTarget)} />
+					<Steps content={content} def={def} lv={lv} onHandbook={openHandbook} tight={tight} />
+				</div>
+			)}
 			{active && <PulseArrow />}
-			{active && <Steps content={content} def={def} lv={lv} onHandbook={openHandbook} />}
 			{!active && <LessonResult content={content} def={def} lv={lv} firstTime={firstTime} openHandbook={openHandbook} onReplay={() => onReplay(def.scenario)} onNext={onReplay} onFreeBuild={onFreeBuild} />}
 		</>
 	) : null;
@@ -201,8 +210,23 @@ export function useLesson({ store, content, state, ui, setUi, enabled, onFreeBui
 
 function GoalBar({ def, lv, total, onSkip, onHandbook }: { def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; total: number; onSkip: () => void; onHandbook: () => void }) {
 	const g = goalModel(lv);
+	// The Inspector and the toasts start below the goal bar, whatever height it wraps to: publish that height on the HUD root.
+	const box = useRef<HTMLElement>(null);
+	useEffect(() => {
+		const el = box.current;
+		const hud = el?.closest<HTMLElement>(".aitower-hud");
+		if (!el || !hud) return;
+		const publish = (): void => hud.style.setProperty("--les-h", `${el.offsetHeight}px`);
+		publish();
+		const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(publish);
+		ro?.observe(el);
+		return () => {
+			ro?.disconnect();
+			hud.style.removeProperty("--les-h");
+		};
+	}, []);
 	return (
-		<section className="les-goal ui-glass" aria-label="Lesson goal" data-lesson-goal>
+		<section className="les-goal ui-glass" aria-label="Lesson goal" data-lesson-goal ref={box}>
 			<div className="les-goal-head">
 				<span className="ui-label">
 					LESSON {def.number} OF {total} · {def.title.toUpperCase()}
@@ -251,17 +275,26 @@ function GoalBar({ def, lv, total, onSkip, onHandbook }: { def: LessonDef; lv: N
 	);
 }
 
-function Steps({ content, def, lv, onHandbook }: { content: ContentDB; def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; onHandbook: (id: string) => void }) {
+function Steps({ content, def, lv, onHandbook, tight }: { content: ContentDB; def: LessonDef; lv: NonNullable<GameState["view"]["lesson"]>; onHandbook: (id: string) => void; tight: boolean }) {
+	// null = follow the window (folded when tight); a click on the header decides for good.
+	const [pick, setPick] = useState<boolean | null>(null);
+	const open = pick ?? !tight;
+	const done = def.steps.filter((s) => lv.stepsDone.includes(s.id)).length;
 	return (
-		<section className="les-steps ui-glass" aria-label="Lesson steps" data-lesson-steps>
-			<h3 className="ui-label">STEPS</h3>
+		<section className={`les-steps ui-glass ${open ? "is-open" : "is-folded"}`} aria-label="Lesson steps" data-lesson-steps>
+			<button type="button" className="les-steps-head" onClick={() => setPick(!open)} aria-expanded={open} data-lesson-steps-toggle title={open ? "Fold the list to the current step" : "Show every step"}>
+				<span className="ui-label">STEPS {Math.min(done + 1, def.steps.length)} / {def.steps.length}</span>
+				<span className="les-steps-chev" aria-hidden="true">
+					{open ? "▾" : "▸"}
+				</span>
+			</button>
 			<ol>
 				{def.steps.map((s, i) => {
-					const done = lv.stepsDone.includes(s.id);
+					const isDone = lv.stepsDone.includes(s.id);
 					return (
-						<li key={s.id} className={done ? "is-done" : i === lv.current ? "is-now" : ""}>
+						<li key={s.id} className={isDone ? "is-done" : i === lv.current ? "is-now" : ""}>
 							<span className="les-tick" aria-hidden="true">
-								{done ? "✓" : i + 1}
+								{isDone ? "✓" : i + 1}
 							</span>
 							<span>{s.text}</span>
 						</li>
@@ -269,7 +302,7 @@ function Steps({ content, def, lv, onHandbook }: { content: ContentDB; def: Less
 				})}
 			</ol>
 			{def.handbook[0] && (
-				<button type="button" className="adv-link" onClick={() => onHandbook(def.handbook[0])}>
+				<button type="button" className="adv-link les-steps-link" onClick={() => onHandbook(def.handbook[0])}>
 					Handbook: {articleTitle(content, def.handbook[0])}
 				</button>
 			)}

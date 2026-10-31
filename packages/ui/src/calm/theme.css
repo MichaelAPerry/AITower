@@ -34,7 +34,8 @@
 	--gap: 8px;
 	--strip-h: 84px;
 	--drawer-w: 520px;
-	--dtab-w: 164px;
+	--dtab-w: 184px;
+	--rail-w: calc(92px + var(--gap) * 2);
 	--dock-w: 120px;
 	/* type scale: floors are 16px labels, 20px body; VN dialogue uses --fs-vn */
 	--fs-label: 16px;

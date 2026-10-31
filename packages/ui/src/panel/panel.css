@@ -2,7 +2,7 @@
 
 /* Shell panels are wider so the list and the Inspector sit side by side. The variable also moves things that dodge the drawer. */
 .aitower-hud.has-wide {
-	--drawer-w: min(640px, calc(100vw - var(--dtab-w) - var(--gap) * 4));
+	--drawer-w: min(640px, calc(100vw / var(--hud-scale) - var(--rail-w) - var(--dtab-w) - var(--gap) * 3));
 }
 .aitower-hud .ui-edge.is-wide {
 	gap: 10px;

@@ -161,13 +161,15 @@ function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; 
 
 function Cluster({ cell, x, y, labelled, a }: { cell: Cell; x: number; y: number; labelled: boolean; a: DrawArgs }) {
 	const st = cellStats(cell, a.states);
-	const R = clusterR(cell.members.length);
+	const isRoot = cell.depth === 0;
+	// A tree's root globe carries its icon above the count: it needs room for both (28 + 4 + 18 px), so it is never smaller than 46.
+	const hasIcon = isRoot && cell.tree !== "core";
+	const R = hasIcon ? Math.max(46, clusterR(cell.members.length)) : clusterR(cell.members.length);
 	const c = TREES[cell.tree].color;
 	const rel = relatives(a.layout, a.selId);
 	const hot = cell.members.some((m) => m === a.selId || rel.prereq.has(m) || rel.follow.has(m));
 	const circ = 2 * Math.PI * (R - 5);
 	const doneArc = st.total ? (st.done / st.total) * circ : 0;
-	const isRoot = cell.depth === 0;
 	const name = isRoot ? TREES[cell.tree].name : cell.name;
 	const sub = `${st.ready > 0 ? `${st.ready} ready · ` : ""}${st.done}/${st.total} done`;
 	return (
@@ -199,8 +201,8 @@ function Cluster({ cell, x, y, labelled, a }: { cell: Cell; x: number; y: number
 				<circle r={R - 5} fill="none" stroke={c} strokeOpacity={0.25} strokeWidth={5} />
 				<circle r={R - 5} fill="none" stroke="#fff" strokeWidth={5} strokeDasharray={`${doneArc} ${circ}`} transform="rotate(-90)" opacity={0.9} />
 				<circle r={R - 14} fill={c} opacity={0.2} />
-				{isRoot && cell.tree !== "core" && <PixelIconSvg name={TREE_ICON[cell.tree]} x={-16} y={-R + 12} size={32} />}
-				<text className="orb-count" y={isRoot && cell.tree !== "core" ? 24 : 7} textAnchor="middle">
+				{hasIcon && cell.tree !== "core" && <PixelIconSvg name={TREE_ICON[cell.tree]} x={-14} y={-26} size={28} />}
+				<text className="orb-count" y={hasIcon ? 26 : 7} textAnchor="middle">
 					{st.total}
 				</text>
 				{hot && <circle r={R + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}

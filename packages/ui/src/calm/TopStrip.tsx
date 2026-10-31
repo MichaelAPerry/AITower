@@ -1,13 +1,14 @@
 import { clock, type Speed } from "@aitower/shared";
 import { anyAutomation, autoLampTitle } from "../automation/automation";
 import { GrowthIndex } from "../bio/GrowthIndex";
-import { Lamp, Toggle } from "../components/common";
+import { Lamp } from "../components/common";
 import { PixelIcon } from "../icons/PixelIcon";
 import type { PixelIconName } from "../icons/pixelIcons";
 import type { PanelProps } from "../components/context";
 import { fmtMoney } from "../format";
 import { saveLamp } from "../menu/slots";
 import { SoulGauge } from "../soul/SoulGauge";
+import { AudioControl } from "./AudioControl";
 import { droughtChip, SANDBOX_TITLE } from "../paths/paths";
 import { currentObjective, isProblem } from "../objective/objective";
 import { clearanceProgress, fmtRateHour, maintenanceReadout, nextDrawer, perHour } from "./calm";
@@ -20,7 +21,7 @@ const SPEED_ICON: Record<Speed, PixelIconName> = { 0: "pause", 1: "play", 3: "ff
  * apply (SANDBOX, AUTO, the drought chip), the path gauge and growth index, menu.
  */
 export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelProps) {
-	const { view, speed, muted } = state;
+	const { view, speed } = state;
 	const lamp = saveLamp(state.saveStatus);
 	const rate = perHour(view);
 	const cl = clearanceProgress(view, content);
@@ -60,7 +61,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				</span>
 				<span className="ui-big">{fmtMoney(view.cash)}</span>
 			</div>
-			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" data-help="perhour">
+			<div className={`ui-chip ui-perhour ${rate !== null && rate < 0 ? "is-bad" : ""}`} data-tut="perhour" data-help="perhour" title={idleCost ? "Upkeep. Accept a contract to earn." : undefined}>
 				<span className="ui-label ui-ic-label">
 					<PixelIcon name="perhour" />
 					PER HOUR
@@ -68,6 +69,8 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				<span className="ui-big">{fmtRateHour(rate)}</span>
 				{idleCost && <span className="ui-hint">Upkeep. Accept a contract to earn.</span>}
 			</div>
+			{/* Tight windows: the strip wraps here. Level, upkeep and the badges go on a second row. */}
+			<span className="ui-strip-break" aria-hidden="true" />
 			{maint && (
 				<button
 					type="button"
@@ -91,7 +94,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 						<PixelIcon name="level" />
 						LEVEL {cl.tier}
 					</span>
-					<span className={cl.techsOk ? "" : "is-warn"}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute${cl.techs > 0 && !cl.techsOk ? ` · research ${cl.techsDone}/${cl.techs}` : ""}` : "top"}</span>
+					<span className={`ui-clr-detail ${cl.techsOk ? "" : "is-warn"}`}>{cl.next ? `${Math.round(cl.have)} / ${cl.need} PF compute${cl.techs > 0 && !cl.techsOk ? ` · research ${cl.techsDone}/${cl.techs}` : ""}` : "top"}</span>
 				</span>
 				<span className="ui-bar" role="progressbar" tabIndex={-1} aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(cl.frac * 100)} aria-label="Level progress">
 					<i style={{ width: `${Math.round(cl.frac * 100)}%` }} />
@@ -127,6 +130,7 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 				<button type="button" className={`ui-btn ui-help-btn ${ui.help ? "is-on" : ""}`} data-help="help" aria-pressed={!!ui.help} aria-label="Help mode (? or F1)" title="Help mode (? or F1)" onClick={() => setUi({ help: !ui.help })}>
 					<PixelIcon name="help" />
 				</button>
+				<AudioControl store={store} state={state} />
 				<button type="button" className="ui-btn ui-menu-btn" onClick={openMenu} title="System menu (Esc): save, load, settings, controls">
 					<PixelIcon name="menu" />
 					<span className="ui-menu-text">Menu</span>
@@ -135,13 +139,6 @@ export function TopStrip({ store, content, state, openMenu, ui, setUi }: PanelPr
 					<Lamp on={lamp.lit} tone={lamp.tone} blink={lamp.blink} />
 				</span>
 			</div>
-			<Toggle on={!muted} onClick={() => store.setMuted(!muted)} title={`${muted ? "Unmute" : "Mute"} (M)`} label={
-					<span className="ui-ic-label">
-						<PixelIcon name={muted ? "mute" : "sound"} />
-						AUDIO
-					</span>
-				}
-				className="ui-mute" />
 		</header>
 	);
 }

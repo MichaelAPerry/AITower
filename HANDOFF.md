@@ -64,6 +64,7 @@ e. Then the presentation work (the new window's job):
 - A fresh clone needs `.claude/` in `.git/info/exclude` (agent worktrees live there).
 - `perf.test.ts` is flaky under load: rerun it alone.
 - e2e: when other agents run, use a private port: `E2E_PORT=<free port> npm run e2e`. Never kill other servers. "Port 4173 in use" means a server is already there; pick another port.
+- HUD layout: `npm run build && npm run e2e:layout` checks that the strip, build bar, drawer tabs, lesson dock, goals, advisor strip, ticker and open drawers stay on screen and never overlap, at 1280x720, 1920x1080, 1920x1080 at 150% and 2560x1440 Auto. Placement rules live in `packages/ui/src/calm/layout.css`. Text is never shrunk to fit: reflow, fold or scroll.
 - Images: recipe is in `docs/HANDOFF_ARCHIVE.md`, section "How to drop in an image".
 - Dialogue: `npx tsx tools/dialogue/export.ts` -> edit -> `npx tsx tools/dialogue/import.ts <file>` (dry-run is the default; `--write` to apply). `export.ts --check` verifies the grammar.
 - A fresh clone may be single-branch. Run `git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'` and fetch main before creating worktree agents. Worktrees base on origin/main, so worktree agents should `git reset --hard origin/<branch>` first.

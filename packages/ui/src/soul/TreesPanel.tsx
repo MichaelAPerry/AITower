@@ -5,7 +5,7 @@ import { ADVISOR_ORDER, ADVISORS } from "../advisors/advisors";
 import { Portrait } from "../advisors/Portrait";
 import { PixelIcon } from "../icons/PixelIcon";
 import { TREE_ICON } from "../icons/pixelIcons";
-import { epilogueAdvisor, type TreeCard, treeCards } from "./soul";
+import { epilogueAdvisor, TREE_SHORT, type TreeCard, treeCards } from "./soul";
 import "./soul.css";
 
 /** One column: a tree's points and pace, its ladder, what comes next, its speed factor and its seal. */
@@ -21,7 +21,7 @@ export function TreeColumn({ card }: { card: TreeCard }) {
 						{card.name}
 					</h3>
 					<small>
-						{card.branch} racks · {champ.first} argues for it
+						{TREE_SHORT[card.tree]} racks · {champ.first} argues for it
 					</small>
 				</div>
 			</header>

@@ -9,6 +9,8 @@ export const TREE_NAME: Record<AscensionPath, string> = { synthetic: "LATTICE", 
 export const TREE_LONG: Record<AscensionPath, string> = { synthetic: "The Lattice", biotech: "The Flesh", greentech: "The Garden" };
 /** The branch word on the Retrofit buttons and in the panel. */
 export const TREE_BRANCH: Record<AscensionPath, string> = { synthetic: "Synthetic", biotech: "Bio", greentech: "Green" };
+/** The tree's short player-facing name (Lattice, Flesh, Garden), for labels that say "<name> racks". */
+export const TREE_SHORT: Record<AscensionPath, string> = { synthetic: "Lattice", biotech: "Flesh", greentech: "Garden" };
 export const TREE_COLOR: Record<AscensionPath, string> = { synthetic: "var(--tree-syn)", biotech: "var(--tree-bio)", greentech: "var(--tree-green)" };
 /** The placeholder tint of a tree's racks in the world (hex, for the renderer and the build cards). */
 export const TREE_TINT: Record<AscensionPath, string> = { synthetic: "#6fd3ff", biotech: "#ff4f6d", greentech: "#9be564" };
@@ -31,7 +33,7 @@ export function treeBars(soul: SoulView): TreeBar[] {
 		const pts = `${Math.floor(soul.sp[tree])} / ${soul.spTarget} Singularity points`;
 		const title = closed
 			? `${TREE_LONG[tree]}: ${pts}. Its seal is full: no new retrofits, and its racks have stopped scoring. Click for the Trees panel.`
-			: `${TREE_LONG[tree]}: ${pts}. Only ${TREE_BRANCH[tree]} racks fill it. At ${soul.spTarget} the world ends this way. Click for the Trees panel.`;
+			: `${TREE_LONG[tree]}: ${pts}. Only ${TREE_SHORT[tree]} racks fill it. At ${soul.spTarget} the world ends this way. Click for the Trees panel.`;
 		return { tree, label: TREE_NAME[tree], frac, state: closed ? "closed" : "active", title };
 	});
 }
@@ -96,7 +98,7 @@ function specialLine(content: ContentDB, tree: AscensionPath): string | null {
 }
 
 function nextStep(view: Pick<SimView, "tier" | "techResearched">, content: ContentDB, tv: TreeView): string {
-	if (tv.closed) return `The ${TREE_BRANCH[tv.tree]} branch is closed: its seal is full. No new retrofits.`;
+	if (tv.closed) return `The ${TREE_SHORT[tv.tree]} branch is closed: its seal is full. No new retrofits.`;
 	const ladder = treeLadder(content, tv.tree);
 	const rack: FacilityDef | undefined = ladder.find((d) => (d.rung ?? 0) === tv.rung + 1);
 	if (!rack) return tv.racks > 0 ? "That is the top rung. Retrofit the rest of your racks." : "No racks on this branch.";

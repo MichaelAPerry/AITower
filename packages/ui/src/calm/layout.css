@@ -1,0 +1,456 @@
+/*
+ * Layout pass (alpha): the text scale grew (16px labels up to 28px VN lines, 44px hit targets), so the regions are placed again.
+ * Rules: no region overlaps another; nothing leaves the screen; text is never made smaller, so things wrap, fold, scroll or move.
+ *   - Left column: the build bar (bottom). Everything else that lives on the left starts to its right (--rail-w).
+ *   - Top: the strip. In tight windows (1280x720 at 100%, 1920x1080 at 150%) it has two rows.
+ *   - Right: the drawer tabs (--dtab-w), then the open drawer, then the Inspector.
+ *   - Bottom: the ticker, and above it the advisor strip. A wide drawer (Research, Handbook ...) folds the strip to its faces.
+ * It is imported after the panels' own sheets, so it can refine them. e2e/layout.mjs checks the result.
+ */
+.aitower-hud {
+	--adv-mini: 66px;
+}
+
+/* ─── Drawer tabs: label, key and the unread dot all fit inside the tab ─── */
+.aitower-hud .ui-dtab {
+	gap: 6px;
+	padding: 9px 10px;
+	white-space: nowrap;
+}
+.aitower-hud .ui-dtab .ui-dtab-name {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+.aitower-hud .ui-dtab kbd {
+	flex: none;
+	min-width: 1.1ch;
+	text-align: center;
+}
+
+/* ─── Top strip ─── */
+.aitower-hud .ui-strip-break {
+	display: none;
+}
+/* Level: if the readout does not fit beside its label it drops under it, instead of being cut. */
+.aitower-hud .ui-clearance {
+	overflow: visible;
+}
+.aitower-hud .ui-clearance .ui-label {
+	flex-wrap: wrap;
+	row-gap: 2px;
+	overflow: visible;
+	text-overflow: clip;
+}
+.aitower-hud .ui-clearance .ui-label > span:last-child {
+	overflow: visible;
+	text-overflow: clip;
+	white-space: nowrap;
+}
+.aitower-hud .ui-strip .ui-sysbox {
+	align-items: center;
+}
+
+/* The Singularity gauge: label, bar and percent sit on shared columns, so a label never touches its bar. */
+.aitower-hud .soul-gauge {
+	min-width: 0;
+}
+.aitower-hud .soul-bars {
+	grid-template-columns: max-content minmax(36px, 1fr) max-content;
+	column-gap: 10px;
+	row-gap: 3px;
+	min-width: 0;
+}
+.aitower-hud .soul-bar {
+	grid-column: 1 / -1;
+	grid-template-columns: subgrid;
+	gap: 0 10px;
+}
+.aitower-hud .soul-bar-label {
+	white-space: nowrap;
+}
+.aitower-hud .soul-bar-pct {
+	white-space: nowrap;
+}
+
+/* Tight windows: two rows. Row 1: time, speed, money and the right-hand controls. Row 2: Level, upkeep and the badges. */
+.aitower-hud.is-density-tight,
+.aitower-hud.is-density-cramped {
+	--strip-h: 124px;
+}
+.aitower-hud.is-density-tight .ui-strip,
+.aitower-hud.is-density-cramped .ui-strip {
+	flex-wrap: wrap;
+	align-content: center;
+	row-gap: 6px;
+	padding: 6px 8px;
+}
+.aitower-hud.is-density-tight .ui-strip-break,
+.aitower-hud.is-density-cramped .ui-strip-break {
+	display: block;
+	order: 2;
+	flex: 0 0 100%;
+	height: 0;
+}
+.aitower-hud.is-density-tight .ui-strip .soul-gauge,
+.aitower-hud.is-density-cramped .ui-strip .soul-gauge {
+	order: 1;
+	margin-left: auto;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-growth,
+.aitower-hud.is-density-tight .ui-strip .ui-sysbox,
+.aitower-hud.is-density-cramped .ui-strip .ui-growth,
+.aitower-hud.is-density-cramped .ui-strip .ui-sysbox {
+	order: 1;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-maint,
+.aitower-hud.is-density-tight .ui-strip .ui-clearance,
+.aitower-hud.is-density-tight .ui-strip .ui-sandbox,
+.aitower-hud.is-density-tight .ui-strip .ui-autolamp,
+.aitower-hud.is-density-tight .ui-strip .ui-drought,
+.aitower-hud.is-density-cramped .ui-strip .ui-maint,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance,
+.aitower-hud.is-density-cramped .ui-strip .ui-sandbox,
+.aitower-hud.is-density-cramped .ui-strip .ui-autolamp,
+.aitower-hud.is-density-cramped .ui-strip .ui-drought {
+	order: 3;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-maint,
+.aitower-hud.is-density-tight .ui-strip .ui-sandbox,
+.aitower-hud.is-density-tight .ui-strip .ui-autolamp,
+.aitower-hud.is-density-tight .ui-strip .ui-drought,
+.aitower-hud.is-density-cramped .ui-strip .ui-maint,
+.aitower-hud.is-density-cramped .ui-strip .ui-sandbox,
+.aitower-hud.is-density-cramped .ui-strip .ui-autolamp,
+.aitower-hud.is-density-cramped .ui-strip .ui-drought {
+	flex-direction: row;
+	align-items: center;
+	gap: 10px;
+	padding: 3px 10px;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-maint,
+.aitower-hud.is-density-cramped .ui-strip .ui-maint {
+	flex: none;
+	overflow: visible;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-maint .ui-big,
+.aitower-hud.is-density-cramped .ui-strip .ui-maint .ui-big {
+	overflow: visible;
+	text-overflow: clip;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex: 1 1 320px;
+	min-width: 0;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance .ui-label,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance .ui-label {
+	display: contents;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance .ui-label > .ui-ic-label,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance .ui-label > .ui-ic-label {
+	order: 0;
+	flex: none;
+	white-space: nowrap;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance .ui-bar,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance .ui-bar {
+	order: 1;
+	flex: 1 1 60px;
+	min-width: 40px;
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance .ui-clr-detail,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance .ui-clr-detail {
+	order: 2;
+	flex: none;
+	color: color-mix(in srgb, var(--text) 80%, var(--text-dim));
+}
+.aitower-hud.is-density-tight .ui-strip .ui-clearance .ui-clr-detail.is-warn,
+.aitower-hud.is-density-cramped .ui-strip .ui-clearance .ui-clr-detail.is-warn {
+	color: var(--warn);
+}
+/* The "Upkeep. Accept a contract to earn." pill would land on row 2 here; it is the PER HOUR chip's tooltip instead. */
+.aitower-hud.is-density-tight .ui-perhour .ui-hint,
+.aitower-hud.is-density-cramped .ui-perhour .ui-hint {
+	display: none;
+}
+
+/* ─── Audio: an icon that mutes, an arrow that opens the volume popover ─── */
+.aitower-hud .ui-audio {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	flex: none;
+}
+.aitower-hud .ui-audio .ui-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-height: var(--hit, 44px);
+	padding: 0 8px;
+}
+.aitower-hud .ui-audio .ui-audio-btn {
+	min-width: var(--hit, 44px);
+}
+.aitower-hud .ui-audio .ui-audio-more {
+	min-width: 30px;
+	padding: 0 4px;
+}
+.aitower-hud .ui-audio-pop {
+	margin: 0;
+	min-inline-size: 0;
+	position: absolute;
+	top: calc(100% + 10px);
+	right: 0;
+	z-index: 30;
+	width: 320px;
+	max-width: calc(100vw / var(--hud-scale) - 16px);
+	display: grid;
+	gap: 6px;
+	padding: 10px 12px;
+	background: var(--panel);
+}
+.aitower-hud .ui-audio-row {
+	display: grid;
+	grid-template-columns: 84px minmax(0, 1fr);
+	align-items: center;
+	gap: 10px;
+}
+.aitower-hud .ui-audio-ctl {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+.aitower-hud .ui-audio-range {
+	flex: 1 1 auto;
+	min-width: 0;
+	height: var(--hit, 44px);
+	margin: 0;
+	accent-color: var(--accent);
+	cursor: pointer;
+}
+.aitower-hud .ui-audio-read {
+	flex: none;
+	min-width: 4ch;
+	text-align: right;
+	font: var(--fs-small) / 1 var(--f-num);
+	color: var(--text);
+}
+
+/* ─── Goals card: right of the build bar, never under it; it scrolls rather than run into the advisors ─── */
+.aitower-hud .ui-goals {
+	left: var(--rail-w);
+	max-height: calc(100% - var(--gap) * 4 - 30px - var(--adv-h));
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+.aitower-hud.has-wide .ui-goals {
+	display: none;
+}
+.aitower-hud.is-density-tight.is-building .ui-goals,
+.aitower-hud.is-density-cramped.is-building .ui-goals {
+	display: none;
+}
+.aitower-hud .ui-next {
+	max-width: min(60%, calc(100% - 2 * (var(--rail-w) + 260px)));
+}
+
+/* ─── Lesson dock: goal bar and steps, one column right of the build bar, above the advisors ─── */
+.aitower-hud .les-dock {
+	position: absolute;
+	z-index: 4;
+	top: var(--gap);
+	left: var(--rail-w);
+	right: calc(var(--dtab-w) + var(--gap) * 2);
+	bottom: calc(var(--gap) * 3 + 30px + var(--adv-h));
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--gap);
+	min-height: 0;
+	pointer-events: none;
+}
+.aitower-hud .les-dock > * {
+	pointer-events: auto;
+}
+.aitower-hud.has-drawer .les-dock {
+	right: calc(var(--dtab-w) + var(--drawer-w) + var(--gap) * 3);
+}
+.aitower-hud.has-wide .les-dock,
+.aitower-hud.has-drawer .les-dock .les-steps {
+	display: none;
+}
+.aitower-hud .les-dock .les-goal {
+	position: static;
+	align-self: stretch;
+	flex: none;
+	flex-wrap: wrap;
+	row-gap: 6px;
+	transition: none;
+}
+.aitower-hud .les-goal-head {
+	flex: 1 1 240px;
+}
+.aitower-hud .les-goal-text {
+	overflow-wrap: break-word;
+}
+.aitower-hud .les-meter {
+	flex: 2 1 300px;
+}
+.aitower-hud .les-meter-line {
+	flex-wrap: wrap;
+	row-gap: 2px;
+}
+.aitower-hud .les-hold {
+	flex: 1 1 150px;
+}
+.aitower-hud .les-dock .les-steps {
+	position: static;
+	width: min(340px, 100%);
+	flex: 0 1 auto;
+	min-height: 0;
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+.aitower-hud .les-steps-head {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--gap);
+	width: 100%;
+	min-height: var(--hit, 44px);
+	margin: -6px 0 0;
+	padding: 0;
+	background: none;
+	border: 0;
+	color: var(--accent);
+	cursor: pointer;
+	text-align: left;
+}
+.aitower-hud .les-steps-head .ui-label {
+	color: inherit;
+}
+.aitower-hud .les-steps ol {
+	margin-top: 0;
+}
+.aitower-hud .les-steps.is-folded li:not(.is-now),
+.aitower-hud .les-steps.is-folded .les-steps-link {
+	display: none;
+}
+/* The Inspector and the toasts start below the goal bar, whatever height it wraps to (--les-h is published by the goal bar). */
+.aitower-hud.is-lesson .ui-center > .ui-right {
+	top: calc(var(--les-h, 80px) + var(--gap) * 2);
+	max-height: calc(100% - var(--les-h, 80px) - var(--gap) * 5 - 30px - var(--adv-h));
+}
+.aitower-hud.is-lesson .ui-toasts {
+	top: calc(var(--les-h, 76px) + var(--gap) * 2);
+}
+
+/* ─── Wide drawers: the advisor strip folds to its four faces under the drawer, and the drawer stays right of the build bar ─── */
+.aitower-hud.has-wide .adv-strip {
+	min-width: 0;
+	width: auto;
+}
+.aitower-hud.has-wide .adv-strip .adv-line,
+.aitower-hud.has-wide .adv-strip .adv-ask {
+	display: none;
+}
+.aitower-hud.has-wide .adv-face .adv-portrait {
+	--portrait: 44px;
+}
+.aitower-hud.has-wide .ui-edge {
+	bottom: calc(var(--gap) * 3 + 30px + var(--adv-mini));
+}
+
+/* ─── Decision card: the standing figure and the card stay above the advisor strip, which folds to its faces meanwhile ─── */
+.aitower-hud.has-decision .adv-strip {
+	min-width: 0;
+	width: auto;
+}
+.aitower-hud.has-decision .adv-strip .adv-line,
+.aitower-hud.has-decision .adv-strip .adv-ask {
+	display: none;
+}
+.aitower-hud.has-decision .adv-face .adv-portrait {
+	--portrait: 44px;
+}
+.aitower-hud.has-decision .adv-faces {
+	gap: 2px;
+}
+.aitower-hud.has-decision .adv-face {
+	padding: 0;
+	border-width: 1px;
+}
+.aitower-hud.has-decision .adv-bar {
+	padding: 5px 6px;
+	min-height: 0;
+}
+.aitower-hud .adv-scrim {
+	padding: calc(var(--gap) * 2) calc(var(--dtab-w, 136px) + 12px) calc(var(--gap) * 3 + 30px + var(--adv-mini)) var(--rail-w);
+}
+.aitower-hud .adv-vn-figure {
+	width: auto;
+	height: min(520px, 100%);
+	max-width: 34%;
+	aspect-ratio: 1;
+	margin-bottom: 0;
+}
+@media (min-width: 901px) {
+	.aitower-hud.is-density-tight .adv-vn-figure,
+	.aitower-hud.is-density-cramped .adv-vn-figure {
+		max-width: 26%;
+	}
+	/* The standing figure already shows who is asking: the small head portrait gives its room to the text. */
+	.aitower-hud.is-density-tight .adv-card-head .adv-portrait,
+	.aitower-hud.is-density-cramped .adv-card-head .adv-portrait {
+		display: none;
+	}
+}
+.aitower-hud .les-goal-head .ui-label {
+	white-space: normal;
+	overflow-wrap: anywhere;
+}
+.aitower-hud .ui-audio .ui-audio-btn.is-muted {
+	border-color: var(--bad);
+	color: var(--bad);
+}
+.aitower-hud .ui-audio .ui-audio-btn.is-muted .ui-px {
+	opacity: 0.7;
+}
+
+/* The Menu button keeps its word at every size (the strip has room now that Audio is an icon). */
+.aitower-hud .ui-strip .ui-menu-text {
+	position: static;
+	width: auto;
+	height: auto;
+	overflow: visible;
+	clip-path: none;
+}
+
+/* The advisor strip never grows past --adv-h: the catalog, goals and lesson dock stop above it. A long line scrolls inside it. */
+.aitower-hud.is-lesson {
+	--adv-h: 138px;
+}
+.aitower-hud .adv-line {
+	max-height: calc(var(--adv-h) - 24px);
+	overflow-y: auto;
+	scrollbar-width: thin;
+}
+.aitower-hud .les-goal-head {
+	gap: 6px;
+}
+.aitower-hud .les-goal-head .ui-label {
+	line-height: 1.2;
+}
+
+/* System menu: the longest section name ("Achievements") fits its rail at the enlarged size. */
+.aitower-hud .ui-menu .ui-drawer-label {
+	letter-spacing: 0.02em;
+}
+.aitower-hud .ui-menu .ui-menu-body {
+	grid-template-columns: 280px minmax(0, 1fr);
+}

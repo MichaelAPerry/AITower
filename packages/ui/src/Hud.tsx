@@ -51,6 +51,8 @@ import "./build/build.css";
 import "./build/tier.css";
 import "./panel/panel.css";
 import "./help/help.css";
+// The layout pass: placement rules for the strip, the lesson dock, the goals card and the drawers (after the panels it arranges).
+import "./calm/layout.css";
 // The PC-98 look goes last: it swaps the theme tokens and frames (docs/SOUL.md §5).
 import "./pc98/pc98.css";
 import { GameMusic } from "./gamemusic/GameMusic";
@@ -236,7 +238,7 @@ export function Hud({ store, content, title }: HudProps) {
 	return (
 		<TermProvider open={openHandbookAt}>
 		<div
-			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" ? "has-orb" : "", ui.help ? "is-help" : "", inLesson ? "is-lesson" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
+			className={["aitower-hud", state.view.bankrupt ? "is-bankrupt" : "", ui.drawer ? "has-drawer" : "", ui.paletteOpen ? "is-building" : "", ui.drawer && WIDE.has(ui.drawer) ? "has-wide" : "", ui.drawer === "research" ? "has-orb" : "", ui.help ? "is-help" : "", state.selection || ui.paletteOpen || ui.buildHover ? "has-insp" : "", inLesson ? "is-lesson" : "", state.view.decision && !titleOpen && !over ? "has-decision" : "", `is-density-${density}`, ...settingsToClasses(settings)].filter(Boolean).join(" ")}
 			style={settingsToCssVars(settings, viewport)}
 		>
 			<GameMusic active={!titleOpen} over={over} level={musicLevel(settings)} />

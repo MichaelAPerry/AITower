@@ -53,6 +53,7 @@ jobs:
           npm install --no-save --no-audit --no-fund "playwright@${PLAYWRIGHT_VERSION}"
           npx playwright install --with-deps chromium
       - run: npm run e2e
+      - run: npm run e2e:layout
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: actions/configure-pages@v5
       - if: github.event_name == 'push' && github.ref == 'refs/heads/main'
