@@ -182,3 +182,27 @@
 	outline: 2px dashed var(--amber);
 	outline-offset: 2px;
 }
+
+/* The "AI TOWER" lettering, cut from the title painting, laid over an ending picture where the painting has it: a box shaped like the
+   painting as the title screen covers the screen with it (cover, anchored top centre), the logo at its place in that box. */
+.aitower-hud .ui-title-sky {
+	container-type: size;
+}
+.aitower-hud .ui-title-logo-frame {
+	position: absolute;
+	z-index: 1;
+	left: 50%;
+	top: 0;
+	width: max(100cqw, 133.3333cqh);
+	height: max(75cqw, 100cqh);
+	transform: translateX(-50%);
+	pointer-events: none;
+}
+.aitower-hud .ui-title-logo {
+	position: absolute;
+	left: 20.3125%;
+	top: 0;
+	width: 60.9375%;
+	height: 41.6667%;
+	image-rendering: pixelated;
+}

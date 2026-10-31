@@ -10,7 +10,8 @@ import { scenarioCards, showPicker, validScenario } from "./scenarios";
 import { backdropCaption, continueSummary, nextTitleEnding, startGame, type TitleEndingTree, type TitleItem, titleBackdrop, titleItems, unlockedTitleEndings } from "./titleState";
 import "./title.css";
 import "./title-pc98.css";
-import { BACKDROP, TITLE_END_ART } from "../art";
+import { BACKDROP, TITLE_END_ART, TITLE_LOGO } from "../art";
+import { createTitleMusic, musicLevel, songFor } from "./titleMusic";
 
 export interface TitleScreenProps {
 	store: GameStore;
@@ -47,6 +48,39 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 	const endings = useMemo(() => unlockedTitleEndings(loadProfile()), []);
 	const [shownEnding, setShownEnding] = useState<TitleEndingTree | undefined>(undefined);
 	const ending = shownEnding && endings.includes(shownEnding) ? shownEnding : endings[0];
+
+	// Music: the song for what the title shows. Browsers block sound until the first click or key, so start then.
+	const music = useRef<ReturnType<typeof createTitleMusic> | null>(null);
+	const [gesture, setGesture] = useState(false);
+	const level = musicLevel(state.settings);
+	const song = songFor(ending);
+	const levelRef = useRef(level);
+	levelRef.current = level;
+	useEffect(() => {
+		if (gesture) return;
+		const go = () => setGesture(true);
+		window.addEventListener("pointerdown", go, true);
+		window.addEventListener("keydown", go, true);
+		return () => {
+			window.removeEventListener("pointerdown", go, true);
+			window.removeEventListener("keydown", go, true);
+		};
+	}, [gesture]);
+	useEffect(() => {
+		if (!gesture) return;
+		music.current ??= createTitleMusic();
+		void music.current.play(song, levelRef.current);
+	}, [gesture, song]);
+	useEffect(() => {
+		music.current?.setLevel(level);
+	}, [level]);
+	useEffect(
+		() => () => {
+			music.current?.stop();
+			music.current = null;
+		},
+		[],
+	);
 
 	// Hold the game paused behind the title.
 	useEffect(() => {
@@ -104,6 +138,11 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 		<div className="ui-title" ref={root} onKeyDown={onKeyDown} data-menu-open={menuOpen || undefined}>
 			<div className="ui-title-sky" aria-hidden="true">
 				<img className={`ui-title-art${ending ? " is-ending" : ""}`} src={ending ? TITLE_END_ART[ending] : BACKDROP.title} alt="" draggable={false} data-title-art={ending ?? "normal"} />
+				{ending && (
+					<div className="ui-title-logo-frame" aria-hidden="true">
+						<img className="ui-title-logo" src={TITLE_LOGO.src} alt="" draggable={false} data-title-logo />
+					</div>
+				)}
 				<span className="ui-title-sign">{saves ? backdropCaption(titleBackdrop(saves)) : "COMPUTE AUTHORITY"}</span>
 			</div>
 			{endings.length > 1 && (
