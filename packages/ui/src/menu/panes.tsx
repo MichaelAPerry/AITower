@@ -221,6 +221,12 @@ export function SettingsPane({ store, state }: PaneProps) {
 			<SettingRow label="Music volume" hint="Background music, on top of the master volume.">
 				<Slider label="Music volume" value={s.musicVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.musicVolume * 100)}%`} onChange={(v) => set({ musicVolume: v })} />
 			</SettingRow>
+			<SettingRow label="Sound effects" hint="Chimes, clicks and alerts. Uses the master volume; Mute silences them too.">
+				<Toggle on={s.sfxEnabled} onClick={() => set({ sfxEnabled: !s.sfxEnabled })} label="SFX" />
+			</SettingRow>
+			<SettingRow label="Effects volume" hint="Sound effects, on top of the master volume.">
+				<Slider label="Effects volume" value={s.sfxVolume} min={0} max={1} step={0.05} readout={`${Math.round(s.sfxVolume * 100)}%`} onChange={(v) => set({ sfxVolume: v })} />
+			</SettingRow>
 			<SettingRow label="Mute" hint="Silence all audio (key M).">
 				<Toggle on={s.muted} onClick={() => set({ muted: !s.muted })} label="MUTE" />
 			</SettingRow>
