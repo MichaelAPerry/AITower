@@ -8,7 +8,7 @@ AI Tower is a browser datacenter-management game in a PC-98 style. You are the O
 You grow racks and power, and retrofit them toward one of three trees: Lattice (synthetic), Flesh (biotech), Garden (greentech). There is no commit step: a tree is chosen by retrofitting.
 Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The sim is deterministic; the UI reads a view of it.
 
-Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/DIALOGUE_NEW.md` (imported; see 3g), `docs/ART_NEEDED.md` (art slots).
+Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots).
 
 ## 1. State on Oct 30 (end of session 2)
 
@@ -48,11 +48,11 @@ d. Locked gallery portraits: crop to the head or hide (section 2). Sample one.
 e. Security: `npm audit` flags `vitest`, `tinypool`, `@vitest/mocker` (test tool only, never shipped to players). Upgrade vitest to the fixed major version, fix any test breakage, rerun everything.
 f. `fast_win` days: headless runs (`tools/sim-cli`) to confirm 25 / 40 / 38 are reachable but tight; report to the owner.
 g. Do without asking:
-   - strip the `the_three_trees.*` lines from `docs/DIALOGUE_NEW.md` (re-importing them would undo the lesson 4 trim), or delete the file since everything in it is imported;
+   - DONE: `docs/DIALOGUE_NEW.md` deleted (dry-run import showed only `the_three_trees.*` differing; everything else imported);
    - add `starter` description from `docs/OWNER_TEXT.md` once approved;
-   - stale docs: ART_NEEDED (backdrops are wired; ending art `bg-end-absorbed` / `bg-end-bankrupt` exist), AUDIT_LEFTOVERS #2 and #3 (fixed), ROADMAP_1.0 (mark historic), stale code comments (`Inspector.tsx:147`, `suggest.ts:207`, `sim/api.ts:624`, `balance.ascension.minTier` naming), reputation mentions in AGENTS.md files;
-   - add the e2e step for the achievements screen if missing;
-   - delete merged remote branches (0 ahead of main): wip/dialogue-import, wip/endings, wip/lessons, wip/owner-art, wip/owner-dialogue, wip/tree-sprites, wip/gallery-art, wip/off-duty, claude/vibrant-albattani-dv9g0z. Ask before deleting `claude/serene-ramanujan-ojshkh` (holds six 2-3 MB concept PNGs; owner has not said keep or drop).
+   - DONE: stale docs and code comments cleaned (`ascension.minTier` kept as a legacy name, documented in schema/AGENTS/test title);
+   - DONE: e2e achievements step already in `e2e/smoke.mjs` (list tab and gallery tab);
+   - Remote branches: wip/dialogue-import, endings, lessons, owner-art, owner-dialogue, tree-sprites are 0 ahead (deletion by push was refused with HTTP 403 from this environment: delete them by hand); wip/gallery-art and wip/off-duty are 1 ahead of main (kept); vibrant-albattani is already gone. `claude/serene-ramanujan-ojshkh`: ask the owner.
 h. Later (still to do before sharing if time allows): achievement balance in real play (`calm_month`, `open_hands`, `books_clean`, bond bars); BALANCE_AUDIT items (L4 research wall, dominated L3 techs, wetware prerequisites) check against current data; ~17 support items and ML-1 reuse a tinted base sprite (owner sets priority).
 i. Owner play-tests. Then full verify (Haiku), push youthful to main, check the live Pages links, and write a new player-facing README (for people who come to look at and play the game: what it is, how to play in the browser, screenshots, controls, credits; dev notes move to a short section or `docs/`).
 
@@ -71,5 +71,4 @@ i. Owner play-tests. Then full verify (Haiku), push youthful to main, check the 
 ## 5. Known issues
 
 - Bond 50 is hard for Mel and Cass in headless runs (scripted player does not follow advice). Check with a human.
-- `docs/DIALOGUE_NEW.md` still holds removed lesson-4 lines (see 3g). Do not import it as is.
 - The full test run can fail on timing (perf, snapshot, economy, ministry, determinism) when several agents run at once. Rerun alone, or verify on a quiet machine.

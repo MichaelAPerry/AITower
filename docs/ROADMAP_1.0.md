@@ -1,3 +1,5 @@
+> **HISTORIC (Oct 2026).** This roadmap was written on 2026-10-15 and is kept for history. Much of it is built or replaced. For the current state read `HANDOFF.md`.
+
 # AItower — Road to 1.0
 
 _Combined from four independent reviews (Sonnet sub-agents, 2026-10-15). Full reports:

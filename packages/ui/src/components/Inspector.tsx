@@ -144,7 +144,7 @@ function NetSummaries({ view, f }: { view: SimView; f: FacilityView }) {
 
 /**
  * Upgrade actions: one button per item this facility upgrades to (`upgradesFrom`), with the price (new cost less half of the old one).
- * The sim decides whether it is open (Level, research, commit, bond, room beside it); its reason is shown when it is not.
+ * The sim decides whether it is open (Level, research, room beside it); its reason is shown when it is not.
  */
 export function UpgradeActions({ store, content, f }: { store: GameStore; content: ContentDB; f: FacilityView }) {
 	const from = content.facilities[f.defId];

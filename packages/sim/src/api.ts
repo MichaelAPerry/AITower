@@ -633,8 +633,8 @@ export interface SimView {
 	greenScore: number;
 	/**
 	 * How strongly the tower leans to each path, as shares summing to 1 (all 0 before any lean). Points come from what is
-	 * built (path-flavoured facilities), researched (path-branch nodes) and chosen in memos (`affinity` effects). At
-	 * Clearance `ascension.minTier` the UI pre-selects the leading path for the player to confirm.
+	 * built (path-flavoured facilities), researched (path-branch nodes) and chosen in memos (`affinity` effects). There
+	 * is no commit step: a tree is chosen by retrofitting, and this only shows which way the tower leans.
 	 */
 	affinity: { biotech: number; greentech: number; synthetic: number };
 	/** Synthetic score 0..1: uptime × share of compute on top-tier racks. */

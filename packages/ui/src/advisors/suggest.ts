@@ -204,7 +204,7 @@ export function suggestions(view: SimView, content: ContentDB, confirmedHot?: Re
 		});
 	}
 
-	// The Lattice outrunning the committed tree.
+	// The Lattice outrunning the leading tree.
 	const pull = latticePull(view);
 	if (pull) out.push(pull);
 

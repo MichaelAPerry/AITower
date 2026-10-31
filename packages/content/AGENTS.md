@@ -36,7 +36,7 @@ Game data, validation and the contract generator. Depends on nothing.
 `npx vitest run packages/content` · `npm run typecheck` · `npm run check:boundaries`
 
 ## M3 (Biotech path)
-- Clearance 5 (3,000 PF, uptime 0.992, reward $25M, loan cap $100M); `ascension.minTier` 3. `paths.json` (the three trees), `endings.json` (singularity, flesh, garden with per-advisor epilogues, absorbed), `balance.bio` / `balance.endings` tuned (see `biotech.test.ts` for the contamination model checks).
+- Clearance 5 (3,000 PF, uptime 0.992, reward $25M, loan cap $100M); `ascension.minTier` 3 (legacy name; it is only the Absorbed threshold Level, since there is no commit step). `paths.json` (the three trees), `endings.json` (singularity, flesh, garden with per-advisor epilogues, absorbed), `balance.bio` / `balance.endings` tuned (see `biotech.test.ts` for the contamination model checks).
 - 8 biotech facilities + 3 growths (`growth: true`, free, no tech), all other wetware facilities gated by a `wetware`-branch tech (`wetware_annex` T3, five T4 nodes, T5 `path: "biotech"` nodes). Organoid racks: `cooling: "bio"`, category `"rack"` (wetware kinds file under rack, power or cooling; `isWetware()` in catalogue.ts, no Wetware tab), `rack.bio` required, liquidFraction 0, `needsNutrient`. Bioreactors need both `power` and `bio` specs. Nutrient is never pre-placed in scenarios.
 - 4 `needsBio` clients (generator sizes them against <= 4 of the best bio racks and sets `needsBio` on the spec); events: 4 T1-T2 seeds, 8 biotech memos, 13 `horror` memos (`minCorruption` 0.1..0.9, required for horror).
 - Tech tree totals: trunk 60-90 days, wetware branch 30-50 more.
@@ -52,7 +52,7 @@ Game data, validation and the contract generator. Depends on nothing.
 ## The Soul (docs/SOUL.md)
 - `facilities.json`: every facility has a `line` (absent = shared) and secret `seal` numbers for biotech/greentech (positive scars, negative heals).
 - `story.json`: the story scenes (category `story`, `trigger`, `whenPath`, `lines`, per-choice `reply`, `backdrop`, `location`), merged into `events` by `load.ts`.
-- `balance.soul`: SP target and weights, seal max and residue rate, objection threshold, bond start and gates. Reputation (`balance.standing`) was removed.
+- `balance.soul`: SP target and weights, seal max and residue rate, objection threshold, bond start and gates. (There is no reputation in the game.)
 
 ### Catalogue redesign (docs/TREES.md)
 Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgradeCost`); sim placement goes through progression/access.ts, `upgradeFacility` in commands/upgrade.ts, snapshot v13 (migrateV12, `bondGiven`). UI reads the same `access()` for tags and lock reasons. Balance: `tools/sim-cli/src/soulRun.ts [scenario] [days] [seeds] [synthetic|biotech|greentech|all]` with the scripted player in player.ts.
