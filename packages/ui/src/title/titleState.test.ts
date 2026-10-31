@@ -1,7 +1,33 @@
 import type { SaveSlotInfo } from "@aitower/shared";
 import { describe, expect, it, vi } from "vitest";
 import { createFakeContent, createFakeStore } from "../dev/fakeStore";
-import { agoText, backdropCaption, continueSummary, showTitleAtBoot, startGame, titleBackdrop, titleItems } from "./titleState";
+import { agoText, backdropCaption, continueSummary, nextTitleEnding, showTitleAtBoot, startGame, titleBackdrop, titleItems, unlockedTitleEndings } from "./titleState";
+
+describe("title ending pictures", () => {
+	const earned = (o: Record<string, number | undefined>) => ({ earned: Object.fromEntries(Object.entries(o).map(([k, at]) => [k, { day: 30, ending: null, at }])) });
+	it("none: nothing, and failure endings never count", () => {
+		expect(unlockedTitleEndings(earned({}))).toEqual([]);
+		expect(unlockedTitleEndings(earned({ end_absorbed: 5, end_bankrupt: 6, fast_win: 7 }))).toEqual([]);
+	});
+	it("one", () => {
+		expect(unlockedTitleEndings(earned({ end_flesh: 10 }))).toEqual(["flesh"]);
+	});
+	it("several: most recent first, failures ignored", () => {
+		expect(unlockedTitleEndings(earned({ end_lattice: 10, end_garden: 30, end_flesh: 20, end_bankrupt: 99 }))).toEqual(["garden", "flesh", "lattice"]);
+	});
+	it("older profiles without a time keep a fixed order, and sort after timed ones", () => {
+		expect(unlockedTitleEndings(earned({ end_garden: undefined, end_lattice: undefined }))).toEqual(["lattice", "garden"]);
+		expect(unlockedTitleEndings(earned({ end_lattice: undefined, end_flesh: 5 }))).toEqual(["flesh", "lattice"]);
+	});
+	it("cycling wraps and starts at the first", () => {
+		const l = ["garden", "flesh", "lattice"] as const;
+		expect(nextTitleEnding([], undefined)).toBeUndefined();
+		expect(nextTitleEnding(l, undefined)).toBe("garden");
+		expect(nextTitleEnding(l, "garden")).toBe("flesh");
+		expect(nextTitleEnding(l, "lattice")).toBe("garden");
+		expect(nextTitleEnding(["flesh"], "flesh")).toBe("flesh");
+	});
+});
 
 const info = (id: SaveSlotInfo["id"], savedAt = 0): SaveSlotInfo => ({ id, name: id, savedAt, day: 11, cash: 1_103_200, tier: 2 });
 

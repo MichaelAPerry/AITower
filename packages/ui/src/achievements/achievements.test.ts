@@ -203,7 +203,7 @@ describe("awarding", () => {
 		expect(awardFor("dayClose", view({ cash: 12e6 }), { storage: s }).won.map((d) => d.id)).toEqual(["cash_deep"]);
 		expect(awardFor("dayClose", view({ cash: 12e6 }), { storage: s }).won).toHaveLength(0);
 		expect(awardFor("dayClose", view({ cash: 1e6 }), { storage: s }).won).toHaveLength(0);
-		expect(loadProfile(s).earned.cash_deep).toEqual({ day: 9, ending: null });
+		expect(loadProfile(s).earned.cash_deep).toMatchObject({ day: 9, ending: null });
 	});
 
 	it("only the checks of that moment run", () => {
@@ -217,9 +217,9 @@ describe("awarding", () => {
 	it("a game over records the ending with the unlock", () => {
 		const s = memory();
 		awardFor("gameOver", view({ over: win("singularity", 30), day: 30 }), { storage: s });
-		expect(loadProfile(s).earned.end_lattice).toEqual({ day: 30, ending: "singularity" });
+		expect(loadProfile(s).earned.end_lattice).toMatchObject({ day: 30, ending: "singularity" });
 		awardFor("gameOver", view({ over: { kind: "bankrupt", tick: 5 }, day: 3 }), { storage: s });
-		expect(loadProfile(s).earned.end_bankrupt).toEqual({ day: 3, ending: "bankrupt" });
+		expect(loadProfile(s).earned.end_bankrupt).toMatchObject({ day: 3, ending: "bankrupt" });
 	});
 
 	it("hidden ones are awarded like any other (the list hides them only until earned)", () => {

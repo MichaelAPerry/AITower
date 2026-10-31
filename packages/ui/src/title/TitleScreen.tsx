@@ -1,16 +1,16 @@
 import { type ContentDB, achievementContent } from "@aitower/content";
 import { type GameState, type GameStore, freeBuildBonus, loadLessonProgress, loadProfile } from "@aitower/shared";
 import { counter } from "../achievements/gallery";
-import { type KeyboardEvent, useEffect, useRef, useState } from "react";
+import { type KeyboardEvent, useEffect, useMemo, useRef, useState } from "react";
 import { fmtMoney } from "../format";
 import { focusables, nextFocusIndex } from "../menu/focus";
 import type { MenuSection } from "../menu/SystemMenu";
 import { useSaves } from "../menu/useSaves";
 import { scenarioCards, showPicker, validScenario } from "./scenarios";
-import { backdropCaption, continueSummary, startGame, type TitleItem, titleBackdrop, titleItems } from "./titleState";
+import { backdropCaption, continueSummary, nextTitleEnding, startGame, type TitleEndingTree, type TitleItem, titleBackdrop, titleItems, unlockedTitleEndings } from "./titleState";
 import "./title.css";
 import "./title-pc98.css";
-import { BACKDROP } from "../art";
+import { BACKDROP, TITLE_END_ART } from "../art";
 
 export interface TitleScreenProps {
 	store: GameStore;
@@ -43,6 +43,10 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 	const lessonDone = lessonOne ? lessonProgress.done[lessonOne.id] !== undefined : false;
 	const bonus = content ? freeBuildBonus(content.lessons, lessonProgress) : 0;
 	const now = Date.now();
+	// A completed tree ending replaces the title painting: the latest first, the button cycles the rest.
+	const endings = useMemo(() => unlockedTitleEndings(loadProfile()), []);
+	const [shownEnding, setShownEnding] = useState<TitleEndingTree | undefined>(undefined);
+	const ending = shownEnding && endings.includes(shownEnding) ? shownEnding : endings[0];
 
 	// Hold the game paused behind the title.
 	useEffect(() => {
@@ -99,9 +103,14 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 		// biome-ignore lint/a11y/noStaticElementInteractions: full-screen modal; the key handler implements arrow navigation and the focus loop
 		<div className="ui-title" ref={root} onKeyDown={onKeyDown} data-menu-open={menuOpen || undefined}>
 			<div className="ui-title-sky" aria-hidden="true">
-				<img className="ui-title-art" src={BACKDROP.title} alt="" draggable={false} />
+				<img className={`ui-title-art${ending ? " is-ending" : ""}`} src={ending ? TITLE_END_ART[ending] : BACKDROP.title} alt="" draggable={false} data-title-art={ending ?? "normal"} />
 				<span className="ui-title-sign">{saves ? backdropCaption(titleBackdrop(saves)) : "COMPUTE AUTHORITY"}</span>
 			</div>
+			{endings.length > 1 && (
+				<button type="button" className="ui-title-switch" data-title-switch onClick={() => setShownEnding(nextTitleEnding(endings, ending))} aria-label="Switch ending picture">
+					◀ ▶ ENDING {ending ? endings.indexOf(ending) + 1 : 1}/{endings.length}
+				</button>
+			)}
 			<div className="ui-title-cabinet ui-panel" role="dialog" aria-modal="true" aria-label="AItower title screen">
 				<div className="ui-title-plate">
 					<span className="ui-title-brand">

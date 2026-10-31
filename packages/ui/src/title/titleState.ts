@@ -1,5 +1,5 @@
 /** Pure logic for the title screen: when it shows, which entries it offers, and how a pick starts the game. */
-import type { GameStore, SaveSlotInfo } from "@aitower/shared";
+import type { GameStore, Profile, SaveSlotInfo } from "@aitower/shared";
 import { fmtMoney } from "../format";
 
 /** Shown at boot unless the URL has ?new (the e2e smoke test relies on that). */
@@ -61,4 +61,29 @@ export function startGame(store: GameStore, how: { kind: "continue" } | { kind: 
 	if (how.scenarioId) store.newGame(undefined, how.scenarioId);
 	else store.newGame();
 	store.setSpeed(how.crawl ? 0 : 1);
+}
+
+/** The success endings that replace the title picture, with the achievement that records each. Failure endings (Absorbed, Bankrupt) never do. */
+export const TITLE_ENDINGS = [
+	{ tree: "lattice", achievement: "end_lattice" },
+	{ tree: "flesh", achievement: "end_flesh" },
+	{ tree: "garden", achievement: "end_garden" },
+] as const;
+export type TitleEndingTree = (typeof TITLE_ENDINGS)[number]["tree"];
+
+/** The trees whose ending the player has completed, most recently completed first (ties and older profiles without a time: Lattice, Flesh, Garden). */
+export function unlockedTitleEndings(profile: Pick<Profile, "earned">): TitleEndingTree[] {
+	return TITLE_ENDINGS.flatMap((t, order) => {
+		const e = profile.earned[t.achievement];
+		return e ? [{ tree: t.tree, at: e.at ?? 0, order }] : [];
+	})
+		.sort((a, b) => b.at - a.at || a.order - b.order)
+		.map((x) => x.tree);
+}
+
+/** The next picture in the cycle after `current` (wraps; a missing or unknown current starts at the first). */
+export function nextTitleEnding(list: readonly TitleEndingTree[], current: TitleEndingTree | undefined): TitleEndingTree | undefined {
+	if (list.length === 0) return undefined;
+	const i = current ? list.indexOf(current) : -1;
+	return list[(i + 1) % list.length];
 }

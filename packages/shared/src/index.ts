@@ -297,7 +297,7 @@ export const ADVISOR_KEYS: readonly AdvisorKey[] = ["luci", "mel", "bea", "cass"
 export interface Profile {
 	v: 1;
 	/** Achievement id to the game day it was earned and the ending of that run (null when earned mid-run). Latched for life. */
-	earned: Record<string, { day: number; ending: string | null }>;
+	earned: Record<string, { day: number; ending: string | null; /** Wall-clock ms when first earned on this device; absent in older profiles. Orders the title-screen ending pictures. */ at?: number }>;
 	/** Which advisors' ending epilogues have been seen (for `heard_out`). */
 	epilogues: Record<AdvisorKey, boolean>;
 	/** Off-duty gallery: the casual portrait of each advisor is unlocked (`aitower.profile.offDuty.<advisor>.casual`). Latched. */
@@ -337,7 +337,8 @@ export function parseProfile(raw: unknown): Profile {
 			for (const [id, e] of Object.entries(p.earned)) {
 				if (e && typeof e === "object" && Number.isFinite((e as { day: unknown }).day)) {
 					const ending = (e as { ending: unknown }).ending;
-					profile.earned[id] = { day: Math.floor((e as { day: number }).day), ending: typeof ending === "string" ? ending : null };
+					const at = (e as { at?: unknown }).at;
+					profile.earned[id] = { day: Math.floor((e as { day: number }).day), ending: typeof ending === "string" ? ending : null, ...(typeof at === "number" && Number.isFinite(at) && at >= 0 ? { at } : {}) };
 				}
 			}
 		for (const a of ADVISOR_KEYS) {
@@ -376,7 +377,7 @@ function saveProfile(profile: Profile, storage: LessonStorage | null): void {
 export function recordAchievement(id: string, day: number, ending: string | null, storage: LessonStorage | null = defaultLessonStorage()): { profile: Profile; first: boolean } {
 	const profile = loadProfile(storage);
 	if (profile.earned[id]) return { profile, first: false };
-	profile.earned[id] = { day: Math.max(0, Math.floor(day)), ending };
+	profile.earned[id] = { day: Math.max(0, Math.floor(day)), ending, at: Date.now() };
 	saveProfile(profile, storage);
 	return { profile, first: true };
 }
@@ -432,7 +433,8 @@ export function mergeProfiles(a: Profile, b: Profile): Profile {
 	for (const src of [a, b])
 		for (const [id, e] of Object.entries(src.earned)) {
 			const cur = out.earned[id];
-			if (!cur || e.day < cur.day) out.earned[id] = { ...e };
+			if (!cur || e.day < cur.day) out.earned[id] = { ...e, ...(e.at === undefined && cur?.at !== undefined ? { at: cur.at } : {}) };
+			else if (cur.at === undefined && e.at !== undefined) cur.at = e.at;
 		}
 	for (const k of ADVISOR_KEYS) {
 		out.epilogues[k] = a.epilogues[k] || b.epilogues[k];

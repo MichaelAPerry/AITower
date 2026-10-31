@@ -43,8 +43,21 @@ describe("profile", () => {
 		const s = memory();
 		expect(recordAchievement("cash_deep", 12, null, s).first).toBe(true);
 		expect(recordAchievement("cash_deep", 30, "flesh", s).first).toBe(false);
-		expect(loadProfile(s).earned.cash_deep).toEqual({ day: 12, ending: null });
+		expect(loadProfile(s).earned.cash_deep).toMatchObject({ day: 12, ending: null });
 		expect(JSON.parse(s.m.get(PROFILE_KEY) as string).v).toBe(1);
+	});
+
+	it("stamps the time earned, keeps it through parse and import merge", () => {
+		const s = memory();
+		recordAchievement("end_garden", 20, "garden", s);
+		const at = loadProfile(s).earned.end_garden.at;
+		expect(typeof at).toBe("number");
+		const old = parseProfile({ v: 1, earned: { end_garden: { day: 25, ending: "garden" } } });
+		expect(old.earned.end_garden.at).toBeUndefined();
+		expect(mergeProfiles(old, loadProfile(s)).earned.end_garden).toEqual({ day: 20, ending: "garden", at });
+		expect(mergeProfiles(loadProfile(s), old).earned.end_garden.at).toBe(at);
+		const older = parseProfile({ v: 1, earned: { end_garden: { day: 10, ending: "garden" } } });
+		expect(mergeProfiles(older, loadProfile(s)).earned.end_garden).toEqual({ day: 10, ending: "garden", at });
 	});
 
 	it("keeps only well-formed rows", () => {

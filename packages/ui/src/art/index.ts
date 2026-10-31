@@ -30,6 +30,9 @@ import bea_offduty from "./bea-offduty.webp";
 import bea_offduty_night from "./bea-offduty-night.webp";
 import cass_offduty from "./cass-offduty.webp";
 import cass_offduty_night from "./cass-offduty-night.webp";
+import title_end_lattice from "./title-end-lattice.webp";
+import title_end_flesh from "./title-end-flesh.webp";
+import title_end_garden from "./title-end-garden.webp";
 import bg_title from "./bg-title.webp";
 import bg_bio from "./bg-bio.webp";
 import bg_green from "./bg-green.webp";
@@ -66,6 +69,9 @@ export const FULL: Record<ArtAdvisor, string> = { luci: luci_full, mel: mel_full
 
 /** Backdrops: the title skyline and the three tree floors (B-3 Bio, C-4 Green, D-2 Synthetic). */
 export const BACKDROP = { title: bg_title, biotech: bg_bio, greentech: bg_green, synthetic: bg_synth } as const;
+/** Title screens for a completed tree ending (owner art, 1448x1086, 64-colour lossless WebP), keyed by tree. */
+export const TITLE_END_ART = { lattice: title_end_lattice, flesh: title_end_flesh, garden: title_end_garden } as const;
+
 export type BackdropId = keyof typeof BACKDROP;
 
 /**

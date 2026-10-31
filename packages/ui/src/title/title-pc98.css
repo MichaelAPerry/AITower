@@ -151,3 +151,34 @@
 	height: auto;
 	bottom: auto;
 }
+
+/* A completed tree ending's picture: the whole 4:3 painting, with a soft dark wash on the menu side so the text stays readable. */
+.aitower-hud .ui-title-art.is-ending {
+	object-position: 50% 50%;
+	image-rendering: auto;
+}
+.aitower-hud .ui-title-sky:has(.is-ending)::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(90deg, rgba(4, 4, 26, 0.55) 0%, rgba(4, 4, 26, 0.2) 40%, transparent 70%);
+}
+.aitower-hud .ui-title-switch {
+	position: absolute;
+	z-index: 2;
+	bottom: 16px;
+	right: clamp(12px, 3vw, 40px);
+	padding: 6px 12px;
+	font: 12px/1 var(--f-display);
+	letter-spacing: 0.12em;
+	color: var(--text);
+	background: rgba(4, 4, 26, 0.85);
+	border: 1px solid var(--pc-rule-in);
+	cursor: pointer;
+}
+.aitower-hud .ui-title-switch:hover,
+.aitower-hud .ui-title-switch:focus-visible {
+	color: var(--warn);
+	outline: 2px dashed var(--amber);
+	outline-offset: 2px;
+}
