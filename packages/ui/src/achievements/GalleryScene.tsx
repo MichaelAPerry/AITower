@@ -1,7 +1,8 @@
 import type { GalleryScene as Scene } from "@aitower/content";
 import { type KeyboardEvent, useEffect, useRef, useState } from "react";
 import { ADVISORS } from "../advisors/advisors";
-import { pagesOf } from "./gallery";
+import { type LockedLook, pagesOf } from "./gallery";
+import { LockedHead } from "./LockedHead";
 import "../vn/vn.css";
 import "./achievements.css";
 
@@ -18,6 +19,8 @@ export interface GalleryFigure {
 	src: string;
 	/** A locked frame's bust, dimmed. */
 	dim?: boolean;
+	/** With `dim`: the head crop (or "hide") a locked portrait is limited to. */
+	look?: LockedLook;
 	alt: string;
 }
 
@@ -67,8 +70,8 @@ export function GalleryScene({ scene, figure, onClose }: { scene: Scene; figure?
 				<b>{scene.title}</b>
 			</div>
 			{figure && (
-				<div className={`gal-figure ${figure.dim ? "is-dim" : ""}`} style={{ ["--adv" as string]: speaker?.color ?? "var(--pc-rule)" }}>
-					<img src={figure.src} alt={figure.alt} draggable={false} />
+				<div className={`gal-figure ${figure.dim ? "is-dim" : ""} ${figure.dim && figure.look ? "is-head" : ""}`} style={{ ["--adv" as string]: speaker?.color ?? "var(--pc-rule)" }}>
+					{figure.dim && figure.look ? <LockedHead src={figure.src} look={figure.look} alt={figure.alt} /> : <img src={figure.src} alt={figure.alt} draggable={false} />}
 				</div>
 			)}
 			{page && (

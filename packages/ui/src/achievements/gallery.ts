@@ -45,6 +45,28 @@ export function listRows(profile: Pick<Profile, "earned">, defs: readonly Achiev
 /** "11 / 18" */
 export const counter = (profile: Pick<Profile, "earned">, defs: readonly AchievementDef[] = ACHIEVEMENTS): string => `${defs.filter((d) => profile.earned[d.id]).length} / ${defs.length || ACHIEVEMENT_COUNT}`;
 
+/**
+ * What a locked portrait may show: a head box as fractions of the (square) bust image, cut just below the neck, or "hide"
+ * for a lock tile with no picture. The owner's rule: never the full greyscale picture.
+ */
+export interface HeadCrop {
+	x: number;
+	y: number;
+	w: number;
+	h: number;
+}
+export type LockedLook = HeadCrop | "hide";
+/** Used for any advisor without an entry in `LOCKED_LOOK`. */
+export const DEFAULT_CROP: HeadCrop = { x: 0.1, y: 0, w: 0.7, h: 0.66 };
+/** Per-portrait head boxes, set by eye from the neutral busts (256x256). */
+export const LOCKED_LOOK: Readonly<Partial<Record<GalleryAdvisor, LockedLook>>> = {
+	luci: { x: 0.12, y: 0.0, w: 0.7, h: 0.66 },
+	mel: { x: 0.06, y: 0.0, w: 0.7, h: 0.66 },
+	bea: { x: 0.12, y: 0.0, w: 0.7, h: 0.66 },
+	cass: { x: 0.12, y: 0.0, w: 0.72, h: 0.66 },
+};
+export const lockedLook = (a: GalleryAdvisor, table: Readonly<Partial<Record<GalleryAdvisor, LockedLook>>> = LOCKED_LOOK): LockedLook => table[a] ?? DEFAULT_CROP;
+
 export interface Frame {
 	advisor: GalleryAdvisor;
 	set: "casual" | "bed";

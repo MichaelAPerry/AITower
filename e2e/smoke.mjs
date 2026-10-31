@@ -118,6 +118,7 @@ async function run(url) {
 		await page.keyboard.press("Escape"); // closes that scene only, not the menu behind it
 		await page.locator(".gal-scene").waitFor({ state: "detached" });
 		assert((await page.locator('[data-set="casual"] .ach-frame.is-locked').count()) === 4, "four locked off-duty frames");
+		assert((await page.locator('[data-set="casual"] .ach-frame.is-locked .ach-head[data-crop="head"]').count()) === 4, "locked portraits are head crops, not the whole picture");
 		assert((await page.locator('[data-set="bed"] .ach-frame.is-blank').count()) === 4, "four blank bed frames");
 		await page.keyboard.press("Escape");
 		await page.locator(".ui-menu").waitFor({ state: "detached" });

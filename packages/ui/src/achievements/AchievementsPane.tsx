@@ -5,7 +5,8 @@ import { ADVISORS } from "../advisors/advisors";
 import { OFF_DUTY, PORTRAITS } from "../art";
 import { AchIcon } from "./AchIcon";
 import { GalleryScene } from "./GalleryScene";
-import { autoScene, counter, type Frame, frames, listRows, sceneById, sceneIdFor } from "./gallery";
+import { autoScene, counter, type Frame, frames, listRows, lockedLook, sceneById, sceneIdFor } from "./gallery";
+import { LockedHead } from "./LockedHead";
 import "./achievements.css";
 
 const U = achievementContent.ui;
@@ -78,7 +79,7 @@ function List() {
 	);
 }
 
-function Gallery({ onPlay }: { onPlay: (sceneId: string, frame: Frame) => void }) {
+export function Gallery({ onPlay }: { onPlay: (sceneId: string, frame: Frame) => void }) {
 	const { casual, bed, bedOpen } = frames(loadProfile());
 	return (
 		<div className="ach-gallery">
@@ -109,10 +110,9 @@ function FrameCard({ frame: f, onPlay }: { frame: Frame; onPlay: (sceneId: strin
 				<span className="ach-blank">{U.hiddenName}</span>
 			</div>
 		);
-	const src = f.unlocked ? OFF_DUTY[f.advisor][f.set] : PORTRAITS[f.advisor].neutral;
 	return (
 		<button type="button" className={`ach-frame ${f.unlocked ? "is-open" : "is-locked"}`} style={style} data-frame={`${f.set}:${f.advisor}`} data-unlocked={f.unlocked || undefined} onClick={() => onPlay(sceneIdFor(f), f)}>
-			<img src={src} alt={`${adv.first}, ${f.unlocked ? U.altOffDuty : U.altLocked}`} draggable={false} />
+			{f.unlocked ? <img src={OFF_DUTY[f.advisor][f.set]} alt={`${adv.first}, ${U.altOffDuty}`} draggable={false} /> : <LockedHead src={PORTRAITS[f.advisor].neutral} look={lockedLook(f.advisor)} alt={`${adv.first}, ${U.altLocked}`} />}
 			<span className="ach-frame-name">{adv.first}</span>
 			{f.set === "casual" && (f.unlocked ? <span className="ach-frame-line">{text.caption}</span> : <span className="ach-frame-line">{text.hint}</span>)}
 			{f.showRule && <span className="ach-frame-rule">{text.rule}</span>}
@@ -124,7 +124,7 @@ function Playback({ playing, onClose }: { playing: Playing; onClose: () => void 
 	const scene = sceneById(playing.sceneId);
 	const f = playing.frame;
 	const advisor: GalleryAdvisor | undefined = f?.advisor;
-	const figure = f && advisor ? { src: f.unlocked ? OFF_DUTY[advisor][f.set] : PORTRAITS[advisor].neutral, dim: !f.unlocked, alt: ADVISORS[advisor].first } : undefined;
+	const figure = f && advisor ? { src: f.unlocked ? OFF_DUTY[advisor][f.set] : PORTRAITS[advisor].neutral, dim: !f.unlocked, look: f.unlocked ? undefined : lockedLook(advisor), alt: ADVISORS[advisor].first } : undefined;
 	// A casual unlock scene ends on her caption (its last line), in her voice.
 	return <GalleryScene scene={scene} figure={figure} onClose={onClose} />;
 }
