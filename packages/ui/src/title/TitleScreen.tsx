@@ -9,7 +9,6 @@ import { useSaves } from "../menu/useSaves";
 import { scenarioCards, showPicker, validScenario } from "./scenarios";
 import { backdropCaption, continueSummary, nextTitleEnding, startGame, type TitleEndingTree, type TitleItem, titleBackdrop, titleItems, unlockedTitleEndings } from "./titleState";
 import "./title.css";
-import "./title-pc98.css";
 import { BACKDROP, TITLE_END_ART, TITLE_LOGO } from "../art";
 import { createTitleMusic, musicLevel, songFor } from "./titleMusic";
 
@@ -180,28 +179,28 @@ export function TitleScreen({ store, state, menuOpen, openMenu, onStart, content
 						</ul>
 					)}
 				</div>
-				{showPicker(cards) && (
-					<fieldset className="ui-title-sites">
-						<legend className="ui-dymo">FREE BUILD SITE</legend>
-						<div className="ui-title-cards" role="radiogroup" aria-label="Scenario">
-							{cards.map((c) => (
-								// biome-ignore lint/a11y/useSemanticElements: card-styled radio
-								<button key={c.id} type="button" role="radio" aria-checked={c.id === scenarioId} className={`ui-title-card ${c.id === scenarioId ? "is-on" : ""}`} data-scenario={c.id} onClick={() => setPicked(c.id)}>
-									<span className="ui-title-card-head">
-										<b>{c.name}</b>
-										{c.sandbox && <span className="ui-tag">SANDBOX</span>}
-										<span className="ui-title-card-facts">{c.facts}</span>
-									</span>
-									<span className="ui-title-card-desc">{c.description}</span>
-								</button>
-							))}
-						</div>
-					</fieldset>
-				)}
 				<div className="ui-title-foot">
 					<span className="ui-dymo">ENTER OR CLICK TO PROCEED</span>
 				</div>
 			</div>
+			{showPicker(cards) && (
+				<fieldset className="ui-title-sites">
+					<legend className="ui-dymo">FREE BUILD SITE</legend>
+					<div className="ui-title-cards" role="radiogroup" aria-label="Scenario">
+						{cards.map((c) => (
+							// biome-ignore lint/a11y/useSemanticElements: card-styled radio
+							<button key={c.id} type="button" role="radio" aria-checked={c.id === scenarioId} className={`ui-title-card ${c.id === scenarioId ? "is-on" : ""}`} data-scenario={c.id} onClick={() => setPicked(c.id)}>
+								<span className="ui-title-card-head">
+									<b>{c.name}</b>
+									{c.sandbox && <span className="ui-tag">SANDBOX</span>}
+									<span className="ui-title-card-facts">{c.facts}</span>
+								</span>
+								<span className="ui-title-card-desc">{c.description}</span>
+							</button>
+						))}
+					</div>
+				</fieldset>
+			)}
 		</div>
 	);
 }
