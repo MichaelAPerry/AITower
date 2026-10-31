@@ -5,6 +5,10 @@ Scope: reputation removed; commit and bond gates, after-hours, texts, gifts, con
 ## Status (cleanup pass)
 
 Done:
+- **2** Lessons: five lessons now exist in `lessons.json` and each outro points to the next one that exists (fixed, verified Oct 30).
+- **3** Absorbed ending: has `bg-end-absorbed` art and epilogues for all four advisors (fixed, verified Oct 30).
+- **8** Stale comments in `Inspector.tsx`, `advisors/suggest.ts` and `packages/sim/src/api.ts` reworded.
+- **9** Reputation mentions removed from the AGENTS.md files (kept only as a history note).
 - **1** Singularity help text rewritten to the current rules (`packages/ui/src/help/helpText.ts`). Click now names the Trees panel.
 - **4** `PathGauge.tsx`, `PueGauge.tsx` and `pathGauge()` removed, with their test case in `m4.test.tsx` and their CSS (`.ui-pathgauge`, `.ui-gauge*`). `paths/paths.ts` stays: `droughtChip` and `SANDBOX_TITLE` are still used by `TopStrip.tsx`. `Dial.tsx` stays (Inspector uses it).
 - **5** `tools/sim-cli/src/run.test.ts` real-content test has an explicit 120 s timeout (it runs about 50 s alone).
@@ -13,11 +17,7 @@ Done:
 - Stale mentions of PueGauge and PathGauge removed from `packages/ui/AGENTS.md`.
 
 Not done (out of this pass):
-- **2** Lesson 2 / outro pointer: owner decision.
-- **3** Absorbed ending: owner decision (not touched).
-- **7** `balance.ascension.minTier` rename: needs the owner of `balance.json`.
-- **8** Stale comments (`Inspector.tsx`, `advisors/suggest.ts`, `packages/sim/src/api.ts`).
-- **9** `packages/content/AGENTS.md` and `packages/sim/AGENTS.md` still mention reputation.
+- **7** `balance.ascension.minTier` rename: not renamed (key is used by validate.ts, tests and the schema); the schema comment and test title now say it is the Absorbed threshold.
 - **11, 12** Scenario description and `m4ids.ts`: low priority.
 - Commit wording in `docs/SOUL.md`, `docs/VN_WRITING.md` and `docs/TREES.md` was left as design history.
 - `events.json` "gift basket" (Form 9B outcome) is a flavour line, not the removed gift mechanic; left as is.

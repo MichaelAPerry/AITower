@@ -84,7 +84,7 @@ Shared style prefix, paste before each description:
 
 > Authentic 16-bit pixel art screenshot from a 1993 Japanese MS-DOS game. A macro photograph of a CRT monitor showing visible scanlines and RGB subpixels. 1990s retro anime game background, Falcom-style detail, extreme limited 16-colour palette, heavy pixel dithering, no people, no text, no UI.
 
-Not wired yet. `packages/ui/src/vn/StoryScene.tsx` takes the backdrop from the scene's `backdrop` field, which is a tree id on the rung scenes and absent on the opening and objection scenes. The 12 location files below need a location-to-file mapping added before they appear in game.
+Wired. `packages/ui/src/art/index.ts` maps each scene to its location file (`SCENE_BACKDROPS`), and all 12 files below exist in `packages/ui/src/art/`. This list is kept for reference only.
 
 ### B1. Story locations
 
@@ -119,7 +119,7 @@ These already exist. They are listed so nothing is redrawn by mistake.
 - `bg-synth.webp` (640 × 420). Ending `singularity`, "The Lattice". Synthetic floor.
 - `bg-bio.webp` (640 × 420). Ending `flesh`, "The Flesh Remembers". Biotech floor.
 - `bg-green.webp` (640 × 420). Ending `garden`, "The Garden". Greentech floor.
-- `absorbed`, "Absorbed". Has no backdrop and no epilogues in `endings.json`, so the screen is text only. Optional: a new `bg-absorbed.webp` in the ART_BRIEFS failure-ending style, if the owner wants one.
+- `bg-end-lattice`, `bg-end-flesh`, `bg-end-garden`, `bg-end-absorbed` and `bg-end-bankrupt` (all in `packages/ui/src/art/`). Every ending now has art and epilogues, including Absorbed and Bankrupt. Nothing is missing here.
 
 The title screen `bg-title.webp` (640 × 480) also exists.
 

@@ -96,7 +96,7 @@ describe("biotech content (bundled)", () => {
 		}
 	});
 
-	it("has five Levels and opens the tree commitment at Level 3", () => {
+	it("has five Levels and sets the Absorbed threshold (`ascension.minTier`, a legacy name) at Level 3", () => {
 		const b = db.balance;
 		expect(b.tiers.pflops).toHaveLength(5);
 		expect(b.tiers.pflops[4]).toBeGreaterThan(b.tiers.pflops[3]);

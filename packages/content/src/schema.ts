@@ -376,6 +376,7 @@ export interface Balance {
 		nutrientPrice: number;
 	};
 	/** Ascension: the path is chosen at `minTier` (Level), once. A sealed tree throws the player back onto Synthetic. */
+	/** Legacy name: `minTier` is now only the lowest Level at which Absorbed can happen (no commit step exists). */
 	ascension: { minTier: number };
 	/** Failure endings that are not bankruptcy or shutdown. */
 	endings: {
