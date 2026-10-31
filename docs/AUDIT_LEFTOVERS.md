@@ -5,7 +5,7 @@ Scope: reputation removed; commit and bond gates, after-hours, texts, gifts, con
 ## Status (cleanup pass)
 
 Done:
-- **2** Lessons: five lessons now exist in `lessons.json` and each outro points to the next one that exists (fixed, verified Oct 30).
+- **2** Lessons: six lessons now exist in `lessons.json` (first_watt, earn_your_keep, grow_the_tower, the_three_trees, liquid, lights_out). The first three outros point to the next lesson that exists (fixed, verified Oct 30). The last three end without a pointer; Lessons 5 and 6 were added after that check, and the findings below were written when only Lesson 1 existed.
 - **3** Absorbed ending: has `bg-end-absorbed` art and epilogues for all four advisors (fixed, verified Oct 30).
 - **8** Stale comments in `Inspector.tsx`, `advisors/suggest.ts` and `packages/sim/src/api.ts` reworded.
 - **9** Reputation mentions removed from the AGENTS.md files (kept only as a history note).

@@ -77,7 +77,7 @@ Legend: **Run** = the achievement can be earned in one run (the profile latches 
 
 Notes on the harder ones:
 - `calm_month`: headless weekly uptime means were 98.3 to 99.3% even for a scripted player, so a 99% daily mean for 20 straight days (with `pflops > 0`) is a real task. The owner set 20 (30 is almost a whole run).
-- `fast_win` targets come from `tools/sim-cli/src/soulRun.ts` (`TARGET_DAYS` 25/40/38). The old `HANDOFF.md` quoted 25/38/44: confirm which is current before building. The scripted player is 10-13% over target, so a skilled human should beat it.
+- `fast_win` targets come from `tools/sim-cli/src/soulRun.ts` (`TARGET_DAYS` 25/40/38). These are the owner's current numbers (Lattice 25, Flesh 40, Garden 38); the older 25/38/44 is retired. The scripted player is 10-13% over target, so a skilled human should beat it.
 - `open_hands` is the least certain: the scripted Lattice run closed both other trees. Verify with a purpose-built run before shipping. If it proves too hard, drop to "one tree closed at most".
 - `clean_hands`: scripted Flesh run ended with bio seal 0, scripted Garden run with green seal 40 (so the Garden is where this bites).
 - `books_clean`: the scripted Lattice run ended with $3.01M, right at the bar. Adjust once a human plays.

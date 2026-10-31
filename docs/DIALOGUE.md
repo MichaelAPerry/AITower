@@ -1881,6 +1881,10 @@ Choice `add`:
 
 - [scenario.lesson_lights_out.description] Description: A small working hall: three racks, an air handler and a grid intake. Bea shows you what happens when the grid drops, and what keeps the racks lit.
 
+### Lesson 5: Going Liquid (`lesson_liquid`)
+
+- [scenario.lesson_liquid.description] Description: A small working hall with Level 2 and the liquid-loop research done. Cass shows you a coolant pipe, a chiller, a CDU and a liquid-cooled rack.
+
 ## 18. Achievements and the off-duty gallery
 
 > The achievements list, the off-duty portraits and gallery scenes, and the words around them. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json. For a short file with only these, run `npx tsx tools/dialogue/export.ts --achievements`.
