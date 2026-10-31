@@ -1,6 +1,7 @@
 import type { ContentDB } from "@aitower/content";
 import type { GameState } from "@aitower/shared";
 import { useEffect, useRef, useState } from "react";
+import { playSfx } from "../sfx/sfx";
 import { levelUpInfo } from "./levelUp";
 import "./levelUp.css";
 
@@ -13,7 +14,10 @@ export function LevelUpCard({ content, state }: { content: ContentDB; state: Gam
 	useEffect(() => {
 		// A real Level-up is one step on the same game; a new game or a load (any other jump) shows nothing.
 		const p = prev.current;
-		if (level === p.level + 1 && day >= p.day && day - p.day <= 1) setShown(level);
+		if (level === p.level + 1 && day >= p.day && day - p.day <= 1) {
+			setShown(level);
+			playSfx("complete");
+		}
 		prev.current = { level, day };
 	}, [level, day]);
 	if (shown === null) return null;

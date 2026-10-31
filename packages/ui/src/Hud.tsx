@@ -1,5 +1,5 @@
 import type { ContentDB } from "@aitower/content";
-import type { GameStore } from "@aitower/shared";
+import { type GameStore, normalizeSettings } from "@aitower/shared";
 import type { QuarterReport } from "@aitower/sim";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { PanelProps, UiState } from "./components/context";
@@ -36,6 +36,7 @@ import { createMenuController } from "./menu/menuController";
 import { newSaveError } from "./menu/slots";
 import { type MenuSection, SystemMenu } from "./menu/SystemMenu";
 import { pushNotice } from "./notices";
+import { configureSfx, playSfx } from "./sfx/sfx";
 import { densityFor, hudScale, isSmallScreen, settingsToClasses, settingsToCssVars } from "./settings";
 import "./ui.css";
 // After ui.css, so these can refine its base rules.
@@ -202,6 +203,19 @@ export function Hud({ store, content, title }: HudProps) {
 		const r = auditToShow(cursor.current, state.log, state.view.reports);
 		if (r) setAudit(r);
 	}, [state.log]);
+
+	// Sound effects follow the settings; a press on any HUD button clicks.
+	useEffect(() => {
+		configureSfx(normalizeSettings(settings));
+	}, [settings]);
+	useEffect(() => {
+		const onDown = (e: PointerEvent): void => {
+			const el = e.target instanceof Element ? e.target.closest("button, [role=button], [role=tab]") : null;
+			if (el && !(el as HTMLButtonElement).disabled && el.closest(".aitower-hud")) playSfx("click");
+		};
+		document.addEventListener("pointerdown", onDown, true);
+		return () => document.removeEventListener("pointerdown", onDown, true);
+	}, []);
 
 	const alertsOpen = ui.drawer === "log";
 	const tick = state.view.tick;

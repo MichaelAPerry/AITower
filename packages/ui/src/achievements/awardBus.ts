@@ -4,6 +4,7 @@
  */
 import type { AdvisorKey } from "@aitower/shared";
 import { useSyncExternalStore } from "react";
+import { playSfx } from "../sfx/sfx";
 import type { AwardResult } from "./achievements";
 
 /** What this run has earned so far (ids), for the ending screen. Cleared when a new game or a load starts. */
@@ -25,6 +26,7 @@ const notify = (): void => {
 export function publishAwards(r: AwardResult): void {
 	if (!r.won.length && !r.portraits.length && !r.bed) return;
 	run = { achievements: [...run.achievements, ...r.won.map((d) => d.id)], portraits: [...run.portraits, ...r.portraits], bed: run.bed || r.bed };
+	playSfx("chime");
 	for (const s of strips) s(r);
 	notify();
 }

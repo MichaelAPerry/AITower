@@ -3,6 +3,7 @@ import type { GameState } from "@aitower/shared";
 import { useEffect, useRef, useState } from "react";
 import { describeEvent, eventKey } from "../events";
 import { type Notice, onNotice, type Severity } from "../notices";
+import { noticeSfx, playSfx } from "../sfx/sfx";
 import { addToast, showCount, type Toast } from "./toastList";
 
 const GLYPH: Record<Severity, string> = { error: "✕", warn: "▲", good: "✓", info: "·" };
@@ -14,6 +15,8 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 	const nextId = useRef(1);
 
 	const add = (n: Notice): void => {
+		const sfx = noticeSfx(n.severity);
+		if (sfx) playSfx(sfx);
 		const now = Date.now();
 		setToasts((list) => addToast(list, n, now, () => nextId.current++));
 	};
@@ -38,6 +41,7 @@ export function Toasts({ content, state }: { content: ContentDB; state: GameStat
 			if (e.tick < c.tick) continue;
 			if (e.tick === c.tick && ++atTick <= c.n) continue;
 			const d = describeEvent(e.event, state.view, content, state.settings.horrorIntensity);
+			if (d.toast && e.event.type === "researched") playSfx("complete");
 			if (d.toast) add({ text: d.text, severity: d.severity, key: eventKey(e.event), group: d.group });
 		}
 		cursor.current = { tick: last.tick, n: countAt(last.tick) };

@@ -60,6 +60,10 @@ export interface Settings {
 	showDesktopNotice: boolean;
 	/** Music volume relative to master, 0..1. */
 	musicVolume: number;
+	/** UI sound effects (achievement chime, clicks, alerts). Master volume and Mute still apply. */
+	sfxEnabled: boolean;
+	/** Sound-effect volume relative to master, 0..1. */
+	sfxVolume: number;
 	/** Advisor tips in the strip. Decisions always appear; this only silences the unprompted tips (Ask still works). */
 	advisorTips: boolean;
 }
@@ -75,6 +79,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	autosave: true,
 	showDesktopNotice: true,
 	musicVolume: 0.6,
+	sfxEnabled: true,
+	sfxVolume: 0.7,
 	advisorTips: true,
 };
 
@@ -95,6 +101,8 @@ export function normalizeSettings(raw: unknown): Settings {
 		autosave: bool(r.autosave, d.autosave),
 		showDesktopNotice: bool(r.showDesktopNotice, d.showDesktopNotice),
 		musicVolume: num(r.musicVolume, d.musicVolume, 0, 1),
+		sfxEnabled: bool(r.sfxEnabled, d.sfxEnabled),
+		sfxVolume: num(r.sfxVolume, d.sfxVolume, 0, 1),
 		// `assistant` is the pre-advisor name of this switch: a player who turned UNIT-7 off keeps tips off.
 		advisorTips: bool(r.advisorTips, bool((r as Record<string, unknown>).assistant, d.advisorTips)),
 	};
