@@ -2,13 +2,13 @@
 	display: grid;
 	gap: 10px;
 	padding: 4px 6px 12px 2px;
-	font: var(--fs-body)/1.35 var(--f-type);
+	font: max(16px, var(--fs-body, 16px)) / 1.35 var(--f-body);
 	color: var(--paper-ink);
 }
 .aitower-hud .cr-title,
 .aitower-hud .cr-head {
 	margin: 0;
-	font: 700 var(--fs-body)/1.2 var(--f-type);
+	font: 400 max(16px, var(--fs-body, 16px)) / 1.2 var(--f-display);
 	letter-spacing: 0.06em;
 	text-transform: uppercase;
 }
@@ -31,6 +31,6 @@
 }
 .aitower-hud .cr-quote p {
 	margin: 2px 0 0;
-	font-size: var(--fs-small);
+	font-size: max(16px, var(--fs-body, 16px));
 	opacity: 0.85;
 }
