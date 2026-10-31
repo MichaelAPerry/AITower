@@ -11,7 +11,7 @@ import { effectText, nodeState, researchedSet, techList, techName, unlocksFor } 
 
 export type NodeGroup = "done" | "ready" | "next" | "later";
 
-export const TAB_LABEL: Record<TechBranch, string> = { compute: "Compute", cooling: "Cooling", power: "Power", logistics: "Logistics", administration: "Admin", wetware: "Wetware" };
+export const TAB_LABEL: Record<TechBranch, string> = { compute: "Compute", cooling: "Cooling", power: "Power", logistics: "Logistics", administration: "Admin", wetware: "Flesh" };
 const TAB_ORDER: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 
 /** Wetware and biotech-path nodes keep their secrets until they can actually be started (same rule as the Encyclopedia). */
