@@ -10,7 +10,7 @@ export function LessonList({ content, onStart }: { content: ContentDB; onStart: 
 	return (
 		<ol className="les-list" aria-label="Lessons">
 			{lessonsInOrder(content).map((def) => {
-				const stars = progress.done[def.id];
+				const done = progress.done[def.id] !== undefined;
 				return (
 					<li key={def.id} data-lesson-row={def.id}>
 						<span className="les-n">{def.number}</span>
@@ -21,7 +21,7 @@ export function LessonList({ content, onStart }: { content: ContentDB; onStart: 
 							</small>
 						</span>
 						<button type="button" className="ui-btn" data-start-lesson={def.id} onClick={() => onStart(def.scenario)}>
-							{stars ? (def.starred === false ? "Replay ✓" : `Replay ${"★".repeat(stars)}`) : "Start"}
+							{done ? "Replay ✓" : "Start"}
 						</button>
 					</li>
 				);

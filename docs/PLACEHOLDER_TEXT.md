@@ -42,8 +42,6 @@ Lesson `liquid`, file `packages/content/src/data/lessons.json`, advisor cass. Ti
 - `liquid.failed` (packages/content/src/data/lessons.json): A rack got too hot. The pipe, the chiller and the CDU all have to be in place and running. Have another go.
 - `liquid.holdLabel` (packages/content/src/data/lessons.json): hours running
 - `liquid.setup[0].label` (packages/content/src/data/lessons.json): Lesson hall: nothing breaks today
-- `liquid.star2Text` (packages/content/src/data/lessons.json): The hall's PUE was 1.6 or lower at the end.
-- `liquid.star3Text` (packages/content/src/data/lessons.json): No rack was throttled or tripped for heat.
 
 ## Lesson 6: Lights Out
 
@@ -81,28 +79,6 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 - `lights_out.failed` (packages/content/src/data/lessons.json): The racks stayed dark too long. The battery and the genset have to be up and running before the grid drops. Have another go.
 - `lights_out.setup[0].label` (packages/content/src/data/lessons.json): Lesson hall: nothing breaks today
 - `lights_out.beats[1].effects[0].label` (packages/content/src/data/lessons.json): Grid failure
-- `lights_out.star2Text` (packages/content/src/data/lessons.json): Not one minute without power during the outage.
-- `lights_out.star3Text` (packages/content/src/data/lessons.json): The battery never ran empty.
-
-## Lessons 1 to 4: star texts
-
-Shown on the lesson result screen next to the labels "Star 2" and "Star 3".
-
-- `first_watt.star2Text` (packages/content/src/data/lessons.json): At least 10% of the power was always spare while the rack ran.
-- `first_watt.star3Text` (packages/content/src/data/lessons.json): Not one minute without power once the first job started.
-- `earn_your_keep.star2Text` (packages/content/src/data/lessons.json): Both contracts were paid, and you finished with more cash than you started with.
-- `earn_your_keep.star3Text` (packages/content/src/data/lessons.json): No job ever sat stalled for want of storage.
-- `grow_the_tower.star2Text` (packages/content/src/data/lessons.json): Done within 2 game days.
-- `grow_the_tower.star3Text` (packages/content/src/data/lessons.json): The Foreman is on, and cash never fell below his $1 million reserve.
-- `the_three_trees.star2Text` (packages/content/src/data/lessons.json): A Green rack and clean power both standing when the first Garden points arrived.
-- `the_three_trees.star3Text` (packages/content/src/data/lessons.json): No minute without power, and no rack ran hotter than 80 degrees C.
-
-## Lesson result screen labels
-
-Row labels on the result screen of a starred lesson, `resultModel` in `packages/ui/src/lessons/lessons.ts`.
-
-- `result.row.star2` (packages/ui/src/lessons/lessons.ts): Star 2
-- `result.row.star3` (packages/ui/src/lessons/lessons.ts): Star 3
 
 ## Lesson build ghost
 

@@ -156,9 +156,6 @@ export function stepPulse(def: LessonDef, lv: LessonView, content: ContentDB, ui
 
 export interface ResultModel {
 	won: boolean;
-	/** False for the lessons that give no stars: finishing is the reward. */
-	starred: boolean;
-	stars: number;
 	rows: { label: string; value: string; earned: boolean }[];
 	learned: string;
 	handbook: { id: string; label: string }[];
@@ -177,18 +174,9 @@ export function articleTitle(content: ContentDB, id: string): string {
 
 export function resultModel(def: LessonDef, lv: LessonView, firstTime: boolean, titleOf: (id: string) => string = (id) => id): ResultModel {
 	const won = lv.status === "won";
-	const starred = def.starred !== false;
 	return {
 		won,
-		starred,
-		stars: lv.stars,
-		rows: starred
-			? [
-					{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won },
-					{ label: "Star 2", value: def.star2Text, earned: won && lv.star2 },
-					{ label: "Star 3", value: def.star3Text, earned: won && lv.star3 },
-				]
-			: [{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won }],
+		rows: [{ label: "Passed", value: won ? (def.passed ?? def.goal) : "Not this time", earned: won }],
 		learned: def.learned,
 		handbook: def.handbook.map((id) => ({ id, label: titleOf(id) })),
 		bonus: won && firstTime ? def.bonus : 0,

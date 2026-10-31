@@ -1,6 +1,6 @@
 /**
  * Lessons (M6.4). A lesson is a scenario plus a script from content (`LessonDef`): goal checks over values the sim already
- * tracks, scripted beats (a client job, a tripped feeder), a catalog restricted to what the lesson teaches, and stars.
+ * tracks, scripted beats (a client job, a tripped feeder), a catalog restricted to what the lesson teaches.
  * Everything here is deterministic and lives in the snapshot (`state.lesson`); the app only presents it.
  */
 import { type ContentDB, type LessonCond, type LessonDef, type LessonEffect, type LessonMetric, treeOf } from "@aitower/content";
@@ -30,7 +30,7 @@ export function startLesson(state: SimState, def: LessonDef): void {
 }
 
 export function newLessonState(def: LessonDef, tick: number, cash = 0): LessonState {
-	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, stars: 0, starBits: 0, minCash: cash, drainTicks: 0, stallTicks: 0, foremanTicks: 0, hotTicks: 0, setupDone: true };
+	return { id: def.id, status: "active", stepsDone: [], beatsFired: [], holdTicks: 0, minHeadroom: 100, downTicks: 0, startTick: tick, endTick: -1, minCash: cash, drainTicks: 0, stallTicks: 0, foremanTicks: 0, hotTicks: 0, setupDone: true };
 }
 
 export type LessonMetrics = Record<LessonMetric, number>;
@@ -265,17 +265,6 @@ function applyEffect(ctx: TickCtx, e: LessonEffect, def: LessonDef): void {
 	void def;
 }
 
-/** Bonus stars for a finished lesson, tested on its metrics at the win: bit 1 = star 2 held, bit 2 = star 3 held. */
-export function lessonStarBits(def: LessonDef, m: LessonMetrics): number {
-	return (allHold(def.stars2, m) ? 1 : 0) | (allHold(def.stars3, m) ? 2 : 0);
-}
-
-/** Star count for a finished lesson: 1 for passing, plus one for each bonus star. */
-export function lessonStars(def: LessonDef, m: LessonMetrics): number {
-	const bits = lessonStarBits(def, m);
-	return 1 + (bits & 1) + (bits >> 1);
-}
-
 /** Tick stage 10b: run the lesson's beats, steps, success and failure. A won or lost lesson stays on the state (for the result screen) but stops restricting. */
 export function lessonStep(ctx: TickCtx): void {
 	const { state, content } = ctx;
@@ -297,7 +286,7 @@ export function lessonStep(ctx: TickCtx): void {
 	}
 	// Downtime after the second rack: any tick the racks are dark or the load exceeds capacity.
 	if (ls.beatsFired.length > 0 && m.racks > 0 && (m.racksDark > 0 || m.shortKw > 0)) ls.downTicks++;
-	// Running tallies the star rules may read.
+	// Running tallies the lesson conditions may read.
 	if (state.cash < ls.minCash) ls.minCash = state.cash;
 	if (m.batteries > 0 && m.upsPct <= 0) ls.drainTicks++;
 	// A storage stall: the datasets of the live jobs do not fit in the powered storage.
@@ -316,10 +305,6 @@ export function lessonStep(ctx: TickCtx): void {
 		if (!ls.stepsDone.includes(last.id)) ls.stepsDone.push(last.id);
 		ls.status = "won";
 		ls.endTick = state.tick;
-		// Tallies include this tick; the win-hold counters above are already settled.
-		const end = lessonMetrics(state, content);
-		ls.starBits = def.starred === false ? 0 : lessonStarBits(def, end);
-		ls.stars = def.starred === false ? 1 : 1 + (ls.starBits & 1) + (ls.starBits >> 1);
 	} else if (def.lose.some((c) => condHolds(c, m))) {
 		ls.status = "lost";
 		ls.endTick = state.tick;
