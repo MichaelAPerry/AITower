@@ -10,6 +10,16 @@ Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The si
 
 Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots).
 
+## 0.5 Session 5 note (Nov 1) — READ FIRST
+
+- Alpha branch = `task/alpha-layout` (all session-5 work merged + layout fix; Haiku verified: check, build, e2e, e2e:layout pass). NOT on main. Main still = `61dc193`.
+- Session 5 added: M PLUS Rounded 1c body font + size scale (16-32px) + UI scale setting; bigger advisor faces; city-pop main menu (steampunk removed); SFX + toggle; lesson stars removed; logo gap fixed; in-game music (tower loop, warm/quiet scene songs, `docs/MUSIC_MAP.md`); ending songs on endings + auto credits roll; research orb with semantic zoom; 44 pixel icons (fork icon on Trees gauge); lessons rebuilt on full UI (player toggles speed); layout check `npm run e2e:layout`.
+- OWNER PLAY-TEST BUG (open): "the old music still plays" in the alpha. Not investigated (usage limit). Start here: `packages/ui/src/gamemusic/`, `title/titleMusic.ts`, `Hud.tsx` GameMusic; check the title song stops and the tower loop/scene songs take over.
+- Open owner questions: Retrofit buttons still say Synthetic/Bio/Green (rename to Lattice/Flesh/Garden?). In-world Pixi labels are 10-11px (`packages/render/src/pixi/markers.ts`, `structure.ts`). Stale font note in `packages/ui/AGENTS.md`.
+- Owner decisions this session: song titles stay as tagged; single-file HTML keeps music (19.6 MB OK); Lesson 4 line changes kept; Trees icon = branching fork; future idea: song lyrics/translation unlock.
+- Branches: owner deletes merged `wip/*` by hand (agents get 403). Task branches `task/*` and `merge/*` can go once the alpha lands on main.
+- Order: fix the music bug, owner play-tests alpha, merge to main on owner's word, then trailer (title theme) / landing page / README.
+
 ## 1. State on Oct 31 (end of session 4)
 
 - `main` = branch `claude/youthful-ramanujan-msqcy9` = `61dc193` (plus this docs commit). Merged to main on the owner's word, FOR PLAY-TEST. GitHub Pages deploys on push to main (`.github/workflows/pages.yml`).
