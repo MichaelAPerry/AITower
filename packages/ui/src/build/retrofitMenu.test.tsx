@@ -76,7 +76,7 @@ describe("the rack inspector's Retrofit section", () => {
 		const { s } = store({});
 		const base = RetrofitSection({ store: s, content, f: fv("rack_air_gpu") });
 		const t = text(base);
-		for (const branch of ["Synthetic", "Bio", "Green"]) expect(t).toContain(branch);
+		for (const branch of ["Lattice", "Flesh", "Garden"]) expect(t).toContain(branch);
 		expect(walk(base).filter((n) => n.type === "button" && String(n.props.className).includes("ui-retrofit-btn"))).toHaveLength(3);
 		expect(RetrofitSection({ store: s, content, f: fv("chiller") })).toBeNull();
 		expect(RetrofitSection({ store: s, content, f: fv("rack_storage") })).toBeNull();

@@ -306,30 +306,30 @@ export class Structure {
 			if (left < 0) continue;
 			const top = floorTop(view, f);
 			const name = floorName(f);
-			const pw = name.length > 1 ? 14 : 9;
+			const pw = name.length > 1 ? 20 : 13;
 			const x = left * TILE - pw - 2;
-			const y = top + 13;
+			const y = top + 11;
 			// Bracket bolting the plate to the facade.
-			px(g, x + pw, y + 4, 2, 2, BRASS.lo);
+			px(g, x + pw, y + 7, 2, 2, BRASS.lo);
 			// Enamel plate: brass rim, paper face, corner screws.
-			px(g, x, y, pw, 11, BRASS.line);
-			px(g, x + 1, y + 1, pw - 2, 9, f < 0 ? mix(T.paper, T.amber, 0.25) : PAPER.mid);
+			px(g, x, y, pw, 16, BRASS.line);
+			px(g, x + 1, y + 1, pw - 2, 14, f < 0 ? mix(T.paper, T.amber, 0.25) : PAPER.mid);
 			px(g, x + 1, y + 1, pw - 2, 1, PAPER.hi);
-			px(g, x + 1, y + 9, pw - 2, 1, PAPER.lo);
+			px(g, x + 1, y + 14, pw - 2, 1, PAPER.lo);
 			px(g, x + 1, y + 1, 1, 1, BRASS.mid);
 			px(g, x + pw - 2, y + 1, 1, 1, BRASS.mid);
-			px(g, x + 1, y + 9, 1, 1, BRASS.mid);
-			px(g, x + pw - 2, y + 9, 1, 1, BRASS.mid);
+			px(g, x + 1, y + 14, 1, 1, BRASS.mid);
+			px(g, x + pw - 2, y + 14, 1, 1, BRASS.mid);
 			let tx = this.plateText[used];
 			if (!tx) {
-				tx = new Text({ text: "", style: { fontFamily: WORLD_FONT, fontSize: 10, fill: T.ink }, resolution: 4 });
+				tx = new Text({ text: "", style: { fontFamily: WORLD_FONT, fontSize: 14, fill: T.ink }, resolution: 4 });
 				tx.anchor.set(0.5, 0.5);
 				this.plateText.push(tx);
 				this.plates.addChild(tx);
 			}
 			tx.text = name;
 			tx.visible = true;
-			tx.position.set(x + pw / 2, y + 5);
+			tx.position.set(x + pw / 2, y + 8);
 			used++;
 		}
 		for (let i = used; i < this.plateText.length; i++) this.plateText[i].visible = false;
