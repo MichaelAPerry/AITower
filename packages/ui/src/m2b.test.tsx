@@ -116,12 +116,12 @@ describe("Research panel", () => {
 		expect(html).not.toContain(">List</button>");
 		expect(html).not.toContain("Available now");
 	});
-	it("shows the opening view's ready globes with their cost, and only a few globes", () => {
+	it("shows the opening view's ready globes with their cost, and every globe", () => {
 		const { content, store } = setup();
 		const html = panel(store, content);
 		expect(html).toContain('data-tech="cmp_burnin"');
 		expect(html).toContain("20 RP");
-		expect((html.match(/data-tech="/g) ?? []).length + (html.match(/data-cluster="/g) ?? []).length).toBeLessThanOrEqual(20);
+		expect((html.match(/data-tech="/g) ?? []).length).toBe(content.tech.length);
 	});
 	it("with nothing picked it shows the cheapest tech you can start; Start is a real, enabled button", () => {
 		const { content, store } = setup();

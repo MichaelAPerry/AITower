@@ -20,7 +20,7 @@ const rpText = (n: number): string => `${Math.floor(Math.max(0, n) + 1e-9).toLoc
 
 type Ctx = Pick<PanelProps, "content" | "setUi"> & { view: PanelProps["state"]["view"] };
 
-/** Research: one screen. The orb (semantic zoom, see orbModel.ts) on the left, the picked tech on the right, the pinned goal on top. */
+/** Research: one screen. The orb (see orbModel.ts) on the left, the picked tech on the right, the pinned goal on top. */
 export function ResearchPanel({ store, content, state, ui, setUi }: PanelProps) {
 	const { view } = state;
 	const nodes = techList(content);
