@@ -1,4 +1,5 @@
 import { fmtMoney } from "../format";
+import { PixelIcon } from "../icons/PixelIcon";
 import { Icon } from "../components/common";
 import { FlavorLine } from "../components/FlavorLine";
 import type { PanelProps } from "../components/context";
@@ -34,7 +35,7 @@ function StatRow({ s }: { s: Stat }) {
  * The persistent Inspector beside the catalog. Hovering a card previews it; the picked item shows when nothing is hovered
  * and stays while the player places it. Replaces the old floating spec card.
  */
-export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
+export function BuildInspector({ store, content, state, ui, setUi }: PanelProps) {
 	const { view, tool } = state;
 	const picked = itemForTool(tool, content);
 	const hovered = findItem(ui.buildHover, content);
@@ -51,7 +52,23 @@ export function BuildInspector({ content, state, ui, setUi }: PanelProps) {
 		<TermScope key={item.key}>
 		<aside className={`bld-insp ui-panel ${item.tier ? `${item.tier.className} is-tier` : ""}`} aria-label="Build inspector" data-help="build-inspector" data-tut="build-inspector">
 			<div className="bld-kicker">
-				{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
+				<span>
+					{isPicked ? "Picked" : "Preview"} · {CATEGORY_LABEL[item.category]}
+				</span>
+				<button
+					type="button"
+					className="ui-btn ui-icon-btn ui-insp-x"
+					data-insp-close
+					aria-label="Close inspector"
+					title="Close (Esc)"
+					onClick={() => {
+						store.setGhost(null);
+						store.setTool({ kind: "select" });
+						setUi({ buildHover: null });
+					}}
+				>
+					<PixelIcon name="close" />
+				</button>
 			</div>
 			{item.tier && !item.tier.isPath && <TierMark t={item.tier} />}
 			<h2 className="bld-h">{item.name}</h2>

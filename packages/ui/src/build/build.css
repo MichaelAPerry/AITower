@@ -191,6 +191,10 @@
 	scrollbar-width: thin;
 }
 .aitower-hud .bld-kicker {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--gap);
 	font: 500 var(--fs-label)/1 var(--f-num);
 	letter-spacing: 0.12em;
 	color: var(--text-dim);
