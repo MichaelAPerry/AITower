@@ -1,9 +1,9 @@
-import { achievementContent, type ContentDB } from "@aitower/content";
+import type { ContentDB } from "@aitower/content";
 import { type KeyboardEvent, useEffect, useRef } from "react";
 import { TITLE_END_ART, TITLE_LOGO } from "../art";
 import type { SongId } from "../title/titleMusic";
 import type { TitleEndingTree } from "../title/titleState";
-import { citation, creditLines, creditQuotes, endingThemeLine, musicCreditLines } from "./credits";
+import { rollCreditLines, endingThemeLine, musicCreditLines } from "./credits";
 import "./creditsRoll.css";
 
 /** Seconds the roll scrolls for: most of a ~3 minute song. */
@@ -14,14 +14,12 @@ export const SKIP_GUARD_MS = 1000;
 export const canSkip = (elapsedMs: number): boolean => elapsedMs >= SKIP_GUARD_MS;
 
 /**
- * Full-screen credits roll after a tree's success ending: that tree's ending picture and logo behind a slow scroll of the same credits the system menu shows
- * (see credits.ts), the ending theme listed first. Esc / Space / Enter / click or the Skip button ends it; so does the end of the scroll. The song is not touched here.
+ * Full-screen credits roll after a tree's success ending: that tree's ending picture and logo behind a slow scroll of the who-made-it and music credits the system menu shows
+ * (see credits.ts), without the menu's quotes, the ending theme listed first. Esc / Space / Enter / click or the Skip button ends it; so does the end of the scroll. The song is not touched here.
  */
-export function CreditsRoll({ tree, song, content, onDone, seconds = ROLL_SECONDS }: { tree: TitleEndingTree; song: SongId; content?: ContentDB; onDone: () => void; seconds?: number }) {
+export function CreditsRoll({ tree, song, onDone, seconds = ROLL_SECONDS }: { tree: TitleEndingTree; song: SongId; content?: ContentDB /* accepted for callers; the roll shows no quotes */; onDone: () => void; seconds?: number }) {
 	const root = useRef<HTMLDivElement>(null);
 	const t0 = useRef(Date.now());
-	const quotes = content ? creditQuotes(content) : [];
-	const U = achievementContent.ui;
 	useEffect(() => {
 		root.current?.focus();
 	}, []);
@@ -47,7 +45,7 @@ export function CreditsRoll({ tree, song, content, onDone, seconds = ROLL_SECOND
 						{endingThemeLine(song)}
 					</p>
 					<ul className="cr-roll-lines">
-						{creditLines().map((l) => (
+						{rollCreditLines().map((l) => (
 							<li key={l}>{l}</li>
 						))}
 					</ul>
@@ -55,15 +53,6 @@ export function CreditsRoll({ tree, song, content, onDone, seconds = ROLL_SECOND
 						{musicCreditLines().map((l) => (
 							<li key={l.text} className={l.id === song ? "is-playing" : undefined}>
 								{l.text}
-							</li>
-						))}
-					</ul>
-					<h2 className="cr-roll-head">{U.creditsQuotesHead}</h2>
-					<ul className="cr-roll-quotes" data-credit-quotes>
-						{quotes.map((q) => (
-							<li key={`${q.kind}:${q.item}`}>
-								<blockquote>{`“${q.flavor.quote}”`}</blockquote>
-								<p>{`— ${citation(q.flavor)}`}</p>
 							</li>
 						))}
 					</ul>

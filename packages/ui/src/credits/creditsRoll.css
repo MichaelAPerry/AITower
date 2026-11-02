@@ -2,6 +2,8 @@
 	position: absolute;
 	inset: 0;
 	z-index: 60;
+	/* The HUD root is pointer-events: none; without this every click (Skip included) fell through the roll. */
+	pointer-events: auto;
 	overflow: hidden;
 	background: #05030c;
 	color: #fff4e6;
@@ -66,13 +68,15 @@
 	letter-spacing: 0.04em;
 	color: #ffd6a0;
 }
-.cr-roll-lines,
-.cr-roll-quotes {
+.cr-roll-lines {
 	list-style: none;
-	margin: 0 0 56px;
+	margin: 0;
 	padding: 0;
 	display: grid;
 	gap: 18px;
+}
+.cr-roll-lines + .cr-roll-lines {
+	margin-top: 56px;
 }
 .cr-roll-lines li.is-playing {
 	color: #ffd6a0;
@@ -80,26 +84,6 @@
 }
 .cr-roll-lines li.is-playing::before {
 	content: "♪ ";
-}
-.cr-roll-head {
-	margin: 0 0 36px;
-	font: 700 36px/1.2 var(--f-display);
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: #ffb4d6;
-}
-.cr-roll-quotes {
-	gap: 24px;
-	margin-bottom: 0;
-}
-.cr-roll-quotes blockquote {
-	margin: 0;
-	font-style: italic;
-}
-.cr-roll-quotes p {
-	margin: 4px 0 0;
-	font-size: 20px;
-	opacity: 0.85;
 }
 .cr-roll-skip {
 	position: absolute;
