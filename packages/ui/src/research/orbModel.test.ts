@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { loadContent } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { describe, expect, it } from "vitest";
-import { LEAF_ZOOM, MAX_LABELS, MAX_ZOOM, type StateMap, TREES, cellStats, clampView, defaultView, fitView, layoutOrb, minZoom, relatives, splitZoom, toScreen, viewForCell, viewForNode, visibleCells, zoomAt } from "./orbModel";
+import { LABEL_ZOOM, MAX_ZOOM, type StateMap, TREES, clampView, defaultView, fitView, globeRadius, layoutOrb, minZoom, orbLinks, relatives, viewForNode, visibleNodes, zoomAt } from "./orbModel";
 import { stateSignature } from "./treeState";
 
 const content = loadContent();
@@ -38,98 +38,64 @@ describe("orb layout (real content)", () => {
 		expect(r(1)).toBeLessThan(r(3));
 		expect(r(3)).toBeLessThan(r(5));
 	});
-	it("groups each tree into a tree of clusters that holds every member once", () => {
-		expect(L.roots.map((r) => r.tree)).toEqual(["lattice", "flesh", "garden", "core"]);
-		expect(L.roots.reduce((a, r) => a + r.members.length, 0)).toBe(content.tech.length);
-		for (const c of L.cells.values()) {
-			if (c.kids.length) expect(c.kids.flatMap((k) => k.members).sort()).toEqual([...c.members].sort());
-			else expect(c.members).toEqual([c.id]);
-		}
-	});
 	it("names the trees Lattice, Flesh and Garden, never the code names", () => {
 		expect(Object.values(TREES).map((t) => t.name)).toEqual(["Core", "Lattice", "Flesh", "Garden"]);
-		const names = [...L.cells.values()].filter((c) => !c.node).map((c) => c.name);
-		for (const n of names) expect(n).not.toMatch(/Synthetic|Wetware|Green\b/);
 	});
 });
 
-describe("semantic zoom", () => {
-	it("zoomed out you see exactly one cluster globe per tree", () => {
+describe("zoom: nothing appears, disappears or merges", () => {
+	const zooms = (f: { z: number }): number[] => [f.z, (f.z + MAX_ZOOM) / 2, MAX_ZOOM];
+	it("every globe is shown at min, mid and max zoom, in every window size and wherever the view is centred", () => {
 		for (const [w, h] of SIZES) {
-			const v = fitView(L, w, h);
-			const shown = visibleCells(L, v);
-			expect(shown.map((s) => s.cell.id)).toEqual(L.roots.map((r) => r.id));
-			expect(shown.every((s) => !s.cell.node)).toBe(true);
+			const f = fitView(L, w, h);
+			for (const z of zooms(f))
+				for (const [cx, cy] of [
+					[0, 0],
+					[300, 200],
+					[-400, -250],
+				]) {
+					const shown = visibleNodes(L, { cx, cy, z, w, h });
+					expect(shown.map((s) => s.node.id).sort(), `z=${z.toFixed(2)}`).toEqual(content.tech.map((t) => t.id).sort());
+				}
 		}
 	});
-	it("fit is the lowest zoom allowed, and the highest splits down to single techs", () => {
+	it("every prerequisite link is drawn at every zoom, and every prerequisite-free globe has a branch from the centre", () => {
+		const links = orbLinks(L);
+		const want = content.tech.reduce((a, t) => a + Math.max(1, t.requires.filter((r) => L.byId.has(r)).length), 0);
+		expect(links).toHaveLength(want);
+		for (const t of content.tech) for (const r of t.requires) if (L.byId.has(r)) expect(links.some((l) => l.from === r && l.to === t.id), `${r}>${t.id}`).toBe(true);
+		for (const n of L.nodes) expect(links.some((l) => l.to === n.id), n.id).toBe(true);
+		expect(links.some((l) => l.from === null)).toBe(true);
+	});
+	it("fit is the lowest zoom allowed and MAX_ZOOM the highest", () => {
 		const v = fitView(L, 1400, 820);
 		expect(clampView(L, { ...v, z: 0.01 }).z).toBe(minZoom(L, 1400, 820));
 		expect(clampView(L, { ...v, z: 99 }).z).toBe(MAX_ZOOM);
-		const hi = visibleCells(L, { ...v, z: MAX_ZOOM });
-		expect(hi.some((s) => s.cell.node)).toBe(true);
 	});
-	it("zooming in splits clusters: more, smaller globes appear around the view centre", () => {
+	it("zooming out only shrinks globes, and never to nothing", () => {
 		const f = fitView(L, 1400, 820);
-		const counts = [f.z, 1.1, 1.4, 1.8].map((z) => visibleCells(L, { ...f, z, cx: 0, cy: 0 }).length);
-		expect(counts[0]).toBe(4);
-		expect(counts[1]).toBeGreaterThan(counts[0]);
-		expect(counts[2]).toBeGreaterThan(counts[1]);
-	});
-	it("single techs only show at or above the leaf zoom", () => {
-		const f = fitView(L, 1400, 820);
-		for (const z of [0.7, 0.9, 1.0, LEAF_ZOOM - 0.01]) {
-			for (const [cx, cy] of [
-				[0, 0],
-				[200, 150],
-				[-300, -200],
-			])
-				expect(
-					visibleCells(L, { ...f, z, cx, cy }).filter((s) => s.cell.node),
-					`z=${z}`,
-				).toHaveLength(0);
+		expect(globeRadius(f.z)).toBeGreaterThanOrEqual(4);
+		expect(globeRadius(f.z)).toBeLessThan(globeRadius(1));
+		let prev = 0;
+		for (let z = f.z; z <= MAX_ZOOM; z *= 1.05) {
+			expect(globeRadius(z)).toBeGreaterThanOrEqual(prev);
+			prev = globeRadius(z);
 		}
 	});
-	it(`never labels more than ${MAX_LABELS} globes, at any zoom, centre or window size`, () => {
-		let worst = 0;
-		for (const [w, h] of SIZES) {
-			const f = fitView(L, w, h);
-			for (let z = f.z; z <= MAX_ZOOM; z *= 1.08)
-				for (let cx = -600; cx <= 600; cx += 150)
-					for (let cy = -400; cy <= 400; cy += 100) {
-						const v = { cx, cy, z, w, h };
-						const n = visibleCells(L, v).filter((s) => s.labelled).length;
-						worst = Math.max(worst, n);
-						expect(n, `z=${z.toFixed(2)} at ${cx},${cy} in ${w}x${h}`).toBeLessThanOrEqual(MAX_LABELS);
-					}
-		}
-		expect(worst).toBeGreaterThan(8); // the cap is reached, not just trivially met
-	});
-	it("a view that would hold too many globes folds the far ones back into clusters, nearest stay split", () => {
+	it("labels hide only when zoomed out too far or off screen; globes stay", () => {
 		const f = fitView(L, 1400, 820);
-		const v = { ...f, z: 1.6, cx: 0, cy: 0 };
-		const all = [...L.cells.values()].filter((c) => !c.kids.length && Math.abs(toScreen(v, c.x, c.y)[0] - v.w / 2) < v.w / 2).length;
-		expect(all).toBeGreaterThan(MAX_LABELS);
-		const shown = visibleCells(L, v).filter((s) => s.labelled);
-		expect(shown.length).toBeLessThanOrEqual(MAX_LABELS);
-		expect(shown.some((s) => !s.cell.node)).toBe(true);
-		expect(shown.some((s) => s.cell.node)).toBe(true);
+		expect(visibleNodes(L, f).every((s) => !s.labelled)).toBe(true);
+		const hi = visibleNodes(L, { ...f, z: MAX_ZOOM, cx: 0, cy: 0 });
+		expect(hi.some((s) => s.labelled)).toBe(true);
+		expect(hi).toHaveLength(content.tech.length);
+		expect(visibleNodes(L, { ...f, z: LABEL_ZOOM, cx: 0, cy: 0 }).some((s) => s.labelled)).toBe(true);
 	});
-	it("clicking a cluster zooms into it so that it splits", () => {
-		for (const r of L.roots) {
-			const v = viewForCell(L, r, 1400, 820);
-			expect(v.z).toBeGreaterThanOrEqual(Math.min(splitZoom(r), MAX_ZOOM));
-			const ids = visibleCells(L, v).map((s) => s.cell.id);
-			expect(ids).not.toContain(r.id);
-			expect(ids.some((id) => r.members.includes(id) || L.cells.get(id)?.members.every((m) => r.members.includes(m)))).toBe(true);
-		}
-	});
-	it("any tech can be flown to and shows as its own globe", () => {
+	it("any tech can be flown to and its label shows", () => {
 		for (const id of ["contracts_clerk", "mind_lattice_dossier", "organoid_vats", "canopy_array", "transfer_protocol"]) {
 			if (!L.byId.has(id)) continue;
 			for (const [w, h] of SIZES) {
 				const v = viewForNode(L, id, w, h);
-				expect(visibleCells(L, v).some((s) => s.cell.id === id && s.labelled), id).toBe(true);
+				expect(visibleNodes(L, v).some((s) => s.node.id === id && s.labelled), id).toBe(true);
 			}
 		}
 	});
@@ -145,27 +111,16 @@ describe("semantic zoom", () => {
 
 describe("opening view and states", () => {
 	const statesFor = (p: Partial<SimView>): StateMap => stateSignature(content, view(p)).states;
-	it("opens zoomed toward what can be researched now, with those techs as single globes", () => {
+	it("opens zoomed toward what can be researched now, with those labels showing", () => {
 		const states = statesFor({ researchPoints: 5000 });
 		const v = defaultView(L, states, 1400, 820);
 		expect(v.z).toBeGreaterThan(fitView(L, 1400, 820).z);
-		const shown = visibleCells(L, v);
-		const ready = shown.filter((s) => s.cell.node && states.get(s.cell.id) === "avail" && s.labelled);
+		const ready = visibleNodes(L, v).filter((s) => states.get(s.node.id) === "avail" && s.labelled);
 		expect(ready.length).toBeGreaterThan(0);
-		expect(shown.filter((s) => s.labelled).length).toBeLessThanOrEqual(MAX_LABELS);
 	});
 	it("falls back to the whole orb when everything is done", () => {
 		const states: StateMap = new Map(content.tech.map((t) => [t.id, "done" as const]));
 		expect(defaultView(L, states, 1400, 820)).toEqual(fitView(L, 1400, 820));
-	});
-	it("cluster stats count ready and done", () => {
-		const states = statesFor({ researchPoints: 5000, techResearched: ["contracts_clerk"] });
-		const core = L.roots.find((r) => r.tree === "core") as (typeof L.roots)[number];
-		const s = cellStats(core, states);
-		expect(s.total).toBe(core.members.length);
-		expect(s.done).toBe(1);
-		expect(s.ready).toBeGreaterThan(0);
-		expect(s.startable).toBe(s.ready);
 	});
 	it("selecting a tech finds its prerequisites and follow-ups", () => {
 		const t = content.tech.find((x) => x.requires.length > 0) as (typeof content.tech)[number];

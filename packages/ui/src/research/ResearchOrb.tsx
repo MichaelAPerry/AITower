@@ -5,24 +5,21 @@ import { PixelIconSvg } from "../icons/PixelIcon";
 import { TREE_ICON } from "../icons/pixelIcons";
 import { lanesOf } from "./lanes";
 import {
-	type Cell,
-	MAX_LABELS,
 	type OrbLayout,
 	type OrbNode,
 	type StateMap,
 	TREES,
 	type View,
-	cellStats,
 	clampView,
 	defaultView,
 	fitView,
 	orbLayoutFor,
 	relatives,
-	splitZoom,
 	toScreen,
-	viewForCell,
 	viewForNode,
-	visibleCells,
+	globeRadius,
+	orbLinks,
+	visibleNodes,
 	zoomAt,
 } from "./orbModel";
 import { ART, drawBackdrop, drawFlora } from "./orbArt";
@@ -69,16 +66,16 @@ interface DrawArgs {
 	rp: number;
 	laneColor: Map<string, string>;
 	onSelect: (id: string) => void;
-	onCluster: (c: Cell) => void;
 	moved: { current: boolean };
 }
 
-const globeR = (z: number): number => Math.round(14 * clamp(0.8 + 0.35 * z, 1, 1.7));
-const clusterR = (n: number): number => Math.round(clamp(24 + 7 * Math.sqrt(n), 30, 60));
+/** Globes are drawn in a 16-unit space and scaled to the zoom's radius. */
+const G = 16;
 const colorOf = (n: OrbNode, laneColor: Map<string, string>): string => (n.tree === "core" ? (laneColor.get(n.lane) ?? TREES.core.color) : TREES[n.tree].color);
 
 function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; labelled: boolean; st: TreeState; a: DrawArgs }) {
-	const R = globeR(a.v.z);
+	const R = globeRadius(a.v.z);
+	const k = R / G;
 	const c = colorOf(n, a.laneColor);
 	const rel = relatives(a.layout, a.selId);
 	const isSel = a.selId === n.id;
@@ -113,33 +110,35 @@ function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; 
 		>
 			<title>{`${n.name} - ${STATE_WORD[st]}`}</title>
 			<g className="orb-pop">
-				<circle r={R + 10} fill="transparent" />
+				<circle r={R + 6} fill="transparent" />
+				<g transform={`scale(${k.toFixed(3)})`}>
 				{st === "done" && (
 					<>
-						<circle r={R + 9} fill={c} opacity={0.14} />
-						<circle r={R + 5} fill={c} opacity={0.28} />
-						<circle r={R} fill={c} stroke="#fff" strokeWidth={2} className="orb-core" />
-						<circle r={R - 6} fill="none" stroke="#04041c" strokeWidth={2} opacity={0.45} />
+						<circle r={G + 9} fill={c} opacity={0.14} />
+						<circle r={G + 5} fill={c} opacity={0.28} />
+						<circle r={G} fill={c} stroke="#fff" strokeWidth={2} className="orb-core" />
+						<circle r={G - 6} fill="none" stroke="#04041c" strokeWidth={2} opacity={0.45} />
 						<path d="M-6,0 L-2,5 L6,-5" fill="none" stroke="#04041c" strokeWidth={3} strokeLinecap="square" />
 					</>
 				)}
 				{ready && (
 					<>
-						<circle r={R + 9} fill="#fff6a8" opacity={0.12} />
-						<circle r={R + 4} fill="none" stroke="#fff6a8" strokeWidth={3} className="orb-ring" />
-						<circle r={R} fill="#101248" stroke="#fff6a8" strokeWidth={3} className="orb-core" />
-						<circle r={R - 6} fill={c} />
+						<circle r={G + 9} fill="#fff6a8" opacity={0.12} />
+						<circle r={G + 4} fill="none" stroke="#fff6a8" strokeWidth={3} className="orb-ring" />
+						<circle r={G} fill="#101248" stroke="#fff6a8" strokeWidth={3} className="orb-core" />
+						<circle r={G - 6} fill={c} />
 					</>
 				)}
 				{(st === "locked" || st === "lvl") && (
 					<>
-						<circle r={R} fill="#080826" stroke={c} strokeOpacity={0.6} strokeWidth={2} className="orb-core" />
+						<circle r={G} fill="#080826" stroke={c} strokeOpacity={0.6} strokeWidth={2} className="orb-core" />
 						<rect x={-5} y={-1} width={10} height={8} fill={c} opacity={0.7} />
 						<path d="M-3.5,-1 v-4 h7 v4" fill="none" stroke={c} strokeOpacity={0.7} strokeWidth={2} />
 					</>
 				)}
-				{isSel && <circle r={R + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}
-				{related && !isSel && <circle r={R + 8} fill="none" stroke="#ff6ad5" strokeWidth={2} />}
+				{isSel && <circle r={G + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}
+				{related && !isSel && <circle r={G + 8} fill="none" stroke="#ff6ad5" strokeWidth={2} />}
+				</g>
 				{labelled && (
 					<text x={lx} y={y0} textAnchor={side > 0 ? "start" : "end"}>
 						{lines.map((l, i) => (
@@ -152,68 +151,6 @@ function Leaf({ n, x, y, labelled, st, a }: { n: OrbNode; x: number; y: number; 
 								{cost}
 							</tspan>
 						)}
-					</text>
-				)}
-			</g>
-		</g>
-	);
-}
-
-function Cluster({ cell, x, y, labelled, a }: { cell: Cell; x: number; y: number; labelled: boolean; a: DrawArgs }) {
-	const st = cellStats(cell, a.states);
-	const isRoot = cell.depth === 0;
-	// A tree's root globe carries its icon above the count: it needs room for both (28 + 4 + 18 px), so it is never smaller than 46.
-	const hasIcon = isRoot && cell.tree !== "core";
-	const R = hasIcon ? Math.max(46, clusterR(cell.members.length)) : clusterR(cell.members.length);
-	const c = TREES[cell.tree].color;
-	const rel = relatives(a.layout, a.selId);
-	const hot = cell.members.some((m) => m === a.selId || rel.prereq.has(m) || rel.follow.has(m));
-	const circ = 2 * Math.PI * (R - 5);
-	const doneArc = st.total ? (st.done / st.total) * circ : 0;
-	const name = isRoot ? TREES[cell.tree].name : cell.name;
-	const sub = `${st.ready > 0 ? `${st.ready} ready · ` : ""}${st.done}/${st.total} done`;
-	return (
-		// biome-ignore lint/a11y/useSemanticElements: an SVG group cannot be a <button>
-		<g
-			className={`orb-g orb-cluster ${hot ? "is-rel" : ""} ${st.ready ? "has-ready" : ""}`}
-			transform={`translate(${x.toFixed(1)},${y.toFixed(1)})`}
-			role="button"
-			tabIndex={0}
-			data-cluster={cell.id}
-			aria-label={`${name}: ${st.total} techs, ${st.ready} ready, ${st.done} done. Press Enter to zoom in.`}
-			onClick={() => {
-				if (!a.moved.current) a.onCluster(cell);
-			}}
-			onKeyDown={(e) => {
-				if (e.key === "Enter" || e.key === " ") {
-					e.preventDefault();
-					a.onCluster(cell);
-				}
-			}}
-		>
-			<title>{`${name} - ${sub}. Click to zoom in.`}</title>
-			<g className="orb-pop">
-				<circle r={R + 12} fill="transparent" />
-				<circle r={R + 10} fill={c} opacity={0.1} />
-				<circle r={R + 6} fill={c} opacity={0.18} />
-				{st.ready > 0 && <circle r={R + 6} fill="none" stroke="#fff6a8" strokeWidth={3} className="orb-ring" />}
-				<circle r={R} fill="#0a0a30" stroke={c} strokeWidth={3} className="orb-core" />
-				<circle r={R - 5} fill="none" stroke={c} strokeOpacity={0.25} strokeWidth={5} />
-				<circle r={R - 5} fill="none" stroke="#fff" strokeWidth={5} strokeDasharray={`${doneArc} ${circ}`} transform="rotate(-90)" opacity={0.9} />
-				<circle r={R - 14} fill={c} opacity={0.2} />
-				{hasIcon && cell.tree !== "core" && <PixelIconSvg name={TREE_ICON[cell.tree]} x={-14} y={-26} size={28} />}
-				<text className="orb-count" y={hasIcon ? 26 : 7} textAnchor="middle">
-					{st.total}
-				</text>
-				{hot && <circle r={R + 10} fill="none" stroke="#ff6ad5" strokeWidth={2} strokeDasharray="4 3" />}
-				{labelled && (
-					<text y={R + 26} textAnchor="middle">
-						<tspan x={0} className={`orb-lab ${st.ready ? "is-avail" : "is-done"}`}>
-							{name}
-						</tspan>
-						<tspan x={0} dy={22} className="orb-sub">
-							{sub}
-						</tspan>
 					</text>
 				)}
 			</g>
@@ -238,31 +175,28 @@ function edgePath(a: [number, number], b: [number, number], mid: [number, number
 /** Everything drawn on top of the pixel art, in screen space so text stays 16 px at every zoom. */
 function Scene({ a }: { a: DrawArgs }) {
 	const { layout, v } = a;
-	const shown = visibleCells(layout, v);
-	const leaves = new Map<string, [number, number, number]>();
-	for (const s of shown) if (s.cell.node) leaves.set(s.cell.id, [...toScreen(v, s.cell.x, s.cell.y), globeR(v.z)] as [number, number, number]);
+	const links = useMemo(() => orbLinks(layout), [layout]);
+	const shown = visibleNodes(layout, v);
 	const mid = toScreen(v, 0, 0);
+	const R = globeRadius(v.z);
 	const edges: React.ReactNode[] = [];
-	for (const [to, froms] of layout.prereqs) {
-		const tp = leaves.get(to);
-		if (!tp) continue;
-		for (const from of froms) {
-			const fp = leaves.get(from);
-			if (!fp) continue;
-			const hot = a.selId === to || a.selId === from;
-			const lit = a.states.get(from) === "done";
-			const n = layout.byId.get(to);
-			const col = hot ? "#ff6ad5" : n ? colorOf(n, a.laneColor) : "#6fd3ff";
-			const d = edgePath([fp[0], fp[1]], [tp[0], tp[1]], mid, fp[2], tp[2]);
-			edges.push(
-				<g key={`${from}>${to}`} className={`orb-edge ${hot ? "is-hot" : ""}`}>
-					{(hot || (lit && a.states.get(to) === "done")) && <path d={d} stroke={col} strokeWidth={6} strokeOpacity={0.25} fill="none" />}
-					<path d={d} fill="none" stroke={col} strokeWidth={hot ? 3.4 : lit ? 2.2 : 1.4} strokeOpacity={hot ? 1 : lit ? 0.9 : 0.35} strokeDasharray={hot || lit ? undefined : "2 5"} strokeLinecap="round" />
-				</g>,
-			);
-		}
+	for (const l of links) {
+		const tn = layout.byId.get(l.to);
+		const fn = l.from ? layout.byId.get(l.from) : null;
+		if (!tn || (l.from && !fn)) continue;
+		const tp = toScreen(v, tn.x, tn.y);
+		const fp = fn ? toScreen(v, fn.x, fn.y) : mid;
+		const hot = a.selId === l.to || a.selId === l.from;
+		const lit = !!l.from && a.states.get(l.from) === "done";
+		const col = hot ? "#ff6ad5" : colorOf(tn, a.laneColor);
+		const d = edgePath(fp, tp, mid, fn ? R : 0, R);
+		edges.push(
+			<g key={`${l.from ?? "hub"}>${l.to}`} className={`orb-edge ${hot ? "is-hot" : ""} ${l.from ? "" : "is-branch"}`} data-from={l.from ?? "hub"} data-to={l.to}>
+				{(hot || (lit && a.states.get(l.to) === "done")) && <path d={d} stroke={col} strokeWidth={6} strokeOpacity={0.25} fill="none" />}
+				<path d={d} fill="none" stroke={col} strokeWidth={hot ? 3.4 : lit ? 2.4 : 1.8} strokeOpacity={hot ? 1 : lit ? 0.95 : l.from ? 0.6 : 0.4} strokeDasharray={hot || lit || !l.from ? undefined : "2 5"} strokeLinecap="round" />
+			</g>,
+		);
 	}
-	const rootsOpen = new Map(layout.roots.map((r) => [r.tree, v.z >= splitZoom(r)] as const));
 	const world = `translate(${v.w / 2 - v.cx * v.z} ${v.h / 2 - v.cy * v.z}) scale(${v.z})`;
 	return (
 		<svg className="orb-svg" width={v.w} height={v.h} viewBox={`0 0 ${v.w} ${v.h}`} role="presentation">
@@ -273,12 +207,8 @@ function Scene({ a }: { a: DrawArgs }) {
 				{[330, 93, 207].map((d) => (
 					<line key={d} x1={0} y1={0} x2={Math.cos((d * Math.PI) / 180) * (RA[5] + 30)} y2={Math.sin((d * Math.PI) / 180) * (RB[5] + 30)} className="orb-sp" vectorEffect="non-scaling-stroke" strokeDasharray="3 5" />
 				))}
-				{rootsOpen.get("core") && (
-					<>
-						<circle r={16} fill="#0a1a4a" stroke="#7fe6ff" strokeWidth={2} vectorEffect="non-scaling-stroke" opacity={0.7} />
-						<circle r={8} fill="#bff3ff" opacity={0.6} />
-					</>
-				)}
+				<circle r={16} fill="#0a1a4a" stroke="#7fe6ff" strokeWidth={2} vectorEffect="non-scaling-stroke" opacity={0.7} />
+				<circle r={8} fill="#bff3ff" opacity={0.6} />
 			</g>
 			{layout.levelTags.map((t) => {
 				const [x, y] = toScreen(v, t.x, t.y);
@@ -288,14 +218,13 @@ function Scene({ a }: { a: DrawArgs }) {
 					</text>
 				);
 			})}
-			{layout.roots.map((r) => {
-				if (r.tree === "core" || !rootsOpen.get(r.tree)) return null;
-				const T = TREES[r.tree];
+			{(["lattice", "flesh", "garden"] as const).map((tree) => {
+				const T = TREES[tree];
 				const ang = (T.deg * Math.PI) / 180;
 				const [x, y] = toScreen(v, Math.cos(ang) * RA[5] * 1.06, Math.sin(ang) * RB[5] * 1.06);
 				return (
-					<g key={r.tree}>
-						<PixelIconSvg name={TREE_ICON[r.tree]} x={x - 14} y={y - 46} size={28} />
+					<g key={tree}>
+						<PixelIconSvg name={TREE_ICON[tree]} x={x - 14} y={y - 46} size={28} />
 						<text x={x} y={y} textAnchor="middle" className="orb-rim" fill={T.color}>
 							{T.name.toUpperCase()}
 						</text>
@@ -305,17 +234,15 @@ function Scene({ a }: { a: DrawArgs }) {
 			<g>{edges}</g>
 			<g>
 				{shown.map((s) => {
-					const [x, y] = toScreen(v, s.cell.x, s.cell.y);
-					const n = s.cell.node;
-					if (n) return <Leaf key={s.cell.id} n={n} x={x} y={y} labelled={s.labelled} st={a.states.get(n.id) ?? "locked"} a={a} />;
-					return <Cluster key={s.cell.id} cell={s.cell} x={x} y={y} labelled={s.labelled} a={a} />;
+					const [x, y] = toScreen(v, s.node.x, s.node.y);
+					return <Leaf key={s.node.id} n={s.node} x={x} y={y} labelled={s.labelled} st={a.states.get(s.node.id) ?? "locked"} a={a} />;
 				})}
 			</g>
 		</svg>
 	);
 }
 
-/** The research orb: a pan-and-zoom stage with semantic zoom (see orbModel.ts). */
+/** The research orb: a pan-and-zoom stage where every globe and link stays visible at every zoom (see orbModel.ts). */
 export function ResearchOrb({ content, view, selId, initialFocus = null, onSelect, focus, rp }: OrbProps) {
 	const layout = useMemo(() => orbLayoutFor(content), [content]);
 	const { states, sig } = useMemo(() => stateSignature(content, view), [content, view]);
@@ -451,7 +378,7 @@ export function ResearchOrb({ content, view, selId, initialFocus = null, onSelec
 	const fit = (): void => flyTo(fitView(layoutRef.current, sizeRef.current.w, sizeRef.current.h));
 	const home = (): void => flyTo(defaultView(layoutRef.current, statesRef.current, sizeRef.current.w, sizeRef.current.h));
 	const onKey = (e: KeyboardEvent<HTMLDivElement>): void => {
-		if ((e.target as Element).closest("[data-tech],[data-cluster]") && (e.key === "Enter" || e.key === " ")) return;
+		if ((e.target as Element).closest("[data-tech]") && (e.key === "Enter" || e.key === " ")) return;
 		const pan = (dx: number, dy: number): void => flyTo(clampView(layoutRef.current, { ...tgt.current, cx: tgt.current.cx + dx / tgt.current.z, cy: tgt.current.cy + dy / tgt.current.z }));
 		const map: Record<string, () => void> = { "0": fit, Home: fit, "+": () => zoomBy(1.4), "=": () => zoomBy(1.4), "-": () => zoomBy(1 / 1.4), _: () => zoomBy(1 / 1.4), h: home, ArrowLeft: () => pan(-120, 0), ArrowRight: () => pan(120, 0), ArrowUp: () => pan(0, -120), ArrowDown: () => pan(0, 120) };
 		const f = map[e.key];
@@ -461,13 +388,13 @@ export function ResearchOrb({ content, view, selId, initialFocus = null, onSelec
 		f();
 	};
 
-	const args: DrawArgs = { layout, v: cur, states: stable, selId, rp, laneColor, onSelect, onCluster: (c) => flyTo(viewForCell(layoutRef.current, c, sizeRef.current.w, sizeRef.current.h)), moved };
+	const args: DrawArgs = { layout, v: cur, states: stable, selId, rp, laneColor, onSelect, moved };
 	const worldStyle: CSSProperties = { transform: `translate(${cur.w / 2 - cur.cx * cur.z}px, ${cur.h / 2 - cur.cy * cur.z}px) scale(${cur.z})` };
 	const artStyle: CSSProperties = { left: ART.x0, top: ART.y0, width: ART.w, height: ART.h };
 	return (
 		<div className="orb">
 			{/* biome-ignore lint/a11y/noNoninteractiveTabindex lint/a11y/useSemanticElements: the stage takes arrow and zoom keys */}
-			<div ref={stage} className="orb-stage" tabIndex={0} role="group" aria-label={`Research orb. ${MAX_LABELS} globes at most are labelled. Scroll to zoom, drag to pan, 0 to fit, arrow keys to move.`} onPointerDown={onDown} onKeyDown={onKey} data-zoom={cur.z.toFixed(2)}>
+			<div ref={stage} className="orb-stage" tabIndex={0} role="group" aria-label={`Research orb. Labels show when zoomed in. Scroll to zoom, drag to pan, 0 to fit, arrow keys to move.`} onPointerDown={onDown} onKeyDown={onKey} data-zoom={cur.z.toFixed(2)}>
 				<div className="orb-world" style={worldStyle} aria-hidden="true">
 					<canvas ref={bg} className="orb-art" style={artStyle} />
 					<canvas ref={flora} className="orb-art" style={artStyle} />

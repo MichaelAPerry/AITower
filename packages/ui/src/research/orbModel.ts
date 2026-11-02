@@ -1,13 +1,10 @@
 /**
- * The research orb, as pure geometry and rules: where every tech sits, how the globes group into clusters (a binary
- * dendrogram per tree), and which globes are visible at a zoom level. No React, so it is deterministic and unit-tested.
- *
- * Semantic zoom: zoomed out you see one cluster globe per tree. Zooming in splits a cluster into its two halves once its
- * on-screen size is big enough, down to single techs. At most MAX_LABELS labelled globes are ever in view: if a view would
- * hold more, the clusters farthest from the middle of the view are folded back.
+ * The research orb, as pure geometry and rules: where every tech sits and which globes carry a label at a zoom level.
+ * Every globe and every link is always drawn; zooming out only shrinks them (labels hide when they would be too small).
+ * No React, so it is deterministic and unit-tested.
  */
 import type { ContentDB, TechLane, TechNode } from "@aitower/content";
-import { laneName, laneOf } from "./lanes";
+import { laneOf } from "./lanes";
 import type { TreeState } from "./treeState";
 
 export type TreeId = "core" | "lattice" | "flesh" | "garden";
@@ -20,14 +17,9 @@ export const TREES: Record<TreeId, { name: string; sub: string; color: string; d
 };
 const LANE_TREE: Partial<Record<TechLane, TreeId>> = { syn: "lattice", wet: "flesh", green: "garden" };
 
-export const MAX_LABELS = 15;
 export const MAX_ZOOM = 3.6;
-/** Below this zoom (px per world unit) single globes do not split out: their labels would touch. */
-export const LEAF_ZOOM = 1.15;
-/** A cluster splits once its on-screen radius reaches this (plus a little for big children). */
-const SPLIT_PX = 120;
-/** Per depth: the lowest zoom at which that depth may split (the trees stay whole when zoomed out). */
-const DEPTH_FLOOR = [1.0, 1.1, 1.2];
+/** Below this zoom (px per world unit) labels are hidden: they would touch. Globes and links stay. */
+export const LABEL_ZOOM = 1;
 
 const RA = [0, 125, 255, 375, 470, 560];
 const RB = [0, 95, 195, 285, 355, 395];
@@ -83,37 +75,15 @@ export interface OrbNode {
 	tech: TechNode;
 }
 
-/** A node of the grouping tree: a single tech (leaf) or a cluster of two halves. */
-export interface Cell {
-	id: string;
-	tree: TreeId;
-	depth: number;
-	x: number;
-	y: number;
-	/** World radius that holds every member. */
-	r: number;
-	members: string[];
-	kids: Cell[];
-	parent: Cell | null;
-	/** Cluster title, e.g. "Power · LV1-3". Leaves use the tech name. */
-	name: string;
-	/** Set when the cell is a single tech. */
-	node?: OrbNode;
-}
-
 export interface OrbLayout {
 	nodes: OrbNode[];
 	byId: Map<string, OrbNode>;
-	roots: Cell[];
-	cells: Map<string, Cell>;
 	bounds: { x0: number; y0: number; x1: number; y1: number };
 	/** Where the "LV n" tags go. */
 	levelTags: { level: number; x: number; y: number }[];
 	prereqs: Map<string, string[]>;
 	follows: Map<string, string[]>;
 }
-
-export const isLeaf = (c: Cell): boolean => c.kids.length === 0;
 
 /** Tree a tech belongs to: its own lane if it is one of the three trees, else core. */
 export const treeOfTech = (n: TechNode): TreeId => LANE_TREE[laneOf(n)] ?? "core";
@@ -258,98 +228,11 @@ export function layoutOrb(content: ContentDB): OrbLayout {
 		y1 = Math.max(y1, b.y1);
 	}
 
-	const cells = new Map<string, Cell>();
-	const roots: Cell[] = [];
-	for (const tree of TREE_ORDER) {
-		const ns = nodes.filter((n) => n.tree === tree);
-		if (!ns.length) continue;
-		const root = buildTree(ns, tree, content, cells);
-		assignDepth(root, 0, null);
-		roots.push(root);
-	}
 	const levelTags = [1, 2, 3, 4, 5].map((lv) => {
 		const [x, y] = pol(lv, 312);
 		return { level: lv, x: x + 6, y: y + 4 };
 	});
-	return { nodes, byId, roots, cells, bounds: { x0, y0, x1, y1 }, levelTags, prereqs, follows };
-}
-
-function assignDepth(c: Cell, depth: number, parent: Cell | null): void {
-	c.depth = depth;
-	c.parent = parent;
-	for (const k of c.kids) assignDepth(k, depth + 1, c);
-}
-
-/** Group a tree's techs: repeatedly join the two closest groups (Ward's rule), so every cluster is a compact patch of the orb. */
-function buildTree(ns: OrbNode[], tree: TreeId, content: ContentDB, cells: Map<string, Cell>): Cell {
-	const byId = new Map(ns.map((n) => [n.id, n]));
-	let live: Cell[] = ns.map((n) => {
-		const c: Cell = { id: n.id, tree, depth: 0, x: n.x, y: n.y, r: n.R + 6, members: [n.id], kids: [], parent: null, name: n.name, node: n };
-		cells.set(c.id, c);
-		return c;
-	});
-	let seq = 0;
-	const nameOf = (members: string[]): string => {
-		const counts = new Map<string, number>();
-		let lo = 9;
-		let hi = 0;
-		for (const id of members) {
-			const n = byId.get(id);
-			if (!n) continue;
-			counts.set(n.lane, (counts.get(n.lane) ?? 0) + 1);
-			lo = Math.min(lo, n.level);
-			hi = Math.max(hi, n.level);
-		}
-		const [lane, share] = [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))[0] ?? ["", 0];
-		const base = tree === "core" && share >= members.length * 0.6 ? laneName(lane as TechLane, content) : TREES[tree].name;
-		return `${base} · LV${lo}${hi > lo ? `-${hi}` : ""}`;
-	};
-	while (live.length > 1) {
-		let best = Number.POSITIVE_INFINITY;
-		let bi = 0;
-		let bj = 1;
-		for (let i = 0; i < live.length; i++)
-			for (let j = i + 1; j < live.length; j++) {
-				const a = live[i];
-				const b = live[j];
-				const na = a.members.length;
-				const nb = b.members.length;
-				const d = ((a.x - b.x) ** 2 + (a.y - b.y) ** 2) * ((na * nb) / (na + nb));
-				if (d < best - 1e-9) {
-					best = d;
-					bi = i;
-					bj = j;
-				}
-			}
-		const a = live[bi];
-		const b = live[bj];
-		const members = [...a.members, ...b.members];
-		const x = (a.x * a.members.length + b.x * b.members.length) / members.length;
-		const y = (a.y * a.members.length + b.y * b.members.length) / members.length;
-		let r = 0;
-		for (const id of members) {
-			const n = byId.get(id);
-			if (n) r = Math.max(r, Math.hypot(n.x - x, n.y - y) + n.R + 6);
-		}
-		const cell: Cell = { id: `c:${tree}:${seq++}`, tree, depth: 0, x, y, r, members, kids: [a, b], parent: null, name: nameOf(members) };
-		cells.set(cell.id, cell);
-		live = live.filter((_, k) => k !== bi && k !== bj);
-		live.push(cell);
-	}
-	const root = live[0];
-	if (!root.node) root.name = TREES[tree].name;
-	return root;
-}
-
-/** Zoom (px per world unit) at which a cluster stops being one globe and shows its halves. */
-export function splitZoom(c: Cell): number {
-	if (isLeaf(c)) return Number.POSITIVE_INFINITY;
-	const bigKid = Math.max(...c.kids.map((k) => k.members.length));
-	const need = (SPLIT_PX + 14 * Math.sqrt(bigKid)) / Math.max(30, c.r);
-	const floor = DEPTH_FLOOR[Math.min(c.depth, DEPTH_FLOOR.length - 1)];
-	// Two single techs: the layout keeps their labels apart at 1:1, so they split as soon as labels are legible.
-	if (c.kids.every(isLeaf)) return Math.max(floor, LEAF_ZOOM);
-	return Math.min(Math.max(floor, need, c.kids.some(isLeaf) ? LEAF_ZOOM : 0), MAX_ZOOM * 0.92);
+	return { nodes, byId, bounds: { x0, y0, x1, y1 }, levelTags, prereqs, follows };
 }
 
 export interface View {
@@ -369,65 +252,36 @@ const inView = (v: View, x: number, y: number, pad: number): boolean => {
 	return sx >= pad && sx <= v.w - pad && sy >= pad && sy <= v.h - pad;
 };
 
+/** Every globe is drawn at every zoom; only its label depends on the view (big enough zoom, and the globe is on screen). */
+export function visibleNodes(layout: OrbLayout, v: View): Shown[] {
+	return layout.nodes.map((node) => ({ node, labelled: v.z >= LABEL_ZOOM && inView(v, node.x, node.y, 0) }));
+}
+
 export interface Shown {
-	cell: Cell;
-	/** Counts toward the label cap: its centre is in view. */
+	node: OrbNode;
 	labelled: boolean;
 }
 
-/** The cells to draw at this view: the split rule, then the label cap. Cells far outside the view are left out. */
-export function visibleCells(layout: OrbLayout, v: View): Shown[] {
-	const out: Cell[] = [];
-	const walk = (c: Cell): void => {
-		if (!isLeaf(c) && v.z >= splitZoom(c)) for (const k of c.kids) walk(k);
-		else out.push(c);
-	};
-	for (const r of layout.roots) walk(r);
-	let list = out;
-	const lab = (c: Cell): boolean => inView(v, c.x, c.y, 0);
-	for (let guard = 0; guard < 400; guard++) {
-		if (list.filter(lab).length <= MAX_LABELS) break;
-		const inList = new Set(list);
-		let pick: Cell | null = null;
-		let far = -1;
-		for (const c of list) {
-			const p = c.parent;
-			if (!p?.kids.every((k) => inList.has(k)) || !p.kids.some(lab)) continue;
-			const d = Math.hypot((p.x - v.cx) * v.z, (p.y - v.cy) * v.z);
-			if (d > far) {
-				far = d;
-				pick = p;
-			}
-		}
-		if (!pick) break;
-		const gone = new Set(pick.kids);
-		const at = list.findIndex((c) => gone.has(c));
-		list = list.filter((c) => !gone.has(c));
-		list.splice(at, 0, pick);
+/** On-screen globe radius in px: it shrinks with the zoom (never to nothing), and grows a little when zoomed in. */
+export const globeRadius = (z: number): number => (z >= 1 ? Math.round(14 * clamp(0.8 + 0.35 * z, 1, 1.7)) : Math.max(4, 16 * z));
+
+export interface Link {
+	/** The prerequisite, or null for a branch from the centre of the orb. */
+	from: string | null;
+	to: string;
+}
+/** Every line, at every zoom: each prerequisite link, plus a branch from the centre to every globe that has no prerequisite. */
+export function orbLinks(layout: OrbLayout): Link[] {
+	const out: Link[] = [];
+	for (const n of layout.nodes) {
+		const ps = layout.prereqs.get(n.id) ?? [];
+		if (!ps.length) out.push({ from: null, to: n.id });
+		for (const p of ps) out.push({ from: p, to: n.id });
 	}
-	return list.filter((c) => inView(v, c.x, c.y, -140)).map((c) => ({ cell: c, labelled: lab(c) }));
+	return out;
 }
 
 export type StateMap = Map<string, TreeState>;
-export interface CellStats {
-	total: number;
-	done: number;
-	ready: number;
-	startable: number;
-}
-/** n ready / n done for a cell. Ready = every prerequisite met (it may still need points); startable = and affordable. */
-export function cellStats(c: Cell, states: StateMap): CellStats {
-	const s: CellStats = { total: c.members.length, done: 0, ready: 0, startable: 0 };
-	for (const id of c.members) {
-		const st = states.get(id);
-		if (st === "done") s.done++;
-		else if (st === "avail") {
-			s.ready++;
-			s.startable++;
-		} else if (st === "poor") s.ready++;
-	}
-	return s;
-}
 
 /** The selected tech's direct prerequisites and direct follow-ups. */
 export function relatives(layout: OrbLayout, id: string | null): { prereq: Set<string>; follow: Set<string> } {
@@ -458,27 +312,16 @@ export function zoomAt(layout: OrbLayout, v: View, factor: number, sx: number, s
 	return clampView(layout, { ...v, z, cx: wx - (sx - v.w / 2) / z, cy: wy - (sy - v.h / 2) / z });
 }
 
-/** The view that shows a cluster split into its halves, centred on it. */
-export function viewForCell(layout: OrbLayout, c: Cell, w: number, h: number): View {
-	const fit = fitBox({ x0: c.x - c.r, x1: c.x + c.r, y0: c.y - c.r, y1: c.y + c.r }, w, h);
-	const z = Math.min(MAX_ZOOM, Math.max(fit.z, isLeaf(c) ? 1.5 : splitZoom(c) * 1.04));
-	return clampView(layout, { cx: c.x, cy: c.y, z, w, h });
-}
-
-/** The view that shows one tech as its own globe: the lowest zoom (from `minZ`) at which it is not folded into a cluster. */
+/** The view centred on one tech, at least at zoom `minZ`, with its label showing. */
 export function viewForNode(layout: OrbLayout, id: string, w: number, h: number, minZ = 0): View {
 	const n = layout.byId.get(id);
 	if (!n) return fitView(layout, w, h);
-	for (let z = Math.max(minZ, minZoom(layout, w, h)); z < MAX_ZOOM; z *= 1.06) {
-		const v = clampView(layout, { cx: n.x, cy: n.y, z, w, h });
-		if (visibleCells(layout, v).some((s) => s.cell.id === id)) return v;
-	}
-	return clampView(layout, { cx: n.x, cy: n.y, z: MAX_ZOOM, w, h });
+	return clampView(layout, { cx: n.x, cy: n.y, z: Math.max(minZ, LABEL_ZOOM * 1.1, minZoom(layout, w, h)), w, h });
 }
 
 /**
  * The opening view: zoomed toward what can be researched now (else what is nearly ready), centred on it and close
- * enough for those techs to show as single globes.
+ * enough for their labels to show.
  */
 export function defaultView(layout: OrbLayout, states: StateMap, w: number, h: number): View {
 	let pick = layout.nodes.filter((n) => states.get(n.id) === "avail");
@@ -493,5 +336,5 @@ export function defaultView(layout: OrbLayout, states: StateMap, w: number, h: n
 		b.y1 = Math.max(b.y1, n.y + 50);
 	}
 	const f = fitBox(b, w, h, 60);
-	return clampView(layout, { ...f, z: clamp(f.z, LEAF_ZOOM + 0.1, 2.2) });
+	return clampView(layout, { ...f, z: clamp(f.z, LABEL_ZOOM + 0.1, 2.2) });
 }
