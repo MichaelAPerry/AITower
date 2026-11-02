@@ -180,7 +180,7 @@ describe("Singularity points: each tree scores only its own racks", () => {
 		const s = bare();
 		rackAt(s, "rack_dlc_gpu3", 420);
 		const t = s.view().soul.trees.synthetic;
-		expect(t.spPerDay).toBeCloseTo(420 * 2.5 * so(s).spPerPflopHour * 24, 9);
+		expect(t.spPerDay).toBeCloseTo(420 * so(s).spWeights.synthetic * so(s).spPerPflopHour * 24, 9);
 		expect(t.daysToWin).toBeCloseTo(so(s).spTarget / t.spPerDay, 9);
 		expect(t.rung).toBe(3);
 		expect(t.racks).toBe(1);

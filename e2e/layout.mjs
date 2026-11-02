@@ -178,9 +178,21 @@ async function checkSwitches(page, sel, label, all) {
 			all.push(`${label}: switch #${i} is not clickable (${String(e.message).split("\n")[0]})`);
 		});
 		if (!clicked) continue;
-		const after = await el.getAttribute("aria-checked");
-		if (before === after) all.push(`${label}: clicking switch #${i} did not flip it (${before})`);
-		else await el.click();
+		// The click commits through the store and React re-renders afterwards, so poll for the flip instead of reading the attribute in the same frame.
+		const flipped = await el.evaluate((node, b) => new Promise((res) => {
+			const t0 = performance.now();
+			const poll = () => (node.getAttribute("aria-checked") !== b ? res(true) : performance.now() - t0 > 3000 ? res(false) : setTimeout(poll, 25));
+			poll();
+		}), before);
+		if (!flipped) all.push(`${label}: clicking switch #${i} did not flip it (${before})`);
+		else {
+			await el.click();
+			await el.evaluate((node, b) => new Promise((res) => {
+				const t0 = performance.now();
+				const poll = () => (node.getAttribute("aria-checked") === b || performance.now() - t0 > 3000 ? res() : setTimeout(poll, 25));
+				poll();
+			}), before);
+		}
 	}
 }
 

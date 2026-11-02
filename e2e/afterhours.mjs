@@ -161,7 +161,7 @@ async function run(url) {
 		await newGame();
 		await page.waitForTimeout(500);
 		await edit({ fern: { streak: 2, lastDay: -1 } });
-		await focus(1, 5);
+		await focus(ITEMS[1].floor, ITEMS[1].x);
 		await clickItem(ITEMS[1]);
 		await page.locator("[data-decision]").waitFor();
 		assert((await page.locator("[data-scene]").getAttribute("data-scene")) === "ah_fern_third", "the third-day scene opens");
@@ -179,7 +179,7 @@ async function run(url) {
 		await newGame();
 		await page.waitForTimeout(500);
 		await edit({ fern: { streak: 9, lastDay: -1, thirdSeen: true } });
-		await focus(1, 5);
+		await focus(ITEMS[1].floor, ITEMS[1].x);
 		await clickItem(ITEMS[1]);
 		await page.locator("[data-decision]").waitFor();
 		assert((await page.locator("[data-scene]").getAttribute("data-scene")) === "ah_fern_tenth", "the tenth-day scene opens");
