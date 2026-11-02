@@ -2,7 +2,8 @@ import type { QuarterReport } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
 import { Stamp } from "../components/common";
 import { focusables, nextFocusIndex } from "../menu/focus";
-import { StampBtn } from "../menu/parts";
+import { Portrait } from "../advisors/Portrait";
+import { pickQuip, quipMood } from "./auditQuips";
 import { auditOutcome, gradeTone, reportRows } from "./finance";
 
 /**
@@ -40,42 +41,51 @@ export function AuditSheet({ report, onClose }: { report: QuarterReport; onClose
 	);
 }
 
-/** The paper itself (no hooks, so tests can call it directly). */
+/** The sheet itself (no hooks, so tests can call it directly): Luci's face and remark, the figures, the grade and a Close button. */
 export function AuditPaper({ report, onClose }: { report: QuarterReport; onClose: () => void }) {
 	const tone = gradeTone(report.grade);
 	const out = auditOutcome(report);
 	return (
-			<article className="ui-audit" role="dialog" aria-modal="true" aria-labelledby="audit-title">
-				<header className="ui-audit-head">
-					<span>FACILITY INSPECTION</span>
-					<span>QUARTER {report.quarter}</span>
-				</header>
-				<h2 className="ui-audit-title" id="audit-title">
-					QUARTERLY INSPECTION
-				</h2>
-				<div className="ui-audit-main">
-					<dl className="ui-audit-figs">
-						{reportRows(report).map((r) => (
-							<div key={r.label}>
-								<dt>{r.label}</dt>
-								<dd className={r.tone === "bad" ? "is-bad" : r.tone === "good" ? "is-good" : ""}>{r.value}</dd>
-							</div>
-						))}
-					</dl>
-					<div className="ui-audit-grade">
-						<span className="ui-audit-gradelabel">GRADE</span>
-						<Stamp tone={tone} className="ui-audit-stamp">
-							{report.grade}
-						</Stamp>
-					</div>
-				</div>
-				<p className="ui-audit-outcome">
-					<span className={report.cashDelta < 0 ? "is-bad" : report.cashDelta > 0 ? "is-good" : ""}>{out.cash}</span>
+		<article className="ui-panel ui-audit" role="dialog" aria-modal="true" aria-labelledby="audit-title">
+			<header className="ui-audit-head">
+				<span>FACILITY INSPECTION</span>
+				<span>QUARTER {report.quarter}</span>
+			</header>
+			<h2 className="ui-audit-title" id="audit-title">
+				QUARTERLY INSPECTION
+			</h2>
+			<div className="ui-audit-luci">
+				<Portrait id="luci" size={96} mood={quipMood(report)} />
+				<p className="ui-audit-quip">
+					<b>Luci</b>
+					{pickQuip(report)}
 				</p>
-				<blockquote className="ui-audit-remark">{report.remark}</blockquote>
-				<footer className="ui-audit-acts">
-					<StampBtn tone="green" rest="Close" hot="Closed" onClick={onClose} title="Close the inspection (Esc)" />
-				</footer>
-			</article>
+			</div>
+			<div className="ui-audit-main">
+				<dl className="ui-audit-figs">
+					{reportRows(report).map((r) => (
+						<div key={r.label}>
+							<dt>{r.label}</dt>
+							<dd className={r.tone === "bad" ? "is-bad" : r.tone === "good" ? "is-good" : ""}>{r.value}</dd>
+						</div>
+					))}
+				</dl>
+				<div className="ui-audit-grade">
+					<span className="ui-audit-gradelabel">GRADE</span>
+					<Stamp tone={tone} className="ui-audit-stamp">
+						{report.grade}
+					</Stamp>
+				</div>
+			</div>
+			<p className="ui-audit-outcome">
+				<span className={report.cashDelta < 0 ? "is-bad" : report.cashDelta > 0 ? "is-good" : ""}>{out.cash}</span>
+			</p>
+			<blockquote className="ui-audit-remark">{report.remark}</blockquote>
+			<footer className="ui-audit-acts">
+				<button type="button" className="ui-btn ui-audit-close" data-audit-close onClick={onClose} title="Close the inspection (Esc)">
+					Close
+				</button>
+			</footer>
+		</article>
 	);
 }

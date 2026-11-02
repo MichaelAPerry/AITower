@@ -145,6 +145,22 @@ Lesson `lights_out`, file `packages/content/src/data/lessons.json`, advisor bea.
 - `lights_out.setup[0].label` (packages/content/src/data/lessons.json): Lesson hall: nothing breaks today
 - `lights_out.beats[1].effects[0].label` (packages/content/src/data/lessons.json): Grid failure
 
+## Quarterly inspection: Luci's remarks
+
+Luci's short remark on the inspection sheet (`packages/ui/src/finance/auditQuips.ts`), chosen by the result: the worst finding if the grade is not an A, else the grade. All placeholder.
+
+- `quip.passed.1` (packages/ui/src/finance/auditQuips.ts): Clean sheet. The Ministry can't find a thing to fine you for.
+- `quip.passed.2` (packages/ui/src/finance/auditQuips.ts): Good quarter. Enjoy the grant, and don't touch anything.
+- `quip.warning.1` (packages/ui/src/finance/auditQuips.ts): Not a disaster. Not a compliment either.
+- `quip.warning.2` (packages/ui/src/finance/auditQuips.ts): They let you off with a warning. I'd fix it before next quarter.
+- `quip.failed.1` (packages/ui/src/finance/auditQuips.ts): That went badly. I'll put the kettle on and we'll go through it.
+- `quip.failed.2` (packages/ui/src/finance/auditQuips.ts): A fine. Well. It was bound to happen sooner or later.
+- `quip.failedJobs` (packages/ui/src/finance/auditQuips.ts): Failed jobs on the sheet. Clients remember those.
+- `quip.penalties` (packages/ui/src/finance/auditQuips.ts): Penalties paid. Look at where they came from first.
+- `quip.lowUptime` (packages/ui/src/finance/auditQuips.ts): Uptime is where the inspector looked hardest. So should we.
+- `quip.hotHall` (packages/ui/src/finance/auditQuips.ts): The PUE is high. Too much power is going to cooling, not work.
+- `quip.loss` (packages/ui/src/finance/auditQuips.ts): We spent more than we earned. Check the ledger before the next audit.
+
 ## Lesson build ghost
 
 Labels drawn in the world while a lesson asks for a coolant pipe or a rack click (`slotGhost` in `packages/ui/src/lessons/lessons.ts`). The label for placing a rack is still "BUILD HERE".
