@@ -137,7 +137,14 @@ Well, hands off the books unless you're licensed.
 
 If the user selects no they can come back and it says (buy the {upgrade}) in various different ways with the same dialogue above on the tenth. 
 
-## Open questions for the owner (ask before building)
+## Owner answers (Nov 2)
+
+- Missing a day resets the count to 0.
+- "No" on the third day changes nothing; the count continues.
+- Re-offer lines: Claude writes simple placeholders, e.g. "[ buy the coffee machine ]"; list them in docs/PLACEHOLDER_TEXT.md.
+- Places: Mel B1; Bea and Cass F1 (lobby); Luci F2.
+
+## Open questions for the owner (answered above)
 
 - "Consecutive": does missing a day reset the count to 0? (Assume yes.)
 - Does "No" on the third-day question change anything? (Assume the count continues either way.)
