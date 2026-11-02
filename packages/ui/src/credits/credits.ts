@@ -31,6 +31,12 @@ export function creditLines(): string[] {
 	return [U.creditsDesign, U.creditsCode, U.creditsArt, U.creditsInspired, U.creditsFonts, U.creditsQuotes];
 }
 
+/** The who-made-it lines for the ending roll: the same as `creditLines()` minus the line about quotes, since the roll shows none. */
+export function rollCreditLines(): string[] {
+	const U = achievementContent.ui;
+	return creditLines().filter((l) => l !== U.creditsQuotes);
+}
+
 /** The music lines: the credit, then one "Label: title" per song. */
 export function musicCreditLines(): { id: SongId | null; text: string }[] {
 	return [{ id: null, text: MUSIC_CREDIT }, ...SONG_ORDER.map((id) => ({ id, text: `${SONGS[id].label}: ${SONGS[id].title}` }))];

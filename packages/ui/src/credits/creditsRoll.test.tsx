@@ -1,9 +1,11 @@
-import { loadContent } from "@aitower/content";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { achievementContent, loadContent } from "@aitower/content";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { SONGS } from "../title/titleMusic";
 import { CreditsRoll, canSkip, ROLL_SECONDS } from "./CreditsRoll";
-import { citation, creditLines, creditQuotes, musicCreditLines, rollFor } from "./credits";
+import { citation, creditQuotes, musicCreditLines, rollCreditLines, rollFor } from "./credits";
 import { CreditsPane } from "./CreditsPane";
 
 const esc = (t: string): string => renderToStaticMarkup(<span>{t}</span>).replace(/^<span>|<\/span>$/g, "");
@@ -30,16 +32,31 @@ describe("the ending credits roll", () => {
 		}
 	});
 
-	it("takes its content from the shared credits data (same lines and quotes as the menu section)", () => {
+	it("shares the credit lines with the menu section but shows no quotes", () => {
 		const roll = renderToStaticMarkup(<CreditsRoll tree="flesh" song="flesh" content={content} onDone={() => {}} />);
 		const pane = renderToStaticMarkup(<CreditsPane content={content} />);
-		for (const l of [...creditLines(), ...musicCreditLines().map((m) => m.text)]) {
+		for (const l of [...rollCreditLines(), ...musicCreditLines().map((m) => m.text)]) {
 			expect(roll).toContain(esc(l));
 			expect(pane).toContain(esc(l));
 		}
+		expect(roll).not.toContain(esc(achievementContent.ui.creditsQuotes));
+		expect(roll).not.toContain(esc(achievementContent.ui.creditsQuotesHead));
+		expect(roll).not.toContain("<blockquote");
+		expect(roll).not.toContain("data-credit-quotes");
+		for (const q of creditQuotes(content)) expect(roll, q.item).not.toContain(esc(q.flavor.quote));
+	});
+
+	it("keeps every quote in the menu Credits pane", () => {
+		const pane = renderToStaticMarkup(<CreditsPane content={content} />);
 		const quotes = creditQuotes(content);
-		for (const q of quotes) expect(roll, q.item).toContain(esc(`— ${citation(q.flavor)}`));
-		expect((roll.match(/<blockquote>/g) ?? []).length).toBe(quotes.length);
+		expect(quotes.length).toBeGreaterThan(0);
+		for (const q of quotes) expect(pane, q.item).toContain(esc(`— ${citation(q.flavor)}`));
+		expect((pane.match(/<blockquote>/g) ?? []).length).toBe(quotes.length);
+	});
+
+	it("lets clicks reach the roll and its Skip button (the HUD root is pointer-events: none)", () => {
+		const css = readFileSync(fileURLToPath(new URL("./creditsRoll.css", import.meta.url)), "utf8");
+		expect(/\.cr-roll \{[^}]*pointer-events:\s*auto/.test(css)).toBe(true);
 	});
 
 	it("lasts about three minutes and can be skipped after the first second", () => {
