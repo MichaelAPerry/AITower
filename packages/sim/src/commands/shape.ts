@@ -3,6 +3,7 @@
  * correctly typed copy or a rejection reason; it never throws, whatever it is given (null, wrong types,
  * NaN / Infinity, cyclic or exotic objects, huge arrays). Game-rule validation lives in the `plan*` functions.
  */
+import { AFTER_HOURS_ITEM_IDS } from "@aitower/content";
 import type { CellRef, SimCommand } from "../api";
 import { shapeAutomation } from "../automation/policy";
 
@@ -31,6 +32,7 @@ const NUMERIC: Record<string, readonly string[]> = {
 	deferDecision: ["decisionId"],
 	decisionGate: [],
 	markTip: [],
+	clickAfterHours: [],
 	research: [],
 	setClerk: [],
 	takeLoan: ["amount"],
@@ -96,6 +98,10 @@ export function normalizeCommand(raw: unknown): Normalized {
 		if (type === "markTip") {
 			if (typeof raw.tipId !== "string") return bad("tipId must be a string");
 			out.tipId = raw.tipId;
+		}
+		if (type === "clickAfterHours") {
+			if (typeof raw.item !== "string" || !AFTER_HOURS_ITEM_IDS.includes(raw.item as never)) return bad("item must be fern, tank, coffee or book");
+			out.item = raw.item;
 		}
 		if (type === "decisionGate") {
 			if (typeof raw.open !== "boolean") return bad("open must be a boolean");

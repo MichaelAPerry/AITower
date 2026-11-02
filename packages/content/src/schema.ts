@@ -208,8 +208,7 @@ export interface FacilityDef {
 	line?: TreeLine;
 	/**
 	 * Secret numbers. Placing it adds the positive values to that tree's permanent scar; while it runs it adds
-	 * value × `soul.residuePerDay` per day to the tree's residue (negative values clean residue). Hidden from the player
-	 * unless the tree's champion trusts them (bond ≥ `soul.bondReveal`).
+	 * value × `soul.residuePerDay` per day to the tree's residue (negative values clean residue). Hidden from the player.
 	 */
 	seal?: SealSpec;
 }
@@ -383,8 +382,10 @@ export interface Balance {
 		/** Absorbed: corruption reaches this (any path, at Level ≥ ascension.minTier). */
 		absorbed: { corruption: number };
 	};
-	/** The Soul (docs/SOUL.md): Singularity points, secret seal numbers and advisor bonds. */
+	/** The Soul (docs/SOUL.md): Singularity points and secret seal numbers. */
 	soul: SoulBalance;
+	/** The four after-hours easter eggs (docs/AFTER_HOURS.md). */
+	afterHours: AfterHoursBalance;
 	/** Greentech economy (M4). */
 	green: {
 		/** $ per kWh of heat sold by heat exporters. */
@@ -690,7 +691,21 @@ export type AdvisorId = "cass" | "bea" | "mel" | "luci";
 /** Each tree's champion: she argues for it and speaks when it reaches a new rung. */
 export const CHAMPION: Record<AscensionPath, AdvisorId> = { synthetic: "luci", biotech: "mel", greentech: "bea" };
 
-/** Tuning for Singularity points, seals and bonds (docs/REFRAME.md). */
+/** The four clickable after-hours items: Bea's fern, Mel's fish tank, Cass's coffee machine and the book on Luci's desk. */
+export type AfterHoursItemId = "fern" | "tank" | "coffee" | "book";
+export const AFTER_HOURS_ITEM_IDS: readonly AfterHoursItemId[] = ["fern", "tank", "coffee", "book"];
+
+/** Tuning for the after-hours easter eggs (docs/AFTER_HOURS.md). */
+export interface AfterHoursBalance {
+	/** What the upgrade of an item costs. */
+	price: number;
+	/** Consecutive days with a click that trigger the "third day" dialogue. */
+	thirdDay: number;
+	/** Consecutive days with a click that offer the upgrade. */
+	tenthDay: number;
+}
+
+/** Tuning for Singularity points and seals (docs/REFRAME.md). */
 export interface SoulBalance {
 	/** SP that ends the game with that tree. */
 	spTarget: number;
@@ -706,13 +721,6 @@ export interface SoulBalance {
 	residuePerDay: number;
 	/** A placed facility whose seal for a tree is at least this draws an objection from the tree's champion (once per item). */
 	objectionScar: number;
-	/** Starting bond per advisor (0..100). */
-	bondStart: Record<AdvisorId, number>;
-	/** Bond needed for the ending epilogue (the advisor with the highest bond at this level or more). */
-	bondEpilogue: number;
-	/** Bond change when the player takes / overrules an advisor's recommendation. */
-	bondFollow: number;
-	bondOverrule: number;
 }
 
 /** One line of a visual-novel scene. */
@@ -737,10 +745,8 @@ export type StoryTrigger =
 	| { kind: "seal"; tree: SealedTree }
 	/** The first time any tree's seal is above `above` (the seal tip). The starter tower begins at 10 and the bar shows whole numbers, so 10.5 is the first visible rise. */
 	| { kind: "sealRise"; above: number }
-	/** The first time any advisor's bond differs from its `soul.bondStart` (the bond tip: after the first taken or overruled advice). */
-	| { kind: "bondMoved" }
-	/** The first time that advisor's bond reaches `atLeast`. */
-	| { kind: "bond"; advisor: AdvisorId; atLeast: number };
+	/** Never issued by the story check: the sim opens these when the player clicks an after-hours item (docs/AFTER_HOURS.md). */
+	| { kind: "afterHours" };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
@@ -776,8 +782,8 @@ export type EventEffect =
 	| { type: "affinity"; path: AscensionPath; amount: number }
 	/** Hidden: add to a tree's seal residue (negative cleans it). Never shown as a chip. */
 	| { type: "seal"; path: SealedTree; amount: number }
-	/** Hidden: change an advisor's bond. Never shown as a chip. */
-	| { type: "bond"; advisor: AdvisorId; amount: number }
+	/** Hidden: buy the upgrade of an after-hours item (`balance.afterHours.price`). The choice is refused when the cash is not there. */
+	| { type: "buyUpgrade"; item: AfterHoursItemId }
 	/** Add (or remove) Singularity points of a tree directly (Mel's shortcuts, Cass's slow week). */
 	| { type: "sp"; path: AscensionPath; amount: number };
 
@@ -881,8 +887,8 @@ export interface EndingDef {
 	/** File name (no extension) of the ending's own 640x420 painting in packages/ui/src/art, e.g. "bg-end-lattice". */
 	art?: string;
 	/**
-	 * Coda in the voice of the advisor with the highest bond (if ≥ `soul.bondEpilogue`). `fallback` is shown, as narration,
-	 * when no advisor qualifies.
+	 * Coda in the voice of the advisor tied to this ending (see the ending scene). `fallback` is shown, as narration,
+	 * when that advisor has no coda.
 	 */
 	epilogue?: Partial<Record<AdvisorId, string>> & { fallback?: string };
 }
@@ -906,8 +912,8 @@ export type PerkKind =
 	| "botSpeed"; // bot walk/fly speed
 
 /** Gameplay features switched on by tech. */
-/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). foremanPace: the Foreman builds twice as many facilities per hour. openDoor: taking an advisor's advice gives +1 extra bond. */
-export type FeatureId = "contractsClerk" | "foreman" | "foremanPace" | "openDoor";
+/** contractsClerk: auto-accept offers. foreman: auto-build (Automation drawer). foremanPace: the Foreman builds twice as many facilities per hour. */
+export type FeatureId = "contractsClerk" | "foreman" | "foremanPace";
 
 export type TechEffect = { type: "perk"; kind: PerkKind; factor: number } | { type: "feature"; feature: FeatureId };
 

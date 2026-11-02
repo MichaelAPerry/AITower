@@ -191,17 +191,17 @@ function whenInWords(s: Scene): string {
 		parts.push(`Once, when the game clock reaches ${n} minute${n === 1 ? "" : "s"} of play (${Math.floor(n / 60)}h ${n % 60}m in).`);
 	} else if (t.kind === "seal")
 		parts.push(`Once, the first time the ${TREE_NAME[t.tree ?? ""] ?? t.tree} tree is sealed (its seal reaches 100). It plays even if you never committed to that tree.`);
-	else if (t.kind === "bond")
-		parts.push(`Once, the first time ${ADV_NAME[t.advisor ?? ""] ?? t.advisor}'s bond with the Operator reaches ${t.atLeast}.`);
 	else if (t.kind === "tier") parts.push(`Once, when the Operator's Level reaches ${t.atLeast}.`);
 	else if (t.kind === "rung") parts.push(`Once, when the ${TREE_NAME[t.tree ?? ""] ?? t.tree} tree reaches rung ${t.rung} of 4.`);
 	else if (t.kind === "objection")
 		parts.push(
 			`Once per facility: when you place a facility that scars the ${TREE_NAME[t.path ?? ""] ?? t.path} tree enough, provided that tree is not sealed yet. The {item} in the text is the name of the facility just placed.`,
 		);
+	else if (t.kind === "afterHours")
+		parts.push("When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.");
 	if (s.minTier && s.minTier > 1) parts.push(`Needs Level ${s.minTier} or higher.`);
 	if (s.minDay) parts.push(`Not before game day ${s.minDay}.`);
-	parts.push("Story scenes are issued in file order, one at a time.");
+	if (s.trigger?.kind !== "afterHours") parts.push("Story scenes are issued in file order, one at a time.");
 	return parts.join(" ");
 }
 
@@ -223,7 +223,7 @@ function storyScene(s: Scene): void {
 		if (c.effects?.length)
 			meta(
 				`Effects: ${c.effects
-					.map((e) => (e.type === "bond" ? `${ADV_NAME[String(e.advisor)] ?? e.advisor} bond ${Number(e.amount) > 0 ? "+" : ""}${e.amount}` : effectText(e)))
+					.map((e) => effectText(e))
 					.join("; ")}.`,
 			);
 		for (const [i, r] of (c.reply ?? []).entries()) text(`${s.id}.${c.id}.r${i + 1}`, r.who, r.text, r.mood);
@@ -329,9 +329,11 @@ const storyGroups: { title: string; ids: string[] }[] = [
 	{ title: "Story: Biotech tree, Mel's Flesh", ids: ["obj_biotech", "rung_bio_1", "rung_bio_2", "rung_bio_3", "rung_bio_4"] },
 	{ title: "Story: Greentech tree, Bea's Garden", ids: ["obj_greentech", "rung_green_1", "rung_green_2", "rung_green_3", "rung_green_4"] },
 	{ title: "Story: a tree closes (seal scenes)", ids: ["seal_biotech", "seal_greentech", "tip_seal"] },
-	{ title: "Story: the bond tip", ids: ["tip_bond"] },
-	{ title: "Story: bond 50 beats", ids: ["bond50_luci", "bond50_mel", "bond50_bea", "bond50_cass"] },
 	{ title: "Story: Cass, in her own scene", ids: ["cass_night_shift"] },
+	{ title: "After hours: Bea's fern", ids: ["ah_fern_third", "ah_fern_tenth", "ah_fern_again1", "ah_fern_again2", "ah_fern_again3"] },
+	{ title: "After hours: Mel's fish tank", ids: ["ah_tank_third", "ah_tank_tenth", "ah_tank_again1", "ah_tank_again2", "ah_tank_again3"] },
+	{ title: "After hours: Cass's coffee machine", ids: ["ah_coffee_third", "ah_coffee_tenth", "ah_coffee_again1", "ah_coffee_again2", "ah_coffee_again3"] },
+	{ title: "After hours: the book on Luci's desk", ids: ["ah_book_third", "ah_book_tenth", "ah_book_again1", "ah_book_again2", "ah_book_again3"] },
 ];
 const storyById = new Map(story.map((s) => [s.id, s]));
 const grouped = new Set(storyGroups.flatMap((g) => g.ids));
@@ -354,7 +356,7 @@ for (const g of storyGroups) {
 sections.push({
 	title: "Endings",
 	body: () => {
-		meta("Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when no advisor's bond is high enough.");
+		meta("Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when the ending's own advisor has none.");
 		for (const e of endings) {
 			h(3, `\`${e.id}\``);
 			if (e.art) meta(`Art: ${e.art}.webp${e.backdrop ? ` (placeholder backdrop: ${e.backdrop})` : " (plain stage until it exists)"}.`);
@@ -369,7 +371,7 @@ sections.push({
 				if (t) text(`end.${e.id}.epilogue.${adv}`, "narrator", t);
 			}
 			if (e.epilogue.fallback) {
-				meta("Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).");
+				meta("Shown instead of an advisor epilogue when the ending has none for its own advisor.");
 				text(`end.${e.id}.epilogue.fallback`, "narrator", e.epilogue.fallback);
 			}
 		}
@@ -418,8 +420,6 @@ const ACH_WHEN: Record<string, string> = {
 	books_clean: "Earned at game over on a win with no loan and at least the starting cash.",
 	perfect_qtr: "Earned when a quarterly audit is filed with grade A and uptime of 99% or better.",
 	calm_month: "Earned at day close when the 99%-uptime streak reaches 20 days.",
-	bond_close: "Earned the moment any advisor's trust reaches 50.",
-	bond_crew: "Earned when all four advisors have reached 40 trust in one run.",
 	les_done: "Earned when every lesson is finished.",
 	heard_out: "Earned when the ending epilogues of all four advisors have been seen, across any runs.",
 };

@@ -9,7 +9,6 @@ import {
 	mergeStoredProfile,
 	parseProfile,
 	recordAchievement,
-	recordBonds,
 	recordEpilogue,
 	recordOffDuty,
 } from "./index";
@@ -28,7 +27,6 @@ describe("profile", () => {
 			earned: {},
 			epilogues: { luci: false, mel: false, bea: false, cass: false },
 			offDuty: { luci: { casual: false }, mel: { casual: false }, bea: { casual: false }, cass: { casual: false } },
-			bondMax: { luci: 0, mel: 0, bea: 0, cass: 0 },
 			told: {},
 			scenesSeen: {},
 		});
@@ -62,13 +60,12 @@ describe("profile", () => {
 
 	it("keeps only well-formed rows", () => {
 		const s = memory();
-		s.m.set(PROFILE_KEY, JSON.stringify({ v: 1, earned: { ok: { day: 3, ending: "garden" }, junk: 5, nan: { day: "x" } }, epilogues: { luci: true, mel: "yes" }, offDuty: { cass: { casual: true }, mel: { casual: 1 } }, bondMax: { luci: 61, mel: "x", bea: 900 } }));
+		s.m.set(PROFILE_KEY, JSON.stringify({ v: 1, earned: { ok: { day: 3, ending: "garden" }, junk: 5, nan: { day: "x" } }, epilogues: { luci: true, mel: "yes" }, offDuty: { cass: { casual: true }, mel: { casual: 1 } } }));
 		const p = loadProfile(s);
 		expect(Object.keys(p.earned)).toEqual(["ok"]);
 		expect(p.epilogues).toEqual({ luci: true, mel: false, bea: false, cass: false });
 		expect(p.offDuty.cass.casual).toBe(true);
 		expect(p.offDuty.mel.casual).toBe(false);
-		expect(p.bondMax).toEqual({ luci: 61, mel: 0, bea: 100, cass: 0 });
 	});
 
 	it("an older v1 profile (no gallery fields) still loads", () => {
@@ -97,20 +94,17 @@ describe("profile", () => {
 		expect(() => mergeStoredProfile(empty(), throwing)).not.toThrow();
 	});
 
-	it("latches epilogues, off-duty portraits and the highest bonds; flags are set once", () => {
+	it("latches epilogues and off-duty portraits; flags are set once", () => {
 		const s = memory();
 		expect(recordEpilogue("bea", s)).toBe(true);
 		expect(recordEpilogue("bea", s)).toBe(false);
 		expect(recordOffDuty("cass", s)).toBe(true);
 		expect(recordOffDuty("cass", s)).toBe(false);
-		recordBonds({ luci: 40, mel: 10 }, s);
-		recordBonds({ luci: 30, mel: 12 }, s);
 		markProfileFlag("told", "cass", s);
 		markProfileFlag("scenesSeen", "ach_bed_intro", s);
 		const p = loadProfile(s);
 		expect(p.epilogues.bea).toBe(true);
 		expect(p.offDuty.cass.casual).toBe(true);
-		expect(p.bondMax).toMatchObject({ luci: 40, mel: 12 });
 		expect(p.told).toEqual({ cass: true });
 		expect(p.scenesSeen).toEqual({ ach_bed_intro: true });
 	});
@@ -123,7 +117,6 @@ describe("profile merge and the save file", () => {
 		recordAchievement("cash_deep", 10, null, s);
 		recordEpilogue("luci", s);
 		recordOffDuty("luci", s);
-		recordBonds({ luci: 61 }, s);
 		markProfileFlag("told", "luci", s);
 		return loadProfile(s);
 	};
@@ -133,7 +126,6 @@ describe("profile merge and the save file", () => {
 		recordAchievement("cash_deep", 5, null, s);
 		recordEpilogue("mel", s);
 		recordOffDuty("cass", s);
-		recordBonds({ luci: 20, mel: 44 }, s);
 		markProfileFlag("scenesSeen", "ach_gallery_empty", s);
 		return loadProfile(s);
 	};
@@ -144,7 +136,6 @@ describe("profile merge and the save file", () => {
 		expect(m.earned.cash_deep.day).toBe(5);
 		expect(m.epilogues).toEqual({ luci: true, mel: true, bea: false, cass: false });
 		expect(m.offDuty.luci.casual && m.offDuty.cass.casual).toBe(true);
-		expect(m.bondMax).toMatchObject({ luci: 61, mel: 44 });
 		expect(m.scenesSeen.ach_gallery_empty).toBe(true);
 		// Merging an empty profile changes nothing; merging twice is stable.
 		expect(mergeProfiles(a(), empty())).toEqual({ ...a(), told: {} });

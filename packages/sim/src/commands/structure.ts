@@ -3,6 +3,7 @@ import { conduitTech } from "@aitower/content";
 import type { CellRef, ConduitLayer } from "../api";
 import { cellIdx, inBounds } from "../core/grid";
 import { techGate } from "../research/research";
+import { afterHoursBlock } from "../afterHours/spots";
 import type { Lift } from "../core/state";
 import { addLift, extendLift } from "../world/entities";
 import { accept, type Plan, type PlanCtx, reject } from "./plan";
@@ -100,6 +101,8 @@ export function planLift(ctx: PlanCtx, x: number, floorMin: number, floorMax: nu
 		if (!s.slab[i]) return reject(`no slab at floor ${fl}`);
 		if (s.facilityAt[i] >= 0) return reject(`facility in the way at floor ${fl}`);
 		if (s.liftAt[i] >= 0) return reject(`lift already at floor ${fl}`);
+		const spot = afterHoursBlock(s, fl, x, x);
+		if (spot) return reject(spot);
 	}
 	return accept(liftCost(ctx, floorMax - floorMin + 1), (events) => {
 		addLift(s, x, floorMin, floorMax);
@@ -116,6 +119,8 @@ function planLiftExtend(ctx: PlanCtx, lift: Lift, floorMin: number, floorMax: nu
 		if (!s.slab[i]) return reject(`no slab at floor ${fl}`);
 		if (s.facilityAt[i] >= 0) return reject(`facility in the way at floor ${fl}`);
 		if (s.liftAt[i] >= 0) return reject(`another lift at floor ${fl}`);
+		const spot = afterHoursBlock(s, fl, lift.x, lift.x);
+		if (spot) return reject(spot);
 	}
 	const added = floorMax - floorMin - (lift.floorMax - lift.floorMin);
 	return accept(ctx.content.structure.liftPerFloor * added, (events) => {

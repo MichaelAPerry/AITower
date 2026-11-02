@@ -48,7 +48,6 @@ export function loadSnapshot(content: ContentDB, snap: SimSnapshot): SimState {
 	if (shaped.ok) state.automation = shaped.policy; // fills the Foreman build spec on a save from before M6.2
 	state.sandbox = content.scenarios[state.scenarioId]?.sandbox === true; // follows the scenario, not the save
 	// A tower saved before the Soul (v11) is scarred by what it already holds.
-	if (version < 11) state.bonds = { ...content.balance.soul.bondStart };
 	if (version < 11) for (const f of state.facilities) if (Object.hasOwn(content.facilities, f.defId)) scarOnPlace(state, content.facilities[f.defId]);
 	return state;
 }

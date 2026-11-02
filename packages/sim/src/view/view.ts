@@ -4,7 +4,7 @@
  */
 import { type AscensionPath, type BotDef, type ContentDB, type SceneLine, SEALED_TREES, treeOf, TREES } from "@aitower/content";
 import { currentStepIndex, lessonMetrics } from "../lesson/lesson";
-import type { BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, TreeView, WorkOrderView } from "../api";
+import type { AfterHoursView, BotState, BotView, FacilityView, JobView, MaintenanceView, DecisionView, LessonView, SimView, SoulView, TreeView, WorkOrderView } from "../api";
 import { MIN_POWERED_SATISFACTION } from "../core/constants";
 import { cellCount, findById } from "../core/grid";
 import { isActive, storageCapacityTB } from "../compute/allocation";
@@ -19,6 +19,7 @@ import { eventDef } from "../ministry/decisions";
 import { modFactor } from "../ministry/modifiers";
 import { getDef, serviceTile } from "../world/defs";
 import { facilityStatus } from "./status";
+import { AFTER_HOURS_SPOTS, spotVisible, streakOf } from "../afterHours/spots";
 import { clerkUnlocked, foremanPerHour, foremanUnlocked, perk, researchedCount } from "../research/research";
 import { cloneAutomation } from "../automation/policy";
 import { foremanStatusOf } from "../automation/status";
@@ -69,6 +70,17 @@ function botState(b: Bot, def: BotDef | undefined): BotState {
 	}
 }
 
+function afterHoursView(state: SimState, content: ContentDB): AfterHoursView {
+	const day = dayOf(state.tick);
+	return {
+		price: content.balance.afterHours.price,
+		items: AFTER_HOURS_SPOTS.map((sp) => {
+			const s = state.afterHours[sp.id];
+			return { id: sp.id, advisor: sp.advisor, name: sp.name, floor: sp.floor, x: sp.x, width: sp.width, visible: spotVisible(state, sp), streak: streakOf(s, day), clickedToday: s.lastDay === day, bought: s.bought };
+		}),
+	};
+}
+
 function decisionView(state: SimState, content: ContentDB): DecisionView | null {
 	const d = state.decision;
 	if (!d || d.hiddenUntil > 0) return null;
@@ -84,13 +96,21 @@ function decisionView(state: SimState, content: ContentDB): DecisionView | null 
 		category: def.category,
 		title: def.title,
 		body: sub(def.body),
-		choices: def.choices.map((c) => (c.reply ? { id: c.id, label: sub(c.label), hint: sub(c.hint), reply: lines(c.reply) } : { id: c.id, label: sub(c.label), hint: sub(c.hint) })),
+		choices: def.choices.map((c) => {
+			const out: DecisionView["choices"][number] = { id: c.id, label: sub(c.label), hint: sub(c.hint) };
+			if (c.reply) out.reply = lines(c.reply);
+			if (c.effects.some((e) => e.type === "buyUpgrade")) out.cost = content.balance.afterHours.price;
+			return out;
+		}),
 		recommended: def.recommended,
 		votes: def.votes?.map((v) => ({ ...v })),
 		issuedAt: d.issuedAt,
 		canDefer: !d.deferred && def.category !== "story",
 	};
 	if (def.lines) v.lines = lines(def.lines);
+	// After-hours: the lead-in line of the scene comes first when the player came back after saying No.
+	const lead = d.lead !== undefined ? eventDef(content, d.lead) : undefined;
+	if (lead?.lines && v.lines) v.lines = [...lines(lead.lines)!, ...v.lines];
 	if (def.backdrop) v.backdrop = def.backdrop;
 	if (def.location) v.location = def.location;
 	if (name !== undefined && d.subject !== undefined) v.subject = { defId: d.subject, name };
@@ -163,8 +183,6 @@ function soulView(state: SimState, content: ContentDB): SoulView {
 		spTarget: s.spTarget,
 		seal: { biotech: sealOf(state, "biotech"), greentech: sealOf(state, "greentech") },
 		sealMax: s.sealMax,
-		bonds: { ...state.bonds },
-		bondEpilogue: s.bondEpilogue,
 		trees,
 		green: {
 			score: state.greenScore,
@@ -289,6 +307,7 @@ export function buildView(state: SimState, content: ContentDB, nav: Nav = create
 		nutrientNets: state.nutrientNets.map((n) => ({ ...n })),
 		corruption: state.corruption,
 		uptimeStreak: state.uptimeStreak,
+		afterHours: afterHoursView(state, content),
 		contaminatedShare: state.contaminatedShare,
 		irreversible: state.irreversible,
 		path: leadingTree(state, content),

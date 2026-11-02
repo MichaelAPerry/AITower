@@ -1,4 +1,4 @@
-/** The seal, bond and night-shift story scenes: each fires once, at the right moment and never before, with no new state field. */
+/** The seal and night-shift story scenes: each fires once, at the right moment and never before, with no new state field. */
 import { type ContentDB, loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import type { SimEvent } from "./api";
@@ -58,52 +58,6 @@ describe("seal scenes", () => {
 		});
 	}
 
-	it("the stay choice moves Mel's bond, and the other choice moves Luci's and Mel's", () => {
-		const a = sim("seal_biotech");
-		a.state.sealScar.biotech = 100;
-		steps(a, SETTLE);
-		const mel = a.state.bonds.mel;
-		const luci = a.state.bonds.luci;
-		answer(a, "stay");
-		expect(a.state.bonds.mel).toBe(mel + 3 + a.content.balance.soul.bondFollow);
-		expect(a.state.bonds.luci).toBe(luci);
-		const b = sim("seal_biotech");
-		b.state.sealScar.biotech = 100;
-		steps(b, SETTLE);
-		const mel2 = b.state.bonds.mel;
-		const luci2 = b.state.bonds.luci;
-		answer(b, "other");
-		expect(b.state.bonds.luci).toBe(luci2 + 1);
-		expect(b.state.bonds.mel).toBe(mel2 - 1 + b.content.balance.soul.bondOverrule);
-	});
-});
-
-describe("bond 50 beats", () => {
-	for (const advisor of ["luci", "mel", "bea", "cass"] as const) {
-		const id = `bond50_${advisor}`;
-		it(`${id} plays once, the first time her bond reaches 50, and never before`, () => {
-			const s = sim(id);
-			steps(s, SETTLE);
-			expect(s.view().decision).toBeNull();
-			s.state.bonds[advisor] = 49;
-			// The other advisors at 100 must not trigger her scene.
-			for (const o of ["luci", "mel", "bea", "cass"] as const) if (o !== advisor) s.state.bonds[o] = 100;
-			steps(s, SETTLE);
-			expect(s.view().decision).toBeNull();
-			s.state.bonds[advisor] = 50;
-			steps(s, SETTLE);
-			const d = s.view().decision;
-			expect(d?.eventId).toBe(id);
-			expect(d?.advisor).toBe(advisor);
-			expect(d?.choices.map((c) => c.id)).toEqual(["ok"]);
-			answer(s, "ok");
-			s.state.bonds[advisor] = 30;
-			steps(s, SETTLE);
-			s.state.bonds[advisor] = 90;
-			steps(s, SETTLE * 2);
-			expect(s.view().decision).toBeNull();
-		});
-	}
 });
 
 describe("cass_night_shift", () => {
@@ -120,25 +74,21 @@ describe("cass_night_shift", () => {
 		expect(d?.eventId).toBe("cass_night_shift");
 		expect(d?.advisor).toBe("cass");
 		expect(s.state.tick).toBeGreaterThanOrEqual(first);
-		const cass = s.state.bonds.cass;
+		const cash = s.state.cash;
 		answer(s, "ask");
-		expect(s.state.bonds.cass).toBe(cass + 4 + s.content.balance.soul.bondFollow);
+		expect(cash - s.state.cash).toBeLessThan(1000); // the honest version costs nothing
 		steps(s, SETTLE * 3);
 		expect(s.view().decision).toBeNull();
 	});
 
-	it("the rush order costs $12,000 and moves both bonds", () => {
+	it("the rush order costs $12,000", () => {
 		const s = sim("cass_night_shift");
 		s.state.tick = 14400;
 		steps(s, SETTLE);
 		expect(s.view().decision?.eventId).toBe("cass_night_shift");
 		const cash = s.state.cash;
-		const cass = s.state.bonds.cass;
-		const luci = s.state.bonds.luci;
 		answer(s, "order");
 		expect(cash - s.state.cash).toBeGreaterThan(11000); // $12,000 out; a step of income is small
-		expect(s.state.bonds.cass).toBe(cass + 2 + s.content.balance.soul.bondOverrule);
-		expect(s.state.bonds.luci).toBe(luci - 1);
 	});
 });
 
@@ -159,23 +109,6 @@ describe("tip_seal", () => {
 		s.state.sealScar.greentech = 0;
 		steps(s, SETTLE);
 		s.state.sealScar.biotech = 5;
-		steps(s, SETTLE * 2);
-		expect(s.view().decision).toBeNull();
-	});
-});
-
-describe("tip_bond", () => {
-	it("plays once, Luci speaking, the first time any bond leaves its starting value and never at the start", () => {
-		const s = sim("tip_bond");
-		steps(s, SETTLE);
-		expect(s.view().decision).toBeNull();
-		s.state.bonds.bea += 3;
-		steps(s, SETTLE);
-		const d = s.view().decision;
-		expect(d?.eventId).toBe("tip_bond");
-		expect(d?.advisor).toBe("luci");
-		answer(s, d?.choices[0].id ?? "");
-		s.state.bonds.mel += 3;
 		steps(s, SETTLE * 2);
 		expect(s.view().decision).toBeNull();
 	});

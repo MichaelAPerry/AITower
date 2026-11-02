@@ -15,6 +15,7 @@ import {
 	planDeclineContract,
 	planSetEnabled,
 } from "./operations";
+import { planClickAfterHours } from "../afterHours/click";
 import { planDeferDecision, planDecisionGate, planMarkTip, planResolveDecision } from "../ministry/decisions";
 import { type Plan, type PlanCtx, reject, withFunds } from "./plan";
 import { planPlace } from "./placement";
@@ -88,6 +89,9 @@ function planChecked(ctx: PlanCtx, cmd: SimCommand): Plan {
 			break;
 		case "markTip":
 			plan = planMarkTip(ctx, cmd.tipId);
+			break;
+		case "clickAfterHours":
+			plan = planClickAfterHours(ctx, cmd.item);
 			break;
 		case "research":
 			plan = planResearch(ctx, cmd.techId);

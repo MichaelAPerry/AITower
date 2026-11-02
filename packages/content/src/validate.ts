@@ -2,7 +2,8 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { AdvisorId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
+import { AFTER_HOURS_ITEM_IDS } from "./schema";
+import type { AdvisorId, AfterHoursItemId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
 import { isWetware } from "./catalogue";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
@@ -58,7 +59,7 @@ const TECH_LANES: TechLane[] = ["adm", "log", "pow", "cool", "comp", "wet", "gre
 const TECH_LINES: TechLine[] = ["air", "liquid", "immersion"];
 const TECH_BRANCHES: TechBranch[] = ["compute", "cooling", "power", "logistics", "administration", "wetware"];
 const PERK_KINDS = ["failureRate", "energyPrice", "payout", "coolingCapacity", "repairSpeed", "upkeep", "researchRate", "botSpeed"];
-const FEATURES = ["contractsClerk", "foreman", "foremanPace", "openDoor"];
+const FEATURES = ["contractsClerk", "foreman", "foremanPace"];
 /** Letter grades A..E used by `balance.audit`. */
 const GRADES = 5;
 
@@ -636,11 +637,7 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 		case "sealRise":
 			num(p, `${w}.above`, t.above, { min: 0 });
 			break;
-		case "bondMoved":
-			break;
-		case "bond":
-			if (!ADVISORS.includes(t.advisor)) p.push(`${w}.advisor: unknown advisor "${String(t.advisor)}"`);
-			num(p, `${w}.atLeast`, t.atLeast, { min: 1, max: 100, int: true });
+		case "afterHours":
 			break;
 		default:
 			p.push(`${w}.kind: unknown trigger "${String((t as { kind?: unknown })?.kind)}"`);
@@ -686,9 +683,8 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 			if (!SEALED.includes((e as { path: string }).path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
 			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
 			break;
-		case "bond":
-			if (!ADVISORS.includes((e as { advisor: string }).advisor)) p.push(`${w}.advisor: unknown advisor`);
-			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
+		case "buyUpgrade":
+			if (!AFTER_HOURS_ITEM_IDS.includes((e as { item: AfterHoursItemId }).item)) p.push(`${w}.item: unknown after-hours item`);
 			break;
 		case "sp":
 			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
@@ -849,6 +845,14 @@ function validateBioBalance(p: Problems, db: ContentDB): void {
 	if (!e?.absorbed) p.push("balance.endings: absorbed is required");
 	else num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
 	validateSoul(p, b);
+	const ah = b.afterHours;
+	if (!ah) p.push("balance.afterHours: missing");
+	else {
+		num(p, "balance.afterHours.price", ah.price, { gt: 0 });
+		num(p, "balance.afterHours.thirdDay", ah.thirdDay, { min: 1, int: true });
+		num(p, "balance.afterHours.tenthDay", ah.tenthDay, { min: 1, int: true });
+		if (ah.tenthDay < ah.thirdDay) p.push("balance.afterHours.tenthDay: must not be before thirdDay");
+	}
 }
 
 function validateSoul(p: Problems, b: ContentDB["balance"]): void {
@@ -860,10 +864,6 @@ function validateSoul(p: Problems, b: ContentDB["balance"]): void {
 	num(p, "balance.soul.residuePerDay", s.residuePerDay, { min: 0, max: 1 });
 	num(p, "balance.soul.objectionScar", s.objectionScar, { gt: 0 });
 	num(p, "balance.soul.greenFloor", s.greenFloor, { min: 0, max: 1 });
-	num(p, "balance.soul.bondEpilogue", s.bondEpilogue, { min: 0, max: 100 });
-	num(p, "balance.soul.bondFollow", s.bondFollow, { min: 0, max: 20 });
-	num(p, "balance.soul.bondOverrule", s.bondOverrule, { min: -20, max: 0 });
-	for (const a of ADVISORS) num(p, `balance.soul.bondStart.${a}`, s.bondStart?.[a as AdvisorId], { min: 0, max: 100 });
 	for (const path of PATHS) num(p, `balance.soul.spWeights.${path}`, s.spWeights?.[path], { gt: 0 });
 }
 

@@ -16,25 +16,25 @@ describe("scene -> track mapping", () => {
 		}
 	});
 	it("sends bonding, milestone and celebration scenes to the warm song", () => {
-		for (const id of ["st_intro", "rung_syn_1", "rung_green_4", "bond50_cass", "tip_bond", "ach_unlock_bea", "ach_bed_intro"]) {
+		for (const id of ["st_intro", "rung_syn_1", "rung_green_4", "ach_unlock_bea", "ach_bed_intro"]) {
 			expect(trackForScene(id)).toBe("warm");
 		}
 	});
 	it("an unknown scene falls back to warm", () => {
 		expect(trackForScene("something_new")).toBe("warm");
 	});
-	it("covers every real scene with one of the two songs (24 story + 14 gallery)", () => {
+	it("covers every real scene with one of the two songs (39 story + 14 gallery)", () => {
 		const ids = [...storyIds(), ...galleryIds()];
-		expect(ids.length).toBe(38);
+		expect(ids.length).toBe(53);
 		const counts = { warm: 0, quiet: 0 };
 		for (const id of ids) counts[trackForScene(id)]++;
-		expect(counts).toEqual({ warm: 23, quiet: 15 });
+		expect(counts).toEqual({ warm: 38, quiet: 15 });
 	});
 	it("wants the tower loop in play, the scene's song in a scene, and silence off-game", () => {
 		expect(wantedSong({ active: true, sceneId: null })).toBe("tower");
 		expect(wantedSong({ active: true, sceneId: "seal_biotech" })).toBe("quiet");
-		expect(wantedSong({ active: true, sceneId: "bond50_luci" })).toBe("warm");
-		expect(wantedSong({ active: false, sceneId: "bond50_luci" })).toBeNull();
+		expect(wantedSong({ active: true, sceneId: "ah_bea_third" })).toBe("warm");
+		expect(wantedSong({ active: false, sceneId: "ah_bea_third" })).toBeNull();
 	});
 	it("plays each tree's ending song on a success ending, and the quiet song on a failure", () => {
 		expect(overSong({ kind: "victory", ending: "singularity" })).toBe("lattice");

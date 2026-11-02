@@ -1,6 +1,6 @@
 # After-hours easter eggs (owner spec, Nov 2)
 
-The owner's words below are copied EXACTLY, typos included. Never fix spelling. The owner's words win.
+The owner's words below are copied exactly. The owner later asked for the spelling to be fixed (see Owner answers). The owner's words win.
 
 ## Rules (summary by Claude, from the owner's notes)
 
@@ -27,7 +27,7 @@ Bea's fern:
 
 After the third try:
 
-BEa:  Oh you noticed nigel my fern Isn;t he great!  
+Bea:  Oh you noticed nigel my fern Isn't he great!  
 Bea: I'm glad you're watering him are you going to keep it up?
 
 Yes
@@ -41,7 +41,7 @@ Oh come on, just cause I asked?
 After the tenth: 
 
 Bea: Nigel is doing ok, but I think he deserves better. You think we could upgrade his pot, and give him an automatic watering and feeding huh? 
-Bea: Isn;t he worth it! 
+Bea: Isn't he worth it! 
 
 Yes 
 
@@ -70,7 +70,7 @@ Oh, I guess I'll have to remember.
 
 After the tenth: 
 
-Mel:  Mr Fido is doing good, but look at these new bioenhancements we can add. He'll be so genetically perfect can we? 
+Mel:  Mr. Fido is doing good, but look at these new bio-enhancements we can add. He'll be so genetically perfect can we? 
 
 Yes 
 
@@ -106,12 +106,12 @@ Well, you know what makes me happy.
 
 No 
 
-Ugh, cheap skate. 
+Ugh, cheapskate. 
 
 After the third day
 
-Luci: You're the one who;s been coming in and checking the ledger.
-Luci: Usual, but I appreciate an operator who does the numbers
+Luci: You're the one who's been coming in and checking the ledger.
+Luci: Unusual, but I appreciate an operator who does the numbers
 
 Yes 
 
@@ -124,11 +124,11 @@ Oh, guess I was barking up the wrong tree.
 
 After the tenth: 
 
-Luci: Well, You obviously care about our financial future.  But I need you to get your license if you keep it up.  Don't worry, it comes with perks and I get to be your instructor.  There is a small fee. 
+Luci: Well, you obviously care about our financial future.  But I need you to get your license if you keep it up.  Don't worry, it comes with perks and I get to be your instructor.  There is a small fee. 
 
 Yes 
 
-Excellent class starts tonight.  Don't be late. 
+Excellent, class starts tonight.  Don't be late. 
 
 No 
 
@@ -143,6 +143,7 @@ If the user selects no they can come back and it says (buy the {upgrade}) in var
 - "No" on the third day changes nothing; the count continues. It is just an option: a player can say No and still pay the $1M later and get the portrait.
 - Re-offer lines: Claude writes simple placeholders, e.g. "[ buy the coffee machine ]"; list them in docs/PLACEHOLDER_TEXT.md.
 - Places: Mel B1; Bea and Cass F1 (lobby); Luci F2.
+- Owner (Nov 2): spelling in this dialogue fixed on request.
 
 ## Open questions for the owner (answered above)
 

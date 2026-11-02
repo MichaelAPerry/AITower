@@ -192,3 +192,206 @@ Only the strings Claude wrote: the title-menu button, its subtitle, and the head
 - [ach.ui.credits_detail] Label: who made it · quotes
 - [ach.ui.credits_quotes_head] Label: Quotes
 - Music credit line "Music: Perry, made with Suno." and the seven song titles (`packages/ui/src/title/titleMusic.ts`, shown in `CreditsPane.tsx`). RESOLVED (owner decision): song titles stay exactly as tagged in the files: "まだ見ぬ世界へ" (title), "君の明日が晴れますように" (Garden), "銀のホーム" (Lattice), "雨のしずく" (Flesh), "深夜のゲーム" (tower loop), "夕陽のメロディ" (warm scene song), "Noctune FM" (quiet scene song). The owner's typed variants ("まだない明日へ", "銀のホームを") are not used.
+
+## After hours (the four easter eggs)
+
+The owner's dialogue (the character lines and the Yes / No answers) is in `docs/AFTER_HOURS.md` and is not repeated here. Everything below was written by Claude and is placeholder: the scene titles, locations and captions, the small hint and outcome lines under Yes / No, and the one-line lead-ins that play before the tenth-day scene when the player says No and comes back (the first of each set is the "[ buy the coffee machine ]" style the owner asked for). They are in `story.json` as the scenes `ah_<item>_third`, `ah_<item>_tenth` and `ah_<item>_again1..3`; `<item>` is `fern` (Bea), `tank` (Mel), `coffee` (Cass) or `book` (Luci).
+
+### `ah_fern_third`
+
+- [ah_fern_third.title] Title: Nigel the Fern
+- [ah_fern_third.location] Location: F1 · LOBBY
+- [ah_fern_third.caption] Caption: Bea's fern by the lobby window.
+- [ah_fern_third.yes.hint] Hint: Keep it up.
+- [ah_fern_third.yes.outcome] Outcome: Noted.
+- [ah_fern_third.no.hint] Hint: Not promising anything.
+- [ah_fern_third.no.outcome] Outcome: Noted.
+
+### `ah_fern_tenth`
+
+- [ah_fern_tenth.title] Title: Nigel Deserves Better
+- [ah_fern_tenth.location] Location: F1 · LOBBY
+- [ah_fern_tenth.caption] Caption: Bea and the fern again.
+- [ah_fern_tenth.yes.hint] Hint: $1,000,000
+- [ah_fern_tenth.yes.outcome] Outcome: Bought.
+- [ah_fern_tenth.no.hint] Hint: Not now.
+- [ah_fern_tenth.no.outcome] Outcome: Not now.
+
+### `ah_fern_again1`
+
+- [ah_fern_again1.l1] narrator: [ buy the bigger pot for the fern ]
+
+### `ah_fern_again2`
+
+- [ah_fern_again2.l1] narrator: [ (buy the fern's new pot) ]
+
+### `ah_fern_again3`
+
+- [ah_fern_again3.l1] narrator: [ you could buy the pot with automatic watering ]
+
+### `ah_tank_third`
+
+- [ah_tank_third.title] Title: Fido the Fish
+- [ah_tank_third.location] Location: B1 · MEL'S CORNER
+- [ah_tank_third.caption] Caption: Mel's fish tank on her desk.
+- [ah_tank_third.yes.hint] Hint: Keep it up.
+- [ah_tank_third.yes.outcome] Outcome: Noted.
+- [ah_tank_third.no.hint] Hint: Not promising anything.
+- [ah_tank_third.no.outcome] Outcome: Noted.
+
+### `ah_tank_tenth`
+
+- [ah_tank_tenth.title] Title: Fido's Upgrade
+- [ah_tank_tenth.location] Location: B1 · MEL'S CORNER
+- [ah_tank_tenth.caption] Caption: Mel and the fish tank again.
+- [ah_tank_tenth.yes.hint] Hint: $1,000,000
+- [ah_tank_tenth.yes.outcome] Outcome: Bought.
+- [ah_tank_tenth.no.hint] Hint: Not now.
+- [ah_tank_tenth.no.outcome] Outcome: Not now.
+
+### `ah_tank_again1`
+
+- [ah_tank_again1.l1] narrator: [ buy the bio-enhanced tank ]
+
+### `ah_tank_again2`
+
+- [ah_tank_again2.l1] narrator: [ (buy the tank upgrade) ]
+
+### `ah_tank_again3`
+
+- [ah_tank_again3.l1] narrator: [ you could buy Fido's bio-enhancements ]
+
+### `ah_coffee_third`
+
+- [ah_coffee_third.title] Title: The Coffee Corner
+- [ah_coffee_third.location] Location: F1 · LOBBY
+- [ah_coffee_third.caption] Caption: Cass's coffee machine in the lobby.
+- [ah_coffee_third.yes.hint] Hint: Keep it up.
+- [ah_coffee_third.yes.outcome] Outcome: Noted.
+- [ah_coffee_third.no.hint] Hint: Not promising anything.
+- [ah_coffee_third.no.outcome] Outcome: Noted.
+
+### `ah_coffee_tenth`
+
+- [ah_coffee_tenth.title] Title: A Better Coffee Maker
+- [ah_coffee_tenth.location] Location: F1 · LOBBY
+- [ah_coffee_tenth.caption] Caption: Cass and the coffee machine again.
+- [ah_coffee_tenth.yes.hint] Hint: $1,000,000
+- [ah_coffee_tenth.yes.outcome] Outcome: Bought.
+- [ah_coffee_tenth.no.hint] Hint: Not now.
+- [ah_coffee_tenth.no.outcome] Outcome: Not now.
+
+### `ah_coffee_again1`
+
+- [ah_coffee_again1.l1] narrator: [ buy the coffee machine ]
+
+### `ah_coffee_again2`
+
+- [ah_coffee_again2.l1] narrator: [ (buy the cappuccino machine) ]
+
+### `ah_coffee_again3`
+
+- [ah_coffee_again3.l1] narrator: [ you could buy the new coffee maker ]
+
+### `ah_book_third`
+
+- [ah_book_third.title] Title: The Ledger
+- [ah_book_third.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_third.caption] Caption: The ledger on Luci's desk.
+- [ah_book_third.yes.hint] Hint: Keep it up.
+- [ah_book_third.yes.outcome] Outcome: Noted.
+- [ah_book_third.no.hint] Hint: Not promising anything.
+- [ah_book_third.no.outcome] Outcome: Noted.
+
+### `ah_book_tenth`
+
+- [ah_book_tenth.title] Title: Get Licensed
+- [ah_book_tenth.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_tenth.caption] Caption: Luci and the ledger again.
+- [ah_book_tenth.yes.hint] Hint: $1,000,000
+- [ah_book_tenth.yes.outcome] Outcome: Bought.
+- [ah_book_tenth.no.hint] Hint: Not now.
+- [ah_book_tenth.no.outcome] Outcome: Not now.
+
+### `ah_book_again1`
+
+- [ah_book_again1.l1] narrator: [ buy the license ]
+
+### `ah_book_again2`
+
+- [ah_book_again2.l1] narrator: [ (buy the license and the certificate) ]
+
+### `ah_book_again3`
+
+- [ah_book_again3.l1] narrator: [ you could sign up for the license class ]
+
+### Story scenes that lost their choices
+
+The relationship numbers are gone, so the story scenes whose choices only moved those numbers (the opening, the two objections, the twelve rung scenes and the two seal scenes) now end with one button, `Got it.`, with this placeholder hint and outcome. The scene's own lines are unchanged; the old choices and replies were removed.
+
+- [st_intro.ok.hint] Hint: Moving on.
+- [st_intro.ok.outcome] Outcome: The scene ends and the day goes on.
+- [obj_greentech.ok.hint] Hint: Moving on.
+- [obj_greentech.ok.outcome] Outcome: The scene ends and the day goes on.
+- [obj_biotech.ok.hint] Hint: Moving on.
+- [obj_biotech.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_syn_1.ok.hint] Hint: Moving on.
+- [rung_syn_1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_syn_2.ok.hint] Hint: Moving on.
+- [rung_syn_2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_syn_3.ok.hint] Hint: Moving on.
+- [rung_syn_3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_syn_4.ok.hint] Hint: Moving on.
+- [rung_syn_4.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_bio_1.ok.hint] Hint: Moving on.
+- [rung_bio_1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_bio_2.ok.hint] Hint: Moving on.
+- [rung_bio_2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_bio_3.ok.hint] Hint: Moving on.
+- [rung_bio_3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_bio_4.ok.hint] Hint: Moving on.
+- [rung_bio_4.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_green_1.ok.hint] Hint: Moving on.
+- [rung_green_1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_green_2.ok.hint] Hint: Moving on.
+- [rung_green_2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_green_3.ok.hint] Hint: Moving on.
+- [rung_green_3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [rung_green_4.ok.hint] Hint: Moving on.
+- [rung_green_4.ok.outcome] Outcome: The scene ends and the day goes on.
+- [seal_biotech.ok.hint] Hint: Moving on.
+- [seal_biotech.ok.outcome] Outcome: The scene ends and the day goes on.
+- [seal_greentech.ok.hint] Hint: Moving on.
+- [seal_greentech.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_fern_again1.ok.hint] Hint: Moving on.
+- [ah_fern_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_fern_again2.ok.hint] Hint: Moving on.
+- [ah_fern_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_fern_again3.ok.hint] Hint: Moving on.
+- [ah_fern_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_tank_again1.ok.hint] Hint: Moving on.
+- [ah_tank_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_tank_again2.ok.hint] Hint: Moving on.
+- [ah_tank_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_tank_again3.ok.hint] Hint: Moving on.
+- [ah_tank_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_coffee_again1.ok.hint] Hint: Moving on.
+- [ah_coffee_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_coffee_again2.ok.hint] Hint: Moving on.
+- [ah_coffee_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_coffee_again3.ok.hint] Hint: Moving on.
+- [ah_coffee_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_book_again1.ok.hint] Hint: Moving on.
+- [ah_book_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_book_again2.ok.hint] Hint: Moving on.
+- [ah_book_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+- [ah_book_again3.ok.hint] Hint: Moving on.
+- [ah_book_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### Other changes Claude made with the bond removal
+
+- The ending screens no longer pick an advisor by trust. The advisor whose after-hours upgrade the player bought speaks the closing epilogue (the first one the ending lists if several are bought); with none bought, the narrated fallback closes the ending. No new words.
+- Three ministry choices that only changed trust (`compute_subsidy` decline, `form_9b_brochure` decline, `heat_tariff_revision` keep) now simply do nothing; their hint already says "nothing now".
+- Open Door (research) no longer gives bonds. Its description now reads: "An open-door policy for your advisors. Contract payouts +4%."
+- Removed achievements: "Someone You Trust" and "The Whole Crew".
+- Pressing a click on an item shows nothing; if the cash is not there, the Yes of the tenth-day scene shows the notice "Needs $1,000,000" and stays on the choice.

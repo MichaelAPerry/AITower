@@ -108,7 +108,6 @@ describe("memo chips and urgency", () => {
 		const e = (x: EventEffect) => effectChip(x);
 		expect(e({ type: "cash", amount: -160_000 })).toBe("−$160k");
 		expect(e({ type: "cash", amount: 5000 })).toBe("+$5k");
-		expect(e({ type: "bond", advisor: "mel", amount: -4 })).toBe("");
 		expect(e({ type: "failRacks", count: 2 })).toBe("2 racks fail");
 		expect(e({ type: "failRacks", count: 1 })).toBe("1 rack fail");
 		expect(e({ type: "ambient", deltaC: 8, durationTicks: 1 })).toBe("+8°C");

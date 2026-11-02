@@ -1,12 +1,12 @@
 import { achievementContent, galleryScenes } from "@aitower/content";
-import { loadProfile, markProfileFlag, recordAchievement, recordBonds, recordOffDuty } from "@aitower/shared";
+import { loadProfile, markProfileFlag, recordAchievement, recordOffDuty } from "@aitower/shared";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { AchievementsPane, Gallery } from "./AchievementsPane";
 import { LockedHead } from "./LockedHead";
 import { ACHIEVEMENTS } from "./achievements";
-import { DEFAULT_CROP, HIDDEN_NAME, HIDDEN_TEXT, LOCKED_LOOK, RULE_BOND, lockedLook, autoScene, counter, frames, listRows, newLines, pagesOf, sceneById, sceneIdFor } from "./gallery";
+import { DEFAULT_CROP, HIDDEN_NAME, HIDDEN_TEXT, LOCKED_LOOK, lockedLook, autoScene, counter, frames, listRows, newLines, pagesOf, sceneById, sceneIdFor } from "./gallery";
 
 const memory = () => {
 	const m = new Map<string, string>();
@@ -17,11 +17,11 @@ const all = (s: ReturnType<typeof memory>, skip?: string) => {
 };
 
 describe("the list", () => {
-	it("a new profile: 0 / 18, hidden rows read ??? and the other way this ends", () => {
+	it("a new profile: 0 / 16, hidden rows read ??? and the other way this ends", () => {
 		const p = loadProfile(memory());
-		expect(counter(p)).toBe("0 / 18");
+		expect(counter(p)).toBe("0 / 16");
 		const rows = listRows(p);
-		expect(rows).toHaveLength(18);
+		expect(rows).toHaveLength(16);
 		const hidden = rows.filter((r) => r.hidden);
 		expect(hidden.map((r) => r.id)).toEqual(["end_absorbed", "end_bankrupt"]);
 		for (const r of hidden) expect([r.name, r.text]).toEqual([HIDDEN_NAME, HIDDEN_TEXT]);
@@ -36,17 +36,17 @@ describe("the list", () => {
 		recordAchievement("end_bankrupt", 3, "bankrupt", s);
 		const p = loadProfile(s);
 		const rows = listRows(p);
-		expect(counter(p)).toBe("3 / 18");
+		expect(counter(p)).toBe("3 / 16");
 		expect(rows.find((r) => r.id === "end_lattice")).toMatchObject({ earned: true, when: "Day 28 · The Lattice" });
 		expect(rows.find((r) => r.id === "cash_deep")).toMatchObject({ earned: true, when: "Day 12" });
 		expect(rows.find((r) => r.id === "end_bankrupt")).toMatchObject({ hidden: false, name: "Notice of Termination", when: "Day 3 · Bankrupt" });
 		expect(rows.find((r) => r.id === "end_absorbed")?.hidden).toBe(true);
 	});
 
-	it("counts 18 / 18 when everything is earned", () => {
+	it("counts 16 / 16 when everything is earned", () => {
 		const s = memory();
 		all(s);
-		expect(counter(loadProfile(s))).toBe("18 / 18");
+		expect(counter(loadProfile(s))).toBe("16 / 16");
 	});
 });
 
@@ -58,26 +58,18 @@ describe("the frames", () => {
 		expect(f.bedOpen).toBe(false);
 	});
 
-	it("the plain rule appears once her bond has reached 30, not before", () => {
-		const s = memory();
-		recordBonds({ mel: RULE_BOND - 1, bea: RULE_BOND }, s);
-		const f = frames(loadProfile(s)).casual;
-		expect(f.find((x) => x.advisor === "mel")?.showRule).toBe(false);
-		expect(f.find((x) => x.advisor === "bea")?.showRule).toBe(true);
-		recordOffDuty("bea", s);
-		expect(frames(loadProfile(s)).casual.find((x) => x.advisor === "bea")).toMatchObject({ unlocked: true, showRule: false });
-	});
-
-	it("all four bed frames open together at 18, not at 17", () => {
+	it("the bed frames open only with every achievement AND all four casual portraits", () => {
 		const s = memory();
 		all(s, "heard_out");
+		for (const a of ["luci", "mel", "bea", "cass"] as const) recordOffDuty(a, s);
 		expect(frames(loadProfile(s)).bed.some((x) => x.unlocked)).toBe(false);
 		recordAchievement("heard_out", 5, null, s);
 		const f = frames(loadProfile(s));
 		expect(f.bedOpen).toBe(true);
 		expect(f.bed.every((x) => x.unlocked)).toBe(true);
-		// Cass's casual portrait is a separate unlock: the bed set does not open it.
-		expect(f.casual.every((x) => !x.unlocked)).toBe(true);
+		const s2 = memory();
+		all(s2);
+		expect(frames(loadProfile(s2)).bedOpen).toBe(false);
 	});
 
 	it("each frame plays its own scene: hint when locked, unlock when open, bed in the bed set", () => {
@@ -103,7 +95,7 @@ describe("scenes", () => {
 		expect(pagesOf(sceneById("ach_bed_luci"))).toHaveLength(1);
 	});
 
-	it("plays the bed intro once the 18th has landed, then never again; the empty line once, only while nothing is unlocked", () => {
+	it("plays the bed intro once the last has landed, then never again; the empty line once, only while nothing is unlocked", () => {
 		const s = memory();
 		expect(autoScene(loadProfile(s))).toBe("ach_gallery_empty");
 		markProfileFlag("scenesSeen", "ach_gallery_empty", s);
@@ -112,6 +104,7 @@ describe("scenes", () => {
 		recordOffDuty("cass", t);
 		expect(autoScene(loadProfile(t))).toBeNull();
 		all(s);
+		for (const a of ["luci", "mel", "bea", "cass"] as const) recordOffDuty(a, s);
 		expect(autoScene(loadProfile(s))).toBe("ach_bed_intro");
 		markProfileFlag("scenesSeen", "ach_bed_intro", s);
 		expect(autoScene(loadProfile(s))).toBeNull();
@@ -140,10 +133,10 @@ describe("the ending screen line", () => {
 });
 
 describe("the page", () => {
-	it("renders the list with 0 / 18 and the storage note", () => {
+	it("renders the list with 0 / 16 and the storage note", () => {
 		const html = renderToStaticMarkup(createElement(AchievementsPane));
-		expect(html).toContain("0 / 18");
-		expect(html.match(/class="ach-row /g)).toHaveLength(18);
+		expect(html).toContain("0 / 16");
+		expect(html.match(/class="ach-row /g)).toHaveLength(16);
 		expect(html).toContain("There is another way this ends.");
 		expect(html).toContain("Export to file keeps it");
 	});

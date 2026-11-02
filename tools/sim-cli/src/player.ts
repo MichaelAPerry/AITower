@@ -280,7 +280,6 @@ export class Player {
 				if (e.type === "cash") s += e.amount;
 				if (e.type === "seal" && e.path === this.tree) s -= e.amount * 3e4;
 				if (e.type === "sp") s += (e.path === this.tree ? 1 : e.path === "synthetic" ? -0.3 : 0) * e.amount * 5e4;
-				if (e.type === "bond" && e.advisor === champ) s += e.amount * 5e4;
 			}
 			if (c.id === def.recommended && (def.advisor === champ || def.advisor === "cass")) s += 2e5;
 			return s;

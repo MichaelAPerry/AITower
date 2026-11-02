@@ -388,11 +388,6 @@
      {
       "type": "cash",
       "amount": -150000
-     },
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 2
      }
     ]
    },
@@ -481,18 +476,7 @@
     "label": "Decline",
     "hint": "nothing now",
     "outcome": "The offer was withdrawn with no comment.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     },
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ]
+    "effects": []
    }
   ]
  },
@@ -601,13 +585,7 @@
     "label": "Decline",
     "hint": "nothing now",
     "outcome": "You declined. The brochure was recycled.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     }
-    ]
+    "effects": []
    }
   ]
  },
@@ -666,13 +644,7 @@
     "label": "Keep terms",
     "hint": "nothing now",
     "outcome": "Nothing changed.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ]
+    "effects": []
    }
   ]
  },
@@ -895,11 +867,6 @@
      {
       "type": "cash",
       "amount": -180000
-     },
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
      }
     ]
    },
@@ -1301,11 +1268,6 @@
      {
       "type": "cash",
       "amount": -30000
-     },
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 3
      }
     ]
    }

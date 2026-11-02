@@ -6,7 +6,7 @@
  * that was since removed, and `powerNets` / `coolantNets` having fewer entries than the net count (before the first
  * solve).
  */
-import type { ContentDB } from "@aitower/content";
+import { AFTER_HOURS_ITEM_IDS, type ContentDB } from "@aitower/content";
 import { TICKS_PER_DAY } from "../api";
 import type { BotLeg, BotTask, SimState } from "../core/state";
 import type { Bot, Facility, Job, Lift, WorkOrder } from "../core/state";
@@ -386,9 +386,19 @@ function validateBiotech(s: Obj): void {
 	if (corruption < 0 || corruption > 1) fail("corruption is outside 0..1");
 	if ((s.uptimeStreak as number) < 0) fail("uptimeStreak is negative");
 	validateSoul(s);
+	validateAfterHours(s);
 }
 
-/** Singularity points, seals, bonds, objections (snapshot v11). */
+/** The after-hours easter eggs (snapshot v17). */
+function validateAfterHours(s: Obj): void {
+	const a = isObj(s.afterHours) ? s.afterHours : fail("afterHours is not an object");
+	for (const id of AFTER_HOURS_ITEM_IDS) {
+		const o = fields(a[id], { streak: "int", lastDay: "int", thirdSeen: "bool", tenthReached: "bool", offers: "int", bought: "bool" }, `afterHours.${id}`);
+		if ((o.streak as number) < 0 || (o.offers as number) < 0 || (o.lastDay as number) < -1) fail(`afterHours.${id} has a negative count`);
+	}
+}
+
+/** Singularity points, seals, objections (snapshot v11). */
 function validateSoul(s: Obj): void {
 	const nonNeg = (o: Obj, where: string): void => {
 		for (const k of Object.keys(o)) if (!((o[k] as number) >= 0)) fail(`${where}.${k} must not be negative`);
@@ -396,8 +406,6 @@ function validateSoul(s: Obj): void {
 	nonNeg(fields(s.sp, { synthetic: "num", biotech: "num", greentech: "num" }, "sp"), "sp");
 	nonNeg(fields(s.sealScar, { biotech: "num", greentech: "num" }, "sealScar"), "sealScar");
 	nonNeg(fields(s.sealResidue, { biotech: "num", greentech: "num" }, "sealResidue"), "sealResidue");
-	const b = fields(s.bonds, { cass: "num", bea: "num", mel: "num", luci: "num" }, "bonds");
-	for (const k of ADVISOR_KEYS) if (!((b[k] as number) >= 0 && (b[k] as number) <= 100)) fail(`bonds.${k} is outside 0..100`);
 	array(s, "objected").forEach((x, i) => {
 		if (typeof x !== "string") fail(`objected[${i}] must be a string`);
 	});
@@ -425,7 +433,8 @@ function validateGreen(s: Obj): void {
 
 function validateMinistry(content: ContentDB, s: Obj, nextDecision: number): void {
 	if (s.decision !== null) {
-		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string; subject?: unknown };
+		const d = fields(s.decision, { id: "int", eventId: "str", issuedAt: "num", deferred: "bool", hiddenUntil: "num" }, "decision") as { id: number; eventId: string; subject?: unknown; lead?: unknown };
+		if (d.lead !== undefined && (typeof d.lead !== "string" || !content.events.some((e) => e.id === d.lead))) fail("decision.lead must name a known event");
 		if (d.subject !== undefined && typeof d.subject !== "string") fail("decision.subject must be a string");
 		if (!content.events.some((e) => e.id === d.eventId)) fail(`decision uses unknown event '${d.eventId}'`);
 		checkIds([d], nextDecision, "decision");

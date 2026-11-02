@@ -64,7 +64,7 @@ describe("sim-cli memo policy", () => {
 				cooldownDays: 0,
 				advisor: "luci",
 				recommended: "x",
-				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("z", [{ type: "cash", amount: 50 }, { type: "bond", advisor: "luci", amount: 1 }]), choice("w", [{ type: "cash", amount: 50 }])],
+				choices: [choice("x", [{ type: "cash", amount: -10 }]), choice("z", [{ type: "cash", amount: 50 }]), choice("w", [{ type: "cash", amount: 50 }])],
 			},
 		];
 		expect(bestMemoChoice(c, "e")).toBe("z");

@@ -52,6 +52,8 @@ export type SimCommand =
 	| { type: "decisionGate"; open: boolean }
 	/** Remember an advisor tip as shown, so it never fires again in this game. */
 	| { type: "markTip"; tipId: string }
+	/** Click an after-hours item (the fern, the fish tank, the coffee machine, the book): counts the day and may open a dialogue. */
+	| { type: "clickAfterHours"; item: import("@aitower/content").AfterHoursItemId }
 	/** Spend research points on a tech node (prerequisites researched, tier ≥ minTier, enough RP). */
 	| { type: "research"; techId: string }
 	/** Set the Contracts Clerk's standing order (needs the `contractsClerk` feature researched). */
@@ -459,7 +461,7 @@ export interface TreeView {
 }
 
 /**
- * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, the seal meters and the bonds. The seal is hidden per item but
+ * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, and the seal meters. The seal is hidden per item but
  * shown in total; the three `trees` carry everything the Trees panel needs.
  */
 export interface SoulView {
@@ -467,11 +469,35 @@ export interface SoulView {
 	spTarget: number;
 	seal: Record<SealedTree, number>;
 	sealMax: number;
-	bonds: Record<AdvisorId, number>;
-	bondEpilogue: number;
 	trees: Record<AscensionPath, TreeView>;
 	/** The green score 0..1, its two parts, and the Green speed it gives (`greenFloor` + the rest × score). */
 	green: { score: number; cleanPower: number; heatShare: number; speed: number };
+}
+
+/** One after-hours item for the renderer and the UI. */
+export interface AfterHoursItemView {
+	id: import("@aitower/content").AfterHoursItemId;
+	/** The character it belongs to; her off-duty portrait comes with the upgrade. */
+	advisor: import("@aitower/content").AdvisorId;
+	name: string;
+	/** Sim floor and left tile; the item is `width` tiles wide. */
+	floor: number;
+	x: number;
+	width: number;
+	/** It stands on built floor (F2 appears once a floor is built there). Only a visible item can be clicked. */
+	visible: boolean;
+	/** Consecutive days with a click, counting today (0 after a missed day). */
+	streak: number;
+	/** Clicked today already. */
+	clickedToday: boolean;
+	/** The upgrade is bought: the item is drawn upgraded. */
+	bought: boolean;
+}
+
+export interface AfterHoursView {
+	items: AfterHoursItemView[];
+	/** What an upgrade costs. */
+	price: number;
 }
 
 export interface DecisionView {
@@ -481,7 +507,7 @@ export interface DecisionView {
 	category: import("@aitower/content").EventCategory;
 	title: string;
 	body: string;
-	choices: { id: string; label: string; hint: string; /** Story scenes: what the advisors say back after this choice. */ reply?: import("@aitower/content").SceneLine[] }[];
+	choices: { id: string; label: string; hint: string; /** Story scenes: what the advisors say back after this choice. */ reply?: import("@aitower/content").SceneLine[]; /** After-hours upgrade: the price this choice pays (the answer is refused without the cash). */ cost?: number }[];
 	/** Story scenes: the dialogue before the choice (`{item}` already replaced). */
 	lines?: import("@aitower/content").SceneLine[];
 	/** Story scenes: backdrop and caption box. */
@@ -608,6 +634,8 @@ export interface SimView {
 	corruption: number;
 	/** Days in a row at 99% day-mean uptime or better with pflops above 0 (the Month of Calm and Cass's portrait). */
 	uptimeStreak: number;
+	/** The four after-hours easter eggs (docs/AFTER_HOURS.md): where they stand, the click streak and whether the upgrade is bought. */
+	afterHours: AfterHoursView;
 	/** Share of built cells with contamination ≥ 0.5. */
 	contaminatedShare: number;
 	/** The contaminated share crossed `balance.bio.irreversibleShare` at some point. */

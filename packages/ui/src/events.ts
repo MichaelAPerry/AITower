@@ -37,6 +37,7 @@ const commandName: Record<SimCommand["type"], string> = {
 	deferDecision: "Defer decision",
 	decisionGate: "Pace decisions",
 	markTip: "Note advisor tip",
+	clickAfterHours: "Click",
 	research: "Research",
 	setClerk: "Contract Automation orders",
 	takeLoan: "Take loan",

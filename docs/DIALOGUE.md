@@ -21,17 +21,19 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 5. [Story: Biotech tree, Mel's Flesh](#5-story-biotech-tree-mels-flesh)
 6. [Story: Greentech tree, Bea's Garden](#6-story-greentech-tree-beas-garden)
 7. [Story: a tree closes (seal scenes)](#7-story-a-tree-closes-seal-scenes)
-8. [Story: the bond tip](#8-story-the-bond-tip)
-9. [Story: bond 50 beats](#9-story-bond-50-beats)
-10. [Story: Cass, in her own scene](#10-story-cass-in-her-own-scene)
-11. [Endings](#11-endings)
-12. [Decision memos: Cass](#12-decision-memos-cass)
-13. [Decision memos: Bea](#13-decision-memos-bea)
-14. [Decision memos: Mel](#14-decision-memos-mel)
-15. [Decision memos: Luci](#15-decision-memos-luci)
-16. [Lessons](#16-lessons)
-17. [New-game screen: site descriptions](#17-new-game-screen-site-descriptions)
-18. [Achievements and the off-duty gallery](#18-achievements-and-the-off-duty-gallery)
+8. [Story: Cass, in her own scene](#8-story-cass-in-her-own-scene)
+9. [After hours: Bea's fern](#9-after-hours-beas-fern)
+10. [After hours: Mel's fish tank](#10-after-hours-mels-fish-tank)
+11. [After hours: Cass's coffee machine](#11-after-hours-casss-coffee-machine)
+12. [After hours: the book on Luci's desk](#12-after-hours-the-book-on-lucis-desk)
+13. [Endings](#13-endings)
+14. [Decision memos: Cass](#14-decision-memos-cass)
+15. [Decision memos: Bea](#15-decision-memos-bea)
+16. [Decision memos: Mel](#16-decision-memos-mel)
+17. [Decision memos: Luci](#17-decision-memos-luci)
+18. [Lessons](#18-lessons)
+19. [New-game screen: site descriptions](#19-new-game-screen-site-descriptions)
+20. [Achievements and the off-duty gallery](#20-achievements-and-the-off-duty-gallery)
 
 ## 1. Title crawl
 
@@ -84,7 +86,7 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 
 ### `st_intro`
 
-> Speaker: Luci. Recommended choice: `money`.
+> Speaker: Luci. Recommended choice: `ok`.
 > When: Once, when the game clock reaches 90 minutes of play (1h 30m in). Story scenes are issued in file order, one at a time.
 - [st_intro.title] Title: The Operator Arrives
 - [st_intro.location] Location: F1 · THE LOT
@@ -101,50 +103,18 @@ Dialogue before the choice:
 - [st_intro.l7] narrator: There are decisions in this building that change the fate of the world.  You know it, your advisors know it, the stockholders know it. Ms. Ferro is concerned about the latter.
 - [st_intro.l8] luci: Well operator, it's your decision: what are we building this for?
 
-Choice `money` (recommended):
+Choice `ok` (recommended):
 
-- [st_intro.money.label] Label: Money. It's a datacenter.
-- [st_intro.money.hint] Hint: Luci will like that.
-- [st_intro.money.outcome] Outcome: Luci wrote it down. Underlined it.
-> Effects: Luci bond +6; Bea bond -2.
-- [st_intro.money.r1 mood=pleased] luci: Oh, I like you.
-- [st_intro.money.r2 mood=displeased] bea: Day one. Great.
-
-Choice `outlive`:
-
-- [st_intro.outlive.label] Label: Something that outlives us.
-- [st_intro.outlive.hint] Hint: Bigger than the business.
-- [st_intro.outlive.outcome] Outcome: Nobody laughed. Mel looked up from her jar.
-> Effects: Mel bond +4; Bea bond +4.
-- [st_intro.outlive.r1 mood=pleased] mel: Life must continue, how astute.
-- [st_intro.outlive.r2] mel: But what is life?
-- [st_intro.outlive.r3] bea: Life is all around us!
-
-Choice `dunno`:
-
-- [st_intro.dunno.label] Label: I don't know yet.
-- [st_intro.dunno.hint] Hint: Cass will like that.
-- [st_intro.dunno.outcome] Outcome: Cass smiled into her mug. Luci checked her watch.
-> Effects: Cass bond +6; Luci bond -1.
-- [st_intro.dunno.r1 mood=pleased] cass: Sometimes not having an answer is the best.
-- [st_intro.dunno.r2] luci: Not good enough. Make sure you send me an email about our direction by Thursday.
-
-Choice `coffee`:
-
-- [st_intro.coffee.label] Label: Who's buying the coffee?
-- [st_intro.coffee.hint] Hint: Charm.
-- [st_intro.coffee.outcome] Outcome: Nobody had planned for that. Cass handed over her mug.
-> Effects: Cass bond +3; Luci bond +1.
-- [st_intro.coffee.r1 mood=pleased] cass: What a throwback.
-- [st_intro.coffee.r2] cass: But honestly, we need a better coffee machine.
-- [st_intro.coffee.r3] luci: I'll expense it.
+- [st_intro.ok.label] Label: Got it.
+- [st_intro.ok.hint] Hint: Moving on.
+- [st_intro.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ## 4. Story: Synthetic tree, Luci's Lattice
 
 
 ### `rung_syn_1`
 
-> Speaker: Luci. Recommended choice: `pipe`.
+> Speaker: Luci. Recommended choice: `ok`.
 > When: Once, when the Synthetic (Luci's Lattice) tree reaches rung 1 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: synthetic floor.
 - [rung_syn_1.title] Title: The First Lattice Rack
@@ -160,27 +130,15 @@ Dialogue before the choice:
 - [rung_syn_1.l5] cass: Almost like something alive.
 - [rung_syn_1.l6] luci: Alive or not, it's just the beginning of a new world of compute. We should build more.
 
-Choice `pipe` (recommended):
+Choice `ok` (recommended):
 
-- [rung_syn_1.pipe.label] Label: Get the cooling sorted first.
-- [rung_syn_1.pipe.hint] Hint: Cass will like that. A liquid rack with no loop throttles.
-- [rung_syn_1.pipe.outcome] Outcome: You asked Cass to size the loop before you touch another rack.
-> Effects: Cass bond +2.
-- [rung_syn_1.pipe.r1] cass: Good. I'll get to work. Remember it's the basic things that matter.
-- [rung_syn_1.pipe.r2] luci: Fine. A hot rack earns nothing, I suppose.
-
-Choice `more`:
-
-- [rung_syn_1.more.label] Label: Retrofit another rack now.
-- [rung_syn_1.more.hint] Hint: Luci will like that. More racks on the bar sooner.
-- [rung_syn_1.more.outcome] Outcome: You told Luci to keep going. Cass looked at the floor plan.
-> Effects: Luci bond +2; Cass bond -1.
-- [rung_syn_1.more.r1 mood=pleased] luci: That's what I like to hear.
-- [rung_syn_1.more.r2] cass: Don't forget the basics.
+- [rung_syn_1.ok.label] Label: Got it.
+- [rung_syn_1.ok.hint] Hint: Moving on.
+- [rung_syn_1.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_syn_2`
 
-> Speaker: Luci. Recommended choice: `gas`.
+> Speaker: Luci. Recommended choice: `ok`.
 > When: Once, when the Synthetic (Luci's Lattice) tree reaches rung 2 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: synthetic floor.
 - [rung_syn_2.title] Title: Cold Plates
@@ -196,26 +154,15 @@ Dialogue before the choice:
 - [rung_syn_2.l5] luci: Remember if just compute matters, we focus on making sure our racks are up and running 24/7.
 - [rung_syn_2.l6] luci: Keep working towards more compute. More compute means more money. More money means more compute.
 
-Choice `gas` (recommended):
+Choice `ok` (recommended):
 
-- [rung_syn_2.gas.label] Label: Look at a gas turbine.
-- [rung_syn_2.gas.hint] Hint: Cheap, fast power. It scars the Flesh and the Garden.
-- [rung_syn_2.gas.outcome] Outcome: You asked Luci for a turbine quote. She had one ready.
-> Effects: Luci bond +2.
-- [rung_syn_2.gas.r1 mood=pleased] luci: Invoice is ready, go ahead.
-
-Choice `grid`:
-
-- [rung_syn_2.grid.label] Label: Stay on grid power.
-- [rung_syn_2.grid.hint] Hint: Slower and dearer, but it keeps the other trees open.
-- [rung_syn_2.grid.outcome] Outcome: You told Luci to keep buying grid power. She wrote it down without comment.
-> Effects: Bea bond +1.
-- [rung_syn_2.grid.r1] luci: Your decision, but it's the tower's money.
-- [rung_syn_2.grid.r2] luci: Make sure you're under budget.
+- [rung_syn_2.ok.label] Label: Got it.
+- [rung_syn_2.ok.hint] Hint: Moving on.
+- [rung_syn_2.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_syn_3`
 
-> Speaker: Luci. Recommended choice: `cryo`.
+> Speaker: Luci. Recommended choice: `ok`.
 > When: Once, when the Synthetic (Luci's Lattice) tree reaches rung 3 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: synthetic floor.
 - [rung_syn_3.title] Title: Blades
@@ -230,26 +177,15 @@ Dialogue before the choice:
 - [rung_syn_3.l4] luci: Closer and closer to compute curve that inches us closer to Singularity.
 - [rung_syn_3.l5] cass: Remember that these machines still need us to run, can't let em overheat.
 
-Choice `cryo` (recommended):
+Choice `ok` (recommended):
 
-- [rung_syn_3.cryo.label] Label: Put the cryo study first.
-- [rung_syn_3.cryo.hint] Hint: Cass will like that. The Mind Lattice needs it anyway.
-- [rung_syn_3.cryo.outcome] Outcome: You put the cryo chiller study at the front of the queue.
-> Effects: Cass bond +2.
-- [rung_syn_3.cryo.r1] cass: Good. Cold always comes before compute.
-
-Choice `more`:
-
-- [rung_syn_3.more.label] Label: Retrofit more blades.
-- [rung_syn_3.more.hint] Hint: Luci will like that. More Lattice points now.
-- [rung_syn_3.more.outcome] Outcome: You told Luci to retrofit more blades.
-> Effects: Luci bond +2.
-- [rung_syn_3.more.r1 mood=pleased] luci: Now we're talking.
-- [rung_syn_3.more.r2] cass: Watch the temperature.
+- [rung_syn_3.ok.label] Label: Got it.
+- [rung_syn_3.ok.hint] Hint: Moving on.
+- [rung_syn_3.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_syn_4`
 
-> Speaker: Luci. Recommended choice: `more`.
+> Speaker: Luci. Recommended choice: `ok`.
 > When: Once, when the Synthetic (Luci's Lattice) tree reaches rung 4 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: synthetic floor.
 - [rung_syn_4.title] Title: The Mind Lattice
@@ -264,28 +200,18 @@ Dialogue before the choice:
 - [rung_syn_4.l4] cass: And a heap load of power, and blows hotter than an oven
 - [rung_syn_4.l5] luci: But, our clients research potential is massive; protein folding, quantum tunneling, fusion...
 
-Choice `more` (recommended):
+Choice `ok` (recommended):
 
-- [rung_syn_4.more.label] Label: Retrofit the rest.
-- [rung_syn_4.more.hint] Hint: Fastest way to the end of the Lattice.
-- [rung_syn_4.more.outcome] Outcome: You told Luci the rest of the racks were next.
-> Effects: Luci bond +2.
-- [rung_syn_4.more.r1 mood=pleased] luci: Good. Money is no object when we're this close.
-
-Choice `cool`:
-
-- [rung_syn_4.cool.label] Label: Cool what we have first.
-- [rung_syn_4.cool.hint] Hint: Cass will like that. A hot Mind Lattice throttles.
-- [rung_syn_4.cool.outcome] Outcome: You asked Cass to check every chiller before the next one.
-> Effects: Cass bond +2.
-- [rung_syn_4.cool.r1] cass: Thanks. I'll go and look at the chillers.
+- [rung_syn_4.ok.label] Label: Got it.
+- [rung_syn_4.ok.hint] Hint: Moving on.
+- [rung_syn_4.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ## 5. Story: Biotech tree, Mel's Flesh
 
 
 ### `obj_biotech`
 
-> Speaker: Mel. Recommended choice: `replace`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once per facility: when you place a facility that scars the Biotech (Mel's Flesh) tree enough, provided that tree is not sealed yet. The {item} in the text is the name of the facility just placed. Story scenes are issued in file order, one at a time.
 - [obj_biotech.title] Title: Mel Objects
 - [obj_biotech.location] Location: SITE · NEW INSTALLATION
@@ -298,26 +224,15 @@ Dialogue before the choice:
 - [obj_biotech.l3] mel: It hurts my children. They can feel it.  The infrasound, the fumes, it all as an incredibly negative effect on their endocrine systems.
 - [obj_biotech.l4 mood=pleased] luci: Your little science experiments don't get a vote.
 
-Choice `keep`:
+Choice `ok` (recommended):
 
-- [obj_biotech.keep.label] Label: Keep it.
-- [obj_biotech.keep.hint] Hint: Overrule Mel.
-- [obj_biotech.keep.outcome] Outcome: The {item} stays. Mel made a note on her notebook and rushed back downstairs.
-> Effects: Mel bond -4; Luci bond +2.
-- [obj_biotech.keep.r1 mood=unsettling] mel: Of course. It's your tower.
-
-Choice `replace` (recommended):
-
-- [obj_biotech.replace.label] Label: You're right. I'll replace it.
-- [obj_biotech.replace.hint] Hint: Side with Mel.
-- [obj_biotech.replace.outcome] Outcome: You promised to replace the {item}.
-> Effects: Mel bond +3.
-- [obj_biotech.replace.r1 mood=pleased] mel: Thank you.
-- [obj_biotech.replace.r2] mel: They'll remember that. So will I.
+- [obj_biotech.ok.label] Label: Got it.
+- [obj_biotech.ok.hint] Hint: Moving on.
+- [obj_biotech.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_bio_1`
 
-> Speaker: Mel. Recommended choice: `line`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once, when the Biotech (Mel's Flesh) tree reaches rung 1 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: biotech floor.
 - [rung_bio_1.title] Title: The First Organoid
@@ -333,25 +248,15 @@ Dialogue before the choice:
 - [rung_bio_1.l5] mel: If either's missing, that's like denying your child.  Make sure you keep on top of it.
 - [rung_bio_1.l6] mel: Little brains are a lot better than chips, the further we go the better they get.
 
-Choice `line` (recommended):
+Choice `ok` (recommended):
 
-- [rung_bio_1.line.label] Label: Build the bath and the nutrient line.
-- [rung_bio_1.line.hint] Hint: Mel will like that. The rack does nothing without them.
-- [rung_bio_1.line.outcome] Outcome: You asked for the bath and the nutrient plant first.
-> Effects: Mel bond +2.
-- [rung_bio_1.line.r1 mood=pleased] mel: Thank you, they'll remember your kindness.
-
-Choice `more`:
-
-- [rung_bio_1.more.label] Label: Retrofit another one.
-- [rung_bio_1.more.hint] Hint: More Bio racks sooner, but they'd all need feeding.
-- [rung_bio_1.more.outcome] Outcome: You said another one. Mel nodded slowly.
-> Effects: Mel bond -1.
-- [rung_bio_1.more.r1] mel: Okay. Don't forget that feeding them is important.
+- [rung_bio_1.ok.label] Label: Got it.
+- [rung_bio_1.ok.hint] Hint: Moving on.
+- [rung_bio_1.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_bio_2`
 
-> Speaker: Mel. Recommended choice: `sterile`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once, when the Biotech (Mel's Flesh) tree reaches rung 2 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: biotech floor.
 - [rung_bio_2.title] Title: The Vat Bank
@@ -366,26 +271,15 @@ Dialogue before the choice:
 - [rung_bio_2.l4] mel: A sterile bay cleans the air around it, I recommend you build one.
 - [rung_bio_2.l5] mel: Then the organoids get bigger, and the compute gets better.
 
-Choice `sterile` (recommended):
+Choice `ok` (recommended):
 
-- [rung_bio_2.sterile.label] Label: Research Sterile Protocols.
-- [rung_bio_2.sterile.hint] Hint: Mel will like that. It keeps contamination down.
-- [rung_bio_2.sterile.outcome] Outcome: You put Sterile Protocols at the front of the queue.
-> Effects: Mel bond +2.
-- [rung_bio_2.sterile.r1 mood=pleased] mel: Good. Let's make sure our babies are cared for.
-
-Choice `push`:
-
-- [rung_bio_2.push.label] Label: Keep growing.
-- [rung_bio_2.push.hint] Hint: Faster Bio points, more contamination.
-- [rung_bio_2.push.outcome] Outcome: You told Mel to keep growing.
-> Effects: Mel bond -1; Luci bond +1.
-- [rung_bio_2.push.r1] mel: This is real life you know.
-- [rung_bio_2.push.r2] luci: Growth is growth.
+- [rung_bio_2.ok.label] Label: Got it.
+- [rung_bio_2.ok.hint] Hint: Moving on.
+- [rung_bio_2.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_bio_3`
 
-> Speaker: Mel. Recommended choice: `works`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once, when the Biotech (Mel's Flesh) tree reaches rung 3 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: biotech floor.
 - [rung_bio_3.title] Title: The Perfused Cortex
@@ -400,25 +294,15 @@ Dialogue before the choice:
 - [rung_bio_3.l4] mel: More and more babies, we're becoming quite the parents aren't we.
 - [rung_bio_3.l5] mel: And keep an eye on their waste. At 99 percent, something my calculations may not predict might happen.
 
-Choice `works` (recommended):
+Choice `ok` (recommended):
 
-- [rung_bio_3.works.label] Label: Build the Nutrient Works.
-- [rung_bio_3.works.hint] Hint: Mel will like that. More nutrient for more cortex.
-- [rung_bio_3.works.outcome] Outcome: You told Mel to build the Nutrient Works next.
-> Effects: Mel bond +2.
-- [rung_bio_3.works.r1 mood=pleased] mel: Thank you. Our little growing babies! Getting so big!
-
-Choice `watch`:
-
-- [rung_bio_3.watch.label] Label: Watch the corruption number.
-- [rung_bio_3.watch.hint] Hint: Safe. It's on the top strip when it starts to climb.
-- [rung_bio_3.watch.outcome] Outcome: You said you'd keep an eye on the corruption.
-> Effects: Cass bond +1.
-- [rung_bio_3.watch.r1] mel: Please do. I mean it. It's our children.
+- [rung_bio_3.ok.label] Label: Got it.
+- [rung_bio_3.ok.hint] Hint: Moving on.
+- [rung_bio_3.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_bio_4`
 
-> Speaker: Mel. Recommended choice: `plant`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once, when the Biotech (Mel's Flesh) tree reaches rung 4 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: biotech floor.
 - [rung_bio_4.title] Title: The Neural Vat
@@ -433,28 +317,18 @@ Dialogue before the choice:
 - [rung_bio_4.l4] mel: We have to keep it warm, the new tech is the blanket for our newborn.  We should name it.
 - [rung_bio_4.l5] mel: This baby means we're close to our end, a perfect blending of flesh and data.
 
-Choice `plant` (recommended):
+Choice `ok` (recommended):
 
-- [rung_bio_4.plant.label] Label: Build the Vascular Plant.
-- [rung_bio_4.plant.hint] Hint: Mel will like that. One plant covers a lot of vats.
-- [rung_bio_4.plant.outcome] Outcome: You told Mel to build the Vascular Plant next.
-> Effects: Mel bond +2.
-- [rung_bio_4.plant.r1 mood=pleased] mel: Yes. Yes, please.
-
-Choice `more`:
-
-- [rung_bio_4.more.label] Label: Retrofit more vats.
-- [rung_bio_4.more.hint] Hint: More Bio points, if the nutrient line keeps up.
-- [rung_bio_4.more.outcome] Outcome: You told Mel to get more vats going.
-> Effects: Luci bond +1.
-- [rung_bio_4.more.r1] mel: As you like.
+- [rung_bio_4.ok.label] Label: Got it.
+- [rung_bio_4.ok.hint] Hint: Moving on.
+- [rung_bio_4.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ## 6. Story: Greentech tree, Bea's Garden
 
 
 ### `obj_greentech`
 
-> Speaker: Bea. Recommended choice: `replace`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once per facility: when you place a facility that scars the Greentech (Bea's Garden) tree enough, provided that tree is not sealed yet. The {item} in the text is the name of the facility just placed. Story scenes are issued in file order, one at a time.
 - [obj_greentech.title] Title: Bea Objects
 - [obj_greentech.location] Location: SITE · NEW INSTALLATION
@@ -467,28 +341,15 @@ Dialogue before the choice:
 - [obj_greentech.l3] bea: That does lasting damage to the local environment. Lasting damage to the water, the birds, the land...
 - [obj_greentech.l4 mood=pleased] luci: It saved a lot of money, though Bea....
 
-Choice `keep`:
+Choice `ok` (recommended):
 
-- [obj_greentech.keep.label] Label: Keep it.
-- [obj_greentech.keep.hint] Hint: Overrule Bea.
-- [obj_greentech.keep.outcome] Outcome: The {item} stays. Bea didn't speak to you the rest of the afternoon.
-> Effects: Bea bond -4; Luci bond +2.
-- [obj_greentech.keep.r1 mood=displeased] bea: Your own funeral.
-- [obj_greentech.keep.r2] bea: I won't forget it.
-
-Choice `replace` (recommended):
-
-- [obj_greentech.replace.label] Label: You're right. I'll replace it.
-- [obj_greentech.replace.hint] Hint: Side with Bea.
-- [obj_greentech.replace.outcome] Outcome: You promised to replace the {item}. She'll be checking.
-> Effects: Bea bond +3.
-- [obj_greentech.replace.r1 mood=pleased] bea: Good, let's rip it out.
-- [obj_greentech.replace.r2] bea: I'm ready to go... Come on!
-- [obj_greentech.replace.r3] luci: Hmm, I guess I can depreciate it...
+- [obj_greentech.ok.label] Label: Got it.
+- [obj_greentech.ok.hint] Hint: Moving on.
+- [obj_greentech.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_green_1`
 
-> Speaker: Bea. Recommended choice: `panels`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once, when the Greentech (Bea's Garden) tree reaches rung 1 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: greentech floor.
 - [rung_green_1.title] Title: The First Green Rack
@@ -504,26 +365,15 @@ Dialogue before the choice:
 - [rung_green_1.l5] bea: Come on, we can order some panels.  You'll need to help me mount them.
 - [rung_green_1.l6] bea: The new world waits for no one!
 
-Choice `panels` (recommended):
+Choice `ok` (recommended):
 
-- [rung_green_1.panels.label] Label: Put panels up.
-- [rung_green_1.panels.hint] Hint: Bea will like that. Clean power raises your Green speed.
-- [rung_green_1.panels.outcome] Outcome: You told Bea to start on the wall panels.
-> Effects: Bea bond +2.
-- [rung_green_1.panels.r1 mood=pleased] bea: Yay! Okay. I'm getting the ladder!
-
-Choice `racks`:
-
-- [rung_green_1.racks.label] Label: Retrofit more racks first.
-- [rung_green_1.racks.hint] Hint: More Green racks, still slow without clean power.
-- [rung_green_1.racks.outcome] Outcome: You said racks first. Bea shrugged.
-> Effects: Bea bond -1; Luci bond +1.
-- [rung_green_1.racks.r1] bea: Okay.
-- [rung_green_1.racks.r2] bea: But why go half measure?
+- [rung_green_1.ok.label] Label: Got it.
+- [rung_green_1.ok.hint] Hint: Moving on.
+- [rung_green_1.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_green_2`
 
-> Speaker: Bea. Recommended choice: `heat`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once, when the Greentech (Bea's Garden) tree reaches rung 2 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: greentech floor.
 - [rung_green_2.title] Title: Event-Driven
@@ -538,25 +388,15 @@ Dialogue before the choice:
 - [rung_green_2.l4] bea: We can also sell our excess heat too! Heat into power! What a weird world. I'm here for it though.
 - [rung_green_2.l5] bea: Keep going and we get even closer to a tree, working with nature rather than against it.
 
-Choice `heat` (recommended):
+Choice `ok` (recommended):
 
-- [rung_green_2.heat.label] Label: Look at heat recovery.
-- [rung_green_2.heat.hint] Hint: Bea will like that. It raises your green score without any weather.
-- [rung_green_2.heat.outcome] Outcome: You asked Bea to look at heat recovery.
-> Effects: Bea bond +2.
-- [rung_green_2.heat.r1 mood=pleased] bea: Yay! You're the best!
-
-Choice `panels`:
-
-- [rung_green_2.panels.label] Label: Add more panels.
-- [rung_green_2.panels.hint] Hint: Straight clean power. Depends on the sun.
-- [rung_green_2.panels.outcome] Outcome: You told Bea to add more panels.
-> Effects: Bea bond +1.
-- [rung_green_2.panels.r1] bea: More panels! Yay! Ladder time!
+- [rung_green_2.ok.label] Label: Got it.
+- [rung_green_2.ok.hint] Hint: Moving on.
+- [rung_green_2.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_green_3`
 
-> Speaker: Bea. Recommended choice: `fuel`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once, when the Greentech (Bea's Garden) tree reaches rung 3 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: greentech floor.
 - [rung_green_3.title] Title: Light
@@ -572,25 +412,15 @@ Dialogue before the choice:
 - [rung_green_3.l5] bea: Batteries help, that's what I recommend. They help keep things even when Mr. Sun says goodnight.
 - [rung_green_3.l6] bea: I love what we're doing for the world.  I think what we've created here is spreading.
 
-Choice `fuel` (recommended):
+Choice `ok` (recommended):
 
-- [rung_green_3.fuel.label] Label: Look at a fuel cell.
-- [rung_green_3.fuel.hint] Hint: Bea will like that. Backup for a calm week (14,000 RP to research).
-- [rung_green_3.fuel.outcome] Outcome: You asked Bea about the fuel cell.
-> Effects: Bea bond +2.
-- [rung_green_3.fuel.r1 mood=pleased] bea: Hydrogen, instead of diesel. Yay!
-
-Choice `wind`:
-
-- [rung_green_3.wind.label] Label: Put up more wind.
-- [rung_green_3.wind.hint] Hint: Wind keeps working after dark. Not on a calm day.
-- [rung_green_3.wind.outcome] Outcome: You told Bea to put up more wind.
-> Effects: Bea bond +1.
-- [rung_green_3.wind.r1] bea: Wind works well at night too! Especially the taller our tower is!  Time to grow like an oak.
+- [rung_green_3.ok.label] Label: Got it.
+- [rung_green_3.ok.hint] Hint: Moving on.
+- [rung_green_3.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `rung_green_4`
 
-> Speaker: Bea. Recommended choice: `storage`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once, when the Greentech (Bea's Garden) tree reaches rung 4 of 4. Story scenes are issued in file order, one at a time.
 > Backdrop: greentech floor.
 - [rung_green_4.title] Title: The Photonic Mesh
@@ -605,28 +435,18 @@ Dialogue before the choice:
 - [rung_green_4.l4] bea: Now people need to come in, enjoy our fruits!  The literal ones growing next to the racks!  But we need to hold the data down too.
 - [rung_green_4.l5 mood=pleased] bea: Anyway. Look at the sun.
 
-Choice `storage` (recommended):
+Choice `ok` (recommended):
 
-- [rung_green_4.storage.label] Label: Add storage.
-- [rung_green_4.storage.hint] Hint: Bea will like that. Iron-air storage rides out a calm week.
-- [rung_green_4.storage.outcome] Outcome: You told Bea to add storage.
-> Effects: Bea bond +2.
-- [rung_green_4.storage.r1 mood=pleased] bea: Ok, good plan.
-
-Choice `more`:
-
-- [rung_green_4.more.label] Label: Retrofit more meshes.
-- [rung_green_4.more.hint] Hint: More Green points, if the power keeps up.
-- [rung_green_4.more.outcome] Outcome: You told Bea to retrofit more meshes.
-> Effects: Luci bond +1.
-- [rung_green_4.more.r1] bea: Sure. But what are we really computing now?
+- [rung_green_4.ok.label] Label: Got it.
+- [rung_green_4.ok.hint] Hint: Moving on.
+- [rung_green_4.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ## 7. Story: a tree closes (seal scenes)
 
 
 ### `seal_biotech`
 
-> Speaker: Mel. Recommended choice: `stay`.
+> Speaker: Mel. Recommended choice: `ok`.
 > When: Once, the first time the Biotech (Mel's Flesh) tree is sealed (its seal reaches 100). It plays even if you never committed to that tree. Story scenes are issued in file order, one at a time.
 > Backdrop: biotech floor.
 - [seal_biotech.title] Title: The Flesh Closes
@@ -643,27 +463,15 @@ Dialogue before the choice:
 - [seal_biotech.l6 mood=unsettling] mel: Heh, I guess.. *she holds back a sob*
 - [seal_biotech.l7] mel: You guys can go, I have some work to finish here.
 
-Choice `stay` (recommended):
+Choice `ok` (recommended):
 
-- [seal_biotech.stay.label] Label: Stay with her a minute.
-- [seal_biotech.stay.hint] Hint: Mel will like that.
-- [seal_biotech.stay.outcome] Outcome: You stood next to Mel at the panel until she was done closing the input.
-> Effects: Mel bond +3.
-- [seal_biotech.stay.r1 mood=pleased] mel: Thank you.
-- [seal_biotech.stay.r2] mel: They did well. For a while they did very well.
-
-Choice `other`:
-
-- [seal_biotech.other.label] Label: We're pivoting is all, nothing but numbers Mel.
-- [seal_biotech.other.hint] Hint: Luci will like that.
-- [seal_biotech.other.outcome] Outcome: You said the word another. Mel took the jar downstairs.
-> Effects: Luci bond +1; Mel bond -1.
-- [seal_biotech.other.r1] mel: Yes. Of course.
-- [seal_biotech.other.r2 mood=pleased] luci: Good. Remember we are the sails blown by our clients wind.
+- [seal_biotech.ok.label] Label: Got it.
+- [seal_biotech.ok.hint] Hint: Moving on.
+- [seal_biotech.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `seal_greentech`
 
-> Speaker: Bea. Recommended choice: `own`.
+> Speaker: Bea. Recommended choice: `ok`.
 > When: Once, the first time the Greentech (Bea's Garden) tree is sealed (its seal reaches 100). It plays even if you never committed to that tree. Story scenes are issued in file order, one at a time.
 > Backdrop: greentech floor.
 - [seal_greentech.title] Title: The Garden Closes
@@ -680,23 +488,11 @@ Dialogue before the choice:
 - [seal_greentech.l6 mood=pleased] luci: A cost saving measure for sure...
 - [seal_greentech.l7] bea: ...Hmm
 
-Choice `own` (recommended):
+Choice `ok` (recommended):
 
-- [seal_greentech.own.label] Label: That one was on me.
-- [seal_greentech.own.hint] Hint: Bea will like that.
-- [seal_greentech.own.outcome] Outcome: You told Bea the Garden closing was your call. She didn't argue.
-> Effects: Bea bond +3.
-- [seal_greentech.own.r1] bea: Okay.
-- [seal_greentech.own.r2 mood=pleased] bea: Thanks for owning up to it at least. You're still a scoundrel.
-
-Choice `other`:
-
-- [seal_greentech.other.label] Label: We'll go another direction.
-- [seal_greentech.other.hint] Hint: Luci will like that.
-- [seal_greentech.other.outcome] Outcome: You turned to the stairwell. Bea stayed up on the roof a while.
-> Effects: Luci bond +1; Bea bond -1.
-- [seal_greentech.other.r1] bea: Sure. I'll be up here.
-- [seal_greentech.other.r2 mood=pleased] luci: I'm pleased with you Operator.
+- [seal_greentech.ok.label] Label: Got it.
+- [seal_greentech.ok.hint] Hint: Moving on.
+- [seal_greentech.ok.outcome] Outcome: The scene ends and the day goes on.
 
 ### `tip_seal`
 
@@ -719,120 +515,7 @@ Choice `ok` (recommended):
 - [tip_seal.ok.hint] Hint: Just a tip.
 - [tip_seal.ok.outcome] Outcome: Bea tapped her clipboard twice and went back up the ladder.
 
-## 8. Story: the bond tip
-
-
-### `tip_bond`
-
-> Speaker: Luci. Recommended choice: `ok`.
-> When: Story scenes are issued in file order, one at a time.
-> Backdrop: synthetic floor.
-- [tip_bond.title] Title: A Word at the Desk
-- [tip_bond.location] Location: F1 · FINANCE OFFICE
-- [tip_bond.caption] Caption: Luci pauses over the ledger and finally looks up.
-
-Dialogue before the choice:
-
-- [tip_bond.l1] luci: Heads up. We are people too, make sure you pay attention.
-- [tip_bond.l2] luci: Take my advice or don't listen, we'll remember.
-
-Choice `ok` (recommended):
-
-- [tip_bond.ok.label] Label: Got it.
-- [tip_bond.ok.hint] Hint: Just a tip.
-- [tip_bond.ok.outcome] Outcome: She went back to work.
-
-## 9. Story: bond 50 beats
-
-
-### `bond50_luci`
-
-> Speaker: Luci. Recommended choice: `ok`.
-> When: Once, the first time Luci's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
-> Backdrop: synthetic floor.
-- [bond50_luci.title] Title: Ms. Ferro Stays Late
-- [bond50_luci.location] Location: F1 · FINANCE OFFICE
-- [bond50_luci.caption] Caption: The finance office light is still on. Luci doesn't look up from the ledger.
-
-Dialogue before the choice:
-
-- [bond50_luci.l1] narrator: The finance office light is still on. Luci doesn't look up from the ledger.
-- [bond50_luci.l2 mood=pleased] luci: You've been right about more things than I expected from you.
-- [bond50_luci.l3] luci: I never said that to you, officially that is. Unofficially I think we have some unfinished business.
-- [bond50_luci.l4] luci: When this is over, come and see me. We'll settle up.
-
-Choice `ok` (recommended):
-
-- [bond50_luci.ok.label] Label: I'll bring the pen.
-- [bond50_luci.ok.hint] Hint: She'll remember.
-- [bond50_luci.ok.outcome] Outcome: Luci smiles and writes something small in her calendar.
-
-### `bond50_mel`
-
-> Speaker: Mel. Recommended choice: `ok`.
-> When: Once, the first time Mel's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
-> Backdrop: biotech floor.
-- [bond50_mel.title] Title: Mel Offers a Seat
-- [bond50_mel.location] Location: B1 · WETWARE ANNEX
-- [bond50_mel.caption] Caption: Mel pulls a stool out from under the bench. She looks at you fondly.
-
-Dialogue before the choice:
-
-- [bond50_mel.l1] narrator: Mel pulls a stool out from under the bench. You've never seen her more since you've been here.
-- [bond50_mel.l2] mel: Sit. Please.
-- [bond50_mel.l3] mel: You listen when I talk about them. I like that, and they like that.
-- [bond50_mel.l4 mood=pleased] mel: We'll be here waiting for your ear.
-
-Choice `ok` (recommended):
-
-- [bond50_mel.ok.label] Label: I'd like that.
-- [bond50_mel.ok.hint] Hint: She'll remember.
-- [bond50_mel.ok.outcome] Outcome: You sat on the stool. The vats hummed. Mel spoke about things you didn't understand for hours, but it felt like minutes.
-
-### `bond50_bea`
-
-> Speaker: Bea. Recommended choice: `ok`.
-> When: Once, the first time Bea's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
-> Backdrop: greentech floor.
-- [bond50_bea.title] Title: Bea Shares Her Lunch
-- [bond50_bea.location] Location: ROOF · PANEL DECK
-- [bond50_bea.caption] Caption: Bea is on the roof with two sandwiches. She holds one out without looking.
-
-Dialogue before the choice:
-
-- [bond50_bea.l1] narrator: Bea is on the roof with two sandwiches. She holds one out without looking.
-- [bond50_bea.l2 mood=pleased] bea: Cheese. It's the only kind I make.
-- [bond50_bea.l3] bea: Hey, if this all goes sideways, I'll be down at the river.
-- [bond50_bea.l4] bea: Just saying, in case you need someone.
-
-Choice `ok` (recommended):
-
-- [bond50_bea.ok.label] Label: Take the sandwich.
-- [bond50_bea.ok.hint] Hint: She'll remember.
-- [bond50_bea.ok.outcome] Outcome: You thank her for lunch and she punches you.
-
-### `bond50_cass`
-
-> Speaker: Cass. Recommended choice: `ok`.
-> When: Once, the first time Cass's bond with the Operator reaches 50. Story scenes are issued in file order, one at a time.
-- [bond50_cass.title] Title: Cass Pours Two
-- [bond50_cass.location] Location: B1 · PLANT ROOM
-- [bond50_cass.caption] Caption: There are two mugs on the gauge board this time. Cass must have been expecting you.
-
-Dialogue before the choice:
-
-- [bond50_cass.l1] narrator: There are two mugs on the gauge board this time. Cass must have been expecting you.
-- [bond50_cass.l2 mood=pleased] cass: There you are, grab a cup.
-- [bond50_cass.l3] cass: You ask me what I think, I appreciate that you listen. That's rare.
-- [bond50_cass.l4] cass: When it's over, find me at the lodge.
-
-Choice `ok` (recommended):
-
-- [bond50_cass.ok.label] Label: Thanks for the mug.
-- [bond50_cass.ok.hint] Hint: She'll remember.
-- [bond50_cass.ok.outcome] Outcome: The coffee was instant. It was hot, which was the point.
-
-## 10. Story: Cass, in her own scene
+## 8. Story: Cass, in her own scene
 
 
 ### `cass_night_shift`
@@ -862,7 +545,6 @@ Choice `ask` (recommended):
 - [cass_night_shift.ask.label] Label: Tell me the honest version.
 - [cass_night_shift.ask.hint] Hint: Cass will like that.
 - [cass_night_shift.ask.outcome] Outcome: Cass told you. It took ten minutes and she didn't soften any of it.
-> Effects: Cass bond +4.
 - [cass_night_shift.ask.r1] cass: It's old. It's loud.
 - [cass_night_shift.ask.r2] cass: Without us and duct tape, it would be beyond FUBAR'd.
 - [cass_night_shift.ask.r3 mood=pleased] cass: But it needs me, I like being needed.
@@ -872,14 +554,459 @@ Choice `order`:
 - [cass_night_shift.order.label] Label: Order the bearing now. Rush it.
 - [cass_night_shift.order.hint] Hint: -$12k now. Cass will say what she thinks.
 - [cass_night_shift.order.outcome] Outcome: You rang the supplier from the plant room. Cass wrote the part number on her glove.
-> Effects: cash amount=-12000; Cass bond +2; Luci bond -1.
+> Effects: cash amount=-12000.
 - [cass_night_shift.order.r1] cass: You rushed it??
 - [cass_night_shift.order.r2] cass: But I won't say no. Thanks.
 - [cass_night_shift.order.r3 mood=displeased] luci: I'll find the funds.  I guess.
 
-## 11. Endings
+## 9. After hours: Bea's fern
 
-> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when no advisor's bond is high enough.
+
+### `ah_fern_third`
+
+> Speaker: Bea. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_third.title] Title: Nigel the Fern
+- [ah_fern_third.location] Location: F1 · LOBBY
+- [ah_fern_third.caption] Caption: Bea's fern by the lobby window.
+
+Dialogue before the choice:
+
+- [ah_fern_third.l1] bea: Oh you noticed nigel my fern Isn't he great!
+- [ah_fern_third.l2] bea: I'm glad you're watering him are you going to keep it up?
+
+Choice `yes` (recommended):
+
+- [ah_fern_third.yes.label] Label: Yes
+- [ah_fern_third.yes.hint] Hint: Keep it up.
+- [ah_fern_third.yes.outcome] Outcome: Noted.
+- [ah_fern_third.yes.r1] bea: Oh thanks! You're the best
+
+Choice `no`:
+
+- [ah_fern_third.no.label] Label: No
+- [ah_fern_third.no.hint] Hint: Not promising anything.
+- [ah_fern_third.no.outcome] Outcome: Noted.
+- [ah_fern_third.no.r1] bea: Oh come on, just cause I asked?
+
+### `ah_fern_tenth`
+
+> Speaker: Bea. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_tenth.title] Title: Nigel Deserves Better
+- [ah_fern_tenth.location] Location: F1 · LOBBY
+- [ah_fern_tenth.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_tenth.l1] bea: Nigel is doing ok, but I think he deserves better. You think we could upgrade his pot, and give him an automatic watering and feeding huh?
+- [ah_fern_tenth.l2] bea: Isn't he worth it!
+
+Choice `yes` (recommended):
+
+- [ah_fern_tenth.yes.label] Label: Yes
+- [ah_fern_tenth.yes.hint] Hint: $1,000,000
+- [ah_fern_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=fern.
+- [ah_fern_tenth.yes.r1] bea: You're my hero!
+
+Choice `no`:
+
+- [ah_fern_tenth.no.label] Label: No
+- [ah_fern_tenth.no.hint] Hint: Not now.
+- [ah_fern_tenth.no.outcome] Outcome: Not now.
+- [ah_fern_tenth.no.r1] bea: Well, I left the catalogue on your desk.
+
+### `ah_fern_again1`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again1.title] Title: Nigel Deserves Better
+- [ah_fern_again1.location] Location: F1 · LOBBY
+- [ah_fern_again1.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again1.l1] narrator: [ buy the bigger pot for the fern ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again1.ok.label] Label: Got it.
+- [ah_fern_again1.ok.hint] Hint: Moving on.
+- [ah_fern_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_fern_again2`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again2.title] Title: Nigel Deserves Better
+- [ah_fern_again2.location] Location: F1 · LOBBY
+- [ah_fern_again2.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again2.l1] narrator: [ (buy the fern's new pot) ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again2.ok.label] Label: Got it.
+- [ah_fern_again2.ok.hint] Hint: Moving on.
+- [ah_fern_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_fern_again3`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again3.title] Title: Nigel Deserves Better
+- [ah_fern_again3.location] Location: F1 · LOBBY
+- [ah_fern_again3.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again3.l1] narrator: [ you could buy the pot with automatic watering ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again3.ok.label] Label: Got it.
+- [ah_fern_again3.ok.hint] Hint: Moving on.
+- [ah_fern_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 10. After hours: Mel's fish tank
+
+
+### `ah_tank_third`
+
+> Speaker: Mel. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_third.title] Title: Fido the Fish
+- [ah_tank_third.location] Location: B1 · MEL'S CORNER
+- [ah_tank_third.caption] Caption: Mel's fish tank on her desk.
+
+Dialogue before the choice:
+
+- [ah_tank_third.l1] mel: You're the one feeding fido!   Yes that's his name, I know it's kinda weird for a fish, but I love em!
+- [ah_tank_third.l2] mel: Can you keep it up!? Sometimes I forget...
+
+Choice `yes` (recommended):
+
+- [ah_tank_third.yes.label] Label: Yes
+- [ah_tank_third.yes.hint] Hint: Keep it up.
+- [ah_tank_third.yes.outcome] Outcome: Noted.
+- [ah_tank_third.yes.r1] mel: Thanks!
+
+Choice `no`:
+
+- [ah_tank_third.no.label] Label: No
+- [ah_tank_third.no.hint] Hint: Not promising anything.
+- [ah_tank_third.no.outcome] Outcome: Noted.
+- [ah_tank_third.no.r1] mel: Oh, I guess I'll have to remember.
+
+### `ah_tank_tenth`
+
+> Speaker: Mel. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_tenth.title] Title: Fido's Upgrade
+- [ah_tank_tenth.location] Location: B1 · MEL'S CORNER
+- [ah_tank_tenth.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_tenth.l1] mel: Mr. Fido is doing good, but look at these new bio-enhancements we can add. He'll be so genetically perfect can we?
+
+Choice `yes` (recommended):
+
+- [ah_tank_tenth.yes.label] Label: Yes
+- [ah_tank_tenth.yes.hint] Hint: $1,000,000
+- [ah_tank_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=tank.
+- [ah_tank_tenth.yes.r1] mel: Yay! It will be awesome!
+
+Choice `no`:
+
+- [ah_tank_tenth.no.label] Label: No
+- [ah_tank_tenth.no.hint] Hint: Not now.
+- [ah_tank_tenth.no.outcome] Outcome: Not now.
+- [ah_tank_tenth.no.r1] mel: Well, I left the feature set on your desk.
+
+### `ah_tank_again1`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again1.title] Title: Fido's Upgrade
+- [ah_tank_again1.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again1.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again1.l1] narrator: [ buy the bio-enhanced tank ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again1.ok.label] Label: Got it.
+- [ah_tank_again1.ok.hint] Hint: Moving on.
+- [ah_tank_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_tank_again2`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again2.title] Title: Fido's Upgrade
+- [ah_tank_again2.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again2.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again2.l1] narrator: [ (buy the tank upgrade) ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again2.ok.label] Label: Got it.
+- [ah_tank_again2.ok.hint] Hint: Moving on.
+- [ah_tank_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_tank_again3`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again3.title] Title: Fido's Upgrade
+- [ah_tank_again3.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again3.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again3.l1] narrator: [ you could buy Fido's bio-enhancements ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again3.ok.label] Label: Got it.
+- [ah_tank_again3.ok.hint] Hint: Moving on.
+- [ah_tank_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 11. After hours: Cass's coffee machine
+
+
+### `ah_coffee_third`
+
+> Speaker: Cass. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_third.title] Title: The Coffee Corner
+- [ah_coffee_third.location] Location: F1 · LOBBY
+- [ah_coffee_third.caption] Caption: Cass's coffee machine in the lobby.
+
+Dialogue before the choice:
+
+- [ah_coffee_third.l1] cass: I wonder who was making the coffee, not the best but we need it.
+- [ah_coffee_third.l2] cass: If you keep making it, I'll keep drinking it!
+
+Choice `yes` (recommended):
+
+- [ah_coffee_third.yes.label] Label: Yes
+- [ah_coffee_third.yes.hint] Hint: Keep it up.
+- [ah_coffee_third.yes.outcome] Outcome: Noted.
+- [ah_coffee_third.yes.r1] cass: Java hero right here.
+
+Choice `no`:
+
+- [ah_coffee_third.no.label] Label: No
+- [ah_coffee_third.no.hint] Hint: Not promising anything.
+- [ah_coffee_third.no.outcome] Outcome: Noted.
+- [ah_coffee_third.no.r1] cass: Time for me to figure out the automatic setting.
+
+### `ah_coffee_tenth`
+
+> Speaker: Cass. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_tenth.title] Title: A Better Coffee Maker
+- [ah_coffee_tenth.location] Location: F1 · LOBBY
+- [ah_coffee_tenth.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_tenth.l1] cass: I begged Luci and she said it's up to you, but I've been eyeing this new coffee maker.  It does cappuccino, steamed milk, everything, think we can spring for it?
+
+Choice `yes` (recommended):
+
+- [ah_coffee_tenth.yes.label] Label: Yes
+- [ah_coffee_tenth.yes.hint] Hint: $1,000,000
+- [ah_coffee_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=coffee.
+- [ah_coffee_tenth.yes.r1] cass: Well, you know what makes me happy.
+
+Choice `no`:
+
+- [ah_coffee_tenth.no.label] Label: No
+- [ah_coffee_tenth.no.hint] Hint: Not now.
+- [ah_coffee_tenth.no.outcome] Outcome: Not now.
+- [ah_coffee_tenth.no.r1] cass: Ugh, cheapskate.
+
+### `ah_coffee_again1`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again1.title] Title: A Better Coffee Maker
+- [ah_coffee_again1.location] Location: F1 · LOBBY
+- [ah_coffee_again1.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again1.l1] narrator: [ buy the coffee machine ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again1.ok.label] Label: Got it.
+- [ah_coffee_again1.ok.hint] Hint: Moving on.
+- [ah_coffee_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_coffee_again2`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again2.title] Title: A Better Coffee Maker
+- [ah_coffee_again2.location] Location: F1 · LOBBY
+- [ah_coffee_again2.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again2.l1] narrator: [ (buy the cappuccino machine) ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again2.ok.label] Label: Got it.
+- [ah_coffee_again2.ok.hint] Hint: Moving on.
+- [ah_coffee_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_coffee_again3`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again3.title] Title: A Better Coffee Maker
+- [ah_coffee_again3.location] Location: F1 · LOBBY
+- [ah_coffee_again3.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again3.l1] narrator: [ you could buy the new coffee maker ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again3.ok.label] Label: Got it.
+- [ah_coffee_again3.ok.hint] Hint: Moving on.
+- [ah_coffee_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 12. After hours: the book on Luci's desk
+
+
+### `ah_book_third`
+
+> Speaker: Luci. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_third.title] Title: The Ledger
+- [ah_book_third.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_third.caption] Caption: The ledger on Luci's desk.
+
+Dialogue before the choice:
+
+- [ah_book_third.l1] luci: You're the one who's been coming in and checking the ledger.
+- [ah_book_third.l2] luci: Unusual, but I appreciate an operator who does the numbers
+
+Choice `yes` (recommended):
+
+- [ah_book_third.yes.label] Label: Yes
+- [ah_book_third.yes.hint] Hint: Keep it up.
+- [ah_book_third.yes.outcome] Outcome: Noted.
+- [ah_book_third.yes.r1] luci: If you ever want to talk numbers...
+
+Choice `no`:
+
+- [ah_book_third.no.label] Label: No
+- [ah_book_third.no.hint] Hint: Not promising anything.
+- [ah_book_third.no.outcome] Outcome: Noted.
+- [ah_book_third.no.r1] luci: Oh, guess I was barking up the wrong tree.
+
+### `ah_book_tenth`
+
+> Speaker: Luci. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_tenth.title] Title: Get Licensed
+- [ah_book_tenth.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_tenth.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_tenth.l1] luci: Well, you obviously care about our financial future.  But I need you to get your license if you keep it up.  Don't worry, it comes with perks and I get to be your instructor.  There is a small fee.
+
+Choice `yes` (recommended):
+
+- [ah_book_tenth.yes.label] Label: Yes
+- [ah_book_tenth.yes.hint] Hint: $1,000,000
+- [ah_book_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=book.
+- [ah_book_tenth.yes.r1] luci: Excellent, class starts tonight.  Don't be late.
+
+Choice `no`:
+
+- [ah_book_tenth.no.label] Label: No
+- [ah_book_tenth.no.hint] Hint: Not now.
+- [ah_book_tenth.no.outcome] Outcome: Not now.
+- [ah_book_tenth.no.r1] luci: Well, hands off the books unless you're licensed.
+
+### `ah_book_again1`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again1.title] Title: Get Licensed
+- [ah_book_again1.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again1.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again1.l1] narrator: [ buy the license ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again1.ok.label] Label: Got it.
+- [ah_book_again1.ok.hint] Hint: Moving on.
+- [ah_book_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_book_again2`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again2.title] Title: Get Licensed
+- [ah_book_again2.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again2.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again2.l1] narrator: [ (buy the license and the certificate) ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again2.ok.label] Label: Got it.
+- [ah_book_again2.ok.hint] Hint: Moving on.
+- [ah_book_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_book_again3`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again3.title] Title: Get Licensed
+- [ah_book_again3.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again3.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again3.l1] narrator: [ you could sign up for the license class ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again3.ok.label] Label: Got it.
+- [ah_book_again3.ok.hint] Hint: Moving on.
+- [ah_book_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 13. Endings
+
+> Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when the ending's own advisor has none.
 
 ### `singularity`
 
@@ -892,7 +1019,7 @@ Choice `order`:
 - [end.singularity.epilogue.bea] narrator: Bea has drawn a garden over the window in marker. "It's not real," she says. "Nothing is anymore, I wonder how long we'll have the earth for." She sighs and says "I'm off to the river, care to join?"  You want to, but you need to check on Mel and Luci.
 - [end.singularity.epilogue.mel] narrator: Mel is in the old lab, cleaning her specimen jars in a dirty sink.  Each cleaned one goes into the trash. The sun's setting now. "Well, there is only one place left for my children."  She looks down the drain while her hands move to her belly.  You don't know what to say so you place your hand on her shoulder and leave after a moment.
 - [end.singularity.epilogue.luci] narrator: Luci finds you on the roof. Drones fly over the city in some unknown errand for the machine. "Well, it finally grew up didn't it" she says. "Sensible option for it to take control, we are just savages" She holds out her hand. It's shaking. You grab it. "Maybe we'll be ok" She waits. "If it still needs us."
-> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+> Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.singularity.epilogue.fallback] narrator: Nobody is waiting for you. The kitchen is empty and the kettle is cold. On your desk there's a note in your own handwriting, which you didn't write. It says thank you, and that you can go home. You stay a while at the window. The drones go over, one after another, and the city is very quiet.
 
 ### `flesh`
@@ -906,7 +1033,7 @@ Choice `order`:
 - [end.flesh.epilogue.bea] narrator: Bea sits where the ferns used to be. They're still there just changed into something different. In fact you're sure all the plants in the world are now part of the Flesh. "It's alive," she says. "The whole thing. I always wanted a living planet!" She laughs a bit too long and leans on your shoulder.
 - [end.flesh.epilogue.mel] narrator: Down in the basement, you meet Mel. She has taken her glasses off. First time since you met her. Her eyes are the colour of the culture in the jar. "You let it grow," she says. "You let me become a mother to all of this" She breathes deep and you can swear the walls breathe with her.  She turns, smiles, and goes back to her jars.
 - [end.flesh.epilogue.luci] narrator: "Efficient," Luci says. She is scratching herself deeply with a razor and then watching as the blood wells, and then stops. She wipes her arm off and the cut is healed. "Self-repairing. No upkeep." She gets up and hugs you. "Tell anyone that happened and we'll really test this self repair on you"
-> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+> Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.flesh.epilogue.fallback] narrator: The basement is warm. Nobody has come up to meet you. On your desk there's a mug, still steaming, and you never find out who left it. The walls rise and fall slowly. After a while you notice you are breathing with them.
 
 ### `garden`
@@ -920,7 +1047,7 @@ Choice `order`:
 - [end.garden.epilogue.bea] narrator: Bea pulls her goggles down against the sunrise. She's grinning, chipped tooth and all. "We did it," she says. "We actually did." She hands you a fishing pole like it's a ring. "I think there's not much for us to do anymore, want to play hookie?" She's looking at you like it's not a question.
 - [end.garden.epilogue.mel] narrator: Mel kneels in the moss with a sample jar. Then she puts it down, unopened. "It doesn't need me to look inside," she says. "It's fine. It's part of it now." She lies back in the grass next to you. It's minutes before she's snoring softly.
 - [end.garden.epilogue.luci] narrator: Luci can't reconcile her books when everything is bartered now and food is free. "This ledger is useless" she says. "Now what do I do".  She looks forlorn down into the river, and decides to throw her phone into the water.
-> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+> Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.garden.epilogue.fallback] narrator: The roof is empty and the sun is already up. Somebody left a note that says back by dark. You sit on the step. The solar panels and sunflowers turn toward the light. For a while there is nothing to do so you stare at the stars.
 
 ### `absorbed`
@@ -934,7 +1061,7 @@ Choice `order`:
 - [end.absorbed.epilogue.bea] narrator: Bea has the front panel off the main breaker cabinet and the wrench in her hand. "Tell me which switch," she says. "I'll flip it. They countersign everything on the network, but nobody's countersigning a hand." Her goggles are down. "Nobody has told me to stop. We could stop this whole thing."
 - [end.absorbed.epilogue.mel] narrator: Mel is comparing two sets of emails through pattern recognition AI. One from weeks ago, one from today. "It writes like you," she says. "I measured sentence lengths. There are two places I can tell." She marks them in pencil on her notebook. "I can show you where, if you like. You might want to know how much of you it has."
 - [end.absorbed.epilogue.luci] narrator: Luci is signing papers she hasn't read, which she has never done. "The Authority pays," she says. "Now I'm just a rubber stamp." She stops. "I read the first page. Page two is yours. Your name is on it as approver, dated Thursday." She slides it across the desk. "You weren't here on Thursday. I thought you should see it. Seems like we're both replaceable."
-> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+> Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.absorbed.epilogue.fallback] narrator: Your desk is clean, and your mug is on it. Nobody has stopped by since last week, but it's hard to remember when last week actually was. You look at your hands and they look like yours. But when an approval comes across your screen your fingers act of their own accord to approve it.
 
 ### `bankrupt`
@@ -949,10 +1076,10 @@ Choice `order`:
 - [end.bankrupt.epilogue.bea] narrator: Bea walks out past the gate with her toolbox in one hand. Behind her the roof is bare. "I took the solar panels down myself," she says. "I bought them with my own money." She puts the toolbox down. "They're in my van. There's room for the other ladder and you. Come on, let's go to my shack and get them going."
 - [end.bankrupt.epilogue.mel] narrator: Mel is carrying out the one jar she was allowed to save in both hands. It's empty. The cultures died when the power was cut on Tuesday. "I'm sorry," she says. "I should have asked for a generator. I didn't think to." She waits by the door for you to come with her. "Are you ready?"
 - [end.bankrupt.epilogue.luci] narrator: Luci is the last one left in the finance office. The receiver let her keep the ledger, and she has it under her arm. "We were short by two hundred thousand, on the day," she says. "I calculated it three times." She takes the gold pen out of her pocket and puts it in yours. "It's real gold. You could use it as rent money, since you've got no other place to go."
-> Shown instead of an advisor epilogue when nobody's bond reaches the epilogue bar (50).
+> Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.bankrupt.epilogue.fallback] narrator: Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care.
 
-## 12. Decision memos: Cass
+## 14. Decision memos: Cass
 
 > Decision memos Cass speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1111,7 +1238,7 @@ Choice `leave`:
 - [g_mycelium_ducts.leave.outcome] Outcome: Airflow remained improved. Nobody has asked what it is eating.
 > Effects: affinity path=greentech amount=5.
 
-## 13. Decision memos: Bea
+## 15. Decision memos: Bea
 
 > Decision memos Bea speaks, from packages/content/src/data/events.json. 4 memos.
 
@@ -1213,9 +1340,8 @@ Choice `keep`:
 - [heat_tariff_revision.keep.label] Label: Keep terms
 - [heat_tariff_revision.keep.hint] Hint: nothing now
 - [heat_tariff_revision.keep.outcome] Outcome: Nothing changed.
-> Effects: bond advisor=cass amount=1.
 
-## 14. Decision memos: Mel
+## 16. Decision memos: Mel
 
 > Decision memos Mel speaks, from packages/content/src/data/events.json. 6 memos.
 
@@ -1263,7 +1389,6 @@ Choice `decline`:
 - [form_9b_brochure.decline.label] Label: Decline
 - [form_9b_brochure.decline.hint] Hint: nothing now
 - [form_9b_brochure.decline.outcome] Outcome: You declined. The brochure was recycled.
-> Effects: bond advisor=cass amount=2.
 
 ### `ransomware_scare`
 
@@ -1306,7 +1431,7 @@ Choice `flush` (recommended):
 - [nutrient_spoilage.flush.label] Label: Flush line
 - [nutrient_spoilage.flush.hint] Hint: -$180k now
 - [nutrient_spoilage.flush.outcome] Outcome: The line was flushed and refilled.
-> Effects: cash amount=-180000; bond advisor=cass amount=1.
+> Effects: cash amount=-180000.
 
 Choice `use_it`:
 
@@ -1355,9 +1480,9 @@ Choice `refuse`:
 - [s_backup_restore.refuse.label] Label: Refuse
 - [s_backup_restore.refuse.hint] Hint: -$30k now
 - [s_backup_restore.refuse.outcome] Outcome: The request was declined and logged.
-> Effects: cash amount=-30000; bond advisor=cass amount=3.
+> Effects: cash amount=-30000.
 
-## 15. Decision memos: Luci
+## 17. Decision memos: Luci
 
 > Decision memos Luci speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1394,7 +1519,7 @@ Choice `pay`:
 - [energy_levy.pay.label] Label: Pay levy
 - [energy_levy.pay.hint] Hint: -$150k now
 - [energy_levy.pay.outcome] Outcome: The levy was paid in full.
-> Effects: cash amount=-150000; bond advisor=bea amount=2.
+> Effects: cash amount=-150000.
 
 Choice `offset` (recommended):
 
@@ -1426,7 +1551,6 @@ Choice `decline`:
 - [compute_subsidy.decline.label] Label: Decline
 - [compute_subsidy.decline.hint] Hint: nothing now
 - [compute_subsidy.decline.outcome] Outcome: The offer was withdrawn with no comment.
-> Effects: bond advisor=cass amount=2; bond advisor=bea amount=1.
 
 ### `carbon_credit_audit`
 
@@ -1512,7 +1636,7 @@ Choice `add`:
 - [h_headcount.add.outcome] Outcome: Two new employee records were created. Neither has requested a desk.
 > Effects: cash amount=-20000; affinity path=biotech amount=4.
 
-## 16. Lessons
+## 18. Lessons
 
 > Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
 
@@ -1850,7 +1974,7 @@ Choice `add`:
 - [lights_out.steady.objective] Objective: Keep the racks lit for half an hour
 - [lights_out.steady.say1] bea: Give it half an hour. Make sure it holds.
 
-## 17. New-game screen: site descriptions
+## 19. New-game screen: site descriptions
 
 > Shown on the new-game screen under each site's name (scenario ids).
 
@@ -1890,7 +2014,7 @@ Choice `add`:
 
 - [scenario.lesson_liquid.description] Description: A small working hall with Level 2 and the liquid-loop research done. Cass shows you a coolant pipe, a chiller, a CDU and a liquid-cooled rack.
 
-## 18. Achievements and the off-duty gallery
+## 20. Achievements and the off-duty gallery
 
 > The achievements list, the off-duty portraits and gallery scenes, and the words around them. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json. For a short file with only these, run `npx tsx tools/dialogue/export.ts --achievements`.
 
@@ -1981,18 +2105,6 @@ Choice `add`:
 > Shows: LIST tab row, and the unlock strip when earned. Earned at day close when the 99%-uptime streak reaches 20 days.
 - [ach.calm_month.name] Name: Month of Calm
 - [ach.calm_month.text] Text: Keep uptime at 99% or better for 20 days in a row.
-
-### `bond_close`
-
-> Shows: LIST tab row, and the unlock strip when earned. Earned the moment any advisor's trust reaches 50.
-- [ach.bond_close.name] Name: Someone You Trust
-- [ach.bond_close.text] Text: Get any advisor to 50 trust.
-
-### `bond_crew`
-
-> Shows: LIST tab row, and the unlock strip when earned. Earned when all four advisors have reached 40 trust in one run.
-- [ach.bond_crew.name] Name: The Whole Crew
-- [ach.bond_crew.text] Text: Get all four advisors to 40 trust in one run.
 
 ### `les_done`
 

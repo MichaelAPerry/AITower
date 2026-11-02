@@ -1,5 +1,5 @@
 /**
- * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, the secret seal numbers and advisor bonds.
+ * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points and the secret seal numbers.
  *
  *  - SP: hourly, every running TREE rack (a rack retrofitted down a tree; base racks are neutral) adds its delivered PFLOPS ×
  *    `spPerPflopHour` × the tree's weight × the tree's factor to its own tree only:
@@ -8,7 +8,7 @@
  *      Green      factor (greenFloor + (1 − greenFloor) × green score) × (1 − green seal).
  *  - Seal = scar (placing an item, permanent) + residue (running items, decisions; cleanable, never below 0).
  *  - At `sealMax` a tree is closed: no new retrofits to it, and its racks stop scoring (the factor is 0).
- *  - The first tree to `spTarget` wins. There is no commit and no bond gate: bonds only change scenes and the epilogue.
+ *  - The first tree to `spTarget` wins. There is no commit and no bond gate.
  */
 import { type AdvisorId, type AscensionPath, type ContentDB, type FacilityDef, SEALED_TREES, type SealedTree, treeOf, TREES } from "@aitower/content";
 import type { TickCtx } from "../core/context";
@@ -28,11 +28,6 @@ export const isSealed = (state: SimState, content: ContentDB, tree: SealedTree):
 
 /** A closed tree takes no new retrofits and its racks stop scoring. The Lattice never closes. */
 export const isClosed = (state: SimState, content: ContentDB, tree: AscensionPath): boolean => tree !== "synthetic" && isSealed(state, content, tree);
-
-export function addBond(state: SimState, advisor: AdvisorId, amount: number): void {
-	if (!Number.isFinite(amount) || !(advisor in state.bonds)) return;
-	state.bonds[advisor] = Math.min(100, Math.max(0, state.bonds[advisor] + amount));
-}
 
 export function addResidue(state: SimState, tree: SealedTree, amount: number): void {
 	if (!Number.isFinite(amount)) return;

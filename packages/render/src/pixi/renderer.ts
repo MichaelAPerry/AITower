@@ -11,6 +11,7 @@ import { type SkinStage, pathSkin, skinEffects } from "../skin";
 import { GreenDecals } from "./greenDecals";
 import { Juice } from "./juice";
 import { HorrorLayer } from "./horror";
+import { AfterHoursLayer } from "./afterHours";
 import { Arrows } from "./arrows";
 import { Background } from "./background";
 import { Bots } from "./bots";
@@ -115,6 +116,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 	const conduits = new Graphics();
 	const lifts = new Lifts();
 	const facBodies = new Graphics();
+	const afterHours = new AfterHoursLayer();
 	const facLive = new Graphics();
 	const facLabels = new TextPool(9);
 	const tagLabels = new TextPool(9);
@@ -141,6 +143,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 		structure.plates,
 		lifts.shafts,
 		lifts.cars,
+		afterHours.g,
 		facBodies,
 		facLive,
 		facLabels.root,
@@ -285,6 +288,7 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			structure.rebuild(view);
 		}
 		refreshSkin(view);
+		afterHours.update(view);
 		const ch = hashArrays(view.power, view.coolant, view.nutrient);
 		const fk = facilityKey(view, skinKey);
 		if (gridChanged || ch !== keys.conduit || fk !== keys.fac) {
