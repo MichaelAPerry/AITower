@@ -2504,7 +2504,7 @@
  "consciousness_transfer": {
   "id": "consciousness_transfer",
   "name": "CT-1 Consciousness Transfer Unit",
-  "description": "A chrome pod beside the lift. Every six hours, if it has power, one person walks in and the Lattice gains a resident: about 36 Singularity points a time, 143 a day, the same as one ML-1 running flat out. It needs no coolant and no jobs. Bio and Green both object, loudly.",
+  "description": "A chrome pod beside the lift. Every six hours, if it has power, one person walks in and the Lattice gains a resident: about 36 Singularity points a time, 143 a day, about six ML-1s running flat out. It needs no coolant and no jobs. Bio and Green both object, loudly.",
   "kind": "transfer",
   "category": "rack",
   "width": 3,

@@ -88,8 +88,8 @@ describe("Consciousness Transfer Unit: Singularity points", () => {
 		expect(s.state.sp.greentech).toBe(0);
 	});
 
-	// SKIPPED: intent no longer holds. Lattice SP weight is 0.4 (was 2.5): an ML-1 now makes ~22.85 SP/day vs the CT-1's ~143. Owner decides whether to retune transfer.sp.
-	it.skip("is worth one ML-1 running flat out: a day of transfers is within 1% of the ML-1's daily SP", () => {
+	// Lattice SP weight 0.4 (owner, Nov 2) cut rack SP; transfer.sp kept, so a unit is now worth about six ML-1s (the scripted Lattice run needs it to win near day 41).
+	it("is worth about six ML-1s running flat out", () => {
 		const s = start();
 		const ml1 = treeRack(s.content, "synthetic", 4);
 		const solo = start();
@@ -98,8 +98,9 @@ describe("Consciousness Transfer Unit: Singularity points", () => {
 		const ml1Day = spRates(solo.state, solo.content).synthetic;
 		const t = s.content.facilities[ID].transfer;
 		const perDay = ((t?.sp ?? 0) * 24) / (t?.everyHours ?? 1);
-		expect(ml1Day).toBeGreaterThan(100);
-		expect(Math.abs(perDay - ml1Day) / ml1Day).toBeLessThan(0.01);
+		expect(ml1Day).toBeGreaterThan(10);
+		expect(perDay / ml1Day).toBeGreaterThan(5.5);
+		expect(perDay / ml1Day).toBeLessThan(7);
 	});
 
 	it("does nothing when unpowered, switched off or failed", () => {

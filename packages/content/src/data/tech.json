@@ -1589,7 +1589,7 @@
  {
   "id": "transfer_protocol",
   "name": "Transfer Protocol",
-  "description": "A consent form, a pod and a door. Unlocks the CT-1 Consciousness Transfer Unit: every six hours one person is carried over, worth about one ML-1 in Singularity points. The Garden and the Flesh will remember it.",
+  "description": "A consent form, a pod and a door. Unlocks the CT-1 Consciousness Transfer Unit: every six hours one person is carried over, worth about six ML-1s in Singularity points. The Garden and the Flesh will remember it.",
   "branch": "compute",
   "lane": "syn",
   "minTier": 5,
