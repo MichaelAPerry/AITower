@@ -140,7 +140,7 @@ If the user selects no they can come back and it says (buy the {upgrade}) in var
 ## Owner answers (Nov 2)
 
 - Missing a day resets the count to 0.
-- "No" on the third day changes nothing; the count continues.
+- "No" on the third day changes nothing; the count continues. It is just an option: a player can say No and still pay the $1M later and get the portrait.
 - Re-offer lines: Claude writes simple placeholders, e.g. "[ buy the coffee machine ]"; list them in docs/PLACEHOLDER_TEXT.md.
 - Places: Mel B1; Bea and Cass F1 (lobby); Luci F2.
 
