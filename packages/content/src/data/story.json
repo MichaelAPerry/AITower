@@ -48,132 +48,14 @@
     "text": "Well operator, it's your decision: what are we building this for?"
    }
   ],
-  "recommended": "money",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "money",
-    "label": "Money. It's a datacenter.",
-    "hint": "Luci will like that.",
-    "outcome": "Luci wrote it down. Underlined it.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 6
-     },
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": -2
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "Oh, I like you.",
-      "mood": "pleased"
-     },
-     {
-      "who": "bea",
-      "text": "Day one. Great.",
-      "mood": "displeased"
-     }
-    ]
-   },
-   {
-    "id": "outlive",
-    "label": "Something that outlives us.",
-    "hint": "Bigger than the business.",
-    "outcome": "Nobody laughed. Mel looked up from her jar.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 4
-     },
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 4
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Life must continue, how astute.",
-      "mood": "pleased"
-     },
-     {
-      "who": "mel",
-      "text": "But what is life?"
-     },
-     {
-      "who": "bea",
-      "text": "Life is all around us!"
-     }
-    ]
-   },
-   {
-    "id": "dunno",
-    "label": "I don't know yet.",
-    "hint": "Cass will like that.",
-    "outcome": "Cass smiled into her mug. Luci checked her watch.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 6
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": -1
-     }
-    ],
-    "reply": [
-     {
-      "who": "cass",
-      "text": "Sometimes not having an answer is the best.",
-      "mood": "pleased"
-     },
-     {
-      "who": "luci",
-      "text": "Not good enough. Make sure you send me an email about our direction by Thursday."
-     }
-    ]
-   },
-   {
-    "id": "coffee",
-    "label": "Who's buying the coffee?",
-    "hint": "Charm.",
-    "outcome": "Nobody had planned for that. Cass handed over her mug.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 3
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "cass",
-      "text": "What a throwback.",
-      "mood": "pleased"
-     },
-     {
-      "who": "cass",
-      "text": "But honestly, we need a better coffee machine."
-     },
-     {
-      "who": "luci",
-      "text": "I'll expense it."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -211,64 +93,14 @@
     "mood": "pleased"
    }
   ],
-  "recommended": "replace",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "keep",
-    "label": "Keep it.",
-    "hint": "Overrule Bea.",
-    "outcome": "The {item} stays. Bea didn't speak to you the rest of the afternoon.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": -4
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Your own funeral.",
-      "mood": "displeased"
-     },
-     {
-      "who": "bea",
-      "text": "I won't forget it."
-     }
-    ]
-   },
-   {
-    "id": "replace",
-    "label": "You're right. I'll replace it.",
-    "hint": "Side with Bea.",
-    "outcome": "You promised to replace the {item}. She'll be checking.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 3
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Good, let's rip it out.",
-      "mood": "pleased"
-     },
-     {
-      "who": "bea",
-      "text": "I'm ready to go... Come on!"
-     },
-     {
-      "who": "luci",
-      "text": "Hmm, I guess I can depreciate it..."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -306,56 +138,14 @@
     "mood": "pleased"
    }
   ],
-  "recommended": "replace",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "keep",
-    "label": "Keep it.",
-    "hint": "Overrule Mel.",
-    "outcome": "The {item} stays. Mel made a note on her notebook and rushed back downstairs.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": -4
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Of course. It's your tower.",
-      "mood": "unsettling"
-     }
-    ]
-   },
-   {
-    "id": "replace",
-    "label": "You're right. I'll replace it.",
-    "hint": "Side with Mel.",
-    "outcome": "You promised to replace the {item}.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 3
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Thank you.",
-      "mood": "pleased"
-     },
-     {
-      "who": "mel",
-      "text": "They'll remember that. So will I."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -402,59 +192,14 @@
     "text": "Alive or not, it's just the beginning of a new world of compute. We should build more."
    }
   ],
-  "recommended": "pipe",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "pipe",
-    "label": "Get the cooling sorted first.",
-    "hint": "Cass will like that. A liquid rack with no loop throttles.",
-    "outcome": "You asked Cass to size the loop before you touch another rack.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "cass",
-      "text": "Good. I'll get to work. Remember it's the basic things that matter."
-     },
-     {
-      "who": "luci",
-      "text": "Fine. A hot rack earns nothing, I suppose."
-     }
-    ]
-   },
-   {
-    "id": "more",
-    "label": "Retrofit another rack now.",
-    "hint": "Luci will like that. More racks on the bar sooner.",
-    "outcome": "You told Luci to keep going. Cass looked at the floor plan.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     },
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": -1
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "That's what I like to hear.",
-      "mood": "pleased"
-     },
-     {
-      "who": "cass",
-      "text": "Don't forget the basics."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -501,50 +246,14 @@
     "text": "Keep working towards more compute. More compute means more money. More money means more compute."
    }
   ],
-  "recommended": "gas",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "gas",
-    "label": "Look at a gas turbine.",
-    "hint": "Cheap, fast power. It scars the Flesh and the Garden.",
-    "outcome": "You asked Luci for a turbine quote. She had one ready.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "Invoice is ready, go ahead.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "grid",
-    "label": "Stay on grid power.",
-    "hint": "Slower and dearer, but it keeps the other trees open.",
-    "outcome": "You told Luci to keep buying grid power. She wrote it down without comment.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "Your decision, but it's the tower's money."
-     },
-     {
-      "who": "luci",
-      "text": "Make sure you're under budget."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -587,50 +296,14 @@
     "text": "Remember that these machines still need us to run, can't let em overheat."
    }
   ],
-  "recommended": "cryo",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "cryo",
-    "label": "Put the cryo study first.",
-    "hint": "Cass will like that. The Mind Lattice needs it anyway.",
-    "outcome": "You put the cryo chiller study at the front of the queue.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "cass",
-      "text": "Good. Cold always comes before compute."
-     }
-    ]
-   },
-   {
-    "id": "more",
-    "label": "Retrofit more blades.",
-    "hint": "Luci will like that. More Lattice points now.",
-    "outcome": "You told Luci to retrofit more blades.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "Now we're talking.",
-      "mood": "pleased"
-     },
-     {
-      "who": "cass",
-      "text": "Watch the temperature."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -673,46 +346,14 @@
     "text": "But, our clients research potential is massive; protein folding, quantum tunneling, fusion..."
    }
   ],
-  "recommended": "more",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "more",
-    "label": "Retrofit the rest.",
-    "hint": "Fastest way to the end of the Lattice.",
-    "outcome": "You told Luci the rest of the racks were next.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "luci",
-      "text": "Good. Money is no object when we're this close.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "cool",
-    "label": "Cool what we have first.",
-    "hint": "Cass will like that. A hot Mind Lattice throttles.",
-    "outcome": "You asked Cass to check every chiller before the next one.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "cass",
-      "text": "Thanks. I'll go and look at the chillers."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -758,46 +399,14 @@
     "text": "Little brains are a lot better than chips, the further we go the better they get."
    }
   ],
-  "recommended": "line",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "line",
-    "label": "Build the bath and the nutrient line.",
-    "hint": "Mel will like that. The rack does nothing without them.",
-    "outcome": "You asked for the bath and the nutrient plant first.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Thank you, they'll remember your kindness.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "more",
-    "label": "Retrofit another one.",
-    "hint": "More Bio racks sooner, but they'd all need feeding.",
-    "outcome": "You said another one. Mel nodded slowly.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": -1
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Okay. Don't forget that feeding them is important."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -839,55 +448,14 @@
     "text": "Then the organoids get bigger, and the compute gets better."
    }
   ],
-  "recommended": "sterile",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "sterile",
-    "label": "Research Sterile Protocols.",
-    "hint": "Mel will like that. It keeps contamination down.",
-    "outcome": "You put Sterile Protocols at the front of the queue.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Good. Let's make sure our babies are cared for.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "push",
-    "label": "Keep growing.",
-    "hint": "Faster Bio points, more contamination.",
-    "outcome": "You told Mel to keep growing.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": -1
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "This is real life you know."
-     },
-     {
-      "who": "luci",
-      "text": "Growth is growth."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -929,46 +497,14 @@
     "text": "And keep an eye on their waste. At 99 percent, something my calculations may not predict might happen."
    }
   ],
-  "recommended": "works",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "works",
-    "label": "Build the Nutrient Works.",
-    "hint": "Mel will like that. More nutrient for more cortex.",
-    "outcome": "You told Mel to build the Nutrient Works next.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Thank you. Our little growing babies! Getting so big!",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "watch",
-    "label": "Watch the corruption number.",
-    "hint": "Safe. It's on the top strip when it starts to climb.",
-    "outcome": "You said you'd keep an eye on the corruption.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Please do. I mean it. It's our children."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1010,46 +546,14 @@
     "text": "This baby means we're close to our end, a perfect blending of flesh and data."
    }
   ],
-  "recommended": "plant",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "plant",
-    "label": "Build the Vascular Plant.",
-    "hint": "Mel will like that. One plant covers a lot of vats.",
-    "outcome": "You told Mel to build the Vascular Plant next.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Yes. Yes, please.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "more",
-    "label": "Retrofit more vats.",
-    "hint": "More Bio points, if the nutrient line keeps up.",
-    "outcome": "You told Mel to get more vats going.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "As you like."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1095,55 +599,14 @@
     "text": "The new world waits for no one!"
    }
   ],
-  "recommended": "panels",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "panels",
-    "label": "Put panels up.",
-    "hint": "Bea will like that. Clean power raises your Green speed.",
-    "outcome": "You told Bea to start on the wall panels.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Yay! Okay. I'm getting the ladder!",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "racks",
-    "label": "Retrofit more racks first.",
-    "hint": "More Green racks, still slow without clean power.",
-    "outcome": "You said racks first. Bea shrugged.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": -1
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Okay."
-     },
-     {
-      "who": "bea",
-      "text": "But why go half measure?"
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1185,46 +648,14 @@
     "text": "Keep going and we get even closer to a tree, working with nature rather than against it."
    }
   ],
-  "recommended": "heat",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "heat",
-    "label": "Look at heat recovery.",
-    "hint": "Bea will like that. It raises your green score without any weather.",
-    "outcome": "You asked Bea to look at heat recovery.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Yay! You're the best!",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "panels",
-    "label": "Add more panels.",
-    "hint": "Straight clean power. Depends on the sun.",
-    "outcome": "You told Bea to add more panels.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "More panels! Yay! Ladder time!"
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1270,46 +701,14 @@
     "text": "I love what we're doing for the world.  I think what we've created here is spreading."
    }
   ],
-  "recommended": "fuel",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "fuel",
-    "label": "Look at a fuel cell.",
-    "hint": "Bea will like that. Backup for a calm week (14,000 RP to research).",
-    "outcome": "You asked Bea about the fuel cell.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Hydrogen, instead of diesel. Yay!",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "wind",
-    "label": "Put up more wind.",
-    "hint": "Wind keeps working after dark. Not on a calm day.",
-    "outcome": "You told Bea to put up more wind.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Wind works well at night too! Especially the taller our tower is!  Time to grow like an oak."
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1352,46 +751,14 @@
     "mood": "pleased"
    }
   ],
-  "recommended": "storage",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "storage",
-    "label": "Add storage.",
-    "hint": "Bea will like that. Iron-air storage rides out a calm week.",
-    "outcome": "You told Bea to add storage.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 2
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Ok, good plan.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "more",
-    "label": "Retrofit more meshes.",
-    "hint": "More Green points, if the power keeps up.",
-    "outcome": "You told Bea to retrofit more meshes.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Sure. But what are we really computing now?"
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1464,13 +831,7 @@
     "label": "Tell me the honest version.",
     "hint": "Cass will like that.",
     "outcome": "Cass told you. It took ten minutes and she didn't soften any of it.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 4
-     }
-    ],
+    "effects": [],
     "reply": [
      {
       "who": "cass",
@@ -1496,16 +857,6 @@
      {
       "type": "cash",
       "amount": -12000
-     },
-     {
-      "type": "bond",
-      "advisor": "cass",
-      "amount": 2
-     },
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": -1
      }
     ],
     "reply": [
@@ -1573,60 +924,14 @@
     "text": "You guys can go, I have some work to finish here."
    }
   ],
-  "recommended": "stay",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "stay",
-    "label": "Stay with her a minute.",
-    "hint": "Mel will like that.",
-    "outcome": "You stood next to Mel at the panel until she was done closing the input.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": 3
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Thank you.",
-      "mood": "pleased"
-     },
-     {
-      "who": "mel",
-      "text": "They did well. For a while they did very well."
-     }
-    ]
-   },
-   {
-    "id": "other",
-    "label": "We're pivoting is all, nothing but numbers Mel.",
-    "hint": "Luci will like that.",
-    "outcome": "You said the word another. Mel took the jar downstairs.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     },
-     {
-      "type": "bond",
-      "advisor": "mel",
-      "amount": -1
-     }
-    ],
-    "reply": [
-     {
-      "who": "mel",
-      "text": "Yes. Of course."
-     },
-     {
-      "who": "luci",
-      "text": "Good. Remember we are the sails blown by our clients wind.",
-      "mood": "pleased"
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1676,60 +981,14 @@
     "text": "...Hmm"
    }
   ],
-  "recommended": "own",
+  "recommended": "ok",
   "choices": [
    {
-    "id": "own",
-    "label": "That one was on me.",
-    "hint": "Bea will like that.",
-    "outcome": "You told Bea the Garden closing was your call. She didn't argue.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": 3
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Okay."
-     },
-     {
-      "who": "bea",
-      "text": "Thanks for owning up to it at least. You're still a scoundrel.",
-      "mood": "pleased"
-     }
-    ]
-   },
-   {
-    "id": "other",
-    "label": "We'll go another direction.",
-    "hint": "Luci will like that.",
-    "outcome": "You turned to the stairwell. Bea stayed up on the roof a while.",
-    "effects": [
-     {
-      "type": "bond",
-      "advisor": "luci",
-      "amount": 1
-     },
-     {
-      "type": "bond",
-      "advisor": "bea",
-      "amount": -1
-     }
-    ],
-    "reply": [
-     {
-      "who": "bea",
-      "text": "Sure. I'll be up here."
-     },
-     {
-      "who": "luci",
-      "text": "I'm pleased with you Operator.",
-      "mood": "pleased"
-     }
-    ]
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
    }
   ]
  },
@@ -1769,224 +1028,6 @@
     "label": "Got it.",
     "hint": "Just a tip.",
     "outcome": "Bea tapped her clipboard twice and went back up the ladder.",
-    "effects": []
-   }
-  ]
- },
- {
-  "id": "tip_bond",
-  "category": "story",
-  "advisor": "luci",
-  "title": "A Word at the Desk",
-  "body": "Luci pauses over the ledger and finally looks up.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "trigger": {
-   "kind": "bondMoved"
-  },
-  "backdrop": "synthetic",
-  "location": "F1 · FINANCE OFFICE",
-  "lines": [
-   {
-    "who": "luci",
-    "text": "Heads up. We are people too, make sure you pay attention."
-   },
-   {
-    "who": "luci",
-    "text": "Take my advice or don't listen, we'll remember."
-   }
-  ],
-  "recommended": "ok",
-  "choices": [
-   {
-    "id": "ok",
-    "label": "Got it.",
-    "hint": "Just a tip.",
-    "outcome": "She went back to work.",
-    "effects": []
-   }
-  ]
- },
- {
-  "id": "bond50_luci",
-  "category": "story",
-  "advisor": "luci",
-  "title": "Ms. Ferro Stays Late",
-  "body": "The finance office light is still on. Luci doesn't look up from the ledger.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "trigger": {
-   "kind": "bond",
-   "advisor": "luci",
-   "atLeast": 50
-  },
-  "backdrop": "synthetic",
-  "location": "F1 · FINANCE OFFICE",
-  "lines": [
-   {
-    "who": "narrator",
-    "text": "The finance office light is still on. Luci doesn't look up from the ledger."
-   },
-   {
-    "who": "luci",
-    "text": "You've been right about more things than I expected from you.",
-    "mood": "pleased"
-   },
-   {
-    "who": "luci",
-    "text": "I never said that to you, officially that is. Unofficially I think we have some unfinished business."
-   },
-   {
-    "who": "luci",
-    "text": "When this is over, come and see me. We'll settle up."
-   }
-  ],
-  "recommended": "ok",
-  "choices": [
-   {
-    "id": "ok",
-    "label": "I'll bring the pen.",
-    "hint": "She'll remember.",
-    "outcome": "Luci smiles and writes something small in her calendar.",
-    "effects": []
-   }
-  ]
- },
- {
-  "id": "bond50_mel",
-  "category": "story",
-  "advisor": "mel",
-  "title": "Mel Offers a Seat",
-  "body": "Mel pulls a stool out from under the bench. She looks at you fondly.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "trigger": {
-   "kind": "bond",
-   "advisor": "mel",
-   "atLeast": 50
-  },
-  "backdrop": "biotech",
-  "location": "B1 · WETWARE ANNEX",
-  "lines": [
-   {
-    "who": "narrator",
-    "text": "Mel pulls a stool out from under the bench. You've never seen her more since you've been here."
-   },
-   {
-    "who": "mel",
-    "text": "Sit. Please."
-   },
-   {
-    "who": "mel",
-    "text": "You listen when I talk about them. I like that, and they like that."
-   },
-   {
-    "who": "mel",
-    "text": "We'll be here waiting for your ear.",
-    "mood": "pleased"
-   }
-  ],
-  "recommended": "ok",
-  "choices": [
-   {
-    "id": "ok",
-    "label": "I'd like that.",
-    "hint": "She'll remember.",
-    "outcome": "You sat on the stool. The vats hummed. Mel spoke about things you didn't understand for hours, but it felt like minutes.",
-    "effects": []
-   }
-  ]
- },
- {
-  "id": "bond50_bea",
-  "category": "story",
-  "advisor": "bea",
-  "title": "Bea Shares Her Lunch",
-  "body": "Bea is on the roof with two sandwiches. She holds one out without looking.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "trigger": {
-   "kind": "bond",
-   "advisor": "bea",
-   "atLeast": 50
-  },
-  "backdrop": "greentech",
-  "location": "ROOF · PANEL DECK",
-  "lines": [
-   {
-    "who": "narrator",
-    "text": "Bea is on the roof with two sandwiches. She holds one out without looking."
-   },
-   {
-    "who": "bea",
-    "text": "Cheese. It's the only kind I make.",
-    "mood": "pleased"
-   },
-   {
-    "who": "bea",
-    "text": "Hey, if this all goes sideways, I'll be down at the river."
-   },
-   {
-    "who": "bea",
-    "text": "Just saying, in case you need someone."
-   }
-  ],
-  "recommended": "ok",
-  "choices": [
-   {
-    "id": "ok",
-    "label": "Take the sandwich.",
-    "hint": "She'll remember.",
-    "outcome": "You thank her for lunch and she punches you.",
-    "effects": []
-   }
-  ]
- },
- {
-  "id": "bond50_cass",
-  "category": "story",
-  "advisor": "cass",
-  "title": "Cass Pours Two",
-  "body": "There are two mugs on the gauge board this time. Cass must have been expecting you.",
-  "weight": 1,
-  "minTier": 1,
-  "cooldownDays": 0,
-  "trigger": {
-   "kind": "bond",
-   "advisor": "cass",
-   "atLeast": 50
-  },
-  "location": "B1 · PLANT ROOM",
-  "lines": [
-   {
-    "who": "narrator",
-    "text": "There are two mugs on the gauge board this time. Cass must have been expecting you."
-   },
-   {
-    "who": "cass",
-    "text": "There you are, grab a cup.",
-    "mood": "pleased"
-   },
-   {
-    "who": "cass",
-    "text": "You ask me what I think, I appreciate that you listen. That's rare."
-   },
-   {
-    "who": "cass",
-    "text": "When it's over, find me at the lodge."
-   }
-  ],
-  "recommended": "ok",
-  "choices": [
-   {
-    "id": "ok",
-    "label": "Thanks for the mug.",
-    "hint": "She'll remember.",
-    "outcome": "The coffee was instant. It was hot, which was the point.",
     "effects": []
    }
   ]

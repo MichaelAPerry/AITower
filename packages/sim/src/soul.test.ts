@@ -201,18 +201,17 @@ describe("Singularity points: each tree scores only its own racks", () => {
 	});
 });
 
-describe("no commit, no bond gates", () => {
+describe("no commit, no bonds", () => {
 	it("the sim has no commit command, no path state and no dating state", () => {
 		const s = sim();
 		const r = s.submit({ type: "choosePath", path: "greentech" } as never);
 		expect(r.ok).toBe(false);
-		for (const k of ["path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in s.state, k).toBe(false);
+		for (const k of ["bonds", "path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in s.state, k).toBe(false);
 		for (const type of ["visitAdvisor", "giveGift", "replyMessage"]) expect(s.submit({ type } as never).ok, type).toBe(false);
 	});
 
-	it("any mix of trees may be built whatever the bonds (all at 0), as long as Level and research allow", () => {
+	it("any mix of trees may be built as long as Level and research allow", () => {
 		const s = sim();
-		s.state.bonds = { cass: 0, bea: 0, mel: 0, luci: 0 };
 		s.state.tier = 5;
 		s.state.cash = 1e9;
 		for (const t of ["chilled_loop", "wetware_annex", "neuromorphic_bench"]) s.state.techResearched.push(t);
@@ -222,7 +221,7 @@ describe("no commit, no bond gates", () => {
 		const trees = ["synthetic", "biotech", "greentech"] as const;
 		racks.forEach((f, i) => {
 			const c = s.canBuild({ type: "retrofit", facilityId: f.id, tree: trees[i] });
-			// The only things that can say no are the rack's site (pipe under it), never a commit or a bond.
+			// The only things that can say no are the rack's site (pipe under it), never a commit.
 			if (!c.ok) expect(c.reason).toMatch(/conduit/);
 		});
 	});
@@ -236,7 +235,7 @@ describe("story scenes and objections", () => {
 		s.step();
 	};
 
-	it("the opening scene arrives with its lines, is not deferrable, and moves the bonds", () => {
+	it("the opening scene arrives with its lines, is not deferrable, and has only an acknowledgement", () => {
 		const s = sim(loadContent());
 		steps(s, 120);
 		const d = s.view().decision;
@@ -244,21 +243,9 @@ describe("story scenes and objections", () => {
 		expect(d?.canDefer).toBe(false);
 		expect(d?.lines?.[0].who).toBe("narrator");
 		expect(d?.lines?.length).toBeGreaterThan(3);
-		expect(d?.choices.find((c) => c.id === "dunno")?.reply?.[0].who).toBe("cass");
-		const cass = s.state.bonds.cass;
-		const luci = s.state.bonds.luci;
-		answer(s, "dunno");
-		expect(s.state.bonds.cass).toBe(cass + 6);
-		// Luci recommended "money": overruling her costs her -1 plus the scene's own -1.
-		expect(s.state.bonds.luci).toBe(luci - 1 + s.content.balance.soul.bondOverrule);
-	});
-
-	it("taking the recommendation warms that advisor to you", () => {
-		const s = sim(loadContent());
-		steps(s, 120);
-		const luci = s.state.bonds.luci;
-		answer(s, "money");
-		expect(s.state.bonds.luci).toBe(luci + 6 + s.content.balance.soul.bondFollow);
+		expect(d?.choices.map((c) => c.id)).toEqual(["ok"]);
+		answer(s, "ok");
+		expect(s.view().decision).toBeNull();
 	});
 
 	it("placing a heavy polluter draws its champion's objection once, naming the item", () => {
@@ -271,7 +258,7 @@ describe("story scenes and objections", () => {
 		expect(d?.eventId).toBe("obj_greentech");
 		expect(d?.subject).toEqual({ defId: "genset", name: s.content.facilities.genset.name });
 		expect(d?.lines?.some((l) => l.text.includes(s.content.facilities.genset.name))).toBe(true);
-		answer(s, "replace");
+		answer(s, "ok");
 		place(s, "genset", 0, 12);
 		steps(s, 200);
 		expect(s.view().decision).toBeNull();
@@ -305,23 +292,22 @@ describe("saves", () => {
 		const s = sim();
 		s.state.sp.synthetic = 12.5;
 		s.state.sealResidue.biotech = 3;
-		s.state.bonds.mel = 71;
 		s.state.objected.push("greentech:genset");
 		const twin = simFromSnapshot(s.content, JSON.parse(JSON.stringify(s.snapshot()))) as SimImpl;
 		expect(twin.hash()).toBe(s.hash());
-		expect(twin.state.bonds.mel).toBe(71);
 	});
 
-	it("a v10 save gains the Soul: scars rebuilt from its facilities, content bonds, old endings mapped", () => {
+	it("a v10 save gains the Soul: scars rebuilt from its facilities, old endings mapped, no bonds", () => {
 		const s = sim();
 		const snap = JSON.parse(JSON.stringify(s.snapshot())) as { version: number; state: Record<string, unknown> };
 		snap.version = 10;
-		for (const k of ["sp", "sealScar", "sealResidue", "bonds", "objected"]) delete snap.state[k];
+		for (const k of ["sp", "sealScar", "sealResidue", "objected"]) delete snap.state[k];
+		snap.state.bonds = { cass: 20, bea: 20, mel: 20, luci: 30 };
 		snap.state.endingDays = { livingTower: 0, cleanTower: 0, greenExemplar: 0, millionMinds: 0 };
 		snap.state.gameOver = { kind: "victory", tick: 5, ending: "millionMinds" };
 		const loaded = simFromSnapshot(s.content, snap as never) as SimImpl;
 		expect(loaded.state.sealScar).toEqual(s.state.sealScar);
-		expect(loaded.state.bonds).toEqual(s.content.balance.soul.bondStart);
+		expect("bonds" in loaded.state).toBe(false);
 		expect(loaded.state.gameOver?.ending).toBe("singularity");
 		expect("endingDays" in loaded.state).toBe(false);
 		expect(sealOf(loaded.state, "greentech")).toBeGreaterThanOrEqual(0);

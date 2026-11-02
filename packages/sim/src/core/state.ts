@@ -414,8 +414,6 @@ export interface SimState {
 	sealScar: Record<SealedTree, number>;
 	/** Secret numbers: the cleanable part (from running facilities and decisions; ≥ 0). */
 	sealResidue: Record<SealedTree, number>;
-	/** Advisor bonds 0..100. */
-	bonds: Record<AdvisorId, number>;
 	/** Objections already raised, as "tree:defId". */
 	objected: string[];
 	// ── Automation, greentech, scenarios (snapshot v6) ──

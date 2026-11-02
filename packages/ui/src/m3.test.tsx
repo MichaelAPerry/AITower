@@ -178,30 +178,16 @@ describe("endings", () => {
 		expect(endingOf(over("absorbed"))).toBe("absorbed");
 		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
 	});
-	it("Bankrupt and Absorbed are final scenes: the epilogue of the closest advisor (at the bond bar) closes each", () => {
+	it("every ending closes on the epilogue of the advisor it is about (the first one its file lists)", () => {
 		const real = loadContent();
 		const v = setup().store.get().view;
-		for (const id of ["bankrupt", "absorbed", "singularity", "flesh", "garden"] as const) {
-			const end = real.endings.find((e) => e.id === id)!;
-			const bonds = { cass: 20, mel: 20, bea: 20, luci: 20 };
-			const soul = (b: typeof bonds) => ({ ...v, soul: { ...v.soul!, bonds: b, bondEpilogue: 60 } });
-			expect(epilogueAdvisor(soul(bonds), end), id).toBeNull();
-			for (const adv of ["cass", "mel", "bea", "luci"] as const) expect(epilogueAdvisor(soul({ ...bonds, [adv]: 70 }), end), `${id} ${adv}`).toBe(adv);
+		for (const end of real.endings) {
+			const first = Object.keys(end.epilogue ?? {}).find((k) => k !== "fallback");
+			expect(epilogueAdvisor(v, end), end.id).toBe(first);
+			const pages = endingPages(end, v);
+			expect(pages.at(-1), end.id).toEqual({ who: first, text: (end.epilogue as Record<string, string>)[first as string] });
 		}
 		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
-	});
-	it("every ending closes on the fallback epilogue when all bonds are under the bar, and on an advisor's at 50", () => {
-		const real = loadContent();
-		const v = setup().store.get().view;
-		const at = (b: Record<"cass" | "mel" | "bea" | "luci", number>) => ({ ...v, soul: { ...v.soul!, bonds: b, bondEpilogue: real.balance.soul.bondEpilogue } });
-		for (const end of real.endings) {
-			const body = end.body.split(/\n\s*\n/).length;
-			const low = endingPages(end, at({ cass: 49, mel: 49, bea: 49, luci: 49 }));
-			expect(low, end.id).toHaveLength(body + 1);
-			expect(low.at(-1), end.id).toEqual({ who: null, text: end.epilogue?.fallback });
-			const high = endingPages(end, at({ cass: 20, mel: 20, bea: 50, luci: 20 }));
-			expect(high.at(-1), end.id).toEqual({ who: "bea", text: end.epilogue?.bea });
-		}
 	});
 	it("prints plain forms at horror off", () => {
 		expect(overCopyFor(over("absorbed"), content, "full").stamp).toBe("ABSORBED");

@@ -459,7 +459,7 @@ export interface TreeView {
 }
 
 /**
- * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, the seal meters and the bonds. The seal is hidden per item but
+ * The Soul (docs/SOUL.md, docs/REFRAME.md): Singularity points, and the seal meters. The seal is hidden per item but
  * shown in total; the three `trees` carry everything the Trees panel needs.
  */
 export interface SoulView {
@@ -467,8 +467,6 @@ export interface SoulView {
 	spTarget: number;
 	seal: Record<SealedTree, number>;
 	sealMax: number;
-	bonds: Record<AdvisorId, number>;
-	bondEpilogue: number;
 	trees: Record<AscensionPath, TreeView>;
 	/** The green score 0..1, its two parts, and the Green speed it gives (`greenFloor` + the rest × score). */
 	green: { score: number; cleanPower: number; heatShare: number; speed: number };

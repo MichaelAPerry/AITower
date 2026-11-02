@@ -20,7 +20,7 @@ export const SCENE_RULES: ReadonlyArray<{ prefix: string; track: SceneTrack }> =
 	{ prefix: "ach_gallery_empty", track: "quiet" },
 	{ prefix: "ach_hint_", track: "quiet" }, // a locked frame: "not there yet"
 ];
-/** Everything else (introduction, retrofit milestones, bond scenes, off-duty portraits) is warm. */
+/** Everything else (introduction, retrofit milestones, off-duty portraits) is warm. */
 export const DEFAULT_SCENE_TRACK: SceneTrack = "warm";
 
 export function trackForScene(id: string): SceneTrack {

@@ -135,16 +135,13 @@ describe("retrofit", () => {
 		expect(r).toMatchObject({ ok: false, reason: expect.stringMatching(/retrofitting a rack/) });
 	});
 
-	it("no commit and no bond gates: retrofit to any tree needs only Level, research, site and cash", () => {
+	it("no commit gate: retrofit to any tree needs only Level, research, site and cash", () => {
 		const s = start();
-		s.state.bonds = { cass: 0, bea: 0, mel: 0, luci: 0 };
 		level(s, 2);
 		research(s, "batch_cards", "neuromorphic_bench");
 		const f = rack(s, "rack_air_gpu", 6);
 		expect(s.canBuild(retro(f.id, "greentech"))).toEqual({ ok: true });
-		expect(s.state.bonds.bea).toBe(0);
 		exec(s, retro(f.id, "greentech"));
-		expect(s.state.bonds.bea).toBe(0); // no bond reward either
 	});
 
 	it("a wider rung takes a free tile beside it (right first), and is refused when boxed in", () => {

@@ -324,7 +324,6 @@ describe("M4 content (bundled)", () => {
 			expect(so.spWeights.greentech).toBeGreaterThan(so.spWeights.synthetic);
 			expect(so.spWeights.synthetic).toBeGreaterThan(so.spWeights.biotech);
 			expect(so.greenFloor).toBeLessThanOrEqual(0.2);
-			expect(so.bondEpilogue).toBe(50);
 			// A Level-5 tower of 3000 PF of Synthetic racks reaches the Lattice within about a week.
 			const days = so.spTarget / (3000 * so.spWeights.synthetic * so.spPerPflopHour * 24);
 			expect(days).toBeGreaterThan(3);
@@ -388,7 +387,6 @@ describe("validateContent: M4 rules", () => {
 
 	it("checks the Soul balance", () => {
 		expect(broken((db) => (db.balance.soul.spTarget = 0))).toMatch(/spTarget/);
-		expect(broken((db) => (db.balance.soul.bondEpilogue = 120))).toMatch(/bondEpilogue/);
 		expect(broken((db) => delete (db.balance.soul.spWeights as Partial<typeof db.balance.soul.spWeights>).greentech)).toMatch(/spWeights.greentech/);
 		expect(broken((db) => delete (db.balance as { soul?: unknown }).soul)).toMatch(/balance.soul: missing/);
 	});

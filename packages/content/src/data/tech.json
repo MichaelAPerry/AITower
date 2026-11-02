@@ -95,7 +95,7 @@
  {
   "id": "grand_concordat",
   "name": "Open Door",
-  "description": "An open-door policy for your advisors. Taking an advisor's advice earns +1 extra bond. Contract payouts +4%.",
+  "description": "An open-door policy for your advisors. Contract payouts +4%.",
   "branch": "administration",
   "lane": "adm",
   "minTier": 4,
@@ -109,10 +109,6 @@
     "type": "perk",
     "kind": "payout",
     "factor": 1.04
-   },
-   {
-    "type": "feature",
-    "feature": "openDoor"
    }
   ],
   "flavor": {

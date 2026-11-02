@@ -115,7 +115,6 @@ function FrameCard({ frame: f, onPlay }: { frame: Frame; onPlay: (sceneId: strin
 			{f.unlocked ? <img src={OFF_DUTY[f.advisor][f.set]} alt={`${adv.first}, ${U.altOffDuty}`} draggable={false} /> : <LockedHead src={PORTRAITS[f.advisor].neutral} look={lockedLook(f.advisor)} alt={`${adv.first}, ${U.altLocked}`} />}
 			<span className="ach-frame-name">{adv.first}</span>
 			{f.set === "casual" && (f.unlocked ? <span className="ach-frame-line">{text.caption}</span> : <span className="ach-frame-line">{text.hint}</span>)}
-			{f.showRule && <span className="ach-frame-rule">{text.rule}</span>}
 		</button>
 	);
 }

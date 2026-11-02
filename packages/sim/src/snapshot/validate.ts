@@ -388,7 +388,7 @@ function validateBiotech(s: Obj): void {
 	validateSoul(s);
 }
 
-/** Singularity points, seals, bonds, objections (snapshot v11). */
+/** Singularity points, seals, objections (snapshot v11). */
 function validateSoul(s: Obj): void {
 	const nonNeg = (o: Obj, where: string): void => {
 		for (const k of Object.keys(o)) if (!((o[k] as number) >= 0)) fail(`${where}.${k} must not be negative`);
@@ -396,8 +396,6 @@ function validateSoul(s: Obj): void {
 	nonNeg(fields(s.sp, { synthetic: "num", biotech: "num", greentech: "num" }, "sp"), "sp");
 	nonNeg(fields(s.sealScar, { biotech: "num", greentech: "num" }, "sealScar"), "sealScar");
 	nonNeg(fields(s.sealResidue, { biotech: "num", greentech: "num" }, "sealResidue"), "sealResidue");
-	const b = fields(s.bonds, { cass: "num", bea: "num", mel: "num", luci: "num" }, "bonds");
-	for (const k of ADVISOR_KEYS) if (!((b[k] as number) >= 0 && (b[k] as number) <= 100)) fail(`bonds.${k} is outside 0..100`);
 	array(s, "objected").forEach((x, i) => {
 		if (typeof x !== "string") fail(`objected[${i}] must be a string`);
 	});

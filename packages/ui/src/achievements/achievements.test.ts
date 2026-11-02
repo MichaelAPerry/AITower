@@ -1,12 +1,12 @@
 import { achievementContent } from "@aitower/content";
-import { loadProfile, recordAchievement } from "@aitower/shared";
+import { loadProfile, recordAchievement, recordOffDuty } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { AchIcon } from "./AchIcon";
 import { bedItem, itemsFor, momentsOf, portraitItem, untoldItems } from "./AchievementToast";
-import { ACHIEVEMENTS, ACHIEVEMENT_COUNT, type AchEnv, type AchievementDef, FAST_WIN_DAYS, PORTRAITS, awardFor, bedComplete, countsForAchievements, evaluate } from "./achievements";
+import { ACHIEVEMENTS, ACHIEVEMENT_COUNT, type AchEnv, type AchievementDef, FAST_WIN_DAYS, awardFor, bedComplete, countsForAchievements, evaluate } from "./achievements";
 import { ICONS, ICON_PALETTE, ICON_SIZE, hasIcon, iconRows, lockedIcon } from "./icons";
 import { ICON_SHEETS, type IconSheet, sheetCellStyle } from "./sheets";
 
@@ -22,7 +22,6 @@ interface Spec {
 	day?: number;
 	over?: Over | null;
 	seal?: { biotech?: number; greentech?: number };
-	bonds?: Partial<Record<"luci" | "mel" | "bea" | "cass", number>>;
 	rungs?: number[];
 	loan?: number;
 	corruption?: number;
@@ -46,7 +45,6 @@ const view = (s: Spec = {}): SimView =>
 		soul: {
 			seal: { biotech: 0, greentech: 0, ...s.seal },
 			sealMax: 100,
-			bonds: { luci: 30, mel: 20, bea: 20, cass: 20, ...s.bonds },
 			trees: { synthetic: { rung: s.rungs?.[0] ?? 0 }, biotech: { rung: s.rungs?.[1] ?? 0 }, greentech: { rung: s.rungs?.[2] ?? 0 } },
 		},
 	}) as unknown as SimView;
@@ -57,8 +55,8 @@ const def = (id: string): AchievementDef => ACHIEVEMENTS.find((d) => d.id === id
 const met = (id: string, v: SimView, e: AchEnv = env()): boolean => def(id).check(v, e);
 
 describe("the table", () => {
-	it("is the 18 rows of the spec, each with a check and a moment", () => {
-		expect(ACHIEVEMENT_COUNT).toBe(18);
+	it("is the 16 rows of the spec, each with a check and a moment", () => {
+		expect(ACHIEVEMENT_COUNT).toBe(16);
 		expect(ACHIEVEMENTS.map((a) => a.id)).toEqual(achievementContent.achievements.map((a) => a.id));
 		const moments: Record<string, string> = {};
 		for (const a of ACHIEVEMENTS) moments[a.id] = a.when;
@@ -66,7 +64,7 @@ describe("the table", () => {
 			end_lattice: "gameOver", end_flesh: "gameOver", end_garden: "gameOver", end_absorbed: "gameOver", end_bankrupt: "gameOver",
 			lvl_five: "dayClose", rung_top: "dayClose", fast_win: "gameOver", clean_hands: "gameOver", open_hands: "gameOver",
 			cash_deep: "dayClose", books_clean: "gameOver", perfect_qtr: "quarterReport", calm_month: "dayClose",
-			bond_close: "dayClose", bond_crew: "dayClose", les_done: "lessonEnd", heard_out: "gameOver",
+			les_done: "lessonEnd", heard_out: "gameOver",
 		});
 	});
 
@@ -173,16 +171,6 @@ describe("each check fires at its boundary, not just below it", () => {
 		expect(met("calm_month", view({ streak: 20 }))).toBe(true);
 	});
 
-	it("Someone You Trust: any advisor at 50", () => {
-		expect(met("bond_close", view({ bonds: { luci: 49, mel: 49 } }))).toBe(false);
-		expect(met("bond_close", view({ bonds: { bea: 50 } }))).toBe(true);
-	});
-
-	it("The Whole Crew: all four at 40", () => {
-		expect(met("bond_crew", view({ bonds: { luci: 80, mel: 39, bea: 40, cass: 40 } }))).toBe(false);
-		expect(met("bond_crew", view({ bonds: { luci: 40, mel: 40, bea: 40, cass: 40 } }))).toBe(true);
-	});
-
 	it("Student: every lesson id finished, none missing", () => {
 		expect(met("les_done", view(), env({ lessonIds: ["a", "b"], lessonsDone: { a: 3 } }))).toBe(false);
 		expect(met("les_done", view(), env({ lessonIds: ["a", "b"], lessonsDone: { a: 1, b: 2 } }))).toBe(true);
@@ -261,55 +249,6 @@ describe("awarding", () => {
 		expect(awardFor("gameOver", over, { storage: s, epilogue: "cass" }).won.map((d) => d.id)).toContain("heard_out");
 	});
 
-	it("remembers the highest bonds for the gallery hints", () => {
-		const s = memory();
-		awardFor("dayClose", view({ bonds: { luci: 33, cass: 12 } }), { storage: s });
-		awardFor("dayClose", view({ bonds: { luci: 31, cass: 30 } }), { storage: s });
-		expect(loadProfile(s).bondMax).toMatchObject({ luci: 33, cass: 30 });
-	});
-});
-
-describe("off-duty portraits unlock at their boundary", () => {
-	const unlocked = (v: SimView, moment: "gameOver" | "dayClose" = "gameOver") => awardFor(moment, v, { storage: memory() }).portraits;
-
-	it("Luci: Lattice win, no loan, bond 50", () => {
-		expect(unlocked(view({ over: win("singularity"), bonds: { luci: 50 } }))).toEqual(["luci"]);
-		expect(unlocked(view({ over: win("singularity"), bonds: { luci: 49 } }))).toEqual([]);
-		expect(unlocked(view({ over: win("singularity"), bonds: { luci: 90 }, loan: 1 }))).toEqual([]);
-		expect(unlocked(view({ over: win("flesh"), bonds: { luci: 90 } }))).toEqual([]);
-	});
-
-	it("Mel: Flesh win, corruption under 0.5, bond 40", () => {
-		expect(unlocked(view({ over: win("flesh"), corruption: 0.49, bonds: { mel: 40 } }))).toEqual(["mel"]);
-		expect(unlocked(view({ over: win("flesh"), corruption: 0.5, bonds: { mel: 40 } }))).toEqual([]);
-		expect(unlocked(view({ over: win("flesh"), corruption: 0.1, bonds: { mel: 39 } }))).toEqual([]);
-		expect(unlocked(view({ over: win("garden"), corruption: 0.1, bonds: { mel: 90 } }))).toEqual([]);
-	});
-
-	it("Bea: Garden win, green seal under 50, bond 50", () => {
-		expect(unlocked(view({ over: win("garden"), seal: { greentech: 49.9 }, bonds: { bea: 50 } }))).toEqual(["bea"]);
-		expect(unlocked(view({ over: win("garden"), seal: { greentech: 50 }, bonds: { bea: 50 } }))).toEqual([]);
-		expect(unlocked(view({ over: win("garden"), seal: { greentech: 0 }, bonds: { bea: 49 } }))).toEqual([]);
-	});
-
-	it("Cass: the day the streak reaches 20, mid-run (day close)", () => {
-		expect(unlocked(view({ streak: 20 }), "dayClose")).toEqual(["cass"]);
-		expect(unlocked(view({ streak: 19 }), "dayClose")).toEqual([]);
-		expect(unlocked(view({ streak: 25 }), "gameOver")).toEqual([]);
-	});
-
-	it("latches, and is announced once", () => {
-		const s = memory();
-		const v = view({ streak: 21 });
-		expect(awardFor("dayClose", v, { storage: s }).portraits).toEqual(["cass"]);
-		expect(awardFor("dayClose", v, { storage: s }).portraits).toEqual([]);
-		expect(loadProfile(s).offDuty.cass.casual).toBe(true);
-		expect(PORTRAITS.map((p) => p.advisor)).toEqual(["luci", "mel", "bea", "cass"]);
-	});
-
-	it("not in lessons or sandbox", () => {
-		expect(awardFor("dayClose", view({ streak: 30, sandbox: true }), { storage: memory() }).portraits).toEqual([]);
-	});
 });
 
 describe("the bed set", () => {
@@ -317,17 +256,32 @@ describe("the bed set", () => {
 		for (const a of ACHIEVEMENTS) if (a.id !== skip) recordAchievement(a.id, 5, null, s);
 	};
 
-	it("opens at all 18, not 17", () => {
+	const eggs = (s: ReturnType<typeof memory>, skip?: string) => {
+		for (const a of ["luci", "mel", "bea", "cass"] as const) if (a !== skip) recordOffDuty(a, s);
+	};
+
+	it("opens only with every achievement AND all four after-hours upgrades", () => {
 		const s = memory();
 		all(s, "heard_out");
-		expect(bedComplete(loadProfile(s))).toBe(false);
+		eggs(s);
+		expect(bedComplete(loadProfile(s))).toBe(false); // one achievement short
 		recordAchievement("heard_out", 5, null, s);
 		expect(bedComplete(loadProfile(s))).toBe(true);
+		const s2 = memory();
+		all(s2);
+		eggs(s2, "bea");
+		expect(bedComplete(loadProfile(s2))).toBe(false); // one upgrade short
+		recordOffDuty("bea", s2);
+		expect(bedComplete(loadProfile(s2))).toBe(true);
+		const s3 = memory();
+		eggs(s3);
+		expect(bedComplete(loadProfile(s3))).toBe(false); // upgrades alone are not enough
 	});
 
-	it("is announced by the call that lands the 18th, once", () => {
+	it("is announced by the call that lands the last achievement, once", () => {
 		const s = memory();
 		all(s, "cash_deep");
+		eggs(s);
 		const r = awardFor("dayClose", view({ cash: 11e6 }), { storage: s });
 		expect(r.won.map((d) => d.id)).toEqual(["cash_deep"]);
 		expect(r.bed).toBe(true);
@@ -340,9 +294,9 @@ describe("the bed set", () => {
 		all(s);
 		const p = loadProfile(s);
 		p.offDuty.mel.casual = true;
-		expect(untoldItems(p).map((i) => i.key)).toEqual(["p:mel", "p:bed"]);
-		p.told.mel = true;
-		p.told.bed = true;
+		p.offDuty.luci.casual = p.offDuty.bea.casual = p.offDuty.cass.casual = true;
+		expect(untoldItems(p).map((i) => i.key)).toEqual(["p:luci", "p:mel", "p:bea", "p:cass", "p:bed"]);
+		for (const k of ["luci", "mel", "bea", "cass", "bed"]) p.told[k] = true;
 		expect(untoldItems(p)).toEqual([]);
 		expect(portraitItem("bea").deferred && bedItem().deferred).toBe(true);
 	});

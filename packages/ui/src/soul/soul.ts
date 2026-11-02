@@ -165,10 +165,3 @@ export function treeCards(view: Pick<SimView, "soul" | "tier" | "techResearched"
 		};
 	});
 }
-
-/** The advisor with the highest bond, if it is at the epilogue level (the one who speaks at the end). */
-export function epilogueAdvisor(soul: Pick<SoulView, "bonds" | "bondEpilogue">): AdvisorId | null {
-	let best: AdvisorId | null = null;
-	for (const id of ["cass", "bea", "mel", "luci"] as const) if (best === null || soul.bonds[id] > soul.bonds[best]) best = id;
-	return best !== null && soul.bonds[best] >= soul.bondEpilogue ? best : null;
-}

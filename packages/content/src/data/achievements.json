@@ -73,16 +73,6 @@
    "text": "Keep uptime at 99% or better for 20 days in a row."
   },
   {
-   "id": "bond_close",
-   "name": "Someone You Trust",
-   "text": "Get any advisor to 50 trust."
-  },
-  {
-   "id": "bond_crew",
-   "name": "The Whole Crew",
-   "text": "Get all four advisors to 40 trust in one run."
-  },
-  {
    "id": "les_done",
    "name": "Student",
    "text": "Finish every lesson."

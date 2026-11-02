@@ -1,11 +1,11 @@
 import type { ContentDB } from "@aitower/content";
 import type { SimView } from "@aitower/sim";
 import { type KeyboardEvent, useEffect, useRef } from "react";
-import { ADVISOR_ORDER, ADVISORS } from "../advisors/advisors";
+import { ADVISORS } from "../advisors/advisors";
 import { Portrait } from "../advisors/Portrait";
 import { PixelIcon } from "../icons/PixelIcon";
 import { TREE_ICON } from "../icons/pixelIcons";
-import { epilogueAdvisor, TREE_SHORT, type TreeCard, treeCards } from "./soul";
+import { TREE_SHORT, type TreeCard, treeCards } from "./soul";
 import "./soul.css";
 
 /** One column: a tree's points and pace, its ladder, what comes next, its speed factor and its seal. */
@@ -89,7 +89,6 @@ export function TreesPanel({ view, content, onClose }: { view: Pick<SimView, "so
 	const soul = view.soul;
 	if (!soul) return null;
 	const cards = treeCards(view, content);
-	const speaker = epilogueAdvisor(soul);
 	const onKey = (e: KeyboardEvent<HTMLDivElement>): void => {
 		e.stopPropagation();
 		if (e.key === "Escape") {
@@ -110,15 +109,6 @@ export function TreesPanel({ view, content, onClose }: { view: Pick<SimView, "so
 						<TreeColumn key={c.tree} card={c} />
 					))}
 				</div>
-				<footer className="trees-bonds">
-					<span>Bonds:</span>
-					{ADVISOR_ORDER.map((id) => (
-						<span key={id} className="trees-bond">
-							{ADVISORS[id].first} {Math.round(soul.bonds[id])}
-						</span>
-					))}
-					<span className="trees-bond-note">{speaker ? `${ADVISORS[speaker].first} will speak at the end.` : `The advisor you trust most (${soul.bondEpilogue}+) speaks at the end.`}</span>
-				</footer>
 				<button type="button" className="ui-btn trees-close" onClick={onClose}>
 					Close (Esc)
 				</button>

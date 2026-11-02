@@ -162,7 +162,6 @@ export function effectChip(e: EventEffect): string {
 			return `${pathLabel(e.path)} ${sign(e.amount)}${Math.abs(e.amount)}`;
 		// The Soul's effects are secret or narrative: never a chip.
 		case "seal":
-		case "bond":
 		case "sp":
 			return "";
 	}
@@ -179,7 +178,7 @@ export const choiceChips = (effects: readonly EventEffect[]): string => {
 	return v.length ? v.map(effectChip).join(" · ") : "no effect";
 };
 
-/** Effects the player may see as chips (seal, bond, SP and commit effects are hidden). */
+/** Effects the player may see as chips (seal, SP and commit effects are hidden). */
 export const visibleEffects = (effects: readonly EventEffect[]): EventEffect[] => effects.filter((e) => effectChip(e) !== "");
 
 // ─── Ticker ───────────────────────────────────────────────────────────────

@@ -318,8 +318,6 @@ export interface Profile {
 	epilogues: Record<AdvisorKey, boolean>;
 	/** Off-duty gallery: the casual portrait of each advisor is unlocked (`aitower.profile.offDuty.<advisor>.casual`). Latched. */
 	offDuty: Record<AdvisorKey, { casual: boolean }>;
-	/** Highest bond each advisor reached in any run (the gallery shows a locked frame's plain rule from 30). */
-	bondMax: Record<AdvisorKey, number>;
 	/** Unlock strips already shown, by key (an advisor id for a casual portrait, "bed" for the bed set). */
 	told: Record<string, boolean>;
 	/** One-time gallery scenes already played (`ach_bed_intro`, `ach_gallery_empty`). */
@@ -332,7 +330,6 @@ const emptyProfile = (): Profile => ({
 	earned: {},
 	epilogues: perAdvisor(() => false),
 	offDuty: perAdvisor(() => ({ casual: false })),
-	bondMax: perAdvisor(() => 0),
 	told: {},
 	scenesSeen: {},
 });
@@ -360,8 +357,6 @@ export function parseProfile(raw: unknown): Profile {
 		for (const a of ADVISOR_KEYS) {
 			profile.epilogues[a] = (p.epilogues as Record<string, unknown> | undefined)?.[a] === true;
 			profile.offDuty[a].casual = (p.offDuty as Record<string, { casual?: unknown } | undefined> | undefined)?.[a]?.casual === true;
-			const b = (p.bondMax as Record<string, unknown> | undefined)?.[a];
-			profile.bondMax[a] = typeof b === "number" && Number.isFinite(b) ? Math.max(0, Math.min(100, b)) : 0;
 		}
 		profile.told = flags(p.told);
 		profile.scenesSeen = flags(p.scenesSeen);
@@ -426,15 +421,6 @@ export function recordOffDuty(advisor: AdvisorKey, storage: LessonStorage | null
 	return first;
 }
 
-/** Remember the highest bond seen per advisor. */
-export function recordBonds(bonds: Partial<Record<AdvisorKey, number>>, storage: LessonStorage | null = defaultLessonStorage()): void {
-	const p0 = loadProfile(storage);
-	if (!ADVISOR_KEYS.some((a) => (bonds[a] ?? 0) > p0.bondMax[a])) return;
-	updateProfile((p) => {
-		for (const a of ADVISOR_KEYS) p.bondMax[a] = Math.max(p.bondMax[a], Math.min(100, bonds[a] ?? 0));
-	}, storage);
-}
-
 /** Mark an unlock strip as shown (`told`) or a one-time scene as played (`scenesSeen`). */
 export function markProfileFlag(kind: "told" | "scenesSeen", key: string, storage: LessonStorage | null = defaultLessonStorage()): void {
 	if (loadProfile(storage)[kind][key]) return;
@@ -455,7 +441,6 @@ export function mergeProfiles(a: Profile, b: Profile): Profile {
 	for (const k of ADVISOR_KEYS) {
 		out.epilogues[k] = a.epilogues[k] || b.epilogues[k];
 		out.offDuty[k].casual = a.offDuty[k].casual || b.offDuty[k].casual;
-		out.bondMax[k] = Math.max(a.bondMax[k], b.bondMax[k]);
 	}
 	// A strip counts as shown only if both sides showed it, so a merge never hides a portrait the player has not been told about.
 	for (const k of Object.keys({ ...a.told, ...b.told })) if (a.told[k] && b.told[k]) out.told[k] = true;

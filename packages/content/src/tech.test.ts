@@ -33,8 +33,8 @@ describe("tech tree (bundled)", () => {
 		expect(n.minTier).toBe(1);
 		expect(n.requires).toEqual([]);
 		expect(n.effects).toEqual([{ type: "feature", feature: "contractsClerk" }]);
-		// The Works Foreman, the Fleet Policy Update (the Foreman builds twice as fast) and Open Door (+1 bond for taking advice) are the only other feature nodes.
-		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature")).map((x) => x.id).sort()).toEqual(["contracts_clerk", "grand_concordat", "standing_orders_binder", "works_foreman"]);
+		// The Works Foreman, the Fleet Policy Update (the Foreman builds twice as fast) and are the only other feature nodes.
+		expect(db.tech.filter((x) => x.effects.some((e) => e.type === "feature")).map((x) => x.id).sort()).toEqual(["contracts_clerk", "standing_orders_binder", "works_foreman"]);
 		// Affordable after about one game day of full starter utilisation (4 racks x 20 PF x 24 h).
 		const fullDay = 4 * 20 * 24 * db.balance.research.pointsPerPflopHour;
 		expect(n.cost).toBeLessThanOrEqual(fullDay);

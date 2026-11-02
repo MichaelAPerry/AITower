@@ -113,7 +113,6 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		sp: { synthetic: 0, biotech: 0, greentech: 0 },
 		sealScar: { biotech: 0, greentech: 0 },
 		sealResidue: { biotech: 0, greentech: 0 },
-		bonds: { ...content.balance.soul.bondStart },
 		objected: [],
 		automation: defaultAutomation(),
 		wind: 0.6,

@@ -49,7 +49,7 @@ export function siteBlock(s: SimState, d: FacilityDef, floor: number, x: number,
 	return null;
 }
 
-/** What placing `d` does to the world beyond adding it: scars, bond rewards, statistics. */
+/** What placing `d` does to the world beyond adding it: scars, statistics. */
 export function afterPlace(s: SimState, d: FacilityDef, ignoreTier: boolean): void {
 	scarOnPlace(s, d);
 	if (!ignoreTier) s.stats.facilitiesBuilt++;

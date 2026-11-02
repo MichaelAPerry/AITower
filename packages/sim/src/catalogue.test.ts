@@ -37,16 +37,14 @@ const can = (s: SimImpl, defId: string, floor: number, x: number): string | null
 const FREE = 20;
 
 describe("who may place what", () => {
-	it("Level and research are the only gates: no commit, no bond, no path", () => {
+	it("Level and research are the only gates: no commit, no path", () => {
 		const s = start();
-		s.state.bonds = { cass: 0, bea: 0, mel: 0, luci: 0 };
 		expect(can(s, "grid_tie_lucy", 0, 36)).toBe("requires tier 3");
 		level(s, 3);
 		expect(can(s, "grid_tie_lucy", 0, 36)).toMatch(/requires research: /);
 		research(s, "substation_licence", "offpeak_petition", "rate_card");
 		expect(can(s, "grid_tie_lucy", 0, 36)).toBeNull();
 		exec(s, { type: "place", defId: "grid_tie_lucy", floor: 0, x: 36 });
-		expect(s.state.bonds.luci).toBe(0); // no bond reward for building it
 		expect(s.state.sealScar.greentech).toBeGreaterThanOrEqual(10 + 16); // the catch
 	});
 
@@ -86,7 +84,6 @@ describe("research has no commit", () => {
 		const s = start();
 		level(s, 4);
 		s.state.researchPoints = 1e6;
-		s.state.bonds.luci = 100;
 		research(s, "tower_hydraulics", "manifold_blade", "chilled_loop", "cold_plate_gen3", "rear_door_drawings", "desk_fan_standard", "batch_cards");
 		expect(s.submit({ type: "research", techId: "cryo_core_dossier" })).toEqual({ ok: true });
 		s.step();
@@ -258,18 +255,16 @@ describe("snapshot v15", () => {
 		return snap;
 	};
 
-	it("drops the commit, the route and all the dating state, and keeps the points, the seals and the bonds", () => {
+	it("drops the commit, the route and all the dating state, and keeps the points and the seals; a v14 save also loses its bonds", () => {
 		const c = loadContent();
 		const s = createSim(c, "starter", 2) as SimImpl;
 		s.state.sp.greentech = 321;
 		s.state.sealResidue.biotech = 7;
-		s.state.bonds.mel = 66;
 		const loaded = simFromSnapshot(c, save(s) as never) as SimImpl;
 		expect(loaded.snapshot().version).toBe(SNAPSHOT_VERSION);
-		for (const k of ["path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in loaded.state, k).toBe(false);
+		for (const k of ["bonds", "path", "route", "sealedOut", "bondGiven", "flags", "afterHoursDay", "afterSeen", "gifted", "inbox", "messageDay", "messageSeen"]) expect(k in loaded.state, k).toBe(false);
 		expect(loaded.state.sp.greentech).toBe(321);
 		expect(loaded.state.sealResidue.biotech).toBe(7);
-		expect(loaded.state.bonds.mel).toBe(66);
 		for (let t = 0; t < 100; t++) loaded.step();
 	});
 

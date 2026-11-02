@@ -21,7 +21,7 @@ export interface OffDutyText {
 	caption: string;
 	/** The locked frame's old-style line. */
 	hint: string;
-	/** The plain rule, shown once her bond has reached 30. */
+	/** The plain rule (not shown any more; kept for the gallery text). */
 	rule: string;
 }
 

@@ -3,9 +3,6 @@ import { type GalleryAdvisor, type GalleryScene, achievementContent, galleryScen
 import type { Profile } from "@aitower/shared";
 import { ACHIEVEMENTS, ACHIEVEMENT_COUNT, type AchievementDef, bedComplete } from "./achievements";
 
-/** A locked frame shows the plain rule once her bond has reached this (so the player can aim). */
-export const RULE_BOND = 30;
-
 /** The text a hidden row shows until it is earned. */
 const U = achievementContent.ui;
 export const HIDDEN_NAME = U.hiddenName;
@@ -71,8 +68,6 @@ export interface Frame {
 	advisor: GalleryAdvisor;
 	set: "casual" | "bed";
 	unlocked: boolean;
-	/** Casual locked frames only: show the plain rule (her bond has reached `RULE_BOND`). */
-	showRule: boolean;
 }
 
 /** The four casual frames, then the four bed frames. */
@@ -81,8 +76,8 @@ export function frames(profile: Profile, defs: readonly AchievementDef[] = ACHIE
 	const advisors = ["luci", "mel", "bea", "cass"] as const;
 	return {
 		bedOpen,
-		casual: advisors.map((advisor) => ({ advisor, set: "casual", unlocked: profile.offDuty[advisor].casual, showRule: !profile.offDuty[advisor].casual && profile.bondMax[advisor] >= RULE_BOND })),
-		bed: advisors.map((advisor) => ({ advisor, set: "bed", unlocked: bedOpen, showRule: false })),
+		casual: advisors.map((advisor) => ({ advisor, set: "casual", unlocked: profile.offDuty[advisor].casual })),
+		bed: advisors.map((advisor) => ({ advisor, set: "bed", unlocked: bedOpen })),
 	};
 }
 

@@ -11,7 +11,7 @@
  * Pause: the sim itself never blocks. The clock owner (the app's store/loop) holds the clock while a decision is open, which
  * keeps the sim a pure function of (seed, commands): the same commands give the same game however fast it is played.
  */
-import { ADVISOR_IDS, type AdvisorId, type ContentDB, type EventChoice, type EventDef, type EventEffect, SEALED_TREES } from "@aitower/content";
+import { type ContentDB, type EventChoice, type EventDef, type EventEffect, SEALED_TREES } from "@aitower/content";
 import type { SimEvent } from "../api";
 import { type Plan, type PlanCtx, accept, reject } from "../commands/plan";
 import { stockParts } from "../commands/operations";
@@ -24,8 +24,7 @@ import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
 import { addAffinity } from "../progression/affinity";
-import { addBond, addResidue, addSp, isSealed, leadingTree, rungsHeld, sealOf } from "../progression/soul";
-import { featureUnlocked } from "../research/research";
+import { addResidue, addSp, isSealed, leadingTree, rungsHeld, sealOf } from "../progression/soul";
 import { expireModifiers, modifierLabel } from "./modifiers";
 
 export const DECISION_HISTORY_LENGTH = 20;
@@ -92,13 +91,6 @@ export const STORY_SPACING_TICKS = 120;
 /** Story scenes and objections are checked every this many ticks (they walk the facility list). */
 export const STORY_CHECK_TICKS = 10;
 
-/** The advisor with the highest bond (ties go to the earlier of cass, bea, mel, luci). */
-export function topBondAdvisor(state: SimState): AdvisorId {
-	let best: AdvisorId = ADVISOR_IDS[0];
-	for (const id of ADVISOR_IDS) if (state.bonds[id] > state.bonds[best]) best = id;
-	return best;
-}
-
 /** The scene's own conditions besides its trigger: Level and day. */
 export function conditionsHold(state: SimState, e: EventDef): boolean {
 	if (state.tier < e.minTier || (e.maxTier !== undefined && state.tier > e.maxTier)) return false;
@@ -121,10 +113,6 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
 			return isSealed(state, content, t.tree);
 		case "sealRise":
 			return SEALED_TREES.some((tree) => sealOf(state, tree) > t.above);
-		case "bondMoved":
-			return ADVISOR_IDS.some((id) => state.bonds[id] !== content.balance.soul.bondStart[id]);
-		case "bond":
-			return state.bonds[t.advisor] >= t.atLeast;
 	}
 }
 
@@ -254,9 +242,6 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 		case "seal":
 			addResidue(state, e.path, e.amount);
 			break;
-		case "bond":
-			addBond(state, e.advisor, e.amount);
-			break;
 		case "sp":
 			addSp(state, e.path, e.amount);
 			break;
@@ -267,9 +252,6 @@ function resolveNow(state: SimState, content: ContentDB, d: Decision, def: Event
 	state.decision = null;
 	state.stats.decisionsMade++;
 	for (const e of choice.effects) applyEffect(state, content, e, events);
-	// Taking an advisor's recommendation warms her to you; overruling her cools her a little.
-	const sb = content.balance.soul;
-	addBond(state, def.advisor, choice.id === def.recommended ? sb.bondFollow + (featureUnlocked(state, content, "openDoor") ? 1 : 0) : sb.bondOverrule);
 	state.decisionHistory.push({ decisionId: d.id, eventId: def.id, title: def.title, choiceId: choice.id, outcome: choice.outcome, tick: state.tick });
 	if (state.decisionHistory.length > DECISION_HISTORY_LENGTH) state.decisionHistory.splice(0, state.decisionHistory.length - DECISION_HISTORY_LENGTH);
 	events.push({ type: "decisionResolved", decisionId: d.id, eventId: def.id, choiceId: choice.id });

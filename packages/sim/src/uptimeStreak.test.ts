@@ -42,8 +42,8 @@ describe("uptimeStreak update rule (closeAuditDay)", () => {
 });
 
 describe("snapshot v16 migration", () => {
-	it("is version 16 and the v15 step defaults the streak to 0", () => {
-		expect(SNAPSHOT_VERSION).toBe(16);
+	it("is at least version 16 and the v15 step defaults the streak to 0", () => {
+		expect(SNAPSHOT_VERSION).toBeGreaterThanOrEqual(16);
 		expect(migrations[15]({ cash: 1 })).toEqual({ cash: 1, uptimeStreak: 0 });
 		expect(migrations[15]({ uptimeStreak: 7 }).uptimeStreak).toBe(7);
 		expect(migrations[15]({ uptimeStreak: -3 }).uptimeStreak).toBe(0);

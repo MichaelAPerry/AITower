@@ -548,13 +548,11 @@ describe("decision effects", () => {
 		const cash0 = sim.state.cash;
 		const events = applyEffects(sim, [
 			{ type: "cash", amount: -1000 },
-			{ type: "bond", advisor: "mel", amount: -5 },
 			{ type: "spareParts", count: 2 },
 			{ type: "energyPrice", factor: 1.5, durationTicks: 60 },
 		]);
 		expect(sim.state.today.penalties).toBeGreaterThanOrEqual(1000);
 		expect(cash0 - sim.state.cash).toBeGreaterThanOrEqual(1000);
-		expect(sim.state.bonds.mel).toBe(45);
 		expect(sim.view().spareParts).toBe(6);
 		expect(sim.state.modifiers).toHaveLength(1);
 		expect(events.some((e) => e.type === "decisionResolved")).toBe(true);
@@ -666,7 +664,7 @@ function playDays(sim: SimImpl, days: number, hook?: (tick: number) => void): vo
 }
 
 const richEvents = (): EventDef[] => [
-	ev("r1", { choices: [choice("a", [{ type: "cash", amount: -5000 }, { type: "bond", advisor: "bea", amount: 2 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
+	ev("r1", { choices: [choice("a", [{ type: "cash", amount: -5000 }]), choice("b", [{ type: "ambient", deltaC: 3, durationTicks: 700 }])] }),
 	ev("r2", { advisor: "cass", recommended: "b", choices: [choice("a", [{ type: "failRacks", count: 1 }]), choice("b", [{ type: "energyPrice", factor: 1.5, durationTicks: 1200 }, { type: "spareParts", count: -1 }])] }),
 	ev("r3", { choices: [choice("a", [{ type: "payout", factor: 1.2, durationTicks: 3000 }]), choice("b", [{ type: "gridCap", factor: 0.9, durationTicks: 300 }, { type: "failureRate", factor: 1.4, durationTicks: 900 }])] }),
 ];

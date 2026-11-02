@@ -12,22 +12,13 @@ import { StampBtn } from "../menu/parts";
 import { endingKicker, lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
 
-/**
- * The advisor whose epilogue closes the ending: the one with the highest bond, if it reaches `bondEpilogue` (ties go to the
- * earlier in this order).
- */
-export function epilogueAdvisor(view: Pick<SimView, "soul">, ending: EndingDef): AdvisorId | null {
-	const s = view.soul;
-	if (!s || !ending.epilogue) return null;
-	let best: AdvisorId | null = null;
-	for (const id of ["cass", "mel", "bea", "luci"] as const) {
-		if (!ending.epilogue[id] || s.bonds[id] < s.bondEpilogue) continue;
-		if (best === null || s.bonds[id] > s.bonds[best]) best = id;
-	}
-	return best;
+/** The advisor whose epilogue closes the ending: the one the ending is about (the first one its file lists). */
+export function epilogueAdvisor(_view: Pick<SimView, "soul">, ending: EndingDef): AdvisorId | null {
+	const first = Object.keys(ending.epilogue ?? {}).find((k) => k !== "fallback");
+	return (first as AdvisorId | undefined) ?? null;
 }
 
-/** The pages of an ending: its paragraphs, then the closest advisor's epilogue, or the ending's narrated fallback if nobody qualifies. */
+/** The pages of an ending: its paragraphs, then the epilogue of the advisor the ending is about. */
 export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { who: AdvisorId | null; text: string }[] {
 	const who = epilogueAdvisor(view, ending);
 	return [
@@ -42,7 +33,7 @@ export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { w
 
 /**
  * A Singularity ending as a visual-novel scene: the tree's floor painting, the ending's paragraphs in the dialogue box, the
- * epilogue of the advisor the player is closest to (or, when no bond reaches the bar, the ending's narrated fallback), then the
+ * epilogue of the advisor the ending is about, then the
  * service record and the buttons.
  */
 export function EndingScene({ ending, view, content, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {

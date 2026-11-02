@@ -241,16 +241,6 @@
 .aitower-hud .trees-seal.is-closed .trees-seal-row b {
 	color: var(--bad);
 }
-.aitower-hud .trees-bonds {
-	display: flex;
-	flex-wrap: wrap;
-	gap: 6px 14px;
-	color: var(--text-dim);
-	font-size: var(--fs-small);
-}
-.aitower-hud .trees-bond {
-	color: var(--text);
-}
 .aitower-hud .trees-close {
 	justify-self: end;
 }

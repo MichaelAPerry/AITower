@@ -161,15 +161,6 @@
   "greenFloor": 0.15,
   "sealMax": 100,
   "residuePerDay": 0.03,
-  "objectionScar": 10,
-  "bondStart": {
-   "cass": 20,
-   "bea": 20,
-   "mel": 20,
-   "luci": 30
-  },
-  "bondEpilogue": 50,
-  "bondFollow": 3,
-  "bondOverrule": -1
+  "objectionScar": 10
  }
 }

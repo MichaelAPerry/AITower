@@ -3,7 +3,7 @@
  * Names, texts and the hidden flag live in packages/content/src/data/achievements.json; this file adds the check, the moment and the icon.
  */
 import { type AchievementText, achievementContent } from "@aitower/content";
-import { ADVISOR_KEYS, type AdvisorKey, type Profile, loadLessonProgress, loadProfile, recordAchievement, recordBonds, recordEpilogue, recordOffDuty } from "@aitower/shared";
+import { ADVISOR_KEYS, type AdvisorKey, type Profile, loadLessonProgress, loadProfile, recordAchievement, recordEpilogue } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 
 /** The moments the app checks (spec section 1). */
@@ -35,7 +35,6 @@ const TICKS_PER_DAY = 1440;
 export const CALM_DAYS = 20;
 
 const winEnding = (v: SimView): string | undefined => (v.gameOver?.kind === "victory" ? v.gameOver.ending : undefined);
-const bondValues = (v: SimView): number[] => (v.soul ? Object.values(v.soul.bonds) : []);
 
 type Check = Pick<AchievementDef, "when" | "check" | "icon">;
 
@@ -77,8 +76,6 @@ const CHECKS: Readonly<Record<string, Check>> = {
 		},
 	},
 	calm_month: { icon: { sheet: "achievements", col: 1, row: 2 }, when: "dayClose", check: (v) => v.uptimeStreak >= CALM_DAYS },
-	bond_close: { icon: { sheet: "achievements", col: 2, row: 2 }, when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.max(...bondValues(v)) >= 50 },
-	bond_crew: { icon: { sheet: "achievements", col: 3, row: 2 }, when: "dayClose", check: (v) => bondValues(v).length > 0 && Math.min(...bondValues(v)) >= 40 },
 	les_done: { icon: { sheet: "achievements", col: 4, row: 2 }, when: "lessonEnd", check: (_v, e) => e.lessonIds.length > 0 && e.lessonIds.every((id) => e.lessonsDone[id] !== undefined) },
 	heard_out: { icon: { sheet: "achievements", col: 5, row: 2 }, when: "gameOver", check: (_v, e) => ADVISOR_KEYS.every((a) => e.profile.epilogues[a]) },
 };
@@ -95,23 +92,13 @@ export const ACHIEVEMENT_COUNT = ACHIEVEMENTS.length;
 /** Only normal runs count: not lessons, not sandbox sites. `lessonEnd` is the one exception (Student is earned in lessons). */
 export const countsForAchievements = (view: Pick<SimView, "lesson" | "sandbox">): boolean => !view.lesson && !view.sandbox;
 
-// ─── Off-duty portraits (spec section 4) ─────────────────────────────────
+// ─── Off-duty portraits ──────────────────────────────────────────────────
+// A casual portrait is unlocked by buying that character's upgrade for her after-hours item (docs/AFTER_HOURS.md); the sim reports
+// it in `view.afterHours`.
 
-export interface PortraitDef {
-	advisor: AdvisorKey;
-	when: AchievementMoment;
-	check: (view: SimView) => boolean;
-}
-
-export const PORTRAITS: readonly PortraitDef[] = [
-	{ advisor: "luci", when: "gameOver", check: (v) => winEnding(v) === "singularity" && v.loan.principal === 0 && (v.soul?.bonds.luci ?? 0) >= 50 },
-	{ advisor: "mel", when: "gameOver", check: (v) => winEnding(v) === "flesh" && v.corruption < 0.5 && (v.soul?.bonds.mel ?? 0) >= 40 },
-	{ advisor: "bea", when: "gameOver", check: (v) => winEnding(v) === "garden" && !!v.soul && v.soul.seal.greentech < 50 && v.soul.bonds.bea >= 50 },
-	{ advisor: "cass", when: "dayClose", check: (v) => v.uptimeStreak >= CALM_DAYS },
-];
-
-/** The bed set: all of the achievements earned. */
-export const bedComplete = (profile: Pick<Profile, "earned">, defs: readonly AchievementDef[] = ACHIEVEMENTS): boolean => defs.length > 0 && defs.every((d) => profile.earned[d.id]);
+/** The bed set: every achievement earned AND all four after-hours upgrades bought (all four casual portraits unlocked). */
+export const bedComplete = (profile: Pick<Profile, "earned" | "offDuty">, defs: readonly AchievementDef[] = ACHIEVEMENTS): boolean =>
+	defs.length > 0 && defs.every((d) => profile.earned[d.id]) && ADVISOR_KEYS.every((a) => profile.offDuty[a].casual);
 
 // ─── The checker ─────────────────────────────────────────────────────────
 
@@ -158,12 +145,9 @@ export function awardFor(moment: AchievementMoment, view: SimView, opts: AwardOp
 	if (moment !== "lessonEnd" && !countsForAchievements(view)) return out;
 	const bedBefore = bedComplete(loadProfile(storage), defs);
 	if (moment === "gameOver" && opts.epilogue) recordEpilogue(opts.epilogue, storage);
-	if ((moment === "dayClose" || moment === "gameOver") && view.soul) recordBonds(view.soul.bonds, storage);
 	const env = achEnv(opts.content, storage);
 	const ending = view.gameOver ? (view.gameOver.ending ?? (view.gameOver.kind === "victory" ? null : view.gameOver.kind)) : null;
 	for (const d of evaluate(moment, view, env, defs)) if (recordAchievement(d.id, view.day, ending, storage).first) out.won.push(d);
-	if (moment !== "lessonEnd")
-		for (const p of PORTRAITS) if (p.when === moment && !env.profile.offDuty[p.advisor].casual && p.check(view) && recordOffDuty(p.advisor, storage)) out.portraits.push(p.advisor);
 	out.bed = !bedBefore && bedComplete(loadProfile(storage), defs);
 	return out;
 }

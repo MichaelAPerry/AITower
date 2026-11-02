@@ -101,7 +101,7 @@ function runFuzz(seed: number, total: number): { hash: string; accepted: number;
 	content.events = [
 		{ id: "fa", category: "ministry", title: "A", body: "a", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "a", choices: [
 			{ id: "a", label: "A", hint: "", outcome: "", effects: [{ type: "cash", amount: -1000 }, { type: "failRacks", count: 1 }] },
-			{ id: "b", label: "B", hint: "", outcome: "", effects: [{ type: "bond", advisor: "luci", amount: 3 }, { type: "ambient", deltaC: 4, durationTicks: 90 }, { type: "spareParts", count: -2 }] },
+			{ id: "b", label: "B", hint: "", outcome: "", effects: [{ type: "ambient", deltaC: 4, durationTicks: 90 }, { type: "spareParts", count: -2 }] },
 		] },
 		{ id: "fb", category: "environmental", title: "B", body: "b", weight: 1, minTier: 1, cooldownDays: 0, advisor: "cass", recommended: "b", choices: [
 			{ id: "a", label: "A", hint: "", outcome: "", effects: [{ type: "gridCap", factor: 0.5, durationTicks: 50 }, { type: "payout", factor: 1.5, durationTicks: 200 }] },
@@ -142,7 +142,6 @@ function runFuzz(seed: number, total: number): { hash: string; accepted: number;
 			if (i % 200 === 199) {
 				// The live state must always be a loadable save and numerically sane.
 				expect(Number.isFinite(sim.state.cash)).toBe(true);
-				for (const b of Object.values(sim.state.bonds)) expect(b >= 0 && b <= 100).toBe(true);
 				expect(() => simFromSnapshot(content, JSON.parse(JSON.stringify(sim.snapshot())))).not.toThrow();
 			}
 		}

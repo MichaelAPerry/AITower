@@ -89,7 +89,7 @@ describe("events.json", () => {
 			expect(new Set(e.choices.map((c) => c.id)).size, e.id).toBe(e.choices.length);
 			expect(new Set(e.choices.map((c) => c.hint)).size, e.id).toBe(e.choices.length);
 			expect(e.body.split("\n\n").length, e.id).toBeLessThanOrEqual(3);
-			for (const c of e.choices) expect(c.effects.length, `${e.id}/${c.id}`).toBeGreaterThan(0);
+			for (const c of e.choices) if (c.effects.length === 0) expect(c.hint, `${e.id}/${c.id}`).toMatch(/nothing/);
 		}
 	});
 
@@ -113,7 +113,6 @@ describe("events.json", () => {
 							break;
 						case "affinity":
 						case "seal":
-						case "bond":
 						case "sp":
 							break; // the hint names the lean in words; the Soul's effects are secret
 						case "gridCap":
@@ -179,7 +178,7 @@ describe("events.json", () => {
 		const tiers = db.balance.tiers.pflops.length;
 		for (const e of db.events) {
 			expect(e.minTier, e.id).toBeLessThanOrEqual(tiers);
-			for (const c of e.choices) for (const f of c.effects) if (f.type === "bond" || f.type === "seal") expect(Math.abs(f.amount), e.id).toBeLessThanOrEqual(12);
+			for (const c of e.choices) for (const f of c.effects) if (f.type === "seal") expect(Math.abs(f.amount), e.id).toBeLessThanOrEqual(12);
 		}
 	});
 });
@@ -227,7 +226,6 @@ describe("validateContent: events", () => {
 		const fx = (db: ContentDB): EventEffect[] => first(db).choices[0].effects;
 		expect(broken((db) => fx(db).push({ type: "teleport" } as never))).toMatch(/unknown effect type/);
 		expect(broken((db) => fx(db).push({ type: "cash", amount: Number.NaN }))).toMatch(/amount/);
-		expect(broken((db) => fx(db).push({ type: "bond", advisor: "mel", amount: 500 }))).toMatch(/amount/);
 		expect(broken((db) => fx(db).push({ type: "standing", amount: 1 } as never))).toMatch(/unknown effect type/);
 		expect(broken((db) => fx(db).push({ type: "affinity", path: "nope" as never, amount: 3 }))).toMatch(/unknown path/);
 		expect(broken((db) => fx(db).push({ type: "affinity", path: "biotech", amount: -1 }))).toMatch(/amount/);

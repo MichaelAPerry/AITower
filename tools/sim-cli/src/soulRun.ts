@@ -36,12 +36,11 @@ const r1 = (n: number): string => n.toFixed(1).padStart(7);
 
 export function rowOf(v: SimView): string {
 	const s = v.soul;
-	const b = s.bonds;
 	const rung = (t: AscensionPath): number => s.trees[t].rung;
-	return `${String(v.day).padStart(3)} ${String(v.tier).padStart(4)} ${r1(v.pflops)} ${r1(s.sp.synthetic)} ${r1(s.sp.biotech)} ${r1(s.sp.greentech)} ${r1(s.seal.greentech).slice(1)} ${r1(s.seal.biotech).slice(1)}  ${[b.cass, b.bea, b.mel, b.luci].map((x) => String(Math.round(x)).padStart(3)).join("/")}  ${rung("synthetic")}/${rung("biotech")}/${rung("greentech")} gs=${v.greenScore.toFixed(2)} ${v.gameOver ? `GAME OVER ${v.gameOver.kind} ${v.gameOver.ending ?? ""}` : ""}`;
+	return `${String(v.day).padStart(3)} ${String(v.tier).padStart(4)} ${r1(v.pflops)} ${r1(s.sp.synthetic)} ${r1(s.sp.biotech)} ${r1(s.sp.greentech)} ${r1(s.seal.greentech).slice(1)} ${r1(s.seal.biotech).slice(1)} ${rung("synthetic")}/${rung("biotech")}/${rung("greentech")} gs=${v.greenScore.toFixed(2)} ${v.gameOver ? `GAME OVER ${v.gameOver.kind} ${v.gameOver.ending ?? ""}` : ""}`;
 }
 
-export const HEADER = "day tier     PF  SPsyn  SPbio  SPgrn sealG sealB  bonds(c/b/m/l)  rungs(s/b/g)";
+export const HEADER = "day tier     PF  SPsyn  SPbio  SPgrn sealG sealB  rungs(s/b/g)";
 
 /** One scripted game of `tree` for up to `days` days. */
 export function scriptedRun(content: ContentDB, scenario: string, tree: Tree, seed: number, days: number, onRow?: (row: string) => void, opts: { noClean?: boolean } = {}): TreeRun {

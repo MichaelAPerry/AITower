@@ -163,8 +163,6 @@ function soulView(state: SimState, content: ContentDB): SoulView {
 		spTarget: s.spTarget,
 		seal: { biotech: sealOf(state, "biotech"), greentech: sealOf(state, "greentech") },
 		sealMax: s.sealMax,
-		bonds: { ...state.bonds },
-		bondEpilogue: s.bondEpilogue,
 		trees,
 		green: {
 			score: state.greenScore,

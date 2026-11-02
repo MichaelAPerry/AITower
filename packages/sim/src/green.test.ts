@@ -546,7 +546,7 @@ describe("snapshot v6", () => {
 	};
 
 	it("is the current version", () => {
-		expect(SNAPSHOT_VERSION).toBe(16);
+		expect(SNAPSHOT_VERSION).toBe(17);
 		expect(base().snapshot().version).toBe(SNAPSHOT_VERSION);
 	});
 
@@ -614,7 +614,6 @@ describe("snapshot v6", () => {
 		expect(bad((s) => (s.automation.research.branches = ["nope"]))).toMatch(/^Invalid save:.*automation/);
 		expect(bad((s) => (s.automation = null))).toMatch(/^Invalid save:.*automation/);
 		expect(bad((s) => (s.sp.synthetic = -1))).toMatch(/^Invalid save:.*sp/);
-		expect(bad((s) => (s.bonds.luci = 101))).toMatch(/^Invalid save:.*bonds/);
 		expect(bad((s) => delete s.rng.weather)).toMatch(/^Invalid save:.*rng/);
 		expect(bad((s) => (s.metrics.ringGreenKwh.v = [1, 2]))).toMatch(/^Invalid save:/);
 		expect(bad((s) => (s.gameOver = { kind: "victory", tick: 1, ending: "singularity" }))).toBe("");
