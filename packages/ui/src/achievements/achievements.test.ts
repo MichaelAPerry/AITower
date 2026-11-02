@@ -58,8 +58,8 @@ const def = (id: string): AchievementDef => ACHIEVEMENTS.find((d) => d.id === id
 const met = (id: string, v: SimView, e: AchEnv = env()): boolean => def(id).check(v, e);
 
 describe("the table", () => {
-	it("is the 16 rows of the spec, each with a check and a moment", () => {
-		expect(ACHIEVEMENT_COUNT).toBe(16);
+	it("is the 20 rows of the spec (16 plus the four off-duty upgrades), each with a check and a moment", () => {
+		expect(ACHIEVEMENT_COUNT).toBe(20);
 		expect(ACHIEVEMENTS.map((a) => a.id)).toEqual(achievementContent.achievements.map((a) => a.id));
 		const moments: Record<string, string> = {};
 		for (const a of ACHIEVEMENTS) moments[a.id] = a.when;
@@ -68,6 +68,7 @@ describe("the table", () => {
 			lvl_five: "dayClose", rung_top: "dayClose", fast_win: "gameOver", clean_hands: "gameOver", open_hands: "gameOver",
 			cash_deep: "dayClose", books_clean: "gameOver", perfect_qtr: "quarterReport", calm_month: "dayClose",
 			les_done: "lessonEnd", heard_out: "gameOver",
+			ah_bea: "decisionResolved", ah_mel: "decisionResolved", ah_cass: "decisionResolved", ah_luci: "decisionResolved",
 		});
 	});
 
@@ -76,12 +77,13 @@ describe("the table", () => {
 		for (const a of ACHIEVEMENTS) expect(a.name && a.text, a.id).toBeTruthy();
 	});
 
-	it("every row has a cell of the achievements sheet, each cell used once, all inside the grid", () => {
+	it("every row has a cell of the achievements sheet, each cell used once (the four off-duty rows reuse cells), all inside the grid", () => {
 		const sheet = ICON_SHEETS.achievements;
 		expect(sheet).toMatchObject({ cols: 6, rows: 3 });
 		const cells = ACHIEVEMENTS.map((a) => a.icon);
+		const own = ACHIEVEMENTS.filter((a) => !a.id.startsWith("ah_")).map((a) => a.icon);
 		for (const c of cells) expect(c && typeof c === "object" && sheetCellStyle(c, 48), String(c)).not.toBeNull();
-		expect(new Set(cells.map((c) => JSON.stringify(c))).size).toBe(ACHIEVEMENTS.length);
+		expect(new Set(own.map((c) => JSON.stringify(c))).size).toBe(own.length);
 	});
 });
 

@@ -121,8 +121,8 @@ describe("multiple lifts", () => {
 	});
 
 	it("a nearer shaft that has no power is not routed through: bots use the powered one", () => {
-		const sim = tower([{ x: 40, min: -1, max: 8 }], 8, 3);
-		sim.submit({ type: "demolish", floor: 0, x: 24 }); // the starter lift: only the far shaft at x=40 is alive
+		const sim = tower([{ x: 38, min: -1, max: 8 }], 8, 3);
+		sim.submit({ type: "demolish", floor: 0, x: 24 }); // the starter lift: only the far shaft at x=38 is alive
 		sim.step();
 		const dead = deadShaft(sim, 20, 8);
 		expect(dead?.powerNet).toBe(-1);

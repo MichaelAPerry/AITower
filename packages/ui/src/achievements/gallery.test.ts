@@ -17,11 +17,11 @@ const all = (s: ReturnType<typeof memory>, skip?: string) => {
 };
 
 describe("the list", () => {
-	it("a new profile: 0 / 16, hidden rows read ??? and the other way this ends", () => {
+	it("a new profile: 0 / 20, hidden rows read ??? and the other way this ends", () => {
 		const p = loadProfile(memory());
-		expect(counter(p)).toBe("0 / 16");
+		expect(counter(p)).toBe("0 / 20");
 		const rows = listRows(p);
-		expect(rows).toHaveLength(16);
+		expect(rows).toHaveLength(20);
 		const hidden = rows.filter((r) => r.hidden);
 		expect(hidden.map((r) => r.id)).toEqual(["end_absorbed", "end_bankrupt"]);
 		for (const r of hidden) expect([r.name, r.text]).toEqual([HIDDEN_NAME, HIDDEN_TEXT]);
@@ -36,17 +36,17 @@ describe("the list", () => {
 		recordAchievement("end_bankrupt", 3, "bankrupt", s);
 		const p = loadProfile(s);
 		const rows = listRows(p);
-		expect(counter(p)).toBe("3 / 16");
+		expect(counter(p)).toBe("3 / 20");
 		expect(rows.find((r) => r.id === "end_lattice")).toMatchObject({ earned: true, when: "Day 28 · The Lattice" });
 		expect(rows.find((r) => r.id === "cash_deep")).toMatchObject({ earned: true, when: "Day 12" });
 		expect(rows.find((r) => r.id === "end_bankrupt")).toMatchObject({ hidden: false, name: "Notice of Termination", when: "Day 3 · Bankrupt" });
 		expect(rows.find((r) => r.id === "end_absorbed")?.hidden).toBe(true);
 	});
 
-	it("counts 16 / 16 when everything is earned", () => {
+	it("counts 20 / 20 when everything is earned", () => {
 		const s = memory();
 		all(s);
-		expect(counter(loadProfile(s))).toBe("16 / 16");
+		expect(counter(loadProfile(s))).toBe("20 / 20");
 	});
 });
 
@@ -133,10 +133,10 @@ describe("the ending screen line", () => {
 });
 
 describe("the page", () => {
-	it("renders the list with 0 / 16 and the storage note", () => {
+	it("renders the list with 0 / 20 and the storage note", () => {
 		const html = renderToStaticMarkup(createElement(AchievementsPane));
-		expect(html).toContain("0 / 16");
-		expect(html.match(/class="ach-row /g)).toHaveLength(16);
+		expect(html).toContain("0 / 20");
+		expect(html.match(/class="ach-row /g)).toHaveLength(20);
 		expect(html).toContain("There is another way this ends.");
 		expect(html).toContain("Export to file keeps it");
 	});

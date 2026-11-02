@@ -81,6 +81,26 @@
    "id": "heard_out",
    "name": "Heard Her Out",
    "text": "See an ending epilogue from each of the four advisors, across any runs."
+  },
+  {
+   "id": "ah_bea",
+   "name": "Green Thumb",
+   "text": "Buy Bea's fern the big self-watering pot."
+  },
+  {
+   "id": "ah_mel",
+   "name": "Fish Person",
+   "text": "Buy Mel's fish the bio-enhanced tank."
+  },
+  {
+   "id": "ah_cass",
+   "name": "Barista Bonus",
+   "text": "Buy Cass the cappuccino machine."
+  },
+  {
+   "id": "ah_luci",
+   "name": "Fully Licensed",
+   "text": "Buy Luci's office its licence and certificate."
   }
  ],
  "offDuty": {

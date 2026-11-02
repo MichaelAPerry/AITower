@@ -32,13 +32,13 @@ const streak = (s: SimImpl, item: "fern" | "tank" | "coffee" | "book"): number =
 
 describe("the four spots", () => {
 	it("stand where the owner put them and never overlap a facility, a lift or each other in any scenario", () => {
-		expect(AFTER_HOURS_SPOTS.map((p) => [p.id, p.advisor, p.floor])).toEqual([["tank", "mel", -1], ["fern", "bea", 1], ["coffee", "cass", 1], ["book", "luci", 2]]);
+		expect(AFTER_HOURS_SPOTS.map((p) => [p.id, p.advisor, p.floor])).toEqual([["tank", "mel", -1], ["fern", "bea", 0], ["coffee", "cass", 0], ["book", "luci", -1]]);
 		// The fern and the coffee machine are on opposite sides of the lobby.
 		const fern = AFTER_HOURS_SPOTS.find((p) => p.id === "fern");
 		const coffee = AFTER_HOURS_SPOTS.find((p) => p.id === "coffee");
 		expect((fern?.x ?? 99) + 20).toBeLessThan(coffee?.x ?? 0);
 		const c = loadContent();
-		for (const id of ["starter", "brownfield"]) {
+		for (const id of ["starter", "brownfield", "sandbox", "lesson_earn"]) {
 			const s = createSim(c, id, 1) as SimImpl;
 			for (const p of AFTER_HOURS_SPOTS) {
 				for (let x = p.x; x < p.x + p.width; x++) {
@@ -47,47 +47,38 @@ describe("the four spots", () => {
 					expect(s.state.lifts.find((l) => l.x === x && p.floor >= l.floorMin && p.floor <= l.floorMax), `${id} ${p.id} lift`).toBeUndefined();
 				}
 				expect(p.x + p.width).toBeLessThanOrEqual(s.state.width);
+				for (let x = p.x; x < p.x + p.width; x++) expect(s.state.slab[(p.floor - s.state.floorMin) * s.state.width + x], `${id} ${p.id} slab x=${x}`).toBe(1);
 			}
 		}
 	});
 
 	it("cannot be built over: a facility or a lift on a spot is refused", () => {
 		const s = sim();
-		expect(afterHoursBlock(s.state, 1, 4, 4)).toMatch(/not for building/);
-		expect(afterHoursBlock(s.state, 1, 10, 12)).toBeNull();
-		expect(afterHoursBlock(s.state, 2, 38, 38)).not.toBeNull();
-		// Lessons and the sandbox have no spots.
-		expect(afterHoursBlock({ scenarioId: "sandbox" }, 1, 4, 4)).toBeNull();
-		expect(afterHoursBlock({ scenarioId: "lesson_earn" }, 1, 4, 4)).toBeNull();
+		expect(afterHoursBlock(s.state, 0, 4, 4)).toMatch(/not for building/);
+		expect(afterHoursBlock(s.state, 0, 10, 12)).toBeNull();
+		expect(afterHoursBlock(s.state, -1, 32, 32)).not.toBeNull();
+		// Every game mode has the spots, the sandbox and lessons too.
+		expect(afterHoursBlock({ scenarioId: "sandbox" }, 0, 4, 4)).not.toBeNull();
+		expect(afterHoursBlock({ scenarioId: "lesson_earn" }, 0, 4, 4)).not.toBeNull();
 		s.state.cash = 1e9;
 		const fern = AFTER_HOURS_SPOTS.find((p) => p.id === "fern");
-		const r = s.canBuild({ type: "place", defId: "crah_unit", floor: 1, x: fern?.x ?? 4 });
+		const r = s.canBuild({ type: "place", defId: "crah_unit", floor: 0, x: fern?.x ?? 4 });
 		expect(r.ok).toBe(false);
 		const tank = AFTER_HOURS_SPOTS.find((p) => p.id === "tank");
-		expect(s.canBuild({ type: "place", defId: "crah_unit", floor: -1, x: tank?.x ?? 36 }).ok).toBe(false);
+		expect(s.canBuild({ type: "place", defId: "crah_unit", floor: -1, x: tank?.x ?? 31 }).ok).toBe(false);
 		// A lift through the coffee corner is refused as well.
-		const cx = AFTER_HOURS_SPOTS.find((p) => p.id === "coffee")?.x ?? 36;
+		const cx = AFTER_HOURS_SPOTS.find((p) => p.id === "coffee")?.x ?? 42;
 		const lift = s.canBuild({ type: "buildLift", x: cx, floorMin: 0, floorMax: 1 });
 		expect(lift.ok).toBe(false);
 		// And another tile of the same floor is fine.
-		expect(s.canBuild({ type: "place", defId: "crah_unit", floor: 1, x: 22 }).ok).toBe(true);
+		expect(s.canBuild({ type: "place", defId: "crah_unit", floor: 0, x: 22 }).ok).toBe(true);
 	});
 
-	it("show in the view: B1, G-floor lobby corners are built; F2 appears only once a floor is built there", () => {
-		const s = sim();
-		const items = s.view().afterHours.items;
-		expect(items.find((i) => i.id === "tank")?.visible).toBe(true);
-		expect(items.find((i) => i.id === "fern")?.visible).toBe(true);
-		expect(items.find((i) => i.id === "coffee")?.visible).toBe(true);
-		expect(items.find((i) => i.id === "book")?.visible).toBe(false);
-		expect(s.submit({ type: "clickAfterHours", item: "book" }).ok).toBe(false); // no floor built there yet
-		s.step();
-		expect(s.view().afterHours.items.find((i) => i.id === "book")?.streak).toBe(0);
-		s.state.cash = 1e9;
-		const book = AFTER_HOURS_SPOTS.find((p) => p.id === "book");
-		expect(s.submit({ type: "buildSlab", floor: 2, x0: book?.x ?? 36, x1: (book?.x ?? 36) + (book?.width ?? 4) - 1 })).toEqual({ ok: true });
-		s.step();
-		expect(s.view().afterHours.items.find((i) => i.id === "book")?.visible).toBe(true);
+	it("show in the view in every mode, with no extra floor built", () => {
+		for (const id of ["starter", "brownfield", "sandbox"]) {
+			const s = sim(id);
+			expect(s.view().afterHours.items.map((i) => i.visible), id).toEqual([true, true, true, true]);
+		}
 	});
 });
 
@@ -129,12 +120,10 @@ describe("the streak", () => {
 		expect(s.state.cash).toBeGreaterThan(cash - 100000);
 	});
 
-	it("is refused in a lesson, in a sandbox and while a decision is open", () => {
+	it("is refused while a decision is open", () => {
 		const s = sim("sandbox");
-		goTo(s, 1);
-		s.submit({ type: "clickAfterHours", item: "fern" });
-		s.step();
-		expect(streak(s, "fern")).toBe(0);
+		click(s, "fern", 1);
+		expect(streak(s, "fern")).toBe(1);
 		const t = sim();
 		click(t, "fern", 1);
 		click(t, "fern", 2);
