@@ -192,3 +192,24 @@ Only the strings Claude wrote: the title-menu button, its subtitle, and the head
 - [ach.ui.credits_detail] Label: who made it · quotes
 - [ach.ui.credits_quotes_head] Label: Quotes
 - Music credit line "Music: Perry, made with Suno." and the seven song titles (`packages/ui/src/title/titleMusic.ts`, shown in `CreditsPane.tsx`). RESOLVED (owner decision): song titles stay exactly as tagged in the files: "まだ見ぬ世界へ" (title), "君の明日が晴れますように" (Garden), "銀のホーム" (Lattice), "雨のしずく" (Flesh), "深夜のゲーム" (tower loop), "夕陽のメロディ" (warm scene song), "Noctune FM" (quiet scene song). The owner's typed variants ("まだない明日へ", "銀のホームを") are not used.
+
+## Inspection cards: Luci's quips
+
+Each inspection card (a rack or other facility, a bot, the lift, and the build inspector) shows Luci's face and one short line. The line is picked from the pool for what is inspected and its state, the same line each time for the same thing. Pools with no line of their own use the "fine" line. Stored as data in `packages/ui/src/components/inspectQuips.ts` (placeholder).
+
+- `quip.rack.fine.1` (packages/ui/src/components/inspectQuips.ts): Every busy rack is money. Keep it busy.
+- `quip.rack.fine.2` (packages/ui/src/components/inspectQuips.ts): A rack earning its keep. I like that in a rack.
+- `quip.rack.fine.3` (packages/ui/src/components/inspectQuips.ts): That one pays for its own power. Mostly.
+- `quip.rack.off` (packages/ui/src/components/inspectQuips.ts): An idle rack earns nothing. Find it a client.
+- `quip.rack.trouble.1` (packages/ui/src/components/inspectQuips.ts): That rack is costing us. Find out why.
+- `quip.rack.trouble.2` (packages/ui/src/components/inspectQuips.ts): A rack that isn't computing isn't paying.
+- `quip.power.fine` (packages/ui/src/components/inspectQuips.ts): Power is the biggest bill. Watch it.
+- `quip.power.trouble` (packages/ui/src/components/inspectQuips.ts): Short on power, and everything downstream pays for it.
+- `quip.cooling.fine` (packages/ui/src/components/inspectQuips.ts): Cool racks run fast racks. Fast racks pay.
+- `quip.cooling.trouble` (packages/ui/src/components/inspectQuips.ts): If this fails the racks slow down. So does the money.
+- `quip.logistics.fine` (packages/ui/src/components/inspectQuips.ts): Boring parts. Expensive if they go missing.
+- `quip.logistics.trouble` (packages/ui/src/components/inspectQuips.ts): When the spares run out, repairs wait. So do we.
+- `quip.bot.fine` (packages/ui/src/components/inspectQuips.ts): A bot on the job. Cheaper than a person.
+- `quip.bot.trouble` (packages/ui/src/components/inspectQuips.ts): A flat battery earns nothing. Charge it.
+- `quip.lift.fine` (packages/ui/src/components/inspectQuips.ts): The lift moves parts and bots. Don't let it stall.
+- `quip.lift.trouble` (packages/ui/src/components/inspectQuips.ts): A stuck lift strands the bots. Look into it.

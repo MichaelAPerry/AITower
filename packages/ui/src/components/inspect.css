@@ -1,0 +1,83 @@
+/* Inspection cards (Inspector and BuildInspector) in the current look: flat glass, M PLUS Rounded 1c, the 16-32px scale.
+   Text never shrinks: long lines wrap and the card body scrolls. */
+.aitower-hud .ui-inspector .ui-panel-title,
+.aitower-hud .bld-insp .bld-kicker {
+	padding: 10px 14px;
+	font: 600 var(--fs-label) / 1.2 var(--f-body);
+	letter-spacing: 0.06em;
+	color: var(--text-dim);
+	text-transform: uppercase;
+	border-bottom: 1px solid var(--panel-edge);
+	box-shadow: none;
+}
+.aitower-hud .bld-insp .bld-kicker {
+	margin: -14px -14px 0;
+}
+.aitower-hud .ui-inspector .ui-panel-title * {
+	font-family: var(--f-body);
+}
+.aitower-hud .ui-inspector .ui-insp-body {
+	padding: 12px 14px 14px;
+	gap: 12px;
+	font: var(--fs-body) / 1.35 var(--f-body);
+	scrollbar-color: var(--panel-edge) transparent;
+}
+.aitower-hud .ui-inspector .ui-insp-name > span:first-child,
+.aitower-hud .bld-insp .bld-h {
+	font: 600 var(--fs-num) / 1.15 var(--f-body);
+	letter-spacing: 0;
+	color: var(--text);
+}
+.aitower-hud .ui-inspector .ui-insp-name > span:last-child {
+	font: var(--fs-label) / 1.3 var(--f-body);
+	color: var(--text-dim);
+}
+.aitower-hud .ui-inspector .ui-section,
+.aitower-hud .ui-inspector .ui-retrofit,
+.aitower-hud .ui-inspector .ui-upgrade {
+	margin: 0;
+	padding: 10px 12px;
+	background: color-mix(in srgb, var(--bg) 60%, transparent);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius);
+	box-shadow: none;
+	font-family: var(--f-body);
+}
+.aitower-hud .ui-inspector .ui-section-title {
+	font: 600 var(--fs-label) / 1.2 var(--f-body);
+	letter-spacing: 0.06em;
+	color: var(--text-dim);
+	border-bottom: 1px solid var(--panel-edge);
+}
+.aitower-hud .ui-inspector .ui-insp-actions {
+	background: var(--panel);
+	border-top: 1px solid var(--panel-edge);
+	box-shadow: none;
+}
+.aitower-hud .ui-inspector .ui-insp-why {
+	font: var(--fs-small) / 1.4 var(--f-body);
+	border-radius: var(--radius-sm);
+}
+
+/* Luci: face on the left, her line wraps beside it. */
+.aitower-hud .insp-luci {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 8px 12px 8px 8px;
+	border: 1px solid var(--adv);
+	border-radius: var(--radius);
+	background: color-mix(in srgb, var(--adv) 8%, transparent);
+	flex: none;
+}
+.aitower-hud .insp-luci .adv-portrait {
+	flex: none;
+}
+.aitower-hud .insp-quip {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+	font: var(--fs-body) / 1.35 var(--f-body);
+	color: var(--text);
+	overflow-wrap: anywhere;
+}

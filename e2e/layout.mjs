@@ -278,6 +278,22 @@ async function run(url) {
 				const xb = await x.boundingBox();
 				if (!xb || xb.width < 24 || xb.height < 24) all.push(`${sz.name} inspection: dismiss button missing or tiny (${JSON.stringify(xb)})`);
 				await page.screenshot({ path: `${SHOTS}/inspection-${sz.w}x${sz.h}.png` });
+				if (!(await page.locator(".ui-inspector [data-insp-quip] img").first().isVisible())) all.push(`${sz.name} inspection: Luci's face missing`);
+				if (!((await page.locator(".ui-inspector .insp-quip").first().textContent()) ?? "").trim()) all.push(`${sz.name} inspection: Luci's quip missing`);
+				// Other kinds of inspection (one facility per category), for the screenshots.
+				const others = await page.evaluate(() => {
+					const { view } = window.aitower.store.get();
+					const c = window.aitower.content;
+					const seen = new Set();
+					return view.facilities.filter((f) => { const k = c.facilities[f.defId]?.category; if (!k || seen.has(k)) return false; seen.add(k); return true; }).map((f) => [f.id, c.facilities[f.defId].category]);
+				});
+				for (const [id, cat] of others.slice(0, 3)) {
+					await page.evaluate((i) => window.aitower.store.setSelection({ kind: "facility", id: i }), id);
+					await page.waitForTimeout(250);
+					await page.screenshot({ path: `${SHOTS}/inspection-${cat}-${sz.w}x${sz.h}.png` });
+				}
+				await page.evaluate((id) => window.aitower.store.setSelection({ kind: "facility", id }), fid);
+				await page.waitForTimeout(250);
 				await x.click();
 				await page.locator(".ui-inspector").waitFor({ state: "detached" });
 				assert((await page.evaluate(() => window.aitower.store.get().selection)) === null, "dismiss cleared the selection");

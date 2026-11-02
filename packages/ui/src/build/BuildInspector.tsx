@@ -8,6 +8,8 @@ import { OutputBar, TierMark } from "./TierMark";
 import { findItem, itemForTool } from "./catalog";
 import { upgradeCost, upgradesTo } from "@aitower/content";
 import { CATEGORY_LABEL, lockReason, type Stat } from "./plain";
+import { LuciQuip } from "../components/LuciQuip";
+import { pickQuip } from "../components/inspectQuips";
 import { SealNotes } from "../soul/SealNotes";
 
 function StatRow({ s }: { s: Stat }) {
@@ -70,6 +72,7 @@ export function BuildInspector({ store, content, state, ui, setUi }: PanelProps)
 					<PixelIcon name="close" />
 				</button>
 			</div>
+			<LuciQuip text={pickQuip(item.category === "structure" || item.category === "supplies" ? "logistics" : item.category, missing > 0 ? "trouble" : "fine", item.key)} />
 			{item.tier && !item.tier.isPath && <TierMark t={item.tier} />}
 			<h2 className="bld-h">{item.name}</h2>
 			{lock && <p className="bld-lock-why">{lock}</p>}

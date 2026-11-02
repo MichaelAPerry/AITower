@@ -6,9 +6,11 @@ import { fmtDuration, fmtEnergy, fmtMoney, fmtPct, fmtPflops, fmtPower, fmtTemp 
 import { pushNotice } from "../notices";
 import { bioWords, facilityName, tissueState, traitInfo, organoidBand } from "../bio/bio";
 import { rackProblem } from "../objective/diagnose";
-import { FormLabel, Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
+import { Icon, Meter, Pill, Row, Swatch, statusLabel, statusTone, Toggle } from "./common";
 import type { PanelProps } from "./context";
 import { Dial } from "./Dial";
+import { pickQuip, quipState } from "./inspectQuips";
+import { LuciQuip } from "./LuciQuip";
 import { PixelIcon } from "../icons/PixelIcon";
 import { TREE_ICON } from "../icons/pixelIcons";
 import { TREE_COLOR, TREE_LONG } from "../soul/soul";
@@ -258,8 +260,10 @@ function FacilityInspector({ store, content, state, setUi, f }: PanelProps & { f
 	const send = (r: ReturnType<typeof store.dispatch>): void => {
 		if (!r.ok) pushNotice({ text: r.reason, severity: "warn", key: `insp:${r.reason}` });
 	};
+	const quip = pickQuip(def?.category ?? "rack", quipState(f.status, !!problem), f.id);
 	return (
 		<>
+			<LuciQuip text={quip} />
 			<div className="ui-insp-head">
 				{def && <Swatch color={def.color} accent={def.accent} size={28} />}
 				<div className="ui-insp-name">
@@ -366,6 +370,7 @@ export function Inspector(props: PanelProps) {
 			const target = wo && view.facilities.find((f) => f.id === wo.facilityId);
 			body = (
 				<>
+					<LuciQuip text={pickQuip("bot", b.battery < 0.2 ? "trouble" : "fine", b.id)} />
 					<div className="ui-insp-head">
 						<span className="ui-botchip" style={{ background: def?.color ?? "var(--steel)" }} />
 						<div className="ui-insp-name">
@@ -407,6 +412,7 @@ export function Inspector(props: PanelProps) {
 		if (l) {
 			body = (
 				<>
+					<LuciQuip text={pickQuip("lift", "fine", l.id)} />
 					<div className="ui-insp-head">
 						<span className="ui-item-icon ic-lift">
 							<Icon name="lift" size={16} />
@@ -446,7 +452,7 @@ export function Inspector(props: PanelProps) {
 	return (
 		<aside className="ui-inspector ui-panel">
 			<div className="ui-panel-title">
-				<FormLabel>Details</FormLabel>
+				<span className="insp-title">Details</span>
 				<button type="button" className="ui-btn ui-icon-btn ui-insp-x" data-insp-close aria-label="Close details" onClick={() => store.setSelection(null)} title="Close (Esc)">
 					<PixelIcon name="close" />
 				</button>
