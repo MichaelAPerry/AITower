@@ -14,6 +14,8 @@ import { fileURLToPath } from "node:url";
 const root = fileURLToPath(new URL("..", import.meta.url));
 const SHOTS = process.env.E2E_SHOTS ?? "/tmp/shots-switches";
 mkdirSync(SHOTS, { recursive: true });
+const AUDIT_SHOTS = process.env.E2E_AUDIT_SHOTS ?? "/tmp/shots-audit";
+mkdirSync(AUDIT_SHOTS, { recursive: true });
 const PORT = Number(process.env.E2E_PORT ?? 4173);
 const SIZES = [
 	// `full` sizes also run the catalog, a second drawer and the lesson with its steps toggled and a wide drawer over it.
@@ -281,6 +283,62 @@ async function run(url) {
 				await x.click();
 				await page.locator(".ui-inspector").waitFor({ state: "detached" });
 				assert((await page.evaluate(() => window.aitower.store.get().selection)) === null, "dismiss cleared the selection");
+			}
+			// Quarterly inspection: on screen, no overlaps, Luci's face and quip, and the Close button dismisses it.
+			// The real store: step the sim until it files a quarterly report. Story scenes and decision cards that stop a step are played through.
+			for (let n = 0; n < 80 && (await page.evaluate(() => window.aitower.store.get().view.reports.length)) === 0; n++) {
+				await page.evaluate(() => {
+					window.aitower.store.advance(1440);
+					window.aitower.store.publish(performance.now(), true);
+				});
+				if ((await page.locator(".vn-stage").count()) > 0) {
+					await page.locator(".vn-stage").focus();
+					for (let k = 0; k < 80 && (await page.locator(".vn-stage").count()) > 0; k++) {
+						await page.keyboard.press("Enter");
+						await page.waitForTimeout(60);
+					}
+				}
+				if ((await page.locator(".adv-card").count()) > 0) {
+					await page.locator(".adv-card button").first().click();
+					await page.waitForTimeout(100);
+				}
+			}
+			assert((await page.evaluate(() => window.aitower.store.get().view.reports.length)) > 0, "a quarterly report was filed");
+			await page.locator(".ui-audit").waitFor();
+			await page.waitForTimeout(350);
+			{
+				const m = await page.evaluate(() => {
+					const sel = (s) => document.querySelector(s)?.getBoundingClientRect() ?? null;
+					const q = document.querySelector(".ui-audit-quip");
+					return {
+						vw: window.innerWidth,
+						vh: window.innerHeight,
+						sheet: sel(".ui-audit"),
+						face: sel(".ui-audit .adv-portrait img"),
+						faceOk: !!document.querySelector(".ui-audit .adv-portrait img")?.complete,
+						quip: sel(".ui-audit-quip"),
+						quipText: q ? q.textContent.replace(/^Luci/, "").trim() : "",
+						close: sel("[data-audit-close]"),
+						parts: [".ui-audit-head", ".ui-audit-title", ".ui-audit-luci", ".ui-audit-main", ".ui-audit-outcome", ".ui-audit-remark", ".ui-audit-acts"].map((s) => [s, sel(s)]),
+					};
+				});
+				const name = `${sz.name} inspection sheet`;
+				const s = m.sheet;
+				if (!s || s.left < -1 || s.top < -1 || s.right > m.vw + 1 || s.bottom > m.vh + 1) all.push(`${name}: not fully on screen (${JSON.stringify(s)})`);
+				if (!m.face || m.face.width < 48 || !m.faceOk) all.push(`${name}: Luci's face missing`);
+				if (m.quipText.length < 10) all.push(`${name}: no quip`);
+				if (!m.close || m.close.width < 24 || m.close.height < 24 || m.close.bottom > m.vh + 1) all.push(`${name}: Close button missing or off screen (${JSON.stringify(m.close)})`);
+				const parts = m.parts.filter(([, b]) => b);
+				for (let i = 0; i < parts.length; i++)
+					for (let j = i + 1; j < parts.length; j++) {
+						const a = parts[i][1];
+						const b = parts[j][1];
+						if (a.left < b.right - 1 && b.left < a.right - 1 && a.top < b.bottom - 1 && b.top < a.bottom - 1) all.push(`${name}: ${parts[i][0]} overlaps ${parts[j][0]}`);
+					}
+				if (m.face && m.quip && m.face.right > m.quip.left + 1) all.push(`${name}: face overlaps quip`);
+				await page.screenshot({ path: `${AUDIT_SHOTS}/inspection-${sz.w}x${sz.h}.png` });
+				await page.locator("[data-audit-close]").click();
+				await page.locator(".ui-audit").waitFor({ state: "detached" });
 			}
 			// Lesson 1: goal bar, steps (folded or open, then toggled) and a wide drawer opened over it.
 			await page.evaluate(() => {

@@ -106,7 +106,7 @@
 	transform: rotate(-4deg);
 }
 
-/* The sheet. Sits above the game but below the research sheet, the menu and the game-over notice. */
+/* The inspection sheet: the same glass panel as the drawers and the advisor strip. Above the game, below the menu. */
 .aitower-hud .ui-audit-backdrop {
 	position: absolute;
 	inset: 0;
@@ -114,48 +114,71 @@
 	pointer-events: auto;
 	display: grid;
 	place-items: center;
-	padding: 20px;
+	padding: 16px;
 	overflow: auto;
-	background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ink) 35%, transparent), color-mix(in srgb, var(--ink) 80%, transparent));
+	background: color-mix(in srgb, var(--bg) 70%, transparent);
 	animation: ui-menu-in 0.2s ease-out both;
 }
 .aitower-hud .ui-audit {
 	position: relative;
-	width: min(560px, 100%);
-	padding: 18px 28px 16px 36px;
-	color: var(--ink);
-	font: var(--fs-body)/1.35 var(--f-type);
-	background:
-		repeating-linear-gradient(180deg, transparent 0 23px, color-mix(in srgb, var(--beige) 35%, transparent) 23px 24px),
-		linear-gradient(90deg, transparent 0 20px, color-mix(in srgb, var(--red) 40%, var(--paper)) 20px 21px, transparent 21px),
-		var(--paper);
-	border: 1px solid var(--brass-dk);
-	box-shadow: 0 0 0 4px var(--housing), 0 16px 36px var(--shade-hard);
+	width: min(620px, 100%);
+	margin: auto;
+	padding: calc(var(--gap) * 2);
+	display: flex;
+	flex-direction: column;
+	gap: var(--gap);
+	color: var(--text);
+	font: var(--fs-body)/1.35 var(--f-body);
+	box-shadow: 0 0 0 1px var(--panel-edge), 0 16px 36px rgba(0, 0, 0, 0.5);
 }
 .aitower-hud .ui-audit-head {
 	display: flex;
 	justify-content: space-between;
 	flex-wrap: wrap;
-	gap: 6px 12px;
-	font: var(--fs-label)/1.2 var(--f-stamp);
-	letter-spacing: 0.08em;
-	color: var(--brass-dk);
+	gap: 4px 12px;
+	font: var(--fs-label)/1.2 var(--f-display);
+	letter-spacing: var(--tracking);
+	color: var(--accent);
 }
 .aitower-hud .ui-audit-title {
-	margin: 10px 0 8px;
-	font: 30px/1.1 var(--f-type);
-	letter-spacing: 0.06em;
-	text-decoration: underline;
-	text-decoration-color: var(--brass-dk);
+	margin: 0;
+	font: 700 var(--fs-big)/1.15 var(--f-body);
+	color: var(--text);
+}
+.aitower-hud .ui-audit-luci {
+	display: flex;
+	align-items: center;
+	gap: calc(var(--gap) * 1.5);
+}
+.aitower-hud .ui-audit-luci .adv-portrait {
+	--portrait: 96px;
+}
+.aitower-hud .ui-audit-quip {
+	flex: 1;
+	min-width: 0;
+	margin: 0;
+	padding: var(--gap) calc(var(--gap) * 1.5);
+	font: var(--fs-body)/1.35 var(--f-body);
+	background: color-mix(in srgb, var(--housing) 80%, transparent);
+	border: 1px solid var(--panel-edge);
+	border-left: 3px solid var(--accent-2);
+	border-radius: var(--radius-sm);
+	overflow-wrap: anywhere;
+}
+.aitower-hud .ui-audit-quip b {
+	display: block;
+	font: 600 var(--fs-label)/1.2 var(--f-display);
+	letter-spacing: var(--tracking);
+	color: var(--accent-2);
 }
 .aitower-hud .ui-audit-main {
 	display: flex;
-	gap: 18px;
+	gap: calc(var(--gap) * 2);
 	align-items: stretch;
 	flex-wrap: wrap;
 }
 .aitower-hud .ui-audit-figs {
-	flex: 1 1 250px;
+	flex: 1 1 280px;
 	margin: 0;
 	display: grid;
 	gap: 2px;
@@ -165,21 +188,22 @@
 	justify-content: space-between;
 	align-items: baseline;
 	gap: 10px;
-	border-bottom: 1px dotted var(--paper-ink);
+	border-bottom: 1px solid var(--panel-edge);
 }
 .aitower-hud .ui-audit-figs dt {
-	font: var(--fs-body)/1.3 var(--f-type);
-	color: var(--paper-ink);
+	font: var(--fs-small)/1.3 var(--f-body);
+	color: var(--text-dim);
 }
 .aitower-hud .ui-audit-figs dd {
 	margin: 0;
-	font: var(--fs-num)/1.1 var(--f-crt);
+	font: var(--fs-num)/1.1 var(--f-num);
+	text-align: right;
 }
 .aitower-hud .ui-audit .is-bad {
-	color: var(--red);
+	color: var(--bad);
 }
 .aitower-hud .ui-audit .is-good {
-	color: var(--green-dim);
+	color: var(--good);
 }
 .aitower-hud .ui-audit-grade {
 	flex: 0 0 120px;
@@ -190,17 +214,15 @@
 	gap: 8px;
 }
 .aitower-hud .ui-audit-gradelabel {
-	font: var(--fs-label)/1 var(--f-stamp);
-	letter-spacing: 0.12em;
-	color: var(--brass-dk);
+	font: var(--fs-label)/1 var(--f-display);
+	letter-spacing: var(--tracking);
+	color: var(--text-dim);
 }
 .aitower-hud .ui-audit-stamp {
 	font-size: 72px;
 	line-height: 1;
 	padding: 6px 22px 2px;
-	border-width: 5px;
-	outline-width: 2px;
-	outline-offset: 4px;
+	border-width: 4px;
 	letter-spacing: 0;
 }
 .aitower-hud .ui-audit-outcome {
@@ -208,20 +230,48 @@
 	justify-content: space-between;
 	flex-wrap: wrap;
 	gap: 4px 16px;
-	margin: 12px 0 4px;
-	padding: 6px 8px;
-	font: var(--fs-lead)/1.2 var(--f-type);
-	background: color-mix(in srgb, var(--amber) 9%, var(--paper));
-	border: 1px dashed var(--brass-dk);
+	margin: 0;
+	padding: 6px 10px;
+	font: var(--fs-lead)/1.2 var(--f-body);
+	background: color-mix(in srgb, var(--housing) 80%, transparent);
+	border: 1px solid var(--panel-edge);
+	border-radius: var(--radius-sm);
 }
 .aitower-hud .ui-audit-remark {
-	margin: 8px 0 4px;
+	margin: 0;
 	padding: 0 0 0 10px;
-	border-left: 3px solid var(--brass-dk);
-	font: italic var(--fs-body)/1.35 var(--f-type);
+	border-left: 3px solid var(--accent);
+	font: var(--fs-body)/1.35 var(--f-body);
+	color: var(--text-dim);
 }
 .aitower-hud .ui-audit-acts {
 	display: flex;
 	justify-content: flex-end;
-	margin-top: 10px;
+}
+.aitower-hud .ui-btn.ui-audit-close {
+	min-width: 140px;
+	min-height: var(--hit);
+	padding: 0 24px;
+	font: 600 var(--fs-lead)/1 var(--f-display);
+	letter-spacing: var(--tracking);
+	text-transform: none;
+	justify-content: center;
+	color: var(--bg);
+	background: var(--accent);
+	border: 2px solid var(--accent);
+	border-radius: var(--radius-sm);
+	box-shadow: none;
+	filter: none;
+	transform: none;
+	mask-image: none;
+	opacity: 1;
+}
+.aitower-hud .ui-btn.ui-audit-close:hover:not(:disabled),
+.aitower-hud .ui-btn.ui-audit-close:focus-visible {
+	color: var(--bg);
+	background: var(--text);
+	border-color: var(--text);
+	filter: none;
+	outline: 2px solid var(--accent-2);
+	outline-offset: 2px;
 }
