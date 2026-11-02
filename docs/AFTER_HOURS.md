@@ -142,7 +142,9 @@ If the user selects no they can come back and it says (buy the {upgrade}) in var
 - Missing a day resets the count to 0.
 - "No" on the third day changes nothing; the count continues. It is just an option: a player can say No and still pay the $1M later and get the portrait.
 - Re-offer lines: Claude writes simple placeholders, e.g. "[ buy the coffee machine ]"; list them in docs/PLACEHOLDER_TEXT.md.
-- Places: Mel B1; Bea and Cass F1 (lobby); Luci F2.
+- Places (corrected Nov 2): Bea and Cass on G (ground/lobby, opposite sides); Luci and Mel on B (basement). The 4 spots appear in EVERY game mode.
+- Epilogue speaker: depends on which tree/ending the player builds (NOT on which upgrade was bought). Revert the agent's change.
+- Sprites: ChatGPT sprite sheet (docs/ICON_PROMPTS.md sheet 10) replaces the code-drawn items once the owner sends the image.
 - Owner (Nov 2): spelling in this dialogue fixed on request.
 
 ## Open questions for the owner (answered above)

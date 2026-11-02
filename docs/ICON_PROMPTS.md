@@ -280,3 +280,25 @@ The 4 copies, left to right:
 3. Hot: running, with a red-orange glow at the top and red lights.
 4. Broken: dark, one server pulled half out, a red warning light.
 ```
+
+## Sheet 10: after-hours easter-egg items (world sprites)
+
+Owner asked for this (Nov 2): the code-drawn items looked bad. 8 sprites: each item, normal and upgraded.
+
+```
+Make ONE image: a pixel-art sprite sheet of 8 small objects for a side-on cutaway office tower game, in a 4 x 2 grid, read left to right, top to bottom, on a flat magenta background (#ff00ff) so they can be cut out. Leave clear magenta space between sprites.
+
+Style: 1990s Japanese PC-98 pixel art. Hard pixel edges, no anti-aliasing, no blur, no shadows on the background, no text, no letters, no numbers.
+Each object sits on the floor or on a small desk, front view, same lighting (from the top left) and same scale across all 8. Each must still read when about 48 pixels tall. Big shapes, few details.
+Palette only: black #07072a, indigo #1a1a5e, #2e2e8a, #4a4ac0, cyan #40d0e0, gold #e8b830, #ffd860, white #f0f0ff, flesh pink #e07a8a, leaf green #50c060, red #d04040, plus warm browns for wood and pots.
+
+Top row (normal), bottom row (upgraded version of the object above it):
+1. A leafy fern in a small plain clay pot.
+2. A small fish tank on a desk with one orange goldfish.
+3. A plain office drip coffee machine with a glass pot, on a little counter.
+4. A worn leather ledger book lying open on a wooden desk.
+5. The same fern, fuller and greener, in a bigger pot with a small automatic watering and feeding unit and a thin tube.
+6. The same fish tank, bigger and glowing, bio-enhanced: cyan lights, small tubes and a sensor on the lid, the fish bigger and shinier.
+7. A shiny chrome cappuccino and espresso machine with a steam wand and two small cups.
+8. The same desk with a framed license certificate with a gold seal standing up beside the closed ledger.
+```

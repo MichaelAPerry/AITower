@@ -10,25 +10,30 @@ Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The si
 
 Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots), `docs/AFTER_HOURS.md` (easter eggs, owner text), `docs/MUSIC_MAP.md`, `docs/SUNO_PROMPTS.md`, `docs/RESEARCH_UI_PROPOSAL.md`.
 
-## 0.5 Session 5 note (Nov 1) — READ FIRST
+## 0.5 Session 7 start (Nov 2) — READ FIRST, then sections 2 and 4 only
 
-- Alpha branch = `task/alpha-layout` (all session-5 work merged + layout fix; Haiku verified: check, build, e2e, e2e:layout pass). NOT on main. Main still = `61dc193`.
-- Session 5 added: M PLUS Rounded 1c body font + size scale (16-32px) + UI scale setting; bigger advisor faces; city-pop main menu (steampunk removed); SFX + toggle; lesson stars removed; logo gap fixed; in-game music (tower loop, warm/quiet scene songs, `docs/MUSIC_MAP.md`); ending songs on endings + auto credits roll; research orb with semantic zoom; 44 pixel icons (fork icon on Trees gauge); lessons rebuilt on full UI (player toggles speed); layout check `npm run e2e:layout`.
-- OWNER PLAY-TEST BUG (open): "the old music still plays" in the alpha. Not investigated (usage limit). Start here: `packages/ui/src/gamemusic/`, `title/titleMusic.ts`, `Hud.tsx` GameMusic; check the title song stops and the tower loop/scene songs take over.
-- OWNER PLAY-TEST BUG (open): weird overlaps in the Automation drawer/menu. Add it to `e2e/layout.mjs` coverage when fixing.
-- OWNER PLAY-TEST BUG (open): on/off switches everywhere broke in the UI resize (size-up / main-menu pill switches / layout pass). Check every toggle (settings, automation, overlays, audio) at 1280x720 and 1920x1080, and add switches to `e2e/layout.mjs`.
-- OWNER PLAY-TEST BUG (BIG, open): inspection cards/popups still use the OLD style (not restyled). Each inspection should show Luci's face plus a short quip from Luci (new quips = placeholder text, add to docs/PLACEHOLDER_TEXT.md). The button to dismiss/remove an inspection is GONE (likely lost in the resize/layout pass) — restore it and cover it in e2e.
-- OWNER PLAY-TEST BUG (open): the Skip button on the ending credits roll does NOT work (`packages/ui/src/credits/`, roll added this session). Fix + test in a real browser.
-- OWNER DECISION (open task): cut ALL quotes from the ending credits roll (menu Credits keep them).
-- OWNER DECISION (BIG, open task): REMOVE relationship/bond numbers and the attitude/relationship choices. After-hours (off-duty) portraits now come from 4 clickable easter-egg items in the tower (fern/Bea, fish tank/Mel, coffee machine/Cass, book/Luci): click once a day 3 days in a row -> dialogue; 10 days -> $1M upgrade -> new item + portrait. Bed portraits need all four + all achievements. Full spec and the owner's dialogue VERBATIM in `docs/AFTER_HOURS.md` (never fix its spelling). Replaces the earlier "advisor questions" idea. No sim test runs.
-- OWNER (open, balance): endings may be too easy. Owner reached the Garden ending in under 50 days. Look at the research orb costs and win thresholds for all three trees (`fast_win` 40/40/40 is the achievement, not the normal pace); propose numbers to the owner before changing.
-- OWNER REQUEST (open): research orb lines must ALWAYS be visible; branches web out from the centre to every globe (prerequisite links drawn at every zoom level, not only on select). Code: `packages/ui/src/research/orbModel.ts`, `orbArt.ts`. Also: globes must NEVER appear/disappear or merge into clusters on zoom — every globe always visible; when zoomed out they just shrink (labels may hide when too small, globes and lines stay). This replaces the semantic-zoom cluster behaviour.
-- Owner answers (Nov 2, session 6): Retrofit buttons -> Lattice/Flesh/Garden (yes); in-world Pixi labels -> make bigger (yes); no new play-test bugs. After-hours answers in docs/AFTER_HOURS.md.
-- Open owner questions (answered above): Retrofit buttons still say Synthetic/Bio/Green (rename to Lattice/Flesh/Garden?). In-world Pixi labels are 10-11px (`packages/render/src/pixi/markers.ts`, `structure.ts`). Stale font note in `packages/ui/AGENTS.md`.
-- Owner decisions this session: song titles stay as tagged; single-file HTML keeps music (19.6 MB OK); Lesson 4 line changes kept; Trees icon = branching fork; future idea: song lyrics/translation unlock.
-- Branches: owner deletes merged `wip/*` by hand (agents get 403). Task branches `task/*` and `merge/*` can go once the alpha lands on main.
-- Order (session 6): (1) bugs: old music still plays, credits Skip, on/off switches, inspection dismiss button, Automation overlaps; cut roll quotes. (2) Research orb: always-visible globes and lines, shrink on zoom. (3) Inspections restyle + Luci face and quip. (4) After-hours easter eggs (`docs/AFTER_HOURS.md`): ask the owner its open questions first, then remove bond/attitude systems and build. (5) Ending balance: propose numbers, owner decides. (6) Owner questions: Retrofit names, in-world label size. (7) One merge agent, Haiku verify, single-file build to the owner for the alpha play-test. (8) Main only on the owner's word. (9) Then trailer (title theme), landing page, README.
-- Session-5 working notes: worktree agents base on `origin/task/alpha-layout` (`git reset --hard origin/task/alpha-layout` first) and need `npm ci`. Many agents at once make sim tests time out: rerun alone. The owner's "stop" in chat once cancelled all running agents: if the owner says stop, ask what to stop. Show the owner screenshots (copy into `.claude/shots/`, send as files) and the single-file build (`npm run build:single`, `apps/web/dist/AItower.html`) for play-tests.
+Alpha = `task/alpha-layout` @ b06dddc (Haiku verified: check, build, e2e, e2e:layout, afterhours e2e, credits Skip, build:single). NOT on main. Main = `61dc193`.
+
+Done in session 6: old procedural music off (`LEGACY_MUSIC=false` in packages/audio); credits Skip (pointer-events) + quotes cut from roll; switches widened; Automation overlaps; dismiss buttons; research orb always shows all globes and lines (no clusters); QUARTERLY INSPECTION popup (`finance/AuditSheet.tsx`) restyled with Luci face + quips; after-hours easter eggs built, bonds and attitude choices removed (snapshot v17). Session-5 note moved to docs/HANDOFF_ARCHIVE.md.
+
+Order (session 7):
+1. After-hours fixes (one small agent): spots move to G (Bea fern, Cass coffee, opposite sides) and B (Luci book, Mel tank); spots in EVERY game mode; epilogue speaker = by the tree/ending built, revert the "upgrade bought" change. See docs/AFTER_HOURS.md "Owner answers".
+2. Ending balance: endings too easy (Garden in <50 days). Look at orb costs + win thresholds for all three trees; PROPOSE numbers to the owner first (no agent needed to propose if a quick read does it).
+3. Retrofit buttons -> Lattice / Flesh / Garden (owner: yes). In-world Pixi labels bigger (owner: yes; `packages/render/src/pixi/markers.ts`, `structure.ts`).
+4. When the owner sends the ChatGPT sheet (docs/ICON_PROMPTS.md sheet 10): swap the code-drawn easter-egg items for it.
+5. Merge, one Haiku verify, build:single to the owner. Main only on the owner's word. Then trailer, landing page, README.
+
+Open owner question: two bond achievements were removed (18 -> 16); bed portraits need all achievements. OK?
+Owner rejected: Luci's face on machine/room inspection cards (`task/inspect-restyle` is dead; do not merge).
+
+TOKEN RULES (owner, session 6 — strict):
+- No agent for anything a one-line note or a short git command can do. Opus may do docs notes and clean (conflict-free) merges itself; a merge agent only when there are conflicts.
+- Builders: base on origin/task/alpha-layout, `npm ci`, then run ONLY the vitest files they touch + `npm run check` once at the end. NO e2e, NO e2e:layout, NO repeated full checks. One screenshot at 1280x720, only if the change is visual.
+- Full check + e2e + e2e:layout run ONCE, in the single Haiku verify after the merge.
+- Big tasks: split into small steps, sample first, owner looks before bulk.
+- Brief tightly: files, done-when, reply under 80 words. Confirm WHICH screen/popup with the owner if a name is ambiguous ("inspection" = the quarterly audit).
+- Ask the owner every open question BEFORE building; never let an agent guess on design (e.g. which modes, which floors).
+- Opus does not re-read docs it already read; short status messages; screenshots only at the end of a task.
 
 ## 1. State on Oct 31 (end of session 4)
 
