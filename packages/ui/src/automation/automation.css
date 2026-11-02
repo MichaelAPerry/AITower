@@ -128,3 +128,19 @@
 .aitower-hud .ui-auto-status li + li {
 	margin-top: 3px;
 }
+
+/* The plate already engraves ON / OFF, so the caption under it stays for screen readers only (it would double the row's height). */
+.aitower-hud .ui-auto-toggle .ui-toggle-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip-path: inset(50%);
+}
+.aitower-hud .ui-auto-head > .ui-toggle,
+.aitower-hud .ui-auto-head > .ui-btn {
+	flex: none;
+}
+.aitower-hud .ui-auto-set > * {
+	min-width: 0;
+}

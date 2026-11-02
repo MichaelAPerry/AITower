@@ -336,8 +336,11 @@
 .aitower-hud .ui-dh {
 	display: flex;
 	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 2px var(--gap);
 	margin: 0;
-	padding-right: calc(var(--gap) * 3);
+	/* clear the close button (.ui-drawer-x, absolutely placed top right) */
+	padding-right: 44px;
 	font: 600 var(--fs-label) / 1 var(--f-display);
 	letter-spacing: var(--tracking);
 	color: var(--accent);

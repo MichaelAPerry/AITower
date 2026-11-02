@@ -447,8 +447,8 @@ export function Inspector(props: PanelProps) {
 		<aside className="ui-inspector ui-panel">
 			<div className="ui-panel-title">
 				<FormLabel>Details</FormLabel>
-				<button type="button" className="ui-btn ui-icon-btn ui-mini" onClick={() => store.setSelection(null)} title="Close">
-					<Icon name="close" size={11} />
+				<button type="button" className="ui-btn ui-icon-btn ui-insp-x" data-insp-close aria-label="Close details" onClick={() => store.setSelection(null)} title="Close (Esc)">
+					<PixelIcon name="close" />
 				</button>
 			</div>
 			<div className="ui-insp-body">{body}</div>
