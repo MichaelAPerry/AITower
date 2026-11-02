@@ -19,12 +19,16 @@ export interface AfterHoursSpot {
 	width: number;
 }
 
-/** Mel's corner on B1, the lobby's two corners on F1 (Bea's fern on the left, Cass's coffee on the right), Luci's office on F2. */
+/**
+ * Bea's fern and Cass's coffee machine stand on G (the lobby, on opposite sides); Luci's book and Mel's tank stand on B (the
+ * basement). G and B have slab in every scenario, so no extra floor is needed. Positions fit the narrowest lot (48 wide; the
+ * basement slab runs from x=4).
+ */
 export const AFTER_HOURS_SPOTS: readonly AfterHoursSpot[] = [
-	{ id: "tank", advisor: "mel", name: "Fish tank", upgradeName: "Bio-enhanced tank", floor: -1, x: 36, width: 4 },
-	{ id: "fern", advisor: "bea", name: "Fern", upgradeName: "Big pot with automatic watering", floor: 1, x: 4, width: 2 },
-	{ id: "coffee", advisor: "cass", name: "Coffee machine", upgradeName: "Cappuccino machine", floor: 1, x: 36, width: 3 },
-	{ id: "book", advisor: "luci", name: "Book", upgradeName: "Licence and certificate", floor: 2, x: 36, width: 4 },
+	{ id: "tank", advisor: "mel", name: "Fish tank", upgradeName: "Bio-enhanced tank", floor: -1, x: 31, width: 4 },
+	{ id: "fern", advisor: "bea", name: "Fern", upgradeName: "Big pot with automatic watering", floor: 0, x: 4, width: 2 },
+	{ id: "coffee", advisor: "cass", name: "Coffee machine", upgradeName: "Cappuccino machine", floor: 0, x: 42, width: 3 },
+	{ id: "book", advisor: "luci", name: "Book", upgradeName: "Licence and certificate", floor: -1, x: 39, width: 4 },
 ];
 
 export const spotOf = (id: string): AfterHoursSpot | undefined => AFTER_HOURS_SPOTS.find((s) => s.id === id);
@@ -62,10 +66,8 @@ export function spotAt(floor: number, x: number): AfterHoursSpot | undefined {
 	return AFTER_HOURS_SPOTS.find((s) => s.floor === floor && x >= s.x && x < s.x + s.width);
 }
 
-/** The towers that have the four spots: the two real campaign lots. Lessons, the sandbox and the test worlds have none. */
-export const AFTER_HOURS_SCENARIOS: readonly string[] = ["starter", "brownfield"];
-
-export const hasSpots = (state: Pick<SimState, "scenarioId">): boolean => AFTER_HOURS_SCENARIOS.includes(state.scenarioId);
+/** Every game mode has the four spots: the campaign lots, the sandbox and every lesson. Only the sim's own test worlds (`empty` and custom ids) have none. */
+export const hasSpots = (state: Pick<SimState, "scenarioId">): boolean => state.scenarioId === "starter" || state.scenarioId === "brownfield" || state.scenarioId === "sandbox" || state.scenarioId.startsWith("lesson_");
 
 /** The reason a facility or lift over tiles `x0..x1` of `floor` is refused, or null. The spots cannot be built over. */
 export function afterHoursBlock(state: Pick<SimState, "scenarioId">, floor: number, x0: number, x1: number): string | null {
@@ -74,7 +76,7 @@ export function afterHoursBlock(state: Pick<SimState, "scenarioId">, floor: numb
 	return null;
 }
 
-/** Does the spot stand on slab (so it exists in the tower today)? F2 only appears once a floor is built there. */
+/** Does the spot stand on slab (so it exists in the tower today)? G and B are slab in every scenario. */
 export function spotVisible(state: SimState, spot: AfterHoursSpot): boolean {
 	if (!hasSpots(state)) return false;
 	for (let cx = spot.x; cx < spot.x + spot.width; cx++) {

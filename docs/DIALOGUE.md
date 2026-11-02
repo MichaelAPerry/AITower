@@ -567,7 +567,7 @@ Choice `order`:
 > Speaker: Bea. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_fern_third.title] Title: Nigel the Fern
-- [ah_fern_third.location] Location: F1 · LOBBY
+- [ah_fern_third.location] Location: G · LOBBY
 - [ah_fern_third.caption] Caption: Bea's fern by the lobby window.
 
 Dialogue before the choice:
@@ -594,7 +594,7 @@ Choice `no`:
 > Speaker: Bea. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_fern_tenth.title] Title: Nigel Deserves Better
-- [ah_fern_tenth.location] Location: F1 · LOBBY
+- [ah_fern_tenth.location] Location: G · LOBBY
 - [ah_fern_tenth.caption] Caption: Bea and the fern again.
 
 Dialogue before the choice:
@@ -622,7 +622,7 @@ Choice `no`:
 > Speaker: Bea. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_fern_again1.title] Title: Nigel Deserves Better
-- [ah_fern_again1.location] Location: F1 · LOBBY
+- [ah_fern_again1.location] Location: G · LOBBY
 - [ah_fern_again1.caption] Caption: Bea and the fern again.
 
 Dialogue before the choice:
@@ -640,7 +640,7 @@ Choice `ok` (recommended):
 > Speaker: Bea. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_fern_again2.title] Title: Nigel Deserves Better
-- [ah_fern_again2.location] Location: F1 · LOBBY
+- [ah_fern_again2.location] Location: G · LOBBY
 - [ah_fern_again2.caption] Caption: Bea and the fern again.
 
 Dialogue before the choice:
@@ -658,7 +658,7 @@ Choice `ok` (recommended):
 > Speaker: Bea. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_fern_again3.title] Title: Nigel Deserves Better
-- [ah_fern_again3.location] Location: F1 · LOBBY
+- [ah_fern_again3.location] Location: G · LOBBY
 - [ah_fern_again3.caption] Caption: Bea and the fern again.
 
 Dialogue before the choice:
@@ -790,7 +790,7 @@ Choice `ok` (recommended):
 > Speaker: Cass. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_coffee_third.title] Title: The Coffee Corner
-- [ah_coffee_third.location] Location: F1 · LOBBY
+- [ah_coffee_third.location] Location: G · LOBBY
 - [ah_coffee_third.caption] Caption: Cass's coffee machine in the lobby.
 
 Dialogue before the choice:
@@ -817,7 +817,7 @@ Choice `no`:
 > Speaker: Cass. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_coffee_tenth.title] Title: A Better Coffee Maker
-- [ah_coffee_tenth.location] Location: F1 · LOBBY
+- [ah_coffee_tenth.location] Location: G · LOBBY
 - [ah_coffee_tenth.caption] Caption: Cass and the coffee machine again.
 
 Dialogue before the choice:
@@ -844,7 +844,7 @@ Choice `no`:
 > Speaker: Cass. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_coffee_again1.title] Title: A Better Coffee Maker
-- [ah_coffee_again1.location] Location: F1 · LOBBY
+- [ah_coffee_again1.location] Location: G · LOBBY
 - [ah_coffee_again1.caption] Caption: Cass and the coffee machine again.
 
 Dialogue before the choice:
@@ -862,7 +862,7 @@ Choice `ok` (recommended):
 > Speaker: Cass. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_coffee_again2.title] Title: A Better Coffee Maker
-- [ah_coffee_again2.location] Location: F1 · LOBBY
+- [ah_coffee_again2.location] Location: G · LOBBY
 - [ah_coffee_again2.caption] Caption: Cass and the coffee machine again.
 
 Dialogue before the choice:
@@ -880,7 +880,7 @@ Choice `ok` (recommended):
 > Speaker: Cass. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_coffee_again3.title] Title: A Better Coffee Maker
-- [ah_coffee_again3.location] Location: F1 · LOBBY
+- [ah_coffee_again3.location] Location: G · LOBBY
 - [ah_coffee_again3.caption] Caption: Cass and the coffee machine again.
 
 Dialogue before the choice:
@@ -901,7 +901,7 @@ Choice `ok` (recommended):
 > Speaker: Luci. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_book_third.title] Title: The Ledger
-- [ah_book_third.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_third.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_third.caption] Caption: The ledger on Luci's desk.
 
 Dialogue before the choice:
@@ -928,7 +928,7 @@ Choice `no`:
 > Speaker: Luci. Recommended choice: `yes`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_book_tenth.title] Title: Get Licensed
-- [ah_book_tenth.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_tenth.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_tenth.caption] Caption: Luci and the ledger again.
 
 Dialogue before the choice:
@@ -955,7 +955,7 @@ Choice `no`:
 > Speaker: Luci. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_book_again1.title] Title: Get Licensed
-- [ah_book_again1.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again1.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_again1.caption] Caption: Luci and the ledger again.
 
 Dialogue before the choice:
@@ -973,7 +973,7 @@ Choice `ok` (recommended):
 > Speaker: Luci. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_book_again2.title] Title: Get Licensed
-- [ah_book_again2.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again2.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_again2.caption] Caption: Luci and the ledger again.
 
 Dialogue before the choice:
@@ -991,7 +991,7 @@ Choice `ok` (recommended):
 > Speaker: Luci. Recommended choice: `ok`.
 > When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
 - [ah_book_again3.title] Title: Get Licensed
-- [ah_book_again3.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again3.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_again3.caption] Caption: Luci and the ledger again.
 
 Dialogue before the choice:
@@ -2117,6 +2117,30 @@ Choice `add`:
 > Shows: LIST tab row, and the unlock strip when earned. Earned when the ending epilogues of all four advisors have been seen, across any runs.
 - [ach.heard_out.name] Name: Heard Her Out
 - [ach.heard_out.text] Text: See an ending epilogue from each of the four advisors, across any runs.
+
+### `ah_bea`
+
+> Shows: LIST tab row, and the unlock strip when earned.
+- [ach.ah_bea.name] Name: Green Thumb
+- [ach.ah_bea.text] Text: Buy Bea's fern the big self-watering pot.
+
+### `ah_mel`
+
+> Shows: LIST tab row, and the unlock strip when earned.
+- [ach.ah_mel.name] Name: Fish Person
+- [ach.ah_mel.text] Text: Buy Mel's fish the bio-enhanced tank.
+
+### `ah_cass`
+
+> Shows: LIST tab row, and the unlock strip when earned.
+- [ach.ah_cass.name] Name: Barista Bonus
+- [ach.ah_cass.text] Text: Buy Cass the cappuccino machine.
+
+### `ah_luci`
+
+> Shows: LIST tab row, and the unlock strip when earned.
+- [ach.ah_luci.name] Name: Fully Licensed
+- [ach.ah_luci.text] Text: Buy Luci's office its licence and certificate.
 
 ### List screen: headings and labels
 

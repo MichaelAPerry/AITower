@@ -216,7 +216,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_fern_third`
 
 - [ah_fern_third.title] Title: Nigel the Fern
-- [ah_fern_third.location] Location: F1 · LOBBY
+- [ah_fern_third.location] Location: G · LOBBY
 - [ah_fern_third.caption] Caption: Bea's fern by the lobby window.
 - [ah_fern_third.yes.hint] Hint: Keep it up.
 - [ah_fern_third.yes.outcome] Outcome: Noted.
@@ -226,7 +226,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_fern_tenth`
 
 - [ah_fern_tenth.title] Title: Nigel Deserves Better
-- [ah_fern_tenth.location] Location: F1 · LOBBY
+- [ah_fern_tenth.location] Location: G · LOBBY
 - [ah_fern_tenth.caption] Caption: Bea and the fern again.
 - [ah_fern_tenth.yes.hint] Hint: $1,000,000
 - [ah_fern_tenth.yes.outcome] Outcome: Bought.
@@ -280,7 +280,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_coffee_third`
 
 - [ah_coffee_third.title] Title: The Coffee Corner
-- [ah_coffee_third.location] Location: F1 · LOBBY
+- [ah_coffee_third.location] Location: G · LOBBY
 - [ah_coffee_third.caption] Caption: Cass's coffee machine in the lobby.
 - [ah_coffee_third.yes.hint] Hint: Keep it up.
 - [ah_coffee_third.yes.outcome] Outcome: Noted.
@@ -290,7 +290,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_coffee_tenth`
 
 - [ah_coffee_tenth.title] Title: A Better Coffee Maker
-- [ah_coffee_tenth.location] Location: F1 · LOBBY
+- [ah_coffee_tenth.location] Location: G · LOBBY
 - [ah_coffee_tenth.caption] Caption: Cass and the coffee machine again.
 - [ah_coffee_tenth.yes.hint] Hint: $1,000,000
 - [ah_coffee_tenth.yes.outcome] Outcome: Bought.
@@ -312,7 +312,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_book_third`
 
 - [ah_book_third.title] Title: The Ledger
-- [ah_book_third.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_third.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_third.caption] Caption: The ledger on Luci's desk.
 - [ah_book_third.yes.hint] Hint: Keep it up.
 - [ah_book_third.yes.outcome] Outcome: Noted.
@@ -322,7 +322,7 @@ The owner's dialogue (the character lines and the Yes / No answers) is in `docs/
 ### `ah_book_tenth`
 
 - [ah_book_tenth.title] Title: Get Licensed
-- [ah_book_tenth.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_tenth.location] Location: B1 · LUCI'S OFFICE
 - [ah_book_tenth.caption] Caption: Luci and the ledger again.
 - [ah_book_tenth.yes.hint] Hint: $1,000,000
 - [ah_book_tenth.yes.outcome] Outcome: Bought.
@@ -406,8 +406,9 @@ The relationship numbers are gone, so the story scenes whose choices only moved 
 
 ### Other changes Claude made with the bond removal
 
-- The ending screens no longer pick an advisor by trust. The advisor whose after-hours upgrade the player bought speaks the closing epilogue (the first one the ending lists if several are bought); with none bought, the narrated fallback closes the ending. No new words.
+- The ending screens no longer pick an advisor by trust. The closing epilogue speaker depends on the tree and ending built, as before (reverted Nov 2); with none bought, the narrated fallback closes the ending. No new words.
 - Three ministry choices that only changed trust (`compute_subsidy` decline, `form_9b_brochure` decline, `heat_tariff_revision` keep) now simply do nothing; their hint already says "nothing now".
 - Open Door (research) no longer gives bonds. Its description now reads: "An open-door policy for your advisors. Contract payouts +4%."
 - Removed achievements: "Someone You Trust" and "The Whole Crew".
 - Pressing a click on an item shows nothing; if the cash is not there, the Yes of the tenth-day scene shows the notice "Needs $1,000,000" and stays on the choice.
+- New achievements, one per off-duty portrait unlock (placeholder names and texts, listed in `docs/ACHIEVEMENTS_TEXT.md`): Green Thumb (Bea), Fish Person (Mel), Barista Bonus (Cass), Fully Licensed (Luci). Earned when that upgrade is bought; the bed portraits still need all of them plus all four eggs.

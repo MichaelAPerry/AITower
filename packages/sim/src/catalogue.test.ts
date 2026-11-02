@@ -39,12 +39,12 @@ const FREE = 20;
 describe("who may place what", () => {
 	it("Level and research are the only gates: no commit, no path", () => {
 		const s = start();
-		expect(can(s, "grid_tie_lucy", 0, 36)).toBe("requires tier 3");
+		expect(can(s, "grid_tie_lucy", 0, 32)).toBe("requires tier 3");
 		level(s, 3);
-		expect(can(s, "grid_tie_lucy", 0, 36)).toMatch(/requires research: /);
+		expect(can(s, "grid_tie_lucy", 0, 32)).toMatch(/requires research: /);
 		research(s, "substation_licence", "offpeak_petition", "rate_card");
-		expect(can(s, "grid_tie_lucy", 0, 36)).toBeNull();
-		exec(s, { type: "place", defId: "grid_tie_lucy", floor: 0, x: 36 });
+		expect(can(s, "grid_tie_lucy", 0, 32)).toBeNull();
+		exec(s, { type: "place", defId: "grid_tie_lucy", floor: 0, x: 32 });
 		expect(s.state.sealScar.greentech).toBeGreaterThanOrEqual(10 + 16); // the catch
 	});
 
@@ -141,18 +141,18 @@ describe("upgradeFacility", () => {
 		level(s, 3);
 		research(s, "batch_cards", "rear_door_drawings", "desk_fan_standard", "inference_foundry");
 		research(s, "accumulator_charter", "flywheel_patent", "surge_memo");
-		exec(s, { type: "place", defId: "ups_battery", floor: 0, x: 2 });
+		exec(s, { type: "place", defId: "ups_battery", floor: 0, x: 6 });
 		const ups = rackAt(s, "ups_battery") as NonNullable<ReturnType<typeof rackAt>>;
 		const r = s.submit({ type: "upgradeFacility", facilityId: ups.id });
 		expect(r.ok).toBe(true);
 		s.step();
 		const hall = rackAt(s, "ups_bank_big") as NonNullable<ReturnType<typeof rackAt>>;
 		expect(hall.width).toBe(5);
-		expect(hall.x).toBe(2); // grew to the right
+		expect(hall.x).toBe(6); // grew to the right
 		// Boxed in: a hall hard against another facility on both sides cannot grow.
-		exec(s, { type: "place", defId: "ups_battery", floor: 0, x: 10 });
-		exec(s, { type: "place", defId: "parts_depot", floor: 0, x: 13 });
-		exec(s, { type: "place", defId: "bot_charger", floor: 0, x: 8 });
+		exec(s, { type: "place", defId: "ups_battery", floor: 0, x: 13 });
+		exec(s, { type: "place", defId: "parts_depot", floor: 0, x: 16 });
+		exec(s, { type: "place", defId: "bot_charger", floor: 0, x: 11 });
 		const boxed = s.state.facilities.filter((f) => f.defId === "ups_battery").at(-1) as NonNullable<ReturnType<typeof rackAt>>;
 		expect(s.submit({ type: "upgradeFacility", facilityId: boxed.id })).toMatchObject({ ok: false, reason: expect.stringMatching(/does not fit here/) });
 	});

@@ -178,23 +178,14 @@ describe("endings", () => {
 		expect(endingOf(over("absorbed"))).toBe("absorbed");
 		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
 	});
-	it("every ending closes on the narrated fallback, or on the epilogue of an advisor whose after-hours upgrade was bought", () => {
+	it("every ending closes on the epilogue of the advisor it is about (the first one its file lists)", () => {
 		const real = loadContent();
 		const v = setup().store.get().view;
-		const buy = (...who: string[]) => ({ ...v, afterHours: { ...v.afterHours, items: v.afterHours.items.map((i) => ({ ...i, bought: who.includes(i.advisor) })) } });
 		for (const end of real.endings) {
-			const body = end.body.split(/\n\s*\n/).length;
-			expect(epilogueAdvisor(buy(), end), end.id).toBeNull();
-			const none = endingPages(end, buy());
-			expect(none, end.id).toHaveLength(body + 1);
-			expect(none.at(-1), end.id).toEqual({ who: null, text: end.epilogue?.fallback });
-			for (const adv of ["cass", "mel", "bea", "luci"] as const) {
-				expect(epilogueAdvisor(buy(adv), end), `${end.id} ${adv}`).toBe(adv);
-				expect(endingPages(end, buy(adv)).at(-1), `${end.id} ${adv}`).toEqual({ who: adv, text: end.epilogue?.[adv] });
-			}
-			// With several bought, the first one the ending lists speaks.
 			const first = Object.keys(end.epilogue ?? {}).find((k) => k !== "fallback");
-			expect(epilogueAdvisor(buy("cass", "mel", "bea", "luci"), end), end.id).toBe(first);
+			expect(epilogueAdvisor(v, end), end.id).toBe(first);
+			const pages = endingPages(end, v);
+			expect(pages.at(-1), end.id).toEqual({ who: first, text: (end.epilogue as Record<string, string>)[first as string] });
 		}
 		expect(endingOf(over("bankrupt"))).toBe("bankrupt");
 	});

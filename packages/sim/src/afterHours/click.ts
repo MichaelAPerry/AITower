@@ -12,7 +12,7 @@ export function planClickAfterHours(ctx: PlanCtx, item: AfterHoursItemId): Plan 
 	const { state, content } = ctx;
 	const spot = ITEM_IDS.includes(item) ? spotOf(item) : undefined;
 	if (!spot) return reject("no such item");
-	if (state.lesson || state.sandbox) return reject("nothing to see here");
+	if (state.lesson) return reject("nothing to see here");
 	if (state.decision) return reject("answer the open decision first");
 	if (!spotVisible(state, spot)) return reject("nothing built here yet");
 	return accept(0, (events) => {

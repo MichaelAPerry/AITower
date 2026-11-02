@@ -62,10 +62,10 @@ async function startServer() {
 }
 
 const ITEMS = [
-	{ id: "tank", floor: -1, x: 37, label: "mel-tank" },
-	{ id: "fern", floor: 1, x: 5, label: "bea-fern" },
-	{ id: "coffee", floor: 1, x: 37, label: "cass-coffee" },
-	{ id: "book", floor: 2, x: 37, label: "luci-book" },
+	{ id: "tank", floor: -1, x: 32, label: "mel-tank" },
+	{ id: "fern", floor: 0, x: 5, label: "bea-fern" },
+	{ id: "coffee", floor: 0, x: 43, label: "cass-coffee" },
+	{ id: "book", floor: -1, x: 40, label: "luci-book" },
 ];
 
 async function run(url) {
@@ -141,19 +141,10 @@ async function run(url) {
 			await game(() => window.aitower.store.setSpeed(0));
 		};
 
-		// 1. The items stand in their corners; the second floor appears with its slab.
+		// 1. The four items stand in their corners on G and B, with no extra floor built.
 		let ah = await view();
 		assert(ah.items.length === 4 && ah.price === 1_000_000, "four items, upgrade price $1,000,000");
-		assert(ah.items.filter((i) => i.visible).map((i) => i.id).sort().join() === "coffee,fern,tank", "tank, fern and coffee stand on built floor; F2 has no slab yet");
-		await game(() => {
-			window.aitower.store.dispatch({ type: "buildSlab", floor: 2, x0: 36, x1: 39 });
-			window.aitower.store.dispatch({ type: "buildSlab", floor: 2, x0: 4, x1: 12 });
-		});
-		await game(() => window.aitower.store.setSpeed(1));
-		await page.waitForTimeout(600);
-		await game(() => window.aitower.store.setSpeed(0));
-		ah = await view();
-		assert(ah.items.find((i) => i.id === "book").visible, "Luci's office appears once F2 is built");
+		assert(ah.items.filter((i) => i.visible).map((i) => i.id).sort().join() === "book,coffee,fern,tank", "all four stand on G and B");
 
 		// 2. A real mouse click on each item is counted and shows nothing.
 		for (const it of ITEMS) {
@@ -198,12 +189,8 @@ async function run(url) {
 		const cash = await game(() => window.aitower.store.get().view.cash);
 		assert((await view()).items.find((i) => i.id === "fern").bought, "Yes buys the upgrade");
 		assert(cash < 2_100_000, `$1,000,000 left the bank (cash ${Math.round(cash)})`);
-		await game(() => window.aitower.store.dispatch({ type: "buildSlab", floor: 2, x0: 36, x1: 39 }));
 		await edit({ tank: { bought: true }, coffee: { bought: true }, book: { bought: true } });
-		await game(() => {
-			window.aitower.store.dispatch({ type: "buildSlab", floor: 2, x0: 36, x1: 39 });
-			window.aitower.store.setSpeed(1);
-		});
+		await game(() => window.aitower.store.setSpeed(1));
 		await page.waitForTimeout(500);
 		await game(() => window.aitower.store.setSpeed(0));
 		assert((await view()).items.every((i) => i.bought), "all four upgraded");

@@ -1044,7 +1044,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "bea",
@@ -1097,7 +1097,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "bea",
@@ -1155,7 +1155,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1185,7 +1185,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1215,7 +1215,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1442,7 +1442,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "cass",
@@ -1495,7 +1495,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "cass",
@@ -1549,7 +1549,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1579,7 +1579,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1609,7 +1609,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F1 · LOBBY",
+  "location": "G · LOBBY",
   "lines": [
    {
     "who": "narrator",
@@ -1639,7 +1639,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F2 · LUCI'S OFFICE",
+  "location": "B1 · LUCI'S OFFICE",
   "lines": [
    {
     "who": "luci",
@@ -1692,7 +1692,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F2 · LUCI'S OFFICE",
+  "location": "B1 · LUCI'S OFFICE",
   "lines": [
    {
     "who": "luci",
@@ -1746,7 +1746,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F2 · LUCI'S OFFICE",
+  "location": "B1 · LUCI'S OFFICE",
   "lines": [
    {
     "who": "narrator",
@@ -1776,7 +1776,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F2 · LUCI'S OFFICE",
+  "location": "B1 · LUCI'S OFFICE",
   "lines": [
    {
     "who": "narrator",
@@ -1806,7 +1806,7 @@
   "trigger": {
    "kind": "afterHours"
   },
-  "location": "F2 · LUCI'S OFFICE",
+  "location": "B1 · LUCI'S OFFICE",
   "lines": [
    {
     "who": "narrator",

@@ -36,6 +36,8 @@ export const CALM_DAYS = 20;
 
 const winEnding = (v: SimView): string | undefined => (v.gameOver?.kind === "victory" ? v.gameOver.ending : undefined);
 
+const boughtBy = (v: SimView, advisor: AdvisorKey): boolean => v.afterHours.items.some((i) => i.advisor === advisor && i.bought);
+
 type Check = Pick<AchievementDef, "when" | "check" | "icon">;
 
 const CHECKS: Readonly<Record<string, Check>> = {
@@ -78,6 +80,11 @@ const CHECKS: Readonly<Record<string, Check>> = {
 	calm_month: { icon: { sheet: "achievements", col: 1, row: 2 }, when: "dayClose", check: (v) => v.uptimeStreak >= CALM_DAYS },
 	les_done: { icon: { sheet: "achievements", col: 4, row: 2 }, when: "lessonEnd", check: (_v, e) => e.lessonIds.length > 0 && e.lessonIds.every((id) => e.lessonsDone[id] !== undefined) },
 	heard_out: { icon: { sheet: "achievements", col: 5, row: 2 }, when: "gameOver", check: (_v, e) => ADVISOR_KEYS.every((a) => e.profile.epilogues[a]) },
+	// The four off-duty portraits: bought the character's after-hours upgrade. Icons reuse cells (two free, two shared with Month of Calm / Clean Books).
+	ah_bea: { icon: { sheet: "achievements", col: 2, row: 2 }, when: "decisionResolved", check: (v) => boughtBy(v, "bea") },
+	ah_mel: { icon: { sheet: "achievements", col: 3, row: 2 }, when: "decisionResolved", check: (v) => boughtBy(v, "mel") },
+	ah_cass: { icon: { sheet: "achievements", col: 1, row: 2 }, when: "decisionResolved", check: (v) => boughtBy(v, "cass") },
+	ah_luci: { icon: { sheet: "achievements", col: 5, row: 1 }, when: "decisionResolved", check: (v) => boughtBy(v, "luci") },
 };
 
 export const ACHIEVEMENTS: readonly AchievementDef[] = achievementContent.achievements.map((t) => {

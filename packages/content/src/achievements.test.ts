@@ -4,8 +4,8 @@ import { type AchievementContent, achievementContent, galleryScenes, validateAch
 const clone = (): AchievementContent => structuredClone(achievementContent);
 
 describe("achievement content", () => {
-	it("has the 16 rows of docs/ACHIEVEMENTS.md and validates clean", () => {
-		expect(achievementContent.achievements).toHaveLength(16);
+	it("has the 20 rows (docs/ACHIEVEMENTS.md plus four off-duty upgrades) and validates clean", () => {
+		expect(achievementContent.achievements).toHaveLength(20);
 		expect(validateAchievementContent(achievementContent)).toEqual([]);
 	});
 
