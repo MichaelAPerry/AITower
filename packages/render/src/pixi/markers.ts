@@ -31,8 +31,8 @@ export class GhostLayer {
 	private cells = new Graphics();
 	private body = new Graphics();
 	private tag = new Graphics();
-	private label = new Text({ text: "", style: { fontFamily: WORLD_FONT, fontSize: 10, fill: T.ink }, resolution: 4 });
-	private stamp = new Text({ text: "DENIED", style: { fontFamily: WORLD_FONT, fontSize: 11, fill: STAMP }, resolution: 4 });
+	private label = new Text({ text: "", style: { fontFamily: WORLD_FONT, fontSize: 14, fill: T.ink }, resolution: 4 });
+	private stamp = new Text({ text: "DENIED", style: { fontFamily: WORLD_FONT, fontSize: 16, fill: STAMP }, resolution: 4 });
 	private ghost: Ghost | null = null;
 	private dirty = true;
 	private floorMax = Number.NaN;
@@ -120,13 +120,13 @@ export class GhostLayer {
 			this.label.text = gh.label;
 			this.label.style.fill = gh.valid ? T.ink : dk(STAMP, 0.25);
 			const tx = first.x * TILE;
-			const ty = floorTop(view, first.floor) - 12;
+			const ty = floorTop(view, first.floor) - 18;
 			const tw = Math.ceil(this.label.width) + 6;
-			px(this.tag, tx - 1, ty - 1, tw + 2, 12, BRASS.line);
-			px(this.tag, tx, ty, tw, 10, gh.valid ? T.paper : lt(T.paper, 0.1));
+			px(this.tag, tx - 1, ty - 1, tw + 2, 18, BRASS.line);
+			px(this.tag, tx, ty, tw, 16, gh.valid ? T.paper : lt(T.paper, 0.1));
 			px(this.tag, tx, ty, tw, 1, lt(T.paper, 0.5));
 			px(this.tag, tx + 1, ty + 1, 1, 1, BRASS.mid);
-			this.label.position.set(tx + 4, ty + 5);
+			this.label.position.set(tx + 4, ty + 8);
 			this.label.visible = true;
 		}
 	}

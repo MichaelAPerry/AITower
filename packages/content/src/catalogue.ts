@@ -14,7 +14,7 @@ export const TREES: readonly AscensionPath[] = ["synthetic", "biotech", "greente
 export const TREE_RUNGS = 4;
 export const TREE_NAME: Record<AscensionPath, string> = { synthetic: "The Lattice", biotech: "The Flesh", greentech: "The Garden" };
 /** The branch names the player sees on the Retrofit buttons. */
-export const BRANCH_NAME: Record<AscensionPath, string> = { synthetic: "Synthetic", biotech: "Bio", greentech: "Green" };
+export const BRANCH_NAME: Record<AscensionPath, string> = { synthetic: "Lattice", biotech: "Flesh", greentech: "Garden" };
 export const ADVISOR_NAME: Record<AdvisorId, string> = { luci: "Luci", mel: "Mel", bea: "Bea", cass: "Cass" };
 
 /** The rack a rack of another tree is valued as when it switches trees. */
