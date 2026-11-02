@@ -5,6 +5,7 @@ import { placeScenarioFacility } from "../commands/placement";
 import { stockParts } from "../commands/operations";
 import { defaultAutomation } from "../automation/policy";
 import { nextOfferDelay, seedOpeningOffer } from "../compute/offers";
+import { initialAfterHours } from "../afterHours/spots";
 import { nextDecisionDelay } from "../ministry/decisions";
 import { createScratch } from "../core/context";
 import { cellCount, cellIdx, inBounds } from "../core/grid";
@@ -114,6 +115,7 @@ export function createState(content: ContentDB, scenarioId: string, seed: number
 		sealScar: { biotech: 0, greentech: 0 },
 		sealResidue: { biotech: 0, greentech: 0 },
 		objected: [],
+		afterHours: initialAfterHours(),
 		automation: defaultAutomation(),
 		wind: 0.6,
 		droughtUntil: 0,

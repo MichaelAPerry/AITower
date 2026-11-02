@@ -12,14 +12,18 @@ import { StampBtn } from "../menu/parts";
 import { endingKicker, lifetimeStats, paragraphs } from "./gameOver";
 import "../vn/vn.css";
 
-/** The advisor whose epilogue closes the ending: the one the ending is about (the first one its file lists). */
-export function epilogueAdvisor(_view: Pick<SimView, "soul">, ending: EndingDef): AdvisorId | null {
-	const first = Object.keys(ending.epilogue ?? {}).find((k) => k !== "fallback");
+/**
+ * The advisor whose epilogue closes the ending: the first one (in the order the ending lists them) whose after-hours upgrade the
+ * player bought. With none bought the ending's narrated fallback closes it.
+ */
+export function epilogueAdvisor(view: Pick<SimView, "afterHours">, ending: EndingDef): AdvisorId | null {
+	const bought = new Set(view.afterHours.items.filter((i) => i.bought).map((i) => i.advisor));
+	const first = Object.keys(ending.epilogue ?? {}).find((k) => k !== "fallback" && bought.has(k as AdvisorId));
 	return (first as AdvisorId | undefined) ?? null;
 }
 
-/** The pages of an ending: its paragraphs, then the epilogue of the advisor the ending is about. */
-export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { who: AdvisorId | null; text: string }[] {
+/** The pages of an ending: its paragraphs, then the epilogue of the advisor whose upgrade was bought (or the narrated fallback). */
+export function endingPages(ending: EndingDef, view: Pick<SimView, "afterHours">): { who: AdvisorId | null; text: string }[] {
 	const who = epilogueAdvisor(view, ending);
 	return [
 		...paragraphs(ending.body).map((text) => ({ who: null, text })),
@@ -33,7 +37,7 @@ export function endingPages(ending: EndingDef, view: Pick<SimView, "soul">): { w
 
 /**
  * A Singularity ending as a visual-novel scene: the tree's floor painting, the ending's paragraphs in the dialogue box, the
- * epilogue of the advisor the ending is about, then the
+ * epilogue of the advisor whose upgrade was bought (or, with none, the ending's narrated fallback), then the
  * service record and the buttons.
  */
 export function EndingScene({ ending, view, content, menuOpen, final = false, onContinue, onLoad, onNewGame }: { ending: EndingDef; view: SimView; content: ContentDB; menuOpen: boolean; /** Absorbed and Bankrupt: no sandbox, offer Load game instead of Continue. */ final?: boolean; onContinue: () => void; onLoad?: () => void; onNewGame: () => void }) {

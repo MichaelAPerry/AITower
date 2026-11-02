@@ -5,6 +5,7 @@
  */
 import type { AdvisorId, ContractSpec, SealedTree } from "@aitower/content";
 import type { AutomationPolicy, BotTrait, ClerkPolicy, EndingId, GameOverKind, JobStatus, LedgerDay, LifetimeStats, MetricSample, QuarterReport, SimCommand } from "../api";
+import type { AfterHoursState } from "../afterHours/spots";
 import type { RngState } from "./rng";
 
 export interface Facility {
@@ -186,6 +187,8 @@ export interface Decision {
 	hiddenUntil: number;
 	/** Story objections: the facility def the scene is about (its name replaces `{item}`). */
 	subject?: string;
+	/** After-hours scenes: the id of a one-line lead-in scene played before this one (the player came back after saying No). */
+	lead?: string;
 }
 
 export interface DecisionRecord {
@@ -416,6 +419,8 @@ export interface SimState {
 	sealResidue: Record<SealedTree, number>;
 	/** Objections already raised, as "tree:defId". */
 	objected: string[];
+	/** The after-hours easter eggs: click streaks and purchases (snapshot v17; docs/AFTER_HOURS.md). */
+	afterHours: AfterHoursState;
 	// ── Automation, greentech, scenarios (snapshot v6) ──
 	/** Standing orders (research / parts / bots / Foreman). */
 	automation: AutomationPolicy;

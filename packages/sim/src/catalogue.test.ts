@@ -56,11 +56,11 @@ describe("who may place what", () => {
 		expect(can(s, "solar_skin", 1, FREE)).toMatch(/exterior wall/);
 		expect(can(s, "solar_skin", 1, 40)).toBeNull();
 		// The canopy: only on the roof (nothing built above). The starter's top floor is floor 1.
-		expect(can(s, "solar_canopy", 1, 34)).toBeNull();
+		expect(can(s, "solar_canopy", 1, 28)).toBeNull();
 		s.submit({ type: "buildSlab", floor: 2, x0: 4, x1: 43 });
 		s.flush();
-		expect(can(s, "solar_canopy", 1, 34)).toMatch(/roof/);
-		expect(can(s, "solar_canopy", 2, 34)).toMatch(/power conduit/); // the new top floor is the roof (it still needs its conduit)
+		expect(can(s, "solar_canopy", 1, 28)).toMatch(/roof/);
+		expect(can(s, "solar_canopy", 2, 28)).toMatch(/power conduit/); // the new top floor is the roof (it still needs its conduit)
 		// The geothermal well: basement only.
 		expect(can(s, "geothermal", 0, 10)).toMatch(/basement/);
 		expect(can(s, "geothermal", -1, 10)).not.toBe("must go in a basement");

@@ -14,6 +14,7 @@
  * Spot: on the floor nearest the existing racks (floor 0 when there are none), the leftmost cell run that placement accepts.
  * Reach: only on slab a ground bot can path to by the real nav graph (see `reachableRuns`); with none reachable nothing is placed.
  */
+import { afterHoursBlock } from "../afterHours/spots";
 import { facilityTier, isBaseRack, rackLine, retrofitCost, retrofitTarget, TIER_ORDER, treeOf, type ContentDB, type FacilityDef } from "@aitower/content";
 import type { ForemanTierCap } from "../api";
 import { fmtKw, fmtUsd } from "./text";
@@ -118,7 +119,7 @@ function findSpot(r: Run, d: FacilityDef, floors: number[], spotOk: (floor: numb
 			let ok = true;
 			for (let k = 0; k < d.width && ok; k++) {
 				const i = cellIdx(state, x + k, floor);
-				ok = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0;
+				ok = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0 && afterHoursBlock(state, floor, x + k, x + k) === null;
 			}
 			if (!ok) continue;
 			// Only where a bot can walk (and ride) to: the slab run under the spot must be one a bot can path to.
@@ -318,7 +319,7 @@ function leavesRoom(r: Run, floor: number, x: number): boolean {
 	for (let cx = x - 1; cx >= x - reach; cx--) {
 		if (cx < 0) return true;
 		const i = cellIdx(state, cx, floor);
-		const free = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0;
+		const free = state.slab[i] === 1 && state.power[i] === 1 && state.facilityAt[i] < 0 && state.liftAt[i] < 0 && afterHoursBlock(state, floor, cx, cx) === null;
 		if (!free) {
 			if (state.slab[i] === 0) return true; // the edge of the built floor
 			run = 0;

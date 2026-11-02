@@ -162,5 +162,10 @@
   "sealMax": 100,
   "residuePerDay": 0.03,
   "objectionScar": 10
+ },
+ "afterHours": {
+  "price": 1000000,
+  "thirdDay": 3,
+  "tenthDay": 10
  }
 }

@@ -197,9 +197,11 @@ function whenInWords(s: Scene): string {
 		parts.push(
 			`Once per facility: when you place a facility that scars the ${TREE_NAME[t.path ?? ""] ?? t.path} tree enough, provided that tree is not sealed yet. The {item} in the text is the name of the facility just placed.`,
 		);
+	else if (t.kind === "afterHours")
+		parts.push("When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.");
 	if (s.minTier && s.minTier > 1) parts.push(`Needs Level ${s.minTier} or higher.`);
 	if (s.minDay) parts.push(`Not before game day ${s.minDay}.`);
-	parts.push("Story scenes are issued in file order, one at a time.");
+	if (s.trigger?.kind !== "afterHours") parts.push("Story scenes are issued in file order, one at a time.");
 	return parts.join(" ");
 }
 
@@ -328,6 +330,10 @@ const storyGroups: { title: string; ids: string[] }[] = [
 	{ title: "Story: Greentech tree, Bea's Garden", ids: ["obj_greentech", "rung_green_1", "rung_green_2", "rung_green_3", "rung_green_4"] },
 	{ title: "Story: a tree closes (seal scenes)", ids: ["seal_biotech", "seal_greentech", "tip_seal"] },
 	{ title: "Story: Cass, in her own scene", ids: ["cass_night_shift"] },
+	{ title: "After hours: Bea's fern", ids: ["ah_fern_third", "ah_fern_tenth", "ah_fern_again1", "ah_fern_again2", "ah_fern_again3"] },
+	{ title: "After hours: Mel's fish tank", ids: ["ah_tank_third", "ah_tank_tenth", "ah_tank_again1", "ah_tank_again2", "ah_tank_again3"] },
+	{ title: "After hours: Cass's coffee machine", ids: ["ah_coffee_third", "ah_coffee_tenth", "ah_coffee_again1", "ah_coffee_again2", "ah_coffee_again3"] },
+	{ title: "After hours: the book on Luci's desk", ids: ["ah_book_third", "ah_book_tenth", "ah_book_again1", "ah_book_again2", "ah_book_again3"] },
 ];
 const storyById = new Map(story.map((s) => [s.id, s]));
 const grouped = new Set(storyGroups.flatMap((g) => g.ids));

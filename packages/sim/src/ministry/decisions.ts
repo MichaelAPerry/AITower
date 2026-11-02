@@ -24,6 +24,7 @@ import { earn, spend } from "../economy/ledger";
 import { failRack } from "../reliability/reliabilityStep";
 import { getDef } from "../world/defs";
 import { addAffinity } from "../progression/affinity";
+import { ITEM_IDS } from "../afterHours/spots";
 import { addResidue, addSp, isSealed, leadingTree, rungsHeld, sealOf } from "../progression/soul";
 import { expireModifiers, modifierLabel } from "./modifiers";
 
@@ -113,6 +114,8 @@ export function storyHolds(state: SimState, content: ContentDB, e: EventDef): bo
 			return isSealed(state, content, t.tree);
 		case "sealRise":
 			return SEALED_TREES.some((tree) => sealOf(state, tree) > t.above);
+		case "afterHours":
+			return false; // opened by the click on the item
 	}
 }
 
@@ -245,6 +248,14 @@ function applyEffect(state: SimState, content: ContentDB, e: EventEffect, events
 		case "sp":
 			addSp(state, e.path, e.amount);
 			break;
+		case "buyUpgrade": {
+			// The price was checked when the choice was filed (`planResolveDecision`).
+			const s = ITEM_IDS.includes(e.item) ? state.afterHours[e.item] : undefined;
+			if (!s || s.bought) break;
+			s.bought = true;
+			spend(state, "construction", content.balance.afterHours.price);
+			break;
+		}
 	}
 }
 
@@ -271,6 +282,8 @@ export function planResolveDecision(ctx: PlanCtx, decisionId: number, choiceId: 
 	if (!def) return reject("decision refers to unknown event");
 	const choice = def.choices.find((c) => c.id === choiceId);
 	if (!choice) return reject("no such choice");
+	// An after-hours upgrade is paid for by the Yes that buys it: refuse the Yes when the money is not there.
+	if (choice.effects.some((e) => e.type === "buyUpgrade") && state.cash < content.balance.afterHours.price) return reject(`the upgrade costs $${content.balance.afterHours.price.toLocaleString("en-US")}`);
 	return accept(0, (events) => resolveNow(state, content, d, def, choice, events));
 }
 

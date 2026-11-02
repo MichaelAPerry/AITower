@@ -1031,5 +1031,797 @@
     "effects": []
    }
   ]
+ },
+ {
+  "id": "ah_fern_third",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Nigel the Fern",
+  "body": "Bea's fern by the lobby window.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "bea",
+    "text": "Oh you noticed nigel my fern Isn't he great!"
+   },
+   {
+    "who": "bea",
+    "text": "I'm glad you're watering him are you going to keep it up?"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "Keep it up.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Oh thanks! You're the best"
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not promising anything.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Oh come on, just cause I asked?"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_fern_tenth",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Nigel Deserves Better",
+  "body": "Bea and the fern again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "bea",
+    "text": "Nigel is doing ok, but I think he deserves better. You think we could upgrade his pot, and give him an automatic watering and feeding huh?"
+   },
+   {
+    "who": "bea",
+    "text": "Isn't he worth it!"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "$1,000,000",
+    "outcome": "Bought.",
+    "effects": [
+     {
+      "type": "buyUpgrade",
+      "item": "fern"
+     }
+    ],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "You're my hero!"
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not now.",
+    "outcome": "Not now.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "bea",
+      "text": "Well, I left the catalogue on your desk."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_fern_again1",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Nigel Deserves Better",
+  "body": "Bea and the fern again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ buy the bigger pot for the fern ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_fern_again2",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Nigel Deserves Better",
+  "body": "Bea and the fern again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ (buy the fern's new pot) ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_fern_again3",
+  "category": "story",
+  "advisor": "bea",
+  "title": "Nigel Deserves Better",
+  "body": "Bea and the fern again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ you could buy the pot with automatic watering ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_tank_third",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Fido the Fish",
+  "body": "Mel's fish tank on her desk.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · MEL'S CORNER",
+  "lines": [
+   {
+    "who": "mel",
+    "text": "You're the one feeding fido!   Yes that's his name, I know it's kinda weird for a fish, but I love em!"
+   },
+   {
+    "who": "mel",
+    "text": "Can you keep it up!? Sometimes I forget..."
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "Keep it up.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Thanks!"
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not promising anything.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Oh, I guess I'll have to remember."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_tank_tenth",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Fido's Upgrade",
+  "body": "Mel and the fish tank again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · MEL'S CORNER",
+  "lines": [
+   {
+    "who": "mel",
+    "text": "Mr. Fido is doing good, but look at these new bio-enhancements we can add. He'll be so genetically perfect can we?"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "$1,000,000",
+    "outcome": "Bought.",
+    "effects": [
+     {
+      "type": "buyUpgrade",
+      "item": "tank"
+     }
+    ],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Yay! It will be awesome!"
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not now.",
+    "outcome": "Not now.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "mel",
+      "text": "Well, I left the feature set on your desk."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_tank_again1",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Fido's Upgrade",
+  "body": "Mel and the fish tank again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · MEL'S CORNER",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ buy the bio-enhanced tank ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_tank_again2",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Fido's Upgrade",
+  "body": "Mel and the fish tank again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · MEL'S CORNER",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ (buy the tank upgrade) ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_tank_again3",
+  "category": "story",
+  "advisor": "mel",
+  "title": "Fido's Upgrade",
+  "body": "Mel and the fish tank again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "B1 · MEL'S CORNER",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ you could buy Fido's bio-enhancements ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_coffee_third",
+  "category": "story",
+  "advisor": "cass",
+  "title": "The Coffee Corner",
+  "body": "Cass's coffee machine in the lobby.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "cass",
+    "text": "I wonder who was making the coffee, not the best but we need it."
+   },
+   {
+    "who": "cass",
+    "text": "If you keep making it, I'll keep drinking it!"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "Keep it up.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Java hero right here."
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not promising anything.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Time for me to figure out the automatic setting."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_coffee_tenth",
+  "category": "story",
+  "advisor": "cass",
+  "title": "A Better Coffee Maker",
+  "body": "Cass and the coffee machine again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "cass",
+    "text": "I begged Luci and she said it's up to you, but I've been eyeing this new coffee maker.  It does cappuccino, steamed milk, everything, think we can spring for it?"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "$1,000,000",
+    "outcome": "Bought.",
+    "effects": [
+     {
+      "type": "buyUpgrade",
+      "item": "coffee"
+     }
+    ],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Well, you know what makes me happy."
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not now.",
+    "outcome": "Not now.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "cass",
+      "text": "Ugh, cheapskate."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_coffee_again1",
+  "category": "story",
+  "advisor": "cass",
+  "title": "A Better Coffee Maker",
+  "body": "Cass and the coffee machine again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ buy the coffee machine ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_coffee_again2",
+  "category": "story",
+  "advisor": "cass",
+  "title": "A Better Coffee Maker",
+  "body": "Cass and the coffee machine again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ (buy the cappuccino machine) ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_coffee_again3",
+  "category": "story",
+  "advisor": "cass",
+  "title": "A Better Coffee Maker",
+  "body": "Cass and the coffee machine again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F1 · LOBBY",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ you could buy the new coffee maker ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_book_third",
+  "category": "story",
+  "advisor": "luci",
+  "title": "The Ledger",
+  "body": "The ledger on Luci's desk.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LUCI'S OFFICE",
+  "lines": [
+   {
+    "who": "luci",
+    "text": "You're the one who's been coming in and checking the ledger."
+   },
+   {
+    "who": "luci",
+    "text": "Unusual, but I appreciate an operator who does the numbers"
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "Keep it up.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "If you ever want to talk numbers..."
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not promising anything.",
+    "outcome": "Noted.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Oh, guess I was barking up the wrong tree."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_book_tenth",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Get Licensed",
+  "body": "Luci and the ledger again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LUCI'S OFFICE",
+  "lines": [
+   {
+    "who": "luci",
+    "text": "Well, you obviously care about our financial future.  But I need you to get your license if you keep it up.  Don't worry, it comes with perks and I get to be your instructor.  There is a small fee."
+   }
+  ],
+  "recommended": "yes",
+  "choices": [
+   {
+    "id": "yes",
+    "label": "Yes",
+    "hint": "$1,000,000",
+    "outcome": "Bought.",
+    "effects": [
+     {
+      "type": "buyUpgrade",
+      "item": "book"
+     }
+    ],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Excellent, class starts tonight.  Don't be late."
+     }
+    ]
+   },
+   {
+    "id": "no",
+    "label": "No",
+    "hint": "Not now.",
+    "outcome": "Not now.",
+    "effects": [],
+    "reply": [
+     {
+      "who": "luci",
+      "text": "Well, hands off the books unless you're licensed."
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "ah_book_again1",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Get Licensed",
+  "body": "Luci and the ledger again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LUCI'S OFFICE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ buy the license ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_book_again2",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Get Licensed",
+  "body": "Luci and the ledger again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LUCI'S OFFICE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ (buy the license and the certificate) ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
+ },
+ {
+  "id": "ah_book_again3",
+  "category": "story",
+  "advisor": "luci",
+  "title": "Get Licensed",
+  "body": "Luci and the ledger again.",
+  "weight": 1,
+  "minTier": 1,
+  "cooldownDays": 0,
+  "trigger": {
+   "kind": "afterHours"
+  },
+  "location": "F2 · LUCI'S OFFICE",
+  "lines": [
+   {
+    "who": "narrator",
+    "text": "[ you could sign up for the license class ]"
+   }
+  ],
+  "recommended": "ok",
+  "choices": [
+   {
+    "id": "ok",
+    "label": "Got it.",
+    "hint": "Moving on.",
+    "outcome": "The scene ends and the day goes on.",
+    "effects": []
+   }
+  ]
  }
 ]

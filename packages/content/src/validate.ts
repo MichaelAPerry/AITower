@@ -2,7 +2,8 @@
  * Hand-written content validation (no schema library). Returns human-readable
  * problems; an empty array means the DB is valid.
  */
-import type { AdvisorId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
+import { AFTER_HOURS_ITEM_IDS } from "./schema";
+import type { AdvisorId, AfterHoursItemId, AscensionPath, SceneLine, StoryTrigger, BuildCategory, ContentDB, OrganoidSpec, EventChoice, EventDef, EventEffect, FacilityDef, FacilityKind, JobKind, Scenario, TechBranch, TechLane, TechLine, TechNode } from "./schema";
 import { isWetware } from "./catalogue";
 
 const KIND_CATEGORY: Record<FacilityKind, BuildCategory> = {
@@ -636,6 +637,8 @@ function validateTrigger(p: Problems, w: string, t: StoryTrigger): void {
 		case "sealRise":
 			num(p, `${w}.above`, t.above, { min: 0 });
 			break;
+		case "afterHours":
+			break;
 		default:
 			p.push(`${w}.kind: unknown trigger "${String((t as { kind?: unknown })?.kind)}"`);
 	}
@@ -679,6 +682,9 @@ function validateEffect(p: Problems, w: string, e: EventEffect): void {
 		case "seal":
 			if (!SEALED.includes((e as { path: string }).path)) p.push(`${w}.path: only biotech or greentech can be sealed`);
 			num(p, `${w}.amount`, (e as { amount: number }).amount, { min: -100, max: 100 });
+			break;
+		case "buyUpgrade":
+			if (!AFTER_HOURS_ITEM_IDS.includes((e as { item: AfterHoursItemId }).item)) p.push(`${w}.item: unknown after-hours item`);
 			break;
 		case "sp":
 			if (!PATHS.includes((e as { path: AscensionPath }).path)) p.push(`${w}.path: unknown path`);
@@ -839,6 +845,14 @@ function validateBioBalance(p: Problems, db: ContentDB): void {
 	if (!e?.absorbed) p.push("balance.endings: absorbed is required");
 	else num(p, "balance.endings.absorbed.corruption", e.absorbed.corruption, { gt: 0, max: 1 });
 	validateSoul(p, b);
+	const ah = b.afterHours;
+	if (!ah) p.push("balance.afterHours: missing");
+	else {
+		num(p, "balance.afterHours.price", ah.price, { gt: 0 });
+		num(p, "balance.afterHours.thirdDay", ah.thirdDay, { min: 1, int: true });
+		num(p, "balance.afterHours.tenthDay", ah.tenthDay, { min: 1, int: true });
+		if (ah.tenthDay < ah.thirdDay) p.push("balance.afterHours.tenthDay: must not be before thirdDay");
+	}
 }
 
 function validateSoul(p: Problems, b: ContentDB["balance"]): void {

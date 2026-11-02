@@ -1,4 +1,5 @@
 /** Facility placement rules (also exposed as the pure `canPlace`). */
+import { afterHoursBlock } from "../afterHours/spots";
 import { type FacilityDef, isRetrofitOnly } from "@aitower/content";
 import { placeBlock } from "../progression/access";
 import { scarOnPlace } from "../progression/soul";
@@ -39,6 +40,8 @@ export function siteBlock(s: SimState, d: FacilityDef, floor: number, x: number,
 		if (!s.slab[i]) return "needs floor slab under every tile";
 		if (s.facilityAt[i] >= 0 && s.facilityAt[i] !== except) return "overlaps another facility";
 		if (s.liftAt[i] >= 0) return "overlaps a lift shaft";
+		const spot = afterHoursBlock(s, floor, cx, cx);
+		if (spot) return spot;
 		if (s.power[i]) hasPower = true;
 		if (s.coolant[i]) hasCoolant = true;
 		if (s.nutrient[i]) hasNutrient = true;

@@ -3,7 +3,7 @@
  * Names, texts and the hidden flag live in packages/content/src/data/achievements.json; this file adds the check, the moment and the icon.
  */
 import { type AchievementText, achievementContent } from "@aitower/content";
-import { ADVISOR_KEYS, type AdvisorKey, type Profile, loadLessonProgress, loadProfile, recordAchievement, recordEpilogue } from "@aitower/shared";
+import { ADVISOR_KEYS, type AdvisorKey, type Profile, loadLessonProgress, loadProfile, recordAchievement, recordEpilogue, recordOffDuty } from "@aitower/shared";
 import type { SimView } from "@aitower/sim";
 
 /** The moments the app checks (spec section 1). */
@@ -148,6 +148,9 @@ export function awardFor(moment: AchievementMoment, view: SimView, opts: AwardOp
 	const env = achEnv(opts.content, storage);
 	const ending = view.gameOver ? (view.gameOver.ending ?? (view.gameOver.kind === "victory" ? null : view.gameOver.kind)) : null;
 	for (const d of evaluate(moment, view, env, defs)) if (recordAchievement(d.id, view.day, ending, storage).first) out.won.push(d);
+	// A casual portrait comes with buying that character's after-hours upgrade (docs/AFTER_HOURS.md).
+	if (moment !== "lessonEnd")
+		for (const item of view.afterHours.items) if (item.bought && !env.profile.offDuty[item.advisor].casual && recordOffDuty(item.advisor, storage)) out.portraits.push(item.advisor);
 	out.bed = !bedBefore && bedComplete(loadProfile(storage), defs);
 	return out;
 }

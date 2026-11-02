@@ -384,6 +384,8 @@ export interface Balance {
 	};
 	/** The Soul (docs/SOUL.md): Singularity points and secret seal numbers. */
 	soul: SoulBalance;
+	/** The four after-hours easter eggs (docs/AFTER_HOURS.md). */
+	afterHours: AfterHoursBalance;
 	/** Greentech economy (M4). */
 	green: {
 		/** $ per kWh of heat sold by heat exporters. */
@@ -689,6 +691,20 @@ export type AdvisorId = "cass" | "bea" | "mel" | "luci";
 /** Each tree's champion: she argues for it and speaks when it reaches a new rung. */
 export const CHAMPION: Record<AscensionPath, AdvisorId> = { synthetic: "luci", biotech: "mel", greentech: "bea" };
 
+/** The four clickable after-hours items: Bea's fern, Mel's fish tank, Cass's coffee machine and the book on Luci's desk. */
+export type AfterHoursItemId = "fern" | "tank" | "coffee" | "book";
+export const AFTER_HOURS_ITEM_IDS: readonly AfterHoursItemId[] = ["fern", "tank", "coffee", "book"];
+
+/** Tuning for the after-hours easter eggs (docs/AFTER_HOURS.md). */
+export interface AfterHoursBalance {
+	/** What the upgrade of an item costs. */
+	price: number;
+	/** Consecutive days with a click that trigger the "third day" dialogue. */
+	thirdDay: number;
+	/** Consecutive days with a click that offer the upgrade. */
+	tenthDay: number;
+}
+
 /** Tuning for Singularity points and seals (docs/REFRAME.md). */
 export interface SoulBalance {
 	/** SP that ends the game with that tree. */
@@ -728,7 +744,9 @@ export type StoryTrigger =
 	/** The first time that tree's seal reaches `soul.sealMax`. */
 	| { kind: "seal"; tree: SealedTree }
 	/** The first time any tree's seal is above `above` (the seal tip). The starter tower begins at 10 and the bar shows whole numbers, so 10.5 is the first visible rise. */
-	| { kind: "sealRise"; above: number };
+	| { kind: "sealRise"; above: number }
+	/** Never issued by the story check: the sim opens these when the player clicks an after-hours item (docs/AFTER_HOURS.md). */
+	| { kind: "afterHours" };
 export const ADVISOR_IDS: readonly AdvisorId[] = ["cass", "bea", "mel", "luci"];
 
 /** One specialist's vote on a multi-area decision: backs the recommended option (approve) or not. */
@@ -764,6 +782,8 @@ export type EventEffect =
 	| { type: "affinity"; path: AscensionPath; amount: number }
 	/** Hidden: add to a tree's seal residue (negative cleans it). Never shown as a chip. */
 	| { type: "seal"; path: SealedTree; amount: number }
+	/** Hidden: buy the upgrade of an after-hours item (`balance.afterHours.price`). The choice is refused when the cash is not there. */
+	| { type: "buyUpgrade"; item: AfterHoursItemId }
 	/** Add (or remove) Singularity points of a tree directly (Mel's shortcuts, Cass's slow week). */
 	| { type: "sp"; path: AscensionPath; amount: number };
 

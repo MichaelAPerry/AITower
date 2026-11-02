@@ -135,6 +135,7 @@ export const balance: Balance = {
 	automation: { partsBatch: 5, foremanPerHour: 1 },
 	ascension: { minTier: 5 },
 	endings: { absorbed: { corruption: 1 } },
+	afterHours: { price: 1000000, thirdDay: 3, tenthDay: 10 },
 	soul: { spTarget: 1000, spPerPflopHour: 0.0014, spWeights: { synthetic: 2, biotech: 1.5, greentech: 2.5 }, greenFloor: 0.5, sealMax: 100, residuePerDay: 0.03, objectionScar: 10, },
 };
 

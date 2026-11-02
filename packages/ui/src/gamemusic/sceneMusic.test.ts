@@ -23,12 +23,12 @@ describe("scene -> track mapping", () => {
 	it("an unknown scene falls back to warm", () => {
 		expect(trackForScene("something_new")).toBe("warm");
 	});
-	it("covers every real scene with one of the two songs (19 story + 14 gallery)", () => {
+	it("covers every real scene with one of the two songs (39 story + 14 gallery)", () => {
 		const ids = [...storyIds(), ...galleryIds()];
-		expect(ids.length).toBe(33);
+		expect(ids.length).toBe(53);
 		const counts = { warm: 0, quiet: 0 };
 		for (const id of ids) counts[trackForScene(id)]++;
-		expect(counts).toEqual({ warm: 18, quiet: 15 });
+		expect(counts).toEqual({ warm: 38, quiet: 15 });
 	});
 	it("wants the tower loop in play, the scene's song in a scene, and silence off-game", () => {
 		expect(wantedSong({ active: true, sceneId: null })).toBe("tower");

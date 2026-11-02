@@ -162,6 +162,7 @@ export function effectChip(e: EventEffect): string {
 			return `${pathLabel(e.path)} ${sign(e.amount)}${Math.abs(e.amount)}`;
 		// The Soul's effects are secret or narrative: never a chip.
 		case "seal":
+		case "buyUpgrade":
 		case "sp":
 			return "";
 	}

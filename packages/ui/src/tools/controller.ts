@@ -159,6 +159,12 @@ export function createToolController(store: GameStore, content: ContentDB, opts:
 				if (e.button !== LEFT || !cell) return;
 				hover = cell;
 				if (tool.kind === "select") {
+					// An after-hours item (the fern, the fish tank, the coffee machine, the book): a click is counted, nothing is shown.
+					const item = view.afterHours.items.find((i) => i.visible && i.floor === cell.floor && cell.x >= i.x && cell.x < i.x + i.width);
+					if (item && !pickAt(view, cell)) {
+						store.dispatch({ type: "clickAfterHours", item: item.id });
+						return;
+					}
 					store.setSelection(pickAt(view, cell));
 					return;
 				}

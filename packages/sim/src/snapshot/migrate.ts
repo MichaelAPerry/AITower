@@ -38,9 +38,10 @@
  *    gift and inbox state all go. Racks no longer come from the menu: placed OC-0 / IM-2 / IM-3 / Mel's Cortex map to OC-1 / LC-4 / ML-1 /
  *    OC-3 on the same tiles, NT-1 is sold back at the demolish refund, and removed tech nodes are refunded as research points.
  *  - v15 → v16 (achievements, docs/ACHIEVEMENTS.md): `uptimeStreak` starts at 0 (a save loaded mid-streak restarts the count).
- *  - v16 → v17 (bonds removed): the advisor `bonds` go.
+ *  - v16 → v17 (after hours, docs/AFTER_HOURS.md): the advisor `bonds` go; `afterHours` (click streaks and purchases) starts fresh.
  */
 import { defaultAutomation } from "../automation/policy";
+import { initialAfterHours } from "../afterHours/spots";
 import { mixSeed } from "../core/rng";
 
 export const SNAPSHOT_VERSION = 17;
@@ -440,9 +441,10 @@ function migrateV15(state: RawState): RawState {
 	return state;
 }
 
-/** Relationship numbers are gone (docs/AFTER_HOURS.md). */
+/** Relationship numbers are gone, and the after-hours easter eggs start fresh (docs/AFTER_HOURS.md). */
 function migrateV16(state: RawState): RawState {
 	delete state.bonds;
+	if (!isObj(state.afterHours)) state.afterHours = initialAfterHours();
 	return state;
 }
 

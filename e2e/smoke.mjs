@@ -109,8 +109,8 @@ async function run(url) {
 		assert((await page.getByText("Restart tutorial").count()) === 0 && (await page.locator(".ui-coach").count()) === 0, "the old tutorial is gone");
 		await page.getByRole("button", { name: /ACHIEVEMENTS/ }).click();
 		await page.locator(".ach-list").waitFor();
-		assert((await page.locator("[data-ach-count]").innerText()).trim() === "0 / 18", "a new profile shows 0 / 18");
-		assert((await page.locator(".ach-row").count()) === 18, "eighteen achievement rows");
+		assert((await page.locator("[data-ach-count]").innerText()).trim() === "0 / 16", "a new profile shows 0 / 16");
+		assert((await page.locator(".ach-row").count()) === 16, "sixteen achievement rows");
 		assert((await page.locator(".ach-row.is-hidden").count()) === 2, "two hidden rows (There is another way this ends.)");
 		await page.getByRole("tab", { name: "GALLERY" }).click();
 		await page.locator(".ach-frames").first().waitFor();

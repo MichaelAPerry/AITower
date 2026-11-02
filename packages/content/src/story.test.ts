@@ -25,7 +25,7 @@ describe("rung-up scenes", () => {
 	}
 	it("the story file holds the intro, both objections, the twelve rung scenes, Cass's night shift, two seal scenes, and the seal tip", () => {
 		const ids = content.events.filter((x) => x.category === "story").map((x) => x.id);
-		expect(ids).toHaveLength(19);
+		expect(ids).toHaveLength(39); // 19 + the 20 after-hours scenes
 		expect(ids).toContain("st_intro");
 	});
 
@@ -43,6 +43,58 @@ describe("rung-up scenes", () => {
 
 	it("every ending has a fallback epilogue", () => {
 		for (const e of content.endings) expect(e.epilogue?.fallback, e.id).toBeTruthy();
+	});
+});
+
+describe("after-hours scenes", () => {
+	const get = (id: string) => content.events.find((x) => x.id === id);
+	const say = (id: string) => (get(id)?.lines ?? []).map((l) => `${l.who}: ${l.text}`);
+	const reply = (id: string, choice: string) => (get(id)?.choices.find((c) => c.id === choice)?.reply ?? []).map((l) => l.text);
+
+	it("every item has a third-day scene, a tenth-day scene and three lead-in lines, all with the afterHours trigger", () => {
+		for (const item of ["fern", "tank", "coffee", "book"]) {
+			for (const s of ["third", "tenth", "again1", "again2", "again3"]) expect(get(`ah_${item}_${s}`)?.trigger, `${item} ${s}`).toEqual({ kind: "afterHours" });
+			for (const s of ["third", "tenth"]) expect(get(`ah_${item}_${s}`)?.choices.map((c) => c.id), `${item} ${s}`).toEqual(["yes", "no"]);
+		}
+		expect(get("ah_fern_third")?.advisor).toBe("bea");
+		expect(get("ah_tank_third")?.advisor).toBe("mel");
+		expect(get("ah_coffee_third")?.advisor).toBe("cass");
+		expect(get("ah_book_third")?.advisor).toBe("luci");
+	});
+
+	it("only the Yes of a tenth-day scene buys", () => {
+		for (const item of ["fern", "tank", "coffee", "book"]) {
+			expect(get(`ah_${item}_tenth`)?.choices.find((c) => c.id === "yes")?.effects).toEqual([{ type: "buyUpgrade", item }]);
+			expect(get(`ah_${item}_tenth`)?.choices.find((c) => c.id === "no")?.effects).toEqual([]);
+			for (const c of get(`ah_${item}_third`)?.choices ?? []) expect(c.effects, `${item} third ${c.id}`).toEqual([]);
+		}
+	});
+
+	it("carries the owner's words (spelling fixed on request), line for line", () => {
+		expect(say("ah_fern_third")).toEqual(["bea: Oh you noticed nigel my fern Isn't he great!", "bea: I'm glad you're watering him are you going to keep it up?"]);
+		expect(reply("ah_fern_third", "yes")).toEqual(["Oh thanks! You're the best"]);
+		expect(reply("ah_fern_third", "no")).toEqual(["Oh come on, just cause I asked?"]);
+		expect(say("ah_fern_tenth")[1]).toBe("bea: Isn't he worth it!");
+		expect(reply("ah_fern_tenth", "no")).toEqual(["Well, I left the catalogue on your desk."]);
+		expect(say("ah_tank_tenth")[0]).toContain("Mr. Fido is doing good, but look at these new bio-enhancements we can add.");
+		expect(reply("ah_tank_tenth", "yes")).toEqual(["Yay! It will be awesome!"]);
+		expect(reply("ah_coffee_tenth", "no")).toEqual(["Ugh, cheapskate."]);
+		expect(say("ah_book_third")[0]).toBe("luci: You're the one who's been coming in and checking the ledger.");
+		expect(say("ah_book_third")[1]).toBe("luci: Unusual, but I appreciate an operator who does the numbers");
+		expect(say("ah_book_tenth")[0]).toContain("Well, you obviously care about our financial future.");
+		expect(reply("ah_book_tenth", "yes")).toEqual(["Excellent, class starts tonight.  Don't be late."]);
+	});
+
+	it("the lead-in lines are the placeholders, and say nothing about bonds or after hours", () => {
+		expect(say("ah_coffee_again1")).toEqual(["narrator: [ buy the coffee machine ]"]);
+		for (const e of content.events.filter((x) => x.id.startsWith("ah_"))) expect(JSON.stringify(e.lines)).not.toMatch(/bond|after.?hours/i);
+	});
+
+	it("the price and the day counts are in the balance and validated", () => {
+		expect(content.balance.afterHours).toEqual({ price: 1_000_000, thirdDay: 3, tenthDay: 10 });
+		const db = loadContent();
+		db.balance.afterHours.tenthDay = 2;
+		expect(validateContent(db).join("\n")).toMatch(/tenthDay/);
 	});
 });
 

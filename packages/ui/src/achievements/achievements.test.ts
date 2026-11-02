@@ -23,6 +23,8 @@ interface Spec {
 	over?: Over | null;
 	seal?: { biotech?: number; greentech?: number };
 	rungs?: number[];
+	/** Advisors whose after-hours upgrade is bought. */
+	bought?: ("luci" | "mel" | "bea" | "cass")[];
 	loan?: number;
 	corruption?: number;
 	streak?: number;
@@ -42,6 +44,7 @@ const view = (s: Spec = {}): SimView =>
 		corruption: s.corruption ?? 0,
 		uptimeStreak: s.streak ?? 0,
 		reports: s.reports ?? [],
+		afterHours: { price: 1e6, items: (["luci", "mel", "bea", "cass"] as const).map((a) => ({ id: a, advisor: a, name: a, floor: 1, x: 0, width: 2, visible: true, streak: 0, clickedToday: false, bought: !!s.bought?.includes(a) })) },
 		soul: {
 			seal: { biotech: 0, greentech: 0, ...s.seal },
 			sealMax: 100,
@@ -249,6 +252,39 @@ describe("awarding", () => {
 		expect(awardFor("gameOver", over, { storage: s, epilogue: "cass" }).won.map((d) => d.id)).toContain("heard_out");
 	});
 
+});
+
+describe("off-duty portraits come with the after-hours upgrades", () => {
+	const unlocked = (v: SimView, moment: "gameOver" | "dayClose" | "decisionResolved" = "decisionResolved", s = memory()) => awardFor(moment, v, { storage: s }).portraits;
+
+	it("each bought upgrade unlocks that character's portrait, and only hers", () => {
+		expect(unlocked(view({}))).toEqual([]);
+		expect(unlocked(view({ bought: ["bea"] }))).toEqual(["bea"]);
+		expect(unlocked(view({ bought: ["mel"] }))).toEqual(["mel"]);
+		expect(unlocked(view({ bought: ["cass"] }))).toEqual(["cass"]);
+		expect(unlocked(view({ bought: ["luci"] }))).toEqual(["luci"]);
+		expect(unlocked(view({ bought: ["luci", "cass"] }), "dayClose")).toEqual(["luci", "cass"]);
+	});
+
+	it("an ending, a long streak or a rich tower unlock nothing on their own any more", () => {
+		expect(unlocked(view({ over: win("singularity"), streak: 30 }), "gameOver")).toEqual([]);
+		expect(unlocked(view({ over: win("flesh"), corruption: 0.1 }), "gameOver")).toEqual([]);
+		expect(unlocked(view({ over: win("garden"), seal: { greentech: 0 } }), "gameOver")).toEqual([]);
+		expect(unlocked(view({ streak: 25 }), "dayClose")).toEqual([]);
+	});
+
+	it("latches, and is announced once", () => {
+		const s = memory();
+		const v = view({ bought: ["bea"] });
+		expect(awardFor("decisionResolved", v, { storage: s }).portraits).toEqual(["bea"]);
+		expect(awardFor("decisionResolved", v, { storage: s }).portraits).toEqual([]);
+		expect(loadProfile(s).offDuty.bea.casual).toBe(true);
+	});
+
+	it("not in lessons or sandbox", () => {
+		expect(unlocked(view({ bought: ["bea"], sandbox: true }))).toEqual([]);
+		expect(unlocked(view({ bought: ["bea"], lesson: { id: "first_watt" } }))).toEqual([]);
+	});
 });
 
 describe("the bed set", () => {

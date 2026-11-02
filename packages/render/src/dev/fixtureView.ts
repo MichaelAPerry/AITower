@@ -241,6 +241,12 @@ export function createFixture(startMinute = 600, minutesPerTick = 1): Fixture {
 		nutrientNets: [],
 		corruption: 0,
 		uptimeStreak: 0,
+		afterHours: { price: 1000000, items: [
+			{ id: "tank", advisor: "mel", name: "Fish tank", floor: -1, x: 36, width: 4, visible: true, streak: 0, clickedToday: false, bought: false },
+			{ id: "fern", advisor: "bea", name: "Fern", floor: 1, x: 4, width: 2, visible: true, streak: 0, clickedToday: false, bought: false },
+			{ id: "coffee", advisor: "cass", name: "Coffee machine", floor: 1, x: 36, width: 3, visible: true, streak: 0, clickedToday: false, bought: false },
+			{ id: "book", advisor: "luci", name: "Book", floor: 2, x: 36, width: 4, visible: false, streak: 0, clickedToday: false, bought: false },
+		] },
 		contaminatedShare: 0,
 		irreversible: false,
 		path: null,

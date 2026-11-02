@@ -77,6 +77,11 @@ export function StoryScene({ store, decision: d, reduced }: { store: GameStore; 
 	};
 	const choose = (choiceId: string): void => {
 		const c = d.choices.find((x) => x.id === choiceId);
+		// An upgrade is paid for by its Yes: say so here, before the reply plays, when the cash is not there.
+		if (c?.cost !== undefined && store.get().view.cash < c.cost) {
+			pushNotice({ text: `Needs $${c.cost.toLocaleString("en-US")}`, severity: "warn", key: `decision:${d.id}` });
+			return;
+		}
 		if (c?.reply?.length) setPhase({ kind: "reply", choiceId, i: 0 });
 		else file(choiceId);
 	};

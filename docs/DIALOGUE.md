@@ -22,14 +22,18 @@ Every line an advisor, the narrator or a story screen shows the player, in game 
 6. [Story: Greentech tree, Bea's Garden](#6-story-greentech-tree-beas-garden)
 7. [Story: a tree closes (seal scenes)](#7-story-a-tree-closes-seal-scenes)
 8. [Story: Cass, in her own scene](#8-story-cass-in-her-own-scene)
-9. [Endings](#9-endings)
-10. [Decision memos: Cass](#10-decision-memos-cass)
-11. [Decision memos: Bea](#11-decision-memos-bea)
-12. [Decision memos: Mel](#12-decision-memos-mel)
-13. [Decision memos: Luci](#13-decision-memos-luci)
-14. [Lessons](#14-lessons)
-15. [New-game screen: site descriptions](#15-new-game-screen-site-descriptions)
-16. [Achievements and the off-duty gallery](#16-achievements-and-the-off-duty-gallery)
+9. [After hours: Bea's fern](#9-after-hours-beas-fern)
+10. [After hours: Mel's fish tank](#10-after-hours-mels-fish-tank)
+11. [After hours: Cass's coffee machine](#11-after-hours-casss-coffee-machine)
+12. [After hours: the book on Luci's desk](#12-after-hours-the-book-on-lucis-desk)
+13. [Endings](#13-endings)
+14. [Decision memos: Cass](#14-decision-memos-cass)
+15. [Decision memos: Bea](#15-decision-memos-bea)
+16. [Decision memos: Mel](#16-decision-memos-mel)
+17. [Decision memos: Luci](#17-decision-memos-luci)
+18. [Lessons](#18-lessons)
+19. [New-game screen: site descriptions](#19-new-game-screen-site-descriptions)
+20. [Achievements and the off-duty gallery](#20-achievements-and-the-off-duty-gallery)
 
 ## 1. Title crawl
 
@@ -555,7 +559,452 @@ Choice `order`:
 - [cass_night_shift.order.r2] cass: But I won't say no. Thanks.
 - [cass_night_shift.order.r3 mood=displeased] luci: I'll find the funds.  I guess.
 
-## 9. Endings
+## 9. After hours: Bea's fern
+
+
+### `ah_fern_third`
+
+> Speaker: Bea. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_third.title] Title: Nigel the Fern
+- [ah_fern_third.location] Location: F1 · LOBBY
+- [ah_fern_third.caption] Caption: Bea's fern by the lobby window.
+
+Dialogue before the choice:
+
+- [ah_fern_third.l1] bea: Oh you noticed nigel my fern Isn't he great!
+- [ah_fern_third.l2] bea: I'm glad you're watering him are you going to keep it up?
+
+Choice `yes` (recommended):
+
+- [ah_fern_third.yes.label] Label: Yes
+- [ah_fern_third.yes.hint] Hint: Keep it up.
+- [ah_fern_third.yes.outcome] Outcome: Noted.
+- [ah_fern_third.yes.r1] bea: Oh thanks! You're the best
+
+Choice `no`:
+
+- [ah_fern_third.no.label] Label: No
+- [ah_fern_third.no.hint] Hint: Not promising anything.
+- [ah_fern_third.no.outcome] Outcome: Noted.
+- [ah_fern_third.no.r1] bea: Oh come on, just cause I asked?
+
+### `ah_fern_tenth`
+
+> Speaker: Bea. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_tenth.title] Title: Nigel Deserves Better
+- [ah_fern_tenth.location] Location: F1 · LOBBY
+- [ah_fern_tenth.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_tenth.l1] bea: Nigel is doing ok, but I think he deserves better. You think we could upgrade his pot, and give him an automatic watering and feeding huh?
+- [ah_fern_tenth.l2] bea: Isn't he worth it!
+
+Choice `yes` (recommended):
+
+- [ah_fern_tenth.yes.label] Label: Yes
+- [ah_fern_tenth.yes.hint] Hint: $1,000,000
+- [ah_fern_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=fern.
+- [ah_fern_tenth.yes.r1] bea: You're my hero!
+
+Choice `no`:
+
+- [ah_fern_tenth.no.label] Label: No
+- [ah_fern_tenth.no.hint] Hint: Not now.
+- [ah_fern_tenth.no.outcome] Outcome: Not now.
+- [ah_fern_tenth.no.r1] bea: Well, I left the catalogue on your desk.
+
+### `ah_fern_again1`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again1.title] Title: Nigel Deserves Better
+- [ah_fern_again1.location] Location: F1 · LOBBY
+- [ah_fern_again1.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again1.l1] narrator: [ buy the bigger pot for the fern ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again1.ok.label] Label: Got it.
+- [ah_fern_again1.ok.hint] Hint: Moving on.
+- [ah_fern_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_fern_again2`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again2.title] Title: Nigel Deserves Better
+- [ah_fern_again2.location] Location: F1 · LOBBY
+- [ah_fern_again2.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again2.l1] narrator: [ (buy the fern's new pot) ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again2.ok.label] Label: Got it.
+- [ah_fern_again2.ok.hint] Hint: Moving on.
+- [ah_fern_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_fern_again3`
+
+> Speaker: Bea. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_fern_again3.title] Title: Nigel Deserves Better
+- [ah_fern_again3.location] Location: F1 · LOBBY
+- [ah_fern_again3.caption] Caption: Bea and the fern again.
+
+Dialogue before the choice:
+
+- [ah_fern_again3.l1] narrator: [ you could buy the pot with automatic watering ]
+
+Choice `ok` (recommended):
+
+- [ah_fern_again3.ok.label] Label: Got it.
+- [ah_fern_again3.ok.hint] Hint: Moving on.
+- [ah_fern_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 10. After hours: Mel's fish tank
+
+
+### `ah_tank_third`
+
+> Speaker: Mel. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_third.title] Title: Fido the Fish
+- [ah_tank_third.location] Location: B1 · MEL'S CORNER
+- [ah_tank_third.caption] Caption: Mel's fish tank on her desk.
+
+Dialogue before the choice:
+
+- [ah_tank_third.l1] mel: You're the one feeding fido!   Yes that's his name, I know it's kinda weird for a fish, but I love em!
+- [ah_tank_third.l2] mel: Can you keep it up!? Sometimes I forget...
+
+Choice `yes` (recommended):
+
+- [ah_tank_third.yes.label] Label: Yes
+- [ah_tank_third.yes.hint] Hint: Keep it up.
+- [ah_tank_third.yes.outcome] Outcome: Noted.
+- [ah_tank_third.yes.r1] mel: Thanks!
+
+Choice `no`:
+
+- [ah_tank_third.no.label] Label: No
+- [ah_tank_third.no.hint] Hint: Not promising anything.
+- [ah_tank_third.no.outcome] Outcome: Noted.
+- [ah_tank_third.no.r1] mel: Oh, I guess I'll have to remember.
+
+### `ah_tank_tenth`
+
+> Speaker: Mel. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_tenth.title] Title: Fido's Upgrade
+- [ah_tank_tenth.location] Location: B1 · MEL'S CORNER
+- [ah_tank_tenth.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_tenth.l1] mel: Mr. Fido is doing good, but look at these new bio-enhancements we can add. He'll be so genetically perfect can we?
+
+Choice `yes` (recommended):
+
+- [ah_tank_tenth.yes.label] Label: Yes
+- [ah_tank_tenth.yes.hint] Hint: $1,000,000
+- [ah_tank_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=tank.
+- [ah_tank_tenth.yes.r1] mel: Yay! It will be awesome!
+
+Choice `no`:
+
+- [ah_tank_tenth.no.label] Label: No
+- [ah_tank_tenth.no.hint] Hint: Not now.
+- [ah_tank_tenth.no.outcome] Outcome: Not now.
+- [ah_tank_tenth.no.r1] mel: Well, I left the feature set on your desk.
+
+### `ah_tank_again1`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again1.title] Title: Fido's Upgrade
+- [ah_tank_again1.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again1.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again1.l1] narrator: [ buy the bio-enhanced tank ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again1.ok.label] Label: Got it.
+- [ah_tank_again1.ok.hint] Hint: Moving on.
+- [ah_tank_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_tank_again2`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again2.title] Title: Fido's Upgrade
+- [ah_tank_again2.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again2.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again2.l1] narrator: [ (buy the tank upgrade) ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again2.ok.label] Label: Got it.
+- [ah_tank_again2.ok.hint] Hint: Moving on.
+- [ah_tank_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_tank_again3`
+
+> Speaker: Mel. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_tank_again3.title] Title: Fido's Upgrade
+- [ah_tank_again3.location] Location: B1 · MEL'S CORNER
+- [ah_tank_again3.caption] Caption: Mel and the fish tank again.
+
+Dialogue before the choice:
+
+- [ah_tank_again3.l1] narrator: [ you could buy Fido's bio-enhancements ]
+
+Choice `ok` (recommended):
+
+- [ah_tank_again3.ok.label] Label: Got it.
+- [ah_tank_again3.ok.hint] Hint: Moving on.
+- [ah_tank_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 11. After hours: Cass's coffee machine
+
+
+### `ah_coffee_third`
+
+> Speaker: Cass. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_third.title] Title: The Coffee Corner
+- [ah_coffee_third.location] Location: F1 · LOBBY
+- [ah_coffee_third.caption] Caption: Cass's coffee machine in the lobby.
+
+Dialogue before the choice:
+
+- [ah_coffee_third.l1] cass: I wonder who was making the coffee, not the best but we need it.
+- [ah_coffee_third.l2] cass: If you keep making it, I'll keep drinking it!
+
+Choice `yes` (recommended):
+
+- [ah_coffee_third.yes.label] Label: Yes
+- [ah_coffee_third.yes.hint] Hint: Keep it up.
+- [ah_coffee_third.yes.outcome] Outcome: Noted.
+- [ah_coffee_third.yes.r1] cass: Java hero right here.
+
+Choice `no`:
+
+- [ah_coffee_third.no.label] Label: No
+- [ah_coffee_third.no.hint] Hint: Not promising anything.
+- [ah_coffee_third.no.outcome] Outcome: Noted.
+- [ah_coffee_third.no.r1] cass: Time for me to figure out the automatic setting.
+
+### `ah_coffee_tenth`
+
+> Speaker: Cass. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_tenth.title] Title: A Better Coffee Maker
+- [ah_coffee_tenth.location] Location: F1 · LOBBY
+- [ah_coffee_tenth.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_tenth.l1] cass: I begged Luci and she said it's up to you, but I've been eyeing this new coffee maker.  It does cappuccino, steamed milk, everything, think we can spring for it?
+
+Choice `yes` (recommended):
+
+- [ah_coffee_tenth.yes.label] Label: Yes
+- [ah_coffee_tenth.yes.hint] Hint: $1,000,000
+- [ah_coffee_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=coffee.
+- [ah_coffee_tenth.yes.r1] cass: Well, you know what makes me happy.
+
+Choice `no`:
+
+- [ah_coffee_tenth.no.label] Label: No
+- [ah_coffee_tenth.no.hint] Hint: Not now.
+- [ah_coffee_tenth.no.outcome] Outcome: Not now.
+- [ah_coffee_tenth.no.r1] cass: Ugh, cheapskate.
+
+### `ah_coffee_again1`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again1.title] Title: A Better Coffee Maker
+- [ah_coffee_again1.location] Location: F1 · LOBBY
+- [ah_coffee_again1.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again1.l1] narrator: [ buy the coffee machine ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again1.ok.label] Label: Got it.
+- [ah_coffee_again1.ok.hint] Hint: Moving on.
+- [ah_coffee_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_coffee_again2`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again2.title] Title: A Better Coffee Maker
+- [ah_coffee_again2.location] Location: F1 · LOBBY
+- [ah_coffee_again2.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again2.l1] narrator: [ (buy the cappuccino machine) ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again2.ok.label] Label: Got it.
+- [ah_coffee_again2.ok.hint] Hint: Moving on.
+- [ah_coffee_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_coffee_again3`
+
+> Speaker: Cass. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_coffee_again3.title] Title: A Better Coffee Maker
+- [ah_coffee_again3.location] Location: F1 · LOBBY
+- [ah_coffee_again3.caption] Caption: Cass and the coffee machine again.
+
+Dialogue before the choice:
+
+- [ah_coffee_again3.l1] narrator: [ you could buy the new coffee maker ]
+
+Choice `ok` (recommended):
+
+- [ah_coffee_again3.ok.label] Label: Got it.
+- [ah_coffee_again3.ok.hint] Hint: Moving on.
+- [ah_coffee_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 12. After hours: the book on Luci's desk
+
+
+### `ah_book_third`
+
+> Speaker: Luci. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_third.title] Title: The Ledger
+- [ah_book_third.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_third.caption] Caption: The ledger on Luci's desk.
+
+Dialogue before the choice:
+
+- [ah_book_third.l1] luci: You're the one who's been coming in and checking the ledger.
+- [ah_book_third.l2] luci: Unusual, but I appreciate an operator who does the numbers
+
+Choice `yes` (recommended):
+
+- [ah_book_third.yes.label] Label: Yes
+- [ah_book_third.yes.hint] Hint: Keep it up.
+- [ah_book_third.yes.outcome] Outcome: Noted.
+- [ah_book_third.yes.r1] luci: If you ever want to talk numbers...
+
+Choice `no`:
+
+- [ah_book_third.no.label] Label: No
+- [ah_book_third.no.hint] Hint: Not promising anything.
+- [ah_book_third.no.outcome] Outcome: Noted.
+- [ah_book_third.no.r1] luci: Oh, guess I was barking up the wrong tree.
+
+### `ah_book_tenth`
+
+> Speaker: Luci. Recommended choice: `yes`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_tenth.title] Title: Get Licensed
+- [ah_book_tenth.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_tenth.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_tenth.l1] luci: Well, you obviously care about our financial future.  But I need you to get your license if you keep it up.  Don't worry, it comes with perks and I get to be your instructor.  There is a small fee.
+
+Choice `yes` (recommended):
+
+- [ah_book_tenth.yes.label] Label: Yes
+- [ah_book_tenth.yes.hint] Hint: $1,000,000
+- [ah_book_tenth.yes.outcome] Outcome: Bought.
+> Effects: buyUpgrade item=book.
+- [ah_book_tenth.yes.r1] luci: Excellent, class starts tonight.  Don't be late.
+
+Choice `no`:
+
+- [ah_book_tenth.no.label] Label: No
+- [ah_book_tenth.no.hint] Hint: Not now.
+- [ah_book_tenth.no.outcome] Outcome: Not now.
+- [ah_book_tenth.no.r1] luci: Well, hands off the books unless you're licensed.
+
+### `ah_book_again1`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again1.title] Title: Get Licensed
+- [ah_book_again1.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again1.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again1.l1] narrator: [ buy the license ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again1.ok.label] Label: Got it.
+- [ah_book_again1.ok.hint] Hint: Moving on.
+- [ah_book_again1.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_book_again2`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again2.title] Title: Get Licensed
+- [ah_book_again2.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again2.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again2.l1] narrator: [ (buy the license and the certificate) ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again2.ok.label] Label: Got it.
+- [ah_book_again2.ok.hint] Hint: Moving on.
+- [ah_book_again2.ok.outcome] Outcome: The scene ends and the day goes on.
+
+### `ah_book_again3`
+
+> Speaker: Luci. Recommended choice: `ok`.
+> When: When the player clicks the item (third consecutive day with a click, tenth day, or a later click to buy it). _again scenes are the one-line lead-in before the tenth-day scene when the player comes back after saying No.
+- [ah_book_again3.title] Title: Get Licensed
+- [ah_book_again3.location] Location: F2 · LUCI'S OFFICE
+- [ah_book_again3.caption] Caption: Luci and the ledger again.
+
+Dialogue before the choice:
+
+- [ah_book_again3.l1] narrator: [ you could sign up for the license class ]
+
+Choice `ok` (recommended):
+
+- [ah_book_again3.ok.label] Label: Got it.
+- [ah_book_again3.ok.hint] Hint: Moving on.
+- [ah_book_again3.ok.outcome] Outcome: The scene ends and the day goes on.
+
+## 13. Endings
 
 > Shown when the tower reaches an ending. Each ending (the three Singularity wins, Absorbed and Bankrupt) has one short epilogue per advisor, written as narration, and one fallback epilogue for when the ending's own advisor has none.
 
@@ -630,7 +1079,7 @@ Choice `order`:
 > Shown instead of an advisor epilogue when the ending has none for its own advisor.
 - [end.bankrupt.epilogue.fallback] narrator: Nobody stays for the handover. The receiver's clerk gives you a cardboard box for your things. There's a mug in it that isn't yours, and you take it anyway. Rain comes in through the broken pane. At the gate, the guard says take care.
 
-## 10. Decision memos: Cass
+## 14. Decision memos: Cass
 
 > Decision memos Cass speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -789,7 +1238,7 @@ Choice `leave`:
 - [g_mycelium_ducts.leave.outcome] Outcome: Airflow remained improved. Nobody has asked what it is eating.
 > Effects: affinity path=greentech amount=5.
 
-## 11. Decision memos: Bea
+## 15. Decision memos: Bea
 
 > Decision memos Bea speaks, from packages/content/src/data/events.json. 4 memos.
 
@@ -892,7 +1341,7 @@ Choice `keep`:
 - [heat_tariff_revision.keep.hint] Hint: nothing now
 - [heat_tariff_revision.keep.outcome] Outcome: Nothing changed.
 
-## 12. Decision memos: Mel
+## 16. Decision memos: Mel
 
 > Decision memos Mel speaks, from packages/content/src/data/events.json. 6 memos.
 
@@ -1033,7 +1482,7 @@ Choice `refuse`:
 - [s_backup_restore.refuse.outcome] Outcome: The request was declined and logged.
 > Effects: cash amount=-30000.
 
-## 13. Decision memos: Luci
+## 17. Decision memos: Luci
 
 > Decision memos Luci speaks, from packages/content/src/data/events.json. 7 memos.
 
@@ -1187,7 +1636,7 @@ Choice `add`:
 - [h_headcount.add.outcome] Outcome: Two new employee records were created. Neither has requested a desk.
 > Effects: cash amount=-20000; affinity path=biotech amount=4.
 
-## 14. Lessons
+## 18. Lessons
 
 > Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
 
@@ -1525,7 +1974,7 @@ Choice `add`:
 - [lights_out.steady.objective] Objective: Keep the racks lit for half an hour
 - [lights_out.steady.say1] bea: Give it half an hour. Make sure it holds.
 
-## 15. New-game screen: site descriptions
+## 19. New-game screen: site descriptions
 
 > Shown on the new-game screen under each site's name (scenario ids).
 
@@ -1565,7 +2014,7 @@ Choice `add`:
 
 - [scenario.lesson_liquid.description] Description: A small working hall with Level 2 and the liquid-loop research done. Cass shows you a coolant pipe, a chiller, a CDU and a liquid-cooled rack.
 
-## 16. Achievements and the off-duty gallery
+## 20. Achievements and the off-duty gallery
 
 > The achievements list, the off-duty portraits and gallery scenes, and the words around them. All are fired by the UI, not by the sim. Source: packages/content/src/data/achievements.json. For a short file with only these, run `npx tsx tools/dialogue/export.ts --achievements`.
 
