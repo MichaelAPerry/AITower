@@ -1,6 +1,6 @@
 import type { SimEvent, SimView } from "@aitower/sim";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createAudio } from "./engine";
+import { createAudio, LEGACY_MUSIC } from "./engine";
 import { createMusic } from "./music";
 import { musicParams } from "./music/director";
 
@@ -116,7 +116,7 @@ describe("createAudio with a (fake) AudioContext", () => {
 		const ctx = FakeContext.last!;
 		expect(ctx.state).toBe("running");
 		const humSources = ctx.started;
-		expect(humSources).toBe(5 + 3 + 6); // hum (incl. breath LFO) + the tape LFOs + ambience beds (plant 3, fans 1, wind 2)
+		expect(humSources).toBe(5 + 6); // hum (incl. breath LFO) + ambience beds (plant 3, fans 1, wind 2); the old music tape LFOs are retired
 
 		a.update(view(2), [{ type: "jobCompleted", jobId: 1, payout: 1 }]);
 		const afterFirst = ctx.started;
@@ -153,41 +153,28 @@ describe("createAudio with a (fake) AudioContext", () => {
 		expect(ctx.sources.size).toBe(0);
 	});
 
-	it("starts the music timer on resume, stops it at music volume 0, and leaves none after destroy", async () => {
+	it("never starts the retired synthesized music: no timer, no notes, at any music volume, and nothing left after destroy", async () => {
+		expect(LEGACY_MUSIC).toBe(false);
 		vi.useFakeTimers();
 		try {
 			g.AudioContext = FakeContext;
 			const a = createAudio();
 			a.setMusicVolume(0.5);
-			expect(vi.getTimerCount()).toBe(0); // nothing before resume
 			await a.resume();
 			const ctx = FakeContext.last!;
-			const base = vi.getTimerCount();
-			expect(base).toBeGreaterThanOrEqual(1);
+			expect(vi.getTimerCount()).toBe(0); // the old music timer is never created
 			a.update(view(1), []);
 			ctx.currentTime = 0.5;
 			const before = ctx.started;
-			vi.advanceTimersByTime(100);
-			expect(ctx.started).toBeGreaterThan(before); // notes scheduled
-
-			a.setMusicVolume(0);
-			const stopped = vi.getTimerCount();
-			expect(stopped).toBeLessThan(base);
-			ctx.currentTime = 1;
-			const n = ctx.started;
 			vi.advanceTimersByTime(500);
-			expect(ctx.started).toBe(n); // scheduling stopped
-			a.setMusicVolume(0.5);
-			expect(vi.getTimerCount()).toBe(base);
-
+			expect(ctx.started).toBe(before); // no notes scheduled
+			a.setMusicVolume(1);
 			a.update(view(2), [{ type: "decisionIssued", decisionId: 1, eventId: "x" }, { type: "tierUp", tier: 2, reward: 1 }, { type: "rackTripped", facilityId: 1 }]);
 			a.update(view(3, { gameOver: { kind: "bankrupt", tick: 3 } } as Partial<SimView>), [{ type: "gameOver", kind: "bankrupt" }]);
 			a.destroy();
 			vi.advanceTimersByTime(60_000);
 			expect(vi.getTimerCount()).toBe(0);
 			expect(ctx.sources.size).toBe(0);
-			a.setMusicVolume(1);
-			expect(vi.getTimerCount()).toBe(0);
 		} finally {
 			vi.useRealTimers();
 		}
@@ -252,9 +239,9 @@ describe("corruption in the engine", () => {
 		return n;
 	};
 
-	it("builds the under drone only at full intensity and very high corruption", async () => {
+	it("builds no under drone (retired with the old music), at any intensity", async () => {
 		expect(await started("full", 0.5)).toBe(0);
-		expect(await started("full", 0.95)).toBe(4); // three drone oscillators + the breathing LFO
+		expect(await started("full", 0.95)).toBe(0); // the old music "under" drone is retired with the music module
 		expect(await started("mild", 1)).toBe(0); // 1.0 * 0.5 stays below 0.9
 		expect(await started("off", 1)).toBe(0);
 	});

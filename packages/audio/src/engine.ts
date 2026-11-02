@@ -75,6 +75,12 @@ interface HumGraph {
 	breathDepth: GainNode;
 }
 
+/**
+ * The old synthesized score (the pre-session-5 music director, tier tracks, stingers and path notes) is retired: the songs
+ * in `packages/ui/src/gamemusic` and `title/titleMusic.ts` are the only music. SFX, hum and ambience stay.
+ */
+export const LEGACY_MUSIC = false;
+
 export function createAudio(): AudioEngine {
 	let ctx: AudioContext | null = null;
 	let mixer: Mixer | null = null;
@@ -174,7 +180,7 @@ export function createAudio(): AudioEngine {
 		whine.start();
 		breath.start();
 		hum = { bus, drone, droneOctave, droneGain, noise, noiseFilter, noiseGain, whine, whineGain, breath, breathDepth };
-		music = createMusic(c, mixer.buses.music, { stingerOut: mixer.buses.stinger });
+		music = !LEGACY_MUSIC ? null : createMusic(c, mixer.buses.music, { stingerOut: mixer.buses.stinger });
 		buildAmbience(c, mixer.buses.ambience);
 		syncMusic();
 	}
@@ -301,7 +307,7 @@ export function createAudio(): AudioEngine {
 			nextNoteS = null;
 		}
 		const layer = path === "greentech" ? L.gMusic : L.sMusic;
-		if (!notes || !path || paused || musicVolume <= 0 || k <= 0 || layer < 0.02) {
+		if (!LEGACY_MUSIC || !notes || !path || paused || musicVolume <= 0 || k <= 0 || layer < 0.02) {
 			nextNoteS = null;
 			return;
 		}
