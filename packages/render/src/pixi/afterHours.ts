@@ -31,6 +31,9 @@ export const ITEM_ART: Record<Item["id"], readonly [string, string]> = {
 export const afterHoursKey = (view: SimView): string => view.afterHours.items.map((i) => `${i.id}:${i.visible ? 1 : 0}:${i.bought ? 1 : 0}:${i.floor}:${i.x}`).join("|");
 
 /** The layer: rebuilt only when `afterHoursKey` changes (or when a texture finishes loading). */
+/** Owner (Nov 2): items drawn at 1/3 of the PNG size. */
+const ITEM_SCALE = 1 / 3;
+
 export class AfterHoursLayer {
 	readonly g = new Container();
 	private key = "";
@@ -68,6 +71,7 @@ export class AfterHoursLayer {
 			const s = new Sprite(t);
 			// Centred in its spot, standing on the floor.
 			s.anchor.set(0.5, 1);
+			s.scale.set(ITEM_SCALE);
 			s.x = Math.round(item.x * TILE + (item.width * TILE) / 2);
 			s.y = floorTop(view, item.floor) + FAC_BOTTOM;
 			this.g.addChild(s);
