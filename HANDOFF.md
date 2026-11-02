@@ -23,7 +23,7 @@ Order (session 7):
 4. When the owner sends the ChatGPT sheet (docs/ICON_PROMPTS.md sheet 10): swap the code-drawn easter-egg items for it.
 5. Merge, one Haiku verify, build:single to the owner. Main only on the owner's word. Then trailer, landing page, README.
 
-Open owner question: two bond achievements were removed (18 -> 16); bed portraits need all achievements. OK?
+Owner (Nov 2): 2 bond achievements removed, 4 added (one per off-duty portrait) = 20. Bed portraits need ALL achievements incl. fast_win (option a: "the bed portraits should be hard"). Lattice spWeight 2.5 -> 0.4 (scripted player: Lattice 24 -> ~41 days; Flesh/Garden ~42 unchanged). Easter-egg items drawn at 1/3 PNG size.
 Owner rejected: Luci's face on machine/room inspection cards (`task/inspect-restyle` is dead; do not merge).
 
 TOKEN RULES (owner, session 6 — strict):

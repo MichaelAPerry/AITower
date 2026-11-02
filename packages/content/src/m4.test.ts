@@ -322,12 +322,12 @@ describe("M4 content (bundled)", () => {
 			const so = db.balance.soul;
 			for (const w of Object.values(so.spWeights)) expect(w).toBeGreaterThan(0);
 			expect(so.spWeights.greentech).toBeGreaterThan(so.spWeights.synthetic);
-			expect(so.spWeights.synthetic).toBeGreaterThan(so.spWeights.biotech);
+			// Owner (Nov 2): Lattice slowed to ~41 days for the scripted player (was 24), so its weight is now the lowest.
 			expect(so.greenFloor).toBeLessThanOrEqual(0.2);
 			// A Level-5 tower of 3000 PF of Synthetic racks reaches the Lattice within about a week.
 			const days = so.spTarget / (3000 * so.spWeights.synthetic * so.spPerPflopHour * 24);
-			expect(days).toBeGreaterThan(3);
-			expect(days).toBeLessThan(12);
+			expect(days).toBeGreaterThan(15);
+			expect(days).toBeLessThan(30);
 		});
 	});
 });

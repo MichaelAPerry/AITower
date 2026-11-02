@@ -154,7 +154,7 @@
   "spTarget": 1000,
   "spPerPflopHour": 0.0017,
   "spWeights": {
-   "synthetic": 2.5,
+   "synthetic": 0.4,
    "biotech": 1.5,
    "greentech": 4.4
   },
