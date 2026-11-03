@@ -10,6 +10,12 @@ Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The si
 
 Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/dev/ICON_PROMPTS.md`, `docs/dev/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots), `docs/AFTER_HOURS.md` (easter eggs, owner text), `docs/MUSIC_MAP.md`, `docs/dev/SUNO_PROMPTS.md`, `docs/RESEARCH_UI_PROPOSAL.md`.
 
+## 0.4 Session 8 (Nov 3) — marketing shipped. READ FIRST
+
+Main = alpha = `21ab64f`, LIVE: https://michaelaperry.github.io/AITower/ (landing page at root, game at /play/, single file at /play/AItower.html). Repo is public. Pages workflow builds `npm run build:site` from main; every push to main deploys.
+Done: internal docs moved to docs/dev/ (this file now lives here); README rewritten; site/ (landing page, 4 VN-style advisor bios, Ko-fi https://ko-fi.com/50866 = only external link); trailer/ (`npm run trailer`, 30 s, title.mp3 from 182.787 s, ~143 BPM; videos in site/assets/). Owner art in site/assets/art/. Marketing copy: pitch B (owner's pick). Never use title-end-*.webp in marketing (spoilers).
+Open: (1) fix/lesson-camera — lessons start with the camera far above the tower (owner: "a big one"); verify + merge + main on owner's word. (2) Owner to delete 7 old branches on GitHub (auto mode blocks remote deletes): wip/dialogue-import, wip/endings, wip/lessons, wip/owner-art, wip/owner-dialogue, wip/tree-sprites, task/inspect-restyle. (3) Tab title says "AI Tower" — owner hasn't chosen AITower/AItower spelling.
+
 ## 0.5 Session 7 start (Nov 2) — READ FIRST, then sections 2 and 4 only
 
 Alpha = `task/alpha-layout` @ b06dddc (Haiku verified: check, build, e2e, e2e:layout, afterhours e2e, credits Skip, build:single). NOT on main. Main = `61dc193`.
