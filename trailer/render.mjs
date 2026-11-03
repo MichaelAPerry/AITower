@@ -18,10 +18,11 @@ const FRAMES = 900;
 // Music window: strongest 30 s of title.mp3 (loudness + onset strength), starting on a strong onset; the track runs at about 143 BPM.
 const MUSIC_START = 182.787;
 const MUSIC = join(root, "packages/ui/src/music/title.mp3");
-const STILLS = { "still-cutin.png": 12.2 + 0.84 * 0 + 0.55, "still-slam.png": 8.0 + 0.5, "still-endcard.png": 28.4 };
+const B = 60 / 143;
+const STILLS = { "still-hook.png": 16.5 * B + 0.35, "still-build.png": 32 * B, "still-end.png": 28.4 };
 
 mkdirSync(OUT, { recursive: true });
-if (!existsSync(join(CLIPS, "d", "0096.jpg"))) {
+if (!existsSync(join(CLIPS, "upgrade", "0100.jpg"))) {
 	console.log("gameplay frames missing, recording them first");
 	if (!existsSync(join(root, "apps/web/dist/index.html"))) spawnSync("npm", ["run", "build"], { cwd: root, stdio: "inherit" });
 	const r = spawnSync("node", [join(root, "trailer/capture.mjs")], { cwd: root, stdio: "inherit" });
@@ -52,9 +53,9 @@ page.on("pageerror", (e) => console.error("pageerror:", e.message));
 await page.goto(url, { waitUntil: "load" });
 await page.evaluate(() => window.ready);
 // warm up: touch every scene once so fonts and images are loaded before frame 0
-for (const t of [0.8, 1.8, 3.5, 8.3, 12.5, 13.5, 14.3, 15.2, 17, 21.2, 22.5, 24.8, 28.5]) await page.evaluate((x) => window.setTime(x), t);
-await page.evaluate(() => document.fonts.load("40px DotGothic16", "ルーシー・フェッロ世界の終わりエーアイ・タワー"));
-await page.evaluate(() => document.fonts.load("800 40px 'M PLUS Rounded 1c'", "THREE WAYS TO END THE WORLD"));
+for (const t of [0.8, 1.8, 3.5, 6, 7.2, 9.5, 12, 13, 14.5, 17, 19, 21.5, 23, 24.8, 28.5]) await page.evaluate((x) => window.setTime(x), t);
+await page.evaluate(() => document.fonts.load("40px DotGothic16", "ルーシー・フェッロ世界の終わり三つの方法ビルドリサーチアップグレード"));
+await page.evaluate(() => document.fonts.load("800 40px 'M PLUS Rounded 1c'", "THREE WAYS TO END THE WORLD BUILD RESEARCH UPGRADE"));
 await page.evaluate(() => document.fonts.ready);
 await page.waitForTimeout(500);
 

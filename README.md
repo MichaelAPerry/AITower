@@ -1,17 +1,21 @@
-# AI Tower
+<h1 align="center"><img src="site/assets/art/title-logo.webp" width="390" alt="AITower"></h1>
 
 **Three ways to end the world.**
 
 Midnight-indigo pixels, a dreamy synth soundtrack, a lift ride away from 1998.
 Your advisors argue. You decide.
 
-![The AI Tower title screen](site/assets/shots/title.webp)
+![The AITower title screen](site/assets/shots/title.webp)
 
-![A tower hitting its stride](site/assets/shots/tower.webp)
+![A busy tower, racks humming](site/assets/shots/tower.webp)
 
-![An advisor has opinions](site/assets/shots/advisor.webp)
+![BUILD: placing racks from the build bar](site/assets/shots/build.webp)
 
-![The research map](site/assets/shots/research.webp)
+![RESEARCH: the research map](site/assets/shots/research.webp)
+
+![UPGRADE: swapping an air handler for the next model](site/assets/shots/upgrade.webp)
+
+![Counting the money](site/assets/shots/money.webp)
 
 ## How to play
 
