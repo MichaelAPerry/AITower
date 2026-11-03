@@ -22,7 +22,8 @@
     "e2e": "node e2e/smoke.mjs",
     "e2e:layout": "node e2e/layout.mjs",
     "e2e:afterhours": "node e2e/afterhours.mjs",
-    "build:single": "node scripts/build-single.mjs"
+    "build:single": "node scripts/build-single.mjs",
+    "trailer": "node trailer/render.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
