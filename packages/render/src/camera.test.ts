@@ -3,6 +3,7 @@ import {
 	type Camera,
 	clampCamera,
 	floorTop,
+	frameCell,
 	groundY,
 	offset,
 	screenToCell,
@@ -116,4 +117,18 @@ describe("camera insets", () => {
 		expect(sideMargin(4, 1000, 0)).toBe(768);
 		expect(sideMargin(1, 1000, 9999)).toBe(800);
 	});
+});
+
+describe("initial framing", () => {
+	// Every scenario (starter, lessons) shares this grid; a camera left at the top of the world shows only sky.
+	const g = { width: 48, floorMin: -5, floorMax: 40 };
+	for (const [vw, vh] of [[1280, 720], [1920, 1080], [800, 600]]) {
+		it(`frames the ground floor in view at ${vw}x${vh} from any prior camera`, () => {
+			for (const cy of [0, 600, 5000]) {
+				const c = frameCell({ cx: 0, cy, zoom: 2, vw, vh }, g, { x: 19, floor: 0 });
+				expect(worldToScreen(c, 0, floorTop(g, 0)).y).toBeGreaterThanOrEqual(0);
+				expect(worldToScreen(c, 0, groundY(g)).y).toBeLessThanOrEqual(vh);
+			}
+		});
+	}
 });

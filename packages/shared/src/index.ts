@@ -42,6 +42,9 @@ export type HorrorIntensity = "full" | "mild" | "off";
 /** Player preferences. Persisted by the app (localStorage), independent of save games. */
 /** UI size preset: "auto" picks from the window size, the numbers are fixed multipliers. */
 export type UiScale = "auto" | 1 | 1.25 | 1.5;
+/** Where every new game (Free Build and every lesson) frames the camera: the starter rack row on the ground floor, nudged right of the build palette. */
+export const OPENING_FOCUS: CellRef = { x: 19, floor: 0 };
+
 export const UI_SCALES: readonly UiScale[] = ["auto", 1, 1.25, 1.5];
 
 export interface Settings {

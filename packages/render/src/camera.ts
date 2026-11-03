@@ -108,6 +108,12 @@ export const clampCamera = (cam: Camera, grid: GridDims): Camera => {
 	};
 };
 
+/** The camera framed on `cell` (centred on it, then clamped to the world). Used for every initial framing. */
+export const frameCell = (cam: Camera, grid: GridDims, cell: CellRef): Camera => {
+	const p = cellCenter(grid, cell);
+	return clampCamera({ ...cam, cx: p.x, cy: p.y }, grid);
+};
+
 /** Next zoom step in `dir` (+1 in, -1 out), clamped to ZOOMS. */
 export const stepZoom = (zoom: number, dir: number): number => {
 	const i = ZOOMS.indexOf(zoom as (typeof ZOOMS)[number]);

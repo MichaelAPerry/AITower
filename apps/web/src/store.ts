@@ -7,6 +7,7 @@ import {
 	type Ghost,
 	type OverlayMode,
 	type Renderer,
+	OPENING_FOCUS,
 	SAVE_SLOTS,
 	freeBuildBonus,
 	loadLessonProgress,
@@ -296,6 +297,8 @@ export function createGameStore(content: ContentDB, renderer: Renderer | null, a
 		},
 		newGame(seed = (Math.random() * 2 ** 31) | 0, scenarioId?: string) {
 			replaceSim(freshSim(seed, scenarioId));
+			// Every new game, lessons included, opens framed on the ground floor, whatever the camera was doing before.
+			renderer?.focus(OPENING_FOCUS);
 		},
 
 		async listSaves() {
