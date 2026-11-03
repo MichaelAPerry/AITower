@@ -1,51 +1,43 @@
-# AItower
+# AI Tower
 
-A SimTower-style tycoon about building a vertical **AI datacenter** at the end of the world, wrapped in a
-PC-98 visual novel. Stack floors, route power, coolant and service lifts, keep repair bots swapping failed GPUs,
-and sell compute, while four advisors argue over which way the world should end: the **Lattice** (the
-Singularity, the default), the **Flesh** (bio) or the **Garden** (green). Every machine you build quietly closes
-some of those doors. Design: [`docs/SOUL.md`](docs/SOUL.md). Look: [`docs/STYLE_PC98.md`](docs/STYLE_PC98.md).
-2D side-cut pixel art · TypeScript · PixiJS · React.
+**Three ways to end the world.**
 
-## Play
-- **In the browser:** https://michaelaperry.github.io/AITower/
-- **Offline, one file:** download [**AItower.html**](https://michaelaperry.github.io/AITower/AItower.html)
-  (right-click → *Save link as…*) and double-click it. Everything (code, art, fonts, music) is inside that one file:
-  no install and no server. Saves live in that browser. Build it yourself with `npm run build:single`.
+Midnight-indigo pixels, a dreamy synth soundtrack, a lift ride away from 1998.
+Your advisors argue. You decide.
 
-**From source:**
-```sh
-npm install
-npm run dev          # open the printed URL
-```
-URL options: `?new` (fresh game, ignores autosave), `&seed=N`, `&speed=0|1|3|10|30`, `&overlay=heat|power|coolant`.
+![The AI Tower title screen](site/assets/shots/title.webp)
 
-**Controls:**
-- Left-drag with a build tool.
-- Right- or middle-drag, or WASD, to pan; mouse wheel to zoom.
-- Space pauses; 1–5 set the speed.
-- N/H/P/C switch overlays; X selects demolish; Esc goes back to select; `` ` `` toggles the bottom panel.
+![A tower hitting its stride](site/assets/shots/tower.webp)
 
-## Develop
-```sh
-npm run check                      # typecheck + module boundaries + all tests
-npm run sim -- starter 15 [seed]   # headless balance run (per-day economy table)
-npx tsx tools/sim-cli/src/soulRun.ts starter 80   # automated run: Singularity points, seals, bonds per day
-npm run build                      # production bundle in apps/web/dist
-```
+![An advisor has opinions](site/assets/shots/advisor.webp)
 
-| Path | Contents |
-|---|---|
-| `packages/sim` | Pure, deterministic simulation |
-| `packages/content` | JSON balance data and the contract generator |
-| `packages/render` | PixiJS renderer |
-| `packages/ui` | React HUD |
-| `packages/audio` | WebAudio synth |
-| `packages/shared` | Client-side contracts |
-| `apps/web` | Composition root |
-| `tools/sim-cli` | Headless balance runner |
+![The research map](site/assets/shots/research.webp)
 
-Each package has an `AGENTS.md`.
+## How to play
 
-Docs: [`docs/dev/HANDOFF.md`](docs/dev/HANDOFF.md) (start here) · [`docs/SOUL.md`](docs/SOUL.md) · [`docs/RESEARCH.md`](docs/RESEARCH.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
-[`tasks/`](tasks/) · [`docs/dev/BUILD_LOG.md`](docs/dev/BUILD_LOG.md).
+- **Play in your browser:** (link coming)
+- **Single file:** download `AItower.html` and open it. Code, art, fonts and music are all inside that one file; no install, no server. Saves live in that browser.
+- **From source:** `npm ci`, then `npm run dev` and open the printed URL. `npm run build:single` makes the single file; `npm run build:site` assembles the website (with the game at `play/`) into `site-dist/`.
+
+## Features
+
+- Stack floors of a vertical AI datacenter in a 2D side-cut pixel-art tower.
+- Route power, coolant and service lifts; keep repair bots swapping failed GPUs.
+- Sell compute to contracts and watch the money, heat and uptime.
+- Four advisors with strong opinions and visual-novel scenes.
+- A research map to grow your tower in different directions.
+- A synth soundtrack and PC-98 look, with CRT scanlines.
+
+## Credits
+
+Code by Claude. Art generated with ChatGPT; some sprites by Claude. Inspired by SimTower; nothing borrowed. Quotes credited in game. Design by Perry.
+
+[Support on Ko-fi](https://ko-fi.com/50866)
+
+## Development
+
+`npm run check` runs typecheck, module boundaries, lint and tests. Architecture: [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md). Handoff notes: [`docs/dev/HANDOFF.md`](docs/dev/HANDOFF.md). Look: [`docs/STYLE_PC98.md`](docs/STYLE_PC98.md).
+
+## Licence
+
+MIT License. See [`LICENSE`](LICENSE).

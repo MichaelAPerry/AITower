@@ -11,3 +11,4 @@ dist-artifact/
 apps/*/src/**/*.js
 packages/*/src/**/*.js
 tools/*/src/**/*.js
+site-dist/
