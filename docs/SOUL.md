@@ -1,6 +1,6 @@
 # AI Tower: the Soul (design spec)
 
-Owner direction (latest, overrides HANDOFF.md where they differ):
+Owner direction (latest, overrides docs/dev/HANDOFF.md where they differ):
 
 - The game is the player's journey down **three Singularity trees**.
 - Power, cooling and compute stay the core mechanics, but each tree brings its own problems.

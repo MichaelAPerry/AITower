@@ -1,12 +1,12 @@
 # Achievements and off-duty gallery
 
-Status: **approved by the owner (Oct 30). Built on `claude/youthful-ramanujan-msqcy9`** (see HANDOFF.md). This is the build spec. Read against branch `claude/youthful-ramanujan-msqcy9`. It supersedes `docs/OFF_DUTY.md` (that file lived only on `wip/off-duty` and its art rule is dropped). The gallery scene lines are written: they are the `ach_*` scenes in `docs/NEW_SCENES.md` (typo fixes applied). Portrait art is saved, unregistered, on branch `wip/gallery-art`.
+Status: **approved by the owner (Oct 30). Built on `claude/youthful-ramanujan-msqcy9`** (see docs/dev/HANDOFF.md). This is the build spec. Read against branch `claude/youthful-ramanujan-msqcy9`. It supersedes `docs/OFF_DUTY.md` (that file lived only on `wip/off-duty` and its art rule is dropped). The gallery scene lines are written: they are the `ach_*` scenes in `docs/NEW_SCENES.md` (typo fixes applied). Portrait art is saved, unregistered, on branch `wip/gallery-art`.
 
 Decisions in force: 18 achievements; failure endings kept and hidden; bed set = all 18 earned; Month of Calm = 20 days; the profile travels in the save export/import file; the epilogue bar is 50 (already in code); `les_stars` is replaced by `heard_out`.
 
 ## 0. What I found in the code that changes the plan
 
-1. **No commit step exists.** `HANDOFF.md` section 0 still talks about "commit to a tree". The code does not: `soul.ts` (header, lines 1-12) says "There is no commit and no bond gate". There is no `commitPath` field anywhere. Trees are chosen by retrofitting racks. So no achievement may use `commitPath`.
+1. **No commit step exists.** `docs/dev/HANDOFF.md` section 0 still talks about "commit to a tree". The code does not: `soul.ts` (header, lines 1-12) says "There is no commit and no bond gate". There is no `commitPath` field anywhere. Trees are chosen by retrofitting racks. So no achievement may use `commitPath`.
 2. **Snapshot version is 15** (`packages/sim/src/snapshot/migrate.ts:44`). The streak field makes it 16.
 3. **Uptime is 0..1.** `economyStep.ts:52`: `m.uptime = should > 0 ? sum(ringRunning) / should : 1`. A day's mean is stored in `AuditDay.uptime` (`audit.ts:89`), also 0..1. Careful: with no racks wanted to run, uptime is exactly `1`. A streak must also require `metrics.pflops > 0`.
 4. **Corruption is 0..1** (`corruption.ts`, clamped `Math.min(1, ...)`). Absorbed fires at `>= 0.99` once `tier >= 3` (`path.ts:9`, `balance.json:131-136`).

@@ -1,6 +1,6 @@
 # HANDOFF (short)
 
-Older long notes: [docs/HANDOFF_ARCHIVE.md](docs/HANDOFF_ARCHIVE.md) (verbatim). Open it only when you need a detail.
+Older long notes: [HANDOFF_ARCHIVE.md](HANDOFF_ARCHIVE.md) (verbatim). Open it only when you need a detail.
 
 ## 0. What the game is, and the doc map
 
@@ -8,19 +8,19 @@ AI Tower is a browser datacenter-management game in a PC-98 style. You are the O
 You grow racks and power, and retrofit them toward one of three trees: Lattice (synthetic), Flesh (biotech), Garden (greentech). There is no commit step: a tree is chosen by retrofitting.
 Endings: Lattice, Flesh, Garden, plus the failures Absorbed and Bankrupt. The sim is deterministic; the UI reads a view of it.
 
-Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/ICON_PROMPTS.md`, `docs/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots), `docs/AFTER_HOURS.md` (easter eggs, owner text), `docs/MUSIC_MAP.md`, `docs/SUNO_PROMPTS.md`, `docs/RESEARCH_UI_PROPOSAL.md`.
+Docs: `docs/SOUL.md` (design core), `docs/STYLE_PC98.md` (look), `docs/TREES.md` (trees), `docs/VN_WRITING.md` (voices), `docs/ACHIEVEMENTS.md` (spec, built), `docs/ACHIEVEMENTS_TEXT.md` (owner edit file), `docs/LESSON_PLAN.md`, `docs/OWNER_TEXT.md`, `docs/dev/ICON_PROMPTS.md`, `docs/dev/PLACEHOLDER_TEXT.md` (all Claude-written placeholder text), `docs/NEW_SCENES.md` (new scenes incl. `ach_*`), `docs/DIALOGUE.md` (every line, export), `docs/ART_NEEDED.md` (art slots), `docs/AFTER_HOURS.md` (easter eggs, owner text), `docs/MUSIC_MAP.md`, `docs/dev/SUNO_PROMPTS.md`, `docs/RESEARCH_UI_PROPOSAL.md`.
 
 ## 0.5 Session 7 start (Nov 2) — READ FIRST, then sections 2 and 4 only
 
 Alpha = `task/alpha-layout` @ b06dddc (Haiku verified: check, build, e2e, e2e:layout, afterhours e2e, credits Skip, build:single). NOT on main. Main = `61dc193`.
 
-Done in session 6: old procedural music off (`LEGACY_MUSIC=false` in packages/audio); credits Skip (pointer-events) + quotes cut from roll; switches widened; Automation overlaps; dismiss buttons; research orb always shows all globes and lines (no clusters); QUARTERLY INSPECTION popup (`finance/AuditSheet.tsx`) restyled with Luci face + quips; after-hours easter eggs built, bonds and attitude choices removed (snapshot v17). Session-5 note moved to docs/HANDOFF_ARCHIVE.md.
+Done in session 6: old procedural music off (`LEGACY_MUSIC=false` in packages/audio); credits Skip (pointer-events) + quotes cut from roll; switches widened; Automation overlaps; dismiss buttons; research orb always shows all globes and lines (no clusters); QUARTERLY INSPECTION popup (`finance/AuditSheet.tsx`) restyled with Luci face + quips; after-hours easter eggs built, bonds and attitude choices removed (snapshot v17). Session-5 note moved to docs/dev/HANDOFF_ARCHIVE.md.
 
 Order (session 7):
 1. After-hours fixes (one small agent): spots move to G (Bea fern, Cass coffee, opposite sides) and B (Luci book, Mel tank); spots in EVERY game mode; epilogue speaker = by the tree/ending built, revert the "upgrade bought" change. See docs/AFTER_HOURS.md "Owner answers".
 2. Ending balance: endings too easy (Garden in <50 days). Look at orb costs + win thresholds for all three trees; PROPOSE numbers to the owner first (no agent needed to propose if a quick read does it).
 3. Retrofit buttons -> Lattice / Flesh / Garden (owner: yes). In-world Pixi labels bigger (owner: yes; `packages/render/src/pixi/markers.ts`, `structure.ts`).
-4. When the owner sends the ChatGPT sheet (docs/ICON_PROMPTS.md sheet 10): swap the code-drawn easter-egg items for it.
+4. When the owner sends the ChatGPT sheet (docs/dev/ICON_PROMPTS.md sheet 10): swap the code-drawn easter-egg items for it.
 5. Merge, one Haiku verify, build:single to the owner. Main only on the owner's word. Then trailer, landing page, README.
 
 Owner (Nov 2): 2 bond achievements removed, 4 added (one per off-duty portrait) = 20. Bed portraits need ALL achievements incl. fast_win (option a: "the bed portraits should be hard"). Lattice spWeight 2.5 -> 0.4 (scripted player: Lattice 24 -> ~41 days; Flesh/Garden ~42 unchanged). Easter-egg items drawn at 1/3 PNG size.
@@ -49,7 +49,7 @@ TOKEN RULES (owner, session 6 — strict):
 ## 2. Owner decisions on record
 
 - The owner's words win over ours, in every dialogue file. Keep the owner's spelling exactly; never fix typos without asking.
-- All Claude-written text is placeholder. It is catalogued in `docs/PLACEHOLDER_TEXT.md`. The owner rewrites it later. Import it with the importer; plain `key (file)` lines are moved in by hand.
+- All Claude-written text is placeholder. It is catalogued in `docs/dev/PLACEHOLDER_TEXT.md`. The owner rewrites it later. Import it with the importer; plain `key (file)` lines are moved in by hand.
 - Bed set unlocks at 100% (all 18 achievements); the four bed portraits unlock together.
 - Month of Calm and Cass's portrait: streak of 20 days at 99% uptime with pflops > 0.
 - Failure endings (Absorbed, Bankrupt) are achievements, hidden.
@@ -57,7 +57,7 @@ TOKEN RULES (owner, session 6 — strict):
 - `end.flesh.title` and `heat_tariff_revision.vote.mel` are deliberately kept as the wip/endings wording.
 - Lessons must not spoil the plot: no seal, closed trees, bonds, epilogues or endings in lesson text.
 - Lessons run on the full game UI (same HUD, drawers, build bar, speed controls) with a scenario and guidance on top; nothing is hidden or locked by a lesson. The advisor never starts or stops the clock: Lesson 1 asks the player to press Play, Pause and a faster speed and waits (`wait` on a step, reported by the UI as a `les:<step>` tip). Controls are pointed at with `data-tut` selectors (outline plus arrow); the camera is never moved by a lesson.
-- Icons and menu pictures: image sheets from ChatGPT. In-tower (world) sprites stay drawn in code; a one-rack image test (sheet 9 in `docs/ICON_PROMPTS.md`) is optional, later.
+- Icons and menu pictures: image sheets from ChatGPT. In-tower (world) sprites stay drawn in code; a one-rack image test (sheet 9 in `docs/dev/ICON_PROMPTS.md`) is optional, later.
 - Locked gallery portraits = head crop (done).
 - Credits: code by Claude; all art generated with ChatGPT, some sprites by Claude; inspired by SimTower, nothing borrowed; quotes credited with sources. Design line = "Perry".
 - `fast_win` days 40 / 40 / 40 (confirmed by owner Oct 31).
@@ -90,7 +90,7 @@ e. Then the presentation work (the new window's job):
 - `perf.test.ts` is flaky under load: rerun it alone.
 - e2e: when other agents run, use a private port: `E2E_PORT=<free port> npm run e2e`. Never kill other servers. "Port 4173 in use" means a server is already there; pick another port.
 - HUD layout: `npm run build && npm run e2e:layout` checks that the strip, build bar, drawer tabs, lesson dock, goals, advisor strip, ticker and open drawers stay on screen and never overlap, at 1280x720, 1920x1080, 1920x1080 at 150% and 2560x1440 Auto. Placement rules live in `packages/ui/src/calm/layout.css`. Text is never shrunk to fit: reflow, fold or scroll.
-- Images: recipe is in `docs/HANDOFF_ARCHIVE.md`, section "How to drop in an image".
+- Images: recipe is in `docs/dev/HANDOFF_ARCHIVE.md`, section "How to drop in an image".
 - Dialogue: `npx tsx tools/dialogue/export.ts` -> edit -> `npx tsx tools/dialogue/import.ts <file>` (dry-run is the default; `--write` to apply). `export.ts --check` verifies the grammar.
 - A fresh clone may be single-branch. Run `git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'` and fetch main before creating worktree agents. Worktrees base on origin/main, so worktree agents should `git reset --hard origin/<branch>` first.
 - Agents' screenshots go in /tmp. To show the owner, copy them into the repo's `.claude/` (gitignored via `.git/info/exclude`).

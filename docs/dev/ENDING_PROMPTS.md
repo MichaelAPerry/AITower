@@ -57,7 +57,7 @@ Nothing looks wrong. That is the point. Palette: cold grey-blue, white, one dim 
 
 ## 5. Bankrupt (failure)
 
-Quiet and sad, no horror. The receiver has been and gone. Palette: grey, rust, deep blue night, one red lamp. The existing "failure ending" prompt in `docs/ART_BRIEFS.md` is the same idea; this one replaces it.
+Quiet and sad, no horror. The receiver has been and gone. Palette: grey, rust, deep blue night, one red lamp. The existing "failure ending" prompt in `docs/dev/ART_BRIEFS.md` is the same idea; this one replaces it.
 
 > A dark, emptied datacenter floor at night. Rack cabinets gone, only bolt marks on the concrete and a few cabinets left with orange asset tags. A single red emergency lamp. Rain coming through a broken pane in the high glass roof and puddling in the centre aisle. A lone office chair stands in the middle of the aisle. A chain-link fence and a for-sale sign at the far end, seen through the open loading door. Palette grey, rust, deep blue night, one red lamp.
 

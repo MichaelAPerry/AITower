@@ -1,6 +1,6 @@
 # M3-T5 — agent-audio: corruption on the music, wet textures, tier tracks, stingers
 
-Read `tasks/m3/README.md` (taste rules), `packages/audio/AGENTS.md`, `docs/review/audio-music.md` (especially "Body-horror escalation") and the audio code: the music engine, director, tape chain and hum.
+Read `tasks/m3/README.md` (taste rules), `packages/audio/AGENTS.md`, `docs/dev/review/audio-music.md` (especially "Body-horror escalation") and the audio code: the music engine, director, tape chain and hum.
 Everything stays generative WebAudio (no audio files). Respect `setHorrorIntensity` (now in the `AudioEngine` contract; it is a placeholder in `engine.ts`): `off` means a clean tape and no organic sounds, `mild` means about half the depth.
 
 1. **Corruption on the tape chain**, driven from `view.corruption` (smoothed):

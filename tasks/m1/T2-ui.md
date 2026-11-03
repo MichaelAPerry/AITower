@@ -7,7 +7,7 @@
 - `packages/ui/AGENTS.md`
 - `docs/STYLE.md` (the art bible: everything new must look like the existing control-room HUD)
 - `packages/shared/src/index.ts` (the new `Settings`, `SaveSlotInfo`, `SaveStatus` and `GameStore` methods)
-- `docs/review/ux-art.md` §1–2.
+- `docs/dev/review/ux-art.md` §1–2.
 
 The real store (`apps/web/src/store.ts`) is being completed in parallel by agent-platform. Build against the contract and
 your fake store; make `src/dev/fakeStore.ts` implement the new methods realistically (in-memory slots, async delays).

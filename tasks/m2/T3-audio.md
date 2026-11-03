@@ -5,7 +5,7 @@
 **Read first:**
 - `tasks/m2/README.md`
 - `packages/audio/AGENTS.md` and all of `packages/audio/src`
-- `docs/review/audio-music.md` (the design you are implementing; follow its recommendation (a), runtime generative WebAudio)
+- `docs/dev/review/audio-music.md` (the design you are implementing; follow its recommendation (a), runtime generative WebAudio)
 - `packages/shared/src/index.ts` (`AudioEngine.setMusicVolume`)
 - `packages/sim/src/api.ts` (SimView, SimEvent)
 

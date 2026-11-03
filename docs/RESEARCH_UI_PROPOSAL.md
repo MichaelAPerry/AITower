@@ -1,6 +1,6 @@
 # Research UI: study and proposal
 
-Status: proposal for owner approval. No game code changed. Mockup: `docs/research_mockup.html` (open in a browser; screenshot `docs/research_mockup.png`).
+Status: proposal for owner approval. No game code changed. Mockup: `docs/research_mockup_v2.html` (open in a browser; screenshot `docs/research_mockup_v2.png`).
 
 ## 1. What exists now
 

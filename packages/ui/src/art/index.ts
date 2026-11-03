@@ -1,5 +1,5 @@
 /**
- * PC-98 art (docs/ART_BRIEFS.md): advisor busts in four expressions, full portraits, and the title and tree-floor backdrops.
+ * PC-98 art (docs/dev/ART_BRIEFS.md): advisor busts in four expressions, full portraits, and the title and tree-floor backdrops.
  * Sources were quantised to 32 colours (48 for backdrops) and stored as lossless WebP.
  */
 import luci_neutral from "./luci-neutral.webp";
@@ -79,7 +79,7 @@ export const TITLE_LOGO = { src: title_logo, x: 130, y: 0, w: 390, h: 200, paint
 export type BackdropId = keyof typeof BACKDROP;
 
 /**
- * Ending paintings by the `art` name in endings.json (docs/ENDING_PROMPTS.md). An ending whose name has no entry here falls back
+ * Ending paintings by the `art` name in endings.json (docs/dev/ENDING_PROMPTS.md). An ending whose name has no entry here falls back
  * to its tree floor (`backdrop`), else the plain stage.
  */
 export const ENDING_ART: Record<string, string | undefined> = {
@@ -109,7 +109,7 @@ export const LOCATION_FILES: Record<string, string | undefined> = {
 	"bg-loc-sunrise": bg_loc_sunrise,
 };
 
-/** Scene id -> location painting name (HANDOFF "Art slots"). Only names present in LOCATION_FILES resolve to an image. */
+/** Scene id -> location painting name (docs/dev/HANDOFF.md "Art slots"). Only names present in LOCATION_FILES resolve to an image. */
 export const LOCATION_ART: Record<string, string> = {
 	st_intro: "bg-loc-f1-lot",
 	obj_greentech: "bg-loc-site-install",

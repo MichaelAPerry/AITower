@@ -19,6 +19,6 @@ A chrome pod beside the lift. Every `transfer.everyHours` (6) game hours, if ena
 
 ## Previews
 
-`npm run sprites` writes `docs/preview/green-sprites.png`, `bio-sprites.png`, `synthetic-sprites.png` and `transfer-unit.png` (harness `packages/render/dev/sprites.html?tree=green|bio|synthetic|transfer`). Every sprite is drawn by the real renderer on the game's own background at game scale (1x) and 3x, labelled.
+`npm run sprites` writes `docs/dev/preview/green-sprites.png`, `bio-sprites.png`, `synthetic-sprites.png` and `transfer-unit.png` (harness `packages/render/dev/sprites.html?tree=green|bio|synthetic|transfer`). Every sprite is drawn by the real renderer on the game's own background at game scale (1x) and 3x, labelled.
 
 Sprites not yet drawn for Bio and Synthetic keep the existing kind art: nutrient plant and works, bioreactor, digester, sterile bay, gensets, SMR, PV wall.

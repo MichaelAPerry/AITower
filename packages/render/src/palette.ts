@@ -34,7 +34,7 @@ export const T = {
 	smog: 0x1c1a5a,
 	/** `--accent-2`: research. */
 	accent2: 0xff6ad5,
-	// M3 body-horror tokens (docs/review/ux-art.md): flesh (pink-beige), bile (olive), blood (deep desaturated red-brown).
+	// M3 body-horror tokens (docs/dev/review/ux-art.md): flesh (pink-beige), bile (olive), blood (deep desaturated red-brown).
 	flesh: 0xb5877a,
 	bile: 0x8a8a3a,
 	blood: 0x6a2c22,

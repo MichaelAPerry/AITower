@@ -1,6 +1,6 @@
 # M1 — Foundations (safe to play for hours)
 
-Source: `docs/ROADMAP_1.0.md` (M1) and the evidence in `docs/review/engineering.md` and `docs/review/ux-art.md`.
+Source: `docs/ROADMAP_1.0.md` (M1) and the evidence in `docs/dev/review/engineering.md` and `docs/dev/review/ux-art.md`.
 
 | Task | Agent (model) | Owns (write access) | Spec |
 |---|---|---|---|

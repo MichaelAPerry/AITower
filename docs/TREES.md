@@ -66,7 +66,7 @@ Verdicts: **K** kept, **R** reworked into a tree (stats or line changed), **C** 
 |--|--|--|
 | contracts_clerk, reading_room, works_foreman | K | Core automation, no tree. |
 | vendor_stamp, ledger_audit | K | Small early cash perks, fine at Level 2. |
-| ministry_liaison, procurement_committee | C | Cash-only perks, worthless after Level 3 (BALANCE_AUDIT); Authority flavour was for standing. |
+| ministry_liaison, procurement_committee | C | Cash-only perks, worthless after Level 3 (docs/dev/BALANCE_AUDIT.md); Authority flavour was for standing. |
 | grand_concordat | R | Becomes "Open Door": +1 bond when you take advice. |
 | authority_charter | R | Renamed Research Charter, keeps +20% RP. |
 | standing_orders_binder | K | Foreman pace. |
@@ -302,7 +302,7 @@ A careless Level 1-3 tower (diesel, CH-600, immersion early) is already near 70-
 
 ## 5. Balance targets
 
-Competent player: Level 2 by day 2, Level 3 by day 8, commit about day 9 to 10. Model: BALANCE_AUDIT revenue and PF figures, `spPerPflopHour` 0.0014 (1 PF is 0.0336 SP a day at weight 1). Days are game days (1 day = 144 s at 1x). Estimates only; verify with `soulRun.ts` after implementation.
+Competent player: Level 2 by day 2, Level 3 by day 8, commit about day 9 to 10. Model: docs/dev/BALANCE_AUDIT.md revenue and PF figures, `spPerPflopHour` 0.0014 (1 PF is 0.0336 SP a day at weight 1). Days are game days (1 day = 144 s at 1x). Estimates only; verify with `soulRun.ts` after implementation.
 
 | Tree | Weighted PF-days needed | Days to 1000 SP (competent) | Casual | Notes |
 |--|--|--|--|--|

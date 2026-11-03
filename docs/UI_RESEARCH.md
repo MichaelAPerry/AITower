@@ -52,7 +52,7 @@ Extracted rules: category icons not text tabs; one catalog, one selected-item pa
 
 ## Proposed redesign
 
-Layout (see `docs/mockups/ui-v2.html`): world stays full width. Left edge = category bar. Left flyout = catalog grid. Right = one Inspector. Bottom = status/tool hint. Panels (Contracts, Research, Money, Primer) open as a single "sheet" in the right column or center, never stacked.
+Layout (see `docs/dev/mockups/ui-v2.html`): world stays full width. Left edge = category bar. Left flyout = catalog grid. Right = one Inspector. Bottom = status/tool hint. Panels (Contracts, Research, Money, Primer) open as a single "sheet" in the right column or center, never stacked.
 
 ### Unified interaction model (all panels)
 

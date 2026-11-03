@@ -6,7 +6,7 @@
 - The lot is 11 floors plus 1 basement, which feels ridiculous.
 - In later levels, reputation (uptime) went into freefall, and nobody could tell why.
 
-**Research:** `docs/UI_RESEARCH.md` (friction audit, reference-game patterns, 4 chunks with acceptance criteria). Mockup: `docs/mockups/ui-v2.html`.
+**Research:** `docs/UI_RESEARCH.md` (friction audit, reference-game patterns, 4 chunks with acceptance criteria). Mockup: `docs/dev/mockups/ui-v2.html`.
 
 ## Run order: one agent at a time, Sonnet
 0. **[S: sim and content](S-sim.md):** bigger lot; fair, explained reputation.

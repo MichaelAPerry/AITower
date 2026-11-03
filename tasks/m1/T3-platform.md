@@ -7,7 +7,7 @@
 - `apps/web/src/*` (store, loop, main)
 - `packages/shared/src/index.ts` (the new `Settings`, `normalizeSettings`, save types and `GameStore` methods)
 - `packages/sim/src/api.ts`
-- `docs/review/engineering.md` §1 and §3.
+- `docs/dev/review/engineering.md` §1 and §3.
 
 The placeholders in `apps/web/src/store.ts` are marked "M1-T3"; replace them.
 

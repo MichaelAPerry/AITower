@@ -7,7 +7,7 @@
 - `packages/sim/AGENTS.md`
 - `packages/content/AGENTS.md`
 - The new contract parts in `packages/content/src/schema.ts` and `packages/sim/src/api.ts`
-- `docs/review/game-design.md` §4–5
+- `docs/dev/review/game-design.md` §4–5
 
 ## 1. Memo/event system (sim)
 - **Its own RNG stream.** Add it to `core/rng.ts`. It must not shift existing streams; existing determinism tests must stay valid.
@@ -52,7 +52,7 @@
 - **No horror yet:** the `horror` category is reserved for M3.
 - **Loading and validation:** load `events.json` in `load.ts`, replacing the placeholder. Extend `validateContent`: unique ids, `defaultChoice` exists, effect types and fields valid, durations > 0, weights > 0.
 
-## 4. Economy retune (`docs/review/game-design.md` §5)
+## 4. Economy retune (`docs/dev/review/game-design.md` §5)
 - **Tier rewards:** about 5× their current values.
 - **DLC rack value:** widen the gap. DLC racks should be about 1.6× air PFLOPS per $ including cooling, or say why not.
 - **Guaranteed offers:** at least one offer within 6 hours of the last offer expiring or being accepted, to remove the long zero-revenue streaks.

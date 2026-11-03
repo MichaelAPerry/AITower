@@ -5,7 +5,7 @@ Runs **after** M1-T1 to T4 are integrated, so the codebase is stable.
 **Owns:** `.github/**`, root `package.json` scripts, `biome.json`, `e2e/**`, `apps/web/vite.config.ts` (code-splitting only),
 plus minimal lint fixes anywhere. A lint fix must not change behaviour; if one would, add a targeted ignore with a reason.
 
-**Read first:** `tasks/m1/README.md`, `.github/workflows/pages.yml`, `docs/review/engineering.md` §4.
+**Read first:** `tasks/m1/README.md`, `.github/workflows/pages.yml`, `docs/dev/review/engineering.md` §4.
 
 ## 1. Biome lint
 - Add `@biomejs/biome` as a root devDependency at the exact version `2.5.15`. This is the one install allowed; run `npm install -D -E @biomejs/biome@2.5.15`.

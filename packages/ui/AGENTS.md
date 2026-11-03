@@ -92,9 +92,9 @@ React 19 HUD drawn over the world canvas, plus a pure tool controller. Imports o
 ## Art direction (docs/STYLE.md §1–3)
 Cassette-futurist control-room hardware. `ui.css` defines every STYLE.md §2 token as a custom property on
 `.aitower-hud` (`--ink`, `--housing`, … `--smog`, plus `--heat-18…--heat-50`), and rules use only those
-tokens or `color-mix()` of them, never raw hex. Fonts are `--f-crt` (VT323: numbers and readouts, ≥ 18 px
-for primary numbers, ≥ 15 px for body), `--f-type` (Special Elite: labels, forms, memos) and `--f-stamp`
-(Silkscreen at 8 px: Dymo tape, tags, buttons). `apps/web` loads the fonts and so does the dev harness.
+tokens or `color-mix()` of them, never raw hex. Fonts come from `calm/theme.css`: `--f-crt` = `--f-num` (DotGothic16, falling back to M PLUS Rounded 1c: numbers and readouts, ≥ 18 px
+for primary numbers, ≥ 15 px for body), `--f-type` = `--f-body` (M PLUS Rounded 1c: labels, forms, memos) and `--f-stamp` = `--f-display`
+(DotGothic16: Dymo tape, tags, buttons). They are bundled locally via `@fontsource` (imported in `apps/web/src/main.tsx` and the dev harness); nothing loads from a CDN.
 - Housings: `.ui-panel` is bevelled bakelite with four slotted screws drawn by `::after`. Keep about 12 px
   of padding clear in the corners.
 - Readouts sit in `.ui-crt` (`crt-amber` is the default for data, `crt-green` for OK, `crt-red` for alarms).
@@ -159,7 +159,7 @@ C Contracts, R Research, F Finance, I Gauges (+ the alert log from the ticker). 
   default choice fails racks / costs over 10 % of cash; only urgent memos pop up, the rest raise the inbox count), `isRoutine` (ticker filter).
 - `calm/Panels.tsx`: Contracts drawer (clerk in one line + Edit, compact offers and running jobs), Research drawer (affordable or half-funded nodes + button to the full sheet), alert log, telemetry.
 - Look: `calm/theme.css` holds every palette/font/size token (docs/STYLE_SYNTHETIC.md) and remaps the legacy cassette tokens, so a restyle is a token swap; `calm/calm.css` is the layout and uses tokens only.
-  Fonts (Chakra Petch, IBM Plex) load from Google Fonts with system fallbacks. Older panels (inspector, finance, palette cards) follow through the remapped tokens only.
+  Fonts (M PLUS Rounded 1c for body, DotGothic16 for display and numbers) are bundled locally with `@fontsource`, with system fallbacks. Older panels (inspector, finance, palette cards) follow through the remapped tokens only.
 - Biotech: `bio/bio.ts` (wording per `horrorIntensity`, organoid band, trait text, growth gauge, memo stain), `objective/diagnose.ts` (noNutrient / tooCold reasons), `ascension/` (FORM A-5 sheet; the sim
   applies `choosePath` on the next tick, so `ui.pathFiled` hides the offer meanwhile), `gameover/gameOver.ts` (`overCopyFor`: ending text from `content.endings`, plain forms at off).
 - Harness params added: `?bio=1 &corr=0..1 &asc=1 &over=living|clean|absorbed &drawer=contracts|research|finance|gauges &palette=wetw|rack|...`.

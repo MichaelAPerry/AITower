@@ -1638,7 +1638,7 @@ Choice `add`:
 
 ## 18. Lessons
 
-> Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).
+> Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/dev/AUDIT_LEFTOVERS.md).
 
 ### Lesson 1: Your First Rack (`first_watt`)
 

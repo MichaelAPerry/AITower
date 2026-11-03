@@ -1,6 +1,6 @@
 # M3-T3 — agent-render: the horror overlay pipeline, wetware art, nutrient pipes, contamination overlay
 
-Read `tasks/m3/README.md` (taste rules), `packages/render/AGENTS.md`, `docs/STYLE.md`, `docs/review/ux-art.md` ("Body-horror escalation plan") and the render code.
+Read `tasks/m3/README.md` (taste rules), `packages/render/AGENTS.md`, `docs/STYLE.md`, `docs/dev/review/ux-art.md` ("Body-horror escalation plan") and the render code.
 - **Constraints:**
   - Keep cached facility bodies intact. Horror is drawn as overlay and decal layers driven by `view.corruption`, the per-cell `view.contamination`, the tier and `RenderOptions.horrorIntensity`.
   - Respect reduced motion and colour-blind mode, and keep the frame budget.

@@ -2,7 +2,7 @@
 
 All text below is placeholder. Replace freely.
 
-Lines like `- [id] Tag: text` can be edited here and put in the game with `npx tsx tools/dialogue/import.ts docs/PLACEHOLDER_TEXT.md` (add `--write` to apply it; without it you get a dry run that only reports changes).
+Lines like `- [id] Tag: text` can be edited here and put in the game with `npx tsx tools/dialogue/import.ts docs/dev/PLACEHOLDER_TEXT.md` (add `--write` to apply it; without it you get a dry run that only reports changes).
 Lines like ``- `key` (file): text`` are not read by the importer yet: edit the text and send the file back, and Claude will move it into the game. Keep any `{{term|label}}` markers as they are.
 
 ## Lessons rebuilt on the full game UI (Lessons 1 to 4)

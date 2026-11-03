@@ -395,7 +395,7 @@ sections.push({
 	title: "Lessons",
 	body: () => {
 		meta(
-			'Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/AUDIT_LEFTOVERS.md).',
+			'Lesson scripts from lessons.json. Only Lesson 1 exists in that file. Its "Next lesson" names a lesson that is not in the file (see docs/dev/AUDIT_LEFTOVERS.md).',
 		);
 		for (const l of lessons) lessonBlock(l);
 	},

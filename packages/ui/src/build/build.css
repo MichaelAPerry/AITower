@@ -1,4 +1,4 @@
-/* Build bar, catalog grid and Inspector (docs/mockups/ui-v2.html). Uses the synthetic tokens from calm/theme.css. */
+/* Build bar, catalog grid and Inspector (docs/dev/mockups/ui-v2.html). Uses the synthetic tokens from calm/theme.css. */
 
 /* Category bar: always visible, bottom-left above the ticker. */
 .aitower-hud .bld-bar {

@@ -52,7 +52,7 @@ export const OWNER_ALIASES: Record<string, string> = {
 	"credits.quotes": "ach.ui.credits_quotes",
 };
 
-/** The grammar from export.ts / HANDOFF. */
+/** The grammar from export.ts / docs/dev/HANDOFF.md. */
 export const LINE = /^- \[([a-z0-9_.]+)( mood=[a-z]+)?\] ([A-Za-z][A-Za-z ]*): (\S.*)$/;
 /** A line that has the id and tag but no text: reported as empty rather than malformed. */
 const EMPTY_LINE = /^- \[([a-z0-9_.]+)( mood=[a-z]+)?\] ([A-Za-z][A-Za-z ]*):\s*$/;

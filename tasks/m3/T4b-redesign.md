@@ -1,7 +1,7 @@
 # M3-T4b — agent-ui: Calm HUD redesign (supersedes the layout parts of M3-T4)
 
 Owner feedback: "too much going on at one time … more text that no one reads". It's a clicker, so the world comes first.
-The approved mockup is `docs/mockups/calm-hud.html` (open it in a browser). Owner decisions: **standing stays in the top strip**; start now.
+The approved mockup is `docs/dev/mockups/calm-hud.html` (open it in a browser). Owner decisions: **standing stays in the top strip**; start now.
 Your earlier M3-T4 work in `packages/ui` (partly done: Wetware, nutrient tool, Ascension, endings, diagnosis, corruption gauge, memo stain) folds into this layout. Finish it inside the new structure, and don't build anything twice.
 
 ## Layout (match the mockup)

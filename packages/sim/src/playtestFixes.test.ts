@@ -1,4 +1,4 @@
-/** Regressions for the playtest bugs listed in HANDOFF.md (Foreman stalls, docks unused, dockless bots, liquid racks and air handlers). */
+/** Regressions for the playtest bugs listed in docs/dev/HANDOFF.md (Foreman stalls, docks unused, dockless bots, liquid racks and air handlers). */
 import { loadContent } from "@aitower/content";
 import { describe, expect, it } from "vitest";
 import { expandDown, expandUp } from "./automation/expand";

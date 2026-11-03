@@ -26,7 +26,7 @@ Game data, validation and the contract generator. Depends on nothing.
 - Training/finetune size is capped at what `maxRacksPerTrainingJob` (8, matching the sim scheduler) of the best
   unlocked rack can deliver, so deadlines are achievable.
 - Money is game-scaled: 1 game-day compresses months of real cash flow, so `energyPrice` (7.5 $/kWh) is ~90× a real
-  tariff to keep energy at 15–30 % of revenue. See the economy notes in the agent-assets report / BUILD_LOG.
+  tariff to keep energy at 15–30 % of revenue. See the economy notes in the agent-assets report / docs/dev/BUILD_LOG.md.
 
 - M2b research economy: RP = `pointsPerPflopHour` (0.1) x PF-h + `pointsPerJob` (8) per job. Typical RP/day (6 jobs/day): tier 1 (80 PF) 240, tier 2 (240 PF) 624, tier 3 (800 PF) 1968, tier 4 (1500 PF) 3648. `tech.test.ts` asserts tier-1 nodes take 1-3 days, tier-4 nodes 4.5-10 and the whole tree 60-90 days; change costs and rates together.
 - Heat tuning (starter): `ambientMeanC` 22 (+-8), `envelopeConductance` 0.4 and `rackDeltaC` 48 put 4 full-load Mk.I racks with one CRAH at ~75-79 C on a hot afternoon (okC 80); a heatwave (+9 C) throttles them (~83 C) and a second CRAH brings them back to ~69 C. Liquid racks sit at ~76-78 C at full load (test: inlet + rackDeltaC < okC) so do not raise `rackDeltaC` further.

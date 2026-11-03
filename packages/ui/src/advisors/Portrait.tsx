@@ -3,7 +3,7 @@ import { type Expression, FULL, PORTRAITS } from "../art";
 import { ADVISORS } from "./advisors";
 
 /**
- * An advisor's face from the PC-98 portrait sheets (docs/ART_BRIEFS.md), in a square frame with her colour as the rule.
+ * An advisor's face from the PC-98 portrait sheets (docs/dev/ART_BRIEFS.md), in a square frame with her colour as the rule.
  * `mood` picks the expression; `talking` adds the speaking pulse.
  */
 export function Portrait({ id, size = 44, talking = false, mood = "neutral" }: { id: AdvisorId; size?: number; talking?: boolean; mood?: Expression }) {

@@ -1,4 +1,4 @@
-/** Luci's remarks on the quarterly inspection sheet. All placeholder text (listed in docs/PLACEHOLDER_TEXT.md). */
+/** Luci's remarks on the quarterly inspection sheet. All placeholder text (listed in docs/dev/PLACEHOLDER_TEXT.md). */
 import type { QuarterReport } from "@aitower/sim";
 import type { Expression } from "../art";
 

@@ -6,7 +6,7 @@
 3. Grow the Tower (Mel): research two techs, reach Level 2, switch on the Foreman.
 4. The Three Trees (Bea): retrofit one rack to Green, open the Trees panel, add solar, earn first points.
 
-Stars: the sim awards 1 + headroom star + no-blackout star, but only when `starred` is not false. In lessons.json ALL FOUR are `starred:false`, lesson 1 included (HANDOFF is wrong about lesson 1). So every lesson pays exactly 1 star. The two star rules (headroom %, dark minutes) are power-only, so they mean nothing for lessons 2-4. Progress is saved by lesson id (`aitower.lessons.v1`, best stars), so renumbering is safe.
+Stars: the sim awards 1 + headroom star + no-blackout star, but only when `starred` is not false. In lessons.json ALL FOUR are `starred:false`, lesson 1 included (docs/dev/HANDOFF.md is wrong about lesson 1). So every lesson pays exactly 1 star. The two star rules (headroom %, dark minutes) are power-only, so they mean nothing for lessons 2-4. Progress is saved by lesson id (`aitower.lessons.v1`, best stars), so renumbering is safe.
 
 ## 2. Gaps, worst first
 1. Liquid cooling (chiller, CDU, coolant conduit, LC rack). Air racks cap out; Level 2 opens plumbing. No lesson touches it.

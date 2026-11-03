@@ -385,7 +385,7 @@ keyed by `version`. Autosave daily in the browser (IndexedDB); export/import fil
 | `agent-render` | `packages/render` | `SimView`, content sprites | `Renderer.draw(view, alpha)`, overlays, camera |
 | `agent-ui` | `packages/ui` | `SimView`, `SimEvent` | HUD, build tools emitting `SimCommand` |
 | `agent-assets` | `packages/content`, `packages/audio` | schemas | JSON balance data, job generator, audio engine |
-| Orchestrator (me) | `packages/app`, `api.ts` contracts, `tasks/`, `BUILD_LOG.md` | all | integration, CI, reviews |
+| Orchestrator (me) | `packages/app`, `api.ts` contracts, `tasks/`, `docs/dev/BUILD_LOG.md` | all | integration, CI, reviews |
 
 Contract-first: the orchestrator writes `packages/sim/src/api.ts` and
 `packages/content/src/schema.ts` **before** spawning agents, so all four can work in

@@ -12,7 +12,7 @@
 | 2026-10-15 | 5 | Publishing: GitHub Pages workflow + claude.ai artifact build (`scripts/build-artifact.mjs`) | ✅ |
 | 2026-10-15 | 6 | MVP merged to `main` (MichaelAPerry/AITower#1) | ✅ |
 | 2026-10-15 | 6 | Ministry Induction tutorial (13 steps, `packages/ui/src/tutorial`) | ✅ |
-| 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
+| 2026-10-15 | 6 | 1.0 feature review by 4 Sonnet reviewers → `docs/dev/review/`, combined into `docs/ROADMAP_1.0.md` | ✅ |
 | 2026-10-16 | M1 | Foundations: contracts, then T1 sim, T2 ui, T3 platform, T4 render, T5 CI (see `tasks/m1/`) | ✅ |
 | 2026-10-16 | M2a | Ministry memos, standing, game over, economy retune, title screen, tutorial rework, music v1 (see `tasks/m2/`) | ✅ |
 | 2026-10-16 | fix | Playtest fixes: deploys unblocked, money trap removed, CURRENT ORDERS, short tutorial, paused commands apply at once | ✅ |
@@ -153,7 +153,7 @@ All four agents hit an API usage limit once and were resumed from their saved wo
 - **Agents (Sonnet), run one at a time after five parallel agents hit the usage limit twice:**
   - **sim:** nutrient network, organoid incubators, contamination field, quarantine and sterile bays, mutations, growths, corruption, `choosePath`, three endings, snapshot v5.
   - **content:** 8 biotech facilities and 3 growths, a wetware tech branch, Clearance 5, 4 bio clients, 25 memos running from early seeds to horror, paths and endings.
-  - **ui:** the Calm HUD (`tasks/m3/T4b-redesign.md`, mockup in `docs/mockups/`).
+  - **ui:** the Calm HUD (`tasks/m3/T4b-redesign.md`, mockup in `docs/dev/mockups/`).
     - a top strip with PER HOUR and standing
     - a NEXT chip, a one-line ticker, and memo stamps with costs as numbers
     - the C/R/F/I drawers and a build dock

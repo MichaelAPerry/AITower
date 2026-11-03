@@ -12,7 +12,7 @@
 
 **To resume:**
 1. Run `npm run typecheck && npm run check` on the branch and see what is unfinished.
-2. Spec: `docs/mockups/m6-redesign.html`, section 05 and the M6.4 row in section 08.
+2. Spec: `docs/dev/mockups/m6-redesign.html`, section 05 and the M6.4 row in section 08.
 3. Finish M6.4, then open ONE PR, then playtest with the owner before starting M6.5 or M6.6.
 
 **Process rules learned:**

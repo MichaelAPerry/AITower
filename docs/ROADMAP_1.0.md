@@ -1,4 +1,4 @@
-> **HISTORIC (Oct 2026).** This roadmap was written on 2026-10-15 and is kept for history. Much of it is built or replaced. For the current state read `HANDOFF.md`.
+> **HISTORIC (Oct 2026).** This roadmap was written on 2026-10-15 and is kept for history. Much of it is built or replaced. For the current state read `docs/dev/HANDOFF.md`.
 
 # AItower — Road to 1.0
 

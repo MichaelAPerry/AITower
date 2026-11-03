@@ -1,6 +1,6 @@
 # M3 — Into the flesh: the Biotech path and the body-horror arc
 
-Source: `docs/ROADMAP_1.0.md` (M3, "The body-horror arc", taste rules) and `docs/review/game-design.md` §2–3.
+Source: `docs/ROADMAP_1.0.md` (M3, "The body-horror arc", taste rules) and `docs/dev/review/game-design.md` §2–3.
 **Taste rules, binding for every agent:**
 - Never show a human body, and no gore. Horror is *administrative, organic and wrong*: forms, euphemism, texture and sound.
 - The Ministry never acknowledges it. Growths are "assets"; a mutated bot is "reclassified".

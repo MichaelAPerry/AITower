@@ -6,7 +6,7 @@
 - `tasks/m1/README.md`
 - `packages/sim/AGENTS.md`
 - `packages/sim/src/api.ts` (note the new `canBuild` and `submit` / `fromSnapshot` docs)
-- `docs/review/engineering.md`. It cites exact file:line problems; verify each one before fixing.
+- `docs/dev/review/engineering.md`. It cites exact file:line problems; verify each one before fixing.
 
 ## 1. Queue-aware validation (`submit` and `canBuild`)
 - **Problem:** `submit()` validates only against the current state. So "buildSlab on F2, then place on F2" in the same paused tick is rejected, and two purchases that together exceed cash are both accepted.

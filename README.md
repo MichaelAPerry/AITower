@@ -47,5 +47,5 @@ npm run build                      # production bundle in apps/web/dist
 
 Each package has an `AGENTS.md`.
 
-Docs: [`HANDOFF.md`](HANDOFF.md) (start here) · [`docs/SOUL.md`](docs/SOUL.md) · [`docs/RESEARCH.md`](docs/RESEARCH.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
-[`tasks/`](tasks/) · [`BUILD_LOG.md`](BUILD_LOG.md).
+Docs: [`docs/dev/HANDOFF.md`](docs/dev/HANDOFF.md) (start here) · [`docs/SOUL.md`](docs/SOUL.md) · [`docs/RESEARCH.md`](docs/RESEARCH.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) ·
+[`tasks/`](tasks/) · [`docs/dev/BUILD_LOG.md`](docs/dev/BUILD_LOG.md).

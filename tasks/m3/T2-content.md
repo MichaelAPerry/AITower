@@ -1,6 +1,6 @@
 # M3-T2 — agent-content: Biotech path content, Clearance 5, horror memos, endings
 
-Read `tasks/m3/README.md` (taste rules), `packages/content/AGENTS.md`, `src/schema.ts` (M3 parts), `docs/ROADMAP_1.0.md` (arc table) and `docs/review/game-design.md` §2–3.
+Read `tasks/m3/README.md` (taste rules), `packages/content/AGENTS.md`, `src/schema.ts` (M3 parts), `docs/ROADMAP_1.0.md` (arc table) and `docs/dev/review/game-design.md` §2–3.
 Write in the existing cassette-futurist *Brazil* voice. All of it is fictional. Never show a body or gore, and the Ministry never acknowledges the horror.
 
 ## 1. Clearance 5 and paths

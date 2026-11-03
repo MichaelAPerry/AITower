@@ -3,7 +3,7 @@
 ## 0. The Soul (latest owner direction; it overrides everything below)
 The game is the player's journey down **three Singularity trees**, wrapped in a **PC-98 visual-novel dating sim at the end of the world**.
 
-The full spec is in `docs/SOUL.md`, the look is in `docs/STYLE_PC98.md`, and the portrait prompts are in `docs/ART_BRIEFS.md`.
+The full spec is in `docs/SOUL.md`, the look is in `docs/STYLE_PC98.md`, and the portrait prompts are in `docs/dev/ART_BRIEFS.md`.
 
 ### Done (on `main`)
 - **The three trees, each scored in Singularity points (SP) toward a target of 1000:**
@@ -42,9 +42,9 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 ### State on Oct 30 (read this first)
 - **Live main = `d8e2450`** (retrofit reframe). Branch `claude/youthful-ramanujan-msqcy9` (`9883f4b`) holds unreleased work: build-menu fixes, audit cleanups, docs. Not live.
 - **Four finished branches, all built on youthful, NOT merged, awaiting owner approval:**
-  - `wip/tree-sprites` (`6425adb`): Green, Bio and Synthetic sprites redrawn, plus the Consciousness Transfer Unit (CT-1) walk-in/upload animation. Previews in `docs/preview/` (`green-`, `bio-`, `synthetic-sprites.png`, `transfer-unit.png`, `green-ingame.png`). Check, build, e2e, budget pass. Owner will likely say: the pod looks like a vending machine; Bio is uniformly pink; 7 support items are still base art (nutrient plant/works, bioreactor, digester, sterile bay, gensets, SMR, PV wall). Direction: `docs/ART_DIRECTION.md` on that branch.
+  - `wip/tree-sprites` (`6425adb`): Green, Bio and Synthetic sprites redrawn, plus the Consciousness Transfer Unit (CT-1) walk-in/upload animation. Previews in `docs/dev/preview/` (`green-`, `bio-`, `synthetic-sprites.png`, `transfer-unit.png`, `green-ingame.png`). Check, build, e2e, budget pass. Owner will likely say: the pod looks like a vending machine; Bio is uniformly pink; 7 support items are still base art (nutrient plant/works, bioreactor, digester, sterile bay, gensets, SMR, PV wall). Direction: `docs/ART_DIRECTION.md` on that branch.
   - `wip/lessons` (`3a8be69`): four lessons (Build, Earn, Grow, The trees), each scripted to completion in tests; e2e plays the new Lesson 1. All checks pass. Lessons 2-4 give no stars; lesson 4 does not wait for a seal. Owner has not read the lesson text yet.
-  - `wip/endings` (`005fd38`): five ending screens (Lattice, Flesh, Garden, Absorbed, Bankrupt), 20 epilogues (4 advisors x 5), `docs/ENDING_PROMPTS.md`. All checks pass (`perf.test.ts` is flaky under load; passes alone). It adds `art` to `endings.json`, `ENDING_ART` in `packages/ui/src/art/index.ts`, and edits `tools/dialogue/export.ts` (new `Art:` line; epilogues for all five endings). `docs/DIALOGUE.md` was NOT regenerated there.
+  - `wip/endings` (`005fd38`): five ending screens (Lattice, Flesh, Garden, Absorbed, Bankrupt), 20 epilogues (4 advisors x 5), `docs/dev/ENDING_PROMPTS.md`. All checks pass (`perf.test.ts` is flaky under load; passes alone). It adds `art` to `endings.json`, `ENDING_ART` in `packages/ui/src/art/index.ts`, and edits `tools/dialogue/export.ts` (new `Art:` line; epilogues for all five endings). `docs/DIALOGUE.md` was NOT regenerated there.
   - `wip/off-duty` (`f622354`): `docs/OFF_DUTY.md` only, no code. Unlocks: Luci = Lattice win, no debt, bond >= 70; Mel = Flesh win, corruption < 0.5 (a guess); Bea = Garden win; Cass = 30 days in a row at 99% uptime (needs new `uptimeStreak` field + snapshot v16; whether uptime is 0-1 or 0-100 is unconfirmed). Gallery in localStorage `aitower.gallery`.
 - A pairwise merge-tree of the three code branches shows no conflicts, but they were never tested combined.
 - **Pending owner approvals:** sprite previews, `ENDING_PROMPTS.md`, `OFF_DUTY.md`, and optionally a lesson text sample.
@@ -56,7 +56,7 @@ Balance knobs: `balance.soul` (SP rate, residue rate, bond gates) and the `seal`
 4. ~~Lessons 2+ for the new loop~~ done on `wip/lessons`: Build, Earn, Grow, The trees (scripted in `sim/src/lessons.test.ts`).
 
 ## Next session: owner art and dialogue
-The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening message: `docs/NEXT_PROMPT.md`.
+The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening message: `docs/dev/NEXT_PROMPT.md`.
 
 ### Order of work
 **(a) Approvals and merges.**
@@ -81,7 +81,7 @@ The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening mes
 
 ### How to drop in an image
 - Format: **lossless WebP**, quantised (48 colours for backdrops, 32 for portraits). Pillow: `Image.open(p).convert("RGB").quantize(48).convert("RGB").save(out, lossless=True)`. If the size is wrong, resize with `Image.NEAREST` first (art drawn at 2x halves cleanly).
-- Sizes in the repo today: backdrops 640x420 (`bg-title` 640x480), busts 256x256, full figures 280x420. `docs/ART_BRIEFS.md` says `art/portraits/*.png` at about 480x600; the repo actually keeps `.webp` directly in `packages/ui/src/art/`. The briefs are a source-art spec, not the repo layout.
+- Sizes in the repo today: backdrops 640x420 (`bg-title` 640x480), busts 256x256, full figures 280x420. `docs/dev/ART_BRIEFS.md` says `art/portraits/*.png` at about 480x600; the repo actually keeps `.webp` directly in `packages/ui/src/art/`. The briefs are a source-art spec, not the repo layout.
 - Put the file in `packages/ui/src/art/<name>.webp`. `assets.d.ts` declares `*.webp`.
 - Register it in `packages/ui/src/art/index.ts` with a static import (`import x from "./x.webp"`):
   - Portraits: `PORTRAITS[advisor][expression]` (`neutral|pleased|displeased|unsettling`) or `FULL[advisor]`. Names `<advisor>-<expression>.webp`, `<advisor>-full.webp`; advisors `luci mel bea cass`.
@@ -118,7 +118,7 @@ The owner will attach new images and a rewritten `docs/DIALOGUE.md`. Opening mes
 | Location: sunrise (`rung_green_4`) | `bg-loc-sunrise.webp` | `LOCATION_ART` + `LOCATION_FILES` | done |
 | Off duty: Luci, Mel, Bea, Cass | `{advisor}-offduty.webp` (match the base set's size) | gallery (d) | empty |
 
-Prompts: `docs/ART_NEEDED.md` (locations), `docs/ENDING_PROMPTS.md` (endings, on `wip/endings`), `docs/OFF_DUTY.md` (on `wip/off-duty`), `docs/ART_BRIEFS.md` (portraits). Layout rule for every backdrop: keep the upper-left third quiet (caption box) and the subject in the upper two thirds (the dialogue box covers the bottom third). Rack and support sprites are Part A of `docs/ART_NEEDED.md` and `wip/tree-sprites`; they are code, not owner art.
+Prompts: `docs/ART_NEEDED.md` (locations), `docs/dev/ENDING_PROMPTS.md` (endings, on `wip/endings`), `docs/OFF_DUTY.md` (on `wip/off-duty`), `docs/dev/ART_BRIEFS.md` (portraits). Layout rule for every backdrop: keep the upper-left third quiet (caption box) and the subject in the upper two thirds (the dialogue box covers the bottom third). Rack and support sprites are Part A of `docs/ART_NEEDED.md` and `wip/tree-sprites`; they are code, not owner art.
 
 ### DIALOGUE.md grammar (what the importer must read)
 Generated by `tools/dialogue/export.ts`; `npx tsx tools/dialogue/export.ts --check` validates it. Sections `## N. Title` in order: crawl, advisors, four story groups, endings, memos (Cass, Bea, Mel, Luci), lessons.
@@ -224,8 +224,8 @@ The concept art originals (PNG) are on branch `claude/serene-ramanujan-ojshkh`, 
 - `perf.test.ts` can fail under machine load; re-run alone.
 
 ## 5. Docs
-- `docs/mockups/m6-redesign.html`: the M6 design. Superseded by `docs/SOUL.md`; kept for history. It is also published at https://claude.ai/artifact/YBoKgwG1Uw6cDVekeZUUer
-- `docs/BALANCE_AUDIT.md`
+- `docs/dev/mockups/m6-redesign.html`: the M6 design. Superseded by `docs/SOUL.md`; kept for history. It is also published at https://claude.ai/artifact/YBoKgwG1Uw6cDVekeZUUer
+- `docs/dev/BALANCE_AUDIT.md`
 - `docs/UI_RESEARCH.md`
 - `docs/QUOTES.md`
 
@@ -258,7 +258,7 @@ Shared access rules live in packages/content/src/catalogue.ts (`access`, `upgrad
 - OWNER PLAY-TEST BUG (open): "the old music still plays" in the alpha. Not investigated (usage limit). Start here: `packages/ui/src/gamemusic/`, `title/titleMusic.ts`, `Hud.tsx` GameMusic; check the title song stops and the tower loop/scene songs take over.
 - OWNER PLAY-TEST BUG (open): weird overlaps in the Automation drawer/menu. Add it to `e2e/layout.mjs` coverage when fixing.
 - OWNER PLAY-TEST BUG (open): on/off switches everywhere broke in the UI resize (size-up / main-menu pill switches / layout pass). Check every toggle (settings, automation, overlays, audio) at 1280x720 and 1920x1080, and add switches to `e2e/layout.mjs`.
-- OWNER PLAY-TEST BUG (BIG, open): inspection cards/popups still use the OLD style (not restyled). Each inspection should show Luci's face plus a short quip from Luci (new quips = placeholder text, add to docs/PLACEHOLDER_TEXT.md). The button to dismiss/remove an inspection is GONE (likely lost in the resize/layout pass) — restore it and cover it in e2e.
+- OWNER PLAY-TEST BUG (BIG, open): inspection cards/popups still use the OLD style (not restyled). Each inspection should show Luci's face plus a short quip from Luci (new quips = placeholder text, add to docs/dev/PLACEHOLDER_TEXT.md). The button to dismiss/remove an inspection is GONE (likely lost in the resize/layout pass) — restore it and cover it in e2e.
 - OWNER PLAY-TEST BUG (open): the Skip button on the ending credits roll does NOT work (`packages/ui/src/credits/`, roll added this session). Fix + test in a real browser.
 - OWNER DECISION (open task): cut ALL quotes from the ending credits roll (menu Credits keep them).
 - OWNER DECISION (BIG, open task): REMOVE relationship/bond numbers and the attitude/relationship choices. After-hours (off-duty) portraits now come from 4 clickable easter-egg items in the tower (fern/Bea, fish tank/Mel, coffee machine/Cass, book/Luci): click once a day 3 days in a row -> dialogue; 10 days -> $1M upgrade -> new item + portrait. Bed portraits need all four + all achievements. Full spec and the owner's dialogue VERBATIM in `docs/AFTER_HOURS.md` (never fix its spelling). Replaces the earlier "advisor questions" idea. No sim test runs.

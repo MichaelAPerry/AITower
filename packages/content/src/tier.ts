@@ -1,5 +1,5 @@
 /**
- * Facility tier ladder (docs/mockups/m6-redesign.html section 03). Pure and computed from `unlockTier`, the lane of the
+ * Facility tier ladder (docs/dev/mockups/m6-redesign.html section 03). Pure and computed from `unlockTier`, the lane of the
  * gating tech and the path; it never changes a balance number. Sim, UI and render share it.
  *
  *   Standard : core-ladder items at Level 1 or 2.

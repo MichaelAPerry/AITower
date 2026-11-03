@@ -3,9 +3,9 @@
  * Sprite previews for the three trees and the Consciousness Transfer Unit (docs/TREES.md section 7). Usage (from the repo root):
  *
  *   npx tsx tools/sprites/preview.ts            # every PNG
- *   npx tsx tools/sprites/preview.ts sheet      # the four sheets: green-sprites, bio-sprites, synthetic-sprites, transfer-unit (docs/preview/)
+ *   npx tsx tools/sprites/preview.ts sheet      # the four sheets: green-sprites, bio-sprites, synthetic-sprites, transfer-unit (docs/dev/preview/)
  *   npx tsx tools/sprites/preview.ts bio        # one sheet: green | bio | synthetic | transfer
- *   npx tsx tools/sprites/preview.ts ingame     # docs/preview/green-ingame.png only
+ *   npx tsx tools/sprites/preview.ts ingame     # docs/dev/preview/green-ingame.png only
  *
  * `sheet` serves packages/render/dev (sprites.html) with vite and screenshots it in headless Chromium: every new sprite drawn by the
  * real renderer at 1x and 3x on the game's own walls, pipes and sky, next to the base AC-1 and LC-2 (and the base cooling, power and
@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 import { loadContent } from "@aitower/content";
 
 const root = fileURLToPath(new URL("../..", import.meta.url));
-const OUT = join(root, "docs/preview");
+const OUT = join(root, "docs/dev/preview");
 
 function loadPlaywright(): { chromium: { launch(o: object): Promise<Browser> } } {
 	const dirs = [process.env.PLAYWRIGHT_DIR, root, "/opt/node22/lib/node_modules/"].filter(Boolean) as string[];
@@ -103,7 +103,7 @@ async function sheet(browser: Browser, only?: string): Promise<void> {
 		await page.waitForTimeout(300);
 		await page.screenshot({ path: join(OUT, sh.file), fullPage: true });
 		if (errors.length) throw new Error(`page errors (${sh.tree}):\n${errors.join("\n")}`);
-		console.log(`saved docs/preview/${sh.file}`);
+		console.log(`saved docs/dev/preview/${sh.file}`);
 	}
 }
 
@@ -179,7 +179,7 @@ async function ingame(browser: Browser): Promise<void> {
 	await dismissScenes(page);
 	await page.screenshot({ path: join(OUT, "green-ingame.png") });
 	if (errors.length) console.warn(`console errors:\n${errors.join("\n")}`);
-	console.log("saved docs/preview/green-ingame.png");
+	console.log("saved docs/dev/preview/green-ingame.png");
 }
 
 const which = process.argv[2] ?? "all";
