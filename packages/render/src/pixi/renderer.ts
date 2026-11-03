@@ -3,7 +3,7 @@ import type { ContentDB } from "@aitower/content";
 import type { CellPointerEvent, Ghost, OverlayMode, Renderer, RenderOptions, Selection } from "@aitower/shared";
 import type { CellRef, SimEvent, SimView } from "@aitower/sim";
 import { Application, Container, Graphics, Sprite, Texture, TextureSource, TilingSprite } from "pixi.js";
-import { type Camera, type GridDims, cellCenter, clampCamera, floorTop, groundY, offset } from "../camera";
+import { type Camera, type GridDims, clampCamera, floorTop, frameCell, groundY, offset } from "../camera";
 import { DEFAULT_ZOOM, FAC_BOTTOM, FAC_TOP, SETTLE_MS, TILE } from "../constants";
 import { Interpolator, effectiveAlpha, hashArrays } from "../interp";
 import { type HorrorStages, type LiveFx, SIGN_WORD, easeToward, horrorStages, signWord } from "../horror";
@@ -256,8 +256,13 @@ export async function createPixiRenderer(host: HTMLElement, content: ContentDB):
 			pendingFocus = cell;
 			return;
 		}
-		const p = cellCenter(grid, cell);
-		cam = clampCamera({ ...cam, cx: p.x, cy: p.y }, grid);
+		cam = frameCell(cam, grid, cell);
+		// Behind the title the camera is driven from the saved pre-title view, so frame that one too (else the
+		// title's close restores a stale position, e.g. the unframed top of the world).
+		if (titleScene && titleCam) {
+			titleCam = frameCell(titleCam, grid, cell);
+			titleCx = titleCam.cx;
+		}
 	};
 
 	const onNewTick = (view: SimView, now: number): void => {

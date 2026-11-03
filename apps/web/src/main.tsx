@@ -5,7 +5,7 @@ import "@fontsource/vt323";
 import { createAudio } from "@aitower/audio";
 import { loadContent } from "@aitower/content";
 import { createRenderer } from "@aitower/render";
-import type { AudioEngine } from "@aitower/shared";
+import { type AudioEngine, OPENING_FOCUS } from "@aitower/shared";
 import { Hud, createToolController } from "@aitower/ui";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
@@ -69,7 +69,7 @@ async function boot() {
 	renderer.onPointer((e) => tools.handle(e));
 	renderer.resize(window.innerWidth, window.innerHeight);
 	// Open on the starter rack row, nudged right so the build palette doesn't cover it.
-	renderer.focus({ x: 19, floor: 0 });
+	renderer.focus(OPENING_FOCUS);
 	window.addEventListener("resize", () => renderer.resize(window.innerWidth, window.innerHeight));
 
 	// Let the camera pan the tower ends clear of whatever overlay covers that side.
