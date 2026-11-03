@@ -23,7 +23,8 @@
     "e2e:layout": "node e2e/layout.mjs",
     "e2e:afterhours": "node e2e/afterhours.mjs",
     "build:single": "node scripts/build-single.mjs",
-    "build:site": "node scripts/build-site.mjs"
+    "build:site": "node scripts/build-site.mjs",
+    "trailer": "node trailer/render.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",

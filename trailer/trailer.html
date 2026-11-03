@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>AI Tower trailer</title>
+<meta name="viewport" content="width=1280">
+<!-- 30 s trailer timeline. Everything is a pure function of window.setTime(t); no wall clock, no animation frames.
+     Served by trailer/render.mjs from the repo root (art, fonts) with /clips mapped to /tmp/trailer/clips (gameplay frames). -->
+<style>
+@import url("/node_modules/@fontsource/dotgothic16/400.css");
+@import url("/node_modules/@fontsource/m-plus-rounded-1c/800.css");
+:root {
+	--bg: #07072a; --text: #f0f0ff; --accent: #5ce1ff; --accent-2: #ff6ad5; --good: #6cf08f;
+	--warn: #ffb347; --bad: #ff4d5e; --money: #ffd75e;
+	--luci: #ff5d6c; --mel: #c58bff; --bea: #9be564; --cass: #7fdcff;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 1280px; height: 720px; background: #000; overflow: hidden; }
+body { font-family: "DotGothic16", "M PLUS Rounded 1c", monospace; color: var(--text); }
+#stage { position: relative; width: 1280px; height: 720px; overflow: hidden; background: #000; }
+.abs { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; }
+.hide { opacity: 0; visibility: hidden; }
+.layer { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; overflow: hidden; }
+.layer img.full { position: absolute; left: 0; top: 0; width: 1280px; height: 720px; image-rendering: pixelated; }
+.rd { font-family: "M PLUS Rounded 1c", "DotGothic16", sans-serif; font-weight: 800; }
+.dg { font-family: "DotGothic16", monospace; }
+
+/* title */
+#title .t1 { position: absolute; left: 0; width: 1280px; top: 232px; text-align: center; font-size: 150px; letter-spacing: 14px; color: var(--text); text-shadow: 6px 6px 0 var(--accent-2), 0 0 28px var(--accent); }
+#title .t2 { position: absolute; left: 0; width: 1280px; top: 420px; text-align: center; font-size: 42px; letter-spacing: 12px; color: var(--accent); }
+#title .rule { position: absolute; left: 340px; top: 400px; height: 3px; background: var(--accent); box-shadow: 0 0 12px var(--accent); }
+
+/* slam text */
+.slam { position: absolute; white-space: nowrap; line-height: 1; transform-origin: 50% 60%; }
+.slam .jp { display: block; font-family: "DotGothic16", monospace; font-weight: 400; letter-spacing: 10px; }
+.frame { position: absolute; background: #000; border: 3px solid var(--text); box-shadow: 0 0 0 5px var(--bg), 0 0 0 7px #3a3a9a, 10px 10px 0 7px rgba(0,0,0,.6); overflow: hidden; }
+.frame img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; image-rendering: auto; }
+
+/* cut-ins */
+.nameplate { position: absolute; left: 0; bottom: 70px; padding: 10px 40px 12px 56px; transform-origin: 0 100%; }
+.nameplate .en { font-size: 54px; line-height: 1; color: #07072a; }
+.nameplate .jp { font-size: 34px; line-height: 1.2; color: #07072a; letter-spacing: 6px; margin-top: 4px; }
+.band { position: absolute; top: -200px; height: 1200px; width: 160px; transform: rotate(14deg); transform-origin: 50% 50%; }
+
+/* speed cuts */
+.tag { position: absolute; left: 36px; bottom: 44px; font-size: 44px; letter-spacing: 6px; padding: 4px 18px; background: var(--bg); border: 3px solid var(--text); color: var(--accent); box-shadow: 5px 5px 0 rgba(0,0,0,.6); }
+
+/* dialogue */
+#quote .box { position: absolute; left: 80px; top: 470px; width: 1120px; height: 190px; background: rgba(7,7,42,.93); border: 3px solid var(--luci); box-shadow: 0 0 0 5px var(--bg), 0 0 0 7px var(--text), 8px 8px 0 7px rgba(0,0,0,.5); }
+#quote .nm { position: absolute; left: 30px; top: -22px; padding: 2px 18px; background: var(--bg); border: 3px solid var(--luci); color: var(--luci); font-size: 28px; }
+#quote .tx { position: absolute; left: 36px; top: 40px; right: 36px; font-size: 40px; line-height: 1.45; color: var(--text); }
+
+/* end card */
+#end .logo { position: absolute; left: 0; width: 1280px; top: 110px; text-align: center; font-size: 120px; letter-spacing: 12px; text-shadow: 5px 5px 0 var(--accent-2), 0 0 24px var(--accent); }
+#end .logo-jp { position: absolute; left: 0; width: 1280px; top: 250px; text-align: center; font-size: 34px; letter-spacing: 10px; color: var(--accent); }
+#end .hook { position: absolute; left: 0; width: 1280px; top: 350px; text-align: center; font-size: 66px; color: var(--money); text-shadow: 4px 4px 0 #07072a, 0 0 18px rgba(255,215,94,.5); }
+#end .play { position: absolute; left: 0; width: 1280px; top: 500px; text-align: center; font-size: 36px; }
+#end .play span { background: var(--bg); border: 3px solid var(--text); padding: 12px 34px; box-shadow: 6px 6px 0 rgba(0,0,0,.6); color: var(--text); }
+
+/* overlays */
+#lines { position: absolute; left: 0; top: 0; }
+#flash { position: absolute; inset: 0; background: #fff; opacity: 0; }
+#scan { position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,0) 0, rgba(0,0,0,0) 2px, rgba(0,0,0,.22) 2px, rgba(0,0,0,.22) 3px); mix-blend-mode: multiply; pointer-events: none; }
+#vig { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(0,0,0,0) 55%, rgba(0,0,0,.55) 100%); pointer-events: none; }
+#fade { position: absolute; inset: 0; background: #000; opacity: 0; }
+</style>
+</head>
+<body>
+<div id="stage">
+
+	<!-- S1: key visual -->
+	<div class="layer hide" id="tower"><img class="full" id="towerImg" src="/site/assets/art/tower-night.webp" alt="" style="width:2048px;height:1152px;image-rendering:auto"></div>
+
+	<!-- S2/S5 backdrop panel -->
+	<div class="layer hide" id="panel" style="background:linear-gradient(160deg,#07072a 0%,#1a0f4a 60%,#3a0f4a 100%)">
+		<img class="full" id="panelBg" src="/site/assets/art/tower-night.webp" alt="" style="opacity:.28;filter:blur(3px);image-rendering:auto">
+	</div>
+
+	<!-- cut-ins -->
+	<div class="layer hide" id="cutins"></div>
+
+	<!-- speed cuts -->
+	<div class="layer hide" id="cuts"><img class="full" id="cutImg" alt="" style="width:1280px;height:720px;image-rendering:auto"><div class="tag dg" id="cutTag"></div></div>
+
+	<canvas id="lines" width="1280" height="720"></canvas>
+
+	<!-- framed gameplay window for the THREE slam -->
+	<div class="frame hide" id="winA" style="left:610px;top:200px;width:600px;height:338px"><img id="winImg" alt=""></div>
+
+	<div class="layer hide" id="slams"></div>
+
+	<div class="layer hide" id="title">
+		<div class="t1 dg" id="t1">AI TOWER</div>
+		<div class="rule" id="rule"></div>
+		<div class="t2 dg" id="t2">エーアイ・タワー</div>
+	</div>
+
+	<div class="layer hide" id="quote">
+		<img class="full" id="quoteImg" src="/site/assets/art/luci-cutin.webp" alt="" style="image-rendering:auto">
+		<div class="box"><div class="nm dg">ルーシー・フェッロ</div><div class="tx rd" id="quoteTx"></div></div>
+	</div>
+
+	<div class="layer hide" id="end">
+		<img class="full" id="endImg" src="/site/assets/art/tower-night.webp" alt="" style="filter:blur(7px) brightness(.42) saturate(1.2);transform:scale(1.08);image-rendering:auto">
+		<div class="abs" style="background:linear-gradient(to bottom,rgba(7,7,42,.55),rgba(7,7,42,.85))"></div>
+		<div class="logo dg">AI TOWER</div>
+		<div class="logo-jp dg">エーアイ・タワー</div>
+		<div class="hook rd" id="hook">Three ways to end the world.</div>
+		<div class="play rd" id="play"><span>Play free in your browser</span></div>
+	</div>
+
+	<div id="vig"></div>
+	<div id="scan"></div>
+	<div id="flash"></div>
+	<div id="fade"></div>
+</div>
+
+<script>
+"use strict";
+// ───── timing ─────
+const BPM = 143, B = 60 / BPM; // one beat = 0.4196 s
+const beat = (n) => n * B;
+const T = { // scene boundaries, all on beats
+	title: [0, beat(7)], tower: [beat(7), beat(19)], three: [beat(19), beat(29)], cutins: [beat(29), beat(37)],
+	speed: [beat(37), beat(50)], ways: [beat(50), beat(57)], quote: [beat(57), beat(64)], end: [beat(64), 30],
+};
+const ADV = [
+	{ id: "luci", en: "Luci Ferro", jp: "ルーシー・フェッロ", c: "#ff5d6c", img: "/site/assets/art/luci-cutin.webp", dir: -1 },
+	{ id: "mel", en: "Dr. Mel Kiorre", jp: "ドクター・メル・キオーレ", c: "#c58bff", img: "/site/assets/art/mel-cutin.webp", dir: 1 },
+	{ id: "bea", en: "Bea Altasar", jp: "ビー・アルタサール", c: "#9be564", img: "/site/assets/art/bea-cutin.webp", dir: -1 },
+	{ id: "cass", en: "Cass Parr", jp: "キャス・パー", c: "#7fdcff", img: "/site/assets/art/cass-cutin.webp", dir: 1 },
+];
+const N = { a: 119, b: 96, c: 96, d: 96 }; // frames per gameplay clip (30 fps)
+const QUOTE = "You can call me Ms. Ferro. Remember who you're doing this for.";
+
+// ───── helpers ─────
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, k) => a + (b - a) * k;
+const easeOut = (k) => 1 - Math.pow(1 - clamp(k), 3);
+const easeBack = (k) => { k = clamp(k); const c = 2.2; return 1 + (c + 1) * Math.pow(k - 1, 3) + c * Math.pow(k - 1, 2); };
+const hash = (n) => { let x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+const show = (el, on) => { el.classList.toggle("hide", !on); };
+const inR = (t, r) => t >= r[0] && t < r[1];
+const pulse = (t, k = 6) => Math.exp(-((t / B) % 1) * k); // 1 on each beat, decays
+const shake = (seed, amp) => [(hash(seed) - 0.5) * 2 * amp, (hash(seed + 99) - 0.5) * 2 * amp];
+
+// build cut-in DOM once
+const cutins = $("cutins");
+ADV.forEach((a, i) => {
+	const d = document.createElement("div");
+	d.className = "layer hide"; d.id = "ci" + i;
+	d.innerHTML = `<div class="abs" style="background:${a.c}"></div>
+		<div class="band" style="left:${a.dir < 0 ? 900 : 200}px;background:rgba(255,255,255,.18)"></div>
+		<img class="full" src="${a.img}" alt="" style="image-rendering:auto">
+		<div class="nameplate" style="background:${a.c}"><div class="en rd">${a.en}</div><div class="jp dg">${a.jp}</div></div>`;
+	cutins.appendChild(d);
+});
+const slams = $("slams");
+const mkSlam = (id, html, css) => { const d = document.createElement("div"); d.className = "slam hide"; d.id = id; d.style.cssText = css; d.innerHTML = html; slams.appendChild(d); return d; };
+const stroke = "-4px -4px 0 #07072a,4px -4px 0 #07072a,-4px 4px 0 #07072a,4px 4px 0 #07072a";
+const sThree = mkSlam("sThree", `<div class="rd" style="font-size:210px;color:var(--money);text-shadow:${stroke},9px 9px 0 var(--accent-2)">THREE</div><span class="jp" style="font-size:54px;color:var(--text);margin-top:12px;text-shadow:3px 3px 0 #07072a">スリー</span>`, "left:44px;top:200px");
+const sWays = mkSlam("sWays", `<div class="rd" style="font-size:250px;color:var(--accent-2);text-shadow:${stroke},10px 10px 0 var(--accent)">WAYS</div><span class="jp" style="font-size:54px;color:var(--text);text-shadow:3px 3px 0 #07072a">ウェイズ</span>`, "left:0;width:1280px;text-align:center;top:70px");
+const sEnd = mkSlam("sEnd", `<div class="rd" style="font-size:96px;color:var(--text);text-shadow:${stroke},7px 7px 0 var(--accent-2);white-space:nowrap">TO END THE WORLD</div><span class="jp" style="font-size:56px;color:var(--accent);text-shadow:3px 3px 0 #07072a">世界の終わり</span>`, "left:0;width:1280px;text-align:center;top:420px");
+
+// speed-line canvas
+const cv = $("lines"), cx = cv.getContext("2d");
+function drawLines(t, color, alpha, inner, seed) {
+	cx.clearRect(0, 0, 1280, 720);
+	if (alpha <= 0) return;
+	cx.fillStyle = color; cx.globalAlpha = alpha;
+	const x0 = 640, y0 = 360, rot = t * 0.35, n = 70;
+	for (let i = 0; i < n; i++) {
+		const a = (i / n) * Math.PI * 2 + (hash(i + seed) - 0.5) * 0.06 + rot * 0.02;
+		const w = 0.006 + hash(i * 3 + seed) * 0.02;
+		const r1 = inner + hash(i * 5 + seed + Math.floor(t * 20)) * 140;
+		const r2 = 1100;
+		cx.beginPath();
+		cx.moveTo(x0 + Math.cos(a - w) * r2, y0 + Math.sin(a - w) * r2);
+		cx.lineTo(x0 + Math.cos(a) * r1, y0 + Math.sin(a) * r1);
+		cx.lineTo(x0 + Math.cos(a + w) * r2, y0 + Math.sin(a + w) * r2);
+		cx.fill();
+	}
+	cx.globalAlpha = 1;
+}
+
+// gameplay frame loader (the previous frame stays on screen until the next one has decoded)
+const loadFrame = async (img, clip, i) => {
+	const idx = String(Math.min(N[clip], Math.max(1, i + 1))).padStart(4, "0");
+	const src = `/clips/${clip}/${idx}.jpg`;
+	if (img.dataset.src === src) return;
+	const p = new Image(); p.src = src;
+	await p.decode();
+	img.src = src; img.dataset.src = src;
+};
+
+// the speed-cut montage: [clip, start frame, tag, zoom, focus x, focus y, tilt]
+const CUTS = [
+	["b", 0, "POWER ▲", 1.0, 640, 360, 0], ["c", 20, "COMPUTE", 1.7, 420, 280, -2], ["d", 0, "RACKS", 1.6, 640, 300, 2],
+	["b", 40, "COOLANT", 1.9, 300, 380, 3], ["c", 50, "NEW FLOOR", 1.5, 520, 240, -3], ["d", 40, "UPTIME", 1.8, 700, 330, 0],
+	["a", 40, "BUILD", 1.4, 400, 300, 2], ["b", 66, "FAST", 1.2, 640, 360, -2],
+];
+const CUT_LEN = 1.5 * B;
+
+// ───── the timeline ─────
+window.setTime = async function setTime(t) {
+	const frame = Math.round(t * 30);
+	const ids = ["tower", "panel", "cutins", "cuts", "winA", "slams", "title", "quote", "end"];
+	const on = {};
+	let flash = 0, lineCol = null, lineA = 0, lineIn = 150, fade = 0;
+	const sc = (name) => inR(t, T[name]);
+	const bp = pulse(t);
+
+	// S0 title
+	if (sc("title")) {
+		on.title = true;
+		const k = easeOut((t - 0.5) / 0.9), k2 = easeOut((t - 1.4) / 0.6);
+		$("t1").style.opacity = k; $("t1").style.transform = `scale(${lerp(1.18, 1, k)})`;
+		$("rule").style.left = 640 - 300 * k + "px"; $("rule").style.width = 600 * k + "px"; $("rule").style.opacity = k;
+		$("t2").style.opacity = k2;
+		const out = clamp((t - (T.title[1] - 0.3)) / 0.3);
+		fade = out * 0.6;
+		if (t > 0.3 && t < 0.45) flash = (0.45 - t) / 0.15 * 0.5; // single synth note
+	}
+
+	// S1 slow pan up the tower
+	if (sc("tower")) {
+		on.tower = true;
+		const k = (t - T.tower[0]) / (T.tower[1] - T.tower[0]);
+		const s = lerp(1.6, 1.12, easeOut(k * 0.9 + 0.1));
+		const w = 1280 * s, h = 720 * s;
+		const img = $("towerImg");
+		img.style.width = w + "px"; img.style.height = h + "px";
+		img.style.transform = `translate(${-(w - 1280) / 2}px, ${-(h - 720) * (1 - easeOut(k))}px)`;
+		const flick = 0.92 + 0.08 * hash(frame / 3) + 0.1 * bp;
+		img.style.filter = `brightness(${lerp(0.55, 1, clamp(k * 2.5)) * flick}) saturate(1.15)`;
+		fade = Math.max(fade, 1 - clamp((t - T.tower[0]) / 0.25)) * 0.0 + (1 - clamp((t - T.tower[0]) / 0.25)) * 0.6;
+	}
+
+	// S2 THREE
+	if (sc("three")) {
+		on.panel = true; on.winA = true; on.slams = true;
+		const lt = t - T.three[0];
+		flash = Math.max(flash, 1 - clamp(lt / 0.28));
+		lineCol = "#ff6ad5"; lineA = 0.35; lineIn = 230;
+		$("panelBg").style.opacity = 0.28;
+		// framed gameplay window slides in
+		const kw = easeBack((lt - 0.12) / 0.25);
+		const wa = $("winA");
+		const [sx, sy] = shake(frame, 3 * bp);
+		wa.style.transform = `translate(${(1 - kw) * 700 + sx}px, ${sy}px) rotate(${3 - 2 * bp}deg) scale(${1 + 0.03 * bp})`;
+		await loadFrame($("winImg"), "a", Math.floor(lt * 30 * 0.9));
+		show(sThree, true); show(sWays, false); show(sEnd, false);
+		const ks = easeBack(lt / 0.2);
+		const [tx, ty] = shake(frame + 7, lt < 0.5 ? 6 * (1 - lt / 0.5) + 2 * bp : 2 * bp);
+		sThree.style.transform = `translate(${tx}px, ${ty}px) scale(${lerp(3.2, 1, ks)}) rotate(${lerp(-8, -3, ks)}deg)`;
+		sThree.style.opacity = clamp(lt / 0.06);
+	}
+
+	// S3 cut-ins
+	if (sc("cutins")) {
+		on.cutins = true;
+		const per = 2 * B;
+		const idx = Math.min(3, Math.floor((t - T.cutins[0]) / per));
+		const lt = t - T.cutins[0] - idx * per;
+		ADV.forEach((a, i) => { show($(`ci${i}`), i === idx); });
+		const el = $("ci" + idx), a = ADV[idx];
+		const slide = 1 - easeOut(lt / 0.14);
+		const [sx, sy] = shake(frame * 3 + idx, 14 * Math.max(0, 1 - lt / 0.3));
+		const z = 1.02 + 0.07 * (lt / per);
+		el.style.transform = `translate(${a.dir * -420 * slide + sx}px, ${sy}px) scale(${z})`;
+		const np = el.querySelector(".nameplate");
+		np.style.transform = `translateX(${-(1 - easeOut((lt - 0.12) / 0.15)) * 700}px) skewX(-8deg)`;
+		el.querySelector(".band").style.transform = `rotate(14deg) translateX(${lerp(-400, 600, lt / per) * -a.dir}px)`;
+		flash = Math.max(flash, (1 - clamp(lt / 0.09)) * 0.85);
+	}
+
+	// S4 speed cuts
+	if (sc("speed")) {
+		on.cuts = true;
+		const per = CUT_LEN, lt0 = t - T.speed[0];
+		const idx = Math.min(CUTS.length - 1, Math.floor(lt0 / per));
+		const lt = lt0 - idx * per;
+		const [clip, f0, tag, zoom, fx, fy, tilt] = CUTS[idx];
+		await loadFrame($("cutImg"), clip, f0 + Math.floor(lt * 30 * 1.8));
+		const zz = zoom * (1 + 0.08 * (lt / per));
+		const [sx, sy] = shake(frame * 5, 8 * Math.max(0, 1 - lt / 0.2));
+		$("cutImg").style.transformOrigin = `${fx}px ${fy}px`;
+		$("cutImg").style.transform = `translate(${sx}px,${sy}px) scale(${zz}) rotate(${tilt * (1 - easeOut(lt / 0.2))}deg)`;
+		$("cutImg").style.filter = `saturate(1.3) contrast(1.1) brightness(${1 + 0.4 * (1 - clamp(lt / 0.12))})`;
+		$("cutTag").textContent = tag;
+		$("cutTag").style.transform = `translateX(${-(1 - easeOut(lt / 0.1)) * 400}px)`;
+		lineCol = idx % 2 ? "#5ce1ff" : "#ffffff"; lineA = 0.22 * (1 - clamp(lt / per)); lineIn = 320;
+		flash = Math.max(flash, (1 - clamp(lt / 0.07)) * 0.6);
+	}
+
+	// S5 flash + WAYS / TO END THE WORLD
+	if (sc("ways")) {
+		on.panel = true; on.slams = true;
+		const lt = t - T.ways[0];
+		flash = Math.max(flash, 1 - clamp(lt / 0.45));
+		$("panelBg").style.opacity = 0.55;
+		lineCol = "#5ce1ff"; lineA = 0.3; lineIn = 250;
+		show(sThree, false); show(sWays, true); show(sEnd, true);
+		const k1 = easeBack((lt - 0.03) / 0.2);
+		const [wx, wy] = shake(frame + 3, lt < 0.6 ? 7 * (1 - lt / 0.6) + 2 * bp : 2 * bp);
+		sWays.style.transform = `translate(${wx}px, ${wy}px) scale(${lerp(3, 1, k1)}) rotate(${lerp(6, 2, k1)}deg)`;
+		sWays.style.opacity = clamp((lt - 0.03) / 0.05);
+		const k2 = easeBack((lt - 2 * B) / 0.2);
+		const [ex, ey] = shake(frame + 11, lt < 2 * B + 0.5 ? 6 * Math.max(0, 1 - (lt - 2 * B) / 0.5) + 2 * bp : 2 * bp);
+		sEnd.style.transform = `translate(${ex}px, ${ey}px) scale(${lerp(2.6, 1, k2)}) rotate(${lerp(-4, 0, k2)}deg)`;
+		sEnd.style.opacity = clamp((lt - 2 * B) / 0.05);
+		if (lt >= 2 * B && lt < 2 * B + 0.2) flash = Math.max(flash, (1 - (lt - 2 * B) / 0.2) * 0.7);
+		on.winA = false;
+	}
+
+	// S6 Luci's line
+	if (sc("quote")) {
+		on.quote = true;
+		const lt = t - T.quote[0], dur = T.quote[1] - T.quote[0];
+		const [sx, sy] = shake(frame, 8 * Math.max(0, 1 - lt / 0.2));
+		$("quoteImg").style.transform = `translate(${sx}px,${sy}px) scale(${1.02 + 0.07 * lt / dur})`;
+		const n = Math.floor(clamp((lt - 0.25) / 1.9) * QUOTE.length);
+		$("quoteTx").textContent = QUOTE.slice(0, n);
+		flash = Math.max(flash, (1 - clamp(lt / 0.1)) * 0.8);
+	}
+
+	// S7 end card
+	if (sc("end")) {
+		on.end = true;
+		const lt = t - T.end[0];
+		flash = Math.max(flash, (1 - clamp(lt / 0.2)) * 0.9);
+		const kh = easeBack((lt - 0.3) / 0.35);
+		$("hook").style.transform = `scale(${lerp(1.6, 1, kh)})`; $("hook").style.opacity = clamp((lt - 0.3) / 0.1);
+		const kp = clamp((lt - 1.1) / 0.3);
+		$("play").style.opacity = kp * (Math.floor(lt * 2.4) % 2 === 0 || lt < 1.8 ? 1 : 0.55);
+		fade = clamp((t - 29.4) / 0.6);
+	}
+
+	for (const id of ids) show($(id), !!on[id]);
+	drawLines(t, lineCol || "#fff", lineCol ? lineA : 0, lineIn, Math.floor(t / B));
+	$("flash").style.opacity = clamp(flash);
+	$("fade").style.opacity = clamp(fade);
+	// beat punch on the whole stage
+	$("stage").style.filter = sc("tower") || sc("title") ? "none" : `brightness(${1 + 0.12 * bp})`;
+};
+
+// preload art + fonts so the very first screenshot is right
+window.ready = (async () => {
+	const urls = ["tower-night", ...ADV.map((a) => a.id + "-cutin")].map((n) => `/site/assets/art/${n}.webp`);
+	await Promise.all(urls.map((u) => { const i = new Image(); i.src = u; return i.decode(); }));
+	for (const id of ["sThree", "sWays", "sEnd"]) show($(id), true);
+	await document.fonts.ready;
+	await window.setTime(0);
+})();
+</script>
+</body>
+</html>
