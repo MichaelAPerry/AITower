@@ -19,7 +19,7 @@ Your advisors argue. You decide.
 
 ## How to play
 
-- **Play in your browser:** (link coming)
+- **Play in your browser:** <https://michaelaperry.github.io/AITower/>
 - **Single file:** download `AItower.html` and open it. Code, art, fonts and music are all inside that one file; no install, no server. Saves live in that browser.
 - **From source:** `npm ci`, then `npm run dev` and open the printed URL. `npm run build:single` makes the single file; `npm run build:site` assembles the website (with the game at `play/`) into `site-dist/`.
 
